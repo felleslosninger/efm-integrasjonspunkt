@@ -3,7 +3,9 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.close;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.copy;
 
@@ -28,8 +31,12 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final IntegrasjonspunktNokkel keyInfo;
     private final Plumber plumber;
+    private final IntegrasjonspunktProperties props;
 
     public void write(String messageId, String filename, byte[] message) throws IOException {
+        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
+            BugFix610.applyPatch(message, messageId);
+        }
         byte[] encryptedMessage = getCmsUtil().createCMS(message, keyInfo.getX509Certificate());
         delegate.write(messageId, filename, encryptedMessage);
     }

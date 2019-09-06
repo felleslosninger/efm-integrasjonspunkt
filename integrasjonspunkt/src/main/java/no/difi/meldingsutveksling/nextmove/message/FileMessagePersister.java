@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import javax.persistence.PersistenceException;
 import java.io.*;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.nextmove.useDbPersistence", havingValue = "false")
@@ -30,10 +28,6 @@ public class FileMessagePersister implements MessagePersister {
         String filedir = getMessageFiledirPath(messageId);
         File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
-
-        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, messageId);
-        }
 
         try (FileOutputStream os = new FileOutputStream(localFile);
              BufferedOutputStream bos = new BufferedOutputStream(os)) {

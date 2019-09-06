@@ -23,16 +23,11 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 public class DBMessagePersister implements MessagePersister {
 
     private final NextMoveMessageEntryRepository repo;
-    private final IntegrasjonspunktProperties props;
     private final BlobFactory blobFactory;
 
     @Override
     @Transactional
     public void write(String messageId, String filename, byte[] message) throws IOException {
-        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, messageId);
-        }
-
         Blob contentBlob = blobFactory.createBlob(message);
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, (long) message.length);
         repo.save(entry);
