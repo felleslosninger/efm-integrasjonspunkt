@@ -43,7 +43,7 @@ public class DBMessagePersister implements MessagePersister {
     public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
         Blob blob = blobFactory.createBlob(stream, size);
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, blob, size);
-        repo.saveAndFlush(entry);
+        repo.save(entry);
     }
 
     @Override
