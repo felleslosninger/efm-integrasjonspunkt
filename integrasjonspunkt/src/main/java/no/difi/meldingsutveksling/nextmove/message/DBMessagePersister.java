@@ -4,12 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.LobHelper;
-import org.hibernate.Session;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -27,17 +24,16 @@ public class DBMessagePersister implements MessagePersister {
 
     private final NextMoveMessageEntryRepository repo;
     private final IntegrasjonspunktProperties props;
-    private final EntityManager em;
+    private final BlobFactory blobFactory;
 
     @Override
     @Transactional
     public void write(String messageId, String filename, byte[] message) throws IOException {
-        LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
-        Blob contentBlob = lobHelper.createBlob(message);
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
             BugFix610.applyPatch(message, messageId);
         }
 
+        Blob contentBlob = blobFactory.createBlob(message);
         NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, (long) message.length);
         repo.save(entry);
     }
@@ -45,11 +41,9 @@ public class DBMessagePersister implements MessagePersister {
     @Override
     @Transactional
     public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
-        LobHelper lobHelper = em.unwrap(Session.class).getLobHelper();
-        Blob contentBlob = lobHelper.createBlob(stream, size);
-
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, size);
-        repo.save(entry);
+        Blob blob = blobFactory.createBlob(stream, size);
+        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, blob, size);
+        repo.saveAndFlush(entry);
     }
 
     @Override
