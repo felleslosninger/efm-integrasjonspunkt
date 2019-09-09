@@ -1,72 +1,66 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
-import lombok.RequiredArgsConstructor;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 
-@RequiredArgsConstructor
-public class AutoClosingInputStream extends InputStream {
+public class AutoClosingInputStream extends PushbackInputStream {
 
-    private final InputStream delegate;
     private final Callback callback;
     private boolean closed = false;
 
+    AutoClosingInputStream(InputStream in, Callback callback) {
+        super(in);
+        this.callback = callback;
+    }
+
+    @Override
+    public int read() throws IOException {
+        return closed ? -1 : closeIfEndOfStream(super.read());
+    }
+
     @Override
     public int read(byte[] b) throws IOException {
-        int read = delegate.read(b);
-        if (read < b.length) {
-            close();
-        }
-        return read;
+        return closed ? -1 : closeIfEndOfStream(super.read(b));
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int read = delegate.read(b, off, len);
-        if (read < b.length) {
-            close();
+        return closed ? -1 : closeIfEndOfStream(super.read(b, off, len));
+    }
+
+    private int closeIfEndOfStream(int read) throws IOException {
+        if (closed) {
+            return read;
         }
+
+        if (read == -1) {
+            close();
+            return read;
+        }
+
+        int next = super.read();
+
+        if (next == -1) {
+            close();
+        } else {
+            super.unread(next);
+        }
+
         return read;
-    }
-
-    @Override
-    public long skip(long n) throws IOException {
-        return delegate.skip(n);
-    }
-
-    @Override
-    public int available() throws IOException {
-        return delegate.available();
     }
 
     @Override
     public void close() throws IOException {
         if (!closed) {
-            delegate.close();
+            super.close();
             closed = true;
             callback.onClose();
         }
     }
 
-    @Override
-    public synchronized void mark(int readlimit) {
-        delegate.mark(readlimit);
-    }
-
-    @Override
-    public synchronized void reset() throws IOException {
-        delegate.reset();
-    }
-
-    @Override
-    public boolean markSupported() {
-        return delegate.markSupported();
-    }
-
-    @Override
-    public int read() throws IOException {
-        return delegate.read();
+    public boolean isClosed() {
+        return closed;
     }
 
     interface Callback {
