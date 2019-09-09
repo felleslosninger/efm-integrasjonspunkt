@@ -77,7 +77,7 @@ public class FiksMapper {
         return Forsendelse.builder()
                 .withEksternref(message.getMessageId())
                 .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(uuidGenerator.generate()))
+                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null))
                 .withTittel(journalpost.getOffentligTittel())
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())

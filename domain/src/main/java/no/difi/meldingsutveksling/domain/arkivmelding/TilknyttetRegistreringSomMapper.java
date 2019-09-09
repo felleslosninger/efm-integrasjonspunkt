@@ -19,7 +19,7 @@ public class TilknyttetRegistreringSomMapper {
 
     public static String getNoarkType(TilknyttetRegistreringSom trs) {
         if (!mapper.containsValue(trs)) {
-            log.error("TilknyttetRegistreringSom \"{}\" not registered in map, defaulting to \"{}\"", trs.value(), TilknyttetRegistreringSom.HOVEDDOKUMENT.value());
+            log.warn("TilknyttetRegistreringSom \"{}\" not registered in map, defaulting to \"{}\"", trs.value(), TilknyttetRegistreringSom.HOVEDDOKUMENT.value());
             return mapper.inverse().get(TilknyttetRegistreringSom.HOVEDDOKUMENT);
         }
         return mapper.inverse().get(trs);
@@ -27,7 +27,7 @@ public class TilknyttetRegistreringSomMapper {
 
     public static TilknyttetRegistreringSom getArkivmeldingType(String dlType) {
         if (!mapper.containsKey(dlType)) {
-            log.error("DlType \"{}\" not registered in map, defaulting to \"{}\"", dlType, TilknyttetRegistreringSom.HOVEDDOKUMENT.value());
+            log.warn("DlType \"{}\" not registered in map, defaulting to \"{}\"", dlType, TilknyttetRegistreringSom.HOVEDDOKUMENT.value());
             return TilknyttetRegistreringSom.HOVEDDOKUMENT;
         }
         return mapper.get(dlType);

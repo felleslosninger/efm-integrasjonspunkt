@@ -23,7 +23,7 @@ public class AvskrivningsmaateMapper {
 
     public static String getNoarkType(Avskrivningsmaate am) {
         if (!mapper.containsValue(am)) {
-            log.error("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", am.value(), Avskrivningsmaate.BESVART_MED_BREV.value());
+            log.warn("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", am.value(), Avskrivningsmaate.BESVART_MED_BREV.value());
             return mapper.inverse().get(Avskrivningsmaate.BESVART_MED_BREV);
         }
         return mapper.inverse().get(am);
@@ -31,7 +31,7 @@ public class AvskrivningsmaateMapper {
 
     public static Avskrivningsmaate getArkivmeldingType(String amAvskm) {
         if (!mapper.containsKey(amAvskm)) {
-            log.error("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", amAvskm, Avskrivningsmaate.BESVART_MED_BREV.value());
+            log.warn("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", amAvskm, Avskrivningsmaate.BESVART_MED_BREV.value());
             return Avskrivningsmaate.BESVART_MED_BREV;
         }
         return mapper.get(amAvskm);

@@ -37,6 +37,8 @@ import java.math.BigInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -132,10 +134,12 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
         journalpost.setJournalaar(BigInteger.valueOf(Long.valueOf(metadata.getJournalaar())));
         journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalsekvensnummer())));
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
-        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
-        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingTypeFromFiksValue(metadata.getJournalposttype()));
+        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingTypeFromFiksValue(metadata.getJournalstatus()));
         journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getJournaldato())));
-        journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getDokumentetsDato())));
+        if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
+            journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getDokumentetsDato())));
+        }
         journalpost.setOffentligTittel(metadata.getTittel());
 
         saksmappe.getBasisregistrering().add(journalpost);

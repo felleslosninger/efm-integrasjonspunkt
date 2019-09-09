@@ -13,9 +13,9 @@ public class SvarUtConnectionCheck {
     @PostConstruct
     public void checkTheConnection() {
         try {
-            svarUtService.getMessageReceipt("1");
+            svarUtService.retreiveForsendelseTyper();
         } catch (Exception e) {
-            throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt");
+            throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt", e);
         }
     }
 }

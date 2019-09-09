@@ -20,7 +20,7 @@ public class VariantformatMapper {
 
     public static String getNoarkType(Variantformat vf) {
         if (!mapper.containsValue(vf)) {
-            log.error("Variantformat \"{}\" not found in map, defaulting to \"{}\"", vf.value(), Variantformat.PRODUKSJONSFORMAT.value());
+            log.warn("Variantformat \"{}\" not found in map, defaulting to \"{}\"", vf.value(), Variantformat.PRODUKSJONSFORMAT.value());
             return mapper.inverse().get(vf);
         }
         return mapper.inverse().get(vf);
@@ -28,7 +28,7 @@ public class VariantformatMapper {
 
     public static Variantformat getArkivmeldingType(String veVariant) {
         if (!mapper.containsKey(veVariant)) {
-            log.error("Variantformat \"{}\" not found in map, defaulting to \"{}\"", veVariant, Variantformat.PRODUKSJONSFORMAT.value());
+            log.warn("Variantformat \"{}\" not found in map, defaulting to \"{}\"", veVariant, Variantformat.PRODUKSJONSFORMAT.value());
             return Variantformat.PRODUKSJONSFORMAT;
         }
         return mapper.get(veVariant);

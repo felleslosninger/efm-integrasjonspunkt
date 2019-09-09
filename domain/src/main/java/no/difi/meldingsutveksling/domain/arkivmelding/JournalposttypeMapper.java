@@ -22,7 +22,7 @@ public class JournalposttypeMapper {
 
     public static String getNoarkType(Journalposttype jpType) {
         if (!mapper.containsValue(jpType)) {
-            log.error("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType.value(), Journalposttype.INNGÅENDE_DOKUMENT.value());
+            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType.value(), Journalposttype.INNGÅENDE_DOKUMENT.value());
             return mapper.inverse().get(Journalposttype.INNGÅENDE_DOKUMENT);
         }
 
@@ -31,10 +31,20 @@ public class JournalposttypeMapper {
 
     public static Journalposttype getArkivmeldingType(String jpType) {
         if (!mapper.containsKey(jpType)) {
-            log.error("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType, mapper.inverse().get(Journalposttype.INNGÅENDE_DOKUMENT));
+            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType, mapper.inverse().get(Journalposttype.INNGÅENDE_DOKUMENT));
             return Journalposttype.INNGÅENDE_DOKUMENT;
         }
 
         return mapper.get(jpType);
     }
+
+    public static Journalposttype getArkivmeldingTypeFromFiksValue(String fiksType) {
+        try {
+            return Journalposttype.fromValue(fiksType);
+        } catch (IllegalArgumentException e) {
+            log.warn("Cannot map \"{}\" to Journalposttype, defaulting to \"{}\"", fiksType, Journalposttype.INNGÅENDE_DOKUMENT.value());
+            return Journalposttype.INNGÅENDE_DOKUMENT;
+        }
+    }
+
 }
