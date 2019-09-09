@@ -15,6 +15,11 @@ public class AutoClosingInputStream extends PushbackInputStream {
     }
 
     @Override
+    public int available() throws IOException {
+        return closed ? 0 : super.available();
+    }
+
+    @Override
     public int read() throws IOException {
         return closed ? -1 : closeIfEndOfStream(super.read());
     }
