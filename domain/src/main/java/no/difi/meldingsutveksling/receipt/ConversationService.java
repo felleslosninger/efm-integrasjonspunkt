@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Arrays;

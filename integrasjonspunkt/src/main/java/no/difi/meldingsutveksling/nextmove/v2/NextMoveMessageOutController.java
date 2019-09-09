@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -44,7 +44,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional(dontRollbackOn = TimeToLiveException.class)
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public StandardBusinessDocument createAndSendMessage(
             @ApiParam(name = "SBD", value = "Standard Business Document to send. Please note that the property name is not 'any'. \n"
                     + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.", required = true)
@@ -72,7 +72,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional(dontRollbackOn = TimeToLiveException.class)
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public StandardBusinessDocument createMessage(
             @ApiParam(name = "SBD", value = "Standard Business Document to send. Please note that the property name is not 'any'. \n"
                     + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.", required = true)
@@ -152,7 +152,7 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional(dontRollbackOn = TimeToLiveException.class)
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(
             @ApiParam(
                     value = "The message ID. Usually a UUID",
