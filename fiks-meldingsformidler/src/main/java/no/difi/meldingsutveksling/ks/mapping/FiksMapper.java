@@ -5,10 +5,11 @@ import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
-import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
+import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.ks.svarut.*;
@@ -45,19 +46,16 @@ public class FiksMapper {
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
     private final CryptoMessagePersister cryptoMessagePersister;
-    private final UUIDGenerator uuidGenerator;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       CryptoMessagePersister cryptoMessagePersister,
-                      UUIDGenerator uuidGenerator,
                       ObjectProvider<CmsUtil> cmsUtilProvider, Plumber plumber) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.cryptoMessagePersister = cryptoMessagePersister;
-        this.uuidGenerator = uuidGenerator;
         this.cmsUtilProvider = cmsUtilProvider;
         this.plumber = plumber;
     }
@@ -188,8 +186,8 @@ public class FiksMapper {
                 .withJournalaar(toInt(jp.getJournalaar()))
                 .withJournalsekvensnummer(toInt(jp.getJournalsekvensnummer()))
                 .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
-                .withJournalposttype(jp.getJournalposttype().value())
-                .withJournalstatus(jp.getJournalstatus().value())
+                .withJournalposttype(JournalposttypeMapper.getNoarkType(jp.getJournalposttype()))
+                .withJournalstatus(JournalstatusMapper.getNoarkType(jp.getJournalstatus()))
                 .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
                 .withDokumentetsDato(jp.getDokumentetsDato())
                 .withTittel(jp.getOffentligTittel())

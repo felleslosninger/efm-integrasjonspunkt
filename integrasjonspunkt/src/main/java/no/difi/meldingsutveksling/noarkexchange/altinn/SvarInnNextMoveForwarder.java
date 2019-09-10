@@ -134,8 +134,8 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
         journalpost.setJournalaar(BigInteger.valueOf(Long.valueOf(metadata.getJournalaar())));
         journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalsekvensnummer())));
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
-        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingTypeFromFiksValue(metadata.getJournalposttype()));
-        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingTypeFromFiksValue(metadata.getJournalstatus()));
+        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
+        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
         journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getJournaldato())));
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
             journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getDokumentetsDato())));

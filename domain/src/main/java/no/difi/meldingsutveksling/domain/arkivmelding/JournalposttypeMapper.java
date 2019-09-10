@@ -38,13 +38,4 @@ public class JournalposttypeMapper {
         return mapper.get(jpType);
     }
 
-    public static Journalposttype getArkivmeldingTypeFromFiksValue(String fiksType) {
-        try {
-            return Journalposttype.fromValue(fiksType);
-        } catch (IllegalArgumentException e) {
-            log.warn("Cannot map \"{}\" to Journalposttype, defaulting to \"{}\"", fiksType, Journalposttype.INNGÅENDE_DOKUMENT.value());
-            return Journalposttype.INNGÅENDE_DOKUMENT;
-        }
-    }
-
 }

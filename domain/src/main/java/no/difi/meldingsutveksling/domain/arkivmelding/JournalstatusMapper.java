@@ -38,12 +38,4 @@ public class JournalstatusMapper {
         return mapper.get(jpType);
     }
 
-    public static Journalstatus getArkivmeldingTypeFromFiksValue(String fiksValue) {
-        try {
-            return Journalstatus.fromValue(fiksValue);
-        } catch (IllegalArgumentException e) {
-            log.warn("Cannot map \"{}\" to Journalstatus, defaulting to \"{}\"", fiksValue, Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER.value());
-            return Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER;
-        }
-    }
 }
