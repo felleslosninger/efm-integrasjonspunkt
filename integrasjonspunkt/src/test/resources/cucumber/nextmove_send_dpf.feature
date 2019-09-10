@@ -199,7 +199,6 @@ Feature: Sending a Next Move DPF message
             </printkonfigurasjon>
             <signaturtype xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
             <signeringUtloper xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
-            <svarPaForsendelse>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</svarPaForsendelse>
             <svarPaForsendelseLink>false</svarPaForsendelseLink>
             <svarSendesTil>
                 <digitalAdresse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
