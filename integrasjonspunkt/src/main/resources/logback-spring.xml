@@ -18,7 +18,7 @@
                 <destination>${destination}</destination>
                 <!-- encoder is required -->
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                    <customFields>{"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
+                    <customFields>{"appname":"${project.artifactId}","HOSTNAME":"${HOSTNAME}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}","orgnr":"${orgnr}"}</customFields>
                     <fieldNames>
                         <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
                         <message>[ignore]</message>
