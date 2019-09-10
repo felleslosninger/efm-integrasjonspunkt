@@ -181,9 +181,9 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
                 <journalaar>0</journalaar>
                 <journaldato>2017-05-23T00:00:00</journaldato>
                 <journalpostnummer>0</journalpostnummer>
-                <journalposttype>Utgående dokument</journalposttype>
+                <journalposttype>U</journalposttype>
                 <journalsekvensnummer>0</journalsekvensnummer>
-                <journalstatus>Journalført</journalstatus>
+                <journalstatus>J</journalstatus>
                 <saksaar>0</saksaar>
                 <sakssekvensnummer>0</sakssekvensnummer>
                 <tittel>Nye lysrør</tittel>

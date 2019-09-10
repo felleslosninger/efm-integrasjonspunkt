@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.exceptions.MessageStatusNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
@@ -52,12 +51,12 @@ public class MessageStatusController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     @JsonView(Views.MessageStatus.class)
-    public MessageStatus status(
+    public Page<MessageStatus> status(
             @ApiParam(value = "MessageId", required = true, example = "ff88849c-e281-4809-8555-7cd54952b917")
-            @PathVariable("messageId") String messageId) {
+            @PathVariable("messageId") String messageId,
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        return statusRepo.findByConversationMessageId(messageId)
-                .orElseThrow(() -> new MessageStatusNotFoundException(messageId));
+        return statusRepo.findByConversationMessageId(messageId, pageable);
     }
 
     @GetMapping("peek")

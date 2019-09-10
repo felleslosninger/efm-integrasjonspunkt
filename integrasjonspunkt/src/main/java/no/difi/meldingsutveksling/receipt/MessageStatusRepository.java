@@ -19,7 +19,7 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
     Optional<MessageStatus> findById(Long id);
 
     @EntityGraph("MessageStatus.conversation")
-    Optional<MessageStatus> findByConversationMessageId(String messageId);
+    Page<MessageStatus> findByConversationMessageId(String messageId, Pageable pageable);
 
     @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findFirstByOrderByLastUpdateAsc();
