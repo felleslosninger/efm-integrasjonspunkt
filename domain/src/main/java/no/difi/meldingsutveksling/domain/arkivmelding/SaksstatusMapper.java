@@ -28,7 +28,7 @@ public class SaksstatusMapper {
 
     public static String getNoarkType(Saksstatus status) {
         if (!string2Status.containsValue(status)) {
-            log.error("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status.value(), Saksstatus.UNDER_BEHANDLING.value());
+            log.warn("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status.value(), Saksstatus.UNDER_BEHANDLING.value());
             return status2string.get(Saksstatus.UNDER_BEHANDLING);
         }
 
@@ -37,7 +37,7 @@ public class SaksstatusMapper {
 
     static Saksstatus getArkivmeldingType(String status) {
         if (!string2Status.containsKey(status)) {
-            log.error("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status, status2string.get(Saksstatus.UNDER_BEHANDLING));
+            log.warn("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status, status2string.get(Saksstatus.UNDER_BEHANDLING));
             return Saksstatus.UNDER_BEHANDLING;
         }
 

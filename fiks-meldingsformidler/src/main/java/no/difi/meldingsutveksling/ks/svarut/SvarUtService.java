@@ -18,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -70,6 +71,10 @@ public class SvarUtService {
         } else {
             return fiksStatusMapper.noForsendelseId();
         }
+    }
+
+    public List<String> retreiveForsendelseTyper() {
+        return client.retreiveForsendelseTyper(getFiksUtUrl());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {

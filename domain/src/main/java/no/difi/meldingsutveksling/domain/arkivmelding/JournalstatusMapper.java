@@ -22,7 +22,7 @@ public class JournalstatusMapper {
 
     public static String getNoarkType(Journalstatus status) {
         if (!mapper.containsValue(status)) {
-            log.error("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", status.value(), Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER.value());
+            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", status.value(), Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER.value());
             return mapper.inverse().get(Journalstatus.EKSPEDERT);
         }
 
@@ -31,10 +31,19 @@ public class JournalstatusMapper {
 
     public static Journalstatus getArkivmeldingType(String jpType) {
         if (!mapper.containsKey(jpType)) {
-            log.error("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType, mapper.inverse().get(Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER));
+            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType, mapper.inverse().get(Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER));
             return Journalstatus.EKSPEDERT;
         }
 
         return mapper.get(jpType);
+    }
+
+    public static Journalstatus getArkivmeldingTypeFromFiksValue(String fiksValue) {
+        try {
+            return Journalstatus.fromValue(fiksValue);
+        } catch (IllegalArgumentException e) {
+            log.warn("Cannot map \"{}\" to Journalstatus, defaulting to \"{}\"", fiksValue, Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER.value());
+            return Journalstatus.FERDIGSTILT_FRA_SAKSBEHANDLER;
+        }
     }
 }
