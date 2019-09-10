@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
+import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
@@ -65,7 +66,7 @@ public class JmsConfiguration {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(connectionFactory);
-        factory.setErrorHandler(t -> log.warn("JMS error: {}", t.getMessage()));
+        factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(false));
         return factory;
     }
 }
