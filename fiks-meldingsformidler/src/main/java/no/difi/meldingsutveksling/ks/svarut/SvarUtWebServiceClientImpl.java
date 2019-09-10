@@ -36,6 +36,7 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
     @Override
     public ForsendelseStatus getForsendelseStatus(String uri, String forsendelseId) {
         RetrieveForsendelseStatus request = RetrieveForsendelseStatus.builder().withForsendelsesid(forsendelseId).build();
+
         final JAXBElement<RetrieveForsendelseStatusResponse> response =
                 (JAXBElement<RetrieveForsendelseStatusResponse>)
                         getWebServiceTemplate().marshalSendAndReceive(uri, request);
@@ -44,8 +45,9 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
 
     public List<String> retreiveForsendelseTyper(String uri) {
         RetreiveForsendelseTyper request = RetreiveForsendelseTyper.builder().build();
+        JAXBElement<RetreiveForsendelseTyper> wrapped = new ObjectFactory().createRetreiveForsendelseTyper(request);
         final JAXBElement<RetreiveForsendelseTyperResponse> response =
-                (JAXBElement<RetreiveForsendelseTyperResponse>) getWebServiceTemplate().marshalSendAndReceive(uri, request);
+                (JAXBElement<RetreiveForsendelseTyperResponse>) getWebServiceTemplate().marshalSendAndReceive(uri, wrapped);
         return response.getValue().getReturn();
     }
 }
