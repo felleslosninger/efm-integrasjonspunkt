@@ -68,7 +68,6 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public void delete(String messageId) throws IOException {
-        log.info("Deleting files for messageId: {}", messageId);
         delegate.delete(messageId);
     }
 
