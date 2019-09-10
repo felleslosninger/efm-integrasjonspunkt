@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.net.URL;
 
@@ -78,6 +79,9 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private Status status;
+
+    @Valid
+    private DeadLock deadlock;
 
     @Data
     public static class Arkivmelding {
@@ -271,6 +275,7 @@ public class IntegrasjonspunktProperties {
         private boolean returnOkOnEmptyPayload;
         private boolean dumpDlqMessages;
         private boolean mailErrorStatus;
+        private boolean retryOnDeadLock;
 
         /**
          * Service toggles
@@ -297,5 +302,19 @@ public class IntegrasjonspunktProperties {
         private String url;
     }
 
+    @Data
+    public static class DeadLock {
 
+        /**
+         * How many retries should be tried on deadlock
+         **/
+        @Positive
+        private int retryCount = 5;
+
+        /**
+         * How big is delay between deadlock retry (in ms)
+         **/
+        @Positive
+        private int delay = 1000;
+    }
 }

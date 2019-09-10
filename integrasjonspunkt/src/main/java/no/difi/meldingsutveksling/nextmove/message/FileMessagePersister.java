@@ -47,6 +47,7 @@ public class FileMessagePersister implements MessagePersister {
         try (FileOutputStream os = new FileOutputStream(localFile);
              BufferedOutputStream bos = new BufferedOutputStream(os)) {
             int bytes = IOUtils.copy(inputStream, bos);
+            bos.flush();
             log.debug("Storing {}: {}", filename, humanReadableByteCount(bytes));
         } catch (IOException e) {
             log.error("Could not write asic container to disk.", e);

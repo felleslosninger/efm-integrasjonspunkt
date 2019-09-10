@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +37,7 @@ public class NextMoveMessageService {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
 
+    @Transactional(readOnly = true)
     NextMoveOutMessage getMessage(String messageId) {
         return messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));

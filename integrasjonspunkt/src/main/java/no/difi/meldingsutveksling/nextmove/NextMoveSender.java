@@ -3,15 +3,12 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
-
 import org.springframework.transaction.annotation.Transactional;
-import java.io.IOException;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -22,7 +19,6 @@ public class NextMoveSender {
 
     private final ConversationStrategyFactory strategyFactory;
     private final ConversationService conversationService;
-    private final CryptoMessagePersister cryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
@@ -54,10 +50,5 @@ public class NextMoveSender {
         }
 
         messageRepo.deleteByMessageId(msg.getMessageId());
-        try {
-            cryptoMessagePersister.delete(msg.getMessageId());
-        } catch (IOException e) {
-            log.error("Error deleting files from message with id={}", msg.getMessageId(), e);
-        }
     }
 }
