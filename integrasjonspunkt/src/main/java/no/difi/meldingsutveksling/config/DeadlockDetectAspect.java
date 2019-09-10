@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.config;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.exception.LockAcquisitionException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Component;
@@ -14,25 +14,31 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Slf4j
 @Aspect
-@Component
 @Getter
-@Setter
+@Component
+@ConditionalOnProperty(name = "difi.move.feature.retryOnDeadLock", havingValue = "true")
 public class DeadlockDetectAspect implements Ordered {
 
     /**
      * Order for this aspect, should be lower than for transaction manager which has 100
      **/
-    private int order = 99;
+    @Getter
+    private final int order = 99;
 
     /**
      * How many retries should be tried on deadlock
      **/
-    private int retryCount = 5;
+    private final int retryCount;
 
     /**
      * How big is delay between deadlock retry (in ms)
      **/
-    private int delay = 1000;
+    private final int delay;
+
+    public DeadlockDetectAspect(IntegrasjonspunktProperties properties) {
+        this.retryCount = properties.getDeadlock().getRetryCount();
+        this.delay = properties.getDeadlock().getDelay();
+    }
 
     @Around(value = "@annotation(org.springframework.transaction.annotation.Transactional)")
     public Object methodRetry(ProceedingJoinPoint pjp) throws Throwable {
