@@ -156,8 +156,8 @@ Feature: Receiving a Next Move DPF message
                 <journalaar>2016</journalaar>
                 <journalsekvensnummer>25</journalsekvensnummer>
                 <journalpostnummer>13</journalpostnummer>
-                <journalposttype>Utgående dokument</journalposttype>
-                <journalstatus>Godkjent av leder</journalstatus>
+                <journalposttype>Inngående dokument</journalposttype>
+                <journalstatus>Ferdigstilt fra saksbehandler</journalstatus>
                 <journaldato>2016-03-21+01:00</journaldato>
                 <dokumentetsDato>2016-03-21+01:00</dokumentetsDato>
                 <korrespondansepart>
