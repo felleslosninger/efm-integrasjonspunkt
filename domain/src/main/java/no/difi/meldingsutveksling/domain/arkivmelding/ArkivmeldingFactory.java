@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -32,8 +33,8 @@ public class ArkivmeldingFactory {
             throw new MeldingsUtvekslingRuntimeException(format("No Noarksak in MeldingType for message %s, aborting conversion", putMessage.getConversationId()));
         }
         Saksmappe sm = amOf.createSaksmappe();
-        ofNullable(mt.getNoarksak().getSaSaar()).map(BigInteger::new).ifPresent(sm::setSaksaar);
-        ofNullable(mt.getNoarksak().getSaSeknr()).map(BigInteger::new).ifPresent(sm::setSakssekvensnummer);
+        ofNullable(mt.getNoarksak().getSaSaar()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(sm::setSaksaar);
+        ofNullable(mt.getNoarksak().getSaSeknr()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(sm::setSakssekvensnummer);
         ofNullable(mt.getNoarksak().getSaAnsvinit()).ifPresent(sm::setSaksansvarlig);
         ofNullable(mt.getNoarksak().getSaAdmkort()).ifPresent(sm::setAdministrativEnhet);
         ofNullable(mt.getNoarksak().getSaOfftittel()).ifPresent(sm::setOffentligTittel);
@@ -51,14 +52,14 @@ public class ArkivmeldingFactory {
 
         ofNullable(mt.getJournpost().getJpId()).ifPresent(jp::setSystemID);
         ofNullable(mt.getJournpost().getJpInnhold()).ifPresent(jp::setTittel);
-        ofNullable(mt.getJournpost().getJpJaar()).map(BigInteger::new).ifPresent(jp::setJournalaar);
+        ofNullable(mt.getJournpost().getJpJaar()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(jp::setJournalaar);
         ofNullable(mt.getJournpost().getJpForfdato()).map(DateTimeUtil::toXMLGregorianCalendar).ifPresent(jp::setForfallsdato);
-        ofNullable(mt.getJournpost().getJpSeknr()).map(BigInteger::new).ifPresent(jp::setJournalsekvensnummer);
-        ofNullable(mt.getJournpost().getJpJpostnr()).map(BigInteger::new).ifPresent(jp::setJournalpostnummer);
+        ofNullable(mt.getJournpost().getJpSeknr()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(jp::setJournalsekvensnummer);
+        ofNullable(mt.getJournpost().getJpJpostnr()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(jp::setJournalpostnummer);
         ofNullable(mt.getJournpost().getJpNdoktype()).map(JournalposttypeMapper::getArkivmeldingType).ifPresent(jp::setJournalposttype);
         ofNullable(mt.getJournpost().getJpStatus()).map(JournalstatusMapper::getArkivmeldingType).ifPresent(jp::setJournalstatus);
         ofNullable(mt.getJournpost().getJpArkdel()).ifPresent(jp::setReferanseArkivdel);
-        ofNullable(mt.getJournpost().getJpAntved()).map(BigInteger::new).ifPresent(jp::setAntallVedlegg);
+        ofNullable(mt.getJournpost().getJpAntved()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(jp::setAntallVedlegg);
         ofNullable(mt.getJournpost().getJpOffinnhold()).ifPresent(jp::setOffentligTittel);
 
         Skjerming skjerming = amOf.createSkjerming();
@@ -103,7 +104,7 @@ public class ArkivmeldingFactory {
         mt.getJournpost().getDokument().forEach(d -> {
             Dokumentbeskrivelse dbeskr = amOf.createDokumentbeskrivelse();
             dbeskr.setTittel(d.getDbTittel());
-            ofNullable(d.getDlRnr()).map(BigInteger::new).ifPresent(dbeskr::setDokumentnummer);
+            ofNullable(d.getDlRnr()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(dbeskr::setDokumentnummer);
             ofNullable(d.getDlType()).map(TilknyttetRegistreringSomMapper::getArkivmeldingType).ifPresent(dbeskr::setTilknyttetRegistreringSom);
 
             Dokumentobjekt dobj = amOf.createDokumentobjekt();
