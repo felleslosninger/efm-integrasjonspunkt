@@ -79,6 +79,13 @@ Feature: Capabilities
             "postalArea" : "",
             "country" : ""
           },
+          "postAddress" : {
+            "name" : "",
+            "street" : "",
+            "postalCode" : "",
+            "postalArea" : "",
+            "country" : ""
+          },
           "documentTypes" : [ {
             "type" : "digital",
             "standard" : "urn:no:difi:digitalpost:xsd:digital::digital"
@@ -90,6 +97,13 @@ Feature: Capabilities
           "process" : "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
           "serviceIdentifier" : "DPI",
           "returnAddress" : {
+            "name" : "",
+            "street" : "",
+            "postalCode" : "",
+            "postalArea" : "",
+            "country" : ""
+          },
+          "postAddress" : {
             "name" : "",
             "street" : "",
             "postalCode" : "",
