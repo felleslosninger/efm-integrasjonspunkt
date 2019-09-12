@@ -48,7 +48,7 @@ public class FileMessagePersister implements MessagePersister {
              BufferedOutputStream bos = new BufferedOutputStream(os)) {
             int bytes = IOUtils.copy(inputStream, bos);
             bos.flush();
-            log.debug("Storing {}: {}", filename, humanReadableByteCount(bytes));
+            log.debug("Storing {} for message[id={}]: {}", filename, messageId, humanReadableByteCount(bytes));
         } catch (IOException e) {
             log.error("Could not write asic container to disk.", e);
             throw e;
@@ -74,6 +74,7 @@ public class FileMessagePersister implements MessagePersister {
     public FileEntryStream readStream(String messageId, String filename) {
         String filedir = getMessageFiledirPath(messageId);
         File file = new File(filedir + filename);
+        log.debug("Reading stream for file: {}", file.getAbsolutePath());
         try {
             BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
             return FileEntryStream.of(fis, file.length());
@@ -85,6 +86,7 @@ public class FileMessagePersister implements MessagePersister {
     @Override
     public void delete(String messageId) throws IOException {
         File dir = new File(getMessageFiledirPath(messageId));
+        log.debug("Deleting directory {} for message[id={}]", dir.getAbsolutePath(), messageId);
         FileUtils.deleteDirectory(dir);
     }
 
