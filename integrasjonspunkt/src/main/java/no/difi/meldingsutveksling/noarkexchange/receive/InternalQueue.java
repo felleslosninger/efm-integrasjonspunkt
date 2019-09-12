@@ -74,12 +74,6 @@ public class InternalQueue {
         } catch (NextMoveException e) {
             throw new NextMoveRuntimeException("Unable to send NextMove message", e);
         }
-
-        try {
-            cryptoMessagePersister.delete(nextMoveMessage.getMessageId());
-        } catch (IOException e) {
-            log.error("Error deleting files from message with id={}", nextMoveMessage.getMessageId(), e);
-        }
     }
 
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
