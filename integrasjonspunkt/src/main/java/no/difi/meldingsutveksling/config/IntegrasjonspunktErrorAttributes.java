@@ -13,6 +13,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
     @Override
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
         final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
-        errorAttributes.put("timestamp", OffsetDateTime.now(clock));
+        errorAttributes.put("timestamp", Date.from(OffsetDateTime.now(clock).toInstant()));
 
         final Throwable error = super.getError(webRequest);
 

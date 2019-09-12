@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
@@ -40,6 +41,7 @@ public class NextMoveAdapter {
     private final ArkivmeldingFactory arkivmeldingFactory;
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
+    private final UUIDGenerator uuidGenerator;
 
     @Transactional
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
@@ -70,7 +72,7 @@ public class NextMoveAdapter {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
                 message.getConversationId(),
-                message.getConversationId(),
+                uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
                 DocumentType.ARKIVMELDING_KVITTERING,
                 receipt);
