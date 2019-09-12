@@ -3,13 +3,13 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
   Background:
 
     Given a "GET" request to "http://localhost:9099/identifier/910075918?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=c54636e3-4aa4-4d59-91d1-db1b2f59a4b2" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
 
   Scenario: As a user I want to send a BEST/EDU AppReceipt message
 
     Given the sender is "910077473"
     And the receiver is "910075918"
-    And the conversationId is "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2"
+    And the conversationId is "19efbd4c-413d-4e2c-bbc5-257ef4a65b38"
     And the payload is:
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -43,7 +43,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
                             </File>
                         </ArrayOfFile>
                         <Reportee>910075918</Reportee>
-                        <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
+                        <SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</SendersReference>
                     </Manifest>
                     <RecipientList>
                         <Recipient>
@@ -66,7 +66,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     <ns0:BrokerServiceManifest xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
        <ns0:ExternalServiceCode>v3888</ns0:ExternalServiceCode>
        <ns0:ExternalServiceEditionCode>70515</ns0:ExternalServiceEditionCode>
-       <ns0:SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</ns0:SendersReference>
+       <ns0:SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</ns0:SendersReference>
        <ns0:Reportee>910075918</ns0:Reportee>
        <ns0:FileList>
           <ns0:File>
@@ -106,14 +106,14 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+          "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding_kvittering",
           "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
         },
         "businessScope" : {
           "scope" : [ {
             "type" : "ConversationId",
-            "instanceIdentifier" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+            "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
             "identifier" : "urn:no:difi:profile:arkivmelding:response:ver1.0",
             "scopeInformation" : [ {
               "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
@@ -131,22 +131,22 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     }
     """
     And the sent message contains no files
-    And the message statuses for the conversation with id = "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2" are:
+    And the message statuses for the conversation with id = "19efbd4c-413d-4e2c-bbc5-257ef4a65b38" are:
     """
     {
       "content" : [ {
         "id" : 39,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
-        "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
-        "messageId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+        "conversationId" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+        "messageId" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
         "convId" : 38
       }, {
         "id" : 40,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
-        "conversationId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
-        "messageId" : "c54636e3-4aa4-4d59-91d1-db1b2f59a4b2",
+        "conversationId" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+        "messageId" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
         "convId" : 38
       } ],
       "pageable" : {
