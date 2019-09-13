@@ -136,7 +136,7 @@ public class IntegrajonspunktReceiveImpl {
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocument sbd, PutMessageRequestType putMessage) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if (response == null || response.getResult() == null) {
-            Audit.info(String.format("Empty response from archive for message [id=%s]", sbd.getConversationId()), markerFrom(sbd));
+            Audit.info(String.format("Empty response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(sbd));
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
@@ -153,10 +153,10 @@ public class IntegrajonspunktReceiveImpl {
                 try {
                     messagePersister.delete(sbd.getDocumentId());
                 } catch (IOException e) {
-                    log.error(String.format("Unable to delete files for conversation with id=%s", sbd.getConversationId()), e);
+                    log.error(String.format("Unable to delete files for message with id=%s", sbd.getMessageId()), e);
                 }
             } else {
-                Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getConversationId()), markerFrom(response));
+                Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
                 log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
             }
         }

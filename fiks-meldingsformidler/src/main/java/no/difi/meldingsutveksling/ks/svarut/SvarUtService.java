@@ -60,7 +60,7 @@ public class SvarUtService {
     }
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
-        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getConversationId());
+        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getMessageId());
         return getMessageReceipt(forsendelseId);
     }
 

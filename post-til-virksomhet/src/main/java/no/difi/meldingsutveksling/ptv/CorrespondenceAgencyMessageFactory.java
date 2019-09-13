@@ -150,7 +150,7 @@ public class CorrespondenceAgencyMessageFactory {
         myInsertCorrespondenceV2.setCorrespondence(getMyInsertCorrespondenceV2(message, messageTitle, messageSummary, messageBody, attachments));
         myInsertCorrespondenceV2.setSystemUserCode(config.getSystemUserCode());
         // Reference set by the message sender
-        myInsertCorrespondenceV2.setExternalShipmentReference(message.getConversationId());
+        myInsertCorrespondenceV2.setExternalShipmentReference(message.getMessageId());
 
         return myInsertCorrespondenceV2;
     }
@@ -288,7 +288,7 @@ public class CorrespondenceAgencyMessageFactory {
         no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
                 .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
         JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (conversation.getConversationId());
+                (conversation.getMessageId());
         filter.setSendersReference(sendersReference);
         filter.setServiceCode(conversation.getServiceCode());
         filter.setServiceEditionCode(Integer.parseInt(conversation.getServiceEditionCode()));

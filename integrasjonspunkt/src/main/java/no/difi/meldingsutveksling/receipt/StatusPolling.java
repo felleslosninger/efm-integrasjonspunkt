@@ -40,12 +40,12 @@ public class StatusPolling {
     }
 
     private void checkReceiptStatus(Conversation c) {
-        log.debug(markerFrom(c), "Checking status, conversationId={}", c.getConversationId());
+        log.debug(markerFrom(c), "Checking status for message [id={}, conversationId={}]", c.getMessageId(), c.getConversationId());
         try {
             StatusStrategy strategy = statusStrategyFactory.getFactory(c);
             strategy.checkStatus(c);
         } catch (Exception e) {
-            log.error(format("Exception during receipt polling, conversationId=%s", c.getConversationId()), e);
+            log.error(format("Exception during receipt polling, messageId=%s", c.getMessageId()), e);
         }
     }
 
