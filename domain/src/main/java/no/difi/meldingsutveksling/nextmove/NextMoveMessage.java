@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,11 +25,14 @@ import java.util.Set;
 @NoArgsConstructor
 public abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageInformable {
 
-    @Column(unique = true)
+    @Column(length = 36)
     @NonNull
     private String conversationId;
+
     @NonNull
+    @Column(length = 36, unique = true)
     private String messageId;
+
     @NonNull
     private String processIdentifier;
     @NonNull
@@ -43,19 +46,18 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdated;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "message_id", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
     private Set<BusinessMessageFile> files;
 
     @NonNull
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "sbd_id", referencedColumnName = "id")
-    @QueryInit("standardBusinessDocumentHeader.businessScope")
+    @Convert(converter = StandardBusinessDocumentConverter.class)
+    @Lob
     private StandardBusinessDocument sbd;
 
     @JsonIgnore
     public NextMoveMessage addFile(BusinessMessageFile file) {
         Set<BusinessMessageFile> fileSet = getOrCreateFiles();
+        file.setMessage(this);
         fileSet.add(file.setDokumentnummer(fileSet.size() + 1));
         return this;
     }

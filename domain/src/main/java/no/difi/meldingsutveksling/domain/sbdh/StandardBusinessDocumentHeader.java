@@ -17,10 +17,8 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -30,7 +28,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -67,9 +68,7 @@ import java.util.*;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "sbdh")
-public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
+public class StandardBusinessDocumentHeader {
 
     @XmlElement(name = "HeaderVersion", required = true)
     @NotNull
@@ -77,33 +76,26 @@ public class StandardBusinessDocumentHeader extends AbstractEntity<Long> {
     private String headerVersion;
 
     @XmlElement(name = "Sender", required = true)
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "header_id", nullable = false)
     @Size(max = 1)
     @Valid
     private Set<Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
     @Size(min = 1, max = 1)
     @Valid
     private Set<Receiver> receiver;
 
     @XmlElement(name = "DocumentIdentification", required = true)
-    @Embedded
     @NotNull
     @Valid
     private DocumentIdentification documentIdentification;
 
     @XmlElement(name = "Manifest")
     @Valid
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Manifest manifest;
 
     @XmlElement(name = "BusinessScope")
-    @Embedded
     @NotNull
     @Valid
     private BusinessScope businessScope;

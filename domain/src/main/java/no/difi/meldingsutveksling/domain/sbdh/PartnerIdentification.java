@@ -19,7 +19,6 @@ import no.difi.meldingsutveksling.validation.group.sequenceprovider.PartnerIdent
 import org.hibernate.annotations.Parent;
 import org.hibernate.validator.group.GroupSequenceProvider;
 
-import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -49,7 +48,6 @@ import java.io.Serializable;
 @Setter
 @ToString(exclude = "partner")
 @RequiredArgsConstructor
-@Embeddable
 @GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
 public class PartnerIdentification implements Serializable {
 

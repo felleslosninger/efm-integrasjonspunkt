@@ -13,11 +13,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Future;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -52,9 +49,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "correlation_information")
-public class CorrelationInformation extends AbstractEntity<Long> {
+public class CorrelationInformation {
 
     @XmlElement(name = "RequestingDocumentCreationDateTime")
     @XmlSchemaType(name = "dateTime")

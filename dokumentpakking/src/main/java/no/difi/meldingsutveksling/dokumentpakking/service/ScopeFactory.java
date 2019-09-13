@@ -10,13 +10,6 @@ import java.time.OffsetDateTime;
 @UtilityClass
 class ScopeFactory {
 
-    static Scope fromJournalPostId(String journalPostId, String process) {
-        return new Scope()
-                .setIdentifier(process)
-                .setType(ScopeType.JOURNALPOST_ID.toString())
-                .setInstanceIdentifier(journalPostId);
-    }
-
     static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
         return new Scope()
                 .setIdentifier(process)

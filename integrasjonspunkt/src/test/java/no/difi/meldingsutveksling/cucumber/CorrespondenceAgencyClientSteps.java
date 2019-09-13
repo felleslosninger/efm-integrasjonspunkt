@@ -23,8 +23,7 @@ public class CorrespondenceAgencyClientSteps {
 
     @Then("^the CorrespondenceAgencyClient is called with the following payload:$")
     public void theCorrespondenceAgencyClientIsCalledWithTheFollowingPayload(String expectedPayload) {
-        List<String> payloads = webServicePayloadHolder.get();
-        String actualPayload = payloads.get(0);
+        List<String> payloads = webServicePayloadHolder.get();String actualPayload = payloads.get(0);
         assertThat(hideData(actualPayload)).isXmlEqualTo(expectedPayload);
 
         InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);

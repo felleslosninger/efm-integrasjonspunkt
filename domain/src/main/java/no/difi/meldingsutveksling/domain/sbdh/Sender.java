@@ -1,11 +1,7 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 import java.util.Set;
 
-@Entity
-@DiscriminatorValue("sender")
 public class Sender extends Partner {
 
     @Override

@@ -11,10 +11,8 @@ package no.difi.meldingsutveksling.domain.sbdh;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import org.hibernate.annotations.DiscriminatorOptions;
 
-import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -51,22 +49,15 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "partner")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorOptions(force = true)
-public class Partner extends AbstractEntity<Long> {
+public class Partner {
 
     @XmlElement(name = "Identifier", required = true)
-    @Embedded
     @NotNull
     @Valid
     protected PartnerIdentification identifier;
 
     @XmlElement(name = "ContactInformation")
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "partner_id", nullable = false)
     @Valid
     protected Set<ContactInformation> contactInformation;
 

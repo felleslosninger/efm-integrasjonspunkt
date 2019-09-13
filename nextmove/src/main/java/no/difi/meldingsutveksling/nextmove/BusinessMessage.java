@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModel;
 import lombok.*;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -13,9 +12,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type")
 @ApiModel(subTypes = {
         ArkivmeldingMessage.class,
         DigitalDpvMessage.class,
@@ -26,7 +22,6 @@ import javax.validation.constraints.NotNull;
 }, discriminator = "type")
 public abstract class BusinessMessage extends AbstractEntity<Long> {
 
-    @Column(name = "type", insertable = false, updatable = false)
     @JsonIgnore
     private String type;
 

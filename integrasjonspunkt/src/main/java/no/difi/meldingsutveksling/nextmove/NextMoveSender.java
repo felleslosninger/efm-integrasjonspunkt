@@ -3,12 +3,12 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.nextmove.v2.BusinessMessageFileRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -20,11 +20,11 @@ public class NextMoveSender {
     private final ConversationStrategyFactory strategyFactory;
     private final ConversationService conversationService;
     private final NextMoveMessageOutRepository messageRepo;
+    private final BusinessMessageFileRepository businessMessageFileRepository;
     private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
     private final TimeToLiveHelper timeToLiveHelper;
 
-    @Transactional
     public void send(NextMoveOutMessage msg) throws NextMoveException {
         if (sbdUtil.isExpired(msg.getSbd())) {
             conversationService.findConversation(msg.getMessageId())
@@ -49,6 +49,11 @@ public class NextMoveSender {
             conversationService.registerStatus(msg.getMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
         }
 
-        messageRepo.deleteByMessageId(msg.getMessageId());
+        messageRepo.findIdByMessageId(msg.getMessageId()).ifPresent(
+                id -> {
+                    businessMessageFileRepository.deleteFilesByMessageId(id);
+                    messageRepo.deleteMessageById(id);
+                }
+        );
     }
 }

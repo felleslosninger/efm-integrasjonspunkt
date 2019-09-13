@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 })
 @ApiModel(description = "Conversation")
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
+@DynamicUpdate
 public class Conversation extends AbstractEntity<Long> implements MessageInformable {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");

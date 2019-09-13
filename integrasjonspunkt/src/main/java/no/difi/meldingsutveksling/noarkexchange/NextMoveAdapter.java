@@ -41,7 +41,6 @@ public class NextMoveAdapter {
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
 
-    @Transactional
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
         NextMoveOutMessage nextMoveMessage;
         if (PayloadUtil.isAppReceipt(message.getPayload())) {

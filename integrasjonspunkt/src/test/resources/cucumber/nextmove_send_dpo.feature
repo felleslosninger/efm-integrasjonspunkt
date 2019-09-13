@@ -235,7 +235,7 @@ Feature: Sending a Next Move DPO message
             "instanceIdentifier" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
             "identifier" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
             "scopeInformation" : [ {
-              "expectedResponseDateTime" : "2019-05-10T01:31:52+02:00"
+              "expectedResponseDateTime" : "2019-05-10T00:31:52+01:00"
             } ]
           } ]
         }
@@ -407,7 +407,7 @@ Feature: Sending a Next Move DPO message
                     {
                         "scopeInformation": [
                             {
-                                "expectedResponseDateTime": "2019-05-10T01:31:52+02:00"
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:response:ver1.0",

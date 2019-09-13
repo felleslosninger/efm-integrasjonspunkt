@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
+import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
@@ -47,6 +48,7 @@ public class NextMoveMessageService {
         return messageRepo.findAll(predicate, pageable);
     }
 
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public NextMoveOutMessage createMessage(StandardBusinessDocument sbd, List<? extends MultipartFile> files) {
         NextMoveOutMessage message = createMessage(sbd);
         files.forEach(file -> addFile(message, file));

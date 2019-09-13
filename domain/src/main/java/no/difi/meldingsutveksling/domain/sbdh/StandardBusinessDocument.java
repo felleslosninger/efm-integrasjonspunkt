@@ -29,7 +29,6 @@ import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.hibernate.validator.group.GroupSequenceProvider;
 import org.w3c.dom.Node;
 
-import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBContext;
@@ -67,15 +66,12 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "sbd")
 @JsonSerialize(using = NextMoveMessageSerializer.class)
 @GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
 @ApiModel(description = "Standard Business Document")
-public class StandardBusinessDocument extends AbstractEntity<Long> {
+public class StandardBusinessDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     @Valid
     @ApiModelProperty(
@@ -87,7 +83,6 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
     @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = BusinessMessage.class)
     @NotNull
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
     @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
@@ -191,6 +186,11 @@ public class StandardBusinessDocument extends AbstractEntity<Long> {
     @JsonIgnore
     public String getMessageId() {
         return getDocumentId();
+    }
+
+    @JsonIgnore
+    public Optional<String> getOptionalMessageId() {
+        return Optional.ofNullable(getDocumentId());
     }
 
     @JsonIgnore

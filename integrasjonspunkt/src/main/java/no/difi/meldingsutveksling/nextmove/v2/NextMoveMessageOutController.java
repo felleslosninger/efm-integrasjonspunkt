@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class NextMoveMessageOutController {
 
     private static final int MAX_SIZE = 5 * 1024 * 1024;
+
     private final NextMoveMessageService messageService;
 
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -44,7 +45,6 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional(noRollbackFor = TimeToLiveException.class)
     public StandardBusinessDocument createAndSendMessage(
             @ApiParam(name = "SBD", value = "Standard Business Document to send. Please note that the property name is not 'any'. \n"
                     + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.", required = true)
@@ -152,7 +152,6 @@ public class NextMoveMessageOutController {
             @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
-    @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(
             @ApiParam(
                     value = "The message ID. Usually a UUID",

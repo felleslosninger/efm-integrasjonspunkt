@@ -49,16 +49,19 @@ public class NextMoveValidator {
     private final ConversationService conversationService;
 
     void validate(StandardBusinessDocument sbd) {
-        messageRepo.findByMessageId(sbd.getDocumentId())
-            .map(p -> {
-                throw new MessageAlreadyExistsException(p.getMessageId());
-            });
-        if (!sbdUtil.isStatus(sbd)) {
-            conversationService.findConversation(sbd.getMessageId())
-                    .map(c -> {
-                        throw new MessageAlreadyExistsException(sbd.getMessageId());
-                    });
-        }
+        sbd.getOptionalMessageId().ifPresent(messageId -> {
+                    messageRepo.findByMessageId(messageId)
+                            .map(p -> {
+                                throw new MessageAlreadyExistsException(messageId);
+                            });
+                    if (!sbdUtil.isStatus(sbd)) {
+                        conversationService.findConversation(messageId)
+                                .map(c -> {
+                                    throw new MessageAlreadyExistsException(messageId);
+                                });
+                    }
+                }
+        );
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
@@ -81,7 +84,11 @@ public class NextMoveValidator {
         }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
-        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]{group} : new Class<?>[0]);
+        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
+
+                {
+                        group
+                } : new Class<?>[0]);
     }
 
     void validate(NextMoveOutMessage message) {

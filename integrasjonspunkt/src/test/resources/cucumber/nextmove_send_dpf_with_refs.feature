@@ -28,7 +28,7 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
                             }
                         ],
                         "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
-                        "instanceIdentifier": "45efbd4c-413d-4e2c-bbc5-257ef4a65a91",
+                        "instanceIdentifier": "23efbd4c-413d-4e2c-bbc5-257ef4a65a91",
                         "type": "ConversationId"
                     },
                     {

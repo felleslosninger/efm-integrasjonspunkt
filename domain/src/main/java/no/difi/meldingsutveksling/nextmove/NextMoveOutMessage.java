@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLockType;
+import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -17,6 +20,8 @@ import java.util.HashSet;
 @Getter
 @Setter
 @ToString
+@OptimisticLocking(type = OptimisticLockType.DIRTY)
+@DynamicUpdate
 public class NextMoveOutMessage extends NextMoveMessage {
 
     public NextMoveOutMessage(String conversationId,

@@ -16,7 +16,6 @@ import no.difi.meldingsutveksling.validation.IsDocumentType;
 import no.difi.meldingsutveksling.validation.UUID;
 import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
 
-import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.xml.bind.annotation.*;
@@ -57,7 +56,6 @@ import java.time.OffsetDateTime;
         "creationDateAndTime"
 })
 @Data
-@Embeddable
 public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "Standard", required = true)

@@ -21,9 +21,6 @@ public class NextMoveMessageOutControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private StandardBusinessDocumentRepository standardBusinessDocumentRepository;
-
     @Test
     public void createResourceWithoutReceiverShouldFail() throws Exception {
         mvc.perform(post("/api/message/out")

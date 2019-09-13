@@ -12,11 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
-import javax.validation.constraints.NotEmpty;
 
-import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -51,17 +49,12 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "manifest")
-public class Manifest extends AbstractEntity<Long> {
+public class Manifest {
 
     @XmlElement(name = "NumberOfItems", required = true)
-    @Transient
     protected Long numberOfItems;
 
     @XmlElement(name = "ManifestItem", required = true)
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "header_id", nullable = false)
     @NotEmpty
     @Valid
     protected Set<ManifestItem> manifestItem;

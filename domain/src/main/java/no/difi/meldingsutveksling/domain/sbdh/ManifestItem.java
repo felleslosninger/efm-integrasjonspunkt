@@ -13,8 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 
@@ -49,9 +47,7 @@ import javax.xml.bind.annotation.*;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "manifest_item")
-public class ManifestItem extends AbstractEntity<Long> {
+public class ManifestItem {
 
     @XmlElement(name = "MimeTypeQualifierCode", required = true)
     @NotNull

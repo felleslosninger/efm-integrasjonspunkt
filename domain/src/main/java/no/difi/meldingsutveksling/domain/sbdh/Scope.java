@@ -12,11 +12,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.validation.OneOf;
 import no.difi.meldingsutveksling.validation.UUID;
 
-import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBElement;
@@ -56,9 +54,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@Entity
-@Table(name = "scope")
-public class Scope extends AbstractEntity<Long> {
+public class Scope {
 
     @XmlElement(name = "Type", required = true)
     @NotNull
@@ -87,8 +83,6 @@ public class Scope extends AbstractEntity<Long> {
     protected String identifier;
 
     @XmlElement(name = "ScopeInformation")
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "scope_id", nullable = false)
     @Valid
     protected Set<CorrelationInformation> scopeInformation;
 
