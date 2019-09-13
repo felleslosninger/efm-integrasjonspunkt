@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextmove.message;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.sql.Blob;
 
 @Entity
+@Table(name = "next_move_message_entry")
 @RequiredArgsConstructor(staticName = "of")
 @NoArgsConstructor
 @Data
@@ -28,7 +29,7 @@ public class NextMoveMessageEntry {
     private String filename;
 
     @Lob
-    @Column(name ="content")
+    @Column(name = "content")
     @NonNull
     private Blob content;
 

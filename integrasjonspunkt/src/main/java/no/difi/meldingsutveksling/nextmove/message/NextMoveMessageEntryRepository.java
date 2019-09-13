@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
