@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jms.annotation.JmsListener;
@@ -44,21 +43,19 @@ public class InternalQueue {
     private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
     private final DocumentConverter documentConverter;
     private final DeadLetterQueueHandler deadLetterQueueHandler;
-    private final CryptoMessagePersister cryptoMessagePersister;
 
     public InternalQueue(JmsTemplate jmsTemplate,
                          NextMoveSender nextMoveSender,
                          ObjectMapper objectMapper,
                          ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
                          DocumentConverter documentConverter,
-                         DeadLetterQueueHandler deadLetterQueueHandler, CryptoMessagePersister cryptoMessagePersister) {
+                         DeadLetterQueueHandler deadLetterQueueHandler) {
         this.jmsTemplate = jmsTemplate;
         this.nextMoveSender = nextMoveSender;
         this.objectMapper = objectMapper;
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.documentConverter = documentConverter;
         this.deadLetterQueueHandler = deadLetterQueueHandler;
-        this.cryptoMessagePersister = cryptoMessagePersister;
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory", concurrency = "10")
@@ -73,12 +70,6 @@ public class InternalQueue {
             nextMoveSender.send(nextMoveMessage);
         } catch (NextMoveException e) {
             throw new NextMoveRuntimeException("Unable to send NextMove message", e);
-        }
-
-        try {
-            cryptoMessagePersister.delete(nextMoveMessage.getMessageId());
-        } catch (IOException e) {
-            log.error("Error deleting files from message with id={}", nextMoveMessage.getMessageId(), e);
         }
     }
 

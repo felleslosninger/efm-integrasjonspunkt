@@ -21,6 +21,7 @@ public class CapabilityFactory {
                 .setProcess(serviceRecord.getProcess())
                 .setServiceIdentifier(serviceRecord.getServiceIdentifier())
                 .setReturnAddress(getReturnAddress(serviceRecord))
+                .setPostAddress(getPostAddress(serviceRecord))
                 .setDocumentTypes(serviceRecord.getDocumentTypes()
                         .stream()
                         .map(standard -> new DocumentType()
@@ -33,6 +34,12 @@ public class CapabilityFactory {
     private PostalAddress getReturnAddress(ServiceRecord serviceRecord) {
         return serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI
                 ? postalAddressFactory.getPostalAddress(serviceRecord.getReturnAddress())
+                : null;
+    }
+
+    private PostalAddress getPostAddress(ServiceRecord serviceRecord) {
+        return serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI
+                ? postalAddressFactory.getPostalAddress(serviceRecord.getPostAddress())
                 : null;
     }
 

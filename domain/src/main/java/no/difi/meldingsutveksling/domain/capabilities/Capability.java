@@ -26,6 +26,8 @@ public class Capability {
     )
     private ServiceIdentifier serviceIdentifier;
 
+    private PostalAddress postAddress;
+
     private PostalAddress returnAddress;
 
     private List<DocumentType> documentTypes;

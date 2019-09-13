@@ -140,7 +140,7 @@ public class IntegrajonspunktReceiveImpl {
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
-                Audit.info(String.format("Message [id=%s] delivered archive", sbd.getConversationId()), markerFrom(response));
+                Audit.info(String.format("Message [id=%s] delivered archive", sbd.getMessageId()), markerFrom(response));
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
                 sendLevertStatus(sbd);
                 if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
