@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -22,9 +23,11 @@ import no.difi.meldingsutveksling.nextmove.v2.BasicNextMoveFile;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
-import org.springframework.transaction.annotation.Transactional;
 import javax.xml.bind.JAXBException;
 import java.util.Base64;
 import java.util.List;
@@ -42,6 +45,7 @@ public class NextMoveAdapter {
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
     private final UUIDGenerator uuidGenerator;
+    private final ServiceRegistryLookup srLookup;
 
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
         NextMoveOutMessage nextMoveMessage;
@@ -79,6 +83,12 @@ public class NextMoveAdapter {
     }
 
     private NextMoveOutMessage convertEduMessage(PutMessageRequestWrapper message) throws PayloadException, JAXBException {
+        ServiceRecord receiverServiceRecord;
+        try {
+            receiverServiceRecord = srLookup.getServiceRecord(message.getReceiverPartyNumber());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
+        }
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
                 message.getConversationId(),
@@ -86,6 +96,7 @@ public class NextMoveAdapter {
                 properties.getArkivmelding().getDefaultProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage()
+                        .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)
         );
 
