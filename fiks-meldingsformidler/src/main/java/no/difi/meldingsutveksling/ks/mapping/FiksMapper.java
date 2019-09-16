@@ -198,8 +198,8 @@ public class FiksMapper {
     private Optional<String> getSaksbehandler(Journalpost jp) {
         return jp.getKorrespondansepart().stream()
                 .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
-                .map(Korrespondansepart::getSaksbehandler)
-                .findFirst();
+                .findFirst()
+                .map(Korrespondansepart::getSaksbehandler);
     }
 
     private int toInt(BigInteger x) {
