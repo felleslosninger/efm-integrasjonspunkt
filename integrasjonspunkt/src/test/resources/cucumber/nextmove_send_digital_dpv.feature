@@ -109,7 +109,7 @@ Feature: Sending a Next Move Digital DPV message
                                     xmlns:altinn8="http://schemas.altinn.no/serviceengine/formsengine/2009/10"
                                     xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
         <altinn9:SystemUserCode>stuntman</altinn9:SystemUserCode>
-        <altinn9:ExternalShipmentReference>97efbd4c-413d-4e2c-bbc5-257ef4a61212</altinn9:ExternalShipmentReference>
+        <altinn9:ExternalShipmentReference>ff88849c-e281-4809-8555-7cd54952b922</altinn9:ExternalShipmentReference>
         <altinn9:Correspondence>
             <altinn10:ServiceCode>4255</altinn10:ServiceCode>
             <altinn10:ServiceEdition>10</altinn10:ServiceEdition>
