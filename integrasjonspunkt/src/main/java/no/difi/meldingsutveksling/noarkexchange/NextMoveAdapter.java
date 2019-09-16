@@ -70,7 +70,7 @@ public class NextMoveAdapter {
 
     private NextMoveOutMessage convertAppReceipt(PutMessageRequestWrapper message) {
         AppReceiptType appReceiptType = BestEduConverter.payloadAsAppReceipt(message.getPayload());
-        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), Sets.newHashSet());
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), message.getConversationId(), Sets.newHashSet());
         appReceiptType.getMessage().forEach(sm -> receipt.getMessages().add(new KvitteringStatusMessage(sm.getCode(), sm.getText())));
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),

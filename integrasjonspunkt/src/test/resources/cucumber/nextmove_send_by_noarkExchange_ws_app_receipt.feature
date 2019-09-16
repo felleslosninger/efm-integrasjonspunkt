@@ -123,6 +123,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
       },
       "arkivmelding_kvittering" : {
           "receiptType" : "OK",
+          "relatedToMessageId" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "messages" : [ {
             "code" : "Recno",
             "text" : "315890"

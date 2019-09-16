@@ -16,7 +16,7 @@ import java.util.Set;
 public class ArkivmeldingKvitteringMessage extends BusinessMessage {
 
     private String receiptType;
-
+    private String relatedToMessageId;
     private Set<KvitteringStatusMessage> messages;
 
     @JsonIgnore
