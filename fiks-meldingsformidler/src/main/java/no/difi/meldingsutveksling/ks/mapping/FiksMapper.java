@@ -189,7 +189,7 @@ public class FiksMapper {
                 .withJournalposttype(JournalposttypeMapper.getNoarkType(jp.getJournalposttype()))
                 .withJournalstatus(JournalstatusMapper.getNoarkType(jp.getJournalstatus()))
                 .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
-                .withDokumentetsDato(jp.getDokumentetsDato())
+                .withDokumentetsDato(DateTimeUtil.atStartOfDay(jp.getDokumentetsDato()))
                 .withTittel(jp.getOffentligTittel())
                 .withSaksbehandler(getSaksbehandler(jp).orElse(null))
                 .build();
