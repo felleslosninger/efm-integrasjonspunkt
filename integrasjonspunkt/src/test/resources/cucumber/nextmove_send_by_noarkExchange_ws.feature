@@ -250,11 +250,11 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
             <offentligTittel>Test18 - Difi</offentligTittel>
             <referanseArkivdel>SAK1</referanseArkivdel>
             <skjerming>
-                <skjermingshjemmel/>
+                <skjermingshjemmel></skjermingshjemmel>
             </skjerming>
             <basisregistrering xsi:type="journalpost">
                 <systemID>40</systemID>
-                <referanseArkivdel/>
+                <referanseArkivdel></referanseArkivdel>
                 <dokumentbeskrivelse>
                     <tittel>Test18 - liten fil - 22.04.16</tittel>
                     <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
@@ -280,12 +280,12 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
                     <postadresse>Pb 253</postadresse>
                     <postnummer>9951</postnummer>
                     <poststed>VARDØ</poststed>
-                    <land/>
+                    <land></land>
                     <administrativEnhet>[Ufordelt]</administrativEnhet>
                     <saksbehandler>[Ufordelt]</saksbehandler>
                 </korrespondansepart>
                 <avskrivning>
-                    <referanseAvskrivesAvJournalpost/>
+                    <referanseAvskrivesAvJournalpost></referanseAvskrivesAvJournalpost>
                 </avskrivning>
             </basisregistrering>
             <saksaar>2016</saksaar>
