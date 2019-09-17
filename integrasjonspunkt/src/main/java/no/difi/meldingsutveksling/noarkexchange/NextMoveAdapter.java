@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -26,6 +27,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
@@ -105,6 +107,22 @@ public class NextMoveAdapter {
 
     private List<BasicNextMoveFile> getFiles(PutMessageRequestWrapper message) throws JAXBException, PayloadException {
         List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(message.getPayload());
+
+        // Need to check if receiver is on FIKS platform. If so, reject if documents are not PDF.
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = srLookup.getServiceRecord(message.getReceiverPartyNumber());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
+        }
+        if (serviceRecord.getService().getIdentifier() == ServiceIdentifier.DPF) {
+            if (noarkDocuments.stream()
+                    .map(d -> MediaType.valueOf(d.getContentType()))
+                    .anyMatch(mt -> !MediaType.APPLICATION_PDF.equals(mt))) {
+                throw new MeldingsUtvekslingRuntimeException(String.format("Target service for %s is SvarUt, which only supports PDF documents.", message.getReceiverPartyNumber()));
+            }
+        }
+
         List<BasicNextMoveFile> files = noarkDocuments.stream()
                 .map(d -> BasicNextMoveFile.of(d.getTitle(), d.getFilename(), d.getContentType(), Base64.getDecoder().decode(d.getContent())))
                 .collect(Collectors.toList());

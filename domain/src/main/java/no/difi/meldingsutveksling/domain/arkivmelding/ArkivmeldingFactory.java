@@ -82,6 +82,11 @@ public class ArkivmeldingFactory {
             ofNullable(a.getAmAdmkort()).ifPresent(kp::setAdministrativEnhet);
             ofNullable(a.getAmSbhinit()).ifPresent(kp::setSaksbehandler);
 
+            ofNullable(a.getAmAdresse()).ifPresent(adr -> kp.getPostadresse().add(adr));
+            ofNullable(a.getAmPostnr()).ifPresent(kp::setPostnummer);
+            ofNullable(a.getAmPoststed()).ifPresent(kp::setPoststed);
+            ofNullable(a.getAmUtland()).ifPresent(kp::setLand);
+
             if ("0".equals(a.getAmIhtype())) {
                 kp.setKorrespondanseparttype(Korrespondanseparttype.AVSENDER);
             }
