@@ -48,6 +48,10 @@ public class StandardBusinessDocumentConverter implements AttributeConverter<Sta
     private ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
             SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+
+            if (objectMapper == null) {
+                throw new IllegalStateException("Couldn't inject ObjectMapper into StandardBusinessDocumentConverter");
+            }
         }
 
         return objectMapper;
