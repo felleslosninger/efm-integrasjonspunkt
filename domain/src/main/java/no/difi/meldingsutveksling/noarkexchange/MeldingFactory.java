@@ -6,8 +6,8 @@ import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.arkivmelding.*;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -71,6 +71,12 @@ public class MeldingFactory {
             if ("mottaker".equalsIgnoreCase(k.getKorrespondanseparttype().value())) {
                 avsmotType.setAmIhtype("1");
             }
+
+            avsmotType.setAmAdresse(String.join(" ", k.getPostadresse()));
+            avsmotType.setAmPostnr(k.getPostnummer());
+            avsmotType.setAmPoststed(k.getPoststed());
+            avsmotType.setAmUtland(k.getLand());
+
             avsmotType.setAmAdmkort(k.getAdministrativEnhet());
             avsmotType.setAmSbhinit(k.getSaksbehandler());
             if (!jp.getAvskrivning().isEmpty()) {

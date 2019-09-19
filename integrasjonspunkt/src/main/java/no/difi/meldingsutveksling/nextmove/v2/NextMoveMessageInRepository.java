@@ -7,10 +7,13 @@ import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.QNextMoveInMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,6 +31,15 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
     List<NextMoveInMessage> findByLockTimeoutLessThanEqual(OffsetDateTime now);
 
     Optional<NextMoveInMessage> findByMessageId(String messageId);
+
+    @Transactional(readOnly = true)
+    @Query("SELECT id FROM NextMoveInMessage WHERE messageId = ?1")
+    Optional<Long> findIdByMessageId(String messageId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM NextMoveInMessage WHERE id = ?1")
+    void deleteMessageById(Long messageId);
 
     default Page<StandardBusinessDocument> find(NextMoveInMessageQueryInput input, Pageable pageable) {
         return findAll(createQuery(input).getValue()

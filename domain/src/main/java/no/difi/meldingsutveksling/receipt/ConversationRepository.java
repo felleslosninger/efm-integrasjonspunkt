@@ -7,11 +7,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +53,10 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByDirection(ConversationDirection direction);
+
+    @Transactional(readOnly = true)
+    @Query("SELECT id FROM Conversation WHERE expiry < :time AND finished = false")
+    Iterable<Long> findIdsForExpiredConversations(@Param("time") OffsetDateTime time);
 
     Long countByPollable(boolean pollable);
 
