@@ -103,7 +103,11 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public CmsUtil cmsUtil() {
+    public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
+        if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
+                props.getOrg().getKeystore().getLockProvider()) {
+            return new CmsUtil(null);
+        }
         return new CmsUtil();
     }
 

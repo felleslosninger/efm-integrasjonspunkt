@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -64,7 +65,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     public FileEntryStream readStream(String messageId, String filename) {
         InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
         PipedInputStream pipedInputStream = plumber.pipe("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
-        return FileEntryStream.of(getCmsUtil().decryptCMSStreamed(pipedInputStream, keyInfo.loadPrivateKey()), -1);
+        return FileEntryStream.of(new Decryptor(keyInfo).decryptCMSStreamed(pipedInputStream), -1);
     }
 
     public void delete(String messageId) throws IOException {
