@@ -24,7 +24,7 @@ public class FiksConfig {
     public static class SvarUt {
         @Valid()
         @Pattern(regexp = "^[a-zA-Z0-9\\-\\.øæåØÆÅ]{0,20}$")
-        private String konverteringsKode;
+        private String konteringsKode;
         private String username;
         private String password;
         private URL endpointUrl;
@@ -40,5 +40,11 @@ public class FiksConfig {
         private boolean mailOnError;
         private String mailSubject;
         private String fallbackSenderOrgNr;
+        @NotNull
+        private String process;
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
     }
 }

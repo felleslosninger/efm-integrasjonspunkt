@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.w3c.dom.Node;
 
+import java.util.Objects;
+
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.queryJpId;
 
 /**
@@ -19,19 +21,19 @@ public class JournalpostId {
         this.jpId = jpId;
     }
 
-    public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) throws PayloadException {
-        if(message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE){
+    public static JournalpostId fromPutMessage(PutMessageRequestWrapper message) {
+        if (message.getMessageType() != PutMessageRequestWrapper.MessageType.EDUMESSAGE) {
             return new JournalpostId("");
         }
         return new JournalpostId(queryJpId(message.getPayload()));
     }
 
-    public static JournalpostId fromPayload(Object payload) throws PayloadException {
+    public static JournalpostId fromPayload(Object payload) {
         if (payload instanceof String || payload instanceof Node) {
             return new JournalpostId(queryJpId(payload));
         }
         if (payload instanceof MeldingType) {
-            return new JournalpostId(((MeldingType)payload).getJournpost().getJpId());
+            return new JournalpostId(((MeldingType) payload).getJournpost().getJpId());
         }
         return new JournalpostId("");
     }
@@ -48,8 +50,7 @@ public class JournalpostId {
 
         JournalpostId that = (JournalpostId) o;
 
-        return !(jpId != null ? !jpId.equals(that.jpId) : that.jpId != null);
-
+        return Objects.equals(jpId, that.jpId);
     }
 
     @Override

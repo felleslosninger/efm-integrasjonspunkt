@@ -4,7 +4,4 @@
     <endpoint name='noarkExchange'
               implementation='no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl'
               url-pattern='/noarkExchange'/>
-    <endpoint name='receive'
-              implementation='no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl'
-              url-pattern='/receive'/>
 </endpoints>

@@ -8,20 +8,26 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
  * <p>Java class for Manifest complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Manifest">
  *   &lt;complexContent>
@@ -34,72 +40,59 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Manifest", propOrder = {
-    "numberOfItems",
-    "manifestItem"
+        "numberOfItems",
+        "manifestItem"
 })
+@Getter
+@Setter
+@ToString
 public class Manifest {
 
     @XmlElement(name = "NumberOfItems", required = true)
-    protected BigInteger numberOfItems;
+    protected Long numberOfItems;
+
     @XmlElement(name = "ManifestItem", required = true)
-    protected List<ManifestItem> manifestItem;
+    @NotEmpty
+    @Valid
+    protected Set<ManifestItem> manifestItem;
 
-    /**
-     * Gets the value of the numberOfItems property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
-     */
-    public BigInteger getNumberOfItems() {
-        return numberOfItems;
-    }
-
-    /**
-     * Sets the value of the numberOfItems property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
-     */
-    public void setNumberOfItems(BigInteger value) {
-        this.numberOfItems = value;
+    @JsonProperty
+    public Long getNumberOfItems() {
+        return numberOfItems != null ? numberOfItems : getManifestItem().size();
     }
 
     /**
      * Gets the value of the manifestItem property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the manifestItem property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getManifestItem().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ManifestItem }
-     * 
-     * 
      */
-    public List<ManifestItem> getManifestItem() {
+    public Set<ManifestItem> getManifestItem() {
         if (manifestItem == null) {
-            manifestItem = new ArrayList<ManifestItem>();
+            manifestItem = new HashSet<>();
         }
         return this.manifestItem;
     }
 
+    public Manifest addManifestItem(ManifestItem item) {
+        getManifestItem().add(item);
+        return this;
+    }
 }

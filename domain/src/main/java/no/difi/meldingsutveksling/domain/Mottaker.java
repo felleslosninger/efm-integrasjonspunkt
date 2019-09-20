@@ -14,7 +14,7 @@ public class Mottaker extends Aktor {
         return new Builder(organisasjonsnummer, certificate);
     }
 
-    public  Mottaker(Organisasjonsnummer orgNummer, Certificate sertifikat) {
+    public Mottaker(Organisasjonsnummer orgNummer, Certificate sertifikat) {
         super(orgNummer);
         setSertifikat(sertifikat);
     }
@@ -28,7 +28,7 @@ public class Mottaker extends Aktor {
     }
 
 
-    public final static class Builder {
+    public static final class Builder {
 
         private final Mottaker target;
         private boolean built = false;

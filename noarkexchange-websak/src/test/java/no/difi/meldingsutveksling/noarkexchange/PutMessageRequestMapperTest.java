@@ -14,7 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 public class PutMessageRequestMapperTest {
 
@@ -33,7 +34,7 @@ public class PutMessageRequestMapperTest {
 
         final JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> websakPutMessage = mapper.mapFrom(putMessageRequestType);
 
-        assertTrue(websakPutMessage.getValue().getPayload() != null);
+        assertNotNull(websakPutMessage.getValue().getPayload());
     }
 
     @Test()
@@ -43,7 +44,7 @@ public class PutMessageRequestMapperTest {
         PutMessageRequestMapper mapper = new PutMessageRequestMapper();
         no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType websakRequest = mapper.mapFrom(putMessageRequestType).getValue();
 
-        assertTrue(!PayloadUtil.isEmpty(websakRequest.getPayload()));
+        assertFalse(PayloadUtil.isEmpty(websakRequest.getPayload()));
         JAXBContext ctx2 = JAXBContext.newInstance(PutMessageRequestType.class);
         Marshaller marshaller = ctx2.createMarshaller();
         StringWriter writer = new StringWriter();

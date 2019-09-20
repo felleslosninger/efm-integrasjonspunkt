@@ -21,11 +21,12 @@ public class ConversationMarker {
 
     public static LogstashMarker markerFrom(Conversation conversation) {
         LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(conversation.getConversationId());
+        LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(conversation.getMessageId());
         LogstashMarker senderMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
         LogstashMarker receiverMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
         LogstashMarker serviceIdentifierMarker = serviceIdentifierMarker(conversation.getServiceIdentifier());
         LogstashMarker directionMarker = directionMarker(conversation.getDirection());
-        return conversationIdMarker.and(senderMarker).and(receiverMarker).and(serviceIdentifierMarker).and(directionMarker);
+        return conversationIdMarker.and(messageIdMarker).and(senderMarker).and(receiverMarker).and(serviceIdentifierMarker).and(directionMarker);
     }
 
     public static LogstashMarker markerFrom(MessageStatus status) {

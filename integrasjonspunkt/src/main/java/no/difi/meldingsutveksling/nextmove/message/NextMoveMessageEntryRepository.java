@@ -1,13 +1,15 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface NextMoveMessageEntryRepository extends CrudRepository<NextMoveMessageEntry, String> {
+public interface NextMoveMessageEntryRepository extends CrudRepository<NextMoveMessageEntry, String>,
+        JpaRepository<NextMoveMessageEntry, String> {
 
-    Optional<NextMoveMessageEntry> findByConversationIdAndFilename(String conversationId, String filename);
-    List<NextMoveMessageEntry> findByConversationId(String conversationId);
-    void deleteByConversationId(String conversationId);
+    Optional<NextMoveMessageEntry> findByMessageIdAndFilename(String messageId, String filename);
+
+    void deleteByMessageId(String messageId);
 }

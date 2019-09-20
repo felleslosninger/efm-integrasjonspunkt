@@ -8,18 +8,20 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.*;
 
 
 /**
  * <p>Java class for ManifestItem complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ManifestItem">
  *   &lt;complexContent>
@@ -34,122 +36,31 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ManifestItem", propOrder = {
-    "mimeTypeQualifierCode",
-    "uniformResourceIdentifier",
-    "description",
-    "languageCode"
+        "mimeTypeQualifierCode",
+        "uniformResourceIdentifier",
+        "description",
+        "languageCode"
 })
+@Getter
+@Setter
+@ToString
 public class ManifestItem {
 
     @XmlElement(name = "MimeTypeQualifierCode", required = true)
+    @NotNull
     protected String mimeTypeQualifierCode;
+
     @XmlElement(name = "UniformResourceIdentifier", required = true)
     @XmlSchemaType(name = "anyURI")
+    @NotNull
     protected String uniformResourceIdentifier;
+
     @XmlElement(name = "Description")
     protected String description;
+
     @XmlElement(name = "LanguageCode")
     protected String languageCode;
-
-    /**
-     * Gets the value of the mimeTypeQualifierCode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getMimeTypeQualifierCode() {
-        return mimeTypeQualifierCode;
-    }
-
-    /**
-     * Sets the value of the mimeTypeQualifierCode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setMimeTypeQualifierCode(String value) {
-        this.mimeTypeQualifierCode = value;
-    }
-
-    /**
-     * Gets the value of the uniformResourceIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getUniformResourceIdentifier() {
-        return uniformResourceIdentifier;
-    }
-
-    /**
-     * Sets the value of the uniformResourceIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setUniformResourceIdentifier(String value) {
-        this.uniformResourceIdentifier = value;
-    }
-
-    /**
-     * Gets the value of the description property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Sets the value of the description property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setDescription(String value) {
-        this.description = value;
-    }
-
-    /**
-     * Gets the value of the languageCode property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getLanguageCode() {
-        return languageCode;
-    }
-
-    /**
-     * Sets the value of the languageCode property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setLanguageCode(String value) {
-        this.languageCode = value;
-    }
-
 }

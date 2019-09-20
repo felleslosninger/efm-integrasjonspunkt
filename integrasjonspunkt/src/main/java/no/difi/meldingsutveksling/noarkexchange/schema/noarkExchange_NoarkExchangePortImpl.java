@@ -19,6 +19,7 @@ public class noarkExchange_NoarkExchangePortImpl
 
 
     public noarkExchange_NoarkExchangePortImpl() {
+        // NOOP
     }
 
     /**

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>1.7.97</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <version>1.7.97</version>
         </dependency>
 
         <dependency>
@@ -22,10 +21,10 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- change version to parent pom  when cleaning-in-pom-files branch is merged to master -->
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-        </dependency>
+<!--        &lt;!&ndash; change version to parent pom  when cleaning-in-pom-files branch is merged to master &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>commons-configuration</groupId>-->
+<!--            <artifactId>commons-configuration</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

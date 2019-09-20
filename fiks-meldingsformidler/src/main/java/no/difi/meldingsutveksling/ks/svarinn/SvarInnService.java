@@ -1,133 +1,92 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.MessageDownloaderModule;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.core.EDUCore;
-import no.difi.meldingsutveksling.core.EDUCoreFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_LEVERT;
-import static no.difi.meldingsutveksling.receipt.GenericReceiptStatus.INNKOMMENDE_MOTTATT;
 
-public class SvarInnService implements MessageDownloaderModule {
+@RequiredArgsConstructor
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@Component
+public class SvarInnService {
 
-    private SvarInnClient svarInnClient;
-    private SvarInnFileDecryptor decryptor;
-    private SvarInnUnzipper unzipper;
-    private NoarkClient noarkClient;
-    private NoarkClient mailClient;
-    private SvarInnFileFactory svarInnFileFactory;
-    private IntegrasjonspunktProperties properties;
-    private ConversationService conversationService;
+    private final SvarInnClient svarInnClient;
+    private final SvarInnFileDecryptor decryptor;
 
-    public SvarInnService(SvarInnClient svarInnClient,
-                          SvarInnFileDecryptor decryptor,
-                          SvarInnUnzipper unzipper,
-                          NoarkClient noarkClient,
-                          NoarkClient mailClient,
-                          ConversationService conversationService,
-                          IntegrasjonspunktProperties properties) {
-        this.svarInnClient = svarInnClient;
-        this.decryptor = decryptor;
-        this.unzipper = unzipper;
-        this.noarkClient = noarkClient;
-        this.mailClient = mailClient;
-        this.conversationService = conversationService;
-        this.properties = properties;
-        svarInnFileFactory = new SvarInnFileFactory();
+    public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse) {
+        InputStream encrypted = svarInnClient.downloadZipFile(forsendelse);
+        InputStream decrypted = decryptor.decryptCMSStreamed(encrypted);
+        return unzip(forsendelse, decrypted);
     }
 
-    @Override
-    public void downloadFiles() {
-        final List<Forsendelse> forsendelses = svarInnClient.checkForNewMessages();
-        if (!forsendelses.isEmpty()) {
-            Audit.info(format("%d new messages in FIKS", forsendelses.size()));
-        }
-        for(Forsendelse forsendelse : forsendelses) {
-            Audit.info(format("Downloading message with fiks-id %s", forsendelse.getId()), Markers.append("fiks-id", forsendelse.getId()));
-            final SvarInnFile svarInnFile = svarInnClient.downloadFile(forsendelse.getDownloadUrl());
-            final byte[] decrypt = decryptor.decrypt(svarInnFile.getContents());
-            final Map<String, byte[]> unzippedFile;
-            try {
-                unzippedFile = unzipper.unzip(decrypt);
-            } catch (IOException e) {
-                throw new SvarInnForsendelseException("Unable to unzip file", e);
-            }
-            if (unzippedFile.values().isEmpty()) {
-                Audit.error("Zipfile is empty: skipping message", Markers.append("fiks-id", forsendelse.getId()));
-                continue;
-            }
-            // create SvarInnFile with unzipped file and correct mimetype
-            final List<SvarInnFile> files = svarInnFileFactory.createFiles(forsendelse.getFilmetadata(), unzippedFile);
+    private Stream<SvarInnStreamedFile> unzip(Forsendelse forsendelse, InputStream decrypted) {
+        Map<String, String> mimeTypeMap = forsendelse.getFilmetadata()
+                .stream()
+                .collect(Collectors.toMap(p -> p.get("filnavn"), p -> p.get("mimetype")));
 
-            final SvarInnMessage message = new SvarInnMessage(forsendelse, files, properties);
-            final EDUCore eduCore = message.toEduCore();
+        Iterator<SvarInnStreamedFile> sourceIterator = new Iterator<SvarInnStreamedFile>() {
 
-            Conversation c = conversationService.registerConversation(eduCore);
-            c = conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_MOTTATT));
+            private final ZipInputStream stream = new ZipInputStream(decrypted);
+            private ZipEntry entry;
 
-            PutMessageRequestType putMessage = EDUCoreFactory.createPutMessageFromCore(eduCore);
-            if (!validateRequiredFields(forsendelse, eduCore, files)) {
-                checkAndSendMail(putMessage, forsendelse.getId());
-                continue;
+            @Override
+            @SneakyThrows
+            public boolean hasNext() {
+                if (entry == null) {
+                    entry = stream.getNextEntry();
+                }
+
+                if (entry == null) {
+                    stream.close();
+                    return false;
+                }
+
+                return true;
             }
 
-            final PutMessageResponseType response = noarkClient.sendEduMelding(putMessage);
-            if ("OK".equals(response.getResult().getType())) {
-                Audit.info("Message successfully forwarded");
-                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
-                svarInnClient.confirmMessage(forsendelse.getId());
-            } else if ("WARNING".equals(response.getResult().getType())) {
-                Audit.info(format("Archive system responded with warning for message with fiks-id %s",
-                        forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-                conversationService.registerStatus(c, MessageStatus.of(INNKOMMENDE_LEVERT));
-                svarInnClient.confirmMessage(forsendelse.getId());
-            } else {
-                Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-                checkAndSendMail(putMessage, forsendelse.getId());
+            @Override
+            public SvarInnStreamedFile next() {
+                if (hasNext()) {
+                    SvarInnStreamedFile file = SvarInnStreamedFile.of(
+                            entry.getName(),
+                            stream,
+                            mimeTypeMap.get(entry.getName()));
+                    entry = null;
+                    return file;
+                }
+
+                throw new NoSuchElementException();
             }
-        }
+        };
+
+        Iterable<SvarInnStreamedFile> iterable = () -> sourceIterator;
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    private void checkAndSendMail(PutMessageRequestType message, String fiksId) {
-        if (properties.getFiks().getInn().isMailOnError()) {
-            Audit.info(format("Sending message with id=%s by mail", fiksId));
-            mailClient.sendEduMelding(message);
-            svarInnClient.confirmMessage(fiksId);
+    public List<Forsendelse> getForsendelser() {
+        final List<Forsendelse> forsendelser = svarInnClient.checkForNewMessages();
+
+        if (!forsendelser.isEmpty()) {
+            Audit.info(format("%d new messages in FIKS", forsendelser.size()));
         }
+        return forsendelser;
     }
 
-    private boolean validateRequiredFields(Forsendelse forsendelse, EDUCore eduCore, List<SvarInnFile> files) {
-        SvarInnFieldValidator validator = SvarInnFieldValidator.validator()
-                .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
-                .addField(eduCore.getSender().getIdentifier(), "sender: orgnr")
-                .addField(forsendelse.getSvarSendesTil().getNavn(), "sender: name");
-        files.forEach(f ->
-            validator.addField(f.getMediaType().toString(), "veDokformat") // veDokformat
-            .addField(f.getFilnavn(), "dbTittel") // dbTittel
-        );
-
-        if (!validator.getMissing().isEmpty()) {
-            String missingFields = validator.getMissing().stream().reduce((a, b) -> a + ", " + b).get();
-            Audit.error(format("Message with id=%s has the following missing field(s): %s",
-                    forsendelse.getId(), missingFields));
-            return false;
-        }
-
-        return true;
+    public void confirmMessage(String forsendelsesId) {
+        svarInnClient.confirmMessage(forsendelsesId);
     }
-
 }

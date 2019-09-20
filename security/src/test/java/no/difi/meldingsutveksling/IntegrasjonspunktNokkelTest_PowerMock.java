@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import java.io.ByteArrayInputStream;
@@ -56,13 +56,12 @@ public class IntegrasjonspunktNokkelTest_PowerMock {
         properties.setPassword("password");
         properties.setType("type");
 
-        properties.setPath(new PathResource("NONE"));
+        properties.setPath(new FileSystemResource("NONE"));
 
         IntegrasjonspunktNokkel integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties);
 
         Assert.assertEquals(keyStore, integrasjonspunktNokkel.getKeyStore());
     }
-
 
     @Test
     public void testLoadKeyStoreWithPath() throws Exception{

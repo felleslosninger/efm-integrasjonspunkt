@@ -10,7 +10,6 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.client.core.SoapActionCallback;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +28,11 @@ public class WebsakClient implements NoarkClient {
     }
 
     @Override
+    public NoarkClientSettings getNoarkClientSettings() {
+        return settings;
+    }
+
+    @Override
     public boolean canRecieveMessage(String orgnr) {
         GetCanReceiveMessageRequestType r = new GetCanReceiveMessageRequestType();
         AddressType addressType = new AddressType();
@@ -44,16 +48,8 @@ public class WebsakClient implements NoarkClient {
 
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
-        no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType r =
-                new no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType();
-
-        JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> websakRequest;
-        try {
-            websakRequest = new PutMessageRequestMapper().mapFrom(request);
-        } catch (JAXBException e) {
-            throw new RuntimeException("Could not create PutMessageRequest for WebSak", e);
-        }
-
+        JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageRequestType> websakRequest
+                = new PutMessageRequestMapper().mapFrom(request);
 
         final WebServiceTemplate template = templateFactory.createTemplate("no.difi.meldingsutveksling.noarkexchange.websak.schema", markerFrom(new PutMessageRequestWrapper(request)));
         JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> response
@@ -65,7 +61,6 @@ public class WebsakClient implements NoarkClient {
         modelMapper.map(response.getValue(), theResponse);
 
 
-
         setUnmappedValues(response, theResponse);
 
         return theResponse;
@@ -73,13 +68,14 @@ public class WebsakClient implements NoarkClient {
 
     /**
      * Use this method to set values not "mapped" by modelmapper. For instance statusMessage
+     *
      * @param websakResponse from the archive system
-     * @param response websakResponse from this client
+     * @param response       websakResponse from this client
      */
     private void setUnmappedValues(JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> websakResponse, PutMessageResponseType response) {
         List<StatusMessageType> statusMessages = getStatusMessages(websakResponse);
 
-        if(!statusMessages.isEmpty()) {
+        if (!statusMessages.isEmpty()) {
             no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType statusMessage = new no.difi.meldingsutveksling.noarkexchange.schema.StatusMessageType();
             statusMessage.setCode(statusMessages.get(0).getCode());
             statusMessage.setText(statusMessages.get(0).getText());
@@ -87,15 +83,15 @@ public class WebsakClient implements NoarkClient {
         }
     }
 
-    private List<StatusMessageType> getStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> response){
-        List<StatusMessageType> statusMessageTypes = new ArrayList<>() ;
+    private List<StatusMessageType> getStatusMessages(JAXBElement<no.difi.meldingsutveksling.noarkexchange.websak.schema.PutMessageResponseType> response) {
+        List<StatusMessageType> statusMessageTypes = new ArrayList<>();
 
-        if(response.isNil()){
+        if (response.isNil()) {
             return statusMessageTypes;
         }
 
         AppReceiptType appReceipt = response.getValue().getResult();
-        if(appReceipt != null){
+        if (appReceipt != null) {
             statusMessageTypes = appReceipt.getMessage();
         }
 

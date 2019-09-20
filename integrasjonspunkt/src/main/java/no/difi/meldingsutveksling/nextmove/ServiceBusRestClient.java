@@ -1,78 +1,71 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.google.common.hash.Hashing;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.xml.Payload;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.xml.transform.StringSource;
+import org.springframework.web.client.ResourceAccessException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static no.difi.meldingsutveksling.NextMoveConsts.NEXTMOVE_QUEUE_PREFIX;
 
-@Component
 @Slf4j
+@Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
 public class ServiceBusRestClient {
 
-    private static final String NEXTMOVE_QUEUE_PREFIX = "nextbestqueue";
     private static final String AUTH_HEADER = "Authorization";
 
-    private ServiceRegistryLookup sr;
-    private IntegrasjonspunktProperties props;
-    private String localQueuePath;
-    private JAXBContext jaxbContext;
-    private RestTemplate restTemplate;
+    private final ServiceRegistryLookup sr;
+    private final IntegrasjonspunktProperties props;
+    private final ObjectMapper objectMapper;
+    private final ServiceBusPayloadConverter payloadConverter;
+    @Getter
+    private final ServiceBusRestTemplate restTemplate;
+    @Getter
+    private final String localQueuePath;
 
-    public ServiceBusRestClient(ServiceRegistryLookup sr,
-                                IntegrasjonspunktProperties props) throws JAXBException {
+    public ServiceBusRestClient(ServiceRegistryLookup sr, IntegrasjonspunktProperties props, ObjectMapper objectMapper, ServiceBusPayloadConverter payloadConverter, ServiceBusRestTemplate restTemplate) {
         this.sr = sr;
         this.props = props;
-
-        this.localQueuePath = NEXTMOVE_QUEUE_PREFIX+
-                props.getOrg().getNumber()+
+        this.objectMapper = objectMapper;
+        this.payloadConverter = payloadConverter;
+        this.restTemplate = restTemplate;
+        this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
+                props.getOrg().getNumber() +
                 props.getNextmove().getServiceBus().getMode();
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{EduDocument.class, Payload.class, ConversationResource.class}, null);
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .setConnectionRequestTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .setSocketTimeout(props.getNextmove().getServiceBus().getConnectTimeout())
-                .build();
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-        this.restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
-        this.restTemplate.setErrorHandler(new ServiceBusRestErrorHandler(sr));
     }
 
-    public void sendMessage(byte[] message, String queuePath) {
-        String resourceUri = format("https://%s.%s/%s/messages",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+    public String getBase() {
+        return format("%s://%s", props.getNextmove().getServiceBus().isUseHttps() ? "https" : "http",
+                props.getNextmove().getServiceBus().getBaseUrl());
+    }
+
+    void sendMessage(byte[] message, String queuePath) {
+        String resourceUri = format("%s/%s/messages",
+                getBase(),
                 queuePath);
         URI uri = convertToUri(resourceUri);
 
@@ -88,10 +81,9 @@ public class ServiceBusRestClient {
         }
     }
 
-    public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("https://%s.%s/%s/messages/head",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+    Optional<ServiceBusMessage> receiveMessage() {
+        String resourceUri = format("%s/%s/messages/head",
+                getBase(),
                 localQueuePath);
 
         String auth = createAuthorizationHeader(resourceUri);
@@ -101,36 +93,44 @@ public class ServiceBusRestClient {
 
         URI uri = convertToUri(resourceUri);
         log.debug("Calling {}", resourceUri);
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
-        if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
-            log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
+            if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
+                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+                return Optional.empty();
+            }
+
+            ServiceBusMessage.ServiceBusMessageBuilder sbmBuilder = ServiceBusMessage.builder();
+            BrokerProperties brokerProperties = getBrokerProperties(response);
+
+            String messageId = brokerProperties.getMessageId();
+            sbmBuilder.lockToken(brokerProperties.getLockToken())
+                    .messageId(messageId)
+                    .sequenceNumber(brokerProperties.getSequenceNumber());
+
+            try {
+                ServiceBusPayload payload = payloadConverter.convert(response.getBody());
+                sbmBuilder.payload(payload);
+                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getDocumentId()));
+                return Optional.of(sbmBuilder.build());
+            } catch (IOException e) {
+                log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
+            }
+        } catch (ResourceAccessException | IOException e) {
+            log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());
             return Optional.empty();
         }
-
-        ServiceBusMessage.ServiceBusMessageBuilder sbmBuilder = ServiceBusMessage.builder();
-        String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
-        JsonParser jsonParser = new JsonParser();
-        JsonObject brokerProperties = jsonParser.parse(brokerPropertiesJson).getAsJsonObject();
-        sbmBuilder.lockToken(brokerProperties.get("LockToken").getAsString())
-                .messageId(brokerProperties.get("MessageId").getAsString())
-                .sequenceNumber(brokerProperties.get("SequenceNumber").getAsString());
-
-        try {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            EduDocument eduDocument = unmarshaller.unmarshal(new StringSource(response.getBody()), EduDocument.class).getValue();
-            sbmBuilder.body(eduDocument);
-            log.debug(format("Received message on queue=%s with conversationId=%s", localQueuePath, eduDocument.getConversationId()));
-        } catch (JAXBException e) {
-            log.error(String.format("Error unmarshalling service bus message with id=%s", brokerProperties.get("MessageId")), e);
-        }
-
-        return Optional.of(sbmBuilder.build());
+        return Optional.empty();
     }
 
-    public void deleteMessage(ServiceBusMessage message) {
-        String resourceUri = format("https://%s.%s/%s/messages/%s/%s",
-                props.getNextmove().getServiceBus().getNamespace(),
-                props.getNextmove().getServiceBus().getHost(),
+    private BrokerProperties getBrokerProperties(ResponseEntity<String> response) throws IOException {
+        String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
+        return objectMapper.readValue(brokerPropertiesJson, BrokerProperties.class);
+    }
+
+    void deleteMessage(ServiceBusMessage message) {
+        String resourceUri = format("%s/%s/messages/%s/%s",
+                getBase(),
                 localQueuePath,
                 message.getMessageId(),
                 message.getLockToken());
@@ -143,9 +143,9 @@ public class ServiceBusRestClient {
         URI uri = convertToUri(resourceUri);
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.DELETE, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("{} got response {}, message [conversationId={}] was not deleted",
+            log.error("{} got response {}, message [messageId={}] was not deleted",
                     resourceUri, response.getStatusCode().toString(),
-                    message.getBody().getConversationId());
+                    message.getPayload().getSbd().getDocumentId());
         }
     }
 
@@ -167,10 +167,8 @@ public class ServiceBusRestClient {
         }
 
         int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000f);
-        String hashInput = urlEncoded+"\n"+expiry;
-
-        byte[] bytes = Hashing.hmacSha256(getSasKey().getBytes(StandardCharsets.UTF_8))
-                .hashBytes(hashInput.getBytes(StandardCharsets.UTF_8)).asBytes();
+        String hashInput = urlEncoded + "\n" + expiry;
+        byte[] bytes = hmacSha256(getSasKey(), hashInput);
         byte[] signEncoded = Base64.getEncoder().encode(bytes);
         String signature;
         try {
@@ -186,11 +184,18 @@ public class ServiceBusRestClient {
                 props.getNextmove().getServiceBus().getSasKeyName());
     }
 
-    public String getLocalQueuePath() {
-        return this.localQueuePath;
+    private byte[] hmacSha256(String secret, String message) {
+        try {
+            Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSHA256.init(secretKeySpec);
+            return hmacSHA256.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
+        }
     }
 
-    public String getSasKey() {
+    String getSasKey() {
         if (props.getOidc().isEnable()) {
             return sr.getSasKey();
         } else {

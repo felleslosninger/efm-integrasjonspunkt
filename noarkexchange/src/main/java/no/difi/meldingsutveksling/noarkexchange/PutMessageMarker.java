@@ -1,15 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.journalPostIdMarker;
 import static no.difi.meldingsutveksling.noarkexchange.PayloadUtil.isAppReceipt;
 
+@Slf4j
+@UtilityClass
 public class PutMessageMarker {
-    public static final Logger logger = LoggerFactory.getLogger(PutMessageMarker.class);
 
     /**
      * Creates LogstashMarker with conversation id from the putMessageRequest that will appear
@@ -20,16 +21,16 @@ public class PutMessageMarker {
      */
     public static LogstashMarker markerFrom(PutMessageRequestWrapper requestAdapter) {
         final LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(requestAdapter.getMessageType().name().toLowerCase());
-        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(requestAdapter.getRecieverPartyNumber());
+        final LogstashMarker receiverMarker = MarkerFactory.receiverMarker(requestAdapter.getReceiverPartyNumber());
         final LogstashMarker senderMarker = MarkerFactory.senderMarker(requestAdapter.getSenderPartynumber());
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(requestAdapter.getConversationId());
         final LogstashMarker markers = conversationIdMarker.and(receiverMarker).and(senderMarker).and(messageTypeMarker);
 
-        if(requestAdapter.hasPayload() && !isAppReceipt(requestAdapter.getPayload())) {
+        if (requestAdapter.hasPayload() && !isAppReceipt(requestAdapter.getPayload())) {
             try {
                 return journalPostIdMarker(requestAdapter.getJournalPostId()).and(markers);
             } catch (PayloadException e) {
-                logger.error(markers, "We don't want to end execution because of logging problems", e);
+                log.error(markers, "We don't want to end execution because of logging problems", e);
             }
         }
         return markers;

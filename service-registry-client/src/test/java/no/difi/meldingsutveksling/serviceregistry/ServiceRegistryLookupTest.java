@@ -1,112 +1,167 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.proc.BadJWSException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Notification;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.UUID;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
+    private static final String ORGNR2 = "23456789";
     private static final String ORGNAME = "test";
+    private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
+    private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
 
-    @Mock
+    @Configuration
+    @EnableCaching
+    @Import({ServiceRegistryClient.class, ServiceRegistryLookup.class})
+    static class Config {
+
+        // Simulating your caching configuration
+        @Bean
+        CacheManager cacheManager() {
+            return new ConcurrentMapCacheManager();
+        }
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
+    }
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    @Autowired
+    private ServiceRegistryLookup service;
+
+    @MockBean
+    private IntegrasjonspunktProperties properties;
+
+    @MockBean
+    private SasKeyRepository sasKeyRepoMock;
+
+    @MockBean
     private RestClient client;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private ServiceRegistryLookup service;
-    private ServiceRecord dpv = new ServiceRecord(DPV, "000", "", "http://localhost:6789");
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
     private String query;
 
     @Before
     public void setup() {
-        final IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
-        SasKeyRepository sasKeyRepoMock = mock(SasKeyRepository.class);
-        when(properties.isVarslingsplikt()).thenReturn(false);
-        service = new ServiceRegistryLookup(client, properties, sasKeyRepoMock);
-        query = Notification.NOT_OBLIGATED.createQuery();
+        IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
+        when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
+        IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
+        when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
+        when(properties.getArkivmelding()).thenReturn(arkivmelding);
+        query = "securityLevel=3";
+        dpo.setProcess(DEFAULT_PROCESS);
+        dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
 
-    @Test
-    public void clientThrowsExceptionWithInternalServerErrorThenServiceShouldThrowServiceRegistryLookupException() throws BadJWSException {
-        thrown.expect(UncheckedExecutionException.class);
-        when(client.getResource(any(String.class))).thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        service.getServiceRecord(ORGNR);
+    @After
+    public void after() {
+        cacheManager.getCacheNames().forEach(p -> {
+            Objects.requireNonNull(cacheManager.getCache(p)).clear();
+        });
     }
 
-    @Test
-    public void organizationWithoutServiceRecord() throws BadJWSException {
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = this.service.getServiceRecord(ORGNR).getServiceRecord();
-
-        assertThat(serviceRecord, is(ServiceRecord.EMPTY));
+        this.service.getServiceRecord(ORGNR);
     }
 
-    @Test
-    public void organizationWithoutServiceRecords() throws BadJWSException {
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
+        when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        this.service.getServiceRecord(ORGNR);
+    }
+
+    @Test(expected = ServiceRegistryLookupException.class)
+    public void organizationWithoutServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = this.service.getServiceRecord(ORGNR, DPO);
-        assertFalse(serviceRecord.isPresent());
+        this.service.getServiceRecord(ORGNR, DPO);
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR).getServiceRecord();
+        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
 
         assertThat(serviceRecord, is(dpo));
     }
 
     @Test
-    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException {
+    public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        Optional<ServiceRecord> serviceRecord = service.getServiceRecord(ORGNR, DPO);
+        ServiceRecord serviceRecord = service.getServiceRecord(ORGNR, DPO);
 
-        assertTrue(serviceRecord.isPresent());
-        assertThat(serviceRecord.get(), is(dpo));
+        assertThat(serviceRecord, is(dpo));
+    }
+
+    @Test
+    public void testThatConversationIdIsNotInCacheKey() throws BadJWSException, ServiceRegistryLookupException {
+        final String json = new SRContentBuilder().withServiceRecord(dpo).build();
+        when(client.getResource(any(), any())).thenReturn(json);
+
+        String conversationId1 = UUID.randomUUID().toString();
+        String conversationId2 = UUID.randomUUID().toString();
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId2).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        service.getServiceRecord(SRParameter.builder(ORGNR2).build());
+
+        verify(client, times(1)).getResource(endsWith(ORGNR), any());
+        verify(client, times(1)).getResource(endsWith(ORGNR2), any());
     }
 
     @Test
@@ -114,12 +169,11 @@ public class ServiceRegistryLookupTest {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));
-        service.invalidateSasKey();
+        cacheManager.getCache(ServiceRegistryClient.CACHE_GET_SAS_KEY).clear();
         assertThat(service.getSasKey(), is("456"));
     }
 
     public static class SRContentBuilder {
-        private Gson gson = new GsonBuilder().serializeNulls().create();
         private ServiceRecord serviceRecord;
 
         SRContentBuilder withServiceRecord(ServiceRecord serviceRecord) {
@@ -131,20 +185,15 @@ public class ServiceRegistryLookupTest {
             EntityType entityType = new EntityType("Organisasjonsledd", "ORGL");
             InfoRecord infoRecord = new InfoRecord(ORGNR, ORGNAME, entityType);
 
-            final HashMap<String, Object> content = new HashMap<>();
+            IdentifierResource resource = new IdentifierResource()
+                    .setInfoRecord(infoRecord)
+                    .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
-            if (this.serviceRecord == null) {
-                content.put("serviceRecord", ServiceRecord.EMPTY);
-                content.put("serviceRecords", Lists.newArrayList());
-            } else {
-                content.put("serviceRecord", this.serviceRecord);
-                content.put("serviceRecords", Lists.newArrayList(this.serviceRecord));
+            try {
+                return new ObjectMapper().writeValueAsString(resource);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
             }
-            content.put("infoRecord", infoRecord);
-            content.put("failedServiceIdentifiers", Lists.newArrayList());
-            content.put("securitylevels", Maps.newHashMap());
-            return gson.toJson(content);
         }
-
     }
 }

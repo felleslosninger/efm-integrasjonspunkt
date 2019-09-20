@@ -8,19 +8,24 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
+
+import javax.validation.constraints.Future;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.time.OffsetDateTime;
 
 
 /**
  * <p>Java class for CorrelationInformation complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CorrelationInformation">
  *   &lt;complexContent>
@@ -34,96 +39,34 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CorrelationInformation", propOrder = {
-    "requestingDocumentCreationDateTime",
-    "requestingDocumentInstanceIdentifier",
-    "expectedResponseDateTime"
+        "requestingDocumentCreationDateTime",
+        "requestingDocumentInstanceIdentifier",
+        "expectedResponseDateTime"
 })
+@Getter
+@Setter
+@ToString
 public class CorrelationInformation {
 
     @XmlElement(name = "RequestingDocumentCreationDateTime")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar requestingDocumentCreationDateTime;
+    @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
+    protected OffsetDateTime requestingDocumentCreationDateTime;
+
     @XmlElement(name = "RequestingDocumentInstanceIdentifier")
     protected String requestingDocumentInstanceIdentifier;
+
     @XmlElement(name = "ExpectedResponseDateTime")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar expectedResponseDateTime;
-
-    /**
-     * Gets the value of the requestingDocumentCreationDateTime property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getRequestingDocumentCreationDateTime() {
-        return requestingDocumentCreationDateTime;
-    }
-
-    /**
-     * Sets the value of the requestingDocumentCreationDateTime property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setRequestingDocumentCreationDateTime(XMLGregorianCalendar value) {
-        this.requestingDocumentCreationDateTime = value;
-    }
-
-    /**
-     * Gets the value of the requestingDocumentInstanceIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getRequestingDocumentInstanceIdentifier() {
-        return requestingDocumentInstanceIdentifier;
-    }
-
-    /**
-     * Sets the value of the requestingDocumentInstanceIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setRequestingDocumentInstanceIdentifier(String value) {
-        this.requestingDocumentInstanceIdentifier = value;
-    }
-
-    /**
-     * Gets the value of the expectedResponseDateTime property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getExpectedResponseDateTime() {
-        return expectedResponseDateTime;
-    }
-
-    /**
-     * Sets the value of the expectedResponseDateTime property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setExpectedResponseDateTime(XMLGregorianCalendar value) {
-        this.expectedResponseDateTime = value;
-    }
-
+    @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @Future
+    @ApiModelProperty(
+            value = "A timeout timestamp for the message.",
+            example = "2019-05-10T01:31:52+02:00"
+    )
+    protected OffsetDateTime expectedResponseDateTime;
 }

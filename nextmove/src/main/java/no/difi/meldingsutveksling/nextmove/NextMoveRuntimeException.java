@@ -2,11 +2,11 @@ package no.difi.meldingsutveksling.nextmove;
 
 public class NextMoveRuntimeException extends RuntimeException {
 
-    NextMoveRuntimeException(Exception e) {
+    public NextMoveRuntimeException(Exception e) {
         super(e);
     }
 
-    NextMoveRuntimeException(String s) {
+    public NextMoveRuntimeException(String s) {
         super(s);
     }
 

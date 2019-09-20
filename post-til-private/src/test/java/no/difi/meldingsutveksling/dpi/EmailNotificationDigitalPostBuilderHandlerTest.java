@@ -6,9 +6,6 @@ import no.difi.sdp.client2.domain.digital_post.EpostVarsel;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.security.KeyStoreException;
-
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class EmailNotificationDigitalPostBuilderHandlerTest {
@@ -23,9 +20,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void emailFeatureDisabledShouldNotSetEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(false);
-
+    public void emailFeatureDisabledShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true), builder);
 
@@ -33,9 +28,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableFalseShouldNotSetEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableFalseShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(false), builder);
 
@@ -43,9 +36,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true).withEmail("foo@foo.com"), builder);
 
@@ -53,9 +44,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     }
 
     @Test
-    public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() throws KeyStoreException {
-        when(config.isEnableEmailNotification()).thenReturn(true);
-
+    public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
         builder = handler.handle(new Request().withNotifiable(true), builder);
 

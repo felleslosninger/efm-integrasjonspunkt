@@ -1,37 +1,35 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
+import java.util.Optional;
 
+import static no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient.CACHE_GET_SAS_KEY;
+
+@Component
 @Slf4j
+@RequiredArgsConstructor
 public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
 
-    private ServiceRegistryLookup srLookup;
+    private final CacheManager cacheManager;
 
-    public ServiceBusRestErrorHandler(ServiceRegistryLookup srLookup) {
-        this.srLookup = srLookup;
-    }
-
-    /**
-     * This default implementation throws a {@link HttpClientErrorException} if the response status code
-     * is {@link HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
-     * if it is {@link HttpStatus.Series#SERVER_ERROR},
-     * and a {@link RestClientException} in other cases.
-     *
-     * @param response
-     */
     @Override
-    public void handleError(ClientHttpResponse response) throws IOException {
-        HttpStatus statusCode = getHttpStatusCode(response);
+    protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
         if (statusCode == HttpStatus.UNAUTHORIZED) {
             log.debug("Got status {} from service bus, invalidating sas key", statusCode.toString());
-            srLookup.invalidateSasKey();
+            Optional.ofNullable(cacheManager.getCache(CACHE_GET_SAS_KEY))
+                    .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(
+                            String.format("Couldn't get cache names %s", CACHE_GET_SAS_KEY)))
+                    .clear();
         }
-        super.handleError(response);
+        super.handleError(response, statusCode);
     }
 }

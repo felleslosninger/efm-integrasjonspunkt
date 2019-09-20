@@ -1,19 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange.cangetmessage;
 
 import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
-import no.difi.meldingsutveksling.noarkexchange.MessageSender;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.services.Adresseregister;
-import sun.security.x509.X509CertImpl;
 
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,8 +21,6 @@ public class KanMottaMeldingerSteps {
     private IntegrasjonspunktImpl integrasjonspunkt;
     private Adresseregister adresseRegister;
     private GetCanReceiveMessageResponseType responseType;
-    private MessageSender messageSender;
-    private NoarkClient mshClient;
 
     private String message = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;\n"
             + "                &lt;Melding xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n"
@@ -107,27 +102,15 @@ public class KanMottaMeldingerSteps {
     public void setup() {
         integrasjonspunkt = new IntegrasjonspunktImpl();
         adresseRegister = mock(Adresseregister.class);
-        mshClient = mock(NoarkClient.class);
-        messageSender = mock(MessageSender.class);
-        integrasjonspunkt.setAdresseRegister(adresseRegister);
-        integrasjonspunkt.setMshClient(mshClient);
     }
 
     @Given("^virksomhet (.+) i Adresseregisteret$")
     public void virksomhet_i_Adresseregisteret(String finnes) throws Throwable {
         if ("finnes".equals(finnes)) {
-            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(new X509CertImpl());
+            X509Certificate certificate = mock(X509Certificate.class);
+            when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenReturn(certificate);
         } else if ("finnes ikke".equals(finnes)) {
             when(adresseRegister.getCertificate(any(ServiceRecord.class))).thenThrow(CertificateException.class);
-        }
-    }
-
-    @And("^virksomhet (.+) i MSH sitt adresseregister$")
-    public void virksomhet_finnes_i_MSH(String finnes) throws Throwable {
-        if ("finnes".equals(finnes)) {
-            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(true);
-        } else if ("finnes ikke".equals(finnes)) {
-            when(mshClient.canRecieveMessage(any(String.class))).thenReturn(false);
         }
     }
 
@@ -166,11 +149,6 @@ public class KanMottaMeldingerSteps {
         req.setPayload(message);
         integrasjonspunkt.putMessage(req);
 
-    }
-
-    @Then("^skal melding sendes til MSH$")
-    public void skal_melding_sendes_til_MSH() throws Throwable {
-        verify(mshClient).sendEduMelding(any(PutMessageRequestType.class));
     }
 
 }

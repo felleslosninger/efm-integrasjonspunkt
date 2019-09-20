@@ -8,6 +8,11 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,9 +21,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for ContactInformation complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ContactInformation">
  *   &lt;complexContent>
@@ -34,150 +39,33 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ContactInformation", propOrder = {
-    "contact",
-    "emailAddress",
-    "faxNumber",
-    "telephoneNumber",
-    "contactTypeIdentifier"
+        "contact",
+        "emailAddress",
+        "faxNumber",
+        "telephoneNumber",
+        "contactTypeIdentifier"
 })
+@Getter
+@Setter
+@ToString
 public class ContactInformation {
 
     @XmlElement(name = "Contact", required = true)
+    @NotNull
     protected String contact;
+
     @XmlElement(name = "EmailAddress")
     protected String emailAddress;
+
     @XmlElement(name = "FaxNumber")
     protected String faxNumber;
+
     @XmlElement(name = "TelephoneNumber")
     protected String telephoneNumber;
+
     @XmlElement(name = "ContactTypeIdentifier")
     protected String contactTypeIdentifier;
-
-    /**
-     * Gets the value of the contact property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getContact() {
-        return contact;
-    }
-
-    /**
-     * Sets the value of the contact property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setContact(String value) {
-        this.contact = value;
-    }
-
-    /**
-     * Gets the value of the emailAddress property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getEmailAddress() {
-        return emailAddress;
-    }
-
-    /**
-     * Sets the value of the emailAddress property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setEmailAddress(String value) {
-        this.emailAddress = value;
-    }
-
-    /**
-     * Gets the value of the faxNumber property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getFaxNumber() {
-        return faxNumber;
-    }
-
-    /**
-     * Sets the value of the faxNumber property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setFaxNumber(String value) {
-        this.faxNumber = value;
-    }
-
-    /**
-     * Gets the value of the telephoneNumber property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getTelephoneNumber() {
-        return telephoneNumber;
-    }
-
-    /**
-     * Sets the value of the telephoneNumber property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setTelephoneNumber(String value) {
-        this.telephoneNumber = value;
-    }
-
-    /**
-     * Gets the value of the contactTypeIdentifier property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getContactTypeIdentifier() {
-        return contactTypeIdentifier;
-    }
-
-    /**
-     * Sets the value of the contactTypeIdentifier property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setContactTypeIdentifier(String value) {
-        this.contactTypeIdentifier = value;
-    }
-
-
-
 }

@@ -14,6 +14,7 @@
                   xmlns:tns="http://www.altinn.no/services/ServiceEngine/Broker/2015/06"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
                   xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
     <wsp:Policy wsu:Id="BasicHttpBinding_IBrokerServiceExternalBasicStreamed_policy">
         <wsp:ExactlyOne>
@@ -214,6 +215,7 @@
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="DataStream" type="q1:StreamBody"
+                                     xmime:expectedContentTypes="application/octet-stream"
                                      xmlns:q1="http://schemas.microsoft.com/Message"/>
                     </xsd:sequence>
                 </xsd:complexType>
@@ -250,6 +252,7 @@
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="DownloadFileStreamedBasicResult" type="q2:StreamBody"
+                                     xmime:expectedContentTypes="application/octet-stream"
                                      xmlns:q2="http://schemas.microsoft.com/Message"/>
                     </xsd:sequence>
                 </xsd:complexType>

@@ -1,36 +1,29 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noark.NoarkClientFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@EnableScheduling
 @EnableAsync
+@RequiredArgsConstructor
 public class NoarkBeanFactory {
 
-    @Autowired
-    IntegrasjonspunktProperties properties;
+    private final IntegrasjonspunktProperties properties;
 
     @Bean(name = "localNoark")
-    @ConditionalOnProperty(value = "difi.move.feature.enableDPO", havingValue = "true")
+    @ConditionalOnProperty(value = "difi.move.noarkSystem.type")
     public NoarkClient localNoark() {
         NoarkClientSettings clientSettings = new NoarkClientSettings(
                 properties.getNoarkSystem().getEndpointURL(),
                 properties.getNoarkSystem().getUsername(),
                 properties.getNoarkSystem().getPassword(),
                 properties.getNoarkSystem().getDomain());
-        NoarkClient client = new NoarkClientFactory(clientSettings).from(properties);
-        return client;
+        return new NoarkClientFactory(clientSettings).from(properties);
     }
 
-    @Bean(name = "mshClient")
-    public NoarkClient mshClient() {
-        return new MshClient(properties.getMsh().getEndpointURL());
-    }
 }

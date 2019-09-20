@@ -130,14 +130,6 @@ public class DigitalPostInnbyggerConfig {
         return feature;
     }
 
-    public boolean isEnableEmailNotification() {
-        return getFeature().isEnableEmailNotification();
-    }
-
-    public boolean isEnableSmsNotification() {
-        return getFeature().isEnableSmsNotification();
-    }
-
     public IntegrasjonspunktProperties.Sms getSms() {
         return sms;
     }
@@ -155,25 +147,7 @@ public class DigitalPostInnbyggerConfig {
     }
 
     public static class FeatureToggle {
-        private boolean enableEmailNotification = false;
-        private boolean enableSmsNotification = false;
         private boolean enablePrint = false;
-
-        boolean isEnableEmailNotification() {
-            return enableEmailNotification;
-        }
-
-        boolean isEnableSmsNotification() {
-            return enableSmsNotification;
-        }
-
-        public void setEnableEmailNotification(boolean enableEmailNotification) {
-            this.enableEmailNotification = enableEmailNotification;
-        }
-
-        public void setEnableSmsNotification(boolean enableSmsNotification) {
-            this.enableSmsNotification = enableSmsNotification;
-        }
 
         public boolean isEnablePrint() {
             return enablePrint;

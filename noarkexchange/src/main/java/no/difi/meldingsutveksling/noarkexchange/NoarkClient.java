@@ -4,7 +4,9 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 
 public interface NoarkClient {
-    public boolean canRecieveMessage(String orgnr);
+    NoarkClientSettings getNoarkClientSettings();
 
-    public PutMessageResponseType sendEduMelding(PutMessageRequestType request);
+    boolean canRecieveMessage(String orgnr);
+
+    PutMessageResponseType sendEduMelding(PutMessageRequestType request);
 }

@@ -3,10 +3,12 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.noarkexchange.StandardBusinessDocumentWrapper;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.documentTypeMarker;
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.processMarker;
 
 /**
  * Example usage: import static
@@ -18,7 +20,6 @@ import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
  */
 public class MessageMarkerFactory {
 
-    private static final String DOCUMENT_ID = "document_id";
     private static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
     private static final String PAYLOAD_SIZE = "payload-size";
 
@@ -39,17 +40,25 @@ public class MessageMarkerFactory {
      * Creates LogstashMarker with conversation id from the
      * StandardBusinessDocument that will appear in the logs when used.
      *
-     * @param documentWrapper wrapper around StandardBusinessDocument
+     * @param sbd StandardBusinessDocument
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(StandardBusinessDocumentWrapper documentWrapper) {
-        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(documentWrapper.getMessageType());
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(documentWrapper.getJournalPostId());
-        LogstashMarker documentIdMarker = Markers.append(DOCUMENT_ID, documentWrapper.getDocumentId());
-        LogstashMarker conversationIdMarker = conversationIdMarker(documentWrapper.getConversationId());
-        final LogstashMarker receiverMarker = receiverMarker(documentWrapper.getReceiverOrgNumber());
-        final LogstashMarker senderMarker = senderMarker(documentWrapper.getSenderOrgNumber());
-        return documentIdMarker.and(journalPostIdMarker).and(conversationIdMarker).and(senderMarker).and(receiverMarker).and(messageTypeMarker);
+    public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
+        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
+        LogstashMarker messageIdMarker = messageIdMarker(sbd.getDocumentId());
+        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
+        LogstashMarker receiverMarker = receiverMarker(sbd.getReceiverIdentifier());
+        LogstashMarker senderMarker = senderMarker(sbd.getSenderIdentifier());
+        LogstashMarker documentTypeMarker = documentTypeMarker(sbd.getDocumentId());
+        LogstashMarker processMarker = processMarker(sbd.getProcess());
+        return conversationIdMarker.and(messageTypeMarker)
+                .and(messageIdMarker)
+                .and(journalPostIdMarker)
+                .and(receiverMarker)
+                .and(senderMarker)
+                .and(documentTypeMarker)
+                .and(processMarker);
     }
 
     public static LogstashMarker markerFrom(FileReference reference) {

@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.config.JmsConfiguration;
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -20,15 +20,15 @@ public class InternalQueueMain extends SpringBootServletInitializer {
     InternalQueue queue;
 
     public void testPut() {
-        EduDocument eduDocument = new EduDocument();
+        StandardBusinessDocument sbd = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader();
         header.setHeaderVersion("some header version");
-        eduDocument.setStandardBusinessDocumentHeader(header);
-        queue.enqueueNoark(eduDocument);
+        sbd.setStandardBusinessDocumentHeader(header);
+        queue.enqueueNoark(sbd);
     }
 
     public static void main(String... args) {
-        ConfigurableApplicationContext context = SpringApplication.run(new Object[]{InternalQueueMain.class, JmsConfiguration.class}, args);
+        ConfigurableApplicationContext context = SpringApplication.run(new Class[]{InternalQueueMain.class, JmsConfiguration.class}, args);
         InternalQueueMain bean = context.getBean(InternalQueueMain.class);
         bean.testPut();
     }

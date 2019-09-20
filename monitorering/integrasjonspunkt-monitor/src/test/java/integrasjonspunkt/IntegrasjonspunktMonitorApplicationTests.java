@@ -11,8 +11,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @WebIntegrationTest
 public class IntegrasjonspunktMonitorApplicationTests {
 
-	@Test
-	public void contextLoads() {
-	}
+    @Test
+    public void contextLoads() {
+        // Tests that the configuration loads
+    }
 
 }

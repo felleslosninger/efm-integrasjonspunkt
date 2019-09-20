@@ -1,19 +1,18 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.sbdh.EduDocument;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.junit.Test;
 
 public class StandardBusinessDocumentConverterTest {
 
     @Test
-    public void testMarshallToBytes() throws Exception {
+    public void testMarshallToBytes() {
         StandardBusinessDocumentConverter converter = new StandardBusinessDocumentConverter();
 
-        EduDocument sbd = new EduDocument();
+        StandardBusinessDocument sbd = new StandardBusinessDocument();
 
         sbd.setAny(new ObjectFactory().createScopeInformation("Hello world!"));
         converter.marshallToBytes(sbd);
     }
-
 }

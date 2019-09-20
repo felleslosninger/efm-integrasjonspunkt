@@ -1,30 +1,21 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import lombok.experimental.UtilityClass;
+import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
-public class ScopeFactory {
+import java.time.OffsetDateTime;
 
-    public static final String DEFAULT_IDENTIFIER = "urn:no:difi:meldingsutveksling:1.0";
+@UtilityClass
+class ScopeFactory {
 
-    public static Scope fromJournalPostId(String journalPostId) {
-        Scope scope = createDefaultScope();
-        scope.setType(ScopeType.JOURNALPOST_ID.name());
-        scope.setInstanceIdentifier(journalPostId);
-        return scope;
+    static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
+        return new Scope()
+                .setIdentifier(process)
+                .setType(ScopeType.CONVERSATION_ID.toString())
+                .setInstanceIdentifier(conversationId)
+                .addScopeInformation(new CorrelationInformation()
+                        .setExpectedResponseDateTime(expectedResponseDateTime));
     }
-
-    public static Scope fromConversationId(String conversationId) {
-        Scope scope = createDefaultScope();
-        scope.setType(ScopeType.CONVERSATION_ID.name());
-        scope.setInstanceIdentifier(conversationId);
-        return scope;
-    }
-
-    private static Scope createDefaultScope() {
-        Scope scope = new Scope();
-        scope.setIdentifier(DEFAULT_IDENTIFIER);
-        return scope;
-    }
-
 }

@@ -20,12 +20,10 @@ public enum ErrorStatus {
     }
 
     public String enduserErrorMessage() {
-        switch (this) {
-            case CANNOT_RECIEVE:
-                return MOTTAKENDE_ORGANISASJON_KAN_IKKE_MOTTA_MELDINGER;
-            default:
-                return TEKNISK_FEIL;
+        if (this == ErrorStatus.CANNOT_RECIEVE) {
+            return MOTTAKENDE_ORGANISASJON_KAN_IKKE_MOTTA_MELDINGER;
         }
+        return TEKNISK_FEIL;
     }
 
     @Override

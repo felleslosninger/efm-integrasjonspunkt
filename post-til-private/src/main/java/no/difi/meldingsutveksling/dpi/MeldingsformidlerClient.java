@@ -1,55 +1,35 @@
 package no.difi.meldingsutveksling.dpi;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
-import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.KeystoreProvider;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.lang.KeystoreProviderException;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ExternalReceipt;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
-import no.difi.sdp.client2.domain.*;
+import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
+import no.difi.sdp.client2.domain.Dokument;
+import no.difi.sdp.client2.domain.Dokumentpakke;
+import no.difi.sdp.client2.domain.Forsendelse;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-import no.difi.sdp.client2.internal.TrustedCertificates;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
-import java.lang.invoke.MethodHandles;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.cert.Certificate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
 
+@Slf4j
+@RequiredArgsConstructor
 public class MeldingsformidlerClient {
 
-    static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    public static final EmptyKvittering EMPTY_KVITTERING = new EmptyKvittering();
     private final DigitalPostInnbyggerConfig config;
-    private KeyStore keyStore;
-    private ForsendelseHandlerFactory forsendelseHandlerFactory;
-
-    public MeldingsformidlerClient(DigitalPostInnbyggerConfig config, KeyStore keyStore) {
-        this.config = config;
-        this.keyStore = keyStore;
-        forsendelseHandlerFactory = new ForsendelseHandlerFactory(config);
-    }
+    private final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    private final ForsendelseHandlerFactory forsendelseHandlerFactory;
+    private final DpiReceiptMapper dpiReceiptMapper;
 
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
         Dokument dokument = dokumentFromDocument(request.getDocument());
@@ -60,10 +40,10 @@ public class MeldingsformidlerClient {
 
         Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
                 .mpcId(config.getMpcId())
-                .spraakkode(config.getLanguage())
+                .spraakkode(request.getLanguage())
                 .prioritet(config.getPriority()).build();
 
-        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));
+        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));
         try {
             klient.send(forsendelse);
         } catch (SendException e) {
@@ -84,97 +64,56 @@ public class MeldingsformidlerClient {
                 .build();
     }
 
-    private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer, ClientInterceptor clientInterceptor) {
-        KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().soapInterceptors(clientInterceptor).build();
-
-        return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
-    }
-
-    private SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().build();
-
-        return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
-    }
-
-    private SikkerDigitalPostKlient createSikkerDigitalPostKlient(KlientKonfigurasjon klientKonfigurasjon, AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
-        Databehandler tekniskAvsender;
-        if (this.config.getTrustStore() != null) {
-            KeyStore trustStore;
-            try {
-                trustStore = KeystoreProvider.loadKeyStore(this.config.getTrustStore());
-            } catch (KeystoreProviderException e) {
-                throw new MeldingsUtvekslingRuntimeException("Cannot load DPI trust store", e);
-            }
-            KeyStore trustedSDP = TrustedCertificates.getTrustStore();
-            Enumeration<String> aliases = null;
-            try {
-                aliases = trustedSDP.aliases();
-                while (aliases.hasMoreElements()) {
-                    String alias = aliases.nextElement();
-                    Certificate certificate = trustedSDP.getCertificate(alias);
-                    trustStore.setCertificateEntry(alias, certificate);
-                }
-            } catch (KeyStoreException e) {
-                throw new MeldingsUtvekslingRuntimeException("Could not get SDP truststore aliases", e);
-            }
-
-            NoekkelparOverride noekkelparOverride = new NoekkelparOverride(keyStore, trustStore, config.getKeystore().getAlias(), config.getKeystore().getPassword(), false);
-            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), noekkelparOverride).build();
-        } else {
-            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
-        }
-
-        return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
-    }
-
-    private KlientKonfigurasjon.Builder createKlientKonfigurasjonBuilder() {
-        return KlientKonfigurasjon.builder(config.getEndpoint()).connectionTimeout(20, TimeUnit.SECONDS);
-    }
-
-
-    public ExternalReceipt sjekkEtterKvittering(String orgnr) {
+    public Optional<ExternalReceipt> sjekkEtterKvittering(String orgnr) {
         Kvittering kvittering = new Kvittering();
+
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(kvittering::setRawReceipt);
-        SikkerDigitalPostKlient klient = createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
-        final ForretningsKvittering forretningsKvittering = klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build());
-        if (forretningsKvittering == null) {
-            return EMPTY_KVITTERING;
-        }
-        return kvittering.setEksternKvittering(forretningsKvittering).withCallback(klient::bekreft);
+        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
+        return getForretningsKvittering(klient)
+                .map(forretningsKvittering -> kvittering.setEksternKvittering(forretningsKvittering)
+                        .withCallback(klient::bekreft)
+                );
     }
 
+    private Optional<ForretningsKvittering> getForretningsKvittering(SikkerDigitalPostKlient klient) {
+        try {
+            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build()));
+        } catch (SendException e) {
+            log.warn("Polling of DPI receipts failed with: {}", e.getLocalizedMessage());
+            return Optional.empty();
+        }
+    }
 
-    public static class Kvittering implements ExternalReceipt {
+    public class Kvittering implements ExternalReceipt {
         private ForretningsKvittering eksternKvittering;
         private Consumer<ForretningsKvittering> callback;
         private String rawReceipt;
-        private final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPI;
 
-        public Kvittering() {
-   /* This is empty because we need an instance of Kvittering before we have all the values provided for Kvittering.
-    * But it could dropped empty constructor if we used a Builder */
+        Kvittering() {
+            /* This is empty because we need an instance of Kvittering before we have all the values provided for Kvittering.
+             * But it could dropped empty constructor if we used a Builder */
 
         }
 
-        public void setRawReceipt(String rawReceipt) {
+        void setRawReceipt(String rawReceipt) {
             this.rawReceipt = rawReceipt;
         }
 
-        public String getRawReceipt() {
+        String getRawReceipt() {
             return rawReceipt;
         }
 
-        public Kvittering withCallback(Consumer<ForretningsKvittering> callback) {
+        Kvittering withCallback(Consumer<ForretningsKvittering> callback) {
             this.callback = callback;
             return this;
         }
 
-        public Kvittering setEksternKvittering(ForretningsKvittering eksternKvittering) {
+        Kvittering setEksternKvittering(ForretningsKvittering eksternKvittering) {
             this.eksternKvittering = eksternKvittering;
             return this;
         }
 
-        public void executeCallback() {
+        void executeCallback() {
             callback.accept(eksternKvittering);
         }
 
@@ -190,37 +129,14 @@ public class MeldingsformidlerClient {
 
         @Override
         public LogstashMarker logMarkers() {
-            return conversationIdMarker(getId()).and(Markers.append("serviceIdentifier", serviceIdentifier));
+            return conversationIdMarker(getId());
         }
 
         @Override
         public MessageStatus toMessageStatus() {
-            MessageStatus domainReceipt = MessageStatus.of(getReceiptType(),
-                    LocalDateTime.ofInstant(eksternKvittering.getTidspunkt(), ZoneId.systemDefault()));
-            domainReceipt.setRawReceipt(getRawReceipt());
-            return domainReceipt;
+            MessageStatus ms = dpiReceiptMapper.from(eksternKvittering);
+            ms.setRawReceipt(getRawReceipt());
+            return ms;
         }
-
-        /**
-         * Audit logs the receipt description
-         */
-        @Override
-        public void auditLog() {
-            getReceiptType().invokeLoggerMethod(logMarkers());
-        }
-
-        @Override
-        public Conversation createConversation() {
-            Conversation conv = Conversation.of(getId(), "unknown message reference", "unknown sender", "unknown receiver", ConversationDirection.OUTGOING, "unknown message title", ServiceIdentifier.DPI);
-            conv.setMessageStatuses(new ArrayList<>(1));
-            return conv;
-        }
-
-        public DpiReceiptStatus getReceiptType() {
-            return DpiReceiptStatus.from(eksternKvittering);
-        }
-
     }
-
-
 }

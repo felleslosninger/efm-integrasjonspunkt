@@ -11,27 +11,26 @@ import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MarshalManifestTest {
-	@Test
-	public void testMarshalling() throws JAXBException {
+    @Test
+    public void testMarshalling() throws JAXBException {
 
-		Manifest original = new Manifest(new Mottaker(new Organisasjon(new Organisasjonsnummer("12345678"))), new Avsender(new Organisasjon(
-				new Organisasjonsnummer("12345678"))), new HovedDokument("lol.pdf", "application/pdf", "Hoveddokument", "no"));
+        Manifest original = new Manifest(new Mottaker(new Organisasjon(new Organisasjonsnummer("12345678"))), new Avsender(new Organisasjon(
+                new Organisasjonsnummer("12345678"))), new HovedDokument("lol.pdf", "application/pdf", "Hoveddokument", "no"));
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		MarshalManifest.marshal(original, os);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        MarshalManifest.marshal(original, os);
 
-		InputStream is = new ByteArrayInputStream(os.toByteArray());
+        InputStream is = new ByteArrayInputStream(os.toByteArray());
 
-		JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Manifest.class}, null);
-		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-		Manifest kopi = (Manifest) jaxbUnmarshaller.unmarshal(is);
-		assertThat(kopi.getHoveddokument().getTittel().getTittel(), is(original.getHoveddokument().getTittel().getTittel()));
-		assertThat(kopi.getAvsender().getOrganisasjon().getOrgNummer(), is(original.getAvsender().getOrganisasjon().getOrgNummer()));
+        JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Manifest.class}, null);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        Manifest kopi = (Manifest) jaxbUnmarshaller.unmarshal(is);
+        assertThat(kopi.getHoveddokument().getTittel().getTittel()).isEqualTo(original.getHoveddokument().getTittel().getTittel());
+        assertThat(kopi.getAvsender().getOrganisasjon().getOrgNummer()).isEqualTo(original.getAvsender().getOrganisasjon().getOrgNummer());
 
-	}
+    }
 
 }

@@ -6,10 +6,6 @@ public class ExternalServiceBuilder {
     private String externalServiceCode;
     private BigInteger externalServiceEditionCode;
 
-    public ExternalServiceBuilder() {
-
-    }
-
     public ExternalServiceBuilder withExternalServiceCode(String value) {
         this.externalServiceCode = value;
         return this;

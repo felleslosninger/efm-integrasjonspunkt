@@ -15,8 +15,8 @@ import java.net.UnknownHostException;
 @Slf4j
 public class NtpSyncChecker {
 
-    IntegrasjonspunktProperties props;
-    NTPClient client;
+    private final IntegrasjonspunktProperties props;
+    private final NTPClient client;
 
     @Autowired
     NtpSyncChecker(IntegrasjonspunktProperties props) throws UnknownHostException {

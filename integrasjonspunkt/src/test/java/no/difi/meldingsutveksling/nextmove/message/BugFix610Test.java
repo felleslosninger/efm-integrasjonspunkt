@@ -1,62 +1,48 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.DpoConversationResource;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BugFix610Test {
 
-    private final static String FILE_NAME = "bar";
+    private static byte[] OVERLAY = new byte[]{80, 75, 3, 4, 10, 0, 0, 8, 0, 0, -43, 104, 103, 76, -118, 33};
 
-    private IntegrasjonspunktProperties props;
-    private DpoConversationResource cr;
-    private FileMessagePersister messagePersister;
+    @Test
+    public void testApplyPatch() {
+        byte[] message = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+        BugFix610.applyPatch(message, "id");
+        for (int i = 0; i < OVERLAY.length; ++i) {
+            assertThat(message[i]).isEqualTo(OVERLAY[i]);
+        }
 
-    @Before
-    public void setup() throws IOException {
-        props = new IntegrasjonspunktProperties();
-        IntegrasjonspunktProperties.NextMove nextMoveProps = new IntegrasjonspunktProperties.NextMove();
-        nextMoveProps.setFiledir("target/filepersister_testdir");
-        nextMoveProps.setApplyZipHeaderPatch(true);
-        nextMoveProps.setAsicfile(FILE_NAME);
-        props.setNextmove(nextMoveProps);
-
-        messagePersister = new FileMessagePersister(props);
-
-        cr = DpoConversationResource.of("42", "2", "1");
+        assertThat(message[16]).isEqualTo((byte) 16);
+        assertThat(message[17]).isEqualTo((byte) 17);
+        assertThat(message[18]).isEqualTo((byte) 18);
+        assertThat(message[19]).isEqualTo((byte) 19);
     }
 
     @Test
-    public void testPatch() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/buggyAsic.asic");
+    public void testApplyPatchStreamed() throws IOException {
+        byte[] message = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[1024 * 6];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
+        InputStream inputStream = BugFix610.applyPatch(new ByteArrayInputStream(message), "id");
+
+        byte[] buffer = new byte[20];
+
+        assertThat(inputStream.read(buffer)).isEqualTo(20);
+
+        for (int i = 0; i < OVERLAY.length; ++i) {
+            assertThat(buffer[i]).isEqualTo(OVERLAY[i]);
         }
 
-        buffer.flush();
-
-        messagePersister.write(cr, FILE_NAME, buffer.toByteArray());
-        File resultFile = new File(props.getNextmove().getFiledir() + "/" + cr.getConversationId() + "/" + FILE_NAME);
-
-        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(resultFile));
-        ZipEntry zipEntry = zipInputStream.getNextEntry();
-
-        Assert.assertEquals("mimetype", zipEntry.getName());
-
-        byte[] readBuffer = new byte[ (int) zipEntry.getSize() ];
-        zipInputStream.read(readBuffer, 0, readBuffer.length);
-        Assert.assertEquals("application/vnd.etsi.asic-e+zip", new String(readBuffer));
-
-        zipInputStream.close();
+        assertThat(buffer[16]).isEqualTo((byte) 16);
+        assertThat(buffer[17]).isEqualTo((byte) 17);
+        assertThat(buffer[18]).isEqualTo((byte) 18);
+        assertThat(buffer[19]).isEqualTo((byte) 19);
     }
 }

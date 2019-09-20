@@ -19,9 +19,8 @@ public class IntegrasjonspunktNokkel {
     private static final String ERR_MISSING_CERTIFICATE = "No Certificate with alias \"%s\" found in the KeyStore";
     private static final String ERR_GENERAL = "Unexpected problem occurred when operating KeyStore";
 
-    protected final KeyStoreProperties properties;
-
-    protected KeyStore keyStore;
+    private final KeyStoreProperties properties;
+    private final KeyStore keyStore;
 
     public IntegrasjonspunktNokkel(KeyStoreProperties properties) {
 
@@ -29,7 +28,7 @@ public class IntegrasjonspunktNokkel {
 
         try {
             this.keyStore = KeystoreProvider.loadKeyStore(properties);
-        }catch (KeystoreProviderException e){
+        } catch (KeystoreProviderException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -49,21 +48,21 @@ public class IntegrasjonspunktNokkel {
 
             privateKey = (PrivateKey) keyStore.getKey(properties.getAlias(), password);
 
-            if(privateKey == null){
+            if (privateKey == null) {
 
                 throw new IllegalStateException(
                         String.format(ERR_MISSING_PRIVATE_KEY, properties.getAlias())
                 );
             }
 
-        }catch (KeyStoreException | NoSuchAlgorithmException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
 
             throw new IllegalStateException(ERR_GENERAL, e);
-        }catch (UnrecoverableEntryException e){
+        } catch (UnrecoverableEntryException e) {
 
             throw new IllegalStateException(
                     String.format(ERR_MISSING_PRIVATE_KEY_OR_PASS, properties.getAlias())
-                    ,e
+                    , e
             );
 
         }
@@ -73,28 +72,23 @@ public class IntegrasjonspunktNokkel {
 
     public X509Certificate getX509Certificate() {
 
-        X509Certificate certificate;
-
         try {
 
-            certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
+            X509Certificate certificate = (X509Certificate) keyStore.getCertificate(properties.getAlias());
 
-            if( certificate == null ){
+            if (certificate == null) {
                 throw new IllegalStateException(
                         String.format(ERR_MISSING_CERTIFICATE, properties.getAlias())
                 );
             }
 
-        }catch (KeyStoreException e){
-
+            return certificate;
+        } catch (KeyStoreException e) {
             throw new IllegalStateException(ERR_GENERAL, e);
         }
-
-        return certificate;
     }
 
     public KeyPair getKeyPair() {
-
         PrivateKey privateKey = loadPrivateKey();
         X509Certificate certificate = getX509Certificate();
 
@@ -102,12 +96,10 @@ public class IntegrasjonspunktNokkel {
     }
 
     public SignatureHelper getSignatureHelper() {
-
         return new MoveSignaturHelper(keyStore, properties.getAlias(), properties.getPassword());
-
     }
 
-    public boolean shouldLockProvider(){
+    public boolean shouldLockProvider() {
         return properties.getLockProvider();
     }
 
@@ -115,10 +107,9 @@ public class IntegrasjonspunktNokkel {
         return keyStore;
     }
 
-
     public class MoveSignaturHelper extends SignatureHelper {
 
-        public MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword)  {
+        MoveSignaturHelper(KeyStore keyStore, String keyAlias, String keyPassword) {
 
             super(properties.getLockProvider() ? keyStore.getProvider() : null);
             loadCertificate(keyStore, keyAlias, keyPassword);

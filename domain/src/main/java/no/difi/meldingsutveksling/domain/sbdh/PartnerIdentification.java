@@ -8,18 +8,27 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.validation.EqualToProperty;
+import no.difi.meldingsutveksling.validation.InServiceRegistry;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
+import no.difi.meldingsutveksling.validation.group.sequenceprovider.PartnerIdentificationGroupSequenceProvider;
+import org.hibernate.annotations.Parent;
+import org.hibernate.validator.group.GroupSequenceProvider;
+
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 
 
 /**
  * <p>Java class for PartnerIdentification complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PartnerIdentification">
  *   &lt;simpleContent>
@@ -29,66 +38,52 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PartnerIdentification", propOrder = {
-    "value"
+        "value"
 })
-public class PartnerIdentification {
+@EqualsAndHashCode(exclude = "partner")
+@Getter
+@Setter
+@ToString(exclude = "partner")
+@RequiredArgsConstructor
+@GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
+public class PartnerIdentification implements Serializable {
+
+    @XmlTransient
+    @JsonIgnore
+    @Parent
+    private Partner partner;
 
     @XmlValue
+    @InServiceRegistry
+    @EqualToProperty(value = "difi.move.org.number", groups = ValidationGroups.Partner.Sender.class)
+    @NotNull
+    @ApiModelProperty(
+            value = "Identifier",
+            example = "0192:987654321",
+            required = true
+    )
     protected String value;
+
     @XmlAttribute(name = "Authority")
+    @NotNull
+    @ApiModelProperty(
+            value = "Authority",
+            example = "iso6523-actorid-upis",
+            required = true
+    )
     protected String authority;
 
-    /**
-     * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getValue() {
-        return value;
+    @JsonIgnore
+    String getStrippedValue() {
+        if (value == null) {
+            return null;
+        }
+
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).toString() : value;
     }
 
-    /**
-     * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    /**
-     * Gets the value of the authority property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getAuthority() {
-        return authority;
-    }
-
-    /**
-     * Sets the value of the authority property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setAuthority(String value) {
-        this.authority = value;
-    }
 
 }

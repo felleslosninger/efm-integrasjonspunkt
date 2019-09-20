@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import net.logstash.logback.encoder.org.apache.commons.lang.StringEscapeUtils;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,7 +66,7 @@ public class PayloadUtilTest {
 
         assertTrue(PayloadUtil.isAppReceipt(putMessageRequestType.getPayload()));
     }
-    
+
     @Test
     public void isEmptyPayloadFromEphorte() throws JAXBException, XMLStreamException {
         final PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageEmptyPayload.xml");
