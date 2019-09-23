@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.base.Strings;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -60,9 +61,15 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         String orgnr = getCanReceiveMessageRequest.getReceiver().getOrgnr();
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
+        if (Strings.isNullOrEmpty(orgnr)) {
+            log.info("Request does not contain an organization number.");
+            response.setResult(false);
+            return response;
+        }
 
         Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
         if (personnrPredicate.test(orgnr)) {
+            log.info("Request contains an invalid organization number: {}.", orgnr);
             response.setResult(false);
             return response;
         }
