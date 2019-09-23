@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
@@ -76,9 +77,7 @@ public class CorrespondenceAgencyMessageFactory {
 
             BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-            List<BusinessMessageFile> files = new ArrayList<>();
-            files.add(arkivmeldingFile);
-            files.addAll(ArkivmeldingUtil.getFilenames(arkivmelding)
+            List<BusinessMessageFile> files = Lists.newArrayList(ArkivmeldingUtil.getFilenames(arkivmelding)
                     .stream()
                     .map(fileMap::get)
                     .filter(Objects::nonNull)
