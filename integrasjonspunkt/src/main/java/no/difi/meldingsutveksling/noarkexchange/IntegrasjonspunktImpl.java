@@ -77,7 +77,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(orgnr);
         } catch (Exception e) {
-            log.error("Exception during service registry lookup: ", e);
+            log.warn("Exception during service registry lookup: {}", e.getLocalizedMessage());
             response.setResult(false);
             return response;
         }
