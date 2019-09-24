@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -28,7 +28,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
     private final IntegrasjonspunktProperties props;
     private final ServiceRegistryLookup sr;
     private final Clock clock;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MeldingsformidlerClient meldingsformidlerClient;
 
     @Override
@@ -49,7 +49,7 @@ public class DpiConversationStrategy implements ConversationStrategy {
             throw new NextMoveException(errorStr);
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord.get(), cryptoMessagePersister);
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord.get(), optionalCryptoMessagePersister);
 
         try {
             meldingsformidlerClient.sendMelding(request);

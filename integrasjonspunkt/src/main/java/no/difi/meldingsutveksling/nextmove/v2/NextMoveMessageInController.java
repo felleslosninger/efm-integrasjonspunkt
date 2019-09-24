@@ -7,14 +7,15 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
-import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -26,11 +27,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
-import org.springframework.transaction.annotation.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.time.Clock;
@@ -57,7 +58,7 @@ public class NextMoveMessageInController {
     private final IntegrasjonspunktProperties props;
     private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
-    private final CryptoMessagePersisterImpl cryptoMessagePersister;
+    private final CryptoMessagePersister cryptoMessagePersister;
     private final InternalQueue internalQueue;
     private final SBDReceiptFactory receiptFactory;
     private final MessageStatusFactory messageStatusFactory;
@@ -123,7 +124,7 @@ public class NextMoveMessageInController {
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)
                     .body(new InputStreamResource(fileEntry.getInputStream()));
-        } catch (PersistenceException e) {
+        } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s]. Removing message from queue",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
