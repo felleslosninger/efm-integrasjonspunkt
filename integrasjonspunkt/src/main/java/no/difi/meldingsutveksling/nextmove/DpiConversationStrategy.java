@@ -2,21 +2,19 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -33,23 +31,21 @@ public class DpiConversationStrategy implements ConversationStrategy {
 
     @Override
     public void send(NextMoveOutMessage message) throws NextMoveException {
-        List<ServiceRecord> serviceRecords = sr.getServiceRecords(SRParameter.builder(message.getReceiverIdentifier())
-                .conversationId(message.getConversationId()).build());
-        Optional<ServiceRecord> serviceRecord = serviceRecords.stream()
-                .filter(r -> message.getServiceIdentifier() == r.getServiceIdentifier())
-                .findFirst();
-
-        if (!serviceRecord.isPresent()) {
-            List<ServiceIdentifier> acceptableTypes = serviceRecords.stream()
-                    .map(ServiceRecord::getServiceIdentifier)
-                    .collect(Collectors.toList());
-            String errorStr = String.format("Message is of type '%s', but receiver '%s' accepts types '%s'.",
-                    message.getServiceIdentifier(), message.getReceiverIdentifier(), acceptableTypes);
-            log.error(markerFrom(message), errorStr);
-            throw new NextMoveException(errorStr);
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getProcessIdentifier(),
+                    message.getSbd().getStandard());
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(
+                    String.format("Could not find service record[receiver=%s, process=%s, documentType=%s]",
+                            message.getReceiverIdentifier(),
+                            message.getProcessIdentifier(),
+                            message.getSbd().getStandard()));
         }
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord.get(), cryptoMessagePersister);
+        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, cryptoMessagePersister);
 
         try {
             meldingsformidlerClient.sendMelding(request);
