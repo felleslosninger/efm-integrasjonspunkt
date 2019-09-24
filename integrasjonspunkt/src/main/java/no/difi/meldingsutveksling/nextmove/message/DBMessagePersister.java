@@ -40,6 +40,7 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public byte[] read(String messageId, String filename) throws IOException {
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
                 .orElseThrow(() -> new IOException(String.format("File \'%s\' for message with id=%s not found in repository", filename, messageId)));
@@ -52,6 +53,7 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public FileEntryStream readStream(String messageId, String filename) {
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
                 .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));

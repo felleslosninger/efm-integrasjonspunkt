@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
@@ -22,8 +23,8 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -54,7 +55,7 @@ public class CorrespondenceAgencyMessageFactory {
     private final CorrespondenceAgencyConfiguration config;
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Clock clock;
     private final ReporteeFactory reporteeFactory;
     private final ObjectFactory objectFactory = new ObjectFactory();
@@ -70,15 +71,13 @@ public class CorrespondenceAgencyMessageFactory {
             BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
                     .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
 
-            InputStream is = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier()).getInputStream();
+            InputStream is = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier()).getInputStream();
             Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(is);
             Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
 
             BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-            List<BusinessMessageFile> files = new ArrayList<>();
-            files.add(arkivmeldingFile);
-            files.addAll(ArkivmeldingUtil.getFilenames(arkivmelding)
+            List<BusinessMessageFile> files = Lists.newArrayList(ArkivmeldingUtil.getFilenames(arkivmelding)
                     .stream()
                     .map(fileMap::get)
                     .filter(Objects::nonNull)
@@ -132,7 +131,7 @@ public class CorrespondenceAgencyMessageFactory {
 
     private FileEntryStream getFileEntry(String messageId, BusinessMessageFile f) {
         try {
-            return cryptoMessagePersister.readStream(messageId, f.getIdentifier());
+            return optionalCryptoMessagePersister.readStream(messageId, f.getIdentifier());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(
                     String.format("Could not read attachment %s for messageId = %s", f.getIdentifier(), messageId)

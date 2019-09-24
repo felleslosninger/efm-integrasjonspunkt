@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,7 +67,8 @@ public class NextMoveMessageInSteps {
                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
 
         ResponseExtractor<Void> responseExtractor = response -> {
-            messageReceivedHolder.get().attachments(asicParser.parse(response.getBody()));
+            byte[] asic = IOUtils.toByteArray(response.getBody());
+            messageReceivedHolder.get().attachments(asicParser.parse(new ByteArrayInputStream(asic)));
             return null;
         };
 
