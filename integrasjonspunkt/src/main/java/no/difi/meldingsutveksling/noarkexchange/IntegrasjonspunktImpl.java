@@ -59,7 +59,13 @@ public class IntegrasjonspunktImpl implements SOAPport {
     public GetCanReceiveMessageResponseType getCanReceiveMessage(@WebParam(name = "GetCanReceiveMessageRequest", targetNamespace = "http://www.arkivverket.no/Noark/Exchange/types", partName = "getCanReceiveMessageRequest") GetCanReceiveMessageRequestType getCanReceiveMessageRequest) {
 
         String orgnr = getCanReceiveMessageRequest.getReceiver().getOrgnr();
+
         GetCanReceiveMessageResponseType response = new GetCanReceiveMessageResponseType();
+
+        if (orgnr == null) {
+            response.setResult(false);
+            return response;
+        }
 
         Predicate<String> personnrPredicate = Pattern.compile(String.format("\\d{%d}", 11)).asPredicate();
         if (personnrPredicate.test(orgnr)) {
