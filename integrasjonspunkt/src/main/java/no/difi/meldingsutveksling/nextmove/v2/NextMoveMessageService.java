@@ -103,7 +103,7 @@ public class NextMoveMessageService {
         return contentType;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
         internalQueue.enqueueNextMove(message);
