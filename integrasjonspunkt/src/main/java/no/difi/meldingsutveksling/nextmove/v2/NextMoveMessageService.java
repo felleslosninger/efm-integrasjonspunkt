@@ -39,7 +39,7 @@ public class NextMoveMessageService {
     private final ConversationService conversationService;
 
     @Transactional(readOnly = true)
-    NextMoveOutMessage getMessage(String messageId) {
+    public NextMoveOutMessage getMessage(String messageId) {
         return messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
@@ -103,6 +103,7 @@ public class NextMoveMessageService {
         return contentType;
     }
 
+    @Transactional
     public void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
         internalQueue.enqueueNextMove(message);

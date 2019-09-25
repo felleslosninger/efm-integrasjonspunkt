@@ -8,17 +8,16 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartRequest;
 
-import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @RestController
@@ -68,10 +67,9 @@ public class MessageOutController {
     }
 
     @PostMapping("/{conversationId}")
-    @Transactional
     public ResponseEntity send(@PathVariable("conversationId") String conversationId,
             MultipartRequest request) {
-        NextMoveOutMessage outMessage = outRepo.findByConversationId(conversationId).orElseThrow(() -> new MessageNotFoundException(conversationId));
+        NextMoveOutMessage outMessage = messageService.getMessage(conversationId);
         request.getFileMap().values().forEach(f -> messageService.addFile(outMessage, f));
         messageService.sendMessage(outMessage);
         return ResponseEntity.ok().build();
