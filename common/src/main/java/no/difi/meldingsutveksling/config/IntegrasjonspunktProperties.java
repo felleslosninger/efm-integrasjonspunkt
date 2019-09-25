@@ -276,6 +276,7 @@ public class IntegrasjonspunktProperties {
         private boolean dumpDlqMessages;
         private boolean mailErrorStatus;
         private boolean retryOnDeadLock;
+        private boolean cryptoMessagePersister;
 
         /**
          * Service toggles

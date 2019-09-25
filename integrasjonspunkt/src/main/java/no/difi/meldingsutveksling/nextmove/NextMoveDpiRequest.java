@@ -5,7 +5,7 @@ import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
@@ -29,7 +29,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     private final Clock clock;
     private final NextMoveMessage message;
     private final ServiceRecord serviceRecord;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
 
     @Override
     public Document getDocument() {
@@ -58,7 +58,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     private byte[] getContent(String fileName) {
         try {
-            return cryptoMessagePersister.read(message.getMessageId(), fileName);
+            return optionalCryptoMessagePersister.read(message.getMessageId(), fileName);
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }

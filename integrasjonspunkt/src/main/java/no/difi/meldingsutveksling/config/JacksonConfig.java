@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
+import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -65,5 +67,10 @@ public class JacksonConfig {
             return LocalDateTime.from(temporal)
                     .atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now(clock)));
         }
+    }
+
+    @Bean
+    public ObjectMapperHolder objectMapperHolder(Jackson2ObjectMapperBuilder objectMapperBuilder) {
+        return new ObjectMapperHolder(objectMapperBuilder.build());
     }
 }

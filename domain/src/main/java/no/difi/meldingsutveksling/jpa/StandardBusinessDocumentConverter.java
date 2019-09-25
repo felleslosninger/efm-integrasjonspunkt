@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -15,9 +13,6 @@ import java.io.IOException;
 @Converter
 @RequiredArgsConstructor
 public class StandardBusinessDocumentConverter implements AttributeConverter<StandardBusinessDocument, String> {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Override
     public String convertToDatabaseColumn(StandardBusinessDocument sbd) {
@@ -46,14 +41,6 @@ public class StandardBusinessDocumentConverter implements AttributeConverter<Sta
     }
 
     private ObjectMapper getObjectMapper() {
-        if (objectMapper == null) {
-            SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-
-            if (objectMapper == null) {
-                throw new IllegalStateException("Couldn't inject ObjectMapper into StandardBusinessDocumentConverter");
-            }
-        }
-
-        return objectMapper;
+        return ObjectMapperHolder.get();
     }
 }

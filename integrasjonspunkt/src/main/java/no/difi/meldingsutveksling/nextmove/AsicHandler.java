@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
@@ -9,8 +10,8 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.pipes.Plumber;
@@ -27,19 +28,14 @@ import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 
-@Component
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class AsicHandler {
 
     private final IntegrasjonspunktNokkel keyHelper;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Plumber plumber;
-
-    public AsicHandler(IntegrasjonspunktNokkel keyHelper, CryptoMessagePersister cryptoMessagePersister, Plumber plumber) {
-        this.keyHelper = keyHelper;
-        this.cryptoMessagePersister = cryptoMessagePersister;
-        this.plumber = plumber;
-    }
 
     InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
 
@@ -50,7 +46,7 @@ public class AsicHandler {
                     return a.getDokumentnummer().compareTo(b.getDokumentnummer());
                 }).map(f -> {
                     try {
-                        FileEntryStream fes = cryptoMessagePersister.readStream(msg.getMessageId(), f.getIdentifier());
+                        FileEntryStream fes = optionalCryptoMessagePersister.readStream(msg.getMessageId(), f.getIdentifier());
                         return new NextMoveStreamedFile(f.getFilename(), fes.getInputStream(), getMimetype(f));
                     } catch (IOException e) {
                         throw new NextMoveRuntimeException(

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -38,6 +39,7 @@ public class NextMoveMessageOutController {
     private static final int MAX_SIZE = 5 * 1024 * 1024;
 
     private final NextMoveMessageService messageService;
+    private final EntityManager entityManager;
 
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(value = "Create and send multipart message", notes = "Create and send a new message with the given values")
@@ -62,7 +64,7 @@ public class NextMoveMessageOutController {
                 });
 
         NextMoveOutMessage message = messageService.createMessage(sbd, files);
-        messageService.sendMessage(message);
+        messageService.sendMessage(message.getId());
         return message.getSbd();
     }
 

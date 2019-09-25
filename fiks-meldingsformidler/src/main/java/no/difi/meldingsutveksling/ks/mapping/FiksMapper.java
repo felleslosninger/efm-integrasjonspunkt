@@ -17,8 +17,8 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -45,17 +45,17 @@ public class FiksMapper {
 
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
-                      CryptoMessagePersister cryptoMessagePersister,
+                      OptionalCryptoMessagePersister optionalCryptoMessagePersister,
                       ObjectProvider<CmsUtil> cmsUtilProvider, Plumber plumber) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
-        this.cryptoMessagePersister = cryptoMessagePersister;
+        this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
         this.cmsUtilProvider = cmsUtilProvider;
         this.plumber = plumber;
     }
@@ -124,7 +124,7 @@ public class FiksMapper {
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
 
-        try (FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier)) {
+        try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier)) {
             return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
         } catch (JAXBException e) {
             throw new NextMoveException("Error unmarshalling arkivmelding", e);
@@ -159,7 +159,7 @@ public class FiksMapper {
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert) {
         try {
-            FileEntryStream fileEntryStream = cryptoMessagePersister.readStream(messageId, file.getIdentifier());
+            FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier());
 
             return Dokument.builder()
                     .withData(getDataHandler(cert, fileEntryStream.getInputStream()))

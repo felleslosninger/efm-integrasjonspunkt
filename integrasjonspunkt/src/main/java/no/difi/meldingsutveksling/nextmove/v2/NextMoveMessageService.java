@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.data.domain.Page;
@@ -33,13 +33,13 @@ public class NextMoveMessageService {
 
     private final NextMoveValidator validator;
     private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
-    private final CryptoMessagePersister cryptoMessagePersister;
+    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
 
     @Transactional(readOnly = true)
-    NextMoveOutMessage getMessage(String messageId) {
+    public NextMoveOutMessage getMessage(String messageId) {
         return messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
@@ -86,7 +86,7 @@ public class NextMoveMessageService {
         String identifier = UUID.randomUUID().toString();
 
         try {
-            cryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream());
+            optionalCryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream());
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }
@@ -103,8 +103,14 @@ public class NextMoveMessageService {
         return contentType;
     }
 
+    @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
         internalQueue.enqueueNextMove(message);
+    }
+
+    @Transactional(noRollbackFor = TimeToLiveException.class)
+    public void sendMessage(Long id) {
+        messageRepo.findById(id).ifPresent(this::sendMessage);
     }
 }
