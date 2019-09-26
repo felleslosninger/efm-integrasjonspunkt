@@ -67,6 +67,7 @@ public class IntegrajonspunktReceiveImpl {
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final NextMoveAdapter nextMoveAdapter;
     private final InternalQueue internalQueue;
+    private final ConversationIdEntityRepo conversationIdEntityRepo;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        Adresseregister adresseregisterService,
@@ -79,7 +80,8 @@ public class IntegrajonspunktReceiveImpl {
                                        SBDUtil sbdUtil,
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
-                                       @Lazy InternalQueue internalQueue) {
+                                       @Lazy InternalQueue internalQueue,
+                                       ConversationIdEntityRepo conversationIdEntityRepo) {
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
@@ -92,6 +94,7 @@ public class IntegrajonspunktReceiveImpl {
         this.putMessageRequestFactory = putMessageRequestFactory;
         this.nextMoveAdapter = nextMoveAdapter;
         this.internalQueue = internalQueue;
+        this.conversationIdEntityRepo = conversationIdEntityRepo;
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
@@ -118,6 +121,14 @@ public class IntegrajonspunktReceiveImpl {
         if (sbdUtil.isReceipt(sbd)) {
             ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
             AppReceiptType appReceiptType = AppReceiptFactory.from(message);
+            // ConversationId may be be overriden due to invalid UUID in corresponding outgoing message
+            ConversationIdEntity convId = conversationIdEntityRepo.findByNewConversationId(sbd.getConversationId());
+            if (convId != null) {
+                log.warn("Found {} which maps to conversation {} with invalid UUID - overriding in AppReceipt.", sbd.getConversationId(), convId.getOldConversationId());
+                PutMessageRequestType putMessage = putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType), convId.getOldConversationId());
+                conversationIdEntityRepo.delete(convId);
+                return putMessage;
+            }
             return putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
         } else {
             byte[] asicBytes;
