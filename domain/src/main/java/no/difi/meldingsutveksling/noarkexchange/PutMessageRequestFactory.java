@@ -19,13 +19,16 @@ public class PutMessageRequestFactory {
 
     private final ServiceRegistryLookup srLookup;
 
-
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
+        return create(sbd, payload, sbd.getConversationId());
+    }
+
+    public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
         String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
         InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
         InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
-        return create(sbd.getConversationId(),
+        return create(conversationId,
                 Sender.of(sbd.getSenderIdentifier(), senderInfo.getOrganizationName(), senderRef),
                 Receiver.of(sbd.getReceiverIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
                 payload);

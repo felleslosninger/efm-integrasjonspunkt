@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBException;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -48,6 +49,7 @@ public class NextMoveAdapter {
     private final IntegrasjonspunktProperties properties;
     private final UUIDGenerator uuidGenerator;
     private final ServiceRegistryLookup srLookup;
+    private final ConversationIdEntityRepo conversationIdEntityRepo;
 
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
         NextMoveOutMessage nextMoveMessage;
@@ -85,6 +87,14 @@ public class NextMoveAdapter {
     }
 
     private NextMoveOutMessage convertEduMessage(PutMessageRequestWrapper message) throws PayloadException, JAXBException {
+        String conversationId = message.getConversationId();
+        try {
+            UUID.fromString(conversationId);
+        } catch (IllegalArgumentException e) {
+            conversationId = uuidGenerator.generate();
+            log.warn("PutMessage has conversationId={} which is not a valid UUID. Setting new conversationId: {}", message.getConversationId(), conversationId);
+            conversationIdEntityRepo.save(new ConversationIdEntity(message.getConversationId(), conversationId));
+        }
         ServiceRecord receiverServiceRecord;
         try {
             receiverServiceRecord = srLookup.getServiceRecord(message.getReceiverPartyNumber());
@@ -93,8 +103,8 @@ public class NextMoveAdapter {
         }
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
-                message.getConversationId(),
-                message.getConversationId(),
+                conversationId,
+                conversationId,
                 properties.getArkivmelding().getDefaultProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage()

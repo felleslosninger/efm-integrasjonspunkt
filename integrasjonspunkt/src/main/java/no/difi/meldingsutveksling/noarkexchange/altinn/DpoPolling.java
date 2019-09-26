@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -21,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
@@ -78,6 +78,15 @@ public class DpoPolling {
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
             StandardBusinessDocument sbd = client.download(request, messagePersister);
             Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
+
+            try {
+                UUID.fromString(sbd.getMessageId());
+                UUID.fromString(sbd.getConversationId());
+            } catch (IllegalArgumentException e) {
+                log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
+                client.confirmDownload(request);
+                return;
+            }
 
             if (sbdUtil.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
