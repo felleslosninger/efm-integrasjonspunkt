@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -32,6 +33,7 @@ public class SvarUtService {
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
 
+    @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {

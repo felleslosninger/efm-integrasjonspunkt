@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -18,6 +19,7 @@ public class DpeConversationStrategy implements ConversationStrategy {
     private final NextMoveServiceBus serviceBus;
 
     @Override
+    @Transactional
     public void send(NextMoveOutMessage message) throws NextMoveException {
         serviceBus.putMessage(message);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
