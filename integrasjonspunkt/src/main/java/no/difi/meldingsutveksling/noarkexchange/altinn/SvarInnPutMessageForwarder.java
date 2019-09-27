@@ -20,12 +20,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -37,9 +31,6 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVER
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTATT;
 
 @RequiredArgsConstructor
-@Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
-@Conditional(LocalNorarkExistsCondition.class)
 public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
     private final IntegrasjonspunktProperties properties;

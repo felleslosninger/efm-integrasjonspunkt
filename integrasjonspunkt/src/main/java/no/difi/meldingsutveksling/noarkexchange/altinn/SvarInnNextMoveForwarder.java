@@ -7,14 +7,10 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
 @Slf4j
-@Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
 

@@ -5,16 +5,12 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
-@Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 public class DpfPolling {
 
     private final IntegrasjonspunktProperties properties;

@@ -24,9 +24,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
@@ -39,8 +37,6 @@ import java.util.stream.Stream;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
-@Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 public class SvarInnNextMoveConverter {
 
