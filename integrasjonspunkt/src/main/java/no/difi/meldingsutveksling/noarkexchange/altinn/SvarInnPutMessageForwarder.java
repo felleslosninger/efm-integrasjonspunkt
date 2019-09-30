@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageInformable;
@@ -46,6 +47,9 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     public void accept(Forsendelse forsendelse) {
         SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, putMessageRequestFactory);
         svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);
+        if (!Strings.isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+            builder.setFallbackSenderOrgNr(properties.getFiks().getInn().getFallbackSenderOrgNr());
+        }
         PutMessageRequestType putMessage = builder.build();
 
         if (builder.getDokumentTypeList().isEmpty()) {
