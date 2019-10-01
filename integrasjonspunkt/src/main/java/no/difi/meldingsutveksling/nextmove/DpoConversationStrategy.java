@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
     private final ApplicationContextHolder applicationContextHolder;
 
     @Override
+    @Transactional
     public void send(NextMoveOutMessage message) throws NextMoveException {
         Transport transport = transportFactory.createTransport(message.getSbd());
 

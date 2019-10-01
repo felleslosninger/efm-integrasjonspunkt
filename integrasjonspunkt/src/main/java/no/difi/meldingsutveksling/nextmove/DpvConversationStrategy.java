@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -32,6 +33,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private final PutMessageRequestFactory putMessageRequestFactory;
 
     @Override
+    @Transactional
     public void send(NextMoveOutMessage message) throws NextMoveException {
 
         InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);

@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,11 +26,10 @@ public class NextMoveServiceBusPayloadFactory {
         return ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
     }
 
-    @SuppressWarnings({"squid:S1168", "squid:S2583"})
     private byte[] getAsicBytes(NextMoveOutMessage message) throws NextMoveException {
         if (message.getFiles() == null || message.getFiles().isEmpty()) return null;
-        try {
-            InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, getMessageContext(message));
+        MessageContext messageContext = getMessageContext(message);
+        try (InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, messageContext)) {
             return Base64.getEncoder().encode(IOUtils.toByteArray(encryptedAsic));
         } catch (IOException e) {
             throw new NextMoveException("Unable to read encrypted asic", e);

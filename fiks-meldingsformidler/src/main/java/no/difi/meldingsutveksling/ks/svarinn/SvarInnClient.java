@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.AutoCloseInputStream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
@@ -47,7 +48,8 @@ public class SvarInnClient {
     InputStream downloadZipFile(Forsendelse forsendelse) {
         return plumber.pipe("downloading zip file", inlet ->
                 restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
-                    int bytes = IOUtils.copy(response.getBody(), inlet);
+                    InputStream body = new AutoCloseInputStream(response.getBody());
+                    int bytes = IOUtils.copy(body, inlet);
                     log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
                     return null;
                 })

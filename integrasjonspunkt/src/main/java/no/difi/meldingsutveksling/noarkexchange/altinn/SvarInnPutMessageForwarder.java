@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageInformable;
@@ -20,9 +21,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -34,9 +32,6 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVER
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTATT;
 
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
-@ConditionalOnBean(name = "localNoark")
-@Component
 public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
     private final IntegrasjonspunktProperties properties;
@@ -52,6 +47,9 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     public void accept(Forsendelse forsendelse) {
         SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, putMessageRequestFactory);
         svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);
+        if (!Strings.isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
+            builder.setFallbackSenderOrgNr(properties.getFiks().getInn().getFallbackSenderOrgNr());
+        }
         PutMessageRequestType putMessage = builder.build();
 
         if (builder.getDokumentTypeList().isEmpty()) {

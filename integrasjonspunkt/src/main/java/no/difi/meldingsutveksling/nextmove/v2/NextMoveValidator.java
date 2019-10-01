@@ -93,7 +93,7 @@ public class NextMoveValidator {
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
-    void validate(NextMoveOutMessage message) {
+    public void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
         if (!sbdUtil.isReceipt(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {

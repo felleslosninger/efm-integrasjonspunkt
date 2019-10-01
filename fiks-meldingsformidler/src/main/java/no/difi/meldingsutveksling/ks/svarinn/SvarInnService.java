@@ -50,12 +50,7 @@ public class SvarInnService {
                     entry = stream.getNextEntry();
                 }
 
-                if (entry == null) {
-                    stream.close();
-                    return false;
-                }
-
-                return true;
+                return entry != null;
             }
 
             @Override
@@ -63,7 +58,7 @@ public class SvarInnService {
                 if (hasNext()) {
                     SvarInnStreamedFile file = SvarInnStreamedFile.of(
                             entry.getName(),
-                            stream,
+                            new NonClosableInputStream(stream),
                             mimeTypeMap.get(entry.getName()));
                     entry = null;
                     return file;
