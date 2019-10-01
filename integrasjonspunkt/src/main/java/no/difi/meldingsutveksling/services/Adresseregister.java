@@ -38,7 +38,7 @@ public class Adresseregister {
 
         ServiceRecord senderServiceRecord;
         try {
-            senderServiceRecord = serviceRegistryLookup.getServiceRecord(sbd.getSenderIdentifier());
+            senderServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getSenderIdentifier()).build());
         } catch (ServiceRegistryLookupException e) {
             throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
         }

@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.nextmove.v2.BasicNextMoveFile;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -97,7 +98,9 @@ public class NextMoveAdapter {
         }
         ServiceRecord receiverServiceRecord;
         try {
-            receiverServiceRecord = srLookup.getServiceRecord(message.getReceiverPartyNumber());
+            receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber()).build(),
+                    properties.getArkivmelding().getDefaultProcess(),
+                    DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
         }
@@ -121,7 +124,9 @@ public class NextMoveAdapter {
         // Need to check if receiver is on FIKS platform. If so, reject if documents are not PDF.
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = srLookup.getServiceRecord(message.getReceiverPartyNumber());
+            serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber()).build(),
+                    properties.getArkivmelding().getDefaultProcess(),
+                    DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
         }

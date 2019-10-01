@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.nextmove.DpvConversationStrategy;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -41,7 +42,7 @@ public class IntegrasjonspunktImplTest {
     public void setUp() throws ServiceRegistryLookupException {
         initMocks(this);
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
-        when(serviceRegistryLookup.getServiceRecord(anyString())).thenReturn(serviceRecord);
+        when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategy.class)));
     }

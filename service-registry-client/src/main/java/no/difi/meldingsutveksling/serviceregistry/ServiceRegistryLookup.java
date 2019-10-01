@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.serviceregistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -13,10 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.*;
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.hasDocumentType;
+import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 @Slf4j
 @Service
@@ -26,22 +24,8 @@ public class ServiceRegistryLookup {
     private final ServiceRegistryClient serviceRegistryClient;
     private final IntegrasjonspunktProperties properties;
 
-    /**
-     * Method to find out which transport channel to use to send messages to given organization
-     *
-     * @param identifier of the receiver
-     * @return a ServiceRecord if found. Otherwise an empty ServiceRecord is returned.
-     */
-    public ServiceRecord getServiceRecord(String identifier) throws ServiceRegistryLookupException {
-        return getServiceRecord(SRParameter.builder(identifier).build());
-    }
-
     public ServiceRecord getServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         return loadServiceRecord(parameter);
-    }
-
-    public ServiceRecord getServiceRecord(String identifier, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
-        return getServiceRecord(SRParameter.builder(identifier).build(), serviceIdentifier);
     }
 
     public ServiceRecord getServiceRecord(SRParameter parameter, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
@@ -49,10 +33,6 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream()
                 .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, parameter.getIdentifier())));
-    }
-
-    List<ServiceRecord> getServiceRecords(String identifier) {
-        return getServiceRecords(SRParameter.builder(identifier).build());
     }
 
     public List<ServiceRecord> getServiceRecords(SRParameter parameter) {
@@ -64,15 +44,11 @@ public class ServiceRegistryLookup {
     }
 
     public boolean isInServiceRegistry(String identifier) {
-        return !getServiceRecords(identifier).isEmpty();
-    }
-
-    public String getDocumentIdentifier(SRParameter parameter, Process process, DocumentType documentType) throws ServiceRegistryLookupException {
-        return getDocumentIdentifier(parameter, process.getValue(), documentType);
+        return !getServiceRecords(SRParameter.builder(identifier).build()).isEmpty();
     }
 
     public String getDocumentIdentifier(SRParameter parameter, String process, DocumentType documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
+        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .flatMap(r -> r.getDocumentTypes().stream())
                 .filter(documentType::fitsDocumentIdentifier)
@@ -84,19 +60,21 @@ public class ServiceRegistryLookup {
     }
 
     public ServiceRecord getServiceRecord(SRParameter parameter, String process, String documentType) throws ServiceRegistryLookupException {
-        Set<ServiceRecord> serviceRecords = getServiceRecords(parameter, process);
+        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter, process);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), process)));
     }
 
-    private Set<ServiceRecord> getServiceRecords(SRParameter parameter, String process) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
+    public ServiceRecord getServiceRecord(SRParameter parameter, String process, DocumentType documentType) throws ServiceRegistryLookupException {
+        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter, process);
         return serviceRecords.stream()
-                .filter(isProcess(process))
-                .collect(Collectors.toSet());
+                .filter(hasDocumentType(documentType))
+                .findFirst()
+                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), process)));
     }
+
 
     private ServiceRecord loadServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
@@ -123,6 +101,10 @@ public class ServiceRegistryLookup {
 
     private List<ServiceRecord> loadServiceRecords(SRParameter parameter) throws ServiceRegistryLookupException {
         return serviceRegistryClient.loadIdentifierResource(parameter).getServiceRecords();
+    }
+
+    private List<ServiceRecord> loadServiceRecords(SRParameter parameter, String processId) throws ServiceRegistryLookupException {
+        return serviceRegistryClient.loadIdentifierResource(parameter, processId).getServiceRecords();
     }
 
     /**

@@ -109,14 +109,14 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        this.service.getServiceRecord(ORGNR);
+        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
     public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        this.service.getServiceRecord(ORGNR);
+        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
@@ -124,7 +124,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        this.service.getServiceRecord(ORGNR, DPO);
+        this.service.getServiceRecord(SRParameter.builder(ORGNR).build(), DPO);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(ORGNR);
+        final ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build());
 
         assertThat(serviceRecord, is(dpo));
     }
@@ -142,7 +142,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
 
-        ServiceRecord serviceRecord = service.getServiceRecord(ORGNR, DPO);
+        ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build(), DPO);
 
         assertThat(serviceRecord, is(dpo));
     }

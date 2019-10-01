@@ -23,13 +23,13 @@ public class IdentifierRelayController {
     public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
         ServiceRecord serviceRecord = null;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(identifier);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(identifier).build());
         } catch (ServiceRegistryLookupException e) {
             log.error("Error while looking up service record for {}", identifier, e);
             return ResponseEntity.notFound().build();
         }
 
-        List<ServiceRecord> serviceRecords = serviceRegistryLookup.getServiceRecords(identifier);
+        List<ServiceRecord> serviceRecords = serviceRegistryLookup.getServiceRecords(SRParameter.builder(identifier).build());
         if (serviceRecords.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

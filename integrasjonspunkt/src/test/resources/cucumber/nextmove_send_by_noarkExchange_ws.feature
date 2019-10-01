@@ -2,6 +2,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075918?securityLevel=3&conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
 
   Scenario: As a user I want to send a BEST/EDU message
 

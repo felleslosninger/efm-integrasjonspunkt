@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -40,6 +41,6 @@ public class AltinnConnectionCheck {
     }
 
     private ServiceRecord getServiceRecord() throws ServiceRegistryLookupException {
-        return serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO);
+        return serviceRegistryLookup.getServiceRecord(SRParameter.builder(properties.getOrg().getNumber()).build(), DPO);
     }
 }

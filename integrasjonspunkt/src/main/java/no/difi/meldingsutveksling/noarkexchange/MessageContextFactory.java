@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -63,7 +64,7 @@ public class MessageContextFactory {
     private Certificate getCertificate(String identifier, ServiceIdentifier serviceIdentifier) throws MessageContextException {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(identifier, serviceIdentifier);
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(identifier).build(), serviceIdentifier);
         } catch (ServiceRegistryLookupException e) {
             throw new MessageContextException(StatusMessage.NO_MATCHING_SERVICEIDENTIFIER, e);
         }
