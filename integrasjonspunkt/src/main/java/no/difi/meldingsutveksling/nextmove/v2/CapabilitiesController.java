@@ -3,11 +3,10 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.capabilities.Capabilities;
-import no.difi.meldingsutveksling.validation.InServiceRegistry;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -36,7 +35,7 @@ public class CapabilitiesController {
     public Capabilities capabilities(
             @ApiParam(value = "receiverid", required = true)
             @PathVariable
-            @NotNull @InServiceRegistry String receiverid,
+            @NotNull String receiverid,
             @ApiParam(value = "securityLevel")
             @RequestParam(required = false, defaultValue = "3") Integer securityLevel) {
         return capabilitiesFactory.getCapabilities(receiverid, securityLevel);

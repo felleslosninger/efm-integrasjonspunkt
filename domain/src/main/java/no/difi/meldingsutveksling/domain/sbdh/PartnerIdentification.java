@@ -13,7 +13,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.validation.EqualToProperty;
-import no.difi.meldingsutveksling.validation.InServiceRegistry;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.validation.group.sequenceprovider.PartnerIdentificationGroupSequenceProvider;
 import org.hibernate.annotations.Parent;
@@ -57,7 +56,6 @@ public class PartnerIdentification implements Serializable {
     private Partner partner;
 
     @XmlValue
-    @InServiceRegistry
     @EqualToProperty(value = "difi.move.org.number", groups = ValidationGroups.Partner.Sender.class)
     @NotNull
     @ApiModelProperty(
