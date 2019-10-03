@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.BrokerServiceExtern
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.IBrokerServiceExternalBasicStreamed;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import javax.xml.ws.BindingProvider;
@@ -24,8 +23,8 @@ public class AltinnWsClientFactory {
     private final Plumber plumber;
     private final IntegrasjonspunktProperties properties;
 
-    public AltinnWsClient getAltinnWsClient(ServiceRecord serviceRecord) {
-        AltinnWsConfiguration configuration = altinnWsConfigurationFactory.fromServiceRecord(serviceRecord);
+    public AltinnWsClient getAltinnWsClient() {
+        AltinnWsConfiguration configuration = altinnWsConfigurationFactory.create();
         return new AltinnWsClient(
                 getBrokerServiceExternalBasicSF(configuration),
                 getBrokerServiceExternalBasicStreamedSF(configuration),

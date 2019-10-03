@@ -3,8 +3,6 @@ package no.difi.meldingsutveksling;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
@@ -16,20 +14,19 @@ public class AltinnWsConfigurationFactory {
 
     private final IntegrasjonspunktProperties properties;
 
-    public AltinnWsConfiguration fromServiceRecord(ServiceRecord serviceRecord) {
+    public AltinnWsConfiguration create() {
         AltinnFormidlingsTjenestenConfig config = properties.getDpo();
-        Service service = serviceRecord.getService();
 
-        URL streamingserviceUrl = createUrl(service.getEndpointUrl() + config.getStreamingserviceUrl());
-        URL brokerserviceUrl = createUrl(service.getEndpointUrl() + config.getBrokerserviceUrl());
+        URL streamingserviceUrl = createUrl(config.getStreamingserviceUrl());
+        URL brokerserviceUrl = createUrl(config.getBrokerserviceUrl());
 
         return AltinnWsConfiguration.builder()
                 .username(config.getUsername())
                 .password(config.getPassword())
                 .streamingServiceUrl(streamingserviceUrl)
                 .brokerServiceUrl(brokerserviceUrl)
-                .externalServiceCode(service.getServiceCode())
-                .externalServiceEditionCode(Integer.valueOf(service.getServiceEditionCode()))
+                .externalServiceCode(config.getServiceCode())
+                .externalServiceEditionCode(Integer.valueOf(config.getServiceEditionCode()))
                 .build();
     }
 
