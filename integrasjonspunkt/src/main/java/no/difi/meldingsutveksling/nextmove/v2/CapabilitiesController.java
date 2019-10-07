@@ -37,7 +37,7 @@ public class CapabilitiesController {
             @PathVariable
             @NotNull String receiverid,
             @ApiParam(value = "securityLevel")
-            @RequestParam(required = false, defaultValue = "3") Integer securityLevel) {
+            @RequestParam(required = false) Integer securityLevel) {
         return capabilitiesFactory.getCapabilities(receiverid, securityLevel);
     }
 }
