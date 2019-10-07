@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.receipt.DpiReceiptService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;
@@ -61,8 +60,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(ServiceRegistryLookup serviceRegistryLookup, AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
-        return new ServiceRegistryTransportFactory(serviceRegistryLookup, altinnWsClientFactory, uuidGenerator);
+    public TransportFactory serviceRegistryTransportFactory(AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
+        return new ServiceRegistryTransportFactory(altinnWsClientFactory, uuidGenerator);
     }
 
     @Bean
@@ -177,10 +176,8 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public AltinnConnectionCheck altinnConnectionCheck(
             IntegrasjonspunktProperties properties,
-            ServiceRegistryLookup serviceRegistryLookup,
-            AltinnWsClientFactory altinnWsClientFactory
-    ) {
-        return new AltinnConnectionCheck(properties, serviceRegistryLookup, altinnWsClientFactory);
+            AltinnWsClientFactory altinnWsClientFactory ) {
+        return new AltinnConnectionCheck(properties, altinnWsClientFactory);
     }
 
     @Bean

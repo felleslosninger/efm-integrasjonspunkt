@@ -47,14 +47,14 @@ public class AdresseregisterTest {
         when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
                 .conversationId(CONVERSATION_ID).build()))
                 .thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
-        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     @Test
     public void senderCertificateIsMissing() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(SENDER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
         adresseregister.validateCertificates(sbdMock);
     }
@@ -73,7 +73,7 @@ public class AdresseregisterTest {
     @Test
     public void certificatesAreValid() throws MessageException, ServiceRegistryLookupException {
         adresseregister.validateCertificates(sbdMock);
-        when(serviceRegistryLookup.getServiceRecord(RECIEVER_PARTY_NUMBER)).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageException> {

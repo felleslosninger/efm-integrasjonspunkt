@@ -6,20 +6,14 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 
 @RequiredArgsConstructor
 public class AltinnConnectionCheck {
 
     private final IntegrasjonspunktProperties properties;
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final AltinnWsClientFactory altinnWsClientFactory;
 
     @PostConstruct
@@ -35,11 +29,8 @@ public class AltinnConnectionCheck {
         }
     }
 
-    private AltinnWsClient getAltinnWsClient() throws ServiceRegistryLookupException {
-        return altinnWsClientFactory.getAltinnWsClient(getServiceRecord());
+    private AltinnWsClient getAltinnWsClient() {
+        return altinnWsClientFactory.getAltinnWsClient();
     }
 
-    private ServiceRecord getServiceRecord() throws ServiceRegistryLookupException {
-        return serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO);
-    }
 }

@@ -2,6 +2,8 @@ Feature: Validation when attempting to send a Next Move DPO message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075918?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-000000000001" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-planogbygg.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:helseSosialOgOmsorg:ver1.0?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-000000000002" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-helsesosial.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/identifier/09118532322?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
     And a "GET" request to "http://localhost:9099/identifier/09118532323?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532323.json"

@@ -1,46 +1,43 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import no.difi.meldingsutveksling.NextMoveConsts;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SRParameterTest {
 
     private static final String IDENTIFIER = "123123123";
 
     @Test
-    public void shouldUseDefaultValueForSecuritylevel() {
+    public void queryWithNoParameters() {
         SRParameter parameter = SRParameter.builder(IDENTIFIER).build();
         assertEquals(IDENTIFIER, parameter.getIdentifier());
-        assertEquals(NextMoveConsts.DEFAULT_SECURITY_LEVEL, parameter.getSecurityLevel());
+        assertNull(parameter.getSecurityLevel());
     }
 
     @Test
-    public void canOverrideDefaultSecurityLevel() {
+    public void queryShouldOnlyContainSecurityLevel() {
         SRParameter parameter = SRParameter.builder(IDENTIFIER)
                 .securityLevel(4)
                 .build();
         assertEquals(Integer.valueOf(4), parameter.getSecurityLevel());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void nullNotAllowedForSecurityLevel() {
-        SRParameter.builder(IDENTIFIER)
-                .securityLevel(null)
-                .build();
+        assertEquals("securityLevel=4", parameter.getQuery());
     }
 
     @Test
-    public void queryShouldOnlyContainSecurityParameterDefault() {
-        SRParameter parameter = SRParameter.builder(IDENTIFIER).build();
-        assertEquals("securityLevel=3", parameter.getQuery());
-    }
-
-    @Test
-    public void queryShouldContainConversationId() {
+    public void queryShouldOnlyContainConversationId() {
         SRParameter parameter = SRParameter.builder(IDENTIFIER)
                 .conversationId("foo123")
+                .build();
+        assertEquals("conversationId=foo123", parameter.getQuery());
+    }
+
+    @Test
+    public void queryShouldHaveSecurityLevelAndConversationId() {
+        SRParameter parameter = SRParameter.builder(IDENTIFIER)
+                .conversationId("foo123")
+                .securityLevel(3)
                 .build();
         assertEquals("securityLevel=3&conversationId=foo123", parameter.getQuery());
     }

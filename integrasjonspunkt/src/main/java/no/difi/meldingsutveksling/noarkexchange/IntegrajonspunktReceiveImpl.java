@@ -98,14 +98,6 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
-        try {
-            adresseregisterService.validateCertificates(sbd);
-            log.debug(markerFrom(sbd), "Certificates validated");
-        } catch (MessageException e) {
-            log.error(markerFrom(sbd), e.getMessage(), e);
-            throw e;
-        }
-
         if (sbdUtil.isReceipt(sbd)) {
             conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT));
             if (!properties.getFeature().isForwardReceivedAppReceipts()) {

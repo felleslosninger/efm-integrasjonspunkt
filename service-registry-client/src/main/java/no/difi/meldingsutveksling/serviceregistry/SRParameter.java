@@ -4,7 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import no.difi.meldingsutveksling.NextMoveConsts;
+
+import java.util.StringJoiner;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -15,18 +16,19 @@ public class SRParameter {
 
     @NonNull
     private String identifier;
-    @NonNull
-    @Builder.Default
-    private Integer securityLevel = NextMoveConsts.DEFAULT_SECURITY_LEVEL;
+    private Integer securityLevel;
     // Used as correlation id - no need for this to affect caching
     @EqualsAndHashCode.Exclude
     private String conversationId;
 
     public String getQuery() {
-        StringBuilder query = new StringBuilder();
-        query.append(format("securityLevel=%s", securityLevel));
+        StringJoiner query = new StringJoiner("&");
+
+        if (securityLevel != null) {
+            query.add(format("securityLevel=%s", securityLevel));
+        }
         if (!isNullOrEmpty(conversationId)) {
-            query.append(format("&conversationId=%s", conversationId));
+            query.add(format("conversationId=%s", conversationId));
         }
 
         return query.toString();

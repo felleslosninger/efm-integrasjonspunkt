@@ -57,6 +57,10 @@ public class ServiceRecord {
         return s -> s != null && s.getDocumentTypes().contains(documentType);
     }
 
+    public static Predicate<ServiceRecord> hasDocumentType(DocumentType documentType) {
+        return s -> s != null && s.getDocumentTypes().stream().anyMatch(documentType::fitsDocumentIdentifier);
+    }
+
     @JsonIgnore
     public ServiceIdentifier getServiceIdentifier() {
         return getService().getIdentifier();

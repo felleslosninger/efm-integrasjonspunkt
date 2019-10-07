@@ -7,15 +7,11 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -35,13 +31,10 @@ public class DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final MessagePersister messagePersister;
     private final AltinnWsClientFactory altinnWsClientFactory;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
-
-    private ServiceRecord serviceRecord;
 
     public void poll() {
         log.debug("Checking for new messages");
@@ -57,19 +50,7 @@ public class DpoPolling {
     }
 
     private AltinnWsClient getAltinnWsClient() {
-        return altinnWsClientFactory.getAltinnWsClient(getServiceRecord());
-    }
-
-    private ServiceRecord getServiceRecord() {
-        if (serviceRecord == null) {
-            try {
-                serviceRecord = serviceRegistryLookup.getServiceRecord(properties.getOrg().getNumber(), DPO);
-            } catch (ServiceRegistryLookupException e) {
-                throw new MeldingsUtvekslingRuntimeException(String.format("DPO ServiceRecord not found for %s", properties.getOrg().getNumber()), e);
-            }
-        }
-
-        return serviceRecord;
+        return altinnWsClientFactory.getAltinnWsClient();
     }
 
     private void handleFileReference(AltinnWsClient client, FileReference reference) {

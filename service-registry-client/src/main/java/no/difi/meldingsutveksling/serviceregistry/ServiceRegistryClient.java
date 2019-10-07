@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,12 @@ public class ServiceRegistryClient {
 
     @Cacheable(CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
-        String identifierResourceString = getIdentifierResourceString(parameter);
+        return loadIdentifierResource(parameter, null);
+    }
+
+    @Cacheable(CACHE_LOAD_IDENTIFIER_RESOURCE)
+    public IdentifierResource loadIdentifierResource(SRParameter parameter, String processId) throws ServiceRegistryLookupException {
+        String identifierResourceString = getIdentifierResourceString(parameter, processId);
 
         try {
             return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
@@ -40,9 +46,13 @@ public class ServiceRegistryClient {
         }
     }
 
-    private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
+    private String getIdentifierResourceString(SRParameter parameter, String processId) throws ServiceRegistryLookupException {
         try {
-            return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
+            if (!Strings.isNullOrEmpty(processId)) {
+                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + processId, parameter.getQuery());
+            } else {
+                return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
+            }
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundInServiceRegistryException(parameter.getIdentifier());

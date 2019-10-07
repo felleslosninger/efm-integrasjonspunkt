@@ -1,9 +1,10 @@
 Feature: Sending a Next Move DPO message when it expires between create and send
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075918?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    And a "GET" request to "http://localhost:9099/identifier/974720760?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    And a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?securityLevel=3&conversationId=8fb3a080-39fb-4dd7-b20a-dfc70f214f26" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
     And the Noark System is disabled
 
   Scenario: As a user I want to send a DPO message and expect it to expire
