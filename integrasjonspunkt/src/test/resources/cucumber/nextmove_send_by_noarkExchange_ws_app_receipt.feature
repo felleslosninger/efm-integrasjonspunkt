@@ -2,9 +2,9 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
 
   Background:
 
-    Given a "GET" request to "http://localhost:9099/identifier/910075918?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?securityLevel=3&conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910077473?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
 
   Scenario: As a user I want to send a BEST/EDU AppReceipt message
 

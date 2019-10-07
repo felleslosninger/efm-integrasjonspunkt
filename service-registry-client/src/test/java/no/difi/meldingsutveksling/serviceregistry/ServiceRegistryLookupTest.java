@@ -83,7 +83,6 @@ public class ServiceRegistryLookupTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
-    private String query;
 
     @Before
     public void setup() {
@@ -92,7 +91,6 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
-        query = "securityLevel=3";
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
@@ -107,14 +105,14 @@ public class ServiceRegistryLookupTest {
     @Test(expected = ServiceRegistryLookupException.class)
     public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
-        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
         this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
     public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
-        when(client.getResource("identifier/" + ORGNR, query)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        when(client.getResource("identifier/" + ORGNR, "")).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
@@ -122,7 +120,7 @@ public class ServiceRegistryLookupTest {
     @Test(expected = ServiceRegistryLookupException.class)
     public void organizationWithoutServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
-        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
         this.service.getServiceRecord(SRParameter.builder(ORGNR).build(), DPO);
     }
@@ -130,7 +128,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
-        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
         final ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build());
 
@@ -140,7 +138,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithSingleServiceRecordHasServiceRecords() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
-        when(client.getResource("identifier/" + ORGNR, query)).thenReturn(json);
+        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
         ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build(), DPO);
 

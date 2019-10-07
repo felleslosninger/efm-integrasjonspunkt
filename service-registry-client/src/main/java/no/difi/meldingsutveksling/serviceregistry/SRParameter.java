@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
+import java.util.StringJoiner;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
@@ -20,12 +22,13 @@ public class SRParameter {
     private String conversationId;
 
     public String getQuery() {
-        StringBuilder query = new StringBuilder();
+        StringJoiner query = new StringJoiner("&");
+
         if (securityLevel != null) {
-            query.append(format("securityLevel=%s", securityLevel));
+            query.add(format("securityLevel=%s", securityLevel));
         }
         if (!isNullOrEmpty(conversationId)) {
-            query.append(format("&conversationId=%s", conversationId));
+            query.add(format("conversationId=%s", conversationId));
         }
 
         return query.toString();
