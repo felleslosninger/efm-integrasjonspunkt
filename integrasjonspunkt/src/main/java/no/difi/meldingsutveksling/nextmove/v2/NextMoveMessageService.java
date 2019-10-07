@@ -3,7 +3,10 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
@@ -12,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 @Component
 @Slf4j
@@ -74,6 +82,23 @@ public class NextMoveMessageService {
                 .setFilename(file.getOriginalFilename())
                 .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
                 .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
+
+        if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
+            try {
+                Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(file.getInputStream());
+                Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
+                Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
+                conversation.ifPresent(c -> {
+                    c.setMessageTitle(journalpost.getOffentligTittel());
+                    if (journalpost.getJournalpostnummer() != null) {
+                        c.setMessageReference(journalpost.getJournalpostnummer().toString());
+                    }
+                    conversationService.save(c);
+                });
+            } catch (JAXBException | IOException e) {
+                log.error("Error unmarshalling {}", ARKIVMELDING_FILE, e);
+            }
+        }
 
         messageRepo.save(message);
     }
