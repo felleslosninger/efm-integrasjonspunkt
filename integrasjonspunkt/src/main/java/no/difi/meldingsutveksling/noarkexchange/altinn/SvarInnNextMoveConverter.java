@@ -52,13 +52,12 @@ public class SvarInnNextMoveConverter {
     public StandardBusinessDocument convert(Forsendelse forsendelse) {
         MessageContext context = messageContextFactory.from(forsendelse.getSvarSendesTil().getOrgnr(),
                 forsendelse.getMottaker().getOrgnr(),
-                forsendelse.getId(),
                 keyInfo.getX509Certificate());
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 context.getAvsender().getOrgNummer(),
                 context.getMottaker().getOrgNummer(),
-                context.getConversationId(),
-                context.getConversationId(),
+                forsendelse.getId(),
+                forsendelse.getId(),
                 properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
@@ -69,7 +68,7 @@ public class SvarInnNextMoveConverter {
                 svarInnService.getAttachments(forsendelse));
 
         try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile, attachments, context, ServiceIdentifier.DPF)) {
-            messagePersister.writeStream(context.getConversationId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
+            messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Failed to create ASIC", e);
         }

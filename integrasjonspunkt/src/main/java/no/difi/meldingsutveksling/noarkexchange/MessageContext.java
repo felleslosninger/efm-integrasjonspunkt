@@ -10,8 +10,6 @@ import java.util.ArrayList;
 public class MessageContext {
     private Avsender avsender;
     private Mottaker mottaker;
-    private String jpId;
-    private String conversationId;
     private AbstractCollection<ErrorStatus> errors;
 
     public MessageContext() {
@@ -32,24 +30,6 @@ public class MessageContext {
 
     public void setMottaker(Mottaker mottaker) {
         this.mottaker = mottaker;
-    }
-
-    public MessageContext setJpId(String jpId) {
-        this.jpId = jpId;
-        return this;
-    }
-
-    public MessageContext setConversationId(String conversationId) {
-        this.conversationId = conversationId;
-        return this;
-    }
-
-    public String getJournalPostId() {
-        return jpId;
-    }
-
-    public String getConversationId() {
-        return conversationId;
     }
 
     /**

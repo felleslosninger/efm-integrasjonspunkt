@@ -53,7 +53,7 @@ public class DpoConversationStrategy implements ConversationStrategy {
 
     private MessageContext getMessageContext(NextMoveOutMessage message) throws NextMoveException {
         try {
-            return messageContextFactory.from(message);
+            return messageContextFactory.from(message.getSbd());
         } catch (MessageContextException e) {
             throw new NextMoveException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
         }

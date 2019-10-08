@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +37,7 @@ public class NextMoveServiceBusPayloadFactory {
 
     private MessageContext getMessageContext(NextMoveMessage message) throws NextMoveException {
         try {
-            return messageContextFactory.from(message);
+            return messageContextFactory.from(message.getSbd());
         } catch (MessageContextException e) {
             throw new NextMoveException("Could not create message context", e);
         }
