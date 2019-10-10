@@ -6,10 +6,9 @@ import no.difi.asic.AsicWriterFactory;
 import no.difi.asic.MimeType;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.domain.Avsender;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Mottaker;
 import no.difi.meldingsutveksling.domain.StreamedFile;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 
 import java.io.*;
@@ -26,10 +25,12 @@ public class CreateAsice {
         manifestFactory = new ManifestFactory();
     }
 
-    public void createAsiceStreamed(StreamedFile mainAttachment, Stream<? extends StreamedFile> files, OutputStream archive, SignatureHelper signatureHelper, Avsender avsender,
-                                    Mottaker mottaker) throws IOException {
-        Manifest manifest = manifestFactory.createManifest(avsender.getOrgNummer(), mottaker.getOrgNummer(),
-                mainAttachment.getFileName(), mainAttachment.getMimeType());
+    public void createAsiceStreamed(StreamedFile mainAttachment,
+                                    Stream<? extends StreamedFile> files,
+                                    OutputStream archive,
+                                    SignatureHelper signatureHelper,
+                                    NextMoveOutMessage message) throws IOException {
+        Manifest manifest = manifestFactory.createManifest(message, mainAttachment.getFileName(), mainAttachment.getMimeType());
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(archive)
                 .add(new BufferedInputStream(new ByteArrayInputStream(manifest.getBytes())), "manifest.xml", MimeType.XML);

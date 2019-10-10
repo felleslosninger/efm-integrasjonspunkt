@@ -12,9 +12,9 @@ import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.MessageContext;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.services.Adresseregister;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -36,8 +36,9 @@ public class AsicHandler {
     private final IntegrasjonspunktNokkel keyHelper;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Plumber plumber;
+    private final Adresseregister adresseregister;
 
-    InputStream createEncryptedAsic(NextMoveOutMessage msg, MessageContext messageContext) {
+    InputStream createEncryptedAsic(NextMoveOutMessage msg) {
 
         List<NextMoveStreamedFile> attachments = msg.getFiles().stream()
                 .sorted((a, b) -> {
@@ -54,7 +55,7 @@ public class AsicHandler {
                     }
                 }).collect(Collectors.toList());
 
-        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), messageContext, msg.getServiceIdentifier());
+        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), msg);
     }
 
     private String getMimetype(BusinessMessageFile f) {
@@ -66,23 +67,22 @@ public class AsicHandler {
         return MimeTypeExtensionMapper.getMimetype(ext);
     }
 
-    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, ServiceIdentifier si) {
-        CmsUtil cmsUtil = getCmsUtil(si);
-        X509Certificate mottakerSertifikat = getMottakerSertifikat(ctx);
+    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveOutMessage message) {
+        CmsUtil cmsUtil = getCmsUtil(message.getServiceIdentifier());
+        X509Certificate mottakerSertifikat = getMottakerSertifikat(message);
 
-        return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, ctx, inlet))
+        return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, message, inlet))
                 .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
                 .outlet();
     }
 
-    private X509Certificate getMottakerSertifikat(MessageContext ctx) {
-        return (X509Certificate) ctx.getMottaker().getSertifikat();
+    private X509Certificate getMottakerSertifikat(NextMoveOutMessage message) {
+        return (X509Certificate) adresseregister.getReceiverCertificate(message);
     }
 
-    private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, MessageContext ctx, PipedOutputStream pipeOutlet) {
+    private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveOutMessage message, PipedOutputStream pipeOutlet) {
         try {
-            new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keyHelper.getSignatureHelper(),
-                    ctx.getAvsender(), ctx.getMottaker());
+            new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keyHelper.getSignatureHelper(), message);
         } catch (IOException e) {
             throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
         }
