@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import lombok.SneakyThrows;
+import no.altinn.services._2009._10.Test;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -42,7 +43,8 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
         this.endpointUrl = config.getEndpointUrl();
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
-        marshaller.setContextPath(contextPath);
+        String testContextPath = "no.altinn.services._2009._10";
+        marshaller.setContextPaths(contextPath, testContextPath);
         marshaller.setMarshallerProperties(getMarshallerProperties());
 
         WebServiceTemplate template = getWebServiceTemplate();
@@ -139,6 +141,12 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     public Object sendStatusRequest(Object payload) {
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
         return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
+    }
+
+    public Object sendTestRequest() {
+        final String soapAction = "http://www.altinn.no/services/2009/10/IAltinnContractBase/Test";
+        Test testRequest = new Test();
+        return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, testRequest, getActionCallback(soapAction));
     }
 
     @SneakyThrows(URISyntaxException.class)

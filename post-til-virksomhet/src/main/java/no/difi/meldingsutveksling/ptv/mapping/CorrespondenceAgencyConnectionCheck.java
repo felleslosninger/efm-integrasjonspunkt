@@ -20,7 +20,7 @@ public class CorrespondenceAgencyConnectionCheck {
     @PostConstruct
     public void checkTheConnection() {
         try {
-            Object response = correspondenceAgencyClient.sendStatusRequest(getConnectionCheckRequest());
+            Object response = correspondenceAgencyClient.sendTestRequest();
 
             if (response == null) {
                 // Error is picked up by soap fault interceptor

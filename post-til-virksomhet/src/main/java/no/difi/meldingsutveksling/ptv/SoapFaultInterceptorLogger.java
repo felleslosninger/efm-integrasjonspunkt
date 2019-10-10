@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
 import lombok.extern.slf4j.Slf4j;
-import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.logging.Audit;
 import org.springframework.ws.WebServiceMessage;
@@ -37,14 +36,12 @@ public class SoapFaultInterceptorLogger extends ClientInterceptorAdapter {
     public void afterCompletion(MessageContext messageContext, Exception ex) throws WebServiceClientException {
         if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultInterceptorLogger.SoapFaultException).isPresent()) {
             final WebServiceMessage response = messageContext.getResponse();
-            Audit.error(FAILED_TO_SEND_MESSAGE,
-                    getLogMarker().and(Markers.append("soap_fault", XMLUtil.asString(response.getPayloadSource(), getLogMarker()))), ex);
+            String soapFault = XMLUtil.asString(response.getPayloadSource());
+            Audit.error(FAILED_TO_SEND_MESSAGE, Markers.append("soap_fault", soapFault), ex);
+            log.error("SoapFault: {}", soapFault);
         } else if (ex != null) {
             Audit.error(FAILED_TO_SEND_MESSAGE, ex);
         }
     }
 
-    private LogstashMarker getLogMarker() {
-        return LogstashMarkerHolder.get();
-    }
 }
