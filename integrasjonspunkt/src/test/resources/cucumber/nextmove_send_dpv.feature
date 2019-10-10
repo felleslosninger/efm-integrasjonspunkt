@@ -179,6 +179,7 @@ Feature: Sending a Next Move DPV message
     """
     <?xml version="1.0" encoding="UTF-8"?>
     <altinn9:InsertCorrespondenceV2 xmlns:altinn9="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10"
+                                    xmlns:altinn1="http://www.altinn.no/services/2009/10"
                                     xmlns:altinn10="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
                                     xmlns:altinn11="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10"
                                     xmlns:altinn12="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"
