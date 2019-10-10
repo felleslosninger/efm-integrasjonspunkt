@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.ks.svarut.Dokument;
 import no.difi.meldingsutveksling.ks.svarut.OrganisasjonDigitalAdresse;
@@ -28,6 +29,7 @@ public class SvarUtDataParser {
     @SneakyThrows
     Message parse(SvarUtRequest svarUtRequest) {
         return new Message()
+                .setServiceIdentifier(ServiceIdentifier.DPF)
                 .attachments(getAttachment(svarUtRequest));
     }
 

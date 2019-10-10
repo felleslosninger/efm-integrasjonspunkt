@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class Message {
     private String receiver;
     private String conversationId;
     private String messageId;
+    private ServiceIdentifier serviceIdentifier;
 
     Message attachment(Attachment attachment) {
         attachments.add(attachment);

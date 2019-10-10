@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ public class DigipostAttachmentParser {
 
         return new Message()
                 .setBody(payload)
+                .setServiceIdentifier(ServiceIdentifier.DPI)
                 .attachments(getAttachments(cmsUtil.decryptCMSStreamed(encryptedAsic, privateKey)));
     }
 

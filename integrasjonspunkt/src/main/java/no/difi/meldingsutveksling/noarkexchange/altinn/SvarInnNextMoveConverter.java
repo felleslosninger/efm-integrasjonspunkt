@@ -7,10 +7,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
-import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
@@ -48,6 +45,7 @@ public class SvarInnNextMoveConverter {
     private final AsicHandler asicHandler;
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
+    private final IntegrasjonspunktNokkel keyInfo;
 
     @Transactional
     public StandardBusinessDocument convert(Forsendelse forsendelse) {
@@ -67,7 +65,8 @@ public class SvarInnNextMoveConverter {
 
         try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
                 attachments,
-                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF))) {
+                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                keyInfo.getX509Certificate())) {
             messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Failed to create ASIC", e);

@@ -55,7 +55,7 @@ public class AsicHandler {
                     }
                 }).collect(Collectors.toList());
 
-        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), msg);
+        return archiveAndEncryptAttachments(attachments.get(0), attachments.stream(), msg, getMottakerSertifikat(msg));
     }
 
     private String getMimetype(BusinessMessageFile f) {
@@ -67,12 +67,14 @@ public class AsicHandler {
         return MimeTypeExtensionMapper.getMimetype(ext);
     }
 
-    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveOutMessage message) {
+    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment,
+                                                    Stream<? extends StreamedFile> att,
+                                                    NextMoveOutMessage message,
+                                                    X509Certificate certificate) {
         CmsUtil cmsUtil = getCmsUtil(message.getServiceIdentifier());
-        X509Certificate mottakerSertifikat = getMottakerSertifikat(message);
 
         return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, message, inlet))
-                .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, mottakerSertifikat))
+                .andThen("CMS encrypt asic", (outlet, inlet) -> cmsUtil.createCMSStreamed(outlet, inlet, certificate))
                 .outlet();
     }
 

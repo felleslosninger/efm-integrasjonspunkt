@@ -6,6 +6,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ public class MessageInSteps {
     public void altinnPreparesAMessageWithTheFollowingSBD(String who, String body) throws IOException {
         StandardBusinessDocument sbd = objectMapper.readValue(body, StandardBusinessDocument.class);
         Message message = new Message()
+                .setServiceIdentifier(ServiceIdentifier.DPO)
                 .setSbd(sbd);
 
         if ("Altinn".equals(who)) {

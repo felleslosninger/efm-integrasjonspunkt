@@ -23,7 +23,7 @@ public class AsicFactory {
                     .createAsiceStreamed(message.getFirstAttachment(), message.getAttachments().stream(),
                             inlet,
                             keyInfo.getSignatureHelper(),
-                            NextMoveOutMessage.of(message.getSbd(), null));
+                            NextMoveOutMessage.of(message.getSbd(), message.getServiceIdentifier()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.apache.commons.io.IOUtils;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class CorrespondenceAgencyClientSteps {
                         .setMimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFileName().getValue().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
                 ).collect(Collectors.toList());
         messageSentHolder.set(new Message()
+                .setServiceIdentifier(ServiceIdentifier.DPV)
                 .attachments(attachments));
     }
 
