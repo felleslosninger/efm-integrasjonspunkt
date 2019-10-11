@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.hasDocumentType;
-import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.isServiceIdentifier;
 
 @Slf4j
 @Service
@@ -26,13 +25,6 @@ public class ServiceRegistryLookup {
 
     public ServiceRecord getServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         return loadServiceRecord(parameter);
-    }
-
-    public ServiceRecord getServiceRecord(SRParameter parameter, ServiceIdentifier serviceIdentifier) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
-        return serviceRecords.stream()
-                .filter(isServiceIdentifier(serviceIdentifier)).findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record of type=%s not found for identifier=%s", serviceIdentifier, parameter.getIdentifier())));
     }
 
     public List<ServiceRecord> getServiceRecords(SRParameter parameter) {
