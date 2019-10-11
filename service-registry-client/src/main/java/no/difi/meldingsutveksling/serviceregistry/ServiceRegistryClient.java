@@ -30,12 +30,7 @@ public class ServiceRegistryClient {
 
     @Cacheable(CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
-        return loadIdentifierResource(parameter, null);
-    }
-
-    @Cacheable(CACHE_LOAD_IDENTIFIER_RESOURCE)
-    public IdentifierResource loadIdentifierResource(SRParameter parameter, String processId) throws ServiceRegistryLookupException {
-        String identifierResourceString = getIdentifierResourceString(parameter, processId);
+        String identifierResourceString = getIdentifierResourceString(parameter);
 
         try {
             return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
@@ -46,10 +41,10 @@ public class ServiceRegistryClient {
         }
     }
 
-    private String getIdentifierResourceString(SRParameter parameter, String processId) throws ServiceRegistryLookupException {
+    private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
         try {
-            if (!Strings.isNullOrEmpty(processId)) {
-                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + processId, parameter.getQuery());
+            if (!Strings.isNullOrEmpty(parameter.getProcess())) {
+                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + parameter.getProcess(), parameter.getQuery());
             } else {
                 return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
             }

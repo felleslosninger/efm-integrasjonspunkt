@@ -248,8 +248,8 @@ public class NextMoveServiceBus {
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
                     SRParameter.builder(message.getReceiverIdentifier())
+                            .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getProcess(),
                     message.getSbd().getStandard());
 
             if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {

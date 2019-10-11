@@ -16,6 +16,7 @@ public class SRParameter {
 
     @NonNull
     private String identifier;
+    private String process;
     private Integer securityLevel;
     // Used as correlation id - no need for this to affect caching
     @EqualsAndHashCode.Exclude

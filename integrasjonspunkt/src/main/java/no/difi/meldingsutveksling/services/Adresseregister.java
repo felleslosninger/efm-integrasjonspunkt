@@ -58,9 +58,9 @@ public class Adresseregister {
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
             return getCertificate(serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                            .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
-                    message.getSbd().getProcess(),
                     message.getSbd().getStandard()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());

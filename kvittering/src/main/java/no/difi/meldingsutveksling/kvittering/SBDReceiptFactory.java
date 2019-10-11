@@ -65,7 +65,9 @@ public class SBDReceiptFactory {
         String standard;
         try {
             standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
-                    .conversationId(sbd.getConversationId()).build(), Process.ARKIVMELDING_RESPONSE.getValue(), documentType);
+                    .conversationId(sbd.getConversationId())
+                    .process(Process.ARKIVMELDING_RESPONSE.getValue())
+                    .build(), documentType);
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
             throw new MeldingsUtvekslingRuntimeException(e);
@@ -91,7 +93,9 @@ public class SBDReceiptFactory {
         String standard;
         try {
             standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
-                    .conversationId(sbd.getConversationId()).build(), Process.EINNSYN_RESPONSE.getValue(), documentType);
+                    .conversationId(sbd.getConversationId())
+                    .process(Process.EINNSYN_RESPONSE.getValue())
+                    .build(), documentType);
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
             throw new MeldingsUtvekslingRuntimeException(e);
