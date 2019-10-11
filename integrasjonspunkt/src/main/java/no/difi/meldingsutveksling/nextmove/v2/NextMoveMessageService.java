@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -85,7 +86,8 @@ public class NextMoveMessageService {
 
         if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
             try {
-                Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(file.getInputStream());
+                FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier);
+                Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
                 Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
                 Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
                 conversation.ifPresent(c -> {
