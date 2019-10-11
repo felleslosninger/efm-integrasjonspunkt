@@ -130,11 +130,17 @@ public class StandardBusinessDocumentHeader {
 
     @JsonIgnore
     Optional<Sender> getFirstSender() {
+        if (sender == null) {
+            return Optional.empty();
+        }
         return sender.stream().findFirst();
     }
 
     @JsonIgnore
     Optional<Receiver> getFirstReceiver() {
+        if (receiver == null) {
+            return Optional.empty();
+        }
         return receiver.stream().findFirst();
     }
 
