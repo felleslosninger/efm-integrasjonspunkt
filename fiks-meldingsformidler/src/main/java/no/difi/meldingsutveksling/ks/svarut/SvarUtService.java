@@ -39,8 +39,9 @@ public class SvarUtService {
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                             .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
+                            .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
-                    message.getServiceIdentifier());
+                    message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }

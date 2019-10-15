@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.Data;
-import no.difi.meldingsutveksling.domain.Avsender;
-import no.difi.meldingsutveksling.domain.Mottaker;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ public class Message {
     private String receiver;
     private String conversationId;
     private String messageId;
+    private ServiceIdentifier serviceIdentifier;
 
     Message attachment(Attachment attachment) {
         attachments.add(attachment);
@@ -40,14 +39,6 @@ public class Message {
                 .filter(p -> p.getFileName().equals(filename))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("File not found for %s", filename)));
-    }
-
-    Mottaker getMottaker() {
-        return new Mottaker(Organisasjonsnummer.from(sbd.getReceiverIdentifier()), null);
-    }
-
-    Avsender getAvsender() {
-        return new Avsender(Organisasjonsnummer.from(sbd.getSenderIdentifier()));
     }
 
 }

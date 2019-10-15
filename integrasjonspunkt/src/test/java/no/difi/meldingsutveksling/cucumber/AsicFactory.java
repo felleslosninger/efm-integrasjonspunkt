@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +23,7 @@ public class AsicFactory {
                     .createAsiceStreamed(message.getFirstAttachment(), message.getAttachments().stream(),
                             inlet,
                             keyInfo.getSignatureHelper(),
-                            message.getAvsender(),
-                            message.getMottaker());
+                            NextMoveOutMessage.of(message.getSbd(), message.getServiceIdentifier()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

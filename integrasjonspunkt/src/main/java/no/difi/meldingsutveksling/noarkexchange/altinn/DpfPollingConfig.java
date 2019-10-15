@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -47,7 +46,7 @@ public class DpfPollingConfig {
     }
 
     @Bean
-    public SvarInnNextMoveConverter svarInnNextMoveConverter(IntegrasjonspunktNokkel keyInfo, MessagePersister messagePersister, SvarInnService svarInnService, MessageContextFactory messageContextFactory, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties) {
-        return new SvarInnNextMoveConverter(keyInfo, messagePersister, svarInnService, messageContextFactory, asicHandler, createSBD, properties);
+    public SvarInnNextMoveConverter svarInnNextMoveConverter(MessagePersister messagePersister, SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo) {
+        return new SvarInnNextMoveConverter(messagePersister, svarInnService, asicHandler, createSBD, properties, keyInfo);
     }
 }

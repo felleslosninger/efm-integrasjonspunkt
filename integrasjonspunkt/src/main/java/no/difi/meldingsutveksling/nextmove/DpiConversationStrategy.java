@@ -34,8 +34,9 @@ public class DpiConversationStrategy implements ConversationStrategy {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .conversationId(message.getConversationId()).build(),
-                    message.getProcessIdentifier(),
+                            .conversationId(message.getConversationId())
+                            .process(message.getProcessIdentifier())
+                            .build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(

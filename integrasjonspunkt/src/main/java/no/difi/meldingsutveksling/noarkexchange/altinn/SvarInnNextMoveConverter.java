@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
@@ -20,10 +21,9 @@ import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
-import no.difi.meldingsutveksling.noarkexchange.MessageContext;
-import no.difi.meldingsutveksling.noarkexchange.MessageContextFactory;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,25 +40,20 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @RequiredArgsConstructor
 public class SvarInnNextMoveConverter {
 
-    private final IntegrasjonspunktNokkel keyInfo;
     private final MessagePersister messagePersister;
     private final SvarInnService svarInnService;
-    private final MessageContextFactory messageContextFactory;
     private final AsicHandler asicHandler;
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
+    private final IntegrasjonspunktNokkel keyInfo;
 
     @Transactional
     public StandardBusinessDocument convert(Forsendelse forsendelse) {
-        MessageContext context = messageContextFactory.from(forsendelse.getSvarSendesTil().getOrgnr(),
-                forsendelse.getMottaker().getOrgnr(),
-                forsendelse.getId(),
-                keyInfo.getX509Certificate());
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
-                context.getAvsender().getOrgNummer(),
-                context.getMottaker().getOrgNummer(),
-                context.getConversationId(),
-                context.getConversationId(),
+                Organisasjonsnummer.from(forsendelse.getSvarSendesTil().getOrgnr()),
+                Organisasjonsnummer.from(forsendelse.getMottaker().getOrgnr()),
+                forsendelse.getId(),
+                forsendelse.getId(),
                 properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
@@ -68,8 +63,11 @@ public class SvarInnNextMoveConverter {
                 Stream.of(arkivmeldingFile),
                 svarInnService.getAttachments(forsendelse));
 
-        try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile, attachments, context, ServiceIdentifier.DPF)) {
-            messagePersister.writeStream(context.getConversationId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
+        try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
+                attachments,
+                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                keyInfo.getX509Certificate())) {
+            messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
         } catch (IOException e) {
             throw new NextMoveRuntimeException("Failed to create ASIC", e);
         }

@@ -115,6 +115,7 @@ public class MeldingFactory {
 
         String[] split = dobj.getReferanseDokumentfil().split(".");
         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
+        dokumentType.setVeDokformat(ext);
         dokumentType.setVeMimeType(getMimetype(ext));
         dokumentType.setVeVariant(VariantformatMapper.getNoarkType(dobj.getVariantformat()));
 

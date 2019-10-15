@@ -62,7 +62,7 @@ public class SoapFaultInterceptor implements ClientInterceptor {
         if (Optional.ofNullable(ex).filter(e -> e instanceof SoapFaultException).isPresent()) {
             final WebServiceMessage response = messageContext.getResponse();
             Audit.error("Failed to send message to correspondence agency",
-                    logMarkers.and(Markers.append("soap_fault", XMLUtil.asString(response.getPayloadSource(), logMarkers))), ex);
+                    logMarkers.and(Markers.append("soap_fault", XMLUtil.asString(response.getPayloadSource()))), ex);
         }
     }
 }

@@ -26,9 +26,9 @@ public class NextMoveServiceRecordProvider {
             if (businessMessage.getSikkerhetsnivaa() != null) {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
+            parameterBuilder.process(sbd.getProcess());
             return serviceRegistryLookup.getServiceRecord(
                     parameterBuilder.build(),
-                    sbd.getProcess(),
                     sbd.getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());

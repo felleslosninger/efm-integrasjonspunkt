@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class SvarInnSteps {
 
     @And("^Fiks prepares a message with the following body:$")
     public void fiksPreparesAMessageWithTheFollowingBody(String body) {
-        messageInHolder.set(new Message().setBody(body));
+        messageInHolder.set(new Message().setBody(body).setServiceIdentifier(ServiceIdentifier.DPF));
     }
 
     @And("^Fiks has the message with conversationId=\"([^\"]*)\" available$")

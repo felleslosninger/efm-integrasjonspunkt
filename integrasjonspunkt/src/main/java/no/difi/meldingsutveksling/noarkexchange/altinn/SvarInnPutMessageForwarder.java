@@ -120,6 +120,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         if (properties.getFiks().getInn().isMailOnError()) {
             Audit.info(format("Sending message with id=%s by mail", fiksId));
             fiksMailClient.sendEduMelding(message);
+            conversationService.registerStatus(message.getEnvelope().getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(fiksId);
         }
     }

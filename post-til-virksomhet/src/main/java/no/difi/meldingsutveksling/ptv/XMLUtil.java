@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.ptv;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import net.logstash.logback.marker.LogstashMarker;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.*;
@@ -13,7 +12,7 @@ import java.io.StringWriter;
 @UtilityClass
 class XMLUtil {
 
-    static String asString(Source source, LogstashMarker logMarkers) {
+    static String asString(Source source) {
         StringWriter sw = new StringWriter();
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
@@ -25,7 +24,7 @@ class XMLUtil {
             transformer.transform(source, sr);
             return sw.toString();
         } catch (TransformerException e) {
-            log.error(logMarkers, "Failed to marshall webservice response to XML string", e);
+            log.error("Failed to marshall webservice response to XML string", e);
         }
         return "";
     }

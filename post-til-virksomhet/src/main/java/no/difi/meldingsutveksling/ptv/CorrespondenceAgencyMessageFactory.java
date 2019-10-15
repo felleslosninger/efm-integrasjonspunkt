@@ -210,8 +210,9 @@ public class CorrespondenceAgencyMessageFactory {
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(
                     SRParameter.builder(message.getReceiverIdentifier())
-                            .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getProcess(),
+                            .conversationId(message.getConversationId())
+                            .process(message.getSbd().getProcess())
+                            .build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()));

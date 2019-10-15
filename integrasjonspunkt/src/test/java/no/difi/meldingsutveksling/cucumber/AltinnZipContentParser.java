@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.annotation.Profile;
@@ -34,6 +35,7 @@ public class AltinnZipContentParser {
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
         Message message = new Message()
+                .setServiceIdentifier(ServiceIdentifier.DPO)
                 .setSbd(sbd);
 
         zipContent.getOptionalFile(ASIC_FILE).ifPresent(asicFile -> {
