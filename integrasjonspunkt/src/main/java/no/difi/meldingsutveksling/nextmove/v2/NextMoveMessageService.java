@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
+import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -89,11 +90,12 @@ public class NextMoveMessageService {
                 FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier);
                 Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
                 Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
+                Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(arkivmelding);
                 Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
                 conversation.ifPresent(c -> {
                     c.setMessageTitle(journalpost.getOffentligTittel());
                     if (journalpost.getJournalpostnummer() != null) {
-                        c.setMessageReference(journalpost.getJournalpostnummer().toString());
+                        c.setMessageReference(saksmappe.getSystemID()+"-"+journalpost.getJournalpostnummer().toString());
                     }
                     conversationService.save(c);
                 });
