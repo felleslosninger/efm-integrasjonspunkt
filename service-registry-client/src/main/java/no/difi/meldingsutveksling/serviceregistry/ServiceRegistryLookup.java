@@ -103,7 +103,7 @@ public class ServiceRegistryLookup {
      */
     public InfoRecord getInfoRecord(String identifier) {
         try {
-            return loadInfoRecord(SRParameter.builder(identifier).build());
+            return loadInfoRecord(SRParameter.builder(identifier).infoOnly(true).build());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

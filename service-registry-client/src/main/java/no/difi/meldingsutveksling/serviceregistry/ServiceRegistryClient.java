@@ -43,6 +43,9 @@ public class ServiceRegistryClient {
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
         try {
+            if (parameter.getInfoOnly()) {
+                return client.getResource("info/" + parameter.getIdentifier());
+            }
             if (!Strings.isNullOrEmpty(parameter.getProcess())) {
                 return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + parameter.getProcess(), parameter.getQuery());
             } else {
