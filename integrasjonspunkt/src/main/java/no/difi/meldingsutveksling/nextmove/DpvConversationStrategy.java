@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
+import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
@@ -21,6 +20,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 
 @Component
+@Slf4j
 @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
 @RequiredArgsConstructor
 public class DpvConversationStrategy implements ConversationStrategy {
@@ -31,6 +31,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private final IntegrasjonspunktProperties props;
     private final NoarkClient localNoark;
     private final PutMessageRequestFactory putMessageRequestFactory;
+    private final ConversationIdEntityRepo conversationIdEntityRepo;
 
     @Override
     @Transactional
@@ -56,9 +57,17 @@ public class DpvConversationStrategy implements ConversationStrategy {
     }
 
     private void sendAppReceipt(NextMoveOutMessage message) {
+        String conversationId = message.getConversationId();
+        ConversationIdEntity convId = conversationIdEntityRepo.findByNewConversationId(message.getConversationId());
+        if (convId != null) {
+            log.warn("Found {} which maps to conversation {} with invalid UUID - overriding in AppReceipt.", message.getConversationId(), convId.getOldConversationId());
+            conversationId = convId.getOldConversationId();
+            conversationIdEntityRepo.delete(convId);
+        }
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
-                BestEduConverter.appReceiptAsString(appReceipt));
+                BestEduConverter.appReceiptAsString(appReceipt),
+                conversationId);
         localNoark.sendEduMelding(putMessage);
     }
 }

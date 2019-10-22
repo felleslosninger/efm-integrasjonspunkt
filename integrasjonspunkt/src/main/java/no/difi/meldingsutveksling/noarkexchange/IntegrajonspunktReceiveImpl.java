@@ -97,15 +97,8 @@ public class IntegrajonspunktReceiveImpl {
         this.conversationIdEntityRepo = conversationIdEntityRepo;
     }
 
-    public void forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
-        if (sbdUtil.isReceipt(sbd)) {
-            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT));
-            if (!properties.getFeature().isForwardReceivedAppReceipts()) {
-                Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
-            }
-        }
+    public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
         PutMessageRequestType putMessage = convertSbdToPutMessageRequest(sbd);
-
         forwardToNoarkSystemAndSendReceipts(sbd, putMessage);
     }
 
