@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -14,11 +15,13 @@ import java.util.function.Consumer;
 public class Pipe {
 
     private final Executor executor;
+    private final Reject reject;
     private final PipedOutputStream inlet;
     private final PipedInputStream outlet;
 
-    private Pipe(Executor executor) {
+    private Pipe(Executor executor, Reject reject) {
         this.executor = executor;
+        this.reject = reject;
         this.inlet = new PipedOutputStream();
         this.outlet = new PipedInputStream(32768);
         connectInletAndOutlet();
@@ -28,7 +31,7 @@ public class Pipe {
         try {
             inlet.connect(outlet);
         } catch (IOException e) {
-            throw new PipeRuntimeException("Connect failed!", e);
+            reject.reject(e);
         }
     }
 
@@ -41,38 +44,42 @@ public class Pipe {
             inlet.flush();
             inlet.close();
         } catch (IOException e) {
-            throw new PipeRuntimeException("Could not close of", e);
+            reject.reject(e);
         }
     }
 
     @SuppressWarnings("squir:S1172")
-    private void handleCompleteAsync(Void dummy, Throwable t) {
+    private void handleCompleteAsync(Void v, Throwable t) {
         close();
         if (t != null) {
-            log.error("Exception in pipe", t);
-            throw new PipeRuntimeException("Exception was thrown in pipe", t);
+            if (t instanceof CompletionException) {
+                CompletionException ce = (CompletionException) t;
+                reject.reject(ce.getCause());
+            } else {
+                reject.reject(t);
+            }
         }
     }
 
-    public static Pipe of(Executor executor, String description, Consumer<PipedOutputStream> consumer) {
-        Pipe pipe = new Pipe(executor);
+    public static Pipe of(Executor executor, String description, Consumer<PipedOutputStream> consumer, Reject reject) {
+        Pipe pipe = new Pipe(executor, reject);
         logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);
             consumer.accept(pipe.inlet);
             logFinish(description);
-        }, executor).whenCompleteAsync(pipe::handleCompleteAsync);
+        }, executor).whenComplete(pipe::handleCompleteAsync);
         return pipe;
     }
 
     public Pipe andThen(String description, BiConsumer<PipedInputStream, PipedOutputStream> consumer) {
-        Pipe newPipe = new Pipe(executor);
+        Pipe newPipe = new Pipe(executor, reject);
         logBeforeThread(description);
         CompletableFuture.runAsync(() -> {
             logStart(description);
             consumer.accept(outlet, newPipe.inlet);
             logFinish(description);
-        }, executor).whenCompleteAsync(newPipe::handleCompleteAsync);
+        }, executor).whenComplete(newPipe::handleCompleteAsync);
         return newPipe;
     }
 
@@ -81,7 +88,7 @@ public class Pipe {
         try {
             outlet.close();
         } catch (IOException e) {
-            throw new PipeRuntimeException("Could not close outlet", e);
+            reject.reject(e);
         }
     }
 

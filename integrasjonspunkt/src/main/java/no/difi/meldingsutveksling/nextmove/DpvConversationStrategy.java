@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.noarkexchange.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
@@ -32,24 +33,29 @@ public class DpvConversationStrategy implements ConversationStrategy {
     private final NoarkClient localNoark;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final PromiseMaker promiseMaker;
 
     @Override
     @Transactional
-    public void send(NextMoveOutMessage message) throws NextMoveException {
+    public void send(NextMoveOutMessage message) {
 
-        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
+        promiseMaker.awaitVoid(reject -> {
+            InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message, reject);
 
-        Object response = withLogstashMarker(markerFrom(message))
-                .execute(() -> client.sendCorrespondence(correspondence));
+            Object response = withLogstashMarker(markerFrom(message))
+                    .execute(() -> client.sendCorrespondence(correspondence));
 
-        if (response == null) {
-            throw new NextMoveException("Failed to create Correspondence Agency Request");
-        }
+            if (response == null) {
+                throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
+            }
 
-        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
-        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
-        conversationService.findConversation(message.getMessageId())
-                .ifPresent(c -> conversationService.save(c.setServiceCode(serviceCode).setServiceEditionCode(serviceEditionCode)));
+            String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
+            String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
+            conversationService.findConversation(message.getMessageId())
+                    .ifPresent(conversation -> conversationService.save(conversation
+                            .setServiceCode(serviceCode)
+                            .setServiceEditionCode(serviceEditionCode)));
+        });
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
             sendAppReceipt(message);

@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,7 @@ public class SvarInnNextMoveConverter {
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
+    private final PromiseMaker promiseMaker;
 
     @Transactional
     public StandardBusinessDocument convert(Forsendelse forsendelse) {
@@ -59,18 +61,20 @@ public class SvarInnNextMoveConverter {
                 new ArkivmeldingMessage());
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
-        Stream<StreamedFile> attachments = Stream.concat(
-                Stream.of(arkivmeldingFile),
-                svarInnService.getAttachments(forsendelse));
+        promiseMaker.awaitVoid(reject -> {
+            Stream<StreamedFile> attachments = Stream.concat(
+                    Stream.of(arkivmeldingFile),
+                    svarInnService.getAttachments(forsendelse, reject));
 
-        try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
-                attachments,
-                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
-                keyInfo.getX509Certificate())) {
-            messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
-        } catch (IOException e) {
-            throw new NextMoveRuntimeException("Failed to create ASIC", e);
-        }
+            try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
+                    attachments,
+                    NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                    keyInfo.getX509Certificate(), reject)) {
+                messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException("Failed to create ASIC", e);
+            }
+        });
 
         return sbd;
     }

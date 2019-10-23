@@ -20,6 +20,8 @@ import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.beans.factory.ObjectProvider;
@@ -48,26 +50,30 @@ public class FiksMapper {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
+    private final PromiseMaker promiseMaker;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       OptionalCryptoMessagePersister optionalCryptoMessagePersister,
-                      ObjectProvider<CmsUtil> cmsUtilProvider, Plumber plumber) {
+                      ObjectProvider<CmsUtil> cmsUtilProvider,
+                      Plumber plumber,
+                      PromiseMaker promiseMaker) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
         this.cmsUtilProvider = cmsUtilProvider;
         this.plumber = plumber;
+        this.promiseMaker = promiseMaker;
     }
 
-    public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
+    public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
         return SendForsendelseMedId.builder()
-                .withForsendelse(getForsendelse(message, certificate))
+                .withForsendelse(getForsendelse(message, certificate, reject))
                 .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getMessageId()))
                 .build();
     }
 
-    private Forsendelse getForsendelse(NextMoveOutMessage message, X509Certificate certificate) throws NextMoveException {
+    private Forsendelse getForsendelse(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
         Arkivmelding am = getArkivmelding(message);
         Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
@@ -85,7 +91,7 @@ public class FiksMapper {
                 .withMottaker(getMottaker(message))
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
-                .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate))
+                .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
                 .build();
     }
 
@@ -124,13 +130,15 @@ public class FiksMapper {
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
 
-        try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier)) {
-            return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-        } catch (JAXBException e) {
-            throw new NextMoveException("Error unmarshalling arkivmelding", e);
-        } catch (IOException e) {
-            throw new NextMoveException("Reading failed for arkivmelding", e);
-        }
+        return promiseMaker.await(reject -> {
+            try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier, reject)) {
+                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
+            } catch (JAXBException e) {
+                throw new NextMoveRuntimeException("Error unmarshalling arkivmelding", e);
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException("Reading failed for arkivmelding", e);
+            }
+        });
     }
 
     private String getArkivmeldingIdentifier(NextMoveOutMessage message) throws NextMoveException {
@@ -141,11 +149,11 @@ public class FiksMapper {
                 .orElseThrow(() -> new NextMoveException(format("No attachement \"%s\" found", ARKIVMELDING_FILE)));
     }
 
-    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert) {
+    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
         return docs.stream()
                 .flatMap(p -> p.getDokumentobjekt().stream())
                 .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
-                .map(file -> getDocument(message.getMessageId(), file, cert))
+                .map(file -> getDocument(message.getMessageId(), file, cert, reject))
                 .collect(Collectors.toSet());
     }
 
@@ -157,23 +165,19 @@ public class FiksMapper {
                         String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getMessageId())));
     }
 
-    private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert) {
-        try {
-            FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier());
+    private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
+        FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier(), reject);
 
-            return Dokument.builder()
-                    .withData(getDataHandler(cert, fileEntryStream.getInputStream()))
-                    .withFilnavn(file.getFilename())
-                    .withMimetype(file.getMimetype())
-                    .build();
-        } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Could not get Document for messageId=%s", messageId));
-        }
+        return Dokument.builder()
+                .withData(getDataHandler(cert, fileEntryStream.getInputStream(), reject))
+                .withFilnavn(file.getFilename())
+                .withMimetype(file.getMimetype())
+                .build();
     }
 
-    private DataHandler getDataHandler(X509Certificate cert, InputStream is) {
+    private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {
         PipedInputStream encrypted = plumber.pipe("encrypt attachment for FIKS forsendelse",
-                inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert))
+                inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert), reject)
                 .outlet();
 
         return new DataHandler(InputStreamDataSource.of(encrypted));
