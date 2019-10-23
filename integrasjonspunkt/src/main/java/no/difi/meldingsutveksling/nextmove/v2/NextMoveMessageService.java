@@ -14,9 +14,11 @@ import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.data.domain.Page;
@@ -47,6 +49,7 @@ public class NextMoveMessageService {
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
+    private final PromiseMaker promiseMaker;
 
     @Transactional(readOnly = true)
     public NextMoveOutMessage getMessage(String messageId) {
@@ -86,25 +89,31 @@ public class NextMoveMessageService {
                 .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 
         if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
-            try {
-                FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier);
-                Arkivmelding arkivmelding = ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-                Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
-                Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(arkivmelding);
-                Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
-                conversation.ifPresent(c -> {
-                    c.setMessageTitle(journalpost.getOffentligTittel());
-                    if (journalpost.getJournalpostnummer() != null) {
-                        c.setMessageReference(saksmappe.getSystemID()+"-"+journalpost.getJournalpostnummer().toString());
-                    }
-                    conversationService.save(c);
-                });
-            } catch (JAXBException | IOException e) {
-                log.error("Error unmarshalling {}", ARKIVMELDING_FILE, e);
-            }
+            Arkivmelding arkivmelding = getArkivmelding(message, identifier);
+            Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
+            Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(arkivmelding);
+            Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
+            conversation.ifPresent(c -> {
+                c.setMessageTitle(journalpost.getOffentligTittel());
+                if (journalpost.getJournalpostnummer() != null) {
+                    c.setMessageReference(saksmappe.getSystemID() + "-" + journalpost.getJournalpostnummer().toString());
+                }
+                conversationService.save(c);
+            });
         }
 
         messageRepo.save(message);
+    }
+
+    private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
+        return promiseMaker.await(reject -> {
+            FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier, reject);
+            try {
+                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
+            } catch (JAXBException e) {
+                throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
+            }
+        });
     }
 
     private String getTitle(String name) {

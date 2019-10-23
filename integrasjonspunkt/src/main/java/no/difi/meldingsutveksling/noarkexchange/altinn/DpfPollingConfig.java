@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -35,9 +36,9 @@ public class DpfPollingConfig {
 
     @Bean
     @Conditional(LocalNorarkExistsCondition.class)
-    public SvarInnPutMessageForwarder svarInnPutMessageForwarder(IntegrasjonspunktProperties properties, ConversationService conversationService, SvarInnService svarInnService, NoarkClient localNoark, NoarkClient fiksMailClient, MessageStatusFactory messageStatusFactory, PutMessageRequestFactory putMessageRequestFactory, Clock clock) {
+    public SvarInnPutMessageForwarder svarInnPutMessageForwarder(IntegrasjonspunktProperties properties, ConversationService conversationService, SvarInnService svarInnService, NoarkClient localNoark, NoarkClient fiksMailClient, MessageStatusFactory messageStatusFactory, PutMessageRequestFactory putMessageRequestFactory, Clock clock, PromiseMaker promiseMaker) {
         log.info("SvarInnPutMessageForwarder created");
-        return new SvarInnPutMessageForwarder(properties, conversationService, svarInnService, localNoark, fiksMailClient, messageStatusFactory, putMessageRequestFactory, clock);
+        return new SvarInnPutMessageForwarder(properties, conversationService, svarInnService, localNoark, fiksMailClient, messageStatusFactory, putMessageRequestFactory, clock, promiseMaker);
     }
 
     @Bean
@@ -46,7 +47,7 @@ public class DpfPollingConfig {
     }
 
     @Bean
-    public SvarInnNextMoveConverter svarInnNextMoveConverter(MessagePersister messagePersister, SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo) {
-        return new SvarInnNextMoveConverter(messagePersister, svarInnService, asicHandler, createSBD, properties, keyInfo);
+    public SvarInnNextMoveConverter svarInnNextMoveConverter(MessagePersister messagePersister, SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo, PromiseMaker promiseMaker) {
+        return new SvarInnNextMoveConverter(messagePersister, svarInnService, asicHandler, createSBD, properties, keyInfo, promiseMaker);
     }
 }

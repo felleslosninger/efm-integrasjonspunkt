@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import no.difi.meldingsutveksling.pipes.Reject;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -12,7 +14,7 @@ public interface OptionalCryptoMessagePersister {
 
     byte[] read(String messageId, String filename) throws IOException;
 
-    FileEntryStream readStream(String messageId, String filename) throws IOException;
+    FileEntryStream readStream(String messageId, String filename, Reject reject);
 
     void delete(String messageId) throws IOException;
 }

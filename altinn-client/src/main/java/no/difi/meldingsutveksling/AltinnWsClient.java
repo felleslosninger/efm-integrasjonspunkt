@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
@@ -49,6 +51,7 @@ public class AltinnWsClient {
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
     private final Plumber plumber;
+    private final PromiseMaker promiseMaker;
 
     public void send(UploadRequest request) {
         String senderReference = initiateBrokerService(request);
@@ -56,22 +59,28 @@ public class AltinnWsClient {
     }
 
     private void upload(UploadRequest request, String senderReference) {
-        try (InputStream inputStream = getInputStream(request)) {
-            StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-            parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
-            uploadToAltinn(request, senderReference, parameters);
-        } catch (IOException e) {
+        try {
+            promiseMaker.awaitVoid(reject -> {
+                try (InputStream inputStream = getInputStream(request, reject)) {
+                    StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
+                    parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
+                    uploadToAltinn(request, senderReference, parameters);
+                } catch (IOException e) {
+                    throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
+                }
+            });
+        } catch (Exception e) {
             auditError(request, e);
-            throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
+            throw e;
         }
     }
 
-    private InputStream getInputStream(UploadRequest request) {
+    private InputStream getInputStream(UploadRequest request, Reject reject) {
         return plumber.pipe("write Altinn zip",
                 inlet -> {
                     AltinnPackage altinnPackage = AltinnPackage.from(request);
                     writeAltinnZip(request, altinnPackage, inlet);
-                }).outlet();
+                }, reject).outlet();
     }
 
     private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {

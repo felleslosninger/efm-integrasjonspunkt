@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
@@ -48,6 +49,7 @@ public class NextMoveValidator {
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final ConversationService conversationService;
+    private final PromiseMaker promiseMaker;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalMessageId().ifPresent(messageId -> {
@@ -136,11 +138,13 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-        try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier())) {
-            return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-        } catch (JAXBException | IOException e) {
-            throw new UnmarshalArkivmeldingException();
-        }
+        return promiseMaker.await(reject -> {
+            try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier(), reject)) {
+                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
+            } catch (JAXBException | IOException e) {
+                throw new UnmarshalArkivmeldingException();
+            }
+        });
     }
 
     void validateFile(NextMoveOutMessage message, MultipartFile file) {

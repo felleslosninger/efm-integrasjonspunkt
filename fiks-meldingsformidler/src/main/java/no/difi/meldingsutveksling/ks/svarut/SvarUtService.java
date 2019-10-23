@@ -8,6 +8,9 @@ import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -32,6 +35,7 @@ public class SvarUtService {
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
+    private final PromiseMaker promiseMaker;
 
     @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
@@ -46,20 +50,24 @@ public class SvarUtService {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }
 
-        SvarUtRequest svarUtRequest = new SvarUtRequest(
-                getFiksUtUrl(),
-                getForsendelse(message, serviceRecord));
-
-        return client.sendMessage(svarUtRequest);
+        return promiseMaker.await(reject -> {
+            try {
+                SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
+                SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
+                return client.sendMessage(svarUtRequest);
+            } catch (NextMoveException e) {
+                throw new NextMoveRuntimeException("Couldn't create Forsendelse", e);
+            }
+        });
     }
 
     private String getFiksUtUrl() {
         return props.getFiks().getUt().getEndpointUrl().toString();
     }
 
-    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord) throws NextMoveException {
+    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord, Reject reject) throws NextMoveException {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
-        return fiksMapper.mapFrom(message, x509Certificate);
+        return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {

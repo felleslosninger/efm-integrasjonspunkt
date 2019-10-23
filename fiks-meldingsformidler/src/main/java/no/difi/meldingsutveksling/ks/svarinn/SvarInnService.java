@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +28,8 @@ public class SvarInnService {
     private final SvarInnClient svarInnClient;
     private final SvarInnFileDecryptor decryptor;
 
-    public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse) {
-        InputStream encrypted = svarInnClient.downloadZipFile(forsendelse);
+    public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse, Reject reject) {
+        InputStream encrypted = svarInnClient.downloadZipFile(forsendelse, reject);
         InputStream decrypted = decryptor.decryptCMSStreamed(encrypted);
         return unzip(forsendelse, decrypted);
     }

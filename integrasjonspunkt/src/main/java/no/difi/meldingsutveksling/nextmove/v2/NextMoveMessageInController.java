@@ -119,13 +119,16 @@ public class NextMoveMessageInController {
         }
 
         try {
-            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE);
+            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE, throwable ->
+                    Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
+                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
+            );
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)
                     .body(new InputStreamResource(fileEntry.getInputStream()));
-        } catch (PersistenceException | IOException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s]. Removing message from queue",
+        } catch (PersistenceException e) {
+            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
