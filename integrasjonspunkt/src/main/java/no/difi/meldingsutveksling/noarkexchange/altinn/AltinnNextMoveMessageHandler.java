@@ -56,7 +56,6 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
                 conversationService.registerStatus(receipt.getRelatedToMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
             }
-            sendReceivedStatusToSender(sbd);
         }
     }
 
@@ -66,7 +65,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         conversationService.registerStatus(sbd.getDocumentId(), ms);
     }
 
-    private void sendReceivedStatusToSender(StandardBusinessDocument sbd) {
+    public void sendReceivedStatusToSender(StandardBusinessDocument sbd) {
         StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.MOTTATT);
         NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
         internalQueue.enqueueNextMove(msg);
