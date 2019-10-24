@@ -19,11 +19,13 @@ import java.util.stream.Collectors;
 @Component
 public class ArkivmeldingUtil {
 
-    private final JAXBContext jaxbContext;
+    private final JAXBContext marshallerContext;
+    private final JAXBContext unmarshallerContext;
 
     @SneakyThrows
     public ArkivmeldingUtil() {
-        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, new HashMap());
+        this.marshallerContext = JAXBContext.newInstance(Arkivmelding.class);
+        this.unmarshallerContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, new HashMap());
     }
 
     public List<String> getFilenames(Arkivmelding am) {
@@ -38,12 +40,12 @@ public class ArkivmeldingUtil {
 
     public byte[] marshalArkivmelding(Arkivmelding am) throws JAXBException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        jaxbContext.createMarshaller().marshal(am, bos);
+        marshallerContext.createMarshaller().marshal(am, bos);
         return bos.toByteArray();
     }
 
     public Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
-        return jaxbContext.createUnmarshaller().unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
+        return unmarshallerContext.createUnmarshaller().unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
     }
 
     public Saksmappe getSaksmappe(Arkivmelding am) {
