@@ -36,14 +36,14 @@ public class DpoConversationStrategy implements ConversationStrategy {
         }
 
         try {
-            promiseMaker.await(reject -> {
+            promiseMaker.promise(reject -> {
                 try (InputStream is = asicHandler.createEncryptedAsic(message, reject)) {
                     transport.send(applicationContextHolder.getApplicationContext(), message.getSbd(), is);
                     return null;
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
                 }
-            });
+            }).await();
         } catch (Exception e) {
             Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);
             throw e;

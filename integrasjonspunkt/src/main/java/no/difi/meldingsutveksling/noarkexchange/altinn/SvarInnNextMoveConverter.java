@@ -61,7 +61,7 @@ public class SvarInnNextMoveConverter {
                 new ArkivmeldingMessage());
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
-        promiseMaker.await(reject -> {
+        promiseMaker.promise(reject -> {
             Stream<StreamedFile> attachments = Stream.concat(
                     Stream.of(arkivmeldingFile),
                     svarInnService.getAttachments(forsendelse, reject));
@@ -75,7 +75,7 @@ public class SvarInnNextMoveConverter {
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Failed to create ASIC", e);
             }
-        });
+        }).await();
 
         return sbd;
     }

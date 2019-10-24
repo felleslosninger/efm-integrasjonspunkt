@@ -24,14 +24,10 @@ public class Promise<T> {
     public Promise(BiConsumer<Resolve<T>, Reject> action, Executor executor) {
         this.completableFuture = CompletableFuture.runAsync(() -> action.accept(this::resolve, this::reject), executor)
                 .whenComplete((v, t) -> {
-                    if (t != null) {
-                        reject(t);
-                    }
-
                     if (status.get() == PromiseStatus.PENDING) {
                         String message = "Promise completed without being resolved or rejected!";
-                        log.warn(message);
-                        reject(new PromiseRuntimeException(message));
+                        log.error(message);
+                        reject(t != null ? new PromiseRuntimeException(message, t) : new PromiseRuntimeException(message));
                     }
                 });
         this.status = new AtomicReference<>(PromiseStatus.PENDING);
@@ -59,18 +55,16 @@ public class Promise<T> {
             throw new PromiseRuntimeException("Promise catched exception that was not rejected!", e);
         }
 
-        switch (status.get()) {
-            case FULLFILLED:
-                return resolved.get();
-            case REJECTED: {
-                Throwable thowable = rejected.get();
-                if (thowable instanceof RuntimeException) {
-                    throw (RuntimeException) thowable;
-                }
-                throw new PromiseRuntimeException("Promise was rejected", thowable);
-            }
-            default:
-                throw new PromiseRuntimeException("Status is still PENDING");
+        if (status.get() == PromiseStatus.FULLFILLED) {
+            return resolved.get();
         }
+
+        Throwable thowable = rejected.get();
+
+        if (thowable instanceof RuntimeException) {
+            throw (RuntimeException) thowable;
+        }
+
+        throw new PromiseRuntimeException("Promise was rejected", thowable);
     }
 }

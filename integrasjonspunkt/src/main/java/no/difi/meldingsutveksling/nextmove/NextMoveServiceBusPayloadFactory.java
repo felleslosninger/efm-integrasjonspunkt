@@ -26,12 +26,12 @@ public class NextMoveServiceBusPayloadFactory {
     private byte[] getAsicBytes(NextMoveOutMessage message) {
         if (message.getFiles() == null || message.getFiles().isEmpty()) return null;
 
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try (InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, reject)) {
                 return Base64.getEncoder().encode(IOUtils.toByteArray(encryptedAsic));
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Unable to read encrypted asic", e);
             }
-        });
+        }).await();
     }
 }

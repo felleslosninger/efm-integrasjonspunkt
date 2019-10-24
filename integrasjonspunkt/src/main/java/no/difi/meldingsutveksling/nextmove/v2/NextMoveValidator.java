@@ -138,13 +138,13 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier(), reject)) {
                 return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
             } catch (JAXBException | IOException e) {
                 throw new UnmarshalArkivmeldingException();
             }
-        });
+        }).await();
     }
 
     void validateFile(NextMoveOutMessage message, MultipartFile file) {

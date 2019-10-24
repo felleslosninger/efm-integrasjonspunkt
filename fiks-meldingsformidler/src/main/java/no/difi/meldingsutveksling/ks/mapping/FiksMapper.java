@@ -130,7 +130,7 @@ public class FiksMapper {
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String arkivmeldingIdentifier = getArkivmeldingIdentifier(message);
 
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingIdentifier, reject)) {
                 return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
             } catch (JAXBException e) {
@@ -138,7 +138,7 @@ public class FiksMapper {
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Reading failed for arkivmelding", e);
             }
-        });
+        }).await();
     }
 
     private String getArkivmeldingIdentifier(NextMoveOutMessage message) throws NextMoveException {

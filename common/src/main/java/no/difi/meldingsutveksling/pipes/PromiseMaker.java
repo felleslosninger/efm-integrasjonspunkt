@@ -12,13 +12,13 @@ public class PromiseMaker {
 
     private final TaskExecutor taskExecutor;
 
-    public <T> T await(Function<Reject, T> action) {
+    public <T> Promise<T> promise(Function<Reject, T> action) {
         return new Promise<T>((resolve, reject) -> {
             try {
                 resolve.resolve(action.apply(reject));
             } catch (Exception e) {
                 reject.reject(e);
             }
-        }, taskExecutor).await();
+        }, taskExecutor);
     }
 }
