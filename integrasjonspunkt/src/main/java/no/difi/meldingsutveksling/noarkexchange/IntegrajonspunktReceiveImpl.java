@@ -98,6 +98,16 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
+        if (sbdUtil.isExpired(sbd)) {
+            conversationService.registerStatus(sbd.getMessageId(),
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
+            try {
+                messagePersister.delete(sbd.getMessageId());
+            } catch (IOException e) {
+                log.error(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
+            }
+            return;
+        }
         PutMessageRequestType putMessage = convertSbdToPutMessageRequest(sbd);
         forwardToNoarkSystemAndSendReceipts(sbd, putMessage);
     }
