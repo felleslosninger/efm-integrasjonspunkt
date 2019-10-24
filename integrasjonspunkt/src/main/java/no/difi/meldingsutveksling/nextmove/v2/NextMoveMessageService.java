@@ -15,10 +15,8 @@ import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import org.springframework.data.domain.Page;
@@ -30,7 +28,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,7 +49,7 @@ public class NextMoveMessageService {
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
-    private final PromiseMaker promiseMaker;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     @Transactional(readOnly = true)
     public NextMoveOutMessage getMessage(String messageId) {
@@ -90,8 +90,8 @@ public class NextMoveMessageService {
 
         if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
             Arkivmelding arkivmelding = getArkivmelding(message, identifier);
-            Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
-            Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(arkivmelding);
+            Journalpost journalpost = arkivmeldingUtil.getJournalpost(arkivmelding);
+            Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(arkivmelding);
             Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
             conversation.ifPresent(c -> {
                 c.setMessageTitle(journalpost.getOffentligTittel());
@@ -106,14 +106,11 @@ public class NextMoveMessageService {
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
-        return promiseMaker.promise(reject -> {
-            FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier, reject);
-            try {
-                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-            } catch (JAXBException e) {
-                throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
-            }
-        }).await();
+        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), identifier))) {
+            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        } catch (JAXBException | IOException e) {
+            throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
+        }
     }
 
     private String getTitle(String name) {

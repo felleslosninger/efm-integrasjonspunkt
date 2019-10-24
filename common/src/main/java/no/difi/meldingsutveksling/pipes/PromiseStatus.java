@@ -2,5 +2,5 @@ package no.difi.meldingsutveksling.pipes;
 
 public enum PromiseStatus {
 
-    PENDING, REJECTED, FULLFILLED, INVALID
+    PENDING, REJECTED, FULLFILLED
 }

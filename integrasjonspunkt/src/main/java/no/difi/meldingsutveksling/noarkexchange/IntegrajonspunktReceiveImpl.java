@@ -68,6 +68,7 @@ public class IntegrajonspunktReceiveImpl {
     private final NextMoveAdapter nextMoveAdapter;
     private final InternalQueue internalQueue;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final MeldingFactory meldingFactory;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        Adresseregister adresseregisterService,
@@ -81,7 +82,8 @@ public class IntegrajonspunktReceiveImpl {
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
-                                       ConversationIdEntityRepo conversationIdEntityRepo) {
+                                       ConversationIdEntityRepo conversationIdEntityRepo,
+                                       MeldingFactory meldingFactory) {
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
@@ -95,6 +97,7 @@ public class IntegrajonspunktReceiveImpl {
         this.nextMoveAdapter = nextMoveAdapter;
         this.internalQueue = internalQueue;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
+        this.meldingFactory = meldingFactory;
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
@@ -134,7 +137,7 @@ public class IntegrajonspunktReceiveImpl {
             }
             byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
             Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
-            MeldingType meldingType = MeldingFactory.create(arkivmelding, asic);
+            MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
             return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
         }
     }

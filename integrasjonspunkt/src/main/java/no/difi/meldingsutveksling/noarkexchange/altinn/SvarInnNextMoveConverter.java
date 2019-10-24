@@ -48,6 +48,7 @@ public class SvarInnNextMoveConverter {
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
     private final PromiseMaker promiseMaker;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     @Transactional
     public StandardBusinessDocument convert(Forsendelse forsendelse) {
@@ -89,7 +90,7 @@ public class SvarInnNextMoveConverter {
         Arkivmelding arkivmelding = toArkivmelding(forsendelse);
         byte[] arkivmeldingBytes;
         try {
-            arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
+            arkivmeldingBytes = arkivmeldingUtil.marshalArkivmelding(arkivmelding);
         } catch (JAXBException e) {
             log.error("Error marshalling arkivmelding", e);
             throw new NextMoveRuntimeException("Error marshalling arkivmelding");
