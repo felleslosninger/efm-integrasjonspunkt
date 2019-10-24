@@ -59,8 +59,6 @@ public class Pipe {
                 reject.reject(t);
             }
         }
-
-        reject.reject(new NullPointerException("Uh oh!"));
     }
 
     public static Pipe of(Executor executor, String description, Consumer<PipedOutputStream> consumer, Reject reject) {
