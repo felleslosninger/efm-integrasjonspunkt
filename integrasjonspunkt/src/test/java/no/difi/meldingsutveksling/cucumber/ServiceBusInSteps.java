@@ -81,13 +81,13 @@ public class ServiceBusInSteps {
     }
 
     private byte[] getAsic(Message message) {
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
                     .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate())).outlet()) {
                 return IOUtils.toByteArray(is);
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Couldn't get ASIC", e);
             }
-        });
+        }).await();
     }
 }

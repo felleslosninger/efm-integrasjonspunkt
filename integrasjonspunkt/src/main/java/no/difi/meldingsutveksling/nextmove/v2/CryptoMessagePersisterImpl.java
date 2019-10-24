@@ -47,7 +47,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public void writeStream(String messageId, String filename, InputStream stream) {
-        promiseMaker.await(reject -> {
+        promiseMaker.promise(reject -> {
             try {
                 InputStream inputStream = possiblyApplyZipHeaderPatch(messageId, filename, stream);
                 Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(inputStream, inlet, keyInfo.getX509Certificate()), reject);
@@ -58,7 +58,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
             } catch (IOException e) {
                 throw new NextMoveRuntimeException(String.format("Writing of file %s failed for messageId: %s", filename, messageId));
             }
-        });
+        }).await();
     }
 
     private InputStream possiblyApplyZipHeaderPatch(String messageId, String filename, InputStream stream) throws IOException {

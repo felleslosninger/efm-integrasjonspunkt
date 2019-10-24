@@ -120,14 +120,14 @@ public class CorrespondenceAgencyMessageFactory {
         BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
                 .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
 
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             InputStream is = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier(), reject).getInputStream();
             try {
                 return ArkivmeldingUtil.unmarshalArkivmelding(is);
             } catch (JAXBException e) {
                 throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
             }
-        });
+        }).await();
     }
 
     private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files, Reject reject) {

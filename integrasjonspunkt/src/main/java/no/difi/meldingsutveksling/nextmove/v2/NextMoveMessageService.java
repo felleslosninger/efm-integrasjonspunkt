@@ -106,14 +106,14 @@ public class NextMoveMessageService {
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), identifier, reject);
             try {
                 return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
             } catch (JAXBException e) {
                 throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
             }
-        });
+        }).await();
     }
 
     private String getTitle(String name) {

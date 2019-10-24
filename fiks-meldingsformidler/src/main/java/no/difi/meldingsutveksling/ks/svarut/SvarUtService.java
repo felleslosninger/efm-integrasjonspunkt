@@ -50,7 +50,7 @@ public class SvarUtService {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }
 
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try {
                 SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
@@ -58,7 +58,7 @@ public class SvarUtService {
             } catch (NextMoveException e) {
                 throw new NextMoveRuntimeException("Couldn't create Forsendelse", e);
             }
-        });
+        }).await();
     }
 
     private String getFiksUtUrl() {

@@ -39,13 +39,13 @@ public class AltinnZipFactory {
     }
 
     byte[] getAltinnZipAsBytes(Message message) {
-        return promiseMaker.await(reject -> {
+        return promiseMaker.promise(reject -> {
             try {
                 return getBytes(message, reject);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to get AltinnZip", e);
             }
-        });
+        }).await();
     }
 
     private byte[] getBytes(Message message, Reject reject) throws IOException {
