@@ -12,10 +12,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
@@ -26,7 +25,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class NextMoveValidator {
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final ConversationService conversationService;
-    private final PromiseMaker promiseMaker;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalMessageId().ifPresent(messageId -> {
@@ -111,7 +112,7 @@ public class NextMoveValidator {
 
         if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
             // Verify each file referenced in arkivmelding is uploaded
-            List<String> arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
+            List<String> arkivmeldingFiles = arkivmeldingUtil.getFilenames(getArkivmelding(message));
             Set<String> messageFiles = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -138,13 +139,12 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-        return promiseMaker.promise(reject -> {
-            try (FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier(), reject)) {
-                return ArkivmeldingUtil.unmarshalArkivmelding(fileEntryStream.getInputStream());
-            } catch (JAXBException | IOException e) {
-                throw new UnmarshalArkivmeldingException();
-            }
-        }).await();
+
+        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
+            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        } catch (JAXBException | IOException e) {
+            throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
+        }
     }
 
     void validateFile(NextMoveOutMessage message, MultipartFile file) {

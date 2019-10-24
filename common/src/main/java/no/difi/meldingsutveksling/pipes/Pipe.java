@@ -49,7 +49,7 @@ public class Pipe {
     }
 
     @SuppressWarnings("squir:S1172")
-    private void handleCompleteAsync(Void v, Throwable t) {
+    private void handleComplete(Void v, Throwable t) {
         close();
         if (t != null) {
             if (t instanceof CompletionException) {
@@ -59,6 +59,8 @@ public class Pipe {
                 reject.reject(t);
             }
         }
+
+        reject.reject(new NullPointerException("Uh oh!"));
     }
 
     public static Pipe of(Executor executor, String description, Consumer<PipedOutputStream> consumer, Reject reject) {
@@ -68,7 +70,7 @@ public class Pipe {
             logStart(description);
             consumer.accept(pipe.inlet);
             logFinish(description);
-        }, executor).whenComplete(pipe::handleCompleteAsync);
+        }, executor).whenComplete(pipe::handleComplete);
         return pipe;
     }
 
@@ -79,7 +81,7 @@ public class Pipe {
             logStart(description);
             consumer.accept(outlet, newPipe.inlet);
             logFinish(description);
-        }, executor).whenComplete(newPipe::handleCompleteAsync);
+        }, executor).whenComplete(newPipe::handleComplete);
         return newPipe;
     }
 

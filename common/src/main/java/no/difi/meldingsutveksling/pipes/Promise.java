@@ -22,6 +22,7 @@ public class Promise<T> {
     }
 
     public Promise(BiConsumer<Resolve<T>, Reject> action, Executor executor) {
+        this.status = new AtomicReference<>(PromiseStatus.PENDING);
         this.completableFuture = CompletableFuture.runAsync(() -> action.accept(this::resolve, this::reject), executor)
                 .whenComplete((v, t) -> {
                     if (status.get() == PromiseStatus.PENDING) {
@@ -30,7 +31,6 @@ public class Promise<T> {
                         reject(t != null ? new PromiseRuntimeException(message, t) : new PromiseRuntimeException(message));
                     }
                 });
-        this.status = new AtomicReference<>(PromiseStatus.PENDING);
     }
 
     public void resolve(T t) {
@@ -53,6 +53,10 @@ public class Promise<T> {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             throw new PromiseRuntimeException("Promise catched exception that was not rejected!", e);
+        }
+
+        if (status.get() == PromiseStatus.PENDING) {
+            reject(new PromiseRuntimeException("Promise completed without being resolved or rejected!"));
         }
 
         if (status.get() == PromiseStatus.FULLFILLED) {

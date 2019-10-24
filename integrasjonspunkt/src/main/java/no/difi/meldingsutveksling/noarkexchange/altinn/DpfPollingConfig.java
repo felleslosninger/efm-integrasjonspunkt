@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
@@ -47,7 +48,7 @@ public class DpfPollingConfig {
     }
 
     @Bean
-    public SvarInnNextMoveConverter svarInnNextMoveConverter(MessagePersister messagePersister, SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo, PromiseMaker promiseMaker) {
-        return new SvarInnNextMoveConverter(messagePersister, svarInnService, asicHandler, createSBD, properties, keyInfo, promiseMaker);
+    public SvarInnNextMoveConverter svarInnNextMoveConverter(MessagePersister messagePersister, SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, IntegrasjonspunktNokkel keyInfo, PromiseMaker promiseMaker, ArkivmeldingUtil arkivmeldingUtil) {
+        return new SvarInnNextMoveConverter(messagePersister, svarInnService, asicHandler, createSBD, properties, keyInfo, promiseMaker, arkivmeldingUtil);
     }
 }

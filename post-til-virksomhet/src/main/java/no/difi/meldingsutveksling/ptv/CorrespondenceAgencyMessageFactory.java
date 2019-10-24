@@ -25,7 +25,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -39,6 +38,8 @@ import org.springframework.util.StringUtils;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -60,7 +61,7 @@ public class CorrespondenceAgencyMessageFactory {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Clock clock;
     private final ReporteeFactory reporteeFactory;
-    private final PromiseMaker promiseMaker;
+    private final ArkivmeldingUtil arkivmeldingUtil;
     private final ObjectFactory objectFactory = new ObjectFactory();
     private final no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
     private final no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationObjectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
@@ -97,11 +98,11 @@ public class CorrespondenceAgencyMessageFactory {
                 .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
         Arkivmelding arkivmelding = getArkivmelding(message, fileMap);
-        Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
+        Journalpost jp = arkivmeldingUtil.getJournalpost(arkivmelding);
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        List<BusinessMessageFile> files = Lists.newArrayList(ArkivmeldingUtil.getFilenames(arkivmelding)
+        List<BusinessMessageFile> files = Lists.newArrayList(arkivmeldingUtil.getFilenames(arkivmelding)
                 .stream()
                 .map(fileMap::get)
                 .filter(Objects::nonNull)
@@ -120,14 +121,12 @@ public class CorrespondenceAgencyMessageFactory {
         BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
                 .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
 
-        return promiseMaker.promise(reject -> {
-            InputStream is = optionalCryptoMessagePersister.readStream(message.getMessageId(), arkivmeldingFile.getIdentifier(), reject).getInputStream();
-            try {
-                return ArkivmeldingUtil.unmarshalArkivmelding(is);
-            } catch (JAXBException e) {
-                throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
-            }
-        }).await();
+
+        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
+            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        } catch (JAXBException | IOException e) {
+            throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
+        }
     }
 
     private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files, Reject reject) {
