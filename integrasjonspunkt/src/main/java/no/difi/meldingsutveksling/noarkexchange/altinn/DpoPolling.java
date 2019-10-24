@@ -71,6 +71,7 @@ public class DpoPolling {
 
             if (sbdUtil.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
+                messagePersister.delete(sbd.getMessageId());
             } else {
                 altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
             }

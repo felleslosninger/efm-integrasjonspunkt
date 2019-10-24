@@ -89,6 +89,11 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
+            public String getProcessIdentifier() {
+                return properties.getArkivmelding().getDefaultProcess();
+            }
+
+            @Override
             public ConversationDirection getDirection() {
                 return ConversationDirection.INCOMING;
             }

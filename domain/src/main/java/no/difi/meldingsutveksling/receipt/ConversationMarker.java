@@ -15,6 +15,7 @@ public class ConversationMarker {
     private static final String STATUS = "status";
     private static final String DESCRIPTION = "description";
     private static final String DIRECTION = "direction";
+    private static final String PROCESS = "process";
 
     private ConversationMarker() {
     }
@@ -24,9 +25,10 @@ public class ConversationMarker {
         LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(conversation.getMessageId());
         LogstashMarker senderMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
         LogstashMarker receiverMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
+        LogstashMarker processMarker = processIdentifierMarker(conversation.getProcessIdentifier());
         LogstashMarker serviceIdentifierMarker = serviceIdentifierMarker(conversation.getServiceIdentifier());
         LogstashMarker directionMarker = directionMarker(conversation.getDirection());
-        return conversationIdMarker.and(messageIdMarker).and(senderMarker).and(receiverMarker).and(serviceIdentifierMarker).and(directionMarker);
+        return conversationIdMarker.and(messageIdMarker).and(senderMarker).and(receiverMarker).and(processMarker).and(serviceIdentifierMarker).and(directionMarker);
     }
 
     public static LogstashMarker markerFrom(MessageStatus status) {
@@ -35,6 +37,10 @@ public class ConversationMarker {
 
     private static LogstashMarker serviceIdentifierMarker(ServiceIdentifier serviceIdentifier) {
         return Markers.append(SERVICE_IDENTIFIER, serviceIdentifier.toString());
+    }
+
+    private static LogstashMarker processIdentifierMarker(String processIdentifier) {
+        return Markers.append(PROCESS, processIdentifier);
     }
 
     private static LogstashMarker statusMarker(String status) {
