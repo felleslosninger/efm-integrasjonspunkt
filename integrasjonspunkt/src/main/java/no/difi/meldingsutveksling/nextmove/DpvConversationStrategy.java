@@ -39,7 +39,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
     @Transactional
     public void send(NextMoveOutMessage message) {
 
-        promiseMaker.awaitVoid(reject -> {
+        promiseMaker.await(reject -> {
             InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message, reject);
 
             Object response = withLogstashMarker(markerFrom(message))
@@ -55,6 +55,7 @@ public class DpvConversationStrategy implements ConversationStrategy {
                     .ifPresent(conversation -> conversationService.save(conversation
                             .setServiceCode(serviceCode)
                             .setServiceEditionCode(serviceEditionCode)));
+            return null;
         });
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
