@@ -48,7 +48,10 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
     @Override
     public void accept(Forsendelse forsendelse) {
-        promiseMaker.awaitVoid(reject -> forward(forsendelse, reject));
+        promiseMaker.await(reject -> {
+            forward(forsendelse, reject);
+            return null;
+        });
     }
 
     private void forward(Forsendelse forsendelse, Reject reject) {

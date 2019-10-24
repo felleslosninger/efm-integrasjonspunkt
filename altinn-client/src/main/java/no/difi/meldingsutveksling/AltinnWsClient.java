@@ -60,11 +60,12 @@ public class AltinnWsClient {
 
     private void upload(UploadRequest request, String senderReference) {
         try {
-            promiseMaker.awaitVoid(reject -> {
+            promiseMaker.await(reject -> {
                 try (InputStream inputStream = getInputStream(request, reject)) {
                     StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
                     parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
                     uploadToAltinn(request, senderReference, parameters);
+                    return null;
                 } catch (IOException e) {
                     throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
                 }
