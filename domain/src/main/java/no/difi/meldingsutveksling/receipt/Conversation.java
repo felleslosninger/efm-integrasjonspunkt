@@ -58,6 +58,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     private String messageId;
     private String senderIdentifier;
     private String receiverIdentifier;
+    private String processIdentifier;
     private String messageReference;
     private String messageTitle;
     private String serviceCode;
