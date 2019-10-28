@@ -6,9 +6,11 @@ import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -38,6 +40,7 @@ public class ServiceBusInSteps {
     private final IntegrasjonspunktNokkel keyInfo;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
+    private final PromiseMaker promiseMaker;
 
     @After
     public void after() {
@@ -51,10 +54,7 @@ public class ServiceBusInSteps {
 
         Message message = messageInHolder.get();
 
-        PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet))
-                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate())).outlet();
-        byte[] asic = IOUtils.toByteArray(is);
-        is.close();
+        byte[] asic = getAsic(message);
         byte[] base64encodedAsic = Base64.getEncoder().encode(asic);
         ServiceBusPayload serviceBusPayload = ServiceBusPayload.of(message.getSbd(), base64encodedAsic);
         String body = objectMapper.writeValueAsString(serviceBusPayload);
@@ -78,5 +78,16 @@ public class ServiceBusInSteps {
         }).when(serviceBusRestTemplate)
                 .exchange(any(URI.class), eq(HttpMethod.POST), any(), eq(String.class));
 
+    }
+
+    private byte[] getAsic(Message message) {
+        return promiseMaker.promise(reject -> {
+            try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
+                    .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate())).outlet()) {
+                return IOUtils.toByteArray(is);
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException("Couldn't get ASIC", e);
+            }
+        }).await();
     }
 }

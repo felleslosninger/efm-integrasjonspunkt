@@ -51,6 +51,7 @@ public class NextMoveAdapter {
     private final UUIDGenerator uuidGenerator;
     private final ServiceRegistryLookup srLookup;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
         NextMoveOutMessage nextMoveMessage;
@@ -99,7 +100,7 @@ public class NextMoveAdapter {
         ServiceRecord receiverServiceRecord;
         try {
             receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
-                    .process(properties.getArkivmelding().getDefaultProcess()).build(),
+                            .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
@@ -125,7 +126,7 @@ public class NextMoveAdapter {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
-                    .process(properties.getArkivmelding().getDefaultProcess()).build(),
+                            .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
@@ -147,7 +148,7 @@ public class NextMoveAdapter {
 
     private BasicNextMoveFile getArkivmeldingFile(PutMessageRequestWrapper message) throws JAXBException {
         Arkivmelding arkivmelding = arkivmeldingFactory.from(message);
-        byte[] arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
+        byte[] arkivmeldingBytes = arkivmeldingUtil.marshalArkivmelding(arkivmelding);
         return BasicNextMoveFile.of(ARKIVMELDING_FILE,
                 ARKIVMELDING_FILE, MimeTypeExtensionMapper.getMimetype("xml"), arkivmeldingBytes);
     }

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.pipes.Pipe;
+import no.difi.meldingsutveksling.pipes.Promise;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -40,9 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 //@Ignore("JCE support is missing on our build server")
 public class CmsUtilTest {
 
-    public static final String FILENAME_CERT = "difi-cert.pem";
-
-    public static final String FILENAME_PRIVKEY = "difi-privkey.pem";
+    private static final String FILENAME_CERT = "difi-cert.pem";
+    private static final String FILENAME_PRIVKEY = "difi-privkey.pem";
 
     @Test
     public void testDecryptCMSKeysGeneratedProgrammatically() throws Exception {
@@ -106,12 +106,19 @@ public class CmsUtilTest {
         KeyPair keyPair = doOpenSslTestFile(FILENAME_PRIVKEY, RSAPrivateKey.class);
 
         byte[] plaintext = "Text to be encrypted".getBytes();
-        ByteArrayInputStream bis = new ByteArrayInputStream(plaintext);
+        byte[] actual = new Promise<byte[]>((resolve, reject) -> {
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(plaintext)) {
 
-        InputStream encrypted = Pipe.of(Executors.newSingleThreadExecutor(), "CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert)).outlet();
-        InputStream decrypted = util.decryptCMSStreamed(encrypted, keyPair.getPrivate());
+                InputStream encrypted = Pipe.of(Executors.newSingleThreadExecutor(), "CMS encrypt", inlet -> util.createCMSStreamed(bis, inlet, cert), reject).outlet();
+                InputStream decrypted = util.decryptCMSStreamed(encrypted, keyPair.getPrivate());
 
-        assertThat(IOUtils.toByteArray(decrypted)).isEqualTo(plaintext);
+                resolve.resolve(IOUtils.toByteArray(decrypted));
+            } catch (IOException e) {
+                reject.reject(e);
+            }
+        }).await();
+
+        assertThat(actual).isEqualTo(plaintext);
     }
 
     private KeyPair generateKeyPair() throws NoSuchAlgorithmException {

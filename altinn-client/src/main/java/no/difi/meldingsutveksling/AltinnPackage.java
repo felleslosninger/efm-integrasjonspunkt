@@ -111,7 +111,6 @@ public class AltinnPackage {
         marshallObject(recipient, zipOutputStream);
         zipOutputStream.closeEntry();
 
-
         if (sbd.getAny() instanceof Payload || sbd.getAny() instanceof JAXBElement) {
             zipOutputStream.putNextEntry(new ZipEntry(CONTENT_XML));
             no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();

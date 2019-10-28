@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.message.*;
+import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ public class UncryptedMessagePersister implements OptionalCryptoMessagePersister
         return delegate.read(messageId, filename);
     }
 
-    public FileEntryStream readStream(String messageId, String filename) {
+    public FileEntryStream readStream(String messageId, String filename, Reject reject) {
         InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
         return FileEntryStream.of(inputStream, -1);
     }

@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsRequest;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.transport.Transport;
 import org.springframework.context.ApplicationContext;
