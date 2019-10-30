@@ -49,7 +49,7 @@ public class DpfConversationStrategy implements ConversationStrategy {
             conversationIdEntityRepo.delete(convId);
         }
         AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
-        PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(),
+        PutMessageRequestType putMessage = putMessageRequestFactory.createAndSwitchSenderReceiver(message.getSbd(),
                 BestEduConverter.appReceiptAsString(appReceipt),
                 conversationId);
         localNoark.sendEduMelding(putMessage);
