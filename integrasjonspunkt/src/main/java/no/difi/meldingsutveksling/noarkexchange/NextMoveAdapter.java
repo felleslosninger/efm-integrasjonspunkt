@@ -32,9 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -121,6 +119,17 @@ public class NextMoveAdapter {
 
     private List<BasicNextMoveFile> getFiles(PutMessageRequestWrapper message) throws JAXBException, PayloadException {
         List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(message.getPayload());
+        // Check for duplicate filenames
+        List<String> filenames = noarkDocuments.stream()
+                .map(NoarkDocument::getFilename)
+                .collect(Collectors.toList());
+        Optional<String> duplicateFiles = filenames.stream()
+                .filter(f -> Collections.frequency(filenames, f) > 1)
+                .reduce((a, b) -> a + ", " + b);
+        if (duplicateFiles.isPresent()) {
+            throw new PayloadException("Found duplicate filenames in message: " + duplicateFiles.get());
+        }
+
 
         // Need to check if receiver is on FIKS platform. If so, reject if documents are not PDF.
         ServiceRecord serviceRecord;
