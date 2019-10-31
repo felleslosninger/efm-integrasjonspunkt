@@ -15,6 +15,8 @@ import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
@@ -119,13 +121,26 @@ public class NextMoveMessageInController {
         }
 
         try {
-            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE);
+            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE, throwable ->
+                    Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
+                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
+            );
+            InputStreamResource isr;
+            if (props.getNextmove().getApplyZipHeaderPatch()) {
+                try {
+                    isr = new InputStreamResource(BugFix610.applyPatch(fileEntry.getInputStream(), messageId));
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException("Could not apply patch 610 to message", e);
+                }
+            } else {
+                isr = new InputStreamResource(fileEntry.getInputStream());
+            }
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)
-                    .body(new InputStreamResource(fileEntry.getInputStream()));
-        } catch (PersistenceException | IOException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s]. Removing message from queue",
+                    .body(isr);
+        } catch (PersistenceException e) {
+            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }

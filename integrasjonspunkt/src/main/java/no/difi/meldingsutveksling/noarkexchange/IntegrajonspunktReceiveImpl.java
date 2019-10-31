@@ -68,6 +68,7 @@ public class IntegrajonspunktReceiveImpl {
     private final NextMoveAdapter nextMoveAdapter;
     private final InternalQueue internalQueue;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final MeldingFactory meldingFactory;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        Adresseregister adresseregisterService,
@@ -81,7 +82,8 @@ public class IntegrajonspunktReceiveImpl {
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
-                                       ConversationIdEntityRepo conversationIdEntityRepo) {
+                                       ConversationIdEntityRepo conversationIdEntityRepo,
+                                       MeldingFactory meldingFactory) {
         this.localNoark = localNoark.getIfAvailable();
         this.adresseregisterService = adresseregisterService;
         this.properties = properties;
@@ -95,17 +97,21 @@ public class IntegrajonspunktReceiveImpl {
         this.nextMoveAdapter = nextMoveAdapter;
         this.internalQueue = internalQueue;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
+        this.meldingFactory = meldingFactory;
     }
 
-    public void forwardToNoarkSystem(StandardBusinessDocument sbd) throws MessageException {
-        if (sbdUtil.isReceipt(sbd)) {
-            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT));
-            if (!properties.getFeature().isForwardReceivedAppReceipts()) {
-                Audit.info("AppReceipt forwarding disabled - will not deliver to archive");
+    public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
+        if (sbdUtil.isExpired(sbd)) {
+            conversationService.registerStatus(sbd.getMessageId(),
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
+            try {
+                messagePersister.delete(sbd.getMessageId());
+            } catch (IOException e) {
+                log.error(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
             }
+            return;
         }
         PutMessageRequestType putMessage = convertSbdToPutMessageRequest(sbd);
-
         forwardToNoarkSystemAndSendReceipts(sbd, putMessage);
     }
 
@@ -131,7 +137,7 @@ public class IntegrajonspunktReceiveImpl {
             }
             byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
             Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
-            MeldingType meldingType = MeldingFactory.create(arkivmelding, asic);
+            MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
             return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
         }
     }

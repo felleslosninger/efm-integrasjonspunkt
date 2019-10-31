@@ -18,6 +18,8 @@ import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarker
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
@@ -42,11 +44,19 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     private final MessageStatusFactory messageStatusFactory;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final Clock clock;
+    private final PromiseMaker promiseMaker;
 
     @Override
     public void accept(Forsendelse forsendelse) {
+        promiseMaker.promise(reject -> {
+            forward(forsendelse, reject);
+            return null;
+        }).await();
+    }
+
+    private void forward(Forsendelse forsendelse, Reject reject) {
         SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, putMessageRequestFactory);
-        svarInnService.getAttachments(forsendelse).forEach(builder::streamedFile);
+        svarInnService.getAttachments(forsendelse, reject).forEach(builder::streamedFile);
         if (!Strings.isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
             builder.setFallbackSenderOrgNr(properties.getFiks().getInn().getFallbackSenderOrgNr());
         }
@@ -76,6 +86,11 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             @Override
             public String getReceiverIdentifier() {
                 return putMessage.getEnvelope().getReceiver().getOrgnr();
+            }
+
+            @Override
+            public String getProcessIdentifier() {
+                return properties.getArkivmelding().getDefaultProcess();
             }
 
             @Override

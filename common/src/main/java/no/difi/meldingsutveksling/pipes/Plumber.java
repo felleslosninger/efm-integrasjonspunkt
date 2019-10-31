@@ -13,7 +13,7 @@ public class Plumber {
 
     private final TaskExecutor taskExecutor;
 
-    public Pipe pipe(String description, Consumer<PipedOutputStream> consumer) {
-        return Pipe.of(taskExecutor, description, consumer);
+    public Pipe pipe(String description, Consumer<PipedOutputStream> consumer, Reject reject) {
+        return Pipe.of(taskExecutor, description, consumer, reject);
     }
 }

@@ -32,9 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -51,6 +49,7 @@ public class NextMoveAdapter {
     private final UUIDGenerator uuidGenerator;
     private final ServiceRegistryLookup srLookup;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     public PutMessageResponseType convertAndSend(PutMessageRequestWrapper message) {
         NextMoveOutMessage nextMoveMessage;
@@ -99,7 +98,7 @@ public class NextMoveAdapter {
         ServiceRecord receiverServiceRecord;
         try {
             receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
-                    .process(properties.getArkivmelding().getDefaultProcess()).build(),
+                            .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
@@ -120,12 +119,23 @@ public class NextMoveAdapter {
 
     private List<BasicNextMoveFile> getFiles(PutMessageRequestWrapper message) throws JAXBException, PayloadException {
         List<NoarkDocument> noarkDocuments = PayloadUtil.parsePayloadForDocuments(message.getPayload());
+        // Check for duplicate filenames
+        List<String> filenames = noarkDocuments.stream()
+                .map(NoarkDocument::getFilename)
+                .collect(Collectors.toList());
+        Optional<String> duplicateFiles = filenames.stream()
+                .filter(f -> Collections.frequency(filenames, f) > 1)
+                .reduce((a, b) -> a + ", " + b);
+        if (duplicateFiles.isPresent()) {
+            throw new PayloadException("Found duplicate filenames in message: " + duplicateFiles.get());
+        }
+
 
         // Need to check if receiver is on FIKS platform. If so, reject if documents are not PDF.
         ServiceRecord serviceRecord;
         try {
             serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
-                    .process(properties.getArkivmelding().getDefaultProcess()).build(),
+                            .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
@@ -147,7 +157,7 @@ public class NextMoveAdapter {
 
     private BasicNextMoveFile getArkivmeldingFile(PutMessageRequestWrapper message) throws JAXBException {
         Arkivmelding arkivmelding = arkivmeldingFactory.from(message);
-        byte[] arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
+        byte[] arkivmeldingBytes = arkivmeldingUtil.marshalArkivmelding(arkivmelding);
         return BasicNextMoveFile.of(ARKIVMELDING_FILE,
                 ARKIVMELDING_FILE, MimeTypeExtensionMapper.getMimetype("xml"), arkivmeldingBytes);
     }

@@ -44,9 +44,9 @@ public class MessageStatusController {
     }
 
     @GetMapping("{messageId}")
-    @ApiOperation(value = "Get status", notes = "Get status with given id")
+    @ApiOperation(value = "Get all statuses for a given messageId", notes = "Get all statuses for a given messageId")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = MessageStatus.class),
+            @ApiResponse(code = 200, message = "Success", response = MessageStatus[].class),
             @ApiResponse(code = 400, message = "Bad Request", response = String.class),
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })

@@ -144,6 +144,11 @@ public class ConversationService {
             }
 
             @Override
+            public String getProcessIdentifier() {
+                return sbd.getProcess();
+            }
+
+            @Override
             public ConversationDirection getDirection() {
                 return conversationDirection;
             }

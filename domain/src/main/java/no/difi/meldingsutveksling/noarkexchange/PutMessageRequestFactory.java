@@ -34,6 +34,18 @@ public class PutMessageRequestFactory {
                 payload);
     }
 
+    public PutMessageRequestType createAndSwitchSenderReceiver(StandardBusinessDocument sbd, Object payload, String conversationId) {
+        String senderRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
+        String receiverRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
+        return create(conversationId,
+                Sender.of(sbd.getReceiverIdentifier(), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbd.getSenderIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
+                payload);
+    }
+
+
     public PutMessageRequestType create(String conversationId,
                                          Sender sender,
                                          Receiver receiver,

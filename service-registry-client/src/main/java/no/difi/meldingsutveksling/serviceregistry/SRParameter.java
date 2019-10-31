@@ -18,6 +18,9 @@ public class SRParameter {
     private String identifier;
     private String process;
     private Integer securityLevel;
+    @NonNull
+    @Builder.Default
+    private Boolean infoOnly = Boolean.FALSE;
     // Used as correlation id - no need for this to affect caching
     @EqualsAndHashCode.Exclude
     private String conversationId;

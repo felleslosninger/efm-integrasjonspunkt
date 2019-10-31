@@ -1,14 +1,15 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.arkivmelding.*;
-import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
+import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,12 +21,15 @@ import java.util.zip.ZipInputStream;
 import static java.util.Optional.ofNullable;
 import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 
-@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class MeldingFactory {
 
-    public static MeldingType create(Arkivmelding am, byte[] asic) {
-        Saksmappe sm = ArkivmeldingUtil.getSaksmappe(am);
-        Journalpost jp = ArkivmeldingUtil.getJournalpost(am);
+    private final ArkivmeldingUtil arkivmeldingUtil;
+
+    public MeldingType create(Arkivmelding am, byte[] asic) {
+        Saksmappe sm = arkivmeldingUtil.getSaksmappe(am);
+        Journalpost jp = arkivmeldingUtil.getJournalpost(am);
 
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();

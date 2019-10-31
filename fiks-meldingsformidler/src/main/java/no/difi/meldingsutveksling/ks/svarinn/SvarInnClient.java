@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.Reject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -45,14 +46,14 @@ public class SvarInnClient {
         return Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
     }
 
-    InputStream downloadZipFile(Forsendelse forsendelse) {
+    InputStream downloadZipFile(Forsendelse forsendelse, Reject reject) {
         return plumber.pipe("downloading zip file", inlet ->
                 restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
                     InputStream body = new AutoCloseInputStream(response.getBody());
                     int bytes = IOUtils.copy(body, inlet);
                     log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
                     return null;
-                })
+                }), reject
         ).outlet();
     }
 

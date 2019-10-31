@@ -6,12 +6,15 @@ import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +35,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final IntegrasjonspunktNokkel keyInfo;
     private final Plumber plumber;
+    private final PromiseMaker promiseMaker;
     private final IntegrasjonspunktProperties props;
 
     public void write(String messageId, String filename, byte[] message) throws IOException {
@@ -42,29 +46,27 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         delegate.write(messageId, filename, encryptedMessage);
     }
 
-    public void writeStream(String messageId, String filename, InputStream stream) throws IOException {
-        InputStream inputStream = possiblyApplyZipHeaderPatch(messageId, filename, stream);
-        Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(inputStream, inlet, keyInfo.getX509Certificate()));
-        try (PipedInputStream is = pipe.outlet()) {
-            delegate.writeStream(messageId, filename, is, -1L);
-        }
-    }
-
-    private InputStream possiblyApplyZipHeaderPatch(String messageId, String filename, InputStream stream) throws IOException {
-        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            return BugFix610.applyPatch(stream, messageId);
-        }
-
-        return stream;
+    public void writeStream(String messageId, String filename, InputStream stream) {
+        promiseMaker.promise(reject -> {
+            try {
+                Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()), reject);
+                try (PipedInputStream is = pipe.outlet()) {
+                    delegate.writeStream(messageId, filename, is, -1L);
+                }
+                return null;
+            } catch (IOException e) {
+                throw new NextMoveRuntimeException(String.format("Writing of file %s failed for messageId: %s", filename, messageId));
+            }
+        }).await();
     }
 
     public byte[] read(String messageId, String filename) throws IOException {
         return getCmsUtil().decryptCMS(delegate.read(messageId, filename), keyInfo.loadPrivateKey());
     }
 
-    public FileEntryStream readStream(String messageId, String filename) {
+    public FileEntryStream readStream(String messageId, String filename, Reject reject) {
         InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
-        PipedInputStream pipedInputStream = plumber.pipe("Reading file", copy(inputStream).andThen(close(inputStream))).outlet();
+        PipedInputStream pipedInputStream = plumber.pipe("Reading file", copy(inputStream).andThen(close(inputStream)), reject).outlet();
         return FileEntryStream.of(new Decryptor(keyInfo).decryptCMSStreamed(pipedInputStream), -1);
     }
 
