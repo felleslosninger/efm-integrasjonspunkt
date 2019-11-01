@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,11 +56,22 @@ public class NextMoveMessageOutController {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+        // Check for max size
         files.stream()
                 .filter(p -> p.getSize() > MAX_SIZE)
                 .findAny()
                 .ifPresent(p -> {
                     throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
+                });
+        // Check for duplicate filenames
+        List<String> filenames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toList());
+        filenames.stream()
+                .filter(f -> Collections.frequency(filenames, f) > 1)
+                .reduce((a, b) -> a+", "+b)
+                .ifPresent(d -> {
+                    throw new DuplicateFilenameException(d);
                 });
 
         NextMoveOutMessage message = messageService.createMessage(sbd, files);
