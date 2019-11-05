@@ -21,11 +21,11 @@ public class NextMoveMessageMarkers {
     }
 
     public static LogstashMarker processMarker(String processIdentifier) {
-        return Markers.append("process-identifier", processIdentifier);
+        return Markers.append("process_identifier", processIdentifier);
     }
 
     public static LogstashMarker documentTypeMarker(String documentIdentifier) {
-        return Markers.append("documenttype-identifier", documentIdentifier);
+        return Markers.append("documenttype_identifier", documentIdentifier);
     }
 
 }
