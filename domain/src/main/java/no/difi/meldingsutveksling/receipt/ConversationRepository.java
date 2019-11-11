@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.google.common.base.Strings;
 import com.querydsl.core.BooleanBuilder;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.springframework.context.annotation.Profile;
@@ -15,7 +17,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +28,11 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     @EntityGraph(value = "Conversation.messageStatuses")
     default Page<Conversation> findWithMessageStatuses(ConversationQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue()
-                , pageable);
+        return findAll(createQuery(input).getValue(), pageable);
+    }
+
+    default Page<Conversation> findWithMessageStatuses(String input, String direction, LocalDate date, Pageable pageable) {
+        return findAll(freeSearchQuery(input, direction, date).getValue(), pageable);
     }
 
     @EntityGraph(value = "Conversation.messageStatuses")
@@ -75,6 +80,33 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
                 , pageable);
     }
 
+    default BooleanBuilder freeSearchQuery(String input, String direction, LocalDate date) {
+        BooleanBuilder builder = new BooleanBuilder();
+        QConversation conversation = QConversation.conversation;
+        if (!Strings.isNullOrEmpty(direction)) {
+            builder.and(conversation.direction.eq(ConversationDirection.valueOf(direction)));
+        }
+        if (date != null) {
+            Instant startInstant = date.atStartOfDay().atZone(DateTimeUtil.DEFAULT_ZONE_ID).toInstant();
+            Instant endInstant = date.atTime(LocalTime.MAX).atZone(DateTimeUtil.DEFAULT_ZONE_ID).toInstant();
+            OffsetDateTime start = OffsetDateTime.ofInstant(startInstant, DateTimeUtil.DEFAULT_ZONE_ID);
+            OffsetDateTime end = OffsetDateTime.ofInstant(endInstant, DateTimeUtil.DEFAULT_ZONE_ID);
+            builder.and(conversation.lastUpdate.between(start, end));
+        }
+        if (Strings.isNullOrEmpty(input)) return builder;
+        builder.andAnyOf(conversation.conversationId.containsIgnoreCase(input),
+                conversation.messageId.containsIgnoreCase(input),
+                conversation.receiverIdentifier.eq(input),
+                conversation.messageReference.eq(input),
+                conversation.messageTitle.containsIgnoreCase(input),
+                conversation.messageStatuses.any().status.containsIgnoreCase(input));
+        try {
+            builder.or(conversation.serviceIdentifier.eq(ServiceIdentifier.valueOf(input)));
+        } catch (IllegalArgumentException e) {
+        }
+        return builder;
+    }
+
     default BooleanBuilder createQuery(ConversationQueryInput input) {
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -82,6 +114,10 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
         if (input.getConversationId() != null) {
             builder.and(conversation.conversationId.eq(input.getConversationId()));
+        }
+
+        if (input.getMessageId() != null) {
+            builder.and(conversation.messageId.eq(input.getMessageId()));
         }
 
         if (input.getReceiverIdentifier() != null) {

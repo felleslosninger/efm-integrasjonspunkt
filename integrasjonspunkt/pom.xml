@@ -353,6 +353,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>4.3.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -480,11 +486,11 @@
         <!-- end logging/monitoring -->
 
         <!-- Spring Boot Devtools causes class loader problems with Metro generated SOAP clients. -->
-        <!--<dependency>-->
-        <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-devtools</artifactId>-->
-        <!--<optional>true</optional>-->
-        <!--</dependency>-->
+<!--        <dependency>-->
+<!--        <groupId>org.springframework.boot</groupId>-->
+<!--        <artifactId>spring-boot-devtools</artifactId>-->
+<!--        <optional>true</optional>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.jolokia</groupId>
