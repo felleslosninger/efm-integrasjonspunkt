@@ -7,10 +7,7 @@ import org.springframework.util.StringUtils;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -19,6 +16,10 @@ public class DateTimeUtil {
 
     public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("Europe/Oslo");
     public static final ZoneId DEFAULT_ZONE_ID = DEFAULT_TIME_ZONE.toZoneId();
+
+    public static OffsetDateTime toOffsetDateTime(LocalDateTime localDateTime) {
+        return OffsetDateTime.ofInstant(localDateTime.atZone(DEFAULT_ZONE_ID).toInstant(), DEFAULT_ZONE_ID);
+    }
 
     public static XMLGregorianCalendar atStartOfDay(XMLGregorianCalendar in) {
         if (in == null) {

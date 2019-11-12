@@ -16,6 +16,12 @@ public class ConversationQueryInput {
     String conversationId;
 
     @ApiModelProperty(
+            value = "The message ID. Usually a UUID",
+            example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
+    )
+    String messageId;
+
+    @ApiModelProperty(
             value = "Receiver identifier",
             example = "0192:987654321"
     )

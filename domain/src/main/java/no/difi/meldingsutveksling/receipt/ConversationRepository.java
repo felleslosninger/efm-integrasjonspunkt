@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.receipt;
 
+import com.google.common.base.Strings;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
+import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.springframework.context.annotation.Profile;
@@ -15,7 +19,10 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +33,11 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     @EntityGraph(value = "Conversation.messageStatuses")
     default Page<Conversation> findWithMessageStatuses(ConversationQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue()
-                , pageable);
+        return findAll(createQuery(input).getValue(), pageable);
+    }
+
+    default Page<Conversation> findWithMessageStatuses(String input, String direction, LocalDate date, Pageable pageable) {
+        return findAll(freeSearchQuery(input, direction, date).getValue(), pageable);
     }
 
     @EntityGraph(value = "Conversation.messageStatuses")
@@ -75,6 +85,40 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
                 , pageable);
     }
 
+    default BooleanBuilder freeSearchQuery(String input, String direction, LocalDate date) {
+        BooleanBuilder builder = new BooleanBuilder();
+        QConversation conversation = QConversation.conversation;
+        if (!Strings.isNullOrEmpty(direction)) {
+            builder.and(conversation.direction.eq(ConversationDirection.valueOf(direction)));
+        }
+        if (date != null) {
+            OffsetDateTime start = DateTimeUtil.toOffsetDateTime(date.atStartOfDay());
+            OffsetDateTime end = DateTimeUtil.toOffsetDateTime(date.atTime(LocalTime.MAX));
+            builder.and(conversation.lastUpdate.between(start, end));
+        }
+        if (Strings.isNullOrEmpty(input)) return builder;
+
+        builder.andAnyOf(Arrays.stream(input.split("\\|\\|"))
+                .map(s -> ExpressionUtils.allOf(Arrays.stream(s.trim().split("&&"))
+                        .map(String::trim)
+                        .map(sa -> {
+                            Predicate p = ExpressionUtils.anyOf(conversation.conversationId.containsIgnoreCase(sa),
+                                    conversation.messageId.containsIgnoreCase(sa),
+                                    conversation.receiverIdentifier.eq(sa),
+                                    conversation.messageReference.eq(sa),
+                                    conversation.messageTitle.containsIgnoreCase(sa),
+                                    conversation.messageStatuses.any().status.containsIgnoreCase(sa));
+                            try {
+                                return ExpressionUtils.anyOf(p, conversation.serviceIdentifier.eq(ServiceIdentifier.valueOf(sa.toUpperCase())));
+                            } catch (IllegalArgumentException e) {
+                            }
+                            return p;
+                        }).toArray(Predicate[]::new)))
+                .toArray(Predicate[]::new)
+        );
+        return builder;
+    }
+
     default BooleanBuilder createQuery(ConversationQueryInput input) {
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -82,6 +126,10 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
         if (input.getConversationId() != null) {
             builder.and(conversation.conversationId.eq(input.getConversationId()));
+        }
+
+        if (input.getMessageId() != null) {
+            builder.and(conversation.messageId.eq(input.getMessageId()));
         }
 
         if (input.getReceiverIdentifier() != null) {
