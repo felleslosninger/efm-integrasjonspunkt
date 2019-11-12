@@ -99,7 +99,8 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
         if (Strings.isNullOrEmpty(input)) return builder;
 
         builder.andAnyOf(Arrays.stream(input.split("\\|\\|"))
-                .map(s -> ExpressionUtils.allOf(Arrays.stream(s.split("&&"))
+                .map(s -> ExpressionUtils.allOf(Arrays.stream(s.trim().split("&&"))
+                        .map(String::trim)
                         .map(sa -> {
                             Predicate p = ExpressionUtils.anyOf(conversation.conversationId.containsIgnoreCase(sa),
                                     conversation.messageId.containsIgnoreCase(sa),
