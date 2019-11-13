@@ -36,7 +36,7 @@ public class MessageStatusController {
             @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
     @JsonView(Views.MessageStatus.class)
-    public Page<MessageStatus> statuses(
+    public Page<MessageStatus> find(
             @Valid MessageStatusQueryInput input,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
@@ -51,7 +51,7 @@ public class MessageStatusController {
             @ApiResponse(code = 404, message = "Not Found", response = String.class)
     })
     @JsonView(Views.MessageStatus.class)
-    public Page<MessageStatus> status(
+    public Page<MessageStatus> findByMessageId(
             @ApiParam(value = "MessageId", required = true, example = "ff88849c-e281-4809-8555-7cd54952b917")
             @PathVariable("messageId") String messageId,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -66,7 +66,7 @@ public class MessageStatusController {
             @ApiResponse(code = 204, message = "No Content", response = String.class)
     })
     @JsonView(Views.MessageStatus.class)
-    public MessageStatus statusPeek() {
+    public MessageStatus peekLatest() {
         return statusRepo.findFirstByOrderByLastUpdateAsc()
                 .orElseThrow(NoContentException::new);
     }

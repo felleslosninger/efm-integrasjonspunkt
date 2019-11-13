@@ -1,0 +1,72 @@
+= Messages out
+
+[#messages-out-create]
+== Create message
+
+The service is used to perform the first step for sending a message, which is uploading the Standard
+Business Document.
+
+=== Example 1 - Creating an arkvimelding
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create/response-fields.adoc[]
+--
+
+[#messages-out-multipart]
+== Send multipart message
+
+The service is used to send messages using multipart upload.
+
+=== Example 1 - Send a multipart arkvimelding
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/multipart/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/multipart/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/multipart/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parts
+[.request-parts]
+--
+include::{snippets}/messages/out/multipart/request-parts.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/multipart/response-fields.adoc[]
+--

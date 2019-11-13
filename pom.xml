@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.difi.meldingsutveksling</groupId>
@@ -35,6 +36,16 @@
             <url>http://jcenter.bintray.com</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>jcenter-releases</id>
+            <name>jcenter</name>
+            <url>http://jcenter.bintray.com</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <spring.cloud.version>Greenwich.SR2</spring.cloud.version>
@@ -64,7 +75,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.7.RELEASE</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <modules>
@@ -495,12 +506,16 @@
                         <execution>
                             <id>java-compile</id>
                             <phase>compile</phase>
-                            <goals> <goal>compile</goal> </goals>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
                         </execution>
                         <execution>
                             <id>java-test-compile</id>
                             <phase>test-compile</phase>
-                            <goals> <goal>testCompile</goal> </goals>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>

@@ -1,0 +1,39 @@
+= NextMove API Specification
+{project-version}
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:icons: font
+:source-highlighter: highlightjs
+
+== The services
+
+
+|===
+|HTTP Method |URL |Description
+
+|POST
+|<<messages-out-create,/api/messages/out>>
+|<<messages-out-create>>
+
+|POST
+|<<messages-out-multipart,/api/messages/out/multipart>>
+|<<messages-out-multipart>>
+
+|GET
+|<<statuses-find,/api/statuses>>
+|<<statuses-find>>
+
+|GET
+|<<statuses-find-by-message-id,/api/statuses/{messageId}>>
+|<<statuses-find-by-message-id>>
+
+|GET
+|<<statuses-peek-latest,/api/statuses/peek>>
+|<<statuses-peek-latest>>
+
+|===
+
+include::messages-out.adoc[leveloffset=+1]
+include::statuses.adoc[leveloffset=+1]
