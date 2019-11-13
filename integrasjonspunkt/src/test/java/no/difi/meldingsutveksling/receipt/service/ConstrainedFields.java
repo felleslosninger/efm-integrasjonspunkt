@@ -18,6 +18,6 @@ public class ConstrainedFields {
     FieldDescriptor withPath(String path) {
         return fieldWithPath(path).attributes(key("constraints").value(StringUtils
                 .collectionToDelimitedString(this.constraintDescriptions
-                        .descriptionsForProperty(path), ". ")));
+                        .descriptionsForProperty(path), ".\n")));
     }
 }
