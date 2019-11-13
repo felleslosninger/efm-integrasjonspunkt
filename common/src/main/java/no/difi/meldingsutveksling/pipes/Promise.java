@@ -63,12 +63,6 @@ public class Promise<T> {
             return resolved.get();
         }
 
-        Throwable thowable = rejected.get();
-
-        if (thowable instanceof RuntimeException) {
-            throw (RuntimeException) thowable;
-        }
-
-        throw new PromiseRuntimeException("Promise was rejected", thowable);
+        throw new PromiseRuntimeException("Promise was rejected", rejected.get());
     }
 }
