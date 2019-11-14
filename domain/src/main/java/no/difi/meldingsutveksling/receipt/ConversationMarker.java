@@ -15,7 +15,7 @@ public class ConversationMarker {
     private static final String STATUS = "status";
     private static final String DESCRIPTION = "description";
     private static final String DIRECTION = "direction";
-    private static final String PROCESS = "process";
+    private static final String PROCESS = "process_identifier";
 
     private ConversationMarker() {
     }
