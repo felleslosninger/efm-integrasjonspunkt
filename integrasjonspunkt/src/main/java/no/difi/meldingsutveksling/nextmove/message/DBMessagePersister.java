@@ -2,13 +2,15 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.PersistenceException;
-import org.springframework.transaction.annotation.Transactional;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -59,8 +61,14 @@ public class DBMessagePersister implements MessagePersister {
                 .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));
 
         try {
-            return FileEntryStream.of(entry.getContent().getBinaryStream(), entry.getSize());
-        } catch (SQLException e) {
+            InputStream is = entry.getContent().getBinaryStream();
+            TmpFile tmpFile = TmpFile.create(is);
+            is.close();
+
+            File file = tmpFile.getFile();
+            AutoClosingInputStream autoClosingInputStream = new AutoClosingInputStream(tmpFile.getInputStream(), tmpFile::delete);
+            return FileEntryStream.of(autoClosingInputStream, file.length());
+        } catch (SQLException | IOException e) {
             throw new PersistenceException("Error reading data stream from database", e);
         }
     }
