@@ -1,4 +1,4 @@
-no.difi.meldingsutveksling.validation.EqualToPropertyValidator
+no.difi.meldingsutveksling.validation.IntegrasjonspunktOrganizationValidator
 no.difi.meldingsutveksling.validation.IsDocumentTypeValidator
 no.difi.meldingsutveksling.validation.InServiceRegistryValidator
 no.difi.meldingsutveksling.validation.InstanceOfValidator

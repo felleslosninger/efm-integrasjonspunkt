@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.snippet.Attributes.key;
 
-public class ConstrainedFields {
+class ConstrainedFields {
 
     private final ConstraintDescriptions constraintDescriptions;
 

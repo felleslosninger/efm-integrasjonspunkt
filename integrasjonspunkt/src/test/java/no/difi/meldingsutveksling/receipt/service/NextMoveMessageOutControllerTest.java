@@ -5,6 +5,7 @@ import lombok.Data;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
@@ -13,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,22 +56,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class NextMoveMessageOutControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
+    @Autowired private MockMvc mvc;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private NextMoveMessageService messageService;
+    @MockBean private NextMoveMessageService messageService;
+    @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @Mock private NextMoveOutMessage messageMock;
+    @Mock private IntegrasjonspunktProperties.Organization organization;
 
     @Data
     public static class Message {
         private BusinessMessage businessMessage;
         private String standard;
         private String type;
+    }
+
+    @Before
+    public void before() {
+        given(organization.getNumber()).willReturn("910077473");
+        given(integrasjonspunktProperties.getOrg()).willReturn(organization);
     }
 
     @Test
