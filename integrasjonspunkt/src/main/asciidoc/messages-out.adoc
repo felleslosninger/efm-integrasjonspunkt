@@ -19,6 +19,48 @@ include::{snippets}/messages/out/find/http-request.adoc[]
 .Response
 include::{snippets}/messages/out/find/http-response.adoc[]
 
+=== Example 2 - Find all outgoing DPO messages
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/find/dpo/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/find/dpo/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/find/dpo/http-response.adoc[]
+
+=== Example 3 - Sorting
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/find/sorting/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/find/sorting/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/find/sorting/http-response.adoc[]
+
+=== Example 4 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/find/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/find/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/find/paging/http-response.adoc[]
+
 === About the service
 
 [role="primary"]

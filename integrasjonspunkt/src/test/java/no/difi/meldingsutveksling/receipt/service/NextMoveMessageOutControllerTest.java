@@ -2,10 +2,6 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
@@ -37,13 +33,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -80,15 +75,15 @@ public class NextMoveMessageOutControllerTest {
 
     @Captor private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
 
-    private MessageData arkivmeldingMessageData = new MessageData()
+    private final MessageData arkivmeldingMessageData = new MessageData()
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
             .setType("arkivmelding")
             .setBusinessMessage(new ArkivmeldingMessage()
                     .setHoveddokument("before_the_law.txt"));
 
-    private NextMoveOutMessage arkivmeldingMessage = NextMoveOutMessage.of(getResponseSbd(arkivmeldingMessageData), ServiceIdentifier.DPO);
+    private final NextMoveOutMessage arkivmeldingMessage = NextMoveOutMessage.of(getResponseSbd(arkivmeldingMessageData), ServiceIdentifier.DPO);
 
-    private MessageData dpiDigitalMessageData = new MessageData()
+    private final MessageData dpiDigitalMessageData = new MessageData()
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
             .setType("digital")
             .setBusinessMessage(new DpiDigitalMessage()
@@ -106,7 +101,7 @@ public class NextMoveMessageOutControllerTest {
 
             );
 
-    private NextMoveOutMessage dpiDigitalMessage = NextMoveOutMessage.of(getResponseSbd(dpiDigitalMessageData), ServiceIdentifier.DPO);
+    private final NextMoveOutMessage dpiDigitalMessage = NextMoveOutMessage.of(getResponseSbd(dpiDigitalMessageData), ServiceIdentifier.DPI);
 
     @Data
     private static class MessageData {
@@ -264,6 +259,67 @@ public class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).findMessages(any(Predicate.class), any(Pageable.class));
+    }
+
+    @Test
+    public void findDpo() throws Exception {
+        given(messageService.findMessages(any(Predicate.class), any(Pageable.class)))
+                .willAnswer(invocation -> {
+                    List<NextMoveMessage> content = Collections.singletonList(arkivmeldingMessage);
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/messages/out")
+                        .param("serviceIdentifier", "DPO")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/find/dpo"));
+
+        verify(messageService).findMessages(any(Predicate.class), any(Pageable.class));
+    }
+
+    @Test
+    public void findSorting() throws Exception {
+        given(messageService.findMessages(any(), any()))
+                .willAnswer(invocation -> {
+                    List<NextMoveMessage> content = Arrays.asList(arkivmeldingMessage, dpiDigitalMessage);
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/messages/out")
+                        .param("sort", "lastUpdated,asc")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/find/sorting"));
+
+        verify(messageService).findMessages(any(), any());
+    }
+
+    @Test
+    public void findPaging() throws Exception {
+        given(messageService.findMessages(any(), any()))
+                .willAnswer(invocation -> {
+                    List<NextMoveMessage> content = Collections.singletonList(dpiDigitalMessage);
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/messages/out")
+                        .param("page", "1")
+                        .param("size", "1")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/find/paging"));
+
+        verify(messageService).findMessages(any(), any());
     }
 
     @Test
