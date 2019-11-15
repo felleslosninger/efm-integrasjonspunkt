@@ -32,6 +32,14 @@ image:difi-logo.png[]
 |<<messages-out-create,/api/messages/out>>
 |<<messages-out-create>>
 
+|UPDATE
+|<<messages-out-upload,/api/messages/out/{messageId}>>
+|<<messages-out-upload>>
+
+|POST
+|<<messages-out-send,/api/messages/out/{messageId}>>
+|<<messages-out-send>>
+
 |POST
 |<<messages-out-multipart,/api/messages/out/multipart>>
 |<<messages-out-multipart>>

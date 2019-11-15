@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.exceptions.MissingHttpHeaderException;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,8 +58,9 @@ public class NextMoveUploadedFile implements MultipartFile {
     }
 
     @Override
+    @SneakyThrows
     public byte[] getBytes() {
-        throw new UnsupportedOperationException();
+        return IOUtils.toByteArray(request.getInputStream());
     }
 
     @Override

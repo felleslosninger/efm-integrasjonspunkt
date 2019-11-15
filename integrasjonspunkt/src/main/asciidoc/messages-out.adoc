@@ -36,7 +36,7 @@ include::{snippets}/messages/out/find/response-fields.adoc[]
 --
 
 [#messages-out-get]
-== Get message by messageId
+== Get message
 
 The service is used to get a message on the outgoing queue by messageId.
 
@@ -74,7 +74,7 @@ include::{snippets}/messages/out/get/response-fields.adoc[]
 The service is used to perform the first step for sending a message, which is uploading the Standard
 Business Document.
 
-=== Example 1 - Creating an arkivmelding
+=== Example 1 - Creating an arkivmelding message
 
 [source,http,role="primary"]
 .Curl
@@ -88,9 +88,7 @@ include::{snippets}/messages/out/create/http-request.adoc[]
 .Response
 include::{snippets}/messages/out/create/http-response.adoc[]
 
-=== About the service
-
-[role="primary"]
+[role="secondary"]
 .Request fields
 [.request-fields]
 --
@@ -102,6 +100,100 @@ include::{snippets}/messages/out/create/request-fields.adoc[]
 [.response-fields]
 --
 include::{snippets}/messages/out/create/response-fields.adoc[]
+--
+
+=== Example 2 - Creating an DPI digital message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create-dpi-digital/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create-dpi-digital/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create-dpi-digital/http-response.adoc[]
+
+[role="secondary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create-dpi-digital/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create-dpi-digital/response-fields.adoc[]
+--
+
+[#messages-out-upload]
+== Upload attachment
+
+The service is used to upload an attachment to a given message.
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/upload/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/upload/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/upload/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request headers
+[.request-headers]
+--
+include::{snippets}/messages/out/upload/request-headers.adoc[]
+--
+
+[role="secondary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/out/upload/request-parameters.adoc[]
+--
+
+[#messages-out-send]
+== Send message
+
+The service is used to send a given message.
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/send/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/send/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/send/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request headers
+[.request-headers]
+--
+include::{snippets}/messages/out/send/request-headers.adoc[]
+--
+
+[role="secondary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/out/send/request-parameters.adoc[]
 --
 
 [#messages-out-multipart]
@@ -139,38 +231,9 @@ include::{snippets}/messages/out/multipart/request-parts.adoc[]
 include::{snippets}/messages/out/multipart/response-fields.adoc[]
 --
 
-=== Example 1 - Creating an arkivmelding
-
-[source,http,role="primary"]
-.Curl
-include::{snippets}/messages/out/create/curl-request.adoc[]
-
-[source,http,role="secondary"]
-.Request
-include::{snippets}/messages/out/create/http-request.adoc[]
-
-[source,http,role="secondary"]
-.Response
-include::{snippets}/messages/out/create/http-response.adoc[]
-
-=== About the service
-
-[role="primary"]
-.Request fields
-[.request-fields]
---
-include::{snippets}/messages/out/create/request-fields.adoc[]
---
-
-[role="secondary"]
-.Response fields
-[.response-fields]
---
-include::{snippets}/messages/out/create/response-fields.adoc[]
---
 
 [#messages-out-delete]
-== Delete a message by messageId
+== Delete message
 
 The service is used to delete a message on the outgoing queue by messageId.
 

@@ -2,6 +2,10 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
@@ -12,9 +16,12 @@ import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,6 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +37,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -39,9 +49,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -65,6 +77,8 @@ public class NextMoveMessageOutControllerTest {
 
     @Mock private NextMoveOutMessage messageMock;
     @Mock private IntegrasjonspunktProperties.Organization organization;
+
+    @Captor private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
 
     private MessageData arkivmeldingMessageData = new MessageData()
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
@@ -147,21 +161,14 @@ public class NextMoveMessageOutControllerTest {
     }
 
     @Test
-    public void createMessage() throws Exception {
-        MessageData message = new MessageData()
-                .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
-                .setType("arkivmelding")
-                .setBusinessMessage(new ArkivmeldingMessage()
-                        .setHoveddokument("before_the_law.txt"));
-
-
+    public void createArkivmeldingMessage() throws Exception {
         given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(arkivmeldingMessage.getSbd());
 
         mvc.perform(
                 post("/api/messages/out")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(getInputSbd(message)))
+                        .content(objectMapper.writeValueAsBytes(getInputSbd(arkivmeldingMessageData)))
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -178,6 +185,37 @@ public class NextMoveMessageOutControllerTest {
                         responseFields()
                                 .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
                                 .and(arkivmeldingMessageDescriptors("arkivmelding."))
+                        )
+                );
+
+        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+    }
+
+    @Test
+    public void createDpiDigitalMessage() throws Exception {
+        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageMock.getSbd()).willReturn(dpiDigitalMessage.getSbd());
+
+        mvc.perform(
+                post("/api/messages/out")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsBytes(getInputSbd(dpiDigitalMessageData)))
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/create-dpi-digital",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(dpiDigitalMessageDescriptors("digital.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(dpiDigitalMessageDescriptors("digital."))
                         )
                 );
 
@@ -258,6 +296,32 @@ public class NextMoveMessageOutControllerTest {
     }
 
     @Test
+    public void sendMessage() throws Exception {
+        given(messageService.getMessage(any())).willReturn(arkivmeldingMessage);
+
+        mvc.perform(
+                post("/api/messages/out/{messageId}", arkivmeldingMessage.getMessageId())
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/send",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestParameters(
+                                parameterWithName("messageId").optional().description("The messageId")
+                        )
+                        )
+                );
+
+        verify(messageService).getMessage(eq(arkivmeldingMessage.getMessageId()));
+        verify(messageService).sendMessage(same(arkivmeldingMessage));
+    }
+
+    @Test
     public void deleteMessage() throws Exception {
         mvc.perform(
                 delete("/api/messages/out/{messageId}", arkivmeldingMessage.getMessageId())
@@ -279,6 +343,64 @@ public class NextMoveMessageOutControllerTest {
 
         verify(messageService).deleteMessage(eq(arkivmeldingMessageData.messageId));
     }
+
+    @Test
+    public void uploadFile() throws Exception {
+        given(messageService.getMessage(any())).willReturn(arkivmeldingMessage);
+
+        mvc.perform(
+                put("/api/messages/out/{messageId}", arkivmeldingMessageData.messageId)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; name=Before The Law; filename=before_the_law.txt")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .content("Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...".getBytes(StandardCharsets.UTF_8))
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/upload",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders()
+                                .and(getDefaultHeaderDescriptors())
+                                .and(headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type of the attachment."),
+                                        headerWithName(HttpHeaders.CONTENT_DISPOSITION).description("The title of the document. " +
+                                                "The title can alternatively be specified using the name attribute of the Content-Disposition header. " +
+                                                "The filename is specified in the filename attribute of this header.")
+                                ),
+                        requestParameters(
+                                parameterWithName("messageId").optional().description("The messageId"),
+                                parameterWithName("title").optional().description("The attachment title can alternatively be specified in this request parameter. " +
+                                        "If not specified here, then the title is extracted from the Content-Disposition HTTP header.")
+                        ))
+                );
+
+        verify(messageService).getMessage(eq(arkivmeldingMessageData.messageId));
+        verify(messageService).addFile(same(arkivmeldingMessage), nextMoveUploadedFileArgumentCaptor.capture());
+
+        NextMoveUploadedFile value = nextMoveUploadedFileArgumentCaptor.getValue();
+        assertThat(value.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+        assertThat(value.getOriginalFilename()).isEqualTo("before_the_law.txt");
+        assertThat(value.getName()).isEqualTo("Before The Law");
+        assertThat(new String(value.getBytes(), StandardCharsets.UTF_8)).isEqualTo("Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...");
+    }
+
+
+//    @PostMapping("/{messageId}")
+//    @ApiOperation(value = "Send message", notes = "Send the message with supplied messageId")
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+//            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+//    })
+//    public void sendMessage(
+//            @ApiParam(
+//                    value = "The message ID. Usually a UUID",
+//                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+//                    required = true
+//            )
+//            @PathVariable("messageId") String messageId) {
+//        NextMoveOutMessage message = messageService.getMessage(messageId);
+//        messageService.sendMessage(message);
+//    }
 
     private StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
