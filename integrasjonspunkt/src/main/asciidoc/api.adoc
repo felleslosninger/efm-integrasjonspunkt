@@ -24,6 +24,10 @@ image:difi-logo.png[]
 |<<messages-out-find,/api/messages/out>>
 |<<messages-out-find>>
 
+|GET
+|<<messages-out-get,/api/messages/out/{messageId}>>
+|<<messages-out-get>>
+
 |POST
 |<<messages-out-create,/api/messages/out>>
 |<<messages-out-create>>
@@ -31,6 +35,10 @@ image:difi-logo.png[]
 |POST
 |<<messages-out-multipart,/api/messages/out/multipart>>
 |<<messages-out-multipart>>
+
+|DELETE
+|<<messages-out-delete,/api/messages/out/{messageId}>>
+|<<messages-out-delete>>
 
 |GET
 |<<statuses-find,/api/statuses>>

@@ -35,6 +35,39 @@ include::{snippets}/messages/out/find/request-parameters.adoc[]
 include::{snippets}/messages/out/find/response-fields.adoc[]
 --
 
+[#messages-out-get]
+== Get message by messageId
+
+The service is used to get a message on the outgoing queue by messageId.
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/get/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/get/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/get/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/out/get/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/get/response-fields.adoc[]
+--
+
 [#messages-out-create]
 == Create message
 
@@ -134,5 +167,31 @@ include::{snippets}/messages/out/create/request-fields.adoc[]
 [.response-fields]
 --
 include::{snippets}/messages/out/create/response-fields.adoc[]
+--
+
+[#messages-out-delete]
+== Delete a message by messageId
+
+The service is used to delete a message on the outgoing queue by messageId.
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/delete/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/delete/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/delete/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/out/delete/request-parameters.adoc[]
 --
 
