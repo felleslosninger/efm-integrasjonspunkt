@@ -1,17 +1,15 @@
 package no.difi.meldingsutveksling.receipt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.core.types.Predicate;
 import lombok.Data;
-import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import org.junit.Before;
@@ -22,9 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,7 +31,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
@@ -42,11 +45,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -56,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class NextMoveMessageOutControllerTest {
 
+    @Autowired private Clock clock;
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
@@ -113,13 +117,9 @@ public class NextMoveMessageOutControllerTest {
                                                 "The originalFilename will be used as the name of the file in the ASiC.\n" +
                                                 "Please note that the Content-Type of the part must be set to the MIME-type of the attachment.")
                         ),
-                        responseFieldsStandardBusinessDocument()
-                                .andWithPrefix("arkivmelding.",
-                                        fieldWithPath("hoveddokument")
-                                                .type(JsonFieldType.STRING)
-                                                .optional()
-                                                .description("Name of the attachment that is the main document.")
-                                )
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
                         )
                 );
 
@@ -128,8 +128,6 @@ public class NextMoveMessageOutControllerTest {
 
     @Test
     public void createMessage() throws Exception {
-        ConstrainedFields fields = new ConstrainedFields(StandardBusinessDocument.class);
-
         Message message = new Message()
                 .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
                 .setType("arkivmelding")
@@ -154,26 +152,89 @@ public class NextMoveMessageOutControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestFieldsStandardBusinessDocument()
-                                .andWithPrefix("arkivmelding.",
-                                        fieldWithPath("hoveddokument")
-                                                .type(JsonFieldType.STRING)
-                                                .optional()
-                                                .description("Name of the attachment that is the main document.")
-                                ),
-                        responseFieldsStandardBusinessDocument()
-                                .andWithPrefix("arkivmelding.",
-                                        fieldWithPath("hoveddokument")
-                                                .type(JsonFieldType.STRING)
-                                                .optional()
-                                                .description("Name of the attachment that is the main document.")
-                                )
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(arkivmeldingMessageDescriptors("arkivmelding.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
                         )
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
     }
 
+    @Test
+    public void find() throws Exception {
+        NextMoveOutMessage message1 = NextMoveOutMessage.of(getResponseSbd(
+                new Message()
+                        .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
+                        .setType("arkivmelding")
+                        .setBusinessMessage(new ArkivmeldingMessage()
+                                .setHoveddokument("before_the_law.txt"))
+        ), ServiceIdentifier.DPO);
+
+        NextMoveOutMessage message2 = NextMoveOutMessage.of(getResponseSbd(
+                new Message()
+                        .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
+                        .setType("digital")
+                        .setBusinessMessage(new DpiDigitalMessage()
+                                .setSikkerhetsnivaa(4)
+                                .setHoveddokument("kafka_quotes.txt")
+                                .setSpraak("en")
+                                .setTittel("Kafka quotes")
+                                .setDigitalPostInfo(new DigitalPostInfo()
+                                        .setVirkningsdato(LocalDate.now(clock).plusDays(5))
+                                        .setAapningskvittering(true)
+                                ).setVarsler(new DpiNotification()
+                                        .setEpostTekst("Many a book is like a key to unknown chambers within the castle of one’s own self.")
+                                        .setSmsTekst("A book must be the axe for the frozen sea within us.")
+                                )
+
+                        )
+        ), ServiceIdentifier.DPO);
+
+        given(messageService.findMessages(any(Predicate.class), any(Pageable.class)))
+                .willAnswer(invocation -> {
+                    List<NextMoveMessage> content = Arrays.asList(message1, message2);
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/messages/out")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/find",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestParameters(
+                                parameterWithName("conversationId").optional().description("Filter on conversationId"),
+                                parameterWithName("messageId").optional().description("Filter on messageId"),
+                                parameterWithName("processIdentifier").optional().description("Filter on processIdentifier"),
+                                parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier"),
+                                parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier"),
+                                parameterWithName("serviceIdentifier").optional().description(String.format("Filter on service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", "))))
+                        ).and(getPagingParameterDescriptors()),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
+                                .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
+                                .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
+                                .and(subsectionWithPath("content[].digital.").description("The digital DPI business message").optional())
+                                .and(dpiDigitalMessageDescriptors("content[].digital."))
+                                .and(getPageFieldDescriptors())
+                                .andWithPrefix("pageable.", getPageableFieldDescriptors())
+                        )
+                );
+
+        verify(messageService).findMessages(any(Predicate.class), any(Pageable.class));
+    }
 
     private StandardBusinessDocument getInputSbd(Message message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();

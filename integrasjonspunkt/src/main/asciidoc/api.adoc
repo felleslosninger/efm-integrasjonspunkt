@@ -1,17 +1,28 @@
-= NextMove API Specification
-{project-version}
 :doctype: book
 :toc: left
 :toc-title: Table of Contents
-:toclevels: 3
+:toclevels: 2
+:stylesheet: asciidoctor.css
 :icons: font
 :source-highlighter: highlightjs
+:imagesdir: ./images
+
+image:difi-logo.png[]
+
+= NextMove API Specification
+{project-version}
+
+
 
 == The services
 
 
 |===
 |HTTP Method |URL |Description
+
+|GET
+|<<messages-out-find,/api/messages/out>>
+|<<messages-out-find>>
 
 |POST
 |<<messages-out-create,/api/messages/out>>

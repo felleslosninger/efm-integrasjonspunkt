@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
         InnsynskravMessage.class,
         PubliseringMessage.class
 }, discriminator = "type")
-public abstract class BusinessMessage extends AbstractEntity<Long> {
+public abstract class BusinessMessage<T extends BusinessMessage<T>> extends AbstractEntity<Long> {
 
     @JsonIgnore
     private String type;
@@ -32,4 +32,14 @@ public abstract class BusinessMessage extends AbstractEntity<Long> {
     private Integer sikkerhetsnivaa;
 
     private String hoveddokument;
+
+    public T setSikkerhetsnivaa(Integer sikkerhetsnivaa) {
+        this.sikkerhetsnivaa = sikkerhetsnivaa;
+        return (T) this;
+    }
+
+    public T setHoveddokument(String hoveddokument) {
+        this.hoveddokument = hoveddokument;
+        return (T) this;
+    }
 }

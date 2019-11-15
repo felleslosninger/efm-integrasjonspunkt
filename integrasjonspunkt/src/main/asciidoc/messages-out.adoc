@@ -1,12 +1,47 @@
 = Messages out
 
+[#messages-out-find]
+== Find messages
+
+The service is used to find messages on the outgoing queue.
+
+=== Example 1 - Find all outgoing messages
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/find/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/find/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/find/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/out/find/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/find/response-fields.adoc[]
+--
+
 [#messages-out-create]
 == Create message
 
 The service is used to perform the first step for sending a message, which is uploading the Standard
 Business Document.
 
-=== Example 1 - Creating an arkvimelding
+=== Example 1 - Creating an arkivmelding
 
 [source,http,role="primary"]
 .Curl
@@ -70,3 +105,34 @@ include::{snippets}/messages/out/multipart/request-parts.adoc[]
 --
 include::{snippets}/messages/out/multipart/response-fields.adoc[]
 --
+
+=== Example 1 - Creating an arkivmelding
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create/response-fields.adoc[]
+--
+
