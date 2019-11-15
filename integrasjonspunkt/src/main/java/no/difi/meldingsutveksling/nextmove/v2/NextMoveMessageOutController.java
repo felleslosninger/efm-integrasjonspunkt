@@ -125,6 +125,23 @@ public class NextMoveMessageOutController {
         return messageService.getMessage(messageId).getSbd();
     }
 
+    @DeleteMapping("/{messageId}")
+    @ApiOperation(value = "Delete message", notes = "Delete a message with given messageId. Also deletes all associated files.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+    })
+    @Transactional
+    public void deleteMessage(
+            @ApiParam(
+                    value = "The message ID (UUID)",
+                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+                    required = true
+            )
+            @PathVariable("messageId") String messageId) {
+        messageService.deleteMessage(messageId);
+    }
+
     @PutMapping(value = "/{messageId}")
     @ApiOperation(value = "Upload file", notes = "Upload a file to the message with supplied messageId")
     @ApiResponses({

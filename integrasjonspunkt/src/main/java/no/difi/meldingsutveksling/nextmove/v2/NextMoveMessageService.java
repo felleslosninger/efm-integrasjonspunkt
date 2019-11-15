@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.Conversation;
@@ -50,6 +51,8 @@ public class NextMoveMessageService {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final MessagePersister messagePersister;
+    private final BusinessMessageFileRepository businessMessageFileRepository;
 
     @Transactional(readOnly = true)
     public NextMoveOutMessage getMessage(String messageId) {
@@ -74,6 +77,22 @@ public class NextMoveMessageService {
         messageRepo.save(message);
         conversationService.registerConversation(message);
         return message;
+    }
+
+    @Transactional
+    public void deleteMessage(String messageId) {
+        try {
+            messagePersister.delete(messageId);
+        } catch (IOException e) {
+            log.error("Error deleting files from message with id={}", messageId, e);
+        }
+
+        messageRepo.findIdByMessageId(messageId).ifPresent(
+                id -> {
+                    businessMessageFileRepository.deleteFilesByMessageId(id);
+                    messageRepo.deleteMessageById(id);
+                }
+        );
     }
 
     public void addFile(NextMoveOutMessage message, MultipartFile file) {
