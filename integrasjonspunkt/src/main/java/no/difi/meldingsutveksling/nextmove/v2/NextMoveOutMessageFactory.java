@@ -7,10 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
-import no.difi.meldingsutveksling.domain.sbdh.Sender;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownNextMoveDocumentTypeException;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -70,6 +67,18 @@ public class NextMoveOutMessageFactory {
 
         if (documentIdentification.getCreationDateAndTime() == null) {
             documentIdentification.setCreationDateAndTime(OffsetDateTime.now(clock));
+        }
+
+        if (!sbd.getExpectedResponseDateTime().isPresent()) {
+            OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
+            if (sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().isEmpty()) {
+                CorrelationInformation ci = new CorrelationInformation().setExpectedResponseDateTime(ttl);
+                sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().add(ci);
+            } else {
+                sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().stream()
+                        .findFirst()
+                        .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
+            }
         }
 
         if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI) {
