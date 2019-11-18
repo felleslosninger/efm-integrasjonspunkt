@@ -130,7 +130,7 @@ include::{snippets}/messages/out/create/http-request.adoc[]
 .Response
 include::{snippets}/messages/out/create/http-response.adoc[]
 
-[role="secondary"]
+[role="primary"]
 .Request fields
 [.request-fields]
 --
@@ -158,7 +158,7 @@ include::{snippets}/messages/out/create-dpi-digital/http-request.adoc[]
 .Response
 include::{snippets}/messages/out/create-dpi-digital/http-response.adoc[]
 
-[role="secondary"]
+[role="primary"]
 .Request fields
 [.request-fields]
 --
@@ -171,6 +171,33 @@ include::{snippets}/messages/out/create-dpi-digital/request-fields.adoc[]
 --
 include::{snippets}/messages/out/create-dpi-digital/response-fields.adoc[]
 --
+
+=== Example 3 - Validation error
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/messages/out/create/service-not-enabled/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create/service-not-enabled/response-fields.adoc[]
+--
+
+=== Example 4 - Validation error with extended info
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/messages/out/create/constraint-validation/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create/constraint-validation/response-fields.adoc[]
+--
+
 
 [#messages-out-upload]
 == Upload attachment

@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
-import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -35,15 +34,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -75,43 +72,6 @@ public class NextMoveMessageOutControllerTest {
 
     @Captor private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
 
-    private final MessageData arkivmeldingMessageData = new MessageData()
-            .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
-            .setType("arkivmelding")
-            .setBusinessMessage(new ArkivmeldingMessage()
-                    .setHoveddokument("before_the_law.txt"));
-
-    private final NextMoveOutMessage arkivmeldingMessage = NextMoveOutMessage.of(getResponseSbd(arkivmeldingMessageData), ServiceIdentifier.DPO);
-
-    private final MessageData dpiDigitalMessageData = new MessageData()
-            .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
-            .setType("digital")
-            .setBusinessMessage(new DpiDigitalMessage()
-                    .setSikkerhetsnivaa(4)
-                    .setHoveddokument("kafka_quotes.txt")
-                    .setSpraak("en")
-                    .setTittel("Kafka quotes")
-                    .setDigitalPostInfo(new DigitalPostInfo()
-                            .setVirkningsdato(LocalDate.parse("2019-04-01"))
-                            .setAapningskvittering(true)
-                    ).setVarsler(new DpiNotification()
-                            .setEpostTekst("Many a book is like a key to unknown chambers within the castle of one’s own self.")
-                            .setSmsTekst("A book must be the axe for the frozen sea within us.")
-                    )
-
-            );
-
-    private final NextMoveOutMessage dpiDigitalMessage = NextMoveOutMessage.of(getResponseSbd(dpiDigitalMessageData), ServiceIdentifier.DPI);
-
-    @Data
-    private static class MessageData {
-        private final String messageId = UUID.randomUUID().toString();
-        private final String conversationId = UUID.randomUUID().toString();
-        private BusinessMessage businessMessage;
-        private String standard;
-        private String type;
-    }
-
     @Before
     public void before() {
         given(organization.getNumber()).willReturn("910077473");
@@ -121,11 +81,11 @@ public class NextMoveMessageOutControllerTest {
     @Test
     public void multipart() throws Exception {
         given(messageService.createMessage(any(StandardBusinessDocument.class), anyList())).willReturn(messageMock);
-        given(messageMock.getSbd()).willReturn(arkivmeldingMessage.getSbd());
+        given(messageMock.getSbd()).willReturn(ARKIVMELDING_MESSAGE.getSbd());
 
         mvc.perform(
                 MockMvcRequestBuilders.multipart("/api/messages/out/multipart")
-                        .file(new MockMultipartFile("sbd", null, MediaType.APPLICATION_JSON_UTF8_VALUE, objectMapper.writeValueAsBytes(getInputSbd(arkivmeldingMessageData))))
+                        .file(new MockMultipartFile("sbd", null, MediaType.APPLICATION_JSON_UTF8_VALUE, objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT)))
                         .file(new MockMultipartFile("Before The Law", "before_the_law.txt", MediaType.TEXT_PLAIN_VALUE, "Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...".getBytes(StandardCharsets.UTF_8)))
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
@@ -158,12 +118,12 @@ public class NextMoveMessageOutControllerTest {
     @Test
     public void createArkivmeldingMessage() throws Exception {
         given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
-        given(messageMock.getSbd()).willReturn(arkivmeldingMessage.getSbd());
+        given(messageMock.getSbd()).willReturn(ARKIVMELDING_MESSAGE.getSbd());
 
         mvc.perform(
                 post("/api/messages/out")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(getInputSbd(arkivmeldingMessageData)))
+                        .content(objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT))
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -189,12 +149,12 @@ public class NextMoveMessageOutControllerTest {
     @Test
     public void createDpiDigitalMessage() throws Exception {
         given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
-        given(messageMock.getSbd()).willReturn(dpiDigitalMessage.getSbd());
+        given(messageMock.getSbd()).willReturn(DPI_DIGITAL_MESSAGE.getSbd());
 
         mvc.perform(
                 post("/api/messages/out")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .content(objectMapper.writeValueAsBytes(getInputSbd(dpiDigitalMessageData)))
+                        .content(objectMapper.writeValueAsBytes(DPI_DIGITAL_INPUT))
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -221,7 +181,7 @@ public class NextMoveMessageOutControllerTest {
     public void find() throws Exception {
         given(messageService.findMessages(any(Predicate.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<NextMoveMessage> content = Arrays.asList(arkivmeldingMessage, dpiDigitalMessage);
+                    List<NextMoveMessage> content = Arrays.asList(ARKIVMELDING_MESSAGE, DPI_DIGITAL_MESSAGE);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -265,7 +225,7 @@ public class NextMoveMessageOutControllerTest {
     public void findDpo() throws Exception {
         given(messageService.findMessages(any(Predicate.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<NextMoveMessage> content = Collections.singletonList(arkivmeldingMessage);
+                    List<NextMoveMessage> content = Collections.singletonList(ARKIVMELDING_MESSAGE);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -285,7 +245,7 @@ public class NextMoveMessageOutControllerTest {
     public void findSorting() throws Exception {
         given(messageService.findMessages(any(), any()))
                 .willAnswer(invocation -> {
-                    List<NextMoveMessage> content = Arrays.asList(arkivmeldingMessage, dpiDigitalMessage);
+                    List<NextMoveMessage> content = Arrays.asList(ARKIVMELDING_MESSAGE, DPI_DIGITAL_MESSAGE);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -305,7 +265,7 @@ public class NextMoveMessageOutControllerTest {
     public void findPaging() throws Exception {
         given(messageService.findMessages(any(), any()))
                 .willAnswer(invocation -> {
-                    List<NextMoveMessage> content = Collections.singletonList(dpiDigitalMessage);
+                    List<NextMoveMessage> content = Collections.singletonList(DPI_DIGITAL_MESSAGE);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -324,10 +284,10 @@ public class NextMoveMessageOutControllerTest {
 
     @Test
     public void getMessage() throws Exception {
-        given(messageService.getMessage(any())).willReturn(arkivmeldingMessage);
+        given(messageService.getMessage(any())).willReturn(ARKIVMELDING_MESSAGE);
 
         mvc.perform(
-                get("/api/messages/out/{messageId}", arkivmeldingMessage.getMessageId())
+                get("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -348,15 +308,15 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).getMessage(eq(arkivmeldingMessageData.messageId));
+        verify(messageService).getMessage(eq(ARKIVMELDING_MESSAGE_DATA.getMessageId()));
     }
 
     @Test
     public void sendMessage() throws Exception {
-        given(messageService.getMessage(any())).willReturn(arkivmeldingMessage);
+        given(messageService.getMessage(any())).willReturn(ARKIVMELDING_MESSAGE);
 
         mvc.perform(
-                post("/api/messages/out/{messageId}", arkivmeldingMessage.getMessageId())
+                post("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -373,14 +333,14 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).getMessage(eq(arkivmeldingMessage.getMessageId()));
-        verify(messageService).sendMessage(same(arkivmeldingMessage));
+        verify(messageService).getMessage(eq(ARKIVMELDING_MESSAGE_DATA.getMessageId()));
+        verify(messageService).sendMessage(same(ARKIVMELDING_MESSAGE));
     }
 
     @Test
     public void deleteMessage() throws Exception {
         mvc.perform(
-                delete("/api/messages/out/{messageId}", arkivmeldingMessage.getMessageId())
+                delete("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -397,15 +357,15 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).deleteMessage(eq(arkivmeldingMessageData.messageId));
+        verify(messageService).deleteMessage(eq(ARKIVMELDING_MESSAGE_DATA.getMessageId()));
     }
 
     @Test
     public void uploadFile() throws Exception {
-        given(messageService.getMessage(any())).willReturn(arkivmeldingMessage);
+        given(messageService.getMessage(any())).willReturn(ARKIVMELDING_MESSAGE);
 
         mvc.perform(
-                put("/api/messages/out/{messageId}", arkivmeldingMessageData.messageId)
+                put("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
                         .contentType(MediaType.TEXT_PLAIN)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; name=Before The Law; filename=before_the_law.txt")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
@@ -430,81 +390,13 @@ public class NextMoveMessageOutControllerTest {
                         ))
                 );
 
-        verify(messageService).getMessage(eq(arkivmeldingMessageData.messageId));
-        verify(messageService).addFile(same(arkivmeldingMessage), nextMoveUploadedFileArgumentCaptor.capture());
+        verify(messageService).getMessage(eq(ARKIVMELDING_MESSAGE_DATA.getMessageId()));
+        verify(messageService).addFile(same(ARKIVMELDING_MESSAGE), nextMoveUploadedFileArgumentCaptor.capture());
 
         NextMoveUploadedFile value = nextMoveUploadedFileArgumentCaptor.getValue();
         assertThat(value.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
         assertThat(value.getOriginalFilename()).isEqualTo("before_the_law.txt");
         assertThat(value.getName()).isEqualTo("Before The Law");
         assertThat(new String(value.getBytes(), StandardCharsets.UTF_8)).isEqualTo("Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...");
-    }
-
-
-//    @PostMapping("/{messageId}")
-//    @ApiOperation(value = "Send message", notes = "Send the message with supplied messageId")
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-//            @ApiResponse(code = 400, message = "Bad request", response = String.class)
-//    })
-//    public void sendMessage(
-//            @ApiParam(
-//                    value = "The message ID. Usually a UUID",
-//                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
-//                    required = true
-//            )
-//            @PathVariable("messageId") String messageId) {
-//        NextMoveOutMessage message = messageService.getMessage(messageId);
-//        messageService.sendMessage(message);
-//    }
-
-    private StandardBusinessDocument getInputSbd(MessageData message) {
-        StandardBusinessDocument sbd = new StandardBusinessDocument();
-        fill(sbd, message);
-        return sbd;
-    }
-
-    private StandardBusinessDocument getResponseSbd(MessageData message) {
-        StandardBusinessDocument sbd = new StandardBusinessDocument();
-        fill(sbd, message);
-        sbd.getStandardBusinessDocumentHeader().getDocumentIdentification()
-                .setCreationDateAndTime(OffsetDateTime.parse("2019-03-25T11:38:23+02:00"));
-
-        return sbd;
-    }
-
-    private void fill(StandardBusinessDocument sbd, MessageData message) {
-        sbd.setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                .setBusinessScope(new BusinessScope()
-                        .addScope(new Scope()
-                                .addScopeInformation(new CorrelationInformation()
-                                        .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
-                                )
-                                .setIdentifier("urn:no:difi:meldingsutveksling:2.0")
-                                .setInstanceIdentifier(message.conversationId)
-                                .setType("ConversationId")
-                        )
-                )
-                .setDocumentIdentification(new DocumentIdentification()
-                        .setInstanceIdentifier(message.messageId)
-                        .setStandard(message.getStandard())
-                        .setType(message.getType())
-                        .setTypeVersion("1.0")
-                )
-                .setHeaderVersion("1.0")
-                .addReceiver(new Receiver()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910075918")
-                        )
-                )
-                .addSender(new Sender()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910077473")
-                        )
-                )
-        )
-                .setAny(message.businessMessage);
     }
 }

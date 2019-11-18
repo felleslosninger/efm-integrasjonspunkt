@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.nextmove.DpiDigitalMessage;
 import no.difi.meldingsutveksling.nextmove.DpiNotification;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
-import org.springframework.http.HttpHeaders;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -20,12 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 
 @UtilityClass
 class RestDocumentationCommon {
+
+    private static String prefix;
 
     static HeaderDescriptor[] getDefaultHeaderDescriptors() {
         return new HeaderDescriptor[]{
@@ -87,6 +87,68 @@ class RestDocumentationCommon {
                         .type(JsonFieldType.BOOLEAN)
                         .description("True if no sorting. False otherwise")
         };
+    }
+
+    static List<FieldDescriptor> errorFieldDescriptors(boolean withErrors) {
+        FieldDescriptorsBuilder builder = new FieldDescriptorsBuilder();
+        builder.fields(
+                fieldWithPath("timestamp")
+                        .type(JsonFieldType.STRING)
+                        .description("Date and time for when the error occured."),
+                fieldWithPath("status")
+                        .type(JsonFieldType.NUMBER)
+                        .description("HTTP status code."),
+                fieldWithPath("error")
+                        .type(JsonFieldType.STRING)
+                        .description("Error description"),
+                fieldWithPath("exception")
+                        .optional()
+                        .type(JsonFieldType.STRING)
+                        .description("The java class of the Exception that was thrown"),
+                fieldWithPath("message")
+                        .type(JsonFieldType.STRING)
+                        .description("A message describing the error."),
+                fieldWithPath("path")
+                        .type(JsonFieldType.STRING)
+                        .description("The request URI")
+        );
+
+        if (withErrors) {
+            builder.fields(fieldWithPath("errors")
+                    .type(JsonFieldType.ARRAY)
+                    .description("Constraint validations details.")
+            ).fields(errorsFieldDescriptors("errors[]."));
+        }
+
+        return builder.build();
+    }
+
+    private static List<FieldDescriptor> errorsFieldDescriptors(String prefix) {
+        RestDocumentationCommon.prefix = prefix;
+        return new FieldDescriptorsBuilder()
+                .fields(
+                        fieldWithPath(prefix + "codes[]")
+                                .type(JsonFieldType.ARRAY)
+                                .description("The message codes to be used to resolve this message."),
+                        fieldWithPath(prefix + "defaultMessage")
+                                .type(JsonFieldType.STRING)
+                                .description("The default message to be used to resolve this message."),
+                        fieldWithPath(prefix + "objectName")
+                                .type(JsonFieldType.STRING)
+                                .description("The name/path of the object where the constraint validation occurred."),
+                        fieldWithPath(prefix + "field")
+                                .type(JsonFieldType.STRING)
+                                .description("The name/path of the field where the constraint validation occurred."),
+                        fieldWithPath(prefix + "rejectedValue")
+                                .type(JsonFieldType.STRING)
+                                .description("The rejected field value."),
+                        fieldWithPath(prefix + "bindingFailure")
+                                .type(JsonFieldType.BOOLEAN)
+                                .description("Whether this error represents a binding failure (like a type mismatch); otherwise it is a validation failure."),
+                        fieldWithPath(prefix + "code")
+                                .type(JsonFieldType.STRING)
+                                .description("The message code to be used to resolve this message.")
+                ).build();
     }
 
     static FieldDescriptor[] getMessageStatusFieldDescriptors() {
