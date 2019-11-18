@@ -7,9 +7,12 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
+import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
 import no.difi.meldingsutveksling.web.IntegrasjonspunktErrorController;
+import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,6 +38,8 @@ import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getDefaultHeaderDescriptors;
 import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
 import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.getInputSbd;
+import static no.difi.meldingsutveksling.receipt.service.SubscriptionTestData.incomingMessages;
+import static no.difi.meldingsutveksling.receipt.service.SubscriptionTestData.incomingMessagesInput;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -53,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(IntegrasjonspunktErrorController.class)
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
+@ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class IntegrasjonspunktErrorControllerTest {
 
     private static final String ERROR_ATTRIBUTE = DefaultErrorAttributes.class.getName() + ".ERROR";
@@ -104,8 +111,7 @@ public class IntegrasjonspunktErrorControllerTest {
     }
 
     @Test
-    public void constraintValidation() throws Exception {
-
+    public void createMessageConstraintViolation() throws Exception {
         StandardBusinessDocument input = getInputSbd(ARKIVMELDING_MESSAGE_DATA);
 
         input.getStandardBusinessDocumentHeader()
@@ -141,7 +147,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "    \"code\" : \"IsDocumentType\"\n" +
                         "  } ]\n" +
                         "}"))
-                .andDo(document("/messages/out/create/constraint-validation",
+                .andDo(document("/messages/out/create/constraint-violation",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -183,6 +189,90 @@ public class IntegrasjonspunktErrorControllerTest {
                         ),
                         responseFields(
                                 errorFieldDescriptors(false)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void subscriptionNotFound() throws Exception {
+        Long id = incomingMessages().getId();
+
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/subscription/" + id)
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Subscription with id = %d was not found", id))
+                        .requestAttr(ERROR_ATTRIBUTE, new SubscriptionNotFoundException(id)
+                        )
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("{\n" +
+                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
+                        "  \"status\" : 404,\n" +
+                        "  \"error\" : \"Not Found\",\n" +
+                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException\",\n" +
+                        "  \"message\" : \"Subscription with id = 84 was not found\",\n" +
+                        "  \"path\" : \"/api/subscription/84\"\n" +
+                        "}"))
+                .andDo(document("/subscriptions/get/not-found",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(false)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void createSubscriptionConstraintViolation() throws Exception {
+
+        Subscription input = incomingMessagesInput()
+                .setEvent("nonexistent");
+
+        Set<ConstraintViolation<Subscription>> constraintViolations = validator.validate(input);
+        ConstraintViolationException constraintViolationException = new ConstraintViolationException(constraintViolations);
+
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/subscriptions")
+                        .requestAttr(ERROR_ATTRIBUTE, constraintViolationException)
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("{\n" +
+                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
+                        "  \"status\" : 400,\n" +
+                        "  \"error\" : \"Bad Request\",\n" +
+                        "  \"exception\" : \"javax.validation.ConstraintViolationException\",\n" +
+                        "  \"message\" : \"event: 'nonexistent' is not expected. Allowed values are: [all, status]\",\n" +
+                        "  \"path\" : \"/api/subscriptions\",\n" +
+                        "  \"errors\" : [ {\n" +
+                        "    \"codes\" : [ \"OneOf\" ],\n" +
+                        "    \"defaultMessage\" : \"'nonexistent' is not expected. Allowed values are: [all, status]\",\n" +
+                        "    \"objectName\" : \"event\",\n" +
+                        "    \"field\" : \"event\",\n" +
+                        "    \"rejectedValue\" : \"nonexistent\",\n" +
+                        "    \"bindingFailure\" : false,\n" +
+                        "    \"code\" : \"OneOf\"\n" +
+                        "  } ]\n" +
+                        "}"))
+                .andDo(document("/subscriptions/create/constraint-violation",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(true)
                         )
                         )
                 );

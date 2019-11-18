@@ -4,12 +4,12 @@ import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DigitalPostInfo;
 import no.difi.meldingsutveksling.nextmove.DpiDigitalMessage;
 import no.difi.meldingsutveksling.nextmove.DpiNotification;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -436,6 +436,49 @@ class RestDocumentationCommon {
                                 .type(JsonFieldType.VARIES)
                                 .optional()
                                 .description("SMS content")
+                ).build();
+    }
+
+    static List<FieldDescriptor> subscriptionInputDescriptors(String prefix, Class<?> group) {
+        return subscriptionDescriptors(prefix, false, group);
+    }
+
+    static List<FieldDescriptor> subscriptionDescriptors(String prefix, Class<?> group) {
+        return subscriptionDescriptors(prefix, true, group);
+    }
+
+    private static List<FieldDescriptor> subscriptionDescriptors(String prefix, boolean isResponse, Class<?> group) {
+        ConstrainedFields constrainedFields = new ConstrainedFields(Subscription.class, prefix, group);
+
+        FieldDescriptorsBuilder builder = new FieldDescriptorsBuilder();
+
+        if (isResponse) {
+            builder.fields(constrainedFields.withPath("id")
+                    .type(JsonFieldType.NUMBER)
+                    .description("The resource identifier.")
+            );
+        }
+
+        return builder
+                .fields(
+                        constrainedFields.withPath("name")
+                                .type(JsonFieldType.STRING)
+                                .description("A label to remember why it was created. Use it for whatever purpose you'd like."),
+                        constrainedFields.withPath("pushEndpoint")
+                                .type(JsonFieldType.STRING)
+                                .description("URL to push the webhook messages to."),
+                        constrainedFields.withPath("resource")
+                                .type(JsonFieldType.STRING)
+                                .optional()
+                                .description("Indicates the noun being observed."),
+                        constrainedFields.withPath("event")
+                                .type(JsonFieldType.STRING)
+                                .optional()
+                                .description("Further narrows the events by specifying the action that would trigger a notification to your backend."),
+                        constrainedFields.withPath("filter")
+                                .type(JsonFieldType.STRING)
+                                .optional()
+                                .description("A set of filtering critera. Generally speaking, webhook filters will be a subset of the query parameters available when GETing a list of the target resource. It is an optional property. To add multiple filters, separate them with the “&” symbol. Supported filters are: status, serviceIdentifier, direction.")
                 ).build();
     }
 }

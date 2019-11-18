@@ -1,0 +1,146 @@
+= Webhook subscriptions
+
+[#subscriptions-list]
+== List all subscriptions
+
+The service is used to list all subscriptions.
+The response is paged with a default page size of 10.
+
+=== Example 1 - List all subscriptions
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/list/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/list/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/list/http-response.adoc[]
+
+=== Example 2 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/list/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/list/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/list/paging/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/subscriptions/list/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/subscriptions/list/response-fields.adoc[]
+--
+
+[#subscriptions-get]
+== Get a subscription
+
+The service is used to retrieve a subscription.
+
+=== Example 1 - Get a subscription
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/get/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/get/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/get/http-response.adoc[]
+
+=== Example 2 - Subscription not found
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/subscriptions/get/not-found/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/subscriptions/get/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/subscriptions/get/response-fields.adoc[]
+--
+
+[#subscriptions-create]
+== Create a subscription
+
+The service is used to create a webhook a subscription.
+
+=== Example 1 - Create a subscription
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/create/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/create/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/create/http-response.adoc[]
+
+Please note that during validation of the input, the
+service will attempt to POST a ping message to the URL specified in the "pushEndpoint" attribute. Below is an example
+of such a ping message:
+
+[source,json]
+----
+{
+  "createdTs" : "2019-11-18T15:25:49.002+01:00",
+  "event" : "ping"
+}
+----
+
+=== Example 2 - Constraint violation
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/subscriptions/create/constraint-violation/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/subscriptions/create/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/subscriptions/create/response-fields.adoc[]
+--
+

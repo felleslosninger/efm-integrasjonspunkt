@@ -20,7 +20,7 @@ public class ExtendedConstraintDescriptions {
      *
      * @param clazz the class
      */
-    public ExtendedConstraintDescriptions(Class<?> clazz) {
+    ExtendedConstraintDescriptions(Class<?> clazz) {
         this(clazz, new ValidatorConstraintResolver(),
                 new ResourceBundleConstraintDescriptionResolver());
     }
@@ -74,7 +74,7 @@ public class ExtendedConstraintDescriptions {
      * @param property the property
      * @return the list of constraint descriptions
      */
-    public List<String> descriptionsForProperty(String property) {
+    List<String> descriptionsForProperty(String property) {
         return this.constraintResolver
                 .resolveForProperty(property, this.clazz)
                 .stream()
@@ -90,7 +90,7 @@ public class ExtendedConstraintDescriptions {
      * @param group    the validation group
      * @return the list of constraint descriptions
      */
-    public List<String> descriptionsForProperty(String property, Class<?> group) {
+    List<String> descriptionsForProperty(String property, Class<?> group) {
         return this.constraintResolver
                 .resolveForProperty(property, this.clazz)
                 .stream()
@@ -102,6 +102,6 @@ public class ExtendedConstraintDescriptions {
 
     private boolean hasGroup(Constraint constraint, Class<?> group) {
         Class<?>[] groups = (Class<?>[]) constraint.getConfiguration().get("groups");
-        return groups == null || Arrays.asList(groups).contains(group);
+        return groups == null || groups.length == 0 || Arrays.asList(groups).contains(group);
     }
 }

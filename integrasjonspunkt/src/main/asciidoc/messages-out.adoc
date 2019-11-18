@@ -212,17 +212,17 @@ include::{snippets}/messages/out/create/service-not-enabled/http-response.adoc[]
 include::{snippets}/messages/out/create/service-not-enabled/response-fields.adoc[]
 --
 
-=== Example 4 - Validation error with extended info
+=== Example 4 - Constraint violation
 
 [source,http,role="primary"]
 .Response
-include::{snippets}/messages/out/create/constraint-validation/http-response.adoc[]
+include::{snippets}/messages/out/create/constraint-violation/http-response.adoc[]
 
 [role="primary"]
 .Response fields
 [.response-fields]
 --
-include::{snippets}/messages/out/create/constraint-validation/response-fields.adoc[]
+include::{snippets}/messages/out/create/constraint-violation/response-fields.adoc[]
 --
 
 

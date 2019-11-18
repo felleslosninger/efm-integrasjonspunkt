@@ -60,7 +60,16 @@ image:difi-logo.png[]
 |<<statuses-peek-latest,/api/statuses/peek>>
 |<<statuses-peek-latest>>
 
+|GET
+|<<subscriptions-list,/api/subscriptions>>
+|<<subscriptions-list>>
+
+|GET
+|<<subscriptions-get,/api/subscriptions/{id}>>
+|<<subscriptions-get>>
+
 |===
 
 include::messages-out.adoc[leveloffset=+1]
 include::statuses.adoc[leveloffset=+1]
+include::subscriptions.adoc[leveloffset=+1]
