@@ -85,4 +85,8 @@ public class SvarInnService {
     public void confirmMessage(String forsendelsesId) {
         svarInnClient.confirmMessage(forsendelsesId);
     }
+
+    public void setErrorStateForMessage(String forsendelseId, String errorMsg) {
+        svarInnClient.setErrorStateForMessage(forsendelseId, errorMsg);
+    }
 }

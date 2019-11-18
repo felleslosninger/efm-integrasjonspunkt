@@ -60,4 +60,9 @@ public class SvarInnClient {
     void confirmMessage(String forsendelseId) {
         restTemplate.postForLocation("/kvitterMottak/forsendelse/{forsendelseId}", null, forsendelseId);
     }
+
+    void setErrorStateForMessage(String forsendelseId, String errorMsg) {
+        ErrorResponse errorResponse = new ErrorResponse(errorMsg, true);
+        restTemplate.postForLocation("/mottakFeilet/forsendelse/{forsendelseId}", errorResponse, forsendelseId);
+    }
 }

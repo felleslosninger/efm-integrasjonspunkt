@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVERT;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_MOTTATT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @RequiredArgsConstructor
 public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
@@ -110,8 +109,9 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         });
         conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
 
-        if (!validateRequiredFields(forsendelse, putMessage, builder.getDokumentTypeList())) {
-            checkAndSendMail(putMessage, forsendelse.getId());
+        String missingFields = getMissingFields(forsendelse, putMessage, builder.getDokumentTypeList());
+        if (!missingFields.isEmpty()) {
+            handleError(putMessage, forsendelse.getId(), "Validation failed - missing fields: "+missingFields);
             return;
         }
 
@@ -127,20 +127,23 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             svarInnService.confirmMessage(forsendelse.getId());
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            checkAndSendMail(putMessage, forsendelse.getId());
+            handleError(putMessage, forsendelse.getId(), "Archive system responded with error: "+response.getResult().getMessage().get(0).getText());
         }
     }
 
-    private void checkAndSendMail(PutMessageRequestType message, String fiksId) {
+    private void handleError(PutMessageRequestType message, String fiksId, String errorMsg) {
         if (properties.getFiks().getInn().isMailOnError()) {
             Audit.info(format("Sending message with id=%s by mail", fiksId));
             fiksMailClient.sendEduMelding(message);
             conversationService.registerStatus(message.getEnvelope().getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
             svarInnService.confirmMessage(fiksId);
+        } else {
+            svarInnService.setErrorStateForMessage(fiksId, errorMsg);
+            conversationService.registerStatus(message.getEnvelope().getConversationId(), messageStatusFactory.getMessageStatus(FEIL, errorMsg));
         }
     }
 
-    private boolean validateRequiredFields(Forsendelse forsendelse, PutMessageRequestType putMessage, List<DokumentType> files) {
+    private String getMissingFields(Forsendelse forsendelse, PutMessageRequestType putMessage, List<DokumentType> files) {
         SvarInnFieldValidator validator = SvarInnFieldValidator.validator()
                 .addField(forsendelse.getMottaker().getOrgnr(), "receiver: orgnr")
                 .addField(putMessage.getEnvelope().getSender().getOrgnr(), "sender: orgnr")
@@ -155,9 +158,9 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             String missingFields = String.join(", ", validator.getMissing());
             Audit.error(format("Message with id=%s has the following missing field(s): %s",
                     forsendelse.getId(), missingFields));
-            return false;
+            return missingFields;
         }
 
-        return true;
+        return "";
     }
 }
