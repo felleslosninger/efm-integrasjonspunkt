@@ -150,7 +150,7 @@ public class StandardBusinessDocument {
                 .getScope();
     }
 
-    private Scope getScope(ScopeType scopeType) {
+    public Scope getScope(ScopeType scopeType) {
         return findScope(scopeType)
                 .orElseThrow(() -> new NextMoveRuntimeException(String.format("Missing scope %s", scopeType.name())));
     }

@@ -149,6 +149,13 @@ public class NextMoveValidator {
 
     void validateFile(NextMoveOutMessage message, MultipartFile file) {
         Set<BusinessMessageFile> files = message.getOrCreateFiles();
+        files.stream()
+                .map(BusinessMessageFile::getFilename)
+                .filter(fn -> fn.equals(file.getOriginalFilename()))
+                .findAny()
+                .ifPresent(fn -> {
+                    throw new DuplicateFilenameException(file.getOriginalFilename());
+                });
 
         if (message.isPrimaryDocument(file.getOriginalFilename()) && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
             throw new MultiplePrimaryDocumentsNotAllowedException();

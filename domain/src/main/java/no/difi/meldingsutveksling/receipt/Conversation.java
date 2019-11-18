@@ -85,6 +85,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
                          String messageReference,
                          String senderIdentifier,
                          String receiverIdentifier,
+                         String processIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier,
@@ -96,6 +97,7 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
         this.messageReference = messageReference;
         this.senderIdentifier = senderIdentifier;
         this.receiverIdentifier = receiverIdentifier;
+        this.processIdentifier = processIdentifier;
         this.direction = direction;
         this.messageTitle = messageTitle;
         this.messageStatuses = new HashSet<>();
@@ -118,18 +120,20 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
                                   String messageReference,
                                   String senderIdentifier,
                                   String receiverIdentifier,
+                                  String processIdentifier,
                                   ConversationDirection direction,
                                   String messageTitle,
                                   ServiceIdentifier serviceIdentifier,
                                   OffsetDateTime expiry,
                                   OffsetDateTime lastUpdate,
                                   MessageStatus... statuses) {
-        return new Conversation(conversationId, messageId, messageReference, senderIdentifier, receiverIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
+        return new Conversation(conversationId, messageId, messageReference, senderIdentifier, receiverIdentifier, processIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
                 .addMessageStatuses(statuses);
     }
 
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
-        return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(), msg.getSenderIdentifier(), msg.getReceiverIdentifier(),
+        return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
+                msg.getSenderIdentifier(), msg.getReceiverIdentifier(), msg.getProcessIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }

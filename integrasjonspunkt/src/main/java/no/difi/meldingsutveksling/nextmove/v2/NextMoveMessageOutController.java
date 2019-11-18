@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,11 +56,22 @@ public class NextMoveMessageOutController {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+        // Check for max size
         files.stream()
                 .filter(p -> p.getSize() > MAX_SIZE)
                 .findAny()
                 .ifPresent(p -> {
                     throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
+                });
+        // Check for duplicate filenames
+        List<String> filenames = files.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toList());
+        filenames.stream()
+                .filter(f -> Collections.frequency(filenames, f) > 1)
+                .reduce((a, b) -> a+", "+b)
+                .ifPresent(d -> {
+                    throw new DuplicateFilenameException(d);
                 });
 
         NextMoveOutMessage message = messageService.createMessage(sbd, files);
@@ -110,6 +123,23 @@ public class NextMoveMessageOutController {
             )
             @PathVariable("messageId") String messageId) {
         return messageService.getMessage(messageId).getSbd();
+    }
+
+    @DeleteMapping("/{messageId}")
+    @ApiOperation(value = "Delete message", notes = "Delete a message with given messageId. Also deletes all associated files.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 400, message = "Bad request", response = String.class)
+    })
+    @Transactional
+    public void deleteMessage(
+            @ApiParam(
+                    value = "The message ID (UUID)",
+                    example = "90c0bacf-c233-4a54-96fc-e205b79862d9",
+                    required = true
+            )
+            @PathVariable("messageId") String messageId) {
+        messageService.deleteMessage(messageId);
     }
 
     @PutMapping(value = "/{messageId}")
