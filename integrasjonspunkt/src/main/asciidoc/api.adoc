@@ -32,7 +32,7 @@ image:difi-logo.png[]
 |<<messages-out-create,/api/messages/out>>
 |<<messages-out-create>>
 
-|UPDATE
+|PUT
 |<<messages-out-upload,/api/messages/out/{messageId}>>
 |<<messages-out-upload>>
 

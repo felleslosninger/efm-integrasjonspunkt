@@ -19,7 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,13 +39,17 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class, IntegrasjonspunktHandlerExceptionResolver.class, ValidationConfig.class})
+@Import({
+        FixedClockConfig.class,
+        JacksonConfig.class,
+        JacksonMockitoConfig.class,
+        IntegrasjonspunktHandlerExceptionResolver.class,
+        ValidationConfig.class})
 @WebMvcTest(IntegrasjonspunktErrorController.class)
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
@@ -157,6 +160,7 @@ public class IntegrasjonspunktErrorControllerTest {
                 get("/error")
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/messages/out")
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, "Service DPI is not enabled")
                         .requestAttr(ERROR_ATTRIBUTE, new ServiceNotEnabledException(ServiceIdentifier.DPI)
                         )
                         .accept(MediaType.APPLICATION_JSON_UTF8)
@@ -168,7 +172,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"status\" : 400,\n" +
                         "  \"error\" : \"Bad Request\",\n" +
                         "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException\",\n" +
-                        "  \"message\" : \"no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException\",\n" +
+                        "  \"message\" : \"Service DPI is not enabled\",\n" +
                         "  \"path\" : \"/api/messages/out\"\n" +
                         "}"))
                 .andDo(document("/messages/out/create/service-not-enabled",

@@ -1,5 +1,32 @@
 = Messages out
 
+[plantuml,auth-protocol]
+....
+    ArchiveSystem->>Integrasjonspunkt: GET /api/capabilities/{receiverid}
+
+    Integrasjonspunkt->>ServiceRegistry: GET /identifier/{receiverid}
+    ServiceRegistry-->>Integrasjonspunkt: capabilities
+
+    Integrasjonspunkt-->>ArchiveSystem: capabilities
+    ArchiveSystem->>ArchiveSystem: select capability
+    ArchiveSystem->>ArchiveSystem: Create message
+    ArchiveSystem->>Integrasjonspunkt: POST /api/messages/out
+    Integrasjonspunkt-->>ArchiveSystem: StandardBusinessDocument
+    loop
+    ArchiveSystem->>Integrasjonspunkt: PUT /api/messages/out/{messageId}
+    end
+    ArchiveSystem->>Integrasjonspunkt: POST /api/messages/out/{messageId}
+
+    Integrasjonspunkt->>MessageProvider: Upload
+    loop
+        Integrasjonspunkt->>MessageProvider: GetStatus
+        MessageProvider-->>Integrasjonspunkt: status
+    end
+
+    ArchiveSystem->>Integrasjonspunkt: GET /api/statuses/{messageId}
+    Integrasjonspunkt-->>ArchiveSystem: statuses
+....
+
 [#messages-out-find]
 == Find messages
 

@@ -35,6 +35,14 @@
             <name>jcenter</name>
             <url>http://jcenter.bintray.com</url>
         </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>asciidoctor-releases</id>
+            <name>asciidoctor</name>
+            <url>https://dl.bintray.com/asciidoctor/maven/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -44,6 +52,14 @@
             <id>jcenter-releases</id>
             <name>jcenter</name>
             <url>http://jcenter.bintray.com</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>asciidoctor-releases</id>
+            <name>asciidoctor</name>
+            <url>https://dl.bintray.com/asciidoctor/maven/</url>
         </pluginRepository>
     </pluginRepositories>
 

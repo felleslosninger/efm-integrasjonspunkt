@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.nextmove.DigitalPostInfo;
 import no.difi.meldingsutveksling.nextmove.DpiDigitalMessage;
 import no.difi.meldingsutveksling.nextmove.DpiNotification;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -110,7 +111,11 @@ class RestDocumentationCommon {
                         .description("A message describing the error."),
                 fieldWithPath("path")
                         .type(JsonFieldType.STRING)
-                        .description("The request URI")
+                        .description("The request URI"),
+                fieldWithPath("description")
+                        .optional()
+                        .type(JsonFieldType.STRING)
+                        .description("A more detailed description of the error.")
         );
 
         if (withErrors) {
