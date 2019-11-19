@@ -68,8 +68,14 @@ image:difi-logo.png[]
 |<<subscriptions-get,/api/subscriptions/{id}>>
 |<<subscriptions-get>>
 
+|POST
+|<<subscriptions-create,/api/subscriptions>>
+|<<subscriptions-create>>
+
+
 |===
 
 include::messages-out.adoc[leveloffset=+1]
 include::statuses.adoc[leveloffset=+1]
+include::events.adoc[leveloffset=+1]
 include::subscriptions.adoc[leveloffset=+1]

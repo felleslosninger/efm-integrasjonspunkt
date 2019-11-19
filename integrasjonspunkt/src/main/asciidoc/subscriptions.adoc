@@ -1,3 +1,5 @@
+:icons: font
+
 = Webhook subscriptions
 
 [#subscriptions-list]
@@ -96,6 +98,11 @@ include::{snippets}/subscriptions/get/response-fields.adoc[]
 
 The service is used to create a webhook a subscription.
 
+[NOTE]
+Please note, that we do not guarantee delivery of the webhook events.
+An event that cannot be delivered, will be retried three times.
+If all these attempts fail, the event will not be redelivered.
+
 === Example 1 - Create a subscription
 
 [source,http,role="primary"]
@@ -114,12 +121,38 @@ Please note that during validation of the input, the
 service will attempt to POST a ping message to the URL specified in the "pushEndpoint" attribute. Below is an example
 of such a ping message:
 
-[source,json]
+[source,http,role="primary"]
+.Ping event
+include::{snippets}/events/ping/http-request.adoc[]
+
+==== Message Status Filters
+
+Currently the following filters are available:
+
+|===
+| Key | Description | Example
+
+| status
+| Filter events on message status.
+| status=FEIL,LEVETID_UTLOPT
+
+| serviceIdentifier
+| Filter events on serviceIdentifier.
+| serviceIdentifier=DPO,DPF
+
+| direction
+| Filter events on direction.
+| direction=INCOMING
+
+|===
+
+All these can be combined using standard HTTP query style.
+
+[role="primary"]
+.Example
+[source,http,options="nowrap"]
 ----
-{
-  "createdTs" : "2019-11-18T15:25:49.002+01:00",
-  "event" : "ping"
-}
+status=FEIL,LEVETID_UTLOPT&direction=INCOMING&serviceIdentifier=DPO,DPI
 ----
 
 === Example 2 - Constraint violation

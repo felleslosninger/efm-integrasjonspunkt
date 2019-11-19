@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public abstract class WebhookContentBase<T extends WebhookContent> implements WebhookContent {
+public class WebhookContentBase<T extends WebhookContent> implements WebhookContent {
 
     private OffsetDateTime createdTs;
     private String resource;
