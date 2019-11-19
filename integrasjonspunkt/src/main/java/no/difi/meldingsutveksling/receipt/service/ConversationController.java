@@ -29,7 +29,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 @RequestMapping("/api/conversations")
 public class ConversationController {
 
-    private final ConversationRepository convoRepo;
+    private final ConversationRepository conversationRepository;
 
     @GetMapping
     @ApiOperation(
@@ -40,11 +40,11 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class),
     })
     @JsonView(Views.Conversation.class)
-    public Page<Conversation> conversations(
+    public Page<Conversation> find(
             @Valid ConversationQueryInput input,
             @PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return convoRepo.findWithMessageStatuses(input, pageable);
+        return conversationRepository.findWithMessageStatuses(input, pageable);
     }
 
     @GetMapping("{id}")
@@ -58,7 +58,7 @@ public class ConversationController {
     public Conversation getById(
             @ApiParam(value = "id", required = true, example = "1")
             @PathVariable("id") Long id) {
-        return convoRepo.findByIdAndDirection(id, OUTGOING)
+        return conversationRepository.findByIdAndDirection(id, OUTGOING)
                 .orElseThrow(() -> new MessageNotFoundException("id", id.toString()));
     }
 
@@ -73,7 +73,7 @@ public class ConversationController {
     public Conversation getByMessageId(
             @ApiParam(value = "messageId", required = true)
             @PathVariable("id") String messageId) {
-        return convoRepo.findByMessageIdAndDirection(messageId, OUTGOING)
+        return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
@@ -86,6 +86,6 @@ public class ConversationController {
     })
     @JsonView(Views.Conversation.class)
     public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
-        return convoRepo.findByPollable(true, pageable);
+        return conversationRepository.findByPollable(true, pageable);
     }
 }

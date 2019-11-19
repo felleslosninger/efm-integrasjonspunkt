@@ -32,7 +32,7 @@ class StandardBusinessDocumentTestData {
 
     static final NextMoveOutMessage ARKIVMELDING_MESSAGE = NextMoveOutMessage.of(getResponseSbd(ARKIVMELDING_MESSAGE_DATA), ServiceIdentifier.DPO);
 
-    static final MessageData DPI_DIGITAL_MESSAGE_DATA = new MessageData()
+    private static final MessageData DPI_DIGITAL_MESSAGE_DATA = new MessageData()
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
             .setType("digital")
             .setBusinessMessage(new DpiDigitalMessage()
@@ -60,7 +60,7 @@ class StandardBusinessDocumentTestData {
         return sbd;
     }
 
-    static StandardBusinessDocument getResponseSbd(MessageData message) {
+    private static StandardBusinessDocument getResponseSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
         fill(sbd, message);
         sbd.getStandardBusinessDocumentHeader().getDocumentIdentification()

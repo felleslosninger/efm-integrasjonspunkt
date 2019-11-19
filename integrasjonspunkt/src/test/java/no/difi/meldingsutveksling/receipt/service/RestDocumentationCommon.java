@@ -3,12 +3,10 @@ package no.difi.meldingsutveksling.receipt.service;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import no.difi.meldingsutveksling.nextmove.DigitalPostInfo;
-import no.difi.meldingsutveksling.nextmove.DpiDigitalMessage;
-import no.difi.meldingsutveksling.nextmove.DpiNotification;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.springframework.restdocs.headers.HeaderDescriptor;
@@ -25,8 +23,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 
 @UtilityClass
 class RestDocumentationCommon {
-
-    private static String prefix;
 
     static HeaderDescriptor[] getDefaultHeaderDescriptors() {
         return new HeaderDescriptor[]{
@@ -45,7 +41,7 @@ class RestDocumentationCommon {
                         .optional()};
     }
 
-    static FieldDescriptor[] getPageFieldDescriptors() {
+    static FieldDescriptor[] pageDescriptors() {
         return new FieldDescriptor[]{
                 fieldWithPath("last").description("A boolean value indicating if this is the last page or not."),
                 fieldWithPath("totalElements").description("The total number of elements"),
@@ -61,7 +57,7 @@ class RestDocumentationCommon {
         };
     }
 
-    static FieldDescriptor[] getPageableFieldDescriptors() {
+    static FieldDescriptor[] pageableDescriptors() {
         return new FieldDescriptor[]{
                 fieldWithPath("offset")
                         .type(JsonFieldType.NUMBER)
@@ -129,7 +125,6 @@ class RestDocumentationCommon {
     }
 
     private static List<FieldDescriptor> errorsFieldDescriptors(String prefix) {
-        RestDocumentationCommon.prefix = prefix;
         return new FieldDescriptorsBuilder()
                 .fields(
                         fieldWithPath(prefix + "codes[]")
@@ -156,31 +151,113 @@ class RestDocumentationCommon {
                 ).build();
     }
 
-    static FieldDescriptor[] getMessageStatusFieldDescriptors() {
+    static FieldDescriptor[] messageStatusDescriptors(String prefix) {
         return new FieldDescriptor[]{
-                fieldWithPath("id")
+                fieldWithPath(prefix + "id")
                         .type(JsonFieldType.NUMBER)
                         .description("Integer. The numeric message status ID."),
-                fieldWithPath("convId")
+                fieldWithPath(prefix + "convId")
                         .type(JsonFieldType.NUMBER)
                         .description("Integer. The numeric conversation ID."),
-                fieldWithPath("messageId")
+                fieldWithPath(prefix + "messageId")
                         .type(JsonFieldType.STRING)
-                        .description("The messageId. Typically an UUID"),
-                fieldWithPath("conversationId")
+                        .description("The messageId. Typically an UUID."),
+                fieldWithPath(prefix + "conversationId")
                         .type(JsonFieldType.STRING)
-                        .description("The conversationId. Typically an UUID"),
-                fieldWithPath("status")
+                        .description("The conversationId. Typically an UUID."),
+                fieldWithPath(prefix + "status")
                         .type(JsonFieldType.STRING)
                         .description(String.format("The message status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
                         .map(Enum::name)
                         .collect(Collectors.joining(", ")))),
-                fieldWithPath("description")
+                fieldWithPath(prefix + "description")
                         .type(JsonFieldType.STRING)
-                        .description("Description"),
-                fieldWithPath("lastUpdate")
+                        .description("Description."),
+                fieldWithPath(prefix + "lastUpdate")
                         .type(JsonFieldType.STRING)
-                        .description("Date and time of status")
+                        .description("Date and time of status."),
+                fieldWithPath(prefix + "rawReceipt")
+                        .optional()
+                        .type(JsonFieldType.STRING)
+                        .description("The raw receipt.")
+        };
+    }
+
+    static List<FieldDescriptor> conversationDescriptors(String prefix) {
+        return new FieldDescriptorsBuilder()
+                .fields(
+                        fieldWithPath(prefix + "id")
+                                .type(JsonFieldType.NUMBER)
+                                .description("Integer. The numeric message status ID."),
+                        fieldWithPath(prefix + "messageId")
+                                .type(JsonFieldType.STRING)
+                                .description("The messageId. Typically an UUID."),
+                        fieldWithPath(prefix + "conversationId")
+                                .type(JsonFieldType.STRING)
+                                .description("The conversationId. Typically an UUID."),
+                        fieldWithPath(prefix + "senderIdentifier")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "receiverIdentifier")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "processIdentifier")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "messageReference")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "messageTitle")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "serviceCode")
+                                .type(JsonFieldType.STRING)
+                                .description(""),
+                        fieldWithPath(prefix + "serviceEditionCode")
+                                .type(JsonFieldType.STRING)
+                                .description("Description."),
+                        fieldWithPath(prefix + "lastUpdate")
+                                .type(JsonFieldType.STRING)
+                                .description("Date and time of status."),
+                        fieldWithPath(prefix + "finished")
+                                .type(JsonFieldType.BOOLEAN)
+                                .description(""),
+                        fieldWithPath(prefix + "expiry")
+                                .type(JsonFieldType.STRING)
+                                .description("Expiry timestamp"),
+                        fieldWithPath(prefix + "direction")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("The direction. Can be one of: %s", Arrays.stream(ConversationDirection.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", ")))),
+                        fieldWithPath(prefix + "serviceIdentifier")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("The service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", ")))),
+                        fieldWithPath(prefix + "messageStatuses")
+                                .type(JsonFieldType.ARRAY)
+                                .description("An array of message statuses.")
+                ).fields(conversationMessageStatusDescriptors(prefix + "messageStatuses[]."))
+                .build();
+    }
+
+    private static FieldDescriptor[] conversationMessageStatusDescriptors(String prefix) {
+        return new FieldDescriptor[]{
+                fieldWithPath(prefix + "id")
+                        .type(JsonFieldType.NUMBER)
+                        .description("Integer. The numeric message status ID."),
+                fieldWithPath(prefix + "status")
+                        .type(JsonFieldType.STRING)
+                        .description(String.format("The message status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
+                        .map(Enum::name)
+                        .collect(Collectors.joining(", ")))),
+                fieldWithPath(prefix + "description")
+                        .type(JsonFieldType.STRING)
+                        .description("Description."),
+                fieldWithPath(prefix + "lastUpdate")
+                        .type(JsonFieldType.STRING)
+                        .description("Date and time of status.")
         };
     }
 

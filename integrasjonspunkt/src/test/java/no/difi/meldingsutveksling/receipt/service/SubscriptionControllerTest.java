@@ -29,14 +29,12 @@ import java.util.List;
 
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.receipt.service.SubscriptionTestData.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -79,8 +77,8 @@ public class SubscriptionControllerTest {
                         requestParameters(getPagingParameterDescriptors()),
                         responseFields()
                                 .and(subscriptionDescriptors("content[].", null))
-                                .and(getPageFieldDescriptors())
-                                .andWithPrefix("pageable.", getPageableFieldDescriptors())
+                                .and(pageDescriptors())
+                                .andWithPrefix("pageable.", pageableDescriptors())
                         )
                 );
 
@@ -165,5 +163,80 @@ public class SubscriptionControllerTest {
                 ));
 
         verify(subscriptionService).createSubscription(any());
+    }
+
+    @Test
+    public void updateSubscription() throws Exception {
+        Subscription input = incomingMessagesInput();
+        Subscription subscription = incomingMessages();
+
+        mvc.perform(
+                put("/api/subscriptions/{id}", subscription.getId())
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsString(input))
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("subscriptions/update",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("id")
+                                        .description("The id of the subscription to update.")
+                        ),
+                        requestFields(
+                                subscriptionInputDescriptors("", ValidationGroups.Update.class)
+                        )
+                ));
+
+        verify(subscriptionService).updateSubscription(anyLong(), any());
+    }
+
+    @Test
+    public void deleteSubscription() throws Exception {
+        Subscription subscription = incomingMessages();
+
+        mvc.perform(
+                delete("/api/subscriptions/{id}", subscription.getId())
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("subscriptions/delete",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("id")
+                                        .description("The id of the subscription to update.")
+                        )
+                ));
+
+        verify(subscriptionService).deleteSubscription(anyLong());
+    }
+
+    @Test
+    public void deleteAllSubscriptions() throws Exception {
+        mvc.perform(
+                delete("/api/subscriptions")
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("subscriptions/delete-all",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        )
+                ));
+
+        verify(subscriptionService).deleteAll();
     }
 }

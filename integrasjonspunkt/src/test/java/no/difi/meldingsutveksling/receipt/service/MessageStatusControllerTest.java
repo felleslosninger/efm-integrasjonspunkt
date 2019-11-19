@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.receipt.service;
 
-import java.util.Optional;
-
-import lombok.Data;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
+import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,19 +20,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
+import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getMessageStatusFieldDescriptors;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -56,31 +56,11 @@ public class MessageStatusControllerTest {
     @MockBean
     private MessageStatusRepository statusRepo;
 
-    private final MessageStatus messageStatus1 = getMessageStatus(new MessageStatusDTO()
-            .setId(1L)
-            .setConvId(2L)
-            .setMessageId("1cc3fb67-b776-4730-b017-1028b86a8b8b")
-            .setConversationId("cc3740ec-c6c1-474f-a93d-7e73816ca34b")
-            .setStatus(ReceiptStatus.MOTTATT.toString())
-            .setLastUpdate(OffsetDateTime.parse("2019-11-05T12:04:34+02:00"))
-            .setDescription("Mottatt")
-            .setRawReceipt("Th raw receipt"));
-
-    private final MessageStatus messageStatus2 = getMessageStatus(new MessageStatusDTO()
-            .setId(7L)
-            .setConvId(4L)
-            .setMessageId("e424303b-9d8d-4392-b02e-14da4d3dad36")
-            .setConversationId("4364a1f2-be6a-46f2-832d-c11d9b52abad")
-            .setStatus(ReceiptStatus.LEVERT.toString())
-            .setLastUpdate(OffsetDateTime.parse("2019-10-23T15:43:12+02:00"))
-            .setDescription("Levert")
-            .setRawReceipt("Th raw receipt 2"));
-
     @Test
     public void find() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<MessageStatus> content = Arrays.asList(messageStatus1, messageStatus2);
+                    List<MessageStatus> content = Arrays.asList(messageStatus1(), messageStatus2());
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -112,9 +92,9 @@ public class MessageStatusControllerTest {
                                         .collect(Collectors.joining(", "))))
                         ).and(getPagingParameterDescriptors()),
                         responseFields()
-                                .andWithPrefix("content[].", getMessageStatusFieldDescriptors())
-                                .and(getPageFieldDescriptors())
-                                .andWithPrefix("pageable.", getPageableFieldDescriptors())
+                                .and(messageStatusDescriptors("content[]."))
+                                .and(pageDescriptors())
+                                .andWithPrefix("pageable.", pageableDescriptors())
                         )
                 );
 
@@ -125,7 +105,7 @@ public class MessageStatusControllerTest {
     public void findSearch() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus1);
+                    List<MessageStatus> content = Collections.singletonList(messageStatus1());
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -146,7 +126,7 @@ public class MessageStatusControllerTest {
     public void findSorting() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<MessageStatus> content = Arrays.asList(messageStatus2, messageStatus1);
+                    List<MessageStatus> content = Arrays.asList(messageStatus2(), messageStatus1());
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -166,7 +146,7 @@ public class MessageStatusControllerTest {
     public void findPaging() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus2);
+                    List<MessageStatus> content = Collections.singletonList(messageStatus2());
                     return new PageImpl<>(content, invocation.getArgument(1), 2L);
                 });
 
@@ -187,7 +167,7 @@ public class MessageStatusControllerTest {
     public void findByMessageId() throws Exception {
         given(statusRepo.findByConversationMessageId(any(String.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus1);
+                    List<MessageStatus> content = Collections.singletonList(messageStatus1());
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -214,9 +194,9 @@ public class MessageStatusControllerTest {
                                 parameterWithName("messageId").description("The messageId")
                         ).and(getPagingParameterDescriptors()),
                         responseFields()
-                                .andWithPrefix("content[].", getMessageStatusFieldDescriptors())
-                                .and(getPageFieldDescriptors())
-                                .andWithPrefix("pageable.", getPageableFieldDescriptors())
+                                .and(messageStatusDescriptors("content[]."))
+                                .and(pageDescriptors())
+                                .andWithPrefix("pageable.", pageableDescriptors())
                         )
                 );
 
@@ -225,7 +205,7 @@ public class MessageStatusControllerTest {
 
     @Test
     public void peekLatest() throws Exception {
-        given(statusRepo.findFirstByOrderByLastUpdateAsc()).willReturn(Optional.of(messageStatus1));
+        given(statusRepo.findFirstByOrderByLastUpdateAsc()).willReturn(Optional.of(messageStatus1()));
 
         mvc.perform(
                 get("/api/statuses/peek")
@@ -246,35 +226,10 @@ public class MessageStatusControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        responseFields(getMessageStatusFieldDescriptors())
+                        responseFields(messageStatusDescriptors(""))
                         )
                 );
 
         verify(statusRepo).findFirstByOrderByLastUpdateAsc();
-    }
-
-    private MessageStatus getMessageStatus(MessageStatusDTO dto) {
-        MessageStatus messageStatus = spy(MessageStatus.of(ReceiptStatus.valueOf(dto.getStatus()), dto.getLastUpdate(), dto.getDescription())
-                .setConversation(new Conversation()
-                        .setMessageId(dto.getMessageId())
-                        .setConversationId(dto.getConversationId())
-                ));
-
-        given(messageStatus.getId()).willReturn(dto.getId());
-        given(messageStatus.getConvId()).willReturn(dto.getConvId());
-        return messageStatus;
-    }
-
-    @Data
-    private static class MessageStatusDTO {
-
-        private Long id;
-        private Long convId;
-        private String messageId;
-        private String conversationId;
-        private String status;
-        private String description;
-        private String rawReceipt;
-        private OffsetDateTime lastUpdate;
     }
 }

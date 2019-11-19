@@ -12,10 +12,7 @@ image:difi-logo.png[]
 = NextMove API Specification
 {project-version}
 
-
-
 == The services
-
 
 |===
 |HTTP Method |URL |Description
@@ -49,6 +46,10 @@ image:difi-logo.png[]
 |<<messages-out-delete>>
 
 |GET
+|<<conversations-find,/api/conversations>>
+|<<conversations-find>>
+
+|GET
 |<<statuses-find,/api/statuses>>
 |<<statuses-find>>
 
@@ -72,10 +73,22 @@ image:difi-logo.png[]
 |<<subscriptions-create,/api/subscriptions>>
 |<<subscriptions-create>>
 
+|PUT
+|<<subscriptions-update,/api/subscriptions/{id}>>
+|<<subscriptions-update>>
+
+|DELETE
+|<<subscriptions-delete,/api/subscriptions/{id}>>
+|<<subscriptions-delete>>
+
+|DELETE
+|<<subscriptions-delete-all,/api/subscriptions>>
+|<<subscriptions-delete-all>>
 
 |===
 
 include::messages-out.adoc[leveloffset=+1]
+include::conversations.adoc[leveloffset=+1]
 include::statuses.adoc[leveloffset=+1]
 include::events.adoc[leveloffset=+1]
 include::subscriptions.adoc[leveloffset=+1]

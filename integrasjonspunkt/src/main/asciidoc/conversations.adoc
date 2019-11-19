@@ -1,0 +1,81 @@
+= Conversations
+
+[#conversations-find]
+== Find conversations
+
+The service is used to search for message conversations.
+Several request parameters are available, described <<conversations-find_request_parameters, here>>.
+The response is paged with a default page size of 10.
+
+=== Example 1 - Get all conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/http-response.adoc[]
+
+=== Example 2 - Search for conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/search/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/search/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/search/http-response.adoc[]
+
+=== Example 3 - Sorting
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/sorting/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/sorting/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/sorting/http-response.adoc[]
+
+=== Example 4 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/paging/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/conversations/find/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/find/response-fields.adoc[]
+--
+

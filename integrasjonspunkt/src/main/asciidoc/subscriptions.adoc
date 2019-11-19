@@ -177,3 +177,69 @@ include::{snippets}/subscriptions/create/request-fields.adoc[]
 include::{snippets}/subscriptions/create/response-fields.adoc[]
 --
 
+[#subscriptions-update]
+== Update a subscription
+
+The service is used to update a webhook a subscription.
+
+=== Example 1 - Update a subscription
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/update/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/update/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/update/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/subscriptions/update/request-fields.adoc[]
+--
+
+[#subscriptions-delete]
+== Delete a subscription
+
+The service is used to delete a webhook a subscription.
+
+=== Example 1 - Deleta a subscription
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/delete/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/delete/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/delete/http-response.adoc[]
+
+
+[#subscriptions-delete-all]
+== Delete all subscriptions
+
+The service is used to delete all webhook a subscriptions.
+
+=== Example 1 - Delete all subscriptions
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/subscriptions/delete-all/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/subscriptions/delete-all/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/subscriptions/delete-all/http-response.adoc[]

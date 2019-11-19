@@ -213,8 +213,8 @@ public class NextMoveMessageOutControllerTest {
                                 .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
                                 .and(subsectionWithPath("content[].digital.").description("The digital DPI business message").optional())
                                 .and(dpiDigitalMessageDescriptors("content[].digital."))
-                                .and(getPageFieldDescriptors())
-                                .andWithPrefix("pageable.", getPageableFieldDescriptors())
+                                .and(pageDescriptors())
+                                .andWithPrefix("pageable.", pageableDescriptors())
                         )
                 );
 
