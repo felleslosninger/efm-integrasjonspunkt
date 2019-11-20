@@ -78,9 +78,6 @@ public class IntegrasjonspunktProperties {
     private Queue queue;
 
     @Valid
-    private Status status;
-
-    @Valid
     private DeadLock deadlock;
 
     @Data
@@ -97,12 +94,6 @@ public class IntegrasjonspunktProperties {
         private String defaultJournalProcess;
         @NotNull
         private String defaultInnsynskravProcess;
-    }
-
-    @Data
-    public static class Status {
-        @NotNull
-        private Integer messageTimeoutHours;
     }
 
     @Data
