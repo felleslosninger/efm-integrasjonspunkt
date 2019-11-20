@@ -1,0 +1,59 @@
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 2
+:stylesheet: asciidoctor.css
+:icons: font
+:source-highlighter: highlightjs
+:imagesdir: ./images
+
+= Capabilities
+
+[#capabilities]
+== Get capabilities
+
+The service is used to get capabilities for a receiver.
+
+=== Example 1 - Get all capabilities
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/http-response.adoc[]
+
+=== Example 2 - Get capabilities with security level
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/security-level/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/security-level/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/security-level/http-response.adoc[]
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/capabilities/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/capabilities/response-fields.adoc[]
+--
+

@@ -7,8 +7,6 @@
 :source-highlighter: highlightjs
 :imagesdir: ./images
 
-image:difi-logo.png[]
-
 = NextMove API Specification
 {project-version}
 
@@ -16,6 +14,10 @@ image:difi-logo.png[]
 
 |===
 |HTTP Method |URL |Description
+
+|GET
+|<<capabilities,/api/capabilities>>
+|<<capabilities>>
 
 |GET
 |<<messages-in-find,/api/messages/in>>
@@ -115,6 +117,7 @@ image:difi-logo.png[]
 
 |===
 
+include::capabilities.adoc[leveloffset=+1]
 include::messages-in.adoc[leveloffset=+1]
 include::messages-out.adoc[leveloffset=+1]
 include::conversations.adoc[leveloffset=+1]

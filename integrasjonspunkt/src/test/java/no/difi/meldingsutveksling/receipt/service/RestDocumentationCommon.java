@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.capabilities.PostalAddress;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -197,31 +198,31 @@ class RestDocumentationCommon {
                                 .description("The conversationId. Typically an UUID."),
                         fieldWithPath(prefix + "senderIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("Descriptor with information to identify the sender. Requires a 0192: prefix for all norwegian organizations."),
                         fieldWithPath(prefix + "receiverIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("Descriptor with information to identify the receiver. Requires a 0192: prefix for all norwegian organizations. Prefix is not required for individuals."),
                         fieldWithPath(prefix + "processIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("The process identifier used by the message."),
                         fieldWithPath(prefix + "messageReference")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("The message reference"),
                         fieldWithPath(prefix + "messageTitle")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("The message title"),
                         fieldWithPath(prefix + "serviceCode")
                                 .type(JsonFieldType.STRING)
-                                .description(""),
+                                .description("Altinn service code"),
                         fieldWithPath(prefix + "serviceEditionCode")
                                 .type(JsonFieldType.STRING)
-                                .description("Description."),
+                                .description("Altinn service edition code."),
                         fieldWithPath(prefix + "lastUpdate")
                                 .type(JsonFieldType.STRING)
                                 .description("Date and time of status."),
                         fieldWithPath(prefix + "finished")
                                 .type(JsonFieldType.BOOLEAN)
-                                .description(""),
+                                .description("If the conversation has a finished state or not."),
                         fieldWithPath(prefix + "expiry")
                                 .type(JsonFieldType.STRING)
                                 .description("Expiry timestamp"),
@@ -555,7 +556,71 @@ class RestDocumentationCommon {
                         constrainedFields.withPath("filter")
                                 .type(JsonFieldType.STRING)
                                 .optional()
-                                .description("A set of filtering critera. Generally speaking, webhook filters will be a subset of the query parameters available when GETing a list of the target resource. It is an optional property. To add multiple filters, separate them with the “&” symbol. Supported filters are: status, serviceIdentifier, direction.")
+                                .description("A set of filtering criteria. Generally speaking, webhook filters will be a subset of the query parameters available when GETing a list of the target resource. It is an optional property. To add multiple filters, separate them with the “&” symbol. Supported filters are: status, serviceIdentifier, direction.")
                 ).build();
+    }
+
+    static List<FieldDescriptor> capabilitiesDescriptors() {
+        return new FieldDescriptorsBuilder()
+                .fields(capabilityDescriptors("capabilities[]."))
+                .build();
+    }
+
+    private static List<FieldDescriptor> capabilityDescriptors(String prefix) {
+        return new FieldDescriptorsBuilder()
+                .fields(
+                        fieldWithPath(prefix + "process")
+                                .type(JsonFieldType.STRING)
+                                .description("Type of process."),
+                        fieldWithPath(prefix + "serviceIdentifier")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("The service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", ")))),
+                        fieldWithPath(prefix + "postAddress")
+                                .type(JsonFieldType.OBJECT)
+                                .description("An postal address."),
+                        fieldWithPath(prefix + "returnAddress")
+                                .type(JsonFieldType.OBJECT)
+                                .description("An return address."),
+                        fieldWithPath(prefix + "documentTypes")
+                                .type(JsonFieldType.ARRAY)
+                                .description("An postal address.")
+                )
+                .fields(postalAddressDescriptors(prefix + "postAddress."))
+                .fields(postalAddressDescriptors(prefix + "returnAddress."))
+                .fields(documentTypeDescriptors(prefix + "documentTypes[]."))
+                .build();
+    }
+
+    private static FieldDescriptor[] postalAddressDescriptors(String prefix) {
+        return new FieldDescriptor[] {
+                fieldWithPath(prefix + "name")
+                        .type(JsonFieldType.STRING)
+                        .description("SName of recipient.."),
+                fieldWithPath(prefix + "street")
+                        .type(JsonFieldType.STRING)
+                        .description("Street name"),
+                fieldWithPath(prefix + "postalCode")
+                        .type(JsonFieldType.STRING)
+                        .description("Postal code."),
+                fieldWithPath(prefix + "postalArea")
+                        .type(JsonFieldType.STRING)
+                        .description("City / Postal area."),
+                fieldWithPath(prefix + "country")
+                        .type(JsonFieldType.STRING)
+                        .description("Country.")
+        };
+    }
+
+    private static FieldDescriptor[] documentTypeDescriptors(String prefix) {
+        return new FieldDescriptor[] {
+                fieldWithPath(prefix + "type")
+                        .type(JsonFieldType.STRING)
+                        .description("Document type. This is always identical to the last part of the standard."),
+                fieldWithPath(prefix + "standard")
+                        .type(JsonFieldType.STRING)
+                        .description("Document standard.")
+        };
     }
 }
