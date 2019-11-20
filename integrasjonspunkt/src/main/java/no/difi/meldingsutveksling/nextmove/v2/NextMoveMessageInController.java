@@ -96,7 +96,7 @@ public class NextMoveMessageInController {
         messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
-        log.info(markerFrom(message), "Message with id={} locked", message.getMessageId());
+        log.info(markerFrom(message), "Message with id={} locked until {}", message.getMessageId(), message.getLockTimeout());
         return message.getSbd();
     }
 
