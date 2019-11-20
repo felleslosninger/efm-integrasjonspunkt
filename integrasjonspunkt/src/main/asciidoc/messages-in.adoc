@@ -1,0 +1,177 @@
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 2
+:stylesheet: asciidoctor.css
+:icons: font
+:source-highlighter: highlightjs
+:imagesdir: ./images
+
+= Incoming messages
+
+To fetch messages it is necessary to start with the <<messages-in-peek>> operation.
+This will get the first message in the incoming queue and simultaneously lock the message.
+If you are looking for a specific type of message, then there are several filters available.
+When the message is locked, it can be retrieved with <<messages-in-pop>>.
+After the message is successfully downloaded, it should be deleted using the <<messages-in-delete>> operation.
+
+[plantuml]
+....
+    participant "Archive System" as fs
+    participant "Integrasjonspunkt" as ip
+    participant "Service Provider" as mf
+
+    loop
+        ip->>mf: GetMessages
+        mf-->>ip: messages
+    end
+
+    fs->>ip: GET /api/messages/in/peek[?process={processName}]
+    ip-->>fs: messageMetaData
+    fs->>ip: GET /api/messages/in/pop/{messageId}
+    ip-->>fs: ASiC
+    fs->>ip: DELETE /api/messages/in/{messageId}
+....
+
+[#messages-in-find]
+== Find incoming messages
+
+The service is used to search for incoming messages.
+The response is paged with a default page size of 10.
+
+=== Example 1 - Get all incoming messages
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/find/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/find/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/find/http-response.adoc[]
+
+=== Example 2 - Search for incoming DPO messages
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/find/search/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/find/search/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/find/search/http-response.adoc[]
+
+=== Example 3 - Sorting
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/find/sorting/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/find/sorting/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/find/sorting/http-response.adoc[]
+
+=== Example 4 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/find/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/find/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/find/paging/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/in/find/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/in/find/response-fields.adoc[]
+--
+
+[#messages-in-peek]
+== Peek incoming messages
+
+The service is used to initiate the download of an incoming mmessage.
+The operations gets the first message on the incoming queue and simultaneously locks it.
+The message is now ready for download.
+
+=== Example 1 - Peek incoming message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/peek/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/peek/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/peek/http-response.adoc[]
+
+=== Example 2 - Peek incoming DPO message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/peek/dpo/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/peek/dpo/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/peek/dpo/http-response.adoc[]
+
+=== Example 3 - No more messages
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/peek/no-content/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/peek/no-content/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/peek/no-content/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/messages/in/peek/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/in/peek/response-fields.adoc[]
+--

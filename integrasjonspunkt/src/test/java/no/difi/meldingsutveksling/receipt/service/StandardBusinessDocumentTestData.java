@@ -29,8 +29,8 @@ class StandardBusinessDocumentTestData {
                     .setHoveddokument("before_the_law.txt"));
 
     static final StandardBusinessDocument ARKIVMELDING_INPUT = getInputSbd(ARKIVMELDING_MESSAGE_DATA);
-
-    static final NextMoveOutMessage ARKIVMELDING_MESSAGE = NextMoveOutMessage.of(getResponseSbd(ARKIVMELDING_MESSAGE_DATA), ServiceIdentifier.DPO);
+    static final StandardBusinessDocument ARKIVMELDING_SBD = getResponseSbd(ARKIVMELDING_MESSAGE_DATA);
+    static final NextMoveOutMessage ARKIVMELDING_MESSAGE = NextMoveOutMessage.of(ARKIVMELDING_SBD, ServiceIdentifier.DPO);
 
     private static final MessageData DPI_DIGITAL_MESSAGE_DATA = new MessageData()
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
@@ -51,8 +51,8 @@ class StandardBusinessDocumentTestData {
             );
 
     static final StandardBusinessDocument DPI_DIGITAL_INPUT = getInputSbd(DPI_DIGITAL_MESSAGE_DATA);
-
-    static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(getResponseSbd(DPI_DIGITAL_MESSAGE_DATA), ServiceIdentifier.DPI);
+    static final StandardBusinessDocument DPI_DIGITAL_SBD = getResponseSbd(DPI_DIGITAL_MESSAGE_DATA);
+    static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(DPI_DIGITAL_SBD, ServiceIdentifier.DPI);
 
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();

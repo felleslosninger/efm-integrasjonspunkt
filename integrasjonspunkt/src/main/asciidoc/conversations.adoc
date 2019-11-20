@@ -4,7 +4,6 @@
 == Find conversations
 
 The service is used to search for conversations.
-Several request parameters are available, described <<conversations-find_request_parameters, here>>.
 The response is paged with a default page size of 10.
 
 === Example 1 - Get all conversations

@@ -1,4 +1,11 @@
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 2
+:stylesheet: asciidoctor.css
 :icons: font
+:source-highlighter: highlightjs
+:imagesdir: ./images
 
 = Webhook subscriptions
 
@@ -96,12 +103,17 @@ include::{snippets}/subscriptions/get/response-fields.adoc[]
 [#subscriptions-create]
 == Create a subscription
 
-The service is used to create a webhook a subscription.
+The service is used to create a webhook a subscription. The webhook is persisted in the database, so
+it will continue to work after a reboot.
 
 [NOTE]
 Please note, that we do not guarantee delivery of the webhook events.
 An event that cannot be delivered, will be retried three times.
 If all these attempts fail, the event will not be redelivered.
+
+[TIP]
+Only use a small number of webhooks. Usually one webhook should be sufficient.
+Creating a webhook for each message is considered bad practise, and can lead to performance degradation.
 
 === Example 1 - Create a subscription
 

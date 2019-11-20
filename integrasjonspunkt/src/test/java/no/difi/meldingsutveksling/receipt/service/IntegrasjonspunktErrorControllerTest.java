@@ -79,7 +79,7 @@ public class IntegrasjonspunktErrorControllerTest {
     }
 
     @Test
-    public void noContent() throws Exception {
+    public void statusesNoContent() throws Exception {
 
         mvc.perform(
                 get("/error")
@@ -340,6 +340,40 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"path\" : \"/api/conversations/messageId/df64afa1-83f4-497c-ae94-db22108801b9\"\n" +
                         "}"))
                 .andDo(document("/conversations/get-by-message-id/not-found",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(false)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void messagesInNoContent() throws Exception {
+
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 204)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/messages/in/peek")
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, "No content")
+                        .requestAttr(ERROR_ATTRIBUTE, new NoContentException())
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNoContent())
+                .andExpect(content().json("{\n" +
+                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
+                        "  \"status\" : 204,\n" +
+                        "  \"error\" : \"No Content\",\n" +
+                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.NoContentException\",\n" +
+                        "  \"message\" : \"No content\",\n" +
+                        "  \"path\" : \"/api/messages/in/peek\"\n" +
+                        "}"))
+                .andDo(document("/messages/in/peek/no-content",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(

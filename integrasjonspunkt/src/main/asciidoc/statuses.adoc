@@ -1,10 +1,18 @@
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 2
+:stylesheet: asciidoctor.css
+:icons: font
+:source-highlighter: highlightjs
+:imagesdir: ./images
+
 = Message statuses
 
 [#statuses-find]
 == Find message statuses
 
 The service is used to search for message statuses.
-Several request parameters are available, described <<statuses-find_request_parameters, here>>.
 The response is paged with a default page size of 10.
 
 === Example 1 - Get all message statuses

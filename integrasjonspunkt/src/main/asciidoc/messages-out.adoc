@@ -1,34 +1,48 @@
-= Messages out
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 2
+:stylesheet: asciidoctor.css
+:icons: font
+:source-highlighter: highlightjs
+:imagesdir: ./images
 
-[plantuml,auth-protocol]
+= Outgoing messages
+
+[plantuml]
 ....
-    ArchiveSystem->>Integrasjonspunkt: GET /api/capabilities/{receiverid}
+    participant "Archive System" as fs
+    participant Integrasjonspunkt as ip
+    participant "Service Registry" as sr
+    participant "Service Provider" as mf
 
-    Integrasjonspunkt->>ServiceRegistry: GET /identifier/{receiverid}
-    ServiceRegistry-->>Integrasjonspunkt: capabilities
+    fs->>ip: GET api/capabilities/{receiverid}
 
-    Integrasjonspunkt-->>ArchiveSystem: capabilities
-    ArchiveSystem->>ArchiveSystem: select capability
-    ArchiveSystem->>ArchiveSystem: Create message
-    ArchiveSystem->>Integrasjonspunkt: POST /api/messages/out
-    Integrasjonspunkt-->>ArchiveSystem: StandardBusinessDocument
+    ip->>sr: GET /identifier/{receiverid}
+    sr-->>ip: capabilities
+
+    ip-->>fs: capabilities
+    fs->>fs: select capability
+    fs->>fs: Create message
+    fs->>ip: POST api/messages/
+    ip-->>fs: conversationresponse
     loop
-    ArchiveSystem->>Integrasjonspunkt: PUT /api/messages/out/{messageId}
+    fs->>ip: PUT api/messages/out/{messageId}
     end
-    ArchiveSystem->>Integrasjonspunkt: POST /api/messages/out/{messageId}
+    fs->>ip: POST api/messages/out/{messageId}
 
-    Integrasjonspunkt->>MessageProvider: Upload
+    ip->>mf: Upload
     loop
-        Integrasjonspunkt->>MessageProvider: GetStatus
-        MessageProvider-->>Integrasjonspunkt: status
+        ip->>mf: GetStatus
+        mf-->>ip: status
     end
 
-    ArchiveSystem->>Integrasjonspunkt: GET /api/statuses/{messageId}
-    Integrasjonspunkt-->>ArchiveSystem: statuses
+    fs->>ip: GET api/statuses/{messageId}
+    ip-->>fs: statuses
 ....
 
 [#messages-out-find]
-== Find messages
+== Find outgoing messages
 
 The service is used to find messages on the outgoing queue.
 
@@ -105,7 +119,7 @@ include::{snippets}/messages/out/find/response-fields.adoc[]
 --
 
 [#messages-out-get]
-== Get message
+== Get outgoing message
 
 The service is used to get a message on the outgoing queue by messageId.
 
@@ -295,9 +309,16 @@ include::{snippets}/messages/out/send/request-parameters.adoc[]
 [#messages-out-multipart]
 == Send multipart message
 
-The service is used to send messages using multipart upload.
+The service is used to create and send messages using multipart upload.
 
-=== Example 1 - Send a multipart arkvimelding
+[NOTE]
+Please note, that multipart is only allowed for smaller messages.
+For larger messages, please use the following combination:
+ <<messages-out-create>>, <<messages-out-upload>> and <<messages-out-send>> instead.
+<<messages-out-upload>> can be used several times if you have more than one attachment.
+
+
+=== Example 1 - Send a multipart arkivmelding
 
 [source,http,role="primary"]
 .Curl

@@ -18,6 +18,22 @@ image:difi-logo.png[]
 |HTTP Method |URL |Description
 
 |GET
+|<<messages-in-find,/api/messages/in>>
+|<<messages-in-find>>
+
+|GET
+|<<messages-in-peek,/api/messages/in/peek>>
+|<<messages-in-peek>>
+
+|GET
+|<<messages-in-pop,/api/messages/in/pop/{messageId}>>
+|<<messages-in-pop>>
+
+|DELETE
+|<<messages-in-delete,/api/messages/in/{messageId}>>
+|<<messages-in-delete>>
+
+|GET
 |<<messages-out-find,/api/messages/out>>
 |<<messages-out-find>>
 
@@ -58,6 +74,10 @@ image:difi-logo.png[]
 |<<conversations-get-by-message-id>>
 
 |GET
+|<<conversations-queue,/api/conversations/queue>>
+|<<conversations-queue>>
+
+|GET
 |<<statuses-find,/api/statuses>>
 |<<statuses-find>>
 
@@ -95,6 +115,7 @@ image:difi-logo.png[]
 
 |===
 
+include::messages-in.adoc[leveloffset=+1]
 include::messages-out.adoc[leveloffset=+1]
 include::conversations.adoc[leveloffset=+1]
 include::statuses.adoc[leveloffset=+1]
