@@ -175,3 +175,69 @@ include::{snippets}/messages/in/peek/request-parameters.adoc[]
 --
 include::{snippets}/messages/in/peek/response-fields.adoc[]
 --
+
+[#messages-in-pop]
+== Pop incoming messages
+
+The service is used to download the ASiC of an incoming mmessage.
+
+[NOTE]
+Please note, that the message must be deleted from the queue, using <<messages-in-delete>>.
+
+=== Example 1 - Download ASiC
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/pop/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/pop/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/pop/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/messages/in/pop/path-parameters.adoc[]
+--
+
+[#messages-in-delete]
+== Delete incoming message
+
+The service is used to delete an incoming mmessage.
+
+=== Example 1 - Delete an incoming message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/in/delete/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/in/delete/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/in/delete/http-response.adoc[]
+
+=== About the service
+
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/messages/in/delete/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/in/delete/response-fields.adoc[]
+--

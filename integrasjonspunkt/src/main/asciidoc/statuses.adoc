@@ -88,12 +88,12 @@ include::{snippets}/statuses/find/response-fields.adoc[]
 --
 
 [#statuses-find-by-message-id]
-== Find message statuses by message ID
+== Find message statuses by messageId
 
-The service is used to search for message statuses by message ID.
+The service is used to search for message statuses by messageId.
 The response is paged with a default page size of 10
 
-=== Example 1 - Find all message statuses by message ID
+=== Example 1 - Find all message statuses by messageId
 
 [source,http,role="primary"]
 .Curl

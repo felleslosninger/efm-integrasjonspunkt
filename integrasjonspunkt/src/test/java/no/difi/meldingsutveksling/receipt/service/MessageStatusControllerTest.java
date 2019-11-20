@@ -1,15 +1,11 @@
 package no.difi.meldingsutveksling.receipt.service;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
-import no.difi.meldingsutveksling.receipt.*;
-import no.difi.meldingsutveksling.view.Views;
+import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
+import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
 import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;

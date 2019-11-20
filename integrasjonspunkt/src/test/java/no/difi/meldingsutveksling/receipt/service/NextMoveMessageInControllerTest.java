@@ -1,22 +1,16 @@
 package no.difi.meldingsutveksling.receipt.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -32,31 +27,32 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.ARKIVMELDING_SBD;
 import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.DPI_DIGITAL_SBD;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -253,4 +249,68 @@ public class NextMoveMessageInControllerTest {
         verify(messageService).peek(any(NextMoveInMessageQueryInput.class));
     }
 
+    @Test
+    public void pop() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
+        zipOutputStream.putNextEntry(new ZipEntry("test"));
+        byte[] bytes = new byte[1024];
+        new Random().nextBytes(bytes);
+        zipOutputStream.write(bytes);
+        zipOutputStream.closeEntry();
+        zipOutputStream.close();
+
+        given(messageService.popMessage(anyString())).willReturn(
+                new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()))
+        );
+
+        mvc.perform(
+                get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                        .accept(AsicUtils.MIMETYPE_ASICE)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/in/pop",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                        )
+                        )
+                );
+
+        verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
+    }
+
+    @Test
+    public void deleteMessage() throws Exception {
+        given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
+
+        mvc.perform(
+                delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/in/delete",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                        ),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
+                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
+                        )
+                );
+
+        verify(messageService).deleteMessage(ARKIVMELDING_SBD.getMessageId());
+    }
 }
