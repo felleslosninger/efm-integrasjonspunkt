@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
@@ -34,6 +35,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Set;
 
+import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpoConversation;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.errorFieldDescriptors;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getDefaultHeaderDescriptors;
 import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
@@ -273,6 +275,78 @@ public class IntegrasjonspunktErrorControllerTest {
                         ),
                         responseFields(
                                 errorFieldDescriptors(true)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void conversationNotFound() throws Exception {
+        Long id = dpoConversation().getId();
+
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/conversations/" + id)
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with id = %d was not found", id))
+                        .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(id)
+                        )
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("{\n" +
+                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
+                        "  \"status\" : 404,\n" +
+                        "  \"error\" : \"Not Found\",\n" +
+                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ConversationNotFoundException\",\n" +
+                        "  \"message\" : \"Conversation with id = 49 was not found\",\n" +
+                        "  \"path\" : \"/api/conversations/49\"\n" +
+                        "}"))
+                .andDo(document("/conversations/get/not-found",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(false)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void conversationBtMyessageIdNotFound() throws Exception {
+        String messageId = "df64afa1-83f4-497c-ae94-db22108801b9";
+
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/conversations/messageId/" + messageId)
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with messageId = %s was not found", messageId))
+                        .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(messageId)
+                        )
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("{\n" +
+                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
+                        "  \"status\" : 404,\n" +
+                        "  \"error\" : \"Not Found\",\n" +
+                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ConversationNotFoundException\",\n" +
+                        "  \"message\" : \"Conversation with messageId = df64afa1-83f4-497c-ae94-db22108801b9 was not found\",\n" +
+                        "  \"path\" : \"/api/conversations/messageId/df64afa1-83f4-497c-ae94-db22108801b9\"\n" +
+                        "}"))
+                .andDo(document("/conversations/get-by-message-id/not-found",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(false)
                         )
                         )
                 );

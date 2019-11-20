@@ -50,6 +50,14 @@ image:difi-logo.png[]
 |<<conversations-find>>
 
 |GET
+|<<conversations-get,/api/conversations/{id}>>
+|<<conversations-get>>
+
+|GET
+|<<conversations-get-by-message-id,/api/conversations/messageId/{messageId}>>
+|<<conversations-get-by-message-id>>
+
+|GET
 |<<statuses-find,/api/statuses>>
 |<<statuses-find>>
 

@@ -3,7 +3,7 @@
 [#conversations-find]
 == Find conversations
 
-The service is used to search for message conversations.
+The service is used to search for conversations.
 Several request parameters are available, described <<conversations-find_request_parameters, here>>.
 The response is paged with a default page size of 10.
 
@@ -79,3 +79,137 @@ include::{snippets}/conversations/find/request-parameters.adoc[]
 include::{snippets}/conversations/find/response-fields.adoc[]
 --
 
+[#conversations-get]
+== Get conversation by id
+
+The service is used to search for conversations by message ID.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get conversation
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get/http-response.adoc[]
+
+=== Example 2 - Conversation not found
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get/not-found/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get/not-found/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get/not-found/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/conversations/get/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get/response-fields.adoc[]
+--
+
+[#conversations-get-by-message-id]
+== Get conversation by messageId
+
+The service is used to search for conversations by message ID.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get conversation by messageId
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get-by-message-id/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get-by-message-id/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get-by-message-id/http-response.adoc[]
+
+=== Example 2 - Conversation not found
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get-by-message-id/not-found/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get-by-message-id/not-found/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get-by-message-id/not-found/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/conversations/get-by-message-id/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get-by-message-id/response-fields.adoc[]
+--
+
+[#conversations-queue]
+== Queued conversations
+
+The service is used to get all conversations with not-finished state.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get queued conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/queue/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/queue/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/queue/http-response.adoc[]
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/conversations/queue/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/queue/response-fields.adoc[]
+--

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
@@ -59,10 +60,10 @@ public class ConversationController {
             @ApiParam(value = "id", required = true, example = "1")
             @PathVariable("id") Long id) {
         return conversationRepository.findByIdAndDirection(id, OUTGOING)
-                .orElseThrow(() -> new MessageNotFoundException("id", id.toString()));
+                .orElseThrow(() -> new ConversationNotFoundException(id));
     }
 
-    @GetMapping("messageId/{id}")
+    @GetMapping("messageId/{messageId}")
     @ApiOperation(value = "Get conversation", notes = "Find conversation based on messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation.class),
@@ -72,7 +73,7 @@ public class ConversationController {
     @JsonView(Views.Conversation.class)
     public Conversation getByMessageId(
             @ApiParam(value = "messageId", required = true)
-            @PathVariable("id") String messageId) {
+            @PathVariable("messageId") String messageId) {
         return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()

@@ -7,8 +7,9 @@ import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
-import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
@@ -266,13 +267,13 @@ public class NextMoveMessageOutControllerTest {
         given(messageService.findMessages(any(), any()))
                 .willAnswer(invocation -> {
                     List<NextMoveMessage> content = Collections.singletonList(DPI_DIGITAL_MESSAGE);
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                    return new PageImpl<>(content, invocation.getArgument(1), 41L);
                 });
 
         mvc.perform(
                 get("/api/messages/out")
-                        .param("page", "1")
-                        .param("size", "1")
+                        .param("page", "3")
+                        .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())

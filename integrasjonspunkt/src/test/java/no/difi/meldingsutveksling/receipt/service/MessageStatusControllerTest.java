@@ -1,11 +1,15 @@
 package no.difi.meldingsutveksling.receipt.service;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
-import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
+import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.view.Views;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
 import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
@@ -147,13 +154,13 @@ public class MessageStatusControllerTest {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
                     List<MessageStatus> content = Collections.singletonList(messageStatus2());
-                    return new PageImpl<>(content, invocation.getArgument(1), 2L);
+                    return new PageImpl<>(content, invocation.getArgument(1), 31L);
                 });
 
         mvc.perform(
                 get("/api/statuses")
-                        .param("page", "1")
-                        .param("size", "1")
+                        .param("page", "3")
+                        .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -205,7 +212,8 @@ public class MessageStatusControllerTest {
 
     @Test
     public void peekLatest() throws Exception {
-        given(statusRepo.findFirstByOrderByLastUpdateAsc()).willReturn(Optional.of(messageStatus1()));
+        MessageStatus messageStatus = messageStatus1();
+        given(statusRepo.findFirstByOrderByLastUpdateAsc()).willReturn(Optional.of(messageStatus));
 
         mvc.perform(
                 get("/api/statuses/peek")
