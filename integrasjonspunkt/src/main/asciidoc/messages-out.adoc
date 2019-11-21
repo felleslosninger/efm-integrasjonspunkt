@@ -204,7 +204,63 @@ include::{snippets}/messages/out/create-dpi-digital/request-fields.adoc[]
 include::{snippets}/messages/out/create-dpi-digital/response-fields.adoc[]
 --
 
-=== Example 3 - Validation error
+=== Example 3 - Creating a DPE innsynskrav message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create-innsynskrav/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create-innsynskrav/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create-innsynskrav/http-response.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create-innsynskrav/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create-innsynskrav/response-fields.adoc[]
+--
+
+=== Example 4 - Creating a DPE publisering message
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create-publisering/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create-publisering/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create-publisering/http-response.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create-publisering/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create-publisering/response-fields.adoc[]
+--
+
+=== Example 5 - Validation error
 
 [source,http,role="primary"]
 .Response
@@ -217,7 +273,7 @@ include::{snippets}/messages/out/create/service-not-enabled/http-response.adoc[]
 include::{snippets}/messages/out/create/service-not-enabled/response-fields.adoc[]
 --
 
-=== Example 4 - Constraint violation
+=== Example 6 - Constraint violation
 
 [source,http,role="primary"]
 .Response

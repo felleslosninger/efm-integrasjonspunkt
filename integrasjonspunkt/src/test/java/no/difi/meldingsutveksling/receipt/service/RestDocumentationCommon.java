@@ -4,7 +4,6 @@ import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.capabilities.PostalAddress;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -441,29 +440,34 @@ class RestDocumentationCommon {
         };
     }
 
-    static FieldDescriptor[] arkivmeldingMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix);
-
-        return new FieldDescriptor[]{
-                messageFields.withPath("hoveddokument")
-                        .type(JsonFieldType.VARIES)
-                        .optional()
-                        .description("Name of the attachment that is the main document.")
-        };
-    }
-
-    static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix);
+    private static List<FieldDescriptor> businessMessageDescriptors(String prefix, Class<?> group) {
+        ConstrainedFields messageFields = new ConstrainedFields(BusinessMessage.class, prefix, group);
 
         return new FieldDescriptorsBuilder()
                 .fields(
                         messageFields.withPath("sikkerhetsnivaa")
                                 .type(JsonFieldType.VARIES)
+                                .optional()
                                 .description("Defines the authentication level required for the document to be opened."),
                         messageFields.withPath("hoveddokument")
                                 .type(JsonFieldType.VARIES)
                                 .optional()
-                                .description("Name of the attachment that is the main document."),
+                                .description("Name of the attachment that is the main document.")
+                ).build();
+    }
+
+    static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
+//        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix);
+        return businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Arkivmelding.class);
+    }
+
+
+    static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
+        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix);
+
+        return new FieldDescriptorsBuilder()
+                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Digital.class))
+                .fields(
                         messageFields.withPath("tittel")
                                 .type(JsonFieldType.VARIES)
                                 .description("The title of the message."),
@@ -515,6 +519,35 @@ class RestDocumentationCommon {
                                 .optional()
                                 .description("SMS content")
                 ).build();
+    }
+
+    static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
+        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix);
+
+        return new FieldDescriptorsBuilder()
+                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Innsynskrav.class))
+                .fields(
+                        messageFields.withPath("orgnr")
+                                .type(JsonFieldType.VARIES)
+                                .description("Business registration number for the organization that you want to gain insight to."),
+                        messageFields.withPath("epost")
+                                .type(JsonFieldType.VARIES)
+                                .description("E-mail of the recipient of the inquiry.")
+                )
+                .build();
+    }
+
+    static List<FieldDescriptor> publiseringMessageDescriptors(String prefix) {
+        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix);
+
+        return new FieldDescriptorsBuilder()
+                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Innsynskrav.class))
+                .fields(
+                        messageFields.withPath("orgnr")
+                                .type(JsonFieldType.VARIES)
+                                .description("Business registration number.")
+                        )
+                .build();
     }
 
     static List<FieldDescriptor> subscriptionInputDescriptors(String prefix, Class<?> group) {
@@ -594,7 +627,7 @@ class RestDocumentationCommon {
     }
 
     private static FieldDescriptor[] postalAddressDescriptors(String prefix) {
-        return new FieldDescriptor[] {
+        return new FieldDescriptor[]{
                 fieldWithPath(prefix + "name")
                         .type(JsonFieldType.STRING)
                         .description("SName of recipient.."),
@@ -614,7 +647,7 @@ class RestDocumentationCommon {
     }
 
     private static FieldDescriptor[] documentTypeDescriptors(String prefix) {
-        return new FieldDescriptor[] {
+        return new FieldDescriptor[]{
                 fieldWithPath(prefix + "type")
                         .type(JsonFieldType.STRING)
                         .description("Document type. This is always identical to the last part of the standard."),

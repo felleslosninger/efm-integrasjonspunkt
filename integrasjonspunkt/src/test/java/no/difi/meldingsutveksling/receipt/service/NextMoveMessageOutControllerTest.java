@@ -53,6 +53,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -172,6 +173,69 @@ public class NextMoveMessageOutControllerTest {
                         responseFields()
                                 .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
                                 .and(dpiDigitalMessageDescriptors("digital."))
+                        )
+                );
+
+        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+    }
+
+    @Test
+    public void createInnsynskravMessage() throws Exception {
+        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageMock.getSbd()).willReturn(INNSYNSKRAV_MESSAGE.getSbd());
+
+        mvc.perform(
+                post("/api/messages/out")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsBytes(INNSYNSKRAV_INPUT))
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(content().json(objectMapper.writeValueAsString(INNSYNSKRAV_SBD)))
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/create-innsynskrav",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(innsynskravMessageDescriptors("innsynskrav.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(innsynskravMessageDescriptors("innsynskrav."))
+                        )
+                );
+
+        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+    }
+
+    @Test
+    public void createPubliseringMessage() throws Exception {
+        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageMock.getSbd()).willReturn(PUBLISERING_MESSAGE.getSbd());
+
+        mvc.perform(
+                post("/api/messages/out")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsBytes(PUBLISERING_INPUT))
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/out/create-publisering",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(publiseringMessageDescriptors("publisering.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(publiseringMessageDescriptors("publisering."))
                         )
                 );
 

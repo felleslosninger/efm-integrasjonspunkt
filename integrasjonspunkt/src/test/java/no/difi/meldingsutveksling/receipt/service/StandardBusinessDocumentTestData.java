@@ -18,11 +18,13 @@ class StandardBusinessDocumentTestData {
         private final String messageId = UUID.randomUUID().toString();
         private final String conversationId = UUID.randomUUID().toString();
         private BusinessMessage businessMessage;
+        private String process;
         private String standard;
         private String type;
     }
 
     static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
             .setType("arkivmelding")
             .setBusinessMessage(new ArkivmeldingMessage()
@@ -33,6 +35,7 @@ class StandardBusinessDocumentTestData {
     static final NextMoveOutMessage ARKIVMELDING_MESSAGE = NextMoveOutMessage.of(ARKIVMELDING_SBD, ServiceIdentifier.DPO);
 
     private static final MessageData DPI_DIGITAL_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
             .setType("digital")
             .setBusinessMessage(new DpiDigitalMessage()
@@ -55,18 +58,33 @@ class StandardBusinessDocumentTestData {
     static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(DPI_DIGITAL_SBD, ServiceIdentifier.DPI);
 
     private static final MessageData INNSYNSKRAV_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:einnsyn:innsynskrav:ver1.0")
             .setStandard("urn:no:difi:einnsyn:xsd::innsynskrav")
             .setType("innsynskrav")
             .setBusinessMessage(new InnsynskravMessage()
                     .setSikkerhetsnivaa(4)
                     .setHoveddokument("kafka_quotes.txt")
-                    .setOrgnr("")
-                    .setEpost("Kafka quotes")
+                    .setOrgnr("98765432")
+                    .setEpost("doofenshmirtz@evil.inc")
             );
 
-    static final StandardBusinessDocument INNSYNSKRAVL_INPUT = getInputSbd(INNSYNSKRAV_MESSAGE_DATA);
+    static final StandardBusinessDocument INNSYNSKRAV_INPUT = getInputSbd(INNSYNSKRAV_MESSAGE_DATA);
     static final StandardBusinessDocument INNSYNSKRAV_SBD = getResponseSbd(INNSYNSKRAV_MESSAGE_DATA);
     static final NextMoveOutMessage INNSYNSKRAV_MESSAGE = NextMoveOutMessage.of(INNSYNSKRAV_SBD, ServiceIdentifier.DPE);
+
+    private static final MessageData PUBLISERING_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:einnsyn:journalpost:ver1.0")
+            .setStandard("urn:no:difi:einnsyn:xsd::publisering")
+            .setType("publisering")
+            .setBusinessMessage(new PubliseringMessage()
+                    .setSikkerhetsnivaa(4)
+                    .setHoveddokument("kafka_quotes.txt")
+                    .setOrgnr("98765432")
+            );
+
+    static final StandardBusinessDocument PUBLISERING_INPUT = getInputSbd(PUBLISERING_MESSAGE_DATA);
+    static final StandardBusinessDocument PUBLISERING_SBD = getResponseSbd(PUBLISERING_MESSAGE_DATA);
+    static final NextMoveOutMessage PUBLISERING_MESSAGE = NextMoveOutMessage.of(PUBLISERING_SBD, ServiceIdentifier.DPE);
 
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
@@ -90,7 +108,7 @@ class StandardBusinessDocumentTestData {
                                 .addScopeInformation(new CorrelationInformation()
                                         .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
                                 )
-                                .setIdentifier("urn:no:difi:meldingsutveksling:2.0")
+                                .setIdentifier(message.process)
                                 .setInstanceIdentifier(message.conversationId)
                                 .setType("ConversationId")
                         )
