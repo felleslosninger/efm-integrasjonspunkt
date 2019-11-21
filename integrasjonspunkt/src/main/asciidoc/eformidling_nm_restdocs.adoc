@@ -1,14 +1,17 @@
 :doctype: book
 :toc: left
 :toc-title: Table of Contents
-:toclevels: 2
+:toclevels: 3
+:toc-collapsable:
+:linkcss:
+:stylesdir: assets/css
 :stylesheet: asciidoctor.css
 :icons: font
 :source-highlighter: highlightjs
-:imagesdir: ./images
+:imagesdir: images/eformidling
 
 = NextMove API Specification
-{project-version}
+Version {project-version}
 
 == The services
 

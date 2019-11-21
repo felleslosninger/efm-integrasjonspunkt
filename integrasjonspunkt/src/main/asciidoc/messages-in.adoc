@@ -1,12 +1,3 @@
-:doctype: book
-:toc: left
-:toc-title: Table of Contents
-:toclevels: 2
-:stylesheet: asciidoctor.css
-:icons: font
-:source-highlighter: highlightjs
-:imagesdir: ./images
-
 = Incoming messages
 
 To fetch messages it is necessary to start with the <<messages-in-peek>> operation.
@@ -15,7 +6,7 @@ If you are looking for a specific type of message, then there are several filter
 When the message is locked, it can be retrieved with <<messages-in-pop>>.
 After the message is successfully downloaded, it should be deleted using the <<messages-in-delete>> operation.
 
-[plantuml]
+[plantuml,messages-in,png]
 ....
     participant "Archive System" as fs
     participant "Integrasjonspunkt" as ip

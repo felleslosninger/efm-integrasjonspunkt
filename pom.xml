@@ -43,6 +43,14 @@
             <name>asciidoctor</name>
             <url>https://dl.bintray.com/asciidoctor/maven/</url>
         </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-puravida-software-repo</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/puravida-software/repo</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -60,6 +68,14 @@
             <id>asciidoctor-releases</id>
             <name>asciidoctor</name>
             <url>https://dl.bintray.com/asciidoctor/maven/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-puravida-software-repo</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/puravida-software/repo</url>
         </pluginRepository>
     </pluginRepositories>
 

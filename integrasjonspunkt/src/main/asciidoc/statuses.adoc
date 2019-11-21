@@ -1,12 +1,3 @@
-:doctype: book
-:toc: left
-:toc-title: Table of Contents
-:toclevels: 2
-:stylesheet: asciidoctor.css
-:icons: font
-:source-highlighter: highlightjs
-:imagesdir: ./images
-
 = Message statuses
 
 [#statuses-find]

@@ -54,6 +54,20 @@ class StandardBusinessDocumentTestData {
     static final StandardBusinessDocument DPI_DIGITAL_SBD = getResponseSbd(DPI_DIGITAL_MESSAGE_DATA);
     static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(DPI_DIGITAL_SBD, ServiceIdentifier.DPI);
 
+    private static final MessageData INNSYNSKRAV_MESSAGE_DATA = new MessageData()
+            .setStandard("urn:no:difi:einnsyn:xsd::innsynskrav")
+            .setType("innsynskrav")
+            .setBusinessMessage(new InnsynskravMessage()
+                    .setSikkerhetsnivaa(4)
+                    .setHoveddokument("kafka_quotes.txt")
+                    .setOrgnr("")
+                    .setEpost("Kafka quotes")
+            );
+
+    static final StandardBusinessDocument INNSYNSKRAVL_INPUT = getInputSbd(INNSYNSKRAV_MESSAGE_DATA);
+    static final StandardBusinessDocument INNSYNSKRAV_SBD = getResponseSbd(INNSYNSKRAV_MESSAGE_DATA);
+    static final NextMoveOutMessage INNSYNSKRAV_MESSAGE = NextMoveOutMessage.of(INNSYNSKRAV_SBD, ServiceIdentifier.DPE);
+
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
         fill(sbd, message);
