@@ -105,7 +105,7 @@ include::{snippets}/messages/in/find/response-fields.adoc[]
 [#messages-in-peek]
 == Peek incoming messages
 
-The service is used to initiate the download of an incoming mmessage.
+The service is used to initiate the download of an incoming message.
 The operations gets the first message on the incoming queue and simultaneously locks it.
 The message is now ready for download.
 
@@ -170,7 +170,7 @@ include::{snippets}/messages/in/peek/response-fields.adoc[]
 [#messages-in-pop]
 == Pop incoming messages
 
-The service is used to download the ASiC of an incoming mmessage.
+The service is used to download the ASiC of an incoming message.
 
 [NOTE]
 Please note, that the message must be deleted from the queue, using <<messages-in-delete>>.
@@ -201,7 +201,7 @@ include::{snippets}/messages/in/pop/path-parameters.adoc[]
 [#messages-in-delete]
 == Delete incoming message
 
-The service is used to delete an incoming mmessage.
+The service is used to delete an incoming message.
 
 === Example 1 - Delete an incoming message
 
