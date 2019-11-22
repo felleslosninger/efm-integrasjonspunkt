@@ -13,14 +13,12 @@ import java.util.Collections;
 @UtilityClass
 class CapabilityTestData {
 
-    static Capabilities capabilities() {
+    static Capabilities capabilitiesDPO() {
         return new Capabilities()
                 .setCapabilities(Arrays.asList(
                         new Capability()
                                 .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
                                 .setServiceIdentifier(ServiceIdentifier.DPO)
-                                .setPostAddress(getPostAddress())
-                                .setReturnAddress(getPostAddress())
                                 .setDocumentTypes(Collections.singletonList(
                                         new DocumentType()
                                                 .setType("arkivmelding")
@@ -29,26 +27,50 @@ class CapabilityTestData {
                         new Capability()
                                 .setProcess("urn:no:difi:profile:arkivmelding:response:ver1.0")
                                 .setServiceIdentifier(ServiceIdentifier.DPO)
-                                .setPostAddress(getPostAddress())
-                                .setReturnAddress(getPostAddress())
                                 .setDocumentTypes(Arrays.asList(
                                         new DocumentType()
                                                 .setType("arkivmelding_kvittering")
                                                 .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering"),
                                         new DocumentType()
                                                 .setType("status")
-                                                .setStandard("urn:no:difi:eformidling:xsd::status"),
+                                                .setStandard("urn:no:difi:arkivmelding:xsd::status"),
                                         new DocumentType()
                                                 .setType("feil")
-                                                .setStandard("urn:no:difi:eformidling:xsd::feil")
+                                                .setStandard("urn:no:difi:arkivmelding:xsd::feil")
+                                ))
+                ));
+    }
+
+    static Capabilities capabilitiesDPI() {
+        return new Capabilities()
+                .setCapabilities(Arrays.asList(
+                        new Capability()
+                                .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
+                                .setServiceIdentifier(ServiceIdentifier.DPI)
+                                .setPostAddress(getPostAddress())
+                                .setReturnAddress(getPostAddress())
+                                .setDocumentTypes(Collections.singletonList(
+                                        new DocumentType()
+                                                .setType("digital")
+                                                .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
+                                )),
+                        new Capability()
+                                .setProcess("urn:no:difi:profile:digitalpost:vedtak:ver1.0")
+                                .setServiceIdentifier(ServiceIdentifier.DPI)
+                                .setPostAddress(getPostAddress())
+                                .setReturnAddress(getPostAddress())
+                                .setDocumentTypes(Arrays.asList(
+                                        new DocumentType()
+                                                .setType("digital")
+                                                .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
                                 ))
                 ));
     }
 
     private static PostalAddress getPostAddress() {
         return new PostalAddress()
-                .setName("Fjellheimen kommune")
-                .setStreet("Rådhusgaten 1")
+                .setName("Kari Nordmann")
+                .setStreet("Utsikten 1")
                 .setPostalCode("2900")
                 .setPostalArea("FJELLHEIMEN")
                 .setCountry("Norway");

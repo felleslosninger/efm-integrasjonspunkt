@@ -135,16 +135,15 @@ include::{snippets}/statuses/peek-latest/http-response.adoc[]
 === Example 2 - Unsuccessful peek
 
 [source,http,role="primary"]
-.Curl
-include::{snippets}/error/no-content/curl-request.adoc[]
-
-[source,http,role="secondary"]
-.Request
-include::{snippets}/error/no-content/http-request.adoc[]
-
-[source,http,role="secondary"]
 .Response
 include::{snippets}/error/no-content/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/error/no-content/response-fields.adoc[]
+--
 
 
 === About the service

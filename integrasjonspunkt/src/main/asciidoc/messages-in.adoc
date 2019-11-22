@@ -123,33 +123,32 @@ include::{snippets}/messages/in/peek/http-request.adoc[]
 .Response
 include::{snippets}/messages/in/peek/http-response.adoc[]
 
-=== Example 2 - Peek incoming DPO message
+=== Example 2 - Peek incoming DPE message
 
 [source,http,role="primary"]
 .Curl
-include::{snippets}/messages/in/peek/dpo/curl-request.adoc[]
+include::{snippets}/messages/in/peek/dpe/curl-request.adoc[]
 
 [source,http,role="secondary"]
 .Request
-include::{snippets}/messages/in/peek/dpo/http-request.adoc[]
+include::{snippets}/messages/in/peek/dpe/http-request.adoc[]
 
 [source,http,role="secondary"]
 .Response
-include::{snippets}/messages/in/peek/dpo/http-response.adoc[]
+include::{snippets}/messages/in/peek/dpe/http-response.adoc[]
 
 === Example 3 - No more messages
 
 [source,http,role="primary"]
-.Curl
-include::{snippets}/messages/in/peek/no-content/curl-request.adoc[]
-
-[source,http,role="secondary"]
-.Request
-include::{snippets}/messages/in/peek/no-content/http-request.adoc[]
-
-[source,http,role="secondary"]
 .Response
 include::{snippets}/messages/in/peek/no-content/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/in/peek/no-content/response-fields.adoc[]
+--
 
 === About the service
 

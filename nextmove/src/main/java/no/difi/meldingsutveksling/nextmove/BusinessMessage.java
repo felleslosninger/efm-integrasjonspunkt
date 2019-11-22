@@ -31,6 +31,10 @@ public abstract class BusinessMessage<T extends BusinessMessage<T>> extends Abst
     })
     private Integer sikkerhetsnivaa;
 
+    @NotNull(groups = {
+            ValidationGroups.DocumentType.Digital.class,
+            ValidationGroups.DocumentType.Print.class
+    })
     private String hoveddokument;
 
     public T setSikkerhetsnivaa(Integer sikkerhetsnivaa) {

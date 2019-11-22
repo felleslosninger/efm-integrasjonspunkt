@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -168,11 +169,7 @@ class RestDocumentationCommon {
                 fieldWithPath(prefix + "conversationId")
                         .type(JsonFieldType.STRING)
                         .description("The conversationId. Typically an UUID."),
-                fieldWithPath(prefix + "status")
-                        .type(JsonFieldType.STRING)
-                        .description(String.format("The message status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
-                        .map(Enum::name)
-                        .collect(Collectors.joining(", ")))),
+                statusDescription(prefix),
                 fieldWithPath(prefix + "description")
                         .type(JsonFieldType.STRING)
                         .description("Description."),
@@ -184,6 +181,16 @@ class RestDocumentationCommon {
                         .type(JsonFieldType.STRING)
                         .description("The raw receipt.")
         };
+    }
+
+    @NotNull
+    private static FieldDescriptor statusDescription(String prefix) {
+        return fieldWithPath(prefix + "status")
+                .type(JsonFieldType.STRING)
+                .description(String.format("The message status. Can be one of: %s. " +
+                        "More details can be found https://difi.github.io/felleslosninger/eformidling_selfhelp_traffic_flow.html[here].", Arrays.stream(ReceiptStatus.values())
+                        .map(Enum::name)
+                        .collect(Collectors.joining(", "))));
     }
 
     static List<FieldDescriptor> conversationDescriptors(String prefix) {
@@ -250,11 +257,7 @@ class RestDocumentationCommon {
                 fieldWithPath(prefix + "id")
                         .type(JsonFieldType.NUMBER)
                         .description("Integer. The numeric message status ID."),
-                fieldWithPath(prefix + "status")
-                        .type(JsonFieldType.STRING)
-                        .description(String.format("The message status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
-                        .map(Enum::name)
-                        .collect(Collectors.joining(", ")))),
+                statusDescription(prefix),
                 fieldWithPath(prefix + "description")
                         .type(JsonFieldType.STRING)
                         .description("Description."),
@@ -443,32 +446,36 @@ class RestDocumentationCommon {
         };
     }
 
-    private static List<FieldDescriptor> businessMessageDescriptors(String prefix, Class<?> group) {
-        ConstrainedFields messageFields = new ConstrainedFields(BusinessMessage.class, prefix, group);
+    private static FieldDescriptor sikkerhetsnivaaDescriptor(ConstrainedFields messageFields) {
+        return messageFields.withPath("sikkerhetsnivaa")
+                .type(JsonFieldType.VARIES)
+                .optional()
+                .description("Defines the authentication level required for the document to be opened.");
+    }
 
-        return new FieldDescriptorsBuilder()
-                .fields(
-                        messageFields.withPath("sikkerhetsnivaa")
-                                .type(JsonFieldType.VARIES)
-                                .optional()
-                                .description("Defines the authentication level required for the document to be opened."),
-                        messageFields.withPath("hoveddokument")
-                                .type(JsonFieldType.VARIES)
-                                .optional()
-                                .description("Name of the attachment that is the main document.")
-                ).build();
+    private static FieldDescriptor hoveddokumentDescriptor(ConstrainedFields messageFields, String additionalDescription) {
+        return messageFields.withPath("hoveddokument")
+                .type(JsonFieldType.VARIES)
+                .optional()
+                .description("Name of the attachment that is the main document. " +
+                        "Especially when there are more than one attachment, there " +
+                        "is a need to know which document is the main one. "
+                        + additionalDescription
+                );
     }
 
     static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
-        return businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Arkivmelding.class);
+        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, ValidationGroups.DocumentType.Arkivmelding.class);
+        return new FieldDescriptorsBuilder()
+                .fields(hoveddokumentDescriptor(messageFields, "Should only be specified for DPF."))
+                .build();
     }
 
-
     static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, ValidationGroups.DocumentType.Digital.class);
 
         return new FieldDescriptorsBuilder()
-                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Digital.class))
+                .fields(hoveddokumentDescriptor(messageFields, ""), sikkerhetsnivaaDescriptor(messageFields))
                 .fields(
                         messageFields.withPath("tittel")
                                 .type(JsonFieldType.VARIES)
@@ -524,10 +531,10 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> dpiPrintMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, ValidationGroups.DocumentType.Print.class);
 
         return new FieldDescriptorsBuilder()
-                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Print.class))
+                .fields(hoveddokumentDescriptor(messageFields, ""))
                 .fields(
                         messageFields.withPath("mottaker")
                                 .type(JsonFieldType.OBJECT)
@@ -589,7 +596,6 @@ class RestDocumentationCommon {
         ConstrainedFields fields = new ConstrainedFields(MailReturn.class, prefix);
 
         return new FieldDescriptorsBuilder()
-                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Digital.class))
                 .fields(
                         fields.withPath("mottaker")
                                 .type(JsonFieldType.OBJECT)
@@ -604,7 +610,7 @@ class RestDocumentationCommon {
                 .build();
     }
 
-    public static FieldDescriptor[] digitalDpvMessageDescriptors(String prefix) {
+    static FieldDescriptor[] digitalDpvMessageDescriptors(String prefix) {
         ConstrainedFields fields = new ConstrainedFields(DigitalDpvMessage.class, prefix);
 
         return new FieldDescriptor[]{
@@ -621,10 +627,9 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix);
+        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, ValidationGroups.DocumentType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
-                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Innsynskrav.class))
                 .fields(
                         messageFields.withPath("orgnr")
                                 .type(JsonFieldType.VARIES)
@@ -637,10 +642,9 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> publiseringMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix);
+        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, ValidationGroups.DocumentType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
-                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Innsynskrav.class))
                 .fields(
                         messageFields.withPath("orgnr")
                                 .type(JsonFieldType.VARIES)
@@ -710,9 +714,11 @@ class RestDocumentationCommon {
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", ")))),
                         fieldWithPath(prefix + "postAddress")
+                                .optional()
                                 .type(JsonFieldType.OBJECT)
                                 .description("An postal address."),
                         fieldWithPath(prefix + "returnAddress")
+                                .optional()
                                 .type(JsonFieldType.OBJECT)
                                 .description("An return address."),
                         fieldWithPath(prefix + "documentTypes")

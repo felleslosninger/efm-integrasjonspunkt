@@ -79,7 +79,6 @@ class StandardBusinessDocumentTestData {
             .setStandard("urn:no:difi:digitalpost:xsd:fysisk::print")
             .setType("print")
             .setBusinessMessage(new DpiPrintMessage()
-                    .setSikkerhetsnivaa(4)
                     .setHoveddokument("kafka_quotes.txt")
                     .setMottaker(new PostAddress()
                             .setNavn("Ola Nordmann")
@@ -119,8 +118,6 @@ class StandardBusinessDocumentTestData {
             .setStandard("urn:no:difi:einnsyn:xsd::innsynskrav")
             .setType("innsynskrav")
             .setBusinessMessage(new InnsynskravMessage()
-                    .setSikkerhetsnivaa(4)
-                    .setHoveddokument("kafka_quotes.txt")
                     .setOrgnr("98765432")
                     .setEpost("doofenshmirtz@evil.inc")
             );
@@ -134,8 +131,6 @@ class StandardBusinessDocumentTestData {
             .setStandard("urn:no:difi:einnsyn:xsd::publisering")
             .setType("publisering")
             .setBusinessMessage(new PubliseringMessage()
-                    .setSikkerhetsnivaa(4)
-                    .setHoveddokument("kafka_quotes.txt")
                     .setOrgnr("98765432")
             );
 

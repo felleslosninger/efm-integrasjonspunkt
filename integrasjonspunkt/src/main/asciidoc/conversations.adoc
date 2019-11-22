@@ -101,17 +101,15 @@ include::{snippets}/conversations/get/http-response.adoc[]
 === Example 2 - Conversation not found
 
 [source,http,role="primary"]
-.Curl
-include::{snippets}/conversations/get/not-found/curl-request.adoc[]
-
-[source,http,role="secondary"]
-.Request
-include::{snippets}/conversations/get/not-found/http-request.adoc[]
-
-[source,http,role="secondary"]
 .Response
 include::{snippets}/conversations/get/not-found/http-response.adoc[]
 
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get/not-found/response-fields.adoc[]
+--
 
 === About the service
 [role="primary"]
@@ -151,16 +149,15 @@ include::{snippets}/conversations/get-by-message-id/http-response.adoc[]
 === Example 2 - Conversation not found
 
 [source,http,role="primary"]
-.Curl
-include::{snippets}/conversations/get-by-message-id/not-found/curl-request.adoc[]
-
-[source,http,role="secondary"]
-.Request
-include::{snippets}/conversations/get-by-message-id/not-found/http-request.adoc[]
-
-[source,http,role="secondary"]
 .Response
 include::{snippets}/conversations/get-by-message-id/not-found/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get-by-message-id/not-found/response-fields.adoc[]
+--
 
 
 === About the service

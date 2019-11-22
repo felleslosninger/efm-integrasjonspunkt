@@ -39,8 +39,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.ARKIVMELDING_SBD;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.DPI_DIGITAL_SBD;
+import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -80,7 +79,7 @@ public class NextMoveMessageInControllerTest {
     public void find() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, DPI_DIGITAL_SBD);
+                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -110,8 +109,8 @@ public class NextMoveMessageInControllerTest {
                                 .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
                                 .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
                                 .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
-                                .and(subsectionWithPath("content[].digital.").description("The digital DPI business message").optional())
-                                .and(dpiDigitalMessageDescriptors("content[].digital."))
+                                .and(subsectionWithPath("content[].publisering.").description("The publisering DPI business message").optional())
+                                .and(publiseringMessageDescriptors("content[].publisering."))
                                 .and(pageDescriptors())
                                 .andWithPrefix("pageable.", pageableDescriptors())
                         )
@@ -144,7 +143,7 @@ public class NextMoveMessageInControllerTest {
     public void findSorting() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, DPI_DIGITAL_SBD);
+                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
                     return new PageImpl<>(content, invocation.getArgument(1), content.size());
                 });
 
@@ -183,7 +182,7 @@ public class NextMoveMessageInControllerTest {
 
     @Test
     public void peek() throws Exception {
-        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(ARKIVMELDING_SBD);
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(PUBLISERING_SBD);
 
         mvc.perform(
                 get("/api/messages/in/peek")
@@ -209,8 +208,8 @@ public class NextMoveMessageInControllerTest {
                         ),
                         responseFields()
                                 .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
-                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
+                                .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                .and(publiseringMessageDescriptors("publisering."))
                         )
                 );
 
@@ -218,17 +217,17 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void peekDPO() throws Exception {
-        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(ARKIVMELDING_SBD);
+    public void peekDPE() throws Exception {
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(PUBLISERING_SBD);
 
         mvc.perform(
                 get("/api/messages/in/peek")
-                        .param("serviceIdentifier", ServiceIdentifier.DPO.getFullname())
+                        .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andDo(document("messages/in/peek/dpo",
+                .andDo(document("messages/in/peek/dpe",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -241,8 +240,8 @@ public class NextMoveMessageInControllerTest {
                         ),
                         responseFields()
                                 .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
-                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
+                                .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                .and(publiseringMessageDescriptors("publisering."))
                         )
                 );
 

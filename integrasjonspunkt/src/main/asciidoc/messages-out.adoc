@@ -195,6 +195,7 @@ include::{snippets}/messages/out/create/response-fields.adoc[]
 
 |===
 |Available processes
+
 |urn:no:difi:profile:digitalpost:info:ver1.0
 |urn:no:difi:profile:digitalpost:vedtak:ver1.0
 |===
@@ -457,7 +458,7 @@ include::{snippets}/messages/out/send/request-parameters.adoc[]
 The service is used to create and send messages using multipart upload.
 
 [NOTE]
-Please note, that multipart is only allowed for smaller messages.
+Please note, that multipart is only allowed for smaller messages up to 5 MB.
 For larger messages, please use the following combination:
  <<messages-out-create>>, <<messages-out-upload>> and <<messages-out-send>> instead.
 <<messages-out-upload>> can be used several times if you have more than one attachment.
