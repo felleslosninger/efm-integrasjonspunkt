@@ -21,7 +21,11 @@ public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
     @NotNull
     @Valid
     private PostAddress mottaker;
+
+    @NotNull
     private Utskriftsfarge utskriftsfarge;
+
+    @NotNull
     private Posttype posttype;
 
     @NotNull

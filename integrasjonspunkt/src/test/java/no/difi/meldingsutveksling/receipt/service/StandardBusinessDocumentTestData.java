@@ -5,6 +5,9 @@ import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -56,6 +59,60 @@ class StandardBusinessDocumentTestData {
     static final StandardBusinessDocument DPI_DIGITAL_INPUT = getInputSbd(DPI_DIGITAL_MESSAGE_DATA);
     static final StandardBusinessDocument DPI_DIGITAL_SBD = getResponseSbd(DPI_DIGITAL_MESSAGE_DATA);
     static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(DPI_DIGITAL_SBD, ServiceIdentifier.DPI);
+
+    private static final MessageData DIGITAL_DPV_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
+            .setStandard("urn:no:difi:digitalpost:xsd:digital::digital_dpv")
+            .setType("digital_dpv")
+            .setBusinessMessage(new DigitalDpvMessage()
+                    .setTittel("Our winters")
+                    .setSammendrag("A quote from Franz Kafka's The Castle")
+                    .setInnhold("Our winters are very long here, very long and very monotonous. But we don't complain about it downstairs, we're shielded against the winter. Oh, spring does come eventually, and summer, and they last for a while, but now, looking back, spring and summer seem too short, as if they were not much more than a couple of days, and even on those days, no matter how lovely the day, it still snows occasionally.")
+            );
+
+    static final StandardBusinessDocument DIGITAL_DPV_INPUT = getInputSbd(DIGITAL_DPV_MESSAGE_DATA);
+    static final StandardBusinessDocument DIGITAL_DPV_SBD = getResponseSbd(DIGITAL_DPV_MESSAGE_DATA);
+    static final NextMoveOutMessage DIGITAL_DPV_MESSAGE = NextMoveOutMessage.of(DIGITAL_DPV_SBD, ServiceIdentifier.DPV);
+
+    private static final MessageData DPI_PRINT_MESSAGE_DATA = new MessageData()
+            .setProcess("urn:no:difi:profile:digitalpost:vedtak:ver1.0")
+            .setStandard("urn:no:difi:digitalpost:xsd:fysisk::print")
+            .setType("print")
+            .setBusinessMessage(new DpiPrintMessage()
+                    .setSikkerhetsnivaa(4)
+                    .setHoveddokument("kafka_quotes.txt")
+                    .setMottaker(new PostAddress()
+                            .setNavn("Ola Nordmann")
+                            .setAdresselinje1("Langtoppilia 1")
+                            .setAdresselinje2("")
+                            .setAdresselinje3("")
+                            .setAdresselinje4("")
+                            .setPostnummer("9999")
+                            .setPoststed("FJELL")
+                            .setLandkode("NO")
+                            .setLand("Norway")
+                    )
+                    .setUtskriftsfarge(Utskriftsfarge.FARGE)
+                    .setPosttype(Posttype.A_PRIORITERT)
+                    .setRetur(new MailReturn()
+                            .setMottaker(new PostAddress()
+                                    .setNavn("Fjellheimen kommune")
+                                    .setAdresselinje1("Luftigveien 1")
+                                    .setAdresselinje2("")
+                                    .setAdresselinje3("")
+                                    .setAdresselinje4("")
+                                    .setPostnummer("9999")
+                                    .setPoststed("FJELL")
+                                    .setLandkode("NO")
+                                    .setLand("Norway")
+                            )
+                            .setReturhaandtering(Returhaandtering.DIREKTE_RETUR)
+                    )
+            );
+
+    static final StandardBusinessDocument DPI_PRINT_INPUT = getInputSbd(DPI_PRINT_MESSAGE_DATA);
+    static final StandardBusinessDocument DPI_PRINT_SBD = getResponseSbd(DPI_PRINT_MESSAGE_DATA);
+    static final NextMoveOutMessage DPI_PRINT_MESSAGE = NextMoveOutMessage.of(DPI_PRINT_SBD, ServiceIdentifier.DPI);
 
     private static final MessageData INNSYNSKRAV_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:einnsyn:innsynskrav:ver1.0")

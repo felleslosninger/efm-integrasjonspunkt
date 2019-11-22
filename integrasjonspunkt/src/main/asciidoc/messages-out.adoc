@@ -150,6 +150,20 @@ Business Document.
 
 === Example 1 - Creating an arkivmelding message
 
+|===
+|Available processes
+|urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0
+|urn:no:difi:profile:arkivmelding:helseSosialOgOmsorg:ver1.0
+|urn:no:difi:profile:arkivmelding:oppvekstOgUtdanning:ver1.0
+|urn:no:difi:profile:arkivmelding:kulturIdrettOgFritid:ver1.0
+|urn:no:difi:profile:arkivmelding:trafikkReiserOgSamferdsel:ver1.0
+|urn:no:difi:profile:arkivmelding:naturOgMiljoe:ver1.0
+|urn:no:difi:profile:arkivmelding:naeringsutvikling:ver1.0
+|urn:no:difi:profile:arkivmelding:skatterOgAvgifter:ver1.0
+|urn:no:difi:profile:arkivmelding:tekniskeTjenester:ver1.0
+|urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
+|===
+
 [source,http,role="primary"]
 .Curl
 include::{snippets}/messages/out/create/curl-request.adoc[]
@@ -178,6 +192,12 @@ include::{snippets}/messages/out/create/response-fields.adoc[]
 
 === Example 2 - Creating a DPI digital message
 
+|===
+|Available processes
+|urn:no:difi:profile:digitalpost:info:ver1.0
+|urn:no:difi:profile:digitalpost:vedtak:ver1.0
+|===
+
 [source,http,role="primary"]
 .Curl
 include::{snippets}/messages/out/create-dpi-digital/curl-request.adoc[]
@@ -204,7 +224,75 @@ include::{snippets}/messages/out/create-dpi-digital/request-fields.adoc[]
 include::{snippets}/messages/out/create-dpi-digital/response-fields.adoc[]
 --
 
-=== Example 3 - Creating a DPE innsynskrav message
+=== Example 3 - Creating a DPV digital message
+
+|===
+|Available processes
+|urn:no:difi:profile:digitalpost:info:ver1.0
+|urn:no:difi:profile:digitalpost:vedtak:ver1.0
+|===
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create-digital-dpv/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create-digital-dpv/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create-digital-dpv/http-response.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create-digital-dpv/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create-digital-dpv/response-fields.adoc[]
+--
+
+=== Example 4 - Creating a DPI print message
+
+|===
+|Available processes
+|urn:no:difi:profile:digitalpost:info:ver1.0
+|urn:no:difi:profile:digitalpost:vedtak:ver1.0
+|===
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/messages/out/create-dpi-print/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/messages/out/create-dpi-print/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/messages/out/create-dpi-print/http-response.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/messages/out/create-dpi-print/request-fields.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create-dpi-print/response-fields.adoc[]
+--
+
+=== Example 5 - Creating a DPE innsynskrav message
 
 [source,http,role="primary"]
 .Curl
@@ -232,7 +320,13 @@ include::{snippets}/messages/out/create-innsynskrav/request-fields.adoc[]
 include::{snippets}/messages/out/create-innsynskrav/response-fields.adoc[]
 --
 
-=== Example 4 - Creating a DPE publisering message
+=== Example 6 - Creating a DPE publisering message
+
+|===
+|Available processes
+|urn:no:difi:profile:einnsyn:journalpost:ver1.0
+|urn:no:difi:profile:einnsyn:meeting:ver1.0
+|===
 
 [source,http,role="primary"]
 .Curl
@@ -260,7 +354,7 @@ include::{snippets}/messages/out/create-publisering/request-fields.adoc[]
 include::{snippets}/messages/out/create-publisering/response-fields.adoc[]
 --
 
-=== Example 5 - Validation error
+=== Example 7 - Validation error
 
 [source,http,role="primary"]
 .Response
@@ -273,7 +367,7 @@ include::{snippets}/messages/out/create/service-not-enabled/http-response.adoc[]
 include::{snippets}/messages/out/create/service-not-enabled/response-fields.adoc[]
 --
 
-=== Example 6 - Constraint violation
+=== Example 8 - Constraint violation
 
 [source,http,role="primary"]
 .Response

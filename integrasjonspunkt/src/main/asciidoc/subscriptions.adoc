@@ -213,7 +213,7 @@ include::{snippets}/subscriptions/update/request-fields.adoc[]
 
 The service is used to delete a webhook a subscription.
 
-=== Example 1 - Deleta a subscription
+=== Example 1 - Delete a subscription
 
 [source,http,role="primary"]
 .Curl

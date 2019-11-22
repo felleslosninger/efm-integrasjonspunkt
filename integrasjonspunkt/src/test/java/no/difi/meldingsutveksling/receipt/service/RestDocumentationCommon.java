@@ -9,6 +9,9 @@ import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -457,7 +460,6 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
-//        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix);
         return businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Arkivmelding.class);
     }
 
@@ -521,6 +523,103 @@ class RestDocumentationCommon {
                 ).build();
     }
 
+    static List<FieldDescriptor> dpiPrintMessageDescriptors(String prefix) {
+        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix);
+
+        return new FieldDescriptorsBuilder()
+                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Print.class))
+                .fields(
+                        messageFields.withPath("mottaker")
+                                .type(JsonFieldType.OBJECT)
+                                .description("Postal address of the recipient."),
+                        messageFields.withPath("utskriftsfarge")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("Used to specify type of print. Can be one of: %s", Arrays.stream(Utskriftsfarge.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", ")))),
+                        messageFields.withPath("posttype")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("Mail type. Can be one of: %s", Arrays.stream(Posttype.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", ")))),
+                        messageFields.withPath("retur")
+                                .type(JsonFieldType.OBJECT)
+                                .description("Return address to be placed on the back of the envelope.")
+                )
+                .fields(postAddressDescriptors(prefix + "mottaker."))
+                .fields(mailReturnDescriptors(prefix + "retur."))
+                .build();
+    }
+
+    private static FieldDescriptor[] postAddressDescriptors(String prefix) {
+        ConstrainedFields fields = new ConstrainedFields(PostAddress.class, prefix);
+
+        return new FieldDescriptor[]{
+                fields.withPath("navn")
+                        .type(JsonFieldType.STRING)
+                        .description("Name of the recipient."),
+                fields.withPath("adresselinje1")
+                        .type(JsonFieldType.STRING)
+                        .description("Address line 1. Usually the street address."),
+                fields.withPath("adresselinje2")
+                        .type(JsonFieldType.STRING)
+                        .description("Address line 2."),
+                fields.withPath("adresselinje3")
+                        .type(JsonFieldType.STRING)
+                        .description("Address line 3."),
+                fields.withPath("adresselinje4")
+                        .type(JsonFieldType.STRING)
+                        .description("Address line 4."),
+                fields.withPath("postnummer")
+                        .type(JsonFieldType.STRING)
+                        .description("Postal code."),
+                fields.withPath("poststed")
+                        .type(JsonFieldType.STRING)
+                        .description("City / Postal area."),
+                fields.withPath("landkode")
+                        .type(JsonFieldType.STRING)
+                        .description("Country code."),
+                fields.withPath("land")
+                        .type(JsonFieldType.STRING)
+                        .description("Name of country.")
+        };
+    }
+
+    private static List<FieldDescriptor> mailReturnDescriptors(String prefix) {
+        ConstrainedFields fields = new ConstrainedFields(MailReturn.class, prefix);
+
+        return new FieldDescriptorsBuilder()
+                .fields(businessMessageDescriptors(prefix, ValidationGroups.DocumentType.Digital.class))
+                .fields(
+                        fields.withPath("mottaker")
+                                .type(JsonFieldType.OBJECT)
+                                .description("Postal address of the sender."),
+                        fields.withPath("returhaandtering")
+                                .type(JsonFieldType.STRING)
+                                .description(String.format("Used to specify type of return. Can be one of: %s", Arrays.stream(Returhaandtering.values())
+                                        .map(Enum::name)
+                                        .collect(Collectors.joining(", "))))
+                )
+                .fields(postAddressDescriptors(prefix + "mottaker."))
+                .build();
+    }
+
+    public static FieldDescriptor[] digitalDpvMessageDescriptors(String prefix) {
+        ConstrainedFields fields = new ConstrainedFields(DigitalDpvMessage.class, prefix);
+
+        return new FieldDescriptor[]{
+                fields.withPath("tittel")
+                        .type(JsonFieldType.STRING)
+                        .description("The title."),
+                fields.withPath("sammendrag")
+                        .type(JsonFieldType.STRING)
+                        .description("Summary."),
+                fields.withPath("innhold")
+                        .type(JsonFieldType.STRING)
+                        .description("The document content.")
+        };
+    }
+
     static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
         ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix);
 
@@ -546,7 +645,7 @@ class RestDocumentationCommon {
                         messageFields.withPath("orgnr")
                                 .type(JsonFieldType.VARIES)
                                 .description("Business registration number.")
-                        )
+                )
                 .build();
     }
 
@@ -630,7 +729,7 @@ class RestDocumentationCommon {
         return new FieldDescriptor[]{
                 fieldWithPath(prefix + "name")
                         .type(JsonFieldType.STRING)
-                        .description("SName of recipient.."),
+                        .description("Name of the recipient."),
                 fieldWithPath(prefix + "street")
                         .type(JsonFieldType.STRING)
                         .description("Street name"),

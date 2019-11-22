@@ -130,6 +130,7 @@ public class NextMoveMessageOutControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(ARKIVMELDING_SBD)))
                 .andDo(document("messages/out/create",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -161,6 +162,7 @@ public class NextMoveMessageOutControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(DPI_DIGITAL_SBD)))
                 .andDo(document("messages/out/create-dpi-digital",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -180,6 +182,70 @@ public class NextMoveMessageOutControllerTest {
     }
 
     @Test
+    public void createDigitalDpvMessage() throws Exception {
+        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageMock.getSbd()).willReturn(DIGITAL_DPV_MESSAGE.getSbd());
+
+        mvc.perform(
+                post("/api/messages/out")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsBytes(DIGITAL_DPV_INPUT))
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(DIGITAL_DPV_SBD)))
+                .andDo(document("messages/out/create-digital-dpv",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(digitalDpvMessageDescriptors("digital_dpv.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(digitalDpvMessageDescriptors("digital_dpv."))
+                        )
+                );
+
+        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+    }
+
+    @Test
+    public void createDpiPrintMessage() throws Exception {
+        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageMock.getSbd()).willReturn(DPI_PRINT_MESSAGE.getSbd());
+
+        mvc.perform(
+                post("/api/messages/out")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(objectMapper.writeValueAsBytes(DPI_PRINT_INPUT))
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(DPI_PRINT_SBD)))
+                .andDo(document("messages/out/create-dpi-print",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        requestFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(dpiPrintMessageDescriptors("print.")),
+                        responseFields()
+                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                .and(dpiPrintMessageDescriptors("print."))
+                        )
+                );
+
+        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+    }
+
+    @Test
     public void createInnsynskravMessage() throws Exception {
         given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(INNSYNSKRAV_MESSAGE.getSbd());
@@ -191,8 +257,8 @@ public class NextMoveMessageOutControllerTest {
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(content().json(objectMapper.writeValueAsString(INNSYNSKRAV_SBD)))
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(INNSYNSKRAV_SBD)))
                 .andDo(document("messages/out/create-innsynskrav",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -224,6 +290,7 @@ public class NextMoveMessageOutControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(PUBLISERING_SBD)))
                 .andDo(document("messages/out/create-publisering",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
