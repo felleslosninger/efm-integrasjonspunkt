@@ -46,7 +46,7 @@ public class WebhookEventExampleControllerTest {
                         .content(objectMapper.writeValueAsBytes(WebhookEventExamples.ping())))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andDo(document("/events/ping",
+                .andDo(document("events/ping",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -69,7 +69,7 @@ public class WebhookEventExampleControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andDo(document("/events/message-status",
+                .andDo(document("events/message-status",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(

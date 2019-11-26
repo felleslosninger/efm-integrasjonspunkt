@@ -149,7 +149,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "    \"code\" : \"IsDocumentType\"\n" +
                         "  } ]\n" +
                         "}"))
-                .andDo(document("/messages/out/create/constraint-violation",
+                .andDo(document("messages/out/create/constraint-violation",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -183,7 +183,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"Service DPI is not enabled\",\n" +
                         "  \"path\" : \"/api/messages/out\"\n" +
                         "}"))
-                .andDo(document("/messages/out/create/service-not-enabled",
+                .andDo(document("messages/out/create/service-not-enabled",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -219,7 +219,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"Subscription with id = 84 was not found\",\n" +
                         "  \"path\" : \"/api/subscription/84\"\n" +
                         "}"))
-                .andDo(document("/subscriptions/get/not-found",
+                .andDo(document("subscriptions/get/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -267,7 +267,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "    \"code\" : \"OneOf\"\n" +
                         "  } ]\n" +
                         "}"))
-                .andDo(document("/subscriptions/create/constraint-violation",
+                .andDo(document("subscriptions/create/constraint-violation",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -303,7 +303,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"Conversation with id = 49 was not found\",\n" +
                         "  \"path\" : \"/api/conversations/49\"\n" +
                         "}"))
-                .andDo(document("/conversations/get/not-found",
+                .andDo(document("conversations/get/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -339,7 +339,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"Conversation with messageId = df64afa1-83f4-497c-ae94-db22108801b9 was not found\",\n" +
                         "  \"path\" : \"/api/conversations/messageId/df64afa1-83f4-497c-ae94-db22108801b9\"\n" +
                         "}"))
-                .andDo(document("/conversations/get-by-message-id/not-found",
+                .andDo(document("conversations/get-by-message-id/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -373,7 +373,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"No content\",\n" +
                         "  \"path\" : \"/api/messages/in/peek\"\n" +
                         "}"))
-                .andDo(document("/messages/in/peek/no-content",
+                .andDo(document("messages/in/peek/no-content",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
