@@ -8,7 +8,7 @@ After the message is successfully downloaded, it should be deleted using the <<m
 
 [plantuml,messages-in,png]
 ....
-    participant "Archive System" as fs
+    participant "End User System" as fs
     participant "Integrasjonspunkt" as ip
     participant "Service Provider" as mf
 

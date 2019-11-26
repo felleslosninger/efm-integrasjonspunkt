@@ -2,7 +2,7 @@
 
 [plantuml,create-message,png]
 ....
-    participant "Archive System" as fs
+    participant "End User System" as fs
     participant Integrasjonspunkt as ip
     participant "Service Registry" as sr
     participant "Service Provider" as mf
