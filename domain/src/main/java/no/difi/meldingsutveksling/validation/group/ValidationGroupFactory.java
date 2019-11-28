@@ -3,9 +3,6 @@ package no.difi.meldingsutveksling.validation.group;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.Receiver;
-import no.difi.meldingsutveksling.domain.sbdh.Sender;
 
 @UtilityClass
 public class ValidationGroupFactory {
@@ -50,17 +47,4 @@ public class ValidationGroupFactory {
         }
     }
 
-    public static Class<?> toPartner(Partner partner) {
-        if (partner == null) {
-            return null;
-        }
-
-        if (partner instanceof Sender) {
-            return ValidationGroups.Partner.Sender.class;
-        } else if (partner instanceof Receiver) {
-            return ValidationGroups.Partner.Receiver.class;
-        }
-
-        return null;
-    }
 }

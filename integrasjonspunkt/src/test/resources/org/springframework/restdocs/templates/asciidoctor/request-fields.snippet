@@ -1,0 +1,12 @@
+[cols="4,1,4,2"]
+|===
+|Path|Type|Description|Constraints
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{ #constraints }}{{.}}{{ /constraints }}{{/tableCellContent}}
+
+{{/fields}}
+|===

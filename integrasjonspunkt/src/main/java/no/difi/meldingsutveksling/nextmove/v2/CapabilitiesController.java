@@ -18,7 +18,7 @@ public class CapabilitiesController {
 
     private final CapabilitiesFactory capabilitiesFactory;
 
-    @GetMapping("{receiverid}")
+    @GetMapping("{receiverIdentifier}")
     @ApiOperation(
             value = "Get all capabilities",
             notes = "Gets information of all capabilities for a given receiver",
@@ -33,11 +33,11 @@ public class CapabilitiesController {
     @Transactional
     @ResponseBody
     public Capabilities capabilities(
-            @ApiParam(value = "receiverid", required = true)
+            @ApiParam(value = "receiverIdentifier", required = true)
             @PathVariable
-            @NotNull String receiverid,
+            @NotNull String receiverIdentifier,
             @ApiParam(value = "securityLevel")
             @RequestParam(required = false) Integer securityLevel) {
-        return capabilitiesFactory.getCapabilities(receiverid, securityLevel);
+        return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel);
     }
 }

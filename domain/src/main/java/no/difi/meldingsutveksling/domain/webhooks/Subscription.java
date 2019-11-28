@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.validation.WebhookFilter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -47,10 +48,11 @@ public class Subscription extends AbstractEntity<Long> {
         return super.getId();
     }
 
+    @URL
     @NotNull(groups = ValidationGroups.Create.class)
     @ApiModelProperty(
             position = 3,
-            value = "URL to push the webhook messages too",
+            value = "URL to push the webhook messages to",
             required = true,
             example = "https://webhook.site/bb8bb41a-c559-47ed-84f1-1846ece5d590"
     )

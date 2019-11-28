@@ -60,7 +60,7 @@ public class NextMoveMessageService {
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
-    Page<NextMoveOutMessage> findMessages(Predicate predicate, Pageable pageable) {
+    public Page<NextMoveOutMessage> findMessages(Predicate predicate, Pageable pageable) {
         return messageRepo.findAll(predicate, pageable);
     }
 

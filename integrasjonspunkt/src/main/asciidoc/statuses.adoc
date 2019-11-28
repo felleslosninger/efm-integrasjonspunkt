@@ -1,0 +1,163 @@
+= Message statuses
+
+[#statuses-find]
+== Find message statuses
+
+The service is used to search for message statuses.
+The response is paged with a default page size of 10.
+
+=== Example 1 - Get all message statuses
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/find/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/find/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/find/http-response.adoc[]
+
+=== Example 2 - Search for message statuses
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/find/search/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/find/search/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/find/search/http-response.adoc[]
+
+=== Example 3 - Sorting
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/find/sorting/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/find/sorting/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/find/sorting/http-response.adoc[]
+
+=== Example 4 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/find/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/find/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/find/paging/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/statuses/find/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/statuses/find/response-fields.adoc[]
+--
+
+[#statuses-find-by-message-id]
+== Find message statuses by messageId
+
+The service is used to search for message statuses by messageId.
+The response is paged with a default page size of 10
+
+=== Example 1 - Find all message statuses by messageId
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/find-by-message-id/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/find-by-message-id/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/find-by-message-id/http-response.adoc[]
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/statuses/find-by-message-id/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/statuses/find-by-message-id/response-fields.adoc[]
+--
+
+[#statuses-peek-latest]
+== Peek the latest message status
+
+The service is used to peek the message status with the latest lastUpdate timestamp.
+
+=== Example 1 - Successfull peek
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/statuses/peek-latest/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/statuses/peek-latest/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/statuses/peek-latest/http-response.adoc[]
+
+=== Example 2 - Unsuccessful peek
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/error/no-content/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/error/no-content/response-fields.adoc[]
+--
+
+
+=== About the service
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/statuses/peek-latest/response-fields.adoc[]
+--
+
+[role="secondary"]
+.Error fields
+[.error-fields]
+--
+include::{snippets}/error/no-content/response-fields.adoc[]
+--

@@ -12,11 +12,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.validation.EqualToProperty;
+import no.difi.meldingsutveksling.validation.IntegrasjonspunktOrganization;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
-import no.difi.meldingsutveksling.validation.group.sequenceprovider.PartnerIdentificationGroupSequenceProvider;
 import org.hibernate.annotations.Parent;
-import org.hibernate.validator.group.GroupSequenceProvider;
 
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
@@ -47,7 +45,6 @@ import java.io.Serializable;
 @Setter
 @ToString(exclude = "partner")
 @RequiredArgsConstructor
-@GroupSequenceProvider(value = PartnerIdentificationGroupSequenceProvider.class)
 public class PartnerIdentification implements Serializable {
 
     @XmlTransient
@@ -56,7 +53,7 @@ public class PartnerIdentification implements Serializable {
     private Partner partner;
 
     @XmlValue
-    @EqualToProperty(value = "difi.move.org.number", groups = ValidationGroups.Partner.Sender.class)
+    @IntegrasjonspunktOrganization(groups = ValidationGroups.Partner.Sender.class)
     @NotNull
     @ApiModelProperty(
             value = "Identifier",

@@ -51,7 +51,7 @@ public class BusinessScope implements Serializable {
     @Size(min = 1)
     @NotNull
     @Valid
-    protected Set<Scope> scope;
+    protected Set<@Valid Scope> scope;
 
     /**
      * Gets the value of the scope property.

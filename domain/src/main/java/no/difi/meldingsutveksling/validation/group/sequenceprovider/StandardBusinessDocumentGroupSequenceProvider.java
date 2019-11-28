@@ -16,10 +16,8 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
         List<Class<?>> defaultGroupSequence = new ArrayList<>();
         defaultGroupSequence.add(StandardBusinessDocument.class);
 
-        getType(input).ifPresent(type -> DocumentType.valueOfType(type)
-                .map(ValidationGroupFactory::toDocumentType)
-                .ifPresent(defaultGroupSequence::add)
-        );
+        getType(input).flatMap(type -> DocumentType.valueOfType(type).map(ValidationGroupFactory::toDocumentType))
+                .ifPresent(defaultGroupSequence::add);
 
         return defaultGroupSequence;
     }

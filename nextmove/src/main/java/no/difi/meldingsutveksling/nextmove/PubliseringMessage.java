@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "publisering", namespace = "urn:no:difi:meldingsutveksling:2.0")
 @ApiModel(value = "publisering", parent = BusinessMessage.class)
-public class PubliseringMessage extends BusinessMessage {
+public class PubliseringMessage extends BusinessMessage<PubliseringMessage> {
     @NotNull
     private String orgnr;
 }

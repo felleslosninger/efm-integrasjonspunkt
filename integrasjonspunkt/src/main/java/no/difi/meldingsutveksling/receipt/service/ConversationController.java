@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.receipt.service;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
@@ -29,7 +30,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 @RequestMapping("/api/conversations")
 public class ConversationController {
 
-    private final ConversationRepository convoRepo;
+    private final ConversationRepository conversationRepository;
 
     @GetMapping
     @ApiOperation(
@@ -40,11 +41,11 @@ public class ConversationController {
             @ApiResponse(code = 200, message = "Success", response = Conversation[].class),
     })
     @JsonView(Views.Conversation.class)
-    public Page<Conversation> conversations(
+    public Page<Conversation> find(
             @Valid ConversationQueryInput input,
             @PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return convoRepo.findWithMessageStatuses(input, pageable);
+        return conversationRepository.findWithMessageStatuses(input, pageable);
     }
 
     @GetMapping("{id}")
@@ -58,11 +59,11 @@ public class ConversationController {
     public Conversation getById(
             @ApiParam(value = "id", required = true, example = "1")
             @PathVariable("id") Long id) {
-        return convoRepo.findByIdAndDirection(id, OUTGOING)
-                .orElseThrow(() -> new MessageNotFoundException("id", id.toString()));
+        return conversationRepository.findByIdAndDirection(id, OUTGOING)
+                .orElseThrow(() -> new ConversationNotFoundException(id));
     }
 
-    @GetMapping("messageId/{id}")
+    @GetMapping("messageId/{messageId}")
     @ApiOperation(value = "Get conversation", notes = "Find conversation based on messageId")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Conversation.class),
@@ -72,8 +73,8 @@ public class ConversationController {
     @JsonView(Views.Conversation.class)
     public Conversation getByMessageId(
             @ApiParam(value = "messageId", required = true)
-            @PathVariable("id") String messageId) {
-        return convoRepo.findByMessageIdAndDirection(messageId, OUTGOING)
+            @PathVariable("messageId") String messageId) {
+        return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
@@ -86,6 +87,6 @@ public class ConversationController {
     })
     @JsonView(Views.Conversation.class)
     public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
-        return convoRepo.findByPollable(true, pageable);
+        return conversationRepository.findByPollable(true, pageable);
     }
 }

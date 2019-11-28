@@ -14,5 +14,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
 @ApiModel(value = "arkivmelding", parent = BusinessMessage.class)
-public class ArkivmeldingMessage extends BusinessMessage {
+public class ArkivmeldingMessage extends BusinessMessage<ArkivmeldingMessage> {
 }
