@@ -7,7 +7,7 @@
     participant "Service Registry" as sr
     participant "Service Provider" as mf
 
-    fs->>ip: GET api/capabilities/{receiverid}
+    fs->>ip: GET /api/capabilities/{receiverid}
 
     ip->>sr: GET /identifier/{receiverid}
     sr-->>ip: capabilities
@@ -15,12 +15,12 @@
     ip-->>fs: capabilities
     fs->>fs: select capability
     fs->>fs: Create message
-    fs->>ip: POST api/messages/
+    fs->>ip: POST /api/messages/out
     ip-->>fs: conversationresponse
     loop
-    fs->>ip: PUT api/messages/out/{messageId}
+    fs->>ip: PUT /api/messages/out/{messageId}
     end
-    fs->>ip: POST api/messages/out/{messageId}
+    fs->>ip: POST /api/messages/out/{messageId}
 
     ip->>mf: Upload
     loop
@@ -28,7 +28,7 @@
         mf-->>ip: status
     end
 
-    fs->>ip: GET api/statuses/{messageId}
+    fs->>ip: GET /api/statuses/{messageId}
     ip-->>fs: statuses
 ....
 
