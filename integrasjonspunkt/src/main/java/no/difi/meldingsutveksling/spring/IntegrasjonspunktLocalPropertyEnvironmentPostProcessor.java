@@ -12,8 +12,13 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.env.VaultPropertySource;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Properties;
 
 /**
@@ -41,6 +46,16 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
                 log.error("Failed to load integrasjonspunkt-local.properties - exiting.", ex);
             }
         }
+
+        // load vault properties
+        if (environment.getProperty("difi.move.feature.enableVault", Boolean.class, false)) {
+            String vaultUri = environment.getProperty("vault.uri");
+            String token = environment.getProperty("vault.token");
+            VaultTemplate vaultTemplate = new VaultTemplate(VaultEndpoint.from(URI.create(vaultUri)), new TokenAuthentication(token));
+            VaultPropertySource vaultPropertySource = new VaultPropertySource(vaultTemplate, "secret/move");
+            environment.getPropertySources().addFirst(vaultPropertySource);
+        }
+
     }
 
     @Override
