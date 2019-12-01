@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,8 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DpoConversationStrategy implements ConversationStrategy {
+@Order(100)
+public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
     private final TransportFactory transportFactory;
     private final AsicHandler asicHandler;

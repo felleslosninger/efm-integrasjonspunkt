@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -20,8 +21,9 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 
 @Component
 @Slf4j
+@Order(100)
 @RequiredArgsConstructor
-public class DpiConversationStrategy implements ConversationStrategy {
+public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
     private final IntegrasjonspunktProperties props;
     private final ServiceRegistryLookup sr;

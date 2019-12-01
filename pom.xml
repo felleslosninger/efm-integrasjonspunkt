@@ -111,6 +111,7 @@
     </parent>
 
     <modules>
+        <module>api</module>
         <module>common</module>
         <module>security</module>
         <module>noarkexchange</module>
@@ -150,6 +151,11 @@
                 <version>${spring.cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
