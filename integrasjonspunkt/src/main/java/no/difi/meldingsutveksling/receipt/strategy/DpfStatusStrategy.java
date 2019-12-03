@@ -7,17 +7,19 @@ import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
-public class FiksStatusStrategy implements StatusStrategy {
+@Order
+public class DpfStatusStrategy implements StatusStrategy {
 
     private SvarUtService svarUtService;
     private ConversationService conversationService;
 
-    public FiksStatusStrategy(SvarUtService svarUtService, ConversationService conversationService) {
+    public DpfStatusStrategy(SvarUtService svarUtService, ConversationService conversationService) {
         this.svarUtService = svarUtService;
         this.conversationService = conversationService;
     }

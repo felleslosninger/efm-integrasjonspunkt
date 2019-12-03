@@ -15,7 +15,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
-@Order(100)
+@Order
 @Slf4j
 public class DpeConversationStrategyImpl implements DpeConversationStrategy {
 

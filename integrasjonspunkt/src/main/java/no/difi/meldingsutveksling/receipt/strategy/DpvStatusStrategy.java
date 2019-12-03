@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -19,6 +20,7 @@ import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
 @RequiredArgsConstructor
+@Order
 public class DpvStatusStrategy implements StatusStrategy {
 
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;

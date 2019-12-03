@@ -21,7 +21,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 
 @Component
 @Slf4j
-@Order(100)
+@Order
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 

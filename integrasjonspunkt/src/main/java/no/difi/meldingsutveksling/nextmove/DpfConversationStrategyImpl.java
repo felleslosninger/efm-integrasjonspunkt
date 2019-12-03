@@ -19,7 +19,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
-@Order(100)
+@Order
 @Slf4j
 @RequiredArgsConstructor
 public class DpfConversationStrategyImpl implements DpfConversationStrategy {

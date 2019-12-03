@@ -19,7 +19,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(100)
+@Order
 public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
     private final TransportFactory transportFactory;

@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.ConversationService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMark
 @Component
 @Slf4j
 @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-@Order(100)
+@Order
 @RequiredArgsConstructor
 public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
@@ -39,7 +40,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
     @Override
     @Transactional
-    public void send(NextMoveOutMessage message) {
+    public void send(@NotNull NextMoveOutMessage message) {
 
         promiseMaker.promise(reject -> {
             InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message, reject);
