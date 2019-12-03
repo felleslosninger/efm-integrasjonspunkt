@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;

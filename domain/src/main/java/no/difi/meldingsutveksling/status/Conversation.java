@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +23,7 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 @Getter
 @Setter

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

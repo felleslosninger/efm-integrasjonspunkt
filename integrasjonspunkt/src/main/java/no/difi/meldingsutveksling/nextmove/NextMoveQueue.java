@@ -8,9 +8,9 @@ import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.ConversationService;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 

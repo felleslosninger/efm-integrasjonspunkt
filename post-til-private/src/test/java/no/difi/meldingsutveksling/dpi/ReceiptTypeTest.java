@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.domain.kvittering.KvitteringsInfo;
 import no.difi.sdp.client2.domain.kvittering.LeveringsKvittering;

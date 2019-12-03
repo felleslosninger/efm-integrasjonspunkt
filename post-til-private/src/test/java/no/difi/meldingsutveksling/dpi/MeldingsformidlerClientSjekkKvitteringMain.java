@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.receipt.ExternalReceipt;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.ExternalReceipt;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.sdp.client2.domain.Prioritet;
 
 import java.time.Clock;

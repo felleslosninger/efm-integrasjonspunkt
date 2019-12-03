@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;

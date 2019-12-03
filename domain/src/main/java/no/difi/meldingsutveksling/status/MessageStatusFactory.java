@@ -1,6 +1,7 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;

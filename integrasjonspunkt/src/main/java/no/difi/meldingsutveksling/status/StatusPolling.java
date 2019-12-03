@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 /**
  * Periodically checks non final receipts, and their respective services for updates.

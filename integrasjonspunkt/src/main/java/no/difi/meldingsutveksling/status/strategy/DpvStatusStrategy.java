@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.strategy;
+package no.difi.meldingsutveksling.status.strategy;
 
 import lombok.RequiredArgsConstructor;
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusChangeV2;
@@ -9,6 +9,10 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.ConversationService;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.StatusStrategy;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 @Component
 @RequiredArgsConstructor

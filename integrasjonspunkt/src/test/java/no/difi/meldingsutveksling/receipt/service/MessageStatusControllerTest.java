@@ -2,10 +2,11 @@ package no.difi.meldingsutveksling.receipt.service;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
-import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
+import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.status.service.MessageStatusController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

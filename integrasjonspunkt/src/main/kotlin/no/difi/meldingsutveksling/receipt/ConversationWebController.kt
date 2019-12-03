@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.receipt
 
+import no.difi.meldingsutveksling.status.ConversationRepository
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

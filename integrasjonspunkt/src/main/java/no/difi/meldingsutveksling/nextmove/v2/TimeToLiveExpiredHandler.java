@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
 import no.difi.meldingsutveksling.receipt.*;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.ConversationRepository;
+import no.difi.meldingsutveksling.status.ConversationService;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 @Slf4j
 @Component

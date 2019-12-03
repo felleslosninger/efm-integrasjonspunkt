@@ -1,12 +1,12 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
-import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
+import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.view.Views;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

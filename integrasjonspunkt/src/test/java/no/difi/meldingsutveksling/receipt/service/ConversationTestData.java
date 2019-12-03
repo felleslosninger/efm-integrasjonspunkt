@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.receipt.service;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 import java.time.OffsetDateTime;

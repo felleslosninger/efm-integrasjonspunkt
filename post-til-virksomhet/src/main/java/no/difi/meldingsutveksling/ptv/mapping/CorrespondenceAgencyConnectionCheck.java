@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
-import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.status.Conversation;
 
 import javax.annotation.PostConstruct;
 

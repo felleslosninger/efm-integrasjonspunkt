@@ -4,7 +4,7 @@ import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.KeyStoreProperties;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.sdp.client2.domain.Prioritet;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;

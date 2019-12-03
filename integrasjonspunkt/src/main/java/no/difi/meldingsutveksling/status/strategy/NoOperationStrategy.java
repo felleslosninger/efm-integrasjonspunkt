@@ -1,11 +1,11 @@
-package no.difi.meldingsutveksling.receipt.strategy;
+package no.difi.meldingsutveksling.status.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.StatusStrategy;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.StatusStrategy;
 
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 public class NoOperationStrategy implements StatusStrategy {
 

@@ -26,7 +26,7 @@ import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.meldingsutveksling.receipt.Conversation;
+import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;

@@ -1,7 +1,8 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 @UtilityClass
 public class DpoReceiptMapper {

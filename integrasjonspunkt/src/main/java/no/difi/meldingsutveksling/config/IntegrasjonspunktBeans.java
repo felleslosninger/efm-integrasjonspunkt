@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
+import no.difi.meldingsutveksling.status.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;

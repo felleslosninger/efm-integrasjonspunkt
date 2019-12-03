@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt;
+package no.difi.meldingsutveksling.status;
 
 import com.google.common.base.Strings;
 import com.querydsl.core.BooleanBuilder;
