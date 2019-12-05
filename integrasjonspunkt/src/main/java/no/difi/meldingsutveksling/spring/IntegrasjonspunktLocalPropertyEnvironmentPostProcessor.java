@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  *
  * @author kons-nlu
@@ -48,11 +50,14 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
         }
 
         // load vault properties
-        if (environment.getProperty("difi.move.feature.enableVault", Boolean.class, false)) {
-            String vaultUri = environment.getProperty("vault.uri");
-            String token = environment.getProperty("vault.token");
-            VaultTemplate vaultTemplate = new VaultTemplate(VaultEndpoint.from(URI.create(vaultUri)), new TokenAuthentication(token));
-            VaultPropertySource vaultPropertySource = new VaultPropertySource(vaultTemplate, "secret/move");
+        String vaultUri = environment.getProperty("vault.uri");
+        String vaultToken = environment.getProperty("vault.token");
+        String vaultPath = environment.getProperty("vault.path");
+        if (!isNullOrEmpty(vaultUri) &&
+                !isNullOrEmpty(vaultToken) &&
+                !isNullOrEmpty(vaultPath)) {
+            VaultTemplate vaultTemplate = new VaultTemplate(VaultEndpoint.from(URI.create(vaultUri)), new TokenAuthentication(vaultToken));
+            VaultPropertySource vaultPropertySource = new VaultPropertySource(vaultTemplate, vaultPath);
             environment.getPropertySources().addFirst(vaultPropertySource);
         }
 
