@@ -1,0 +1,129 @@
+:doctype: book
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:toc-collapsable:
+:linkcss:
+:stylesdir: assets/css
+:stylesheet: asciidoctor.css
+:icons: font
+:source-highlighter: highlightjs
+:imagesdir: images/eformidling
+
+= NextMove API Specification
+Version {project-version}
+
+== The services
+
+|===
+|HTTP Method |URL |Description
+
+|GET
+|<<capabilities,/api/capabilities>>
+|<<capabilities>>
+
+|GET
+|<<messages-in-find,/api/messages/in>>
+|<<messages-in-find>>
+
+|GET
+|<<messages-in-peek,/api/messages/in/peek>>
+|<<messages-in-peek>>
+
+|GET
+|<<messages-in-pop,/api/messages/in/pop/{messageId}>>
+|<<messages-in-pop>>
+
+|DELETE
+|<<messages-in-delete,/api/messages/in/{messageId}>>
+|<<messages-in-delete>>
+
+|GET
+|<<messages-out-find,/api/messages/out>>
+|<<messages-out-find>>
+
+|GET
+|<<messages-out-get,/api/messages/out/{messageId}>>
+|<<messages-out-get>>
+
+|POST
+|<<messages-out-create,/api/messages/out>>
+|<<messages-out-create>>
+
+|PUT
+|<<messages-out-upload,/api/messages/out/{messageId}>>
+|<<messages-out-upload>>
+
+|POST
+|<<messages-out-send,/api/messages/out/{messageId}>>
+|<<messages-out-send>>
+
+|POST
+|<<messages-out-multipart,/api/messages/out/multipart>>
+|<<messages-out-multipart>>
+
+|DELETE
+|<<messages-out-delete,/api/messages/out/{messageId}>>
+|<<messages-out-delete>>
+
+|GET
+|<<conversations-find,/api/conversations>>
+|<<conversations-find>>
+
+|GET
+|<<conversations-get,/api/conversations/{id}>>
+|<<conversations-get>>
+
+|GET
+|<<conversations-get-by-message-id,/api/conversations/messageId/{messageId}>>
+|<<conversations-get-by-message-id>>
+
+|GET
+|<<conversations-queue,/api/conversations/queue>>
+|<<conversations-queue>>
+
+|GET
+|<<statuses-find,/api/statuses>>
+|<<statuses-find>>
+
+|GET
+|<<statuses-find-by-message-id,/api/statuses/{messageId}>>
+|<<statuses-find-by-message-id>>
+
+|GET
+|<<statuses-peek-latest,/api/statuses/peek>>
+|<<statuses-peek-latest>>
+
+|GET
+|<<subscriptions-list,/api/subscriptions>>
+|<<subscriptions-list>>
+
+|GET
+|<<subscriptions-get,/api/subscriptions/{id}>>
+|<<subscriptions-get>>
+
+|POST
+|<<subscriptions-create,/api/subscriptions>>
+|<<subscriptions-create>>
+
+|PUT
+|<<subscriptions-update,/api/subscriptions/{id}>>
+|<<subscriptions-update>>
+
+|DELETE
+|<<subscriptions-delete,/api/subscriptions/{id}>>
+|<<subscriptions-delete>>
+
+|DELETE
+|<<subscriptions-delete-all,/api/subscriptions>>
+|<<subscriptions-delete-all>>
+
+|===
+
+include::capabilities.adoc[leveloffset=+1]
+include::messages-in.adoc[leveloffset=+1]
+include::messages-out.adoc[leveloffset=+1]
+include::conversations.adoc[leveloffset=+1]
+include::statuses.adoc[leveloffset=+1]
+include::events.adoc[leveloffset=+1]
+include::subscriptions.adoc[leveloffset=+1]

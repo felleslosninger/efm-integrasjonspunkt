@@ -84,7 +84,7 @@ public class Scope {
 
     @XmlElement(name = "ScopeInformation")
     @Valid
-    protected Set<CorrelationInformation> scopeInformation;
+    protected Set<@Valid CorrelationInformation> scopeInformation;
 
     /**
      * Gets the value of the scopeInformation property.

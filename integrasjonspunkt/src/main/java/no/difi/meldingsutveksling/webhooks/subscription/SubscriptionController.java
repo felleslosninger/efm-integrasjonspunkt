@@ -50,8 +50,7 @@ public class SubscriptionController {
     @ApiOperation(value = "Create a webhook subscription", notes = "Create a webhook subscription")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Success", response = Subscription.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 404, message = "Not Found", response = String.class)
+            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
     })
     @Transactional
     public Subscription createSubscription(

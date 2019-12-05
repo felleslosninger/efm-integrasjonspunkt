@@ -13,13 +13,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 @Target({FIELD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
-public @interface EqualToProperty {
+public @interface IntegrasjonspunktOrganization {
 
-    String message() default "{no.difi.meldingsutveksling.validation.EqualToProperty}";
+    String message() default "{no.difi.meldingsutveksling.validation.IntegrasjonspunktOrganization}";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    String value();
 }
