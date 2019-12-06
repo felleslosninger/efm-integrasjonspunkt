@@ -17,12 +17,15 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import org.springframework.util.StringUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.validation.groups.ConvertGroup;
+import javax.validation.groups.Default;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -78,13 +81,15 @@ public class StandardBusinessDocumentHeader {
     @XmlElement(name = "Sender", required = true)
     @Size(max = 1)
     @Valid
-    private Set<Sender> sender;
+    @ConvertGroup(to = ValidationGroups.Partner.Sender.class)
+    private Set<@Valid Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
     @NotEmpty
     @Size(min = 1, max = 1)
     @Valid
-    private Set<Receiver> receiver;
+    @ConvertGroup(to = ValidationGroups.Partner.Receiver.class)
+    private Set<@Valid Receiver> receiver;
 
     @XmlElement(name = "DocumentIdentification", required = true)
     @NotNull

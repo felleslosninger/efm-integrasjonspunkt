@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 @ApiModel(value = "digital", parent = BusinessMessage.class)
-public class DpiDigitalMessage extends BusinessMessage {
+public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
 
     @NotNull
     private String tittel;

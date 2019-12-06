@@ -1,0 +1,38 @@
+= Webhook events
+
+[#event-ping]
+== Ping event
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/events/ping/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/events/ping/http-request.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/events/ping/request-fields.adoc[]
+--
+
+[#event-message-status]
+== Message status event
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/events/message-status/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/events/message-status/http-request.adoc[]
+
+[role="primary"]
+.Request fields
+[.request-fields]
+--
+include::{snippets}/events/message-status/request-fields.adoc[]
+--
+

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.validation;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
@@ -7,15 +8,15 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Objects;
 
-public class EqualToPropertyValidator implements ConstraintValidator<EqualToProperty, String> {
+public class IntegrasjonspunktOrganizationValidator implements ConstraintValidator<IntegrasjonspunktOrganization, String> {
 
     @Autowired
-    private Environment environment;
+    private IntegrasjonspunktProperties properties;
     private String expectedValue;
 
     @Override
-    public void initialize(EqualToProperty constraintAnnotation) {
-        this.expectedValue = environment.getProperty(constraintAnnotation.value());
+    public void initialize(IntegrasjonspunktOrganization constraintAnnotation) {
+        this.expectedValue = "0192:" + properties.getOrg().getNumber();
     }
 
     @Override
@@ -23,6 +24,7 @@ public class EqualToPropertyValidator implements ConstraintValidator<EqualToProp
         if (value == null) {
             return true;
         }
+
         return Objects.equals(expectedValue, value);
     }
 }

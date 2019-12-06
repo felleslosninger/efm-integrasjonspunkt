@@ -5,7 +5,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.7</version>
+    <version>2.0.8</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <scm>
@@ -34,7 +34,49 @@
             <name>jcenter</name>
             <url>http://jcenter.bintray.com</url>
         </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>asciidoctor-releases</id>
+            <name>asciidoctor</name>
+            <url>https://dl.bintray.com/asciidoctor/maven/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-puravida-software-repo</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/puravida-software/repo</url>
+        </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>jcenter-releases</id>
+            <name>jcenter</name>
+            <url>http://jcenter.bintray.com</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>asciidoctor-releases</id>
+            <name>asciidoctor</name>
+            <url>https://dl.bintray.com/asciidoctor/maven/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-puravida-software-repo</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/puravida-software/repo</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <spring.cloud.version>Greenwich.SR2</spring.cloud.version>
@@ -500,12 +542,16 @@
                         <execution>
                             <id>java-compile</id>
                             <phase>compile</phase>
-                            <goals> <goal>compile</goal> </goals>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
                         </execution>
                         <execution>
                             <id>java-test-compile</id>
                             <phase>test-compile</phase>
-                            <goals> <goal>testCompile</goal> </goals>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>

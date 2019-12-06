@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-class PingContent extends WebhookContentBase<PingContent> {
+
+public class PingContent extends WebhookContentBase<PingContent> {
 
 }

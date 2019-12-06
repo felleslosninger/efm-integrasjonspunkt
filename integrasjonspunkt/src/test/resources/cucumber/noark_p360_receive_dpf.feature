@@ -141,9 +141,9 @@ Feature: Receiving a DPF message and forward to Noark P360
             <jpJaar>2016</jpJaar>
             <jpSeknr>25</jpSeknr>
             <jpJpostnr>13</jpJpostnr>
-            <jpJdato>1458514800000</jpJdato>
+            <jpJdato>2016-03-21</jpJdato>
             <jpNdoktype>U</jpNdoktype>
-            <jpDokdato>1458514800000</jpDokdato>
+            <jpDokdato>2016-03-21</jpDokdato>
             <jpStatus>F</jpStatus>
             <jpInnhold>Test4 - liten fil - 22.04.16</jpInnhold>
             <jpOffinnhold>Test4 - liten fil - 22.04.16</jpOffinnhold>

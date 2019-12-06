@@ -4,7 +4,7 @@ Feature: Sending a Next Move Digital DPV message
     Given a "GET" request to "http://localhost:9099/identifier/09118532323?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532323.json"
     And a "GET" request to "http://localhost:9099/identifier/09118532323/process/urn:no:difi:profile:digitalpost:info:ver1.0?conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532323-info.json"
     And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
-    And a "GET" request to "http://localhost:9099/info/974720760" will respond with status "200" and the following "application/json" in "/restmocks/info/974720760.json"
+    And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And the Noark System is disabled
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """
@@ -76,7 +76,7 @@ Feature: Sending a Next Move Digital DPV message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "0192:974720760"
+                        "value": "0192:910077473"
                     }
                 }
             ]
@@ -147,7 +147,7 @@ Feature: Sending a Next Move Digital DPV message
                 <altinn13:TextTokens>
                     <altinn13:TextToken>
                         <altinn13:TokenNum>1</altinn13:TokenNum>
-                        <altinn13:TokenValue>$reporteeName$: Du har mottatt en melding fra Test - C2.</altinn13:TokenValue>
+                        <altinn13:TokenValue>$reporteeName$: Du har mottatt en melding fra TEST - C4.</altinn13:TokenValue>
                     </altinn13:TextToken>
                 </altinn13:TextTokens>
                 <altinn13:ReceiverEndPoints>
@@ -158,7 +158,7 @@ Feature: Sending a Next Move Digital DPV message
             </altinn13:Notification>
         </altinn10:Notifications>
         <altinn10:AllowForwarding>true</altinn10:AllowForwarding>
-        <altinn10:MessageSender>Test - C2</altinn10:MessageSender>
+        <altinn10:MessageSender>TEST - C4</altinn10:MessageSender>
         </altinn9:Correspondence>
     </altinn9:InsertCorrespondenceV2>
     """

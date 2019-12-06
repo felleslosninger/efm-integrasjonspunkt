@@ -1,0 +1,78 @@
+= Capabilities
+
+[#capabilities]
+== Get capabilities
+
+The service is used to get capabilities for a receiver.
+
+=== Example 1 - Get all capabilities for an organization
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpo/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpo/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpo/http-response.adoc[]
+
+=== Example 2 - Get capabilities for an organization with security level
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpo/security-level/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpo/security-level/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpo/security-level/http-response.adoc[]
+
+=== Example 3 - Get all capabilities for an individual
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpi/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpi/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpi/http-response.adoc[]
+
+=== Example 4 - Get capabilities for an individual with security level
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpi/security-level/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpi/security-level/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpi/security-level/http-response.adoc[]
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/capabilities/dpo/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/capabilities/dpo/response-fields.adoc[]
+--
+

@@ -4,6 +4,8 @@ import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,14 +35,27 @@ public class IntegrasjonspunktErrorController implements ErrorController {
     }
 
     @RequestMapping
-    public Map<String, Object> error(HttpServletRequest aRequest) {
+    public ResponseEntity<Map<String, Object>> error(HttpServletRequest aRequest) {
         Map<String, Object> body = getErrorAttributes(aRequest, getTraceParameter(aRequest));
         String trace = (String) body.get("trace");
         if (trace != null) {
             String[] lines = trace.split("\n\t");
             body.put("trace", lines);
         }
-        return body;
+        HttpStatus status = getStatus(aRequest);
+        return new ResponseEntity<>(body, status);
+    }
+
+    protected HttpStatus getStatus(HttpServletRequest request) {
+        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        if (statusCode == null) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        try {
+            return HttpStatus.valueOf(statusCode);
+        } catch (Exception ex) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
     }
 
     private boolean getTraceParameter(HttpServletRequest request) {

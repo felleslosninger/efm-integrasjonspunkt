@@ -128,7 +128,7 @@ public class NextMoveMessageOutController {
     @DeleteMapping("/{messageId}")
     @ApiOperation(value = "Delete message", notes = "Delete a message with given messageId. Also deletes all associated files.")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
+            @ApiResponse(code = 200, message = "Success"),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)
     })
     @Transactional

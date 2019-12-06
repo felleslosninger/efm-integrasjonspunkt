@@ -1,0 +1,211 @@
+= Conversations
+
+[#conversations-find]
+== Find conversations
+
+The service is used to search for conversations.
+The response is paged with a default page size of 10.
+
+=== Example 1 - Get all conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/http-response.adoc[]
+
+=== Example 2 - Search for conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/search/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/search/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/search/http-response.adoc[]
+
+=== Example 3 - Sorting
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/sorting/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/sorting/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/sorting/http-response.adoc[]
+
+=== Example 4 - Paging
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/find/paging/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/find/paging/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/find/paging/http-response.adoc[]
+
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/conversations/find/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/find/response-fields.adoc[]
+--
+
+[#conversations-get]
+== Get conversation by id
+
+The service is used to search for conversations by id.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get conversation
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get/http-response.adoc[]
+
+=== Example 2 - Conversation not found
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/conversations/get/not-found/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get/not-found/response-fields.adoc[]
+--
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/conversations/get/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get/response-fields.adoc[]
+--
+
+[#conversations-get-by-message-id]
+== Get conversation by messageId
+
+The service is used to search for conversations by messageId.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get conversation by messageId
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/get-by-message-id/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/get-by-message-id/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/get-by-message-id/http-response.adoc[]
+
+=== Example 2 - Conversation not found
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/conversations/get-by-message-id/not-found/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get-by-message-id/not-found/response-fields.adoc[]
+--
+
+
+=== About the service
+[role="primary"]
+.Path parameters
+[.path-parameters]
+--
+include::{snippets}/conversations/get-by-message-id/path-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/get-by-message-id/response-fields.adoc[]
+--
+
+[#conversations-queue]
+== Queued conversations
+
+The service is used to get all conversations with not-finished state.
+The response is paged with a default page size of 10
+
+=== Example 1 - Get queued conversations
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/queue/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/queue/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/queue/http-response.adoc[]
+
+=== About the service
+[role="primary"]
+.Request parameters
+[.request-parameters]
+--
+include::{snippets}/conversations/queue/request-parameters.adoc[]
+--
+
+[role="secondary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/conversations/queue/response-fields.adoc[]
+--

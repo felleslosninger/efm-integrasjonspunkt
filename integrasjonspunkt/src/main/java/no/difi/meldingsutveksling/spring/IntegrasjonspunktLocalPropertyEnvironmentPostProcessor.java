@@ -12,9 +12,16 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.env.VaultPropertySource;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Properties;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  *
@@ -41,6 +48,19 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
                 log.error("Failed to load integrasjonspunkt-local.properties - exiting.", ex);
             }
         }
+
+        // load vault properties
+        String vaultUri = environment.getProperty("vault.uri");
+        String vaultToken = environment.getProperty("vault.token");
+        String vaultPath = environment.getProperty("vault.path");
+        if (!isNullOrEmpty(vaultUri) &&
+                !isNullOrEmpty(vaultToken) &&
+                !isNullOrEmpty(vaultPath)) {
+            VaultTemplate vaultTemplate = new VaultTemplate(VaultEndpoint.from(URI.create(vaultUri)), new TokenAuthentication(vaultToken));
+            VaultPropertySource vaultPropertySource = new VaultPropertySource(vaultTemplate, vaultPath);
+            environment.getPropertySources().addFirst(vaultPropertySource);
+        }
+
     }
 
     @Override
