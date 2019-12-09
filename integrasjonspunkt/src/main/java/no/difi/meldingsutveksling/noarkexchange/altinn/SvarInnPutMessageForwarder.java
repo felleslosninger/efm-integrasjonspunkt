@@ -54,7 +54,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     }
 
     private void forward(Forsendelse forsendelse, Reject reject) {
-        SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, putMessageRequestFactory);
+        SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, clock, putMessageRequestFactory);
         svarInnService.getAttachments(forsendelse, reject).forEach(builder::streamedFile);
         if (!Strings.isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {
             builder.setFallbackSenderOrgNr(properties.getFiks().getInn().getFallbackSenderOrgNr());

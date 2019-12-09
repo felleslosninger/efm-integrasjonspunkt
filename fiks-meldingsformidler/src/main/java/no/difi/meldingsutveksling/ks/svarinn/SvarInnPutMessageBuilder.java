@@ -15,6 +15,8 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class SvarInnPutMessageBuilder {
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
     private final Forsendelse forsendelse;
+    private final Clock clock;
     private final PutMessageRequestFactory putMessageRequestFactory;
     @Setter private String fallbackSenderOrgNr;
 
@@ -102,7 +105,7 @@ public class SvarInnPutMessageBuilder {
     private JournpostType createJournpostType() {
         final JournpostType journpostType = objectFactory.createJournpostType();
         final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
-        journpostType.setJpDokdato(metadata.getDokumentetsDato());
+        journpostType.setJpDokdato(Instant.ofEpochMilli(Long.parseLong(metadata.getDokumentetsDato())).atZone(clock.getZone()).toLocalDate().toString());
         journpostType.setJpNdoktype(metadata.getJournalposttype());
         journpostType.setJpStatus(metadata.getJournalstatus());
         journpostType.setJpJaar(metadata.getJournalaar());
@@ -110,7 +113,7 @@ public class SvarInnPutMessageBuilder {
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(getForsendelseTittel());
         journpostType.setJpInnhold(getForsendelseTittel());
-        journpostType.setJpJdato(metadata.getJournaldato());
+        journpostType.setJpJdato(Instant.ofEpochMilli(Long.parseLong(metadata.getJournaldato())).atZone(clock.getZone()).toLocalDate().toString());
         journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
         journpostType.getAvsmot().add(createAvsender());
         return journpostType;
