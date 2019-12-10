@@ -302,6 +302,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>demo</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.vault</groupId>
             <artifactId>spring-vault-core</artifactId>
             <version>2.2.0.RELEASE</version>
@@ -324,14 +329,6 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>transport</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>transport-altinn</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>api</artifactId>
         </dependency>
         <dependency>
@@ -340,13 +337,17 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>altinn-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>kvittering</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>stax2-api</artifactId>
-                    <groupId>org.codehaus.woodstox</groupId>
-                </exclusion>
-            </exclusions>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>stax2-api</artifactId>-->
+<!--                    <groupId>org.codehaus.woodstox</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -747,10 +748,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>altinnexchange</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>transport-file</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

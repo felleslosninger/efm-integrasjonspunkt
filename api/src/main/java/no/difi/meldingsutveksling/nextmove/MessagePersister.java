@@ -1,4 +1,6 @@
-package no.difi.meldingsutveksling.nextmove.message;
+package no.difi.meldingsutveksling.nextmove;
+
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 
 import java.io.IOException;
 import java.io.InputStream;

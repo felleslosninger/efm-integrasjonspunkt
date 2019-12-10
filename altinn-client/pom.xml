@@ -18,6 +18,10 @@
     </dependency>
     <dependency>
         <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>api</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>altinnexchange</artifactId>
     </dependency>
     <dependency>

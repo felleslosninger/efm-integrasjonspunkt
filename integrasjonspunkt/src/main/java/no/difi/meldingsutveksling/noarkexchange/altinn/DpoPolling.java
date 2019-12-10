@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.nextmove.message.MessagePersister;
+import no.difi.meldingsutveksling.nextmove.MessagePersister;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +37,13 @@ public class DpoPolling {
     private final SBDUtil sbdUtil;
 
     public void poll() {
-        log.debug("Checking for new messages");
+        log.debug("Checking for new DPO messages");
 
         AltinnWsClient client = getAltinnWsClient();
         List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
-            log.debug("New message(s) detected");
+            log.debug("New DPO message(s) detected");
         }
 
         fileReferences.forEach(reference -> handleFileReference(client, reference));

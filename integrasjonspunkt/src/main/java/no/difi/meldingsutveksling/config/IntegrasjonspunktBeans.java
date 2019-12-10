@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.AltinnWsClientFactory;
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
+import no.difi.meldingsutveksling.KeystoreProvider;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.*;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
@@ -15,9 +18,8 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.status.DpiReceiptService;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
-import no.difi.meldingsutveksling.transport.TransportFactory;
+import no.difi.meldingsutveksling.status.DpiReceiptService;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -54,11 +56,6 @@ public class IntegrasjonspunktBeans {
                 .locator(new StaticLocator(properties.getElma().getUrl()))
                 .certificateValidator(EmptyCertificateValidator.INSTANCE)
                 .build();
-    }
-
-    @Bean
-    public TransportFactory serviceRegistryTransportFactory(AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
-        return new ServiceRegistryTransportFactory(altinnWsClientFactory, uuidGenerator);
     }
 
     @Bean

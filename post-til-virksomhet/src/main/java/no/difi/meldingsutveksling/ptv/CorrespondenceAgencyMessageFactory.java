@@ -24,7 +24,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;

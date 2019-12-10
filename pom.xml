@@ -123,10 +123,7 @@
         <module>validation</module>
         <module>nextmove</module>
         <module>domain</module>
-        <module>transport</module>
         <module>kvittering</module>
-        <module>transport-file</module>
-        <module>transport-altinn</module>
         <module>altinn-client</module>
         <module>test-tools</module>
         <module>post-til-virksomhet</module>
@@ -213,11 +210,6 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>transport-file</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>post-til-virksomhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -244,16 +236,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>noarkexchange-websak</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>transport-altinn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
