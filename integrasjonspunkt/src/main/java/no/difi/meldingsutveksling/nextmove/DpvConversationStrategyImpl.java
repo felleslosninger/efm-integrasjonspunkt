@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.api.DpvConversationStrategy;
+import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.noarkexchange.*;

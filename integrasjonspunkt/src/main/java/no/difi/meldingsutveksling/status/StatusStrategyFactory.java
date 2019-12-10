@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.status.strategy.NoOperationStrategy;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;

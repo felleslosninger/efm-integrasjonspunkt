@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.ConversationService;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.status.StatusStrategy;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 

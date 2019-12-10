@@ -6,7 +6,7 @@ import lombok.Setter;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestFactory;
+import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;

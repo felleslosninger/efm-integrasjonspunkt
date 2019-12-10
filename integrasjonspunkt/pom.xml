@@ -333,6 +333,10 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>bestedu</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
         </dependency>
         <dependency>

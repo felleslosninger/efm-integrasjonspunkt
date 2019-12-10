@@ -14,7 +14,7 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper
-import no.difi.meldingsutveksling.nextmove.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.ConversationService
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord

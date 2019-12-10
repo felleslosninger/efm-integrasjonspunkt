@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.ConversationService;
-import no.difi.meldingsutveksling.status.StatusStrategy;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;

@@ -62,6 +62,10 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>service-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>security</artifactId>
             <exclusions>
                 <exclusion>

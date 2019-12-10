@@ -23,7 +23,7 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.MessagePersister;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;

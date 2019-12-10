@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.status;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.springframework.scheduling.annotation.Scheduled;

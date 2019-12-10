@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.nextmove.MessagePersister;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

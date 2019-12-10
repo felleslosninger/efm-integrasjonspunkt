@@ -16,7 +16,7 @@ import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nextmove.CryptoMessagePersister;
+import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;

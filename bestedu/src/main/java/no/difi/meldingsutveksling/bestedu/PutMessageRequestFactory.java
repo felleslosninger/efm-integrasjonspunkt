@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange;
+package no.difi.meldingsutveksling.bestedu;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.core.Receiver;

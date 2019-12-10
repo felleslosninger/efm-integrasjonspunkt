@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;

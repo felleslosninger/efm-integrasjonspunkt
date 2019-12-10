@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.api.DpoConversationStrategy;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.springframework.core.annotation.Order;

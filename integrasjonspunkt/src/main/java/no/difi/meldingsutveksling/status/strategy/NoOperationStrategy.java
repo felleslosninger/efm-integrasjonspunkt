@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.status.strategy;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.difi.meldingsutveksling.status.StatusStrategy;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 
 import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 

@@ -1,4 +1,7 @@
-package no.difi.meldingsutveksling.nextmove
+package no.difi.meldingsutveksling.api
+
+import no.difi.meldingsutveksling.nextmove.NextMoveException
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 
 interface ConversationStrategy {
     @Throws(NextMoveException::class)
