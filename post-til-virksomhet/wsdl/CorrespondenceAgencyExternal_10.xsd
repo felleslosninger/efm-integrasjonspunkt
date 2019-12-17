@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02">
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_9.xsd" namespace="http://schemas.altinn.no/services/serviceEntity/2014/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_8.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"/>
+  <xs:complexType name="CorrespondenceStatusFilterV3">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents the request object used as input to the GetCorrespondenceStatusDetailsV3 operation in the CorrespondenceAgency service.
+            It has fields for different filter options presented by the operation.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CreatedAfterDate" nillable="true" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the creation date of the correspondence.
+            Includes correspondence newer than the set date.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="CreatedBeforeDate" nillable="true" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the creation date of the correspondence.
+            Includes correspondence older than the set date.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="CurrentStatus" type="q1:CorrespondenceStatusTypeV2" xmlns:q1="http://schemas.altinn.no/services/serviceEntity/2014/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the current status of the correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="NotificationSent" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the status of notifications.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Reportee" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the recipient of the correspondence.
+            &lt;/summary>
+            &lt;remarks>
+            Value must be an organization number or social security number.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpSearchOptions" nillable="true" type="tns:SdpStatusSearchOptions">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a data object with information on how to include SDP information in the status search results.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SendersReference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the senders reference value on the correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ServiceCode" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the service code. This field is mandatory.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ServiceEditionCode" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value used to filter correspondence based on the service edition code. This field is mandatory.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CorrespondenceStatusFilterV3" nillable="true" type="tns:CorrespondenceStatusFilterV3"/>
+  <xs:complexType name="SdpStatusSearchOptions">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents the search options that can be set when performing a search for status details on digital letters.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="IncludeCorrespondence" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the search should include correspondence or if the logic should save time 
+            and only search for secure digital post elements.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpStatusSearchOptions" nillable="true" type="tns:SdpStatusSearchOptions"/>
+  <xs:complexType name="CorrespondenceStatusResultV3">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents the response from the GetCorrespondenceStatusDetailsV3 operation in the CorrespondenceAgency service.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CorrespondenceStatusInformation" nillable="true" type="tns:CorrespondenceStatusInformation">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the list of correspondences and their statuses.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpStatusInformation" nillable="true" type="tns:SdpStatusInformation">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the list of correspondences and their statuses.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ServiceCode" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the service code for the correspondences in the list.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ServiceEditionCode" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the service edition code for the correspondences in the list.
+            &lt;/summary>CorrespondenceStatusInformationExternalBE</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CorrespondenceStatusResultV3" nillable="true" type="tns:CorrespondenceStatusResultV3"/>
+  <xs:complexType name="CorrespondenceStatusInformation">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a set of data with details and status information about correspondence elements.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CorrespondenceStatusDetailsList" nillable="true" type="q2:ArrayOfStatusV2" xmlns:q2="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the list of correspondences and their statuses.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="LimitReached" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the result set is larger than the list can hold.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CorrespondenceStatusInformation" nillable="true" type="tns:CorrespondenceStatusInformation"/>
+  <xs:complexType name="SdpStatusInformation">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a set of data with details and status information about secure digital post elements.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="LimitReached" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the result set is larger than the list can hold.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpStatusDetailsList" nillable="true" type="tns:ArrayOfSdpStatusDetails">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the list of correspondences and their statuses.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpStatusInformation" nillable="true" type="tns:SdpStatusInformation"/>
+  <xs:complexType name="ArrayOfSdpStatusDetails">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="SdpStatusDetails" nillable="true" type="tns:SdpStatusDetails"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfSdpStatusDetails" nillable="true" type="tns:ArrayOfSdpStatusDetails"/>
+  <xs:complexType name="SdpStatusDetails">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a secure digital post element with key values and status history.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CorrespondenceId" nillable="true" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets unique id of the correspondence that was created at the same time as the digital letter. This is null
+            if no correspondence was created.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="CreatedDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the date for when the digital letter was created.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="LastChangedDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the date and time for when the digital letter element was updated in Altinn. This is updated with every status change.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Reference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the reference value that was provided by the agency that created the secure digital post element. 
+            ExternalShipmentReference or SendersReference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Reportee" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a identifying value for the reportee. This can be a social security number or organization number.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpId" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the unique id of a secure digital post element as it is stored in Altinn.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="StatusHistory" nillable="true" type="tns:ArrayOfSdpStatusChange">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the status history for the secure digital post element.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpStatusDetails" nillable="true" type="tns:SdpStatusDetails"/>
+  <xs:complexType name="ArrayOfSdpStatusChange">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="SdpStatusChange" nillable="true" type="tns:SdpStatusChange"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfSdpStatusChange" nillable="true" type="tns:ArrayOfSdpStatusChange"/>
+  <xs:complexType name="SdpStatusChange">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Business entity containing information about a single status change to a secure digital post element.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Status" type="tns:SdpStatusType">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the status value.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="StatusDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the date and time for when the status was set.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpStatusChange" nillable="true" type="tns:SdpStatusChange"/>
+  <xs:simpleType name="SdpStatusType">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Enumeration for current status for a SDP message
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Unknown">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Unknown status. Either not set, or we were unable to retrieve it.
+            Also used if there is no new status when trying to retrieve status.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sent_Meldingsformidler">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Message is sent to message conveyor
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Delivered_EndUser">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Message is delivered to end user
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Delivery_EndUser_Failed">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Message has failed to be delivered to end user
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Reserved">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            The reportee has opted not to allow electronic communication.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NoMailBox">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            The reportee has not created any electronic mail box.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SdpStatusType" nillable="true" type="tns:SdpStatusType"/>
+  <xs:complexType name="SdpOptions">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents data that are used as input to insert correspondence, to control how it will forward the correspondence to
+            a secure digital mailbox.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="BackupAltinn" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the correspondence should be stored in Altinn instead, if the reportee do
+            not have a digital mailbox. The default value is "true".
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="NotSensitiveTitle" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the Non sensitive message title used on the digital letter send via the mailbox provider
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="PrimaryDocumentFileName" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the name of the file to be used as the primary document in the digital letter. The file name must exist
+            in the list of attachments in the binary attachments list in the insert correspondence request.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpNotifications" nillable="true" type="tns:SdpNotifications">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the notification settings for the digital letter. This is not Altinn notifications, but notifications
+            via the mailbox supplier.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SdpSetting" type="tns:SdpSetting">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value that controls whether Altinn should have a copy of the correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Title" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the Message title used on the digital letter send via the mailbox provider
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="VisibleDateTime" nillable="true" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the Visible date time used on the digital letter send via the mailbox provider
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpOptions" nillable="true" type="tns:SdpOptions"/>
+  <xs:complexType name="SdpNotifications">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Contains all settings for notification of digital letter via mailbox suppliers notification system.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="EmailNotification" nillable="true" type="tns:SdpEmailNotification">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the details required to generate an email notification.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SmsNotification" nillable="true" type="tns:SdpSmsNotification">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the details required to generate a SMS notification.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpNotifications" nillable="true" type="tns:SdpNotifications"/>
+  <xs:complexType name="SdpEmailNotification">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a notification with an email address as the notification recipient. This class tries to match
+            the &lt;a href="http://begrep.difi.no/SikkerDigitalPost/1.2.1/begrep/EpostVarsel">email notification concept&lt;/a> defined by DIFI.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:SdpNotification">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="EmailAddress" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo/>
+              <xs:documentation>&lt;summary>
+            Gets or sets the email address for the recipient of the notification.
+            &lt;/summary></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SdpEmailNotification" nillable="true" type="tns:SdpEmailNotification"/>
+  <xs:complexType name="SdpNotification">
+    <xs:sequence>
+      <xs:element name="NotificationText" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the text that is to be used for notification of the digital letter.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Repetitions" nillable="true" type="tns:DaysDelayedList">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a list containing number of days after the letter has been received,
+            that notification(s) should be sent.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SdpNotification" nillable="true" type="tns:SdpNotification"/>
+  <xs:complexType name="DaysDelayedList">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Wraps a list of integers for better readability in SOAP contract. Used to hold number of days after the letter is sent that the user should get a notification.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="DaysDelayed" type="xs:unsignedInt"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="DaysDelayedList" nillable="true" type="tns:DaysDelayedList"/>
+  <xs:complexType name="SdpSmsNotification">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a notification with a mobile number as the notification recipient. This class tries to match
+            the &lt;a href="http://begrep.difi.no/SikkerDigitalPost/1.2.1/begrep/SmsVarsel">SMS notification concept&lt;/a> defined by DIFI.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:SdpNotification">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="MobileNumber" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo/>
+              <xs:documentation>&lt;summary>
+            Gets or sets the mobile number for the recipient of the notification.
+            &lt;/summary></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="SdpSmsNotification" nillable="true" type="tns:SdpSmsNotification"/>
+  <xs:simpleType name="SdpSetting">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Defines the different options for where a new Correspondence should be handled.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ForwardOnly">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that the correspondence should be forwarded to a digital mail box.
+            &lt;/summary>
+            &lt;remarks>
+            Altinn will try to find the digital mail address of the reportee and forward the message. InsertCorrespondence will fail
+            if no digital mail address exist.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CopyAltinn">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that the correspondence should be both made available in Altinn and forwarded to the digital mail box of the user.
+            &lt;/summary>
+            &lt;remarks>
+            Altinn will try to find the digital mail address of the reportee and forward the message inn addition to keeping a copy that
+            is made available to the reportee. InsertCorrespondence will NOT fail if no digital mail address exist. Instead the forwarding
+            will be skipped. The Receipt will contain a message with the results.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="SdpSetting" nillable="true" type="tns:SdpSetting"/>
+</xs:schema>

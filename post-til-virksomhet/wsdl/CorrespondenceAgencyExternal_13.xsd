@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10">
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_7.xsd" namespace="http://schemas.altinn.no/serviceengine/formsengine/2009/10"/>
+  <xs:complexType name="NotificationBEList">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a strongly typed list of Notification elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Notification" nillable="true" type="tns:Notification"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="NotificationBEList" nillable="true" type="tns:NotificationBEList"/>
+  <xs:complexType name="Notification">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a notification with details about a notification.
+            Notifications are used by agencies to notify end users about new elements that have been created in Altinn for them.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="FromAddress" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the sender of the notification. This will set the "from" in SMS and email notifications.
+            &lt;/summary>
+            &lt;remarks>
+            Default value is noReply@altinn.no.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ShipmentDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a date and time for when the notification should be sent to the recipients.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="LanguageCode" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the language of the notification.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="NotificationType" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the notification type by name. 
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="TextTokens" nillable="true" type="tns:TextTokenSubstitutionBEList">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a list of replacement tokens to insert/replace some content in a notification.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ReceiverEndPoints" nillable="true" type="tns:ReceiverEndPointBEList">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a list of recipients of the notification.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Notification" nillable="true" type="tns:Notification"/>
+  <xs:complexType name="TextTokenSubstitutionBEList">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a strongly typed list of TextToken elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="TextToken" nillable="true" type="tns:TextToken"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TextTokenSubstitutionBEList" nillable="true" type="tns:TextTokenSubstitutionBEList"/>
+  <xs:complexType name="TextToken">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a TextToken. TextTokens is used to create more dynamic notification texts. A Token can trigger text substitution
+            between a token number and a token value. 
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="TokenNum" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the token number. 
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="TokenValue" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the token value.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TextToken" nillable="true" type="tns:TextToken"/>
+  <xs:complexType name="ReceiverEndPointBEList">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a strongly typed list of ReceiverEndPoint elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ReceiverEndPoint" nillable="true" type="tns:ReceiverEndPoint"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ReceiverEndPointBEList" nillable="true" type="tns:ReceiverEndPointBEList"/>
+  <xs:complexType name="ReceiverEndPoint">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a receiver of a notification.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="TransportType" nillable="true" type="q1:TransportType" xmlns:q1="http://schemas.altinn.no/serviceengine/formsengine/2009/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets what type of transport this receiver end point is. (Email, SMS.)
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ReceiverAddress" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the address of the receiver. Email address or mobile phone number.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ReceiverEndPoint" nillable="true" type="tns:ReceiverEndPoint"/>
+</xs:schema>

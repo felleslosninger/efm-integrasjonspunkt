@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10">
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_4.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_5.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_8.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_10.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_11.xsd" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_12.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_16.xsd" namespace="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_18.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"/>
+  <xs:element name="CreateSimpleCorrespondenceService">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" name="templateServiceCode" type="xs:string"/>
+        <xs:element minOccurs="1" name="templateServiceEditionCode" type="xs:int"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CreateSimpleCorrespondenceServiceResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CreateSimpleCorrespondenceServiceResult" nillable="true" type="q1:CorrespondenceServiceInfo" xmlns:q1="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetails">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" name="filterCriteria" type="q2:CorrespondenceStatusFilter" xmlns:q2="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetailsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetCorrespondenceStatusDetailsResult" nillable="true" type="q3:CorrespondenceStatusResult" xmlns:q3="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetailsV2">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" name="filterCriteria" type="q4:CorrespondenceStatusFilterV2" xmlns:q4="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetailsV2Response">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetCorrespondenceStatusDetailsV2Result" nillable="true" type="q5:CorrespondenceStatusResultV2" xmlns:q5="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetailsV3">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" name="filterCriteria" type="q6:CorrespondenceStatusFilterV3" xmlns:q6="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCorrespondenceStatusDetailsV3Response">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetCorrespondenceStatusDetailsV3Result" nillable="true" type="q7:CorrespondenceStatusResultV3" xmlns:q7="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CorrespondenceStatusHistoryRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CorrespondenceSendersReferences" nillable="true" type="q8:ArrayOfstring" xmlns:q8="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CorrespondenceStatusHistoryResult">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CorrespondenceStatusInformation" nillable="true" type="q9:CorrespondenceStatusInformation" xmlns:q9="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+        <xs:element minOccurs="0" name="SdpStatusInformation" nillable="true" type="q10:SdpStatusInformation" xmlns:q10="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InsertCorrespondence">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SystemUserCode" nillable="true" type="xs:string"/>
+        <xs:element minOccurs="0" name="ExternalReference" nillable="true" type="xs:string"/>
+        <xs:element minOccurs="0" name="Correspondence" nillable="true" type="q11:InsertCorrespondence" xmlns:q11="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InsertCorrespondenceResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="InsertCorrespondenceResult" nillable="true" type="q12:ReceiptExternal" xmlns:q12="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InsertCorrespondenceV2">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" name="SystemUserCode" type="xs:string"/>
+        <xs:element minOccurs="1" name="ExternalShipmentReference" type="xs:string"/>
+        <xs:element minOccurs="1" name="Correspondence" type="q13:InsertCorrespondenceV2" xmlns:q13="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InsertCorrespondenceV2Response">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="InsertCorrespondenceV2Result" nillable="true" type="q14:ReceiptExternal" xmlns:q14="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

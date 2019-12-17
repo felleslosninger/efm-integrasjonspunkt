@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10" xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_15.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Subscription/2009/10"/>
+  <xs:complexType name="BinaryAttachmentBEList">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a strongly typed list of BinaryAttachment elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="BinaryAttachment" nillable="true" type="tns:BinaryAttachment"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="BinaryAttachmentBEList" nillable="true" type="tns:BinaryAttachmentBEList"/>
+  <xs:complexType name="BinaryAttachment">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a binary attachment. Binary attachments are any attachment, text, xml, binary where the content is
+            ignored (irrelevant) for Altinn. 
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="FunctionType" type="q1:AttachmentFunctionType" xmlns:q1="http://schemas.altinn.no/services/ServiceEngine/Subscription/2009/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the purpose of the attachment.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the name of the attachment file.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a logical name on the attachment.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Encrypted" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the attachment is encrypted or not.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Data" nillable="true" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the content of the attachment.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SendersReference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a reference value given to the attachment by the creator.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="BinaryAttachment" nillable="true" type="tns:BinaryAttachment"/>
+  <xs:complexType name="XmlAttachment">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents an XML attachment.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="SendersReference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a reference from the sender of the attachment.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="FormDataXml" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the xml document content.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="XmlAttachment" nillable="true" type="tns:XmlAttachment"/>
+</xs:schema>

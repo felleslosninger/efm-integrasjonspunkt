@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<jaxws:bindings  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+<jaxb:bindings version="2.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-           wsdlLocation="wsdl/CorrespondenceAgencyExternal.wsdl"
            xmlns:jaxws="http://java.sun.com/xml/ns/jaxws">
 
-
-    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema/xsd:complexType[@name='InsertCorrespondenceV2']">
+    <jaxb:bindings schemaLocation="wsdl/CorrespondenceAgencyExternal_18.xsd" node="//xs:schema//xs:complexType[@name='InsertCorrespondenceV2']">
         <jaxb:class name="MyInsertCorrespondenceV2"></jaxb:class>
-    </jaxws:bindings>
-    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema/xsd:complexType[@name='InsertCorrespondence']">
-        <jaxb:class name="MyInsertCorrespondence"></jaxb:class>
-    </jaxws:bindings>
-    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11']/xsd:complexType[@name='Notification']">
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="wsdl/CorrespondenceAgencyExternal_5.xsd" node="//xs:schema//xs:complexType[@name='Notification']">
         <jaxb:class name="Notification2013"></jaxb:class>
-    </jaxws:bindings>
-    <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10']/xsd:complexType[@name='Notification']">
-
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="wsdl/CorrespondenceAgencyExternal_13.xsd" node="//xs:schema//xs:complexType[@name='Notification']">
         <jaxb:class name="Notification2009"></jaxb:class>
-    </jaxws:bindings>
+    </jaxb:bindings>
     <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10']/xsd:element[@name='Notification']">
         <jaxb:factoryMethod name="createNotification2009"></jaxb:factoryMethod>
     </jaxws:bindings>
     <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11']/xsd:element[@name='Notification']">
         <jaxb:factoryMethod name="createNotification2013"></jaxb:factoryMethod>
     </jaxws:bindings>
-</jaxws:bindings>
+</jaxb:bindings>
