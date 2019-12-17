@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10">
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_12.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_13.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_10.xsd" namespace="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"/>
+  <xs:import schemaLocation="CorrespondenceAgencyExternal_19.xsd" namespace="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10"/>
+  <xs:complexType name="InsertCorrespondenceV2">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a request object for the operation, InsertCorrespondence, that can create a correspondence in Altinn.
+            Instances of this class can hold the complete set of information about a correspondence. 
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ServiceCode" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the primary id for the correspondence service.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ServiceEdition" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the second id for the correspondence service. 
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Reportee" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the recipient / reportee of the correspondence. 
+            &lt;/summary>
+            &lt;remarks>
+            Social Security number or Organization number.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Content" nillable="true" type="tns:ExternalContentV2">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the correspondence content. Contains information about the Correspondence body, subject etc.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="VisibleDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets when the correspondence should become visible to the recipient.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="AllowSystemDeleteDateTime" nillable="true" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the date for when Altinn can remove the correspondence from its database.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="DueDateTime" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a date and time for when the recipient must reply.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ArchiveReference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets an archive reference. Agencies can use this field to tell the recipient that the correspondence in a reply
+            to a FormTask submission.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ReplyOptions" nillable="true" type="q1:CorrespondenceInsertLinkBEList" xmlns:q1="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets options for how the recipient can reply.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Notifications" nillable="true" type="q2:NotificationBEList" xmlns:q2="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets notification information. Notifications are used to inform the recipient that there is a new correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="AllowForwarding" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a flag that indicate whether the user is allowed to forward the correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="CaseID" nillable="true" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a case id for a correspondence if the correspondence is part of a collaboration service.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="MessageSender" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the name of the sender of a correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="IsReservable" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a value indicating whether the service could be reserved or not
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="SdpOptions" nillable="true" type="q3:SdpOptions" xmlns:q3="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a data object containing details about how Altinn should work when making a submission
+            to the digital mailbox system.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="OnBehalfOfOrgNr" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets an Organization number. Correspondence will be submitted on behalf of this Organization.
+            Must be a valid Organization number.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="InsertCorrespondenceV2" nillable="true" type="tns:InsertCorrespondenceV2"/>
+  <xs:complexType name="ExternalContentV2">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents the content of a reportee element of the type correspondence.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="LanguageCode" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the language that the correspondence is written in.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="MessageTitle" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the correspondence message title. Subject.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="MessageSummary" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a summary text of the correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="MessageBody" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the main message body in a correspondence.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Attachments" nillable="true" type="tns:AttachmentsV2">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a container object for collection of binary and xml attachments.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="CustomMessageData" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets custom xml content.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ExternalContentV2" nillable="true" type="tns:ExternalContentV2"/>
+  <xs:complexType name="AttachmentsV2">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a container object for attachments.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="BinaryAttachments" nillable="true" type="q4:BinaryAttachmentExternalBEV2List" xmlns:q4="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a strongly typed list of BinaryAttachmentV2 elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="XmlAttachmentList" nillable="true" type="tns:XmlAttachmentListV2">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a strongly typed list of XmlAttachmentV2 elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AttachmentsV2" nillable="true" type="tns:AttachmentsV2"/>
+  <xs:simpleType name="UserTypeRestriction">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Defines where an attachment should be available.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Default">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies default value.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PortalOnly">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that attachment should only be available in Altinn web portal.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EndUserSystemOnly">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that attachment should only be available from an end user system.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ShowToAll">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that attachment should be available from all locations.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="UserTypeRestriction" nillable="true" type="tns:UserTypeRestriction"/>
+  <xs:complexType name="XmlAttachmentListV2">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents a strongly typed list of XmlAttachmentV2 elements that can be accessed by index.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="XmlAttachmentV2" nillable="true" type="tns:XmlAttachmentV2"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="XmlAttachmentListV2" nillable="true" type="tns:XmlAttachmentListV2"/>
+  <xs:complexType name="XmlAttachmentV2">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Represents an XML attachment.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="SendersReference" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets a reference from the sender of the attachment.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="FormDataXml" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the xml document content.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="DataFormatId" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the data format id of a form. Both this and DataFormatVersionId is needed to identify the correct form in Altinn.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="DataFormatVersion" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the data format version id of a form. Both this and DataFormatId is needed to identify the correct form in Altinn.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="LogicalFormInFormSetID" type="xs:int">
+        <xs:annotation>
+          <xs:appinfo/>
+          <xs:documentation>&lt;summary>
+            Gets or sets the id of a form as a part of a form set.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="XmlAttachmentV2" nillable="true" type="tns:XmlAttachmentV2"/>
+</xs:schema>

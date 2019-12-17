@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" targetNamespace="http://schemas.altinn.no/services/Intermediary/Shipment/2009/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.altinn.no/services/Intermediary/Shipment/2009/10">
+  <xs:simpleType name="ReferenceType">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation>&lt;summary>
+            Specifies a list of different reference types.
+            &lt;/summary></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotSet">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that reference type is unknown.
+            &lt;/summary>
+            &lt;remarks>
+            This type should not be used. It is an error condition if a reference is of this type.
+            &lt;/remarks></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ExternalShipmentReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is a shipment reference given by an external system.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EndUserSystemReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an element (usually form task) reference given by an external system.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ParentReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an element id for a parent element.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SendersReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an element reference given by an external system. This is similar to EndUserSystemReference,
+            but can also be used by service owners when they are creating elements.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="WorkFlowReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is a workflow id.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="BatchReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is a batch reference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="OutboundShipmentReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an outbound shipment reference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ReceiversReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is a receivers reference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Altinn1Reference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an Altinn1 reference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="OwnerPartyReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is the id of the receipt owner.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PartyReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is the id of the receipt reportee.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ArchiveReference">
+        <xs:annotation>
+          <xs:documentation>&lt;summary>
+            Specifies that a reference value is an archive reference.
+            &lt;/summary></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ReferenceType" nillable="true" type="tns:ReferenceType"/>
+</xs:schema>
