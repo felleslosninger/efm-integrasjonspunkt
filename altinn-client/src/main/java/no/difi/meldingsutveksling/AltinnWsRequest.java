@@ -1,13 +1,10 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
 
 import java.io.InputStream;
-
-import static no.difi.meldingsutveksling.domain.Organisasjonsnummer.fromIso6523;
 
 public class AltinnWsRequest implements UploadRequest {
 
@@ -28,14 +25,12 @@ public class AltinnWsRequest implements UploadRequest {
 
     @Override
     public String getSender() {
-        Organisasjonsnummer orgNumberSender = fromIso6523(sbd.getStandardBusinessDocumentHeader().getSender().iterator().next().getIdentifier().getValue());
-        return orgNumberSender.toString();
+        return sbd.getSenderIdentifier();
     }
 
     @Override
     public String getReceiver() {
-        Organisasjonsnummer orgNumberReceiver = fromIso6523(sbd.getStandardBusinessDocumentHeader().getReceiver().iterator().next().getIdentifier().getValue());
-        return orgNumberReceiver.toString();
+        return sbd.getReceiverIdentifier();
     }
 
     @Override

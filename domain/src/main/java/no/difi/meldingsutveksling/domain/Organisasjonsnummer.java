@@ -15,12 +15,15 @@
  */
 package no.difi.meldingsutveksling.domain;
 
+import lombok.Data;
+
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+@Data
 public class Organisasjonsnummer {
     private static final Pattern ISO6523_PATTERN = Pattern.compile("^([0-9]{4}:)?([0-9]{9})?(?::)?([0-9]{9})?$");
     private static final String ISO6523_AUTHORITY = "iso6523-actorid-upis";
@@ -38,6 +41,17 @@ public class Organisasjonsnummer {
         this.paaVegneAvOrgnr = paaVegneAvOrgnr;
     }
 
+    public Optional<String> getPaaVegneAvOrgnr() {
+        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
+            return Optional.of(paaVegneAvOrgnr);
+        }
+        return Optional.empty();
+    }
+
+    public String getOrgNummer() {
+        return this.orgNummer;
+    }
+
     public String asIso6523() {
         String iso6523 = "0192:" + orgNummer;
         if (!isNullOrEmpty(paaVegneAvOrgnr)) {
@@ -46,20 +60,8 @@ public class Organisasjonsnummer {
         return iso6523;
     }
 
-    public Optional<String> getPaaVegneAvOrgnr() {
-        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
-            return Optional.of(paaVegneAvOrgnr);
-        }
-        return Optional.empty();
-    }
-
     public String authority() {
         return ISO6523_AUTHORITY;
-    }
-
-    @Override
-    public String toString() {
-        return orgNummer;
     }
 
     public static Organisasjonsnummer from(final String orgnr) {
@@ -86,19 +88,4 @@ public class Organisasjonsnummer {
         return ISO6523_PATTERN.matcher(iso6523Orgnr).matches();
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj instanceof Organisasjonsnummer) {
-            return orgNummer.equals(((Organisasjonsnummer) obj).orgNummer);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return orgNummer.hashCode();
-    }
 }
