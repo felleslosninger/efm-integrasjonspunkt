@@ -48,8 +48,8 @@ public class StandardBusinessDocumentHeaderTest {
     @Test
     public void testBuildKvittering() {
         StandardBusinessDocumentHeader h = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.fromIso6523("123456789"))
-                .to(Organisasjonsnummer.fromIso6523("123456789"))
+                .from(Organisasjonsnummer.from("123456789"))
+                .to(Organisasjonsnummer.from("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
                 .relatedToMessageId("some messageId")
@@ -65,8 +65,8 @@ public class StandardBusinessDocumentHeaderTest {
     @Test
     public void testBuildMelding() {
         StandardBusinessDocumentHeader h = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.fromIso6523("123456789"))
-                .to(Organisasjonsnummer.fromIso6523("123456789"))
+                .from(Organisasjonsnummer.from("123456789"))
+                .to(Organisasjonsnummer.from("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
                 .relatedToMessageId("some messageId")
@@ -82,8 +82,8 @@ public class StandardBusinessDocumentHeaderTest {
     @Test(expected = MeldingsUtvekslingRuntimeException.class)
     public void testBuildWithoutType() {
         StandardBusinessDocumentHeader h = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.fromIso6523("123456789"))
-                .to(Organisasjonsnummer.fromIso6523("123456789"))
+                .from(Organisasjonsnummer.from("123456789"))
+                .to(Organisasjonsnummer.from("123456789"))
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
                 .relatedToMessageId("some messageId")
