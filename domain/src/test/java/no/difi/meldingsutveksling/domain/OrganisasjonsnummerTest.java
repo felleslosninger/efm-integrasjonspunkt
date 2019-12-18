@@ -23,11 +23,11 @@ public class OrganisasjonsnummerTest {
     @Test
     public void fromIso6523() {
         Organisasjonsnummer organisasjonsnummer = Organisasjonsnummer.fromIso6523("0192:"+orgnr);
-        assertEquals(orgnr, organisasjonsnummer.toString());
+        assertEquals(orgnr, organisasjonsnummer.getOrgNummer());
         assertFalse(organisasjonsnummer.getPaaVegneAvOrgnr().isPresent());
 
         Organisasjonsnummer organisasjonsnummer2 = Organisasjonsnummer.fromIso6523("0192:" + orgnr + ":" + onbehalf);
-        assertEquals(orgnr, organisasjonsnummer.toString());
+        assertEquals(orgnr, organisasjonsnummer.getOrgNummer());
         assertEquals(onbehalf, organisasjonsnummer2.getPaaVegneAvOrgnr().orElse(""));
     }
 }
