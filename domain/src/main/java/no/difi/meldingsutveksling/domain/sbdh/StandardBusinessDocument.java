@@ -115,6 +115,10 @@ public class StandardBusinessDocument {
                 .map(PartnerIdentification::getStrippedValue)
                 .orElse(null);
     }
+    @JsonIgnore
+    public Optional<String> getOnBehalfOfOrgNr() {
+        return getStandardBusinessDocumentHeader().getFirstSender().map(Partner::getIdentifier).map(PartnerIdentification::getPaaVegneAvValue);
+    }
 
     @JsonIgnore
     public String getReceiverIdentifier() {
