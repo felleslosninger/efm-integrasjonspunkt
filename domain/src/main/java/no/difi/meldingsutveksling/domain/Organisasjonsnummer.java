@@ -15,21 +15,42 @@
  */
 package no.difi.meldingsutveksling.domain;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 public class Organisasjonsnummer {
-    private static final Pattern ISO6523_PATTERN = Pattern.compile("^([0-9]{4}:)?([0-9]{9})$");
+    private static final Pattern ISO6523_PATTERN = Pattern.compile("^([0-9]{4}:)?([0-9]{9})?(?::)?([0-9]{9})?$");
     private static final String ISO6523_AUTHORITY = "iso6523-actorid-upis";
 
     private final String orgNummer;
+    private final String paaVegneAvOrgnr;
 
-    public Organisasjonsnummer(final String orgNummer) {
+    private Organisasjonsnummer(final String orgNummer) {
         this.orgNummer = orgNummer;
+        this.paaVegneAvOrgnr = null;
+    }
+
+    private Organisasjonsnummer(final String orgNummer, final String paaVegneAvOrgnr) {
+        this.orgNummer = orgNummer;
+        this.paaVegneAvOrgnr = paaVegneAvOrgnr;
     }
 
     public String asIso6523() {
-        return "0192:" + orgNummer;
+        String iso6523 = "0192:" + orgNummer;
+        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
+            return iso6523 + ":" + paaVegneAvOrgnr;
+        }
+        return iso6523;
+    }
+
+    public Optional<String> getPaaVegneAvOrgnr() {
+        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
+            return Optional.of(paaVegneAvOrgnr);
+        }
+        return Optional.empty();
     }
 
     public String authority() {
@@ -45,11 +66,18 @@ public class Organisasjonsnummer {
         return new Organisasjonsnummer(orgnr);
     }
 
+    public static Organisasjonsnummer from(final String orgnr, final String paaVegneAvOrgnr) {
+        return new Organisasjonsnummer(orgnr, paaVegneAvOrgnr);
+    }
+
     public static Organisasjonsnummer fromIso6523(final String iso6523Orgnr) {
         Matcher matcher = ISO6523_PATTERN.matcher(iso6523Orgnr);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid organizational number. " +
-                    "Expected format is ISO 6523, got following organizational number: " + iso6523Orgnr);
+            throw new IllegalArgumentException("Invalid organization number. " +
+                    "Expected format is ISO 6523, got following organization number: " + iso6523Orgnr);
+        }
+        if (!isNullOrEmpty(matcher.group(3))) {
+            return new Organisasjonsnummer(matcher.group(2), matcher.group(3));
         }
         return new Organisasjonsnummer(matcher.group(2));
     }
