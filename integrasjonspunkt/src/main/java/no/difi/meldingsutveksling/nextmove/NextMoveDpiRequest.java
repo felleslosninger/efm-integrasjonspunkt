@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -99,6 +100,11 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public String getSenderOrgnumber() {
         return message.getSenderIdentifier();
+    }
+
+    @Override
+    public Optional<String> getOnBehalfOfOrgnr() {
+        return message.getSbd().getOnBehalfOfOrgNr();
     }
 
     @Override
