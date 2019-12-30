@@ -67,7 +67,7 @@ public class NextMoveMessageInService {
         messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
-        log.info(markerFrom(message), "Message with id={} locked until {}", message.getMessageId(), message.getLockTimeout());
+        Audit.info(String.format("Message with id=%s locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
 
@@ -85,7 +85,7 @@ public class NextMoveMessageInService {
                     Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
                             ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
             );
-
+            Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()), markerFrom(message));
             return new InputStreamResource(getInputStream(fileEntry, messageId));
 
         } catch (PersistenceException e) {
@@ -127,7 +127,7 @@ public class NextMoveMessageInService {
         conversationService.registerStatus(messageId,
                 messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
 
-        Audit.info(format("Message with id=%s popped from queue", messageId),
+        Audit.info(format("Message with id=%s deleted from queue", messageId),
                 markerFrom(message));
 
         if (message.getServiceIdentifier() == DPO) {

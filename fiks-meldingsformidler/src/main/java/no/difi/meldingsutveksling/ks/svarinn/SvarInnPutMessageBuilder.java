@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @RequiredArgsConstructor
 @Getter
 public class SvarInnPutMessageBuilder {
@@ -105,7 +107,9 @@ public class SvarInnPutMessageBuilder {
     private JournpostType createJournpostType() {
         final JournpostType journpostType = objectFactory.createJournpostType();
         final Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
-        journpostType.setJpDokdato(Instant.ofEpochMilli(Long.parseLong(metadata.getDokumentetsDato())).atZone(clock.getZone()).toLocalDate().toString());
+        if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
+            journpostType.setJpDokdato(Instant.ofEpochMilli(Long.parseLong(metadata.getDokumentetsDato())).atZone(clock.getZone()).toLocalDate().toString());
+        }
         journpostType.setJpNdoktype(metadata.getJournalposttype());
         journpostType.setJpStatus(metadata.getJournalstatus());
         journpostType.setJpJaar(metadata.getJournalaar());
@@ -113,7 +117,9 @@ public class SvarInnPutMessageBuilder {
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(getForsendelseTittel());
         journpostType.setJpInnhold(getForsendelseTittel());
-        journpostType.setJpJdato(Instant.ofEpochMilli(Long.parseLong(metadata.getJournaldato())).atZone(clock.getZone()).toLocalDate().toString());
+        if (!isNullOrEmpty(metadata.getJournaldato())) {
+            journpostType.setJpJdato(Instant.ofEpochMilli(Long.parseLong(metadata.getJournaldato())).atZone(clock.getZone()).toLocalDate().toString());
+        }
         journpostType.getAvsmot().add(createSaksbehandlerAvsender(metadata));
         journpostType.getAvsmot().add(createAvsender());
         return journpostType;
