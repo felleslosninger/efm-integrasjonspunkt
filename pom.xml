@@ -491,7 +491,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <junitArtifactName>junit:junit</junitArtifactName>
-                        <argLine>-Xms512m -Xmx1g -ea -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-XX:+StartAttachListener -Xms512m -Xmx1g -ea -Dfile.encoding=UTF-8</argLine>
                         <excludes>
                             <exclude>**/*IntegrationTest.java</exclude>
                         </excludes>

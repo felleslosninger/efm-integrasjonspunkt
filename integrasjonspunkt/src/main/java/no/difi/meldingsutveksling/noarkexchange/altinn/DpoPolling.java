@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -32,27 +31,23 @@ public class DpoPolling {
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
     private final MessagePersister messagePersister;
-    private final AltinnWsClientFactory altinnWsClientFactory;
+    private final AltinnWsClient altinnWsClient;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
 
     public void poll() {
         log.debug("Checking for new messages");
 
-        AltinnWsClient client = getAltinnWsClient();
-        List<FileReference> fileReferences = client.availableFiles(properties.getOrg().getNumber());
+        List<FileReference> fileReferences = altinnWsClient.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
             log.debug("New message(s) detected");
         }
 
-        fileReferences.forEach(reference -> handleFileReference(client, reference));
+        fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference));
     }
 
-    private AltinnWsClient getAltinnWsClient() {
-        return altinnWsClientFactory.getAltinnWsClient();
-    }
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void handleFileReference(AltinnWsClient client, FileReference reference) {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
