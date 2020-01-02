@@ -58,9 +58,8 @@ public class IntegrasjonspunktBeans {
     public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
                                             AltinnWsConfigurationFactory altinnWsConfigurationFactory,
                                             Plumber plumber,
-                                            PromiseMaker promiseMaker,
-                                            IntegrasjonspunktProperties properties) {
-        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker, properties).getAltinnWsClient();
+                                            PromiseMaker promiseMaker) {
+        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker).getAltinnWsClient();
     }
 
     @Bean
@@ -188,7 +187,7 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public AltinnConnectionCheck altinnConnectionCheck(
             IntegrasjonspunktProperties properties,
-            AltinnWsClient altinnWsClient ) {
+            AltinnWsClient altinnWsClient) {
         return new AltinnConnectionCheck(properties, altinnWsClient);
     }
 
