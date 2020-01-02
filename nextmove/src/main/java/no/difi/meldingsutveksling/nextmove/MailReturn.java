@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

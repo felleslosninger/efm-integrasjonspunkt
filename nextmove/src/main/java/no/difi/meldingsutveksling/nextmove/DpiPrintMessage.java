@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import io.swagger.annotations.ApiModel;
 import lombok.*;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

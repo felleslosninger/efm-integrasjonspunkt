@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.config.dpi;
+package no.difi.meldingsutveksling.config.dpi.dpi;
 
 public class PrintSettings {
     private ReturnType returnType;

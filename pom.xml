@@ -113,6 +113,7 @@
         <module>api</module>
         <module>bestedu</module>
         <module>common</module>
+        <module>common-spring</module>
         <module>security</module>
         <module>noarkexchange</module>
         <module>noarkexchange-p360</module>
@@ -152,6 +153,11 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>common-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

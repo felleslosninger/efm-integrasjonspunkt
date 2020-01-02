@@ -1,6 +1,5 @@
-package no.difi.meldingsutveksling.config.dpi.securitylevel;
+package no.difi.meldingsutveksling.config.dpi.dpi;
 
-import no.difi.meldingsutveksling.config.dpi.EnumMapping;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 
 import static no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa.NIVAA_3;

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.config.dpi;
+package no.difi.meldingsutveksling.config.dpi.dpi;
 
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 

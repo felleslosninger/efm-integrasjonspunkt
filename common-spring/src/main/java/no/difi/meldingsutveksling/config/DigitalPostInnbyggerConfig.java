@@ -5,16 +5,11 @@
  */
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.config.dpi.PrintSettings;
-import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
-import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import no.difi.sdp.client2.domain.Prioritet;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import static no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel.INVALID;
 
 /**
  *
@@ -51,27 +46,12 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private Prioritet priority;
 
-    @Valid
-    @ValidSecurityLevel(message = "Gyldig verdi er 3 eller 4", invalidValues = INVALID)
-    private SecurityLevel securityLevel;
-
-    @NotNull
-    private PrintSettings printSettings;
-
     public KeyStoreProperties getTrustStore() {
         return trustStore;
     }
 
     public void setTrustStore(KeyStoreProperties trustStore) {
         this.trustStore = trustStore;
-    }
-
-    public PrintSettings getPrintSettings() {
-        return printSettings;
-    }
-
-    public void setPrintSettings(PrintSettings printSettings) {
-        this.printSettings = printSettings;
     }
 
     public String getMpcId() {
@@ -112,14 +92,6 @@ public class DigitalPostInnbyggerConfig {
 
     public void setPriority(Prioritet priority) {
         this.priority = priority;
-    }
-
-    public SecurityLevel getSecurityLevel() {
-        return securityLevel;
-    }
-
-    public void setSecurityLevel(SecurityLevel securityLevel) {
-        this.securityLevel = securityLevel;
     }
 
     public void setFeature(FeatureToggle feature) {

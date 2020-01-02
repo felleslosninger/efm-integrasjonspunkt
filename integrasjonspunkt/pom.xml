@@ -297,6 +297,10 @@
             <version>2.2.0.RELEASE</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>noarkexchange-ephorte</artifactId>
         </dependency>
@@ -315,6 +319,14 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>common-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -371,10 +383,6 @@
                     <groupId>org.ow2.asm</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>common</artifactId>
         </dependency>
 
         <dependency>

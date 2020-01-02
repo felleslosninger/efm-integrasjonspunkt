@@ -10,30 +10,14 @@
     <artifactId>common</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>no.difi.sdp</groupId>
-            <artifactId>sikker-digital-post-klient-java</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>wss4j-ws-security-dom</artifactId>
-                    <groupId>org.apache.wss4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-asic</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <dependency>
@@ -64,11 +48,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.retry</groupId>
-            <artifactId>spring-retry</artifactId>
         </dependency>
 
         <dependency>

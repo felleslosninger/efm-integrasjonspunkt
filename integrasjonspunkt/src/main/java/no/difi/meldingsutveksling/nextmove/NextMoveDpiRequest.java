@@ -213,7 +213,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Utskriftsfarge getPrintColor() {
         if (isPrintMessage()) {
-            return getPrintMessage().getUtskriftsfarge();
+            return Utskriftsfarge.valueOf(getPrintMessage().getUtskriftsfarge().name());
         }
         return Utskriftsfarge.SORT_HVIT;
     }
@@ -221,7 +221,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Posttype getPosttype() {
         if (isPrintMessage()) {
-            return getPrintMessage().getPosttype();
+            return Posttype.valueOf(getPrintMessage().getPosttype().name());
         }
         return Posttype.B_OEKONOMI;
     }
@@ -229,7 +229,7 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     @Override
     public Returhaandtering getReturnHandling() {
         if (isPrintMessage()) {
-            return getPrintMessage().getRetur().getReturhaandtering();
+            return Returhaandtering.valueOf(getPrintMessage().getRetur().getReturhaandtering().name());
         }
         return Returhaandtering.DIREKTE_RETUR;
     }

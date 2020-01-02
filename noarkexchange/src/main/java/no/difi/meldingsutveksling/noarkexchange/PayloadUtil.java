@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import org.springframework.util.StringUtils;
 import org.springframework.xml.transform.StringSource;
@@ -65,7 +64,7 @@ public class PayloadUtil {
         } else if (payload instanceof Node) {
             return ((Node) payload).getFirstChild().getTextContent();
         } else {
-            throw new MeldingsUtvekslingRuntimeException("Could not get payload as String");
+            throw new NoarkPayloadRuntimeException("Could not get payload as String");
         }
     }
 
@@ -75,7 +74,7 @@ public class PayloadUtil {
         } else if (payload instanceof Node) {
             return !((Node) payload).hasChildNodes();
         } else {
-            throw new MeldingsUtvekslingRuntimeException(PAYLOAD_UNKNOWN_TYPE);
+            throw new NoarkPayloadRuntimeException(PAYLOAD_UNKNOWN_TYPE);
         }
     }
 
