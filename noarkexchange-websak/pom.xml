@@ -44,11 +44,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>test-tools</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

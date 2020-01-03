@@ -352,10 +352,6 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>test-tools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>post-til-private</artifactId>
         </dependency>
         <dependency>

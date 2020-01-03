@@ -47,11 +47,6 @@
             <artifactId>junit</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>test-tools</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>2.4.12</version>

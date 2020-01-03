@@ -127,7 +127,6 @@
         <module>domain</module>
         <module>kvittering</module>
         <module>altinn-client</module>
-        <module>test-tools</module>
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
@@ -249,12 +248,6 @@
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>noarkexchange-websak</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>test-tools</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>

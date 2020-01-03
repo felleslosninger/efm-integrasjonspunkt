@@ -44,11 +44,6 @@
             <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>test-tools</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
             <exclusions>
