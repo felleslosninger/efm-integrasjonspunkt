@@ -117,6 +117,7 @@
         <module>common-spring</module>
         <module>security</module>
         <module>noarkexchange</module>
+        <module>noarkexchange-template</module>
         <module>noarkexchange-p360</module>
         <module>noarkexchange-ephorte</module>
         <module>noarkexchange-websak</module>
@@ -198,6 +199,11 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>noarkexchange</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>noarkexchange-template</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

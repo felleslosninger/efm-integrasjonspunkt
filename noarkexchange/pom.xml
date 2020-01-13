@@ -10,6 +10,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
@@ -40,13 +44,7 @@
         </dependency>
         <dependency>
             <groupId>no.difi.move-common</groupId>
-            <artifactId>webservice-tools</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.mail</artifactId>
-                    <groupId>com.sun.mail</groupId>
-                </exclusion>
-            </exclusions>
+            <artifactId>audit</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>

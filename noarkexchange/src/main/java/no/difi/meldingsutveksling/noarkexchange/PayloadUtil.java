@@ -1,10 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import org.springframework.util.StringUtils;
-import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -23,6 +22,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
@@ -80,7 +80,7 @@ public class PayloadUtil {
 
     public static boolean isEmpty(Object payload) {
         if (payload instanceof String) {
-            return StringUtils.isEmpty(payload);
+            return Strings.isNullOrEmpty((String)payload);
         } else if (payload instanceof Node) {
             return !((Node) payload).hasChildNodes();
         } else {
@@ -90,10 +90,10 @@ public class PayloadUtil {
 
     static AppReceiptType getAppReceiptType(Object payload) throws JAXBException {
         final String payloadAsString = payloadAsString(payload);
-
-        StringSource source = new StringSource(payloadAsString);
+        ByteArrayInputStream bis = new ByteArrayInputStream(payloadAsString.getBytes(StandardCharsets.UTF_8));
+        JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
+        JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(new StreamSource(bis), AppReceiptType.class);
         return r.getValue();
     }
 
