@@ -179,8 +179,11 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setServiceEdition(objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceRecord.getService().getServiceEditionCode()));
         // Should the user be allowed to forward the message from portal
         correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
-        // Name of the message sender, always "Avsender"
-        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
+        if (message.getSbd().getOnBehalfOfOrgNr().isPresent()) {
+            correspondence.setOnBehalfOfOrgNr(objectFactory.createMyInsertCorrespondenceV2OnBehalfOfOrgNr(message.getSbd().getOnBehalfOfOrgNr().get()));
+        } else {
+            correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
+        }
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
         correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
