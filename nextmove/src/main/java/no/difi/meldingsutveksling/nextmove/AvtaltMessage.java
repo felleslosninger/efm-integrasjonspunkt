@@ -15,4 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "avtalt", namespace = "urn:no:difi:meldingsutveksling:2.0")
 @ApiModel(value = "avtalt", parent = BusinessMessage.class)
 public class AvtaltMessage extends BusinessMessage<AvtaltMessage> {
+    String identifier;
+    Object content;
 }
