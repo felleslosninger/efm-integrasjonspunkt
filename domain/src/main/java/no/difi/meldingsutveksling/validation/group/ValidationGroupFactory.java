@@ -13,6 +13,8 @@ public class ValidationGroupFactory {
                 return ValidationGroups.DocumentType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
                 return ValidationGroups.DocumentType.ArkivmeldingKvittering.class;
+            case AVTALT:
+                return ValidationGroups.DocumentType.Avtalt.class;
             case PRINT:
                 return ValidationGroups.DocumentType.Print.class;
             case DIGITAL:
