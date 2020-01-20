@@ -113,10 +113,9 @@
                             <bindingFiles>
                                 <bindingFile>./jaxb-bindings-post-til-virksomheter.xsd</bindingFile>
                             </bindingFiles>
-<!--                            <wsdlFiles>-->
-<!--                                <wsdlFile>${basedir}/wsdl/CorrespondenceAgencyExternal.wsdl</wsdlFile>-->
-<!--                            </wsdlFiles>-->
-                            <wsdlDirectory>${basedir}/wsdl</wsdlDirectory>
+                            <wsdlFiles>
+                                <wsdlFile>${basedir}/wsdl/CorrespondenceAgencyExternal.wsdl</wsdlFile>
+                            </wsdlFiles>
                             <vmArgs>
                                 <vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
                                 <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
