@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
+import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
@@ -52,6 +54,15 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 public class IntegrasjonspunktBeans {
 
     @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+    public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
+                                            AltinnWsConfigurationFactory altinnWsConfigurationFactory,
+                                            Plumber plumber,
+                                            PromiseMaker promiseMaker) {
+        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker).getAltinnWsClient();
+    }
+
+    @Bean
     public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
         return LookupClientBuilder.forTest()
                 .locator(new StaticLocator(properties.getElma().getUrl()))
@@ -60,8 +71,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
-        return new ServiceRegistryTransportFactory(altinnWsClientFactory, uuidGenerator);
+    public TransportFactory serviceRegistryTransportFactory(AltinnWsClient altinnWsClient, UUIDGenerator uuidGenerator) {
+        return new ServiceRegistryTransportFactory(altinnWsClient, uuidGenerator);
     }
 
     @Bean
@@ -176,8 +187,8 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public AltinnConnectionCheck altinnConnectionCheck(
             IntegrasjonspunktProperties properties,
-            AltinnWsClientFactory altinnWsClientFactory ) {
-        return new AltinnConnectionCheck(properties, altinnWsClientFactory);
+            AltinnWsClient altinnWsClient) {
+        return new AltinnConnectionCheck(properties, altinnWsClient);
     }
 
     @Bean

@@ -27,8 +27,6 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-//import org.jvnet.staxex.util.XMLStreamReaderToXMLStreamWriter$Breakpoint;
-
 @RequiredArgsConstructor
 public class AltinnInSteps {
 
@@ -144,19 +142,19 @@ public class AltinnInSteps {
         String boundary = UUID.randomUUID().toString();
 
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
-                .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
-                .willReturn(aResponse()
-                        .withStatus(200)
+                        .withHeader(SOAP_ACTION, containing("DownloadFileStreamedBasic"))
+                        .willReturn(aResponse()
+                                        .withStatus(200)
 //                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CACHE_CONTROL, "private")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, String.format("multipart/related; type=\"application/xop+xml\";start=\"<http://tempuri.org/0>\";boundary=\"%s\";start-info=\"text/xml\"", boundary))
-                        .withHeader("MIME-Version", "1.0")
-                        .withHeader(HttpHeaders.SERVER, "Microsoft-IIS/8.5")
-                        .withHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
-                        .withHeader("X-AspNet-Version", "4.0.30319")
-                        .withHeader("X-Powered-By", "ASP.NET")
-                        .withBody(getDownloadBody(boundary))
-                )
+                                        .withHeader(HttpHeaders.CACHE_CONTROL, "private")
+                                        .withHeader(HttpHeaders.CONTENT_TYPE, String.format("multipart/related; type=\"application/xop+xml\";start=\"<http://tempuri.org/0>\";boundary=\"%s\";start-info=\"text/xml\"", boundary))
+                                        .withHeader("MIME-Version", "1.0")
+                                        .withHeader(HttpHeaders.SERVER, "Microsoft-IIS/8.5")
+                                        .withHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
+                                        .withHeader("X-AspNet-Version", "4.0.30319")
+                                        .withHeader("X-Powered-By", "ASP.NET")
+                                        .withBody(getDownloadBody(boundary))
+                        )
         );
     }
 

@@ -12,12 +12,11 @@ import no.difi.meldingsutveksling.transport.altinn.AltinnTransport;
 @RequiredArgsConstructor
 public class ServiceRegistryTransportFactory implements TransportFactory {
 
-    private final AltinnWsClientFactory altinnWsClientFactory;
+    private final AltinnWsClient altinnWsClient;
     private final UUIDGenerator uuidGenerator;
 
     @Override
     public Transport createTransport(StandardBusinessDocument message) {
-        AltinnWsClient altinnWsClient = altinnWsClientFactory.getAltinnWsClient();
         return new AltinnTransport(altinnWsClient, uuidGenerator);
     }
 }

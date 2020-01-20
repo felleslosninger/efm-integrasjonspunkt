@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling;
 
+import com.sun.xml.ws.developer.JAXWSProperties;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
@@ -24,6 +27,9 @@ import org.springframework.context.ApplicationContext;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.soap.MTOMFeature;
+import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +43,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AltinnWsClient {
 
-    private static final String FAILED_TO_PREPARE_ZIP_FOR_UPLOAD_TO_ALTINN_BROKER_SERVICE = "Failed to prepare ZIP for upload to Altinn broker service";
     private static final String FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE = "Failed to upload a message to Altinn broker service";
     private static final String FAILED_TO_INITATE_ALTINN_BROKER_SERVICE = "Failed to initate Altinn broker service";
     private static final String FILE_NAME = "sbd.zip";
@@ -46,12 +51,12 @@ public class AltinnWsClient {
     private static final String CANNOT_DOWNLOAD_FILE = "Cannot download file";
     private static final String CANNOT_CONFIRM_DOWNLOAD = "Cannot confirm download";
 
-    private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic;
-    private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed;
     private final AltinnWsConfiguration configuration;
     private final ApplicationContext context;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
+    @Getter(lazy = true, value = AccessLevel.PRIVATE) private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic = brokerServiceExternalBasicSF();
+    @Getter(lazy = true, value = AccessLevel.PRIVATE) private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed = brokerServiceExternalBasicStreamedSF();
 
     public void send(UploadRequest request) {
         String senderReference = initiateBrokerService(request);
@@ -100,7 +105,7 @@ public class AltinnWsClient {
     private void uploadToAltinn(UploadRequest request, String senderReference, StreamedPayloadBasicBE parameters) {
         log.debug("Starting thread: upload to altinn");
         try {
-            ReceiptExternalStreamedBE receiptAltinn = iBrokerServiceExternalBasicStreamed.uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
+            ReceiptExternalStreamedBE receiptAltinn = getIBrokerServiceExternalBasicStreamed().uploadFileStreamedBasic(parameters, FILE_NAME, senderReference, request.getSender(), configuration.getPassword(), configuration.getUsername());
             log.debug(markerFrom(receiptAltinn).and(request.getMarkers()), "Message uploaded to altinn");
         } catch (IBrokerServiceExternalBasicStreamedUploadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             auditError(request, e);
@@ -134,7 +139,7 @@ public class AltinnWsClient {
 
     private Optional<BrokerServiceAvailableFileList> getBrokerServiceAvailableFileList(String orgnr) {
         try {
-            return Optional.of(iBrokerServiceExternalBasic.getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch(orgnr)));
+            return Optional.of(getIBrokerServiceExternalBasic().getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch(orgnr)));
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             log.error(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReasonFactory.from(e));
             return Optional.empty();
@@ -154,7 +159,7 @@ public class AltinnWsClient {
 
     public StandardBusinessDocument download(DownloadRequest request, MessagePersister messagePersister) {
         try {
-            DataHandler dh = iBrokerServiceExternalBasicStreamed.downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
+            DataHandler dh = getIBrokerServiceExternalBasicStreamed().downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
             // TODO: rewrite this when Altinn fixes zip
             TmpFile tmpFile = TmpFile.create();
             File file = tmpFile.getFile();
@@ -172,7 +177,7 @@ public class AltinnWsClient {
 
     public void confirmDownload(DownloadRequest request) {
         try {
-            iBrokerServiceExternalBasic.confirmDownloadedBasic(configuration.getUsername(), configuration.getPassword(), request.fileReference, request.getReciever());
+            getIBrokerServiceExternalBasic().confirmDownloadedBasic(configuration.getUsername(), configuration.getPassword(), request.fileReference, request.getReciever());
         } catch (IBrokerServiceExternalBasicConfirmDownloadedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(CANNOT_CONFIRM_DOWNLOAD, AltinnReasonFactory.from(e), e);
         }
@@ -181,7 +186,7 @@ public class AltinnWsClient {
     private String initiateBrokerService(UploadRequest request) {
         BrokerServiceInitiation brokerServiceInitiation = createInitiationRequest(request);
         try {
-            return iBrokerServiceExternalBasic.initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
+            return getIBrokerServiceExternalBasic().initiateBrokerServiceBasic(configuration.getUsername(), configuration.getPassword(), brokerServiceInitiation);
         } catch (IBrokerServiceExternalBasicInitiateBrokerServiceBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(FAILED_TO_INITATE_ALTINN_BROKER_SERVICE, AltinnReasonFactory.from(e), e);
         }
@@ -202,5 +207,31 @@ public class AltinnWsClient {
                 .withExternalServiceEditionCode(configuration.getExternalServiceEditionCode())
                 .withFilename(FILE_NAME)
                 .build();
+    }
+
+    private IBrokerServiceExternalBasic brokerServiceExternalBasicSF() {
+        BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+        IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
+        BindingProvider bp = (BindingProvider) service;
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, configuration.getRequestTimeout());
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, configuration.getConnectTimeout());
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getBrokerServiceUrl().toString());
+        return service;
+    }
+
+    private IBrokerServiceExternalBasicStreamed brokerServiceExternalBasicStreamedSF() {
+        BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
+
+        BindingProvider bp = (BindingProvider) streamingService;
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, configuration.getStreamingServiceUrl().toString());
+        bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, configuration.getRequestTimeout());
+        bp.getRequestContext().put(JAXWSProperties.CONNECT_TIMEOUT, configuration.getConnectTimeout());
+        bp.getRequestContext().put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, 8192);
+        SOAPBinding binding = (SOAPBinding) bp.getBinding();
+        binding.setMTOMEnabled(true);
+        return streamingService;
     }
 }
