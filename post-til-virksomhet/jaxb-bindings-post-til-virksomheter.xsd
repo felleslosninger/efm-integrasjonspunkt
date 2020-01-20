@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <jaxws:bindings  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-           xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-           xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-           wsdlLocation="wsdl/CorrespondenceAgencyExternal.wsdl"
-           xmlns:jaxws="http://java.sun.com/xml/ns/jaxws">
+                 xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+                 xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                 wsdlLocation="wsdl/CorrespondenceAgencyExternal.wsdl"
+                 xmlns:jaxws="http://java.sun.com/xml/ns/jaxws">
 
 
     <jaxws:bindings node="wsdl:definitions/wsdl:types/xsd:schema/xsd:complexType[@name='InsertCorrespondenceV2']">

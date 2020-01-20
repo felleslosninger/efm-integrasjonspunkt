@@ -15,7 +15,7 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
 
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
         Avsender avsender = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
 
 

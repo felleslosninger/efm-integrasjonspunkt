@@ -38,7 +38,7 @@ public class SBDFactory {
                         .setHeaderVersion(HEADER_VERSION)
                         .addSender(createSender(avsender))
                         .addReceiver(createReceiver(mottaker))
-                        .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(SRParameter.builder(mottaker.toString())
+                        .setDocumentIdentification(createDocumentIdentification(documentType, getDocumentIdentifier(SRParameter.builder(mottaker.getOrgNummer())
                                 .process(process).conversationId(conversationId).build(), documentType), documentId))
                         .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);

@@ -24,10 +24,11 @@ public class CorrespondenceAgencyClientSteps {
 
     @Then("^the CorrespondenceAgencyClient is called with the following payload:$")
     public void theCorrespondenceAgencyClientIsCalledWithTheFollowingPayload(String expectedPayload) {
-        List<String> payloads = webServicePayloadHolder.get();String actualPayload = payloads.get(0);
+        List<String> payloads = webServicePayloadHolder.get();
+        String actualPayload = payloads.get(0);
+        InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
         assertThat(hideData(actualPayload)).isXmlEqualTo(expectedPayload);
 
-        InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
 
         List<Attachment> attachments = in.getCorrespondence()
                 .getContent().getValue()
@@ -45,7 +46,10 @@ public class CorrespondenceAgencyClientSteps {
     }
 
     private String hideData(String s) {
-        return s.replaceAll("<altinn11:Data>[^<]*</altinn11:Data>", "<altinn11:Data></altinn11:Data>");
+        return s.replaceAll("xmlns:.+?>", ">")
+                .replaceAll("<(?![/?]).+?:", "<")
+                .replaceAll("</.+?:", "</")
+                .replaceAll("<Data>[^<]*</Data>", "<Data></Data>");
     }
 
     @SneakyThrows

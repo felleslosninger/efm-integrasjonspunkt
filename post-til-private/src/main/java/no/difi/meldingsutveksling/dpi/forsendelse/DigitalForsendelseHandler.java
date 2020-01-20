@@ -28,7 +28,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
 
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(request.getVirkningsdato())
                 .aapningskvittering(request.isAapningskvittering())

@@ -19,6 +19,7 @@ import org.hibernate.annotations.Parent;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
+import java.util.Optional;
 
 
 /**
@@ -77,8 +78,15 @@ public class PartnerIdentification implements Serializable {
             return null;
         }
 
-        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).toString() : value;
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).getOrgNummer() : value;
     }
 
+    @JsonIgnore
+    String getPaaVegneAvValue() {
+        if (value == null) {
+            return null;
+        }
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value).getPaaVegneAvOrgnr().orElse(null) : null;
+    }
 
 }
