@@ -23,6 +23,8 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
             gen.writeFieldName(DocumentType.ARKIVMELDING.getType());
         } else if (value.getAny() instanceof InnsynskravMessage) {
             gen.writeFieldName(DocumentType.INNSYNSKRAV.getType());
+        } else if (value.getAny() instanceof AvtaltMessage) {
+            gen.writeFieldName(DocumentType.AVTALT.getType());
         } else if (value.getAny() instanceof PubliseringMessage) {
             gen.writeFieldName(DocumentType.PUBLISERING.getType());
         } else if (value.getAny() instanceof DpiDigitalMessage) {

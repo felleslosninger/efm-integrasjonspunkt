@@ -20,6 +20,8 @@ public enum DocumentType {
     ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
     ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE, ARKIVMELDING_KVITTERING),
 
+    AVTALT("avtalt", ApiType.NEXTMOVE),
+
     DIGITAL("digital", ApiType.NEXTMOVE),
     DIGITAL_DPV("digital_dpv", ApiType.NEXTMOVE),
     PRINT("print", ApiType.NEXTMOVE),
