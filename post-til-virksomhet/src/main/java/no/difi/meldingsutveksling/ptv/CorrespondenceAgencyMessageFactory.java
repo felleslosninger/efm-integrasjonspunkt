@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.ptv;
 
 import com.google.common.collect.Lists;
+import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
@@ -11,6 +12,7 @@ import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ObjectF
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.CorrespondenceStatusFilterV2;
 import no.altinn.schemas.services.serviceengine.notification._2009._10.*;
 import no.altinn.schemas.services.serviceengine.subscription._2009._10.AttachmentFunctionType;
+import no.altinn.services.serviceengine.correspondence._2009._10.CorrespondenceStatusHistoryRequest;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
@@ -293,6 +295,22 @@ public class CorrespondenceAgencyMessageFactory {
 
     private OffsetDateTime getAllowSystemDeleteDateTime() {
         return OffsetDateTime.now(clock).plusMinutes(5);
+    }
+
+    public CorrespondenceStatusHistoryRequest createReceiptRequest(Set<Conversation> conversations) {
+        no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
+                .serviceengine.correspondence._2009._10.ObjectFactory();
+        CorrespondenceStatusHistoryRequest historyRequest = of.createCorrespondenceStatusHistoryRequest();
+
+        com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory arrayOf = new com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory();
+        ArrayOfstring arrayOfstring = arrayOf.createArrayOfstring();
+
+        conversations.stream()
+                .map(Conversation::getMessageId)
+                .forEach(id -> arrayOfstring.getString().add(id));
+
+        historyRequest.setCorrespondenceSendersReferences(arrayOf.createArrayOfstring(arrayOfstring));
+        return historyRequest;
     }
 
     public GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
