@@ -89,18 +89,6 @@ public class IntegrasjonspunktBeans {
         }
     }
 
-    @Bean
-    public StatusStrategyFactory statusStrategyFactory(List<StatusStrategy> statusStrategies) {
-        StatusStrategyFactory statusStrategyFactory = new StatusStrategyFactory();
-        statusStrategies.forEach(statusStrategyFactory::registerStrategy);
-        return statusStrategyFactory;
-    }
-
-    @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, MeldingsformidlerClient meldingsformidlerClient) {
-        return new DpiReceiptService(integrasjonspunktProperties, meldingsformidlerClient);
-    }
-
     @Bean(name = "fiksMailClient")
     public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
         return new MailClient(properties, properties.getFiks().getInn().getMailSubject());

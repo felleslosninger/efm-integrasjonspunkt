@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusChangeV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2;
 import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2;
@@ -13,12 +14,14 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DpvStatusStrategy implements StatusStrategy {
 
     private static final ServiceIdentifier serviceIdentifier = ServiceIdentifier.DPV;
@@ -31,23 +34,26 @@ public class DpvStatusStrategy implements StatusStrategy {
     private final MessageStatusFactory messageStatusFactory;
 
     @Override
-    public void checkStatus(final Conversation conversation) {
-        GetCorrespondenceStatusDetailsV2 receiptRequest = correspondenceAgencyMessageFactory.createReceiptRequest(conversation);
+    public void checkStatus(final Set<Conversation> conversations) {
+        conversations.forEach(c -> {
+            log.debug(markerFrom(c), "Checking status for message [id={}, conversationId={}]", c.getMessageId(), c.getConversationId());
+            GetCorrespondenceStatusDetailsV2 receiptRequest = correspondenceAgencyMessageFactory.createReceiptRequest(c);
 
-        Object response = withLogstashMarker(markerFrom(conversation))
-                .execute(() -> client.sendStatusRequest(receiptRequest));
+            Object response = withLogstashMarker(markerFrom(c))
+                    .execute(() -> client.sendStatusRequest(receiptRequest));
 
-        if (response == null) {
-            // Error is picked up by soap fault interceptor
-            return;
-        }
+            if (response == null) {
+                // Error is picked up by soap fault interceptor
+                return;
+            }
 
-        GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) response;
+            GetCorrespondenceStatusDetailsV2Response result = (GetCorrespondenceStatusDetailsV2Response) response;
 
-        // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
-        result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2()
-                .stream().findFirst()
-                .ifPresent(op -> checkStatus(conversation, op));
+            // TODO: need to find a way to search for CorrespondenceIDs (in response( as ConversationID is not unqiue
+            result.getGetCorrespondenceStatusDetailsV2Result().getValue().getStatusList().getValue().getStatusV2()
+                    .stream().findFirst()
+                    .ifPresent(op -> checkStatus(c, op));
+        });
     }
 
     private void checkStatus(Conversation conversation, StatusV2 op) {
