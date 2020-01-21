@@ -135,10 +135,9 @@ public class CmsUtilTest {
         BigInteger serial = new BigInteger("100");
         Date notBefore = df.parse("2010-01-01");
         Date notAfter = df.parse("2050-01-01");
-        X500Name subject = issuer;
-        SubjectPublicKeyInfo publicKeyInfo = new SubjectPublicKeyInfo(ASN1Sequence.getInstance(subjectPublicKey.getEncoded()));
+        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(subjectPublicKey.getEncoded()));
 
-        X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKeyInfo);
+        X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(issuer, serial, notBefore, notAfter, issuer, publicKeyInfo);
 
         ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(issuerPrivateKey);
 
@@ -146,7 +145,7 @@ public class CmsUtilTest {
 
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
 
-        return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
+        return factory.generateCertificate(new ByteArrayInputStream(holder.getEncoded()));
     }
 
 
