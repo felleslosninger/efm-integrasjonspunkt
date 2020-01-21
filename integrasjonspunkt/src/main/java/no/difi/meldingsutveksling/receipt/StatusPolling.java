@@ -55,20 +55,10 @@ public class StatusPolling {
             Optional<ExternalReceipt> externalReceipt = dpiReceiptService.checkForReceipts();
 
             while (externalReceipt.isPresent()) {
-                externalReceipt.ifPresent(this::handleReceipt);
+                externalReceipt.ifPresent(dpiReceiptService::handleReceipt);
                 externalReceipt = dpiReceiptService.checkForReceipts();
             }
         }
     }
 
-    private void handleReceipt(ExternalReceipt externalReceipt) {
-        final String id = externalReceipt.getId();
-        MessageStatus status = externalReceipt.toMessageStatus();
-
-        conversationService.registerStatus(id, status);
-
-        log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
-        externalReceipt.confirmReceipt();
-        log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
-    }
 }
