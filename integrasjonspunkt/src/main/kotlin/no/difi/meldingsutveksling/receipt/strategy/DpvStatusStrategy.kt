@@ -26,11 +26,13 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
 
     override fun checkStatus(conversations: Set<Conversation>) {
         log.debug("Checking status for ${conversations.size} DPV messages..")
-        val request = correspondencyAgencyMessageFactory.createReceiptRequest(conversations)
-        val result = correspondenceAgencyClient.sendStatusHistoryRequest(request)
-        result?.correspondenceStatusInformation?.value?.correspondenceStatusDetailsList?.value?.statusV2?.forEach { s ->
-            conversations.find { it.messageId == s.sendersReference.value }?.let {
-                updateStatus(it, s)
+        conversations.chunked(10_000).forEach { chunk ->
+            val request = correspondencyAgencyMessageFactory.createReceiptRequest(chunk.toSet())
+            val result = correspondenceAgencyClient.sendStatusHistoryRequest(request)
+            result?.correspondenceStatusInformation?.value?.correspondenceStatusDetailsList?.value?.statusV2?.forEach { s ->
+                chunk.find { it.messageId == s.sendersReference.value }?.let {
+                    updateStatus(it, s)
+                }
             }
         }
     }

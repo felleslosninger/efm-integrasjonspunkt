@@ -115,8 +115,10 @@ public class ConversationService {
 
     @Transactional
     public Conversation registerConversation(MessageInformable message) {
-        return findConversation(message.getMessageId())
-                .orElseGet(() -> createConversation(message));
+        return findConversation(message.getMessageId()).filter(p -> {
+            log.debug(String.format(CONVERSATION_EXISTS, message.getMessageId()));
+            return true;
+        }).orElseGet(() -> createConversation(message));
     }
 
     @Transactional
@@ -166,12 +168,7 @@ public class ConversationService {
     }
 
     public Optional<Conversation> findConversation(String messageId) {
-        return repo.findByMessageId(messageId).stream()
-                .findFirst()
-                .filter(p -> {
-                    log.debug(String.format(CONVERSATION_EXISTS, messageId));
-                    return true;
-                });
+        return repo.findByMessageId(messageId).stream().findFirst();
     }
 
     private Conversation createConversation(MessageInformable message) {
