@@ -9,6 +9,8 @@ import no.difi.meldingsutveksling.receipt.StatusStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -23,8 +25,10 @@ public class FiksStatusStrategy implements StatusStrategy {
     }
 
     @Override
-    public void checkStatus(Conversation conversation) {
-        conversationService.registerStatus(conversation, svarUtService.getMessageReceipt(conversation));
+    public void checkStatus(Set<Conversation> conversations) {
+        conversations.forEach(c -> {
+            conversationService.registerStatus(c, svarUtService.getMessageReceipt(c));
+        });
     }
 
     @Override

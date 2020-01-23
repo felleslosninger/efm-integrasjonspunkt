@@ -2,14 +2,19 @@ package no.difi.meldingsutveksling.receipt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.*;
 import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
 
 /**
@@ -22,7 +27,6 @@ public class StatusPolling {
 
     private final IntegrasjonspunktProperties props;
     private final ConversationRepository conversationRepository;
-    private final ConversationService conversationService;
     private final StatusStrategyFactory statusStrategyFactory;
     private final DpiReceiptService dpiReceiptService;
     private final ServiceIdentifierService serviceIdentifierService;
@@ -36,16 +40,16 @@ public class StatusPolling {
         conversationRepository.findByPollable(true)
                 .stream()
                 .filter(c -> serviceIdentifierService.isEnabled(c.getServiceIdentifier()))
-                .forEach(this::checkReceiptStatus);
+                .collect(groupingBy(Conversation::getServiceIdentifier, toSet()))
+                .forEach(this::checkReceiptForType);
     }
 
-    private void checkReceiptStatus(Conversation c) {
-        log.debug(markerFrom(c), "Checking status for message [id={}, conversationId={}]", c.getMessageId(), c.getConversationId());
+    private void checkReceiptForType(ServiceIdentifier si, Set<Conversation> conversations) {
         try {
-            StatusStrategy strategy = statusStrategyFactory.getFactory(c);
-            strategy.checkStatus(c);
+            StatusStrategy strategy = statusStrategyFactory.getStrategy(si);
+            strategy.checkStatus(conversations);
         } catch (Exception e) {
-            log.error(format("Exception during receipt polling, messageId=%s", c.getMessageId()), e);
+            log.error(format("Exception during receipt polling for %s", si), e);
         }
     }
 
@@ -55,20 +59,10 @@ public class StatusPolling {
             Optional<ExternalReceipt> externalReceipt = dpiReceiptService.checkForReceipts();
 
             while (externalReceipt.isPresent()) {
-                externalReceipt.ifPresent(this::handleReceipt);
+                externalReceipt.ifPresent(dpiReceiptService::handleReceipt);
                 externalReceipt = dpiReceiptService.checkForReceipts();
             }
         }
     }
 
-    private void handleReceipt(ExternalReceipt externalReceipt) {
-        final String id = externalReceipt.getId();
-        MessageStatus status = externalReceipt.toMessageStatus();
-
-        conversationService.registerStatus(id, status);
-
-        log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
-        externalReceipt.confirmReceipt();
-        log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
-    }
 }
