@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
-import java.util.List;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -36,6 +35,7 @@ public class SvarUtService {
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
     private final PromiseMaker promiseMaker;
+    private final ForsendelseIdRepository forsendelseIdRepository;
 
     @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
@@ -53,6 +53,7 @@ public class SvarUtService {
         return promiseMaker.promise(reject -> {
             try {
                 SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
+                forsendelseIdRepository.save(new ForsendelseIdEntry(message.getMessageId(), forsendelse.getForsendelsesid()));
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
                 return client.sendMessage(svarUtRequest);
             } catch (NextMoveException e) {
@@ -71,7 +72,9 @@ public class SvarUtService {
     }
 
     public MessageStatus getMessageReceipt(final Conversation conversation) {
-        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getMessageId());
+        String forsendelseId = forsendelseIdRepository.findByMessageId(conversation.getMessageId())
+                .map(ForsendelseIdEntry::getForsendelseId)
+                .orElse(client.getForsendelseId(getFiksUtUrl(), conversation.getMessageId()));
         return getMessageReceipt(forsendelseId);
     }
 
@@ -84,8 +87,8 @@ public class SvarUtService {
         }
     }
 
-    public List<String> retreiveForsendelseTyper() {
-        return client.retreiveForsendelseTyper(getFiksUtUrl());
+    public void retreiveForsendelseTyper() {
+        client.retreiveForsendelseTyper(getFiksUtUrl());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {
