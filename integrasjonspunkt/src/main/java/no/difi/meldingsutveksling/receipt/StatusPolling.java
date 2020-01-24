@@ -8,14 +8,12 @@ import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.*;
-import static no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Periodically checks non final receipts, and their respective services for updates.

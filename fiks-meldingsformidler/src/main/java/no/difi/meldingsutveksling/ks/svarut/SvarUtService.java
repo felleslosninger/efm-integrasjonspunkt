@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -22,8 +24,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 public class SvarUtService {
@@ -35,7 +43,7 @@ public class SvarUtService {
     private final CertificateParser certificateParser;
     private final FiksStatusMapper fiksStatusMapper;
     private final PromiseMaker promiseMaker;
-    private final ForsendelseIdRepository forsendelseIdRepository;
+    private final ForsendelseIdService forsendelseIdService;
 
     @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
@@ -53,7 +61,7 @@ public class SvarUtService {
         return promiseMaker.promise(reject -> {
             try {
                 SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
-                forsendelseIdRepository.save(new ForsendelseIdEntry(message.getMessageId(), forsendelse.getForsendelsesid()));
+                forsendelseIdService.newEntry(message.getMessageId(), forsendelse.getForsendelsesid());
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
                 return client.sendMessage(svarUtRequest);
             } catch (NextMoveException e) {
@@ -71,11 +79,27 @@ public class SvarUtService {
         return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
-    public MessageStatus getMessageReceipt(final Conversation conversation) {
-        String forsendelseId = forsendelseIdRepository.findByMessageId(conversation.getMessageId())
-                .map(ForsendelseIdEntry::getForsendelseId)
-                .orElse(client.getForsendelseId(getFiksUtUrl(), conversation.getMessageId()));
-        return getMessageReceipt(forsendelseId);
+    public Map<Conversation, MessageStatus> getMessageStatuses(Set<Conversation> conversations) {
+        // Check for missing ids first
+        HashMap<Conversation, MessageStatus> statusMap = Maps.newHashMap();
+        conversations.stream()
+                .filter(c -> forsendelseIdService.getForsendelseId(c) == null)
+                .forEach(c -> statusMap.put(c, fiksStatusMapper.noForsendelseId()));
+        if (!statusMap.isEmpty()) {
+            log.warn("Could not find forsendelseId for the following messages: {}", statusMap.keySet().stream()
+                    .map(Conversation::getMessageId).collect(Collectors.joining(", ")));
+        }
+
+        Map<String, Conversation> forsendelseIdMap = conversations.stream()
+                .filter(c -> forsendelseIdService.getForsendelseId(c) != null)
+                .collect(Collectors.toMap(forsendelseIdService::getForsendelseId, c -> c));
+
+        if (!forsendelseIdMap.isEmpty()) {
+            List<StatusResult> statuses = client.getForsendelseStatuser(getFiksUtUrl(), forsendelseIdMap.keySet());
+            statuses.forEach(s -> statusMap.put(forsendelseIdMap.get(s.forsendelsesid), fiksStatusMapper.mapFrom(s.forsendelseStatus)));
+        }
+
+        return statusMap;
     }
 
     public MessageStatus getMessageReceipt(String forsendelseId) {

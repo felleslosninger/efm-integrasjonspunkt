@@ -1,11 +1,15 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import javax.xml.bind.JAXBElement;
 import java.util.List;
+import java.util.Set;
 
+@Slf4j
 public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport implements SvarUtWebServiceClient {
+
     @Override
     public String sendMessage(SvarUtRequest request) {
 
@@ -16,7 +20,7 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
 
     @Override
     public String getForsendelseId(String uri, String eksternRef) {
-
+        log.debug("No local forsendelseId mapping for messageId={}, performing lookup..", eksternRef);
         RetrieveForsendelseIdByEksternRef request = RetrieveForsendelseIdByEksternRef.builder().
                 withEksternRef(eksternRef).build();
 
@@ -39,6 +43,15 @@ public class SvarUtWebServiceClientImpl extends WebServiceGatewaySupport impleme
 
         final JAXBElement<RetrieveForsendelseStatusResponse> response =
                 (JAXBElement<RetrieveForsendelseStatusResponse>)
+                        getWebServiceTemplate().marshalSendAndReceive(uri, request);
+        return response.getValue().getReturn();
+    }
+
+    public List<StatusResult> getForsendelseStatuser(String uri, Set<String> forsendelseIds) {
+        RetrieveForsendelseStatuser request = RetrieveForsendelseStatuser.builder().withForsendelseider(forsendelseIds).build();
+
+        final JAXBElement<RetrieveForsendelseStatuserResponse> response =
+                (JAXBElement<RetrieveForsendelseStatuserResponse>)
                         getWebServiceTemplate().marshalSendAndReceive(uri, request);
         return response.getValue().getReturn();
     }

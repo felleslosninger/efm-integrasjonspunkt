@@ -18,18 +18,18 @@ public class DpePolling {
     private final NextMoveServiceBus nextMoveServiceBus;
     private final IntegrasjonspunktProperties properties;
 
-    private CompletableFuture batchRead;
+    private CompletableFuture<?> batchRead;
 
     public void poll() {
         if (properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {
-                log.debug("Checking for new NextMove messages (batch)..");
+                log.debug("Checking for new DPE messages (batch)..");
                 this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
             } else {
-                log.debug("Batch still processing..");
+                log.debug("DPE batch still processing..");
             }
         } else {
-            log.debug("Checking for new NextMove messages..");
+            log.debug("Checking for new DPE messages..");
             nextMoveServiceBus.getAllMessagesRest();
         }
     }

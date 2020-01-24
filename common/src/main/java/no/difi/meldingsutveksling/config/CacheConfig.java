@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -23,17 +22,25 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CacheConfig extends CachingConfigurerSupport {
 
+    public static final String CACHE_GET_SAS_KEY = "getSasKey";
+    public static final String CACHE_LOAD_IDENTIFIER_RESOURCE = "loadIdentifierResource";
+    public static final String CACHE_FORSENDELSEID = "forsendelseIdCache";
+
     @Override
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                new CaffeineCache(ServiceRegistryClient.CACHE_GET_SAS_KEY,
+                new CaffeineCache(CACHE_GET_SAS_KEY,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.DAYS)
                                 .build()),
-                new CaffeineCache(ServiceRegistryClient.CACHE_LOAD_IDENTIFIER_RESOURCE,
+                new CaffeineCache(CACHE_FORSENDELSEID,
+                        Caffeine.newBuilder()
+                                .expireAfterWrite(1, TimeUnit.DAYS)
+                                .build()),
+                new CaffeineCache(CACHE_LOAD_IDENTIFIER_RESOURCE,
                         Caffeine.newBuilder()
                                 .maximumSize(100L)
                                 .expireAfterWrite(1, TimeUnit.MINUTES)
