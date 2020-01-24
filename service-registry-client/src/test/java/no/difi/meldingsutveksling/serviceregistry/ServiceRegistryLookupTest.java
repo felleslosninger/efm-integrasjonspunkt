@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.proc.BadJWSException;
+import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
@@ -149,7 +150,7 @@ public class ServiceRegistryLookupTest {
         when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));
-        cacheManager.getCache(ServiceRegistryClient.CACHE_GET_SAS_KEY).clear();
+        cacheManager.getCache(CacheConfig.CACHE_GET_SAS_KEY).clear();
         assertThat(service.getSasKey(), is("456"));
     }
 

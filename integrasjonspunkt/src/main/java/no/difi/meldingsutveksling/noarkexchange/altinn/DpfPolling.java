@@ -30,7 +30,7 @@ public class DpfPolling {
 
     public void poll() {
         Consumer<Forsendelse> forwarder = getSvarInnForwarder();
-        log.debug("Checking for new FIKS messages using {}", forwarder.getClass().getName());
+        log.trace("Checking for new DPF messages using {}", forwarder.getClass().getName());
         svarInnService.getForsendelser().forEach(forwarder);
     }
 

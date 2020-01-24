@@ -36,12 +36,12 @@ public class DpoPolling {
     private final SBDUtil sbdUtil;
 
     public void poll() {
-        log.debug("Checking for new messages");
+        log.trace("Checking for new DPO messages");
 
         List<FileReference> fileReferences = altinnWsClient.availableFiles(properties.getOrg().getNumber());
 
         if (!fileReferences.isEmpty()) {
-            log.debug("New message(s) detected");
+            log.debug("New DPO message(s) detected");
         }
 
         fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference));
