@@ -38,6 +38,6 @@ class ConversationWebController(
         }
         model.addAttribute("statusMap", lastStatusMap)
 
-        return "index"
+        return "conversations/index"
     }
 }
