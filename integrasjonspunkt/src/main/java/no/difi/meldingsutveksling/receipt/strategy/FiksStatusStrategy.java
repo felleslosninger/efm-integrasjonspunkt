@@ -27,12 +27,7 @@ public class FiksStatusStrategy implements StatusStrategy {
     @Override
     @Transactional
     public void checkStatus(Set<Conversation> conversations) {
-        svarUtService.getMessageStatuses(conversations).forEach((c,s) -> {
-            conversationService.registerStatus(c, s);
-            if (!c.isPollable()) {
-                forsendelseIdService.delete(c.getMessageId());
-            }
-        });
+        svarUtService.updateStatuses(conversations);
     }
 
     @Override
