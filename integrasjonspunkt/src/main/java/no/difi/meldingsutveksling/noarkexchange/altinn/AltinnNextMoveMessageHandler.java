@@ -7,10 +7,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
-import no.difi.meldingsutveksling.nextmove.StatusMessage;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatus;
@@ -45,7 +42,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
         } else {
-            if (!isNullOrEmpty(properties.getNoarkSystem().getType())) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && (sbd.getBusinessMessage() instanceof ArkivmeldingMessage || sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage)) {
                 conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
