@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
-import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
@@ -14,7 +13,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,6 +41,7 @@ public class SvarUtService {
     private final FiksStatusMapper fiksStatusMapper;
     private final PromiseMaker promiseMaker;
     private final ForsendelseIdService forsendelseIdService;
+    private final ConversationService conversationService;
 
     @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
@@ -79,35 +77,29 @@ public class SvarUtService {
         return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
-    public Map<Conversation, MessageStatus> getMessageStatuses(Set<Conversation> conversations) {
+    public void updateStatuses(Set<Conversation> conversations) {
         // Check for missing ids first
-        HashMap<Conversation, MessageStatus> statusMap = Maps.newHashMap();
-        conversations.stream()
+        Set<Conversation> missingIds = conversations.stream()
                 .filter(c -> forsendelseIdService.getForsendelseId(c) == null)
-                .forEach(c -> statusMap.put(c, fiksStatusMapper.noForsendelseId()));
-        if (!statusMap.isEmpty()) {
-            log.warn("Could not find forsendelseId for the following messages: {}", statusMap.keySet().stream()
+                .peek(c -> conversationService.registerStatus(c, fiksStatusMapper.noForsendelseId()))
+                .collect(Collectors.toSet());
+        if (!missingIds.isEmpty()) {
+            log.warn("Could not find forsendelseId for the following messages: {}", missingIds.stream()
                     .map(Conversation::getMessageId).collect(Collectors.joining(", ")));
         }
 
         Map<String, Conversation> forsendelseIdMap = conversations.stream()
-                .filter(c -> forsendelseIdService.getForsendelseId(c) != null)
+                .filter(c -> !missingIds.contains(c))
                 .collect(Collectors.toMap(forsendelseIdService::getForsendelseId, c -> c));
 
         if (!forsendelseIdMap.isEmpty()) {
-            List<StatusResult> statuses = client.getForsendelseStatuser(getFiksUtUrl(), forsendelseIdMap.keySet());
-            statuses.forEach(s -> statusMap.put(forsendelseIdMap.get(s.forsendelsesid), fiksStatusMapper.mapFrom(s.forsendelseStatus)));
-        }
-
-        return statusMap;
-    }
-
-    public MessageStatus getMessageReceipt(String forsendelseId) {
-        if (forsendelseId != null) {
-            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
-            return fiksStatusMapper.mapFrom(forsendelseStatus);
-        } else {
-            return fiksStatusMapper.noForsendelseId();
+            client.getForsendelseStatuser(getFiksUtUrl(), forsendelseIdMap.keySet()).forEach(s -> {
+                Conversation c = forsendelseIdMap.get(s.getForsendelsesid());
+                conversationService.registerStatus(c, fiksStatusMapper.mapFrom(s.getForsendelseStatus()));
+                if (!c.isPollable()) {
+                    forsendelseIdService.delete(c.getMessageId());
+                }
+            });
         }
     }
 
