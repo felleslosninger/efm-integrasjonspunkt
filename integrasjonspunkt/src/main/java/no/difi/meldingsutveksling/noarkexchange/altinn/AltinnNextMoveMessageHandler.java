@@ -42,7 +42,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         if (sbdUtil.isStatus(sbd)) {
             handleStatus(sbd);
         } else {
-            if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && (sbd.getBusinessMessage() instanceof ArkivmeldingMessage || sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage)) {
+            if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd)) {
                 conversationService.registerConversation(sbd, DPO, INCOMING);
                 internalQueue.enqueueNoark(sbd);
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
