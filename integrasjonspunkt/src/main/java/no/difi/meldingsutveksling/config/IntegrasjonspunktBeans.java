@@ -17,9 +17,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.StatusStrategy;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;
@@ -44,7 +41,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.time.Clock;
-import java.util.List;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
@@ -71,6 +67,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public TransportFactory serviceRegistryTransportFactory(AltinnWsClient altinnWsClient, UUIDGenerator uuidGenerator) {
         return new ServiceRegistryTransportFactory(altinnWsClient, uuidGenerator);
     }

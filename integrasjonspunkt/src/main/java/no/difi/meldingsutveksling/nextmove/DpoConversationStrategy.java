@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.transport.Transport;
 import no.difi.meldingsutveksling.transport.TransportFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @Slf4j
 public class DpoConversationStrategy implements ConversationStrategy {
 
