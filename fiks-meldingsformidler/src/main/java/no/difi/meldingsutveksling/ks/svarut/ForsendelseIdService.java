@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.receipt.Conversation;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Component
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class ForsendelseIdService {
