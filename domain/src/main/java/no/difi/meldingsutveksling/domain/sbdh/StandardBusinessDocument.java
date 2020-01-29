@@ -82,7 +82,7 @@ public class StandardBusinessDocument {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "beta", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
+    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @NotNull
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
     @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.DocumentType.Avtalt.class)
@@ -93,7 +93,7 @@ public class StandardBusinessDocument {
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @ApiModelProperty(
             value = "The business message. Please note that the property name is not 'any'. "
-                    + "It is one of the following: arkivmelding, beta, digital, digital_dpv, print, innsynskrav or publisering.",
+                    + "It is one of the following: arkivmelding, avtalt, digital, digital_dpv, print, innsynskrav or publisering.",
             dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage",
             required = true
     )
