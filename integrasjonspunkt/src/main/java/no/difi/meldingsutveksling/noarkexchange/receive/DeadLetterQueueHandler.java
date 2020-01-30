@@ -29,7 +29,7 @@ public class DeadLetterQueueHandler {
     private final MessageStatusFactory messageStatusFactory;
     private final NoarkClient noarkClient;
     private final DocumentConverter documentConverter;
-    private final BestEduErrorAppReceiptService bestEduErrorAppReceiptService;
+    private final BestEduAppReceiptService bestEduAppReceiptService;
 
     public DeadLetterQueueHandler(
             IntegrasjonspunktProperties properties,
@@ -38,14 +38,14 @@ public class DeadLetterQueueHandler {
             MessageStatusFactory messageStatusFactory,
             @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
             DocumentConverter documentConverter,
-            BestEduErrorAppReceiptService bestEduErrorAppReceiptService) {
+            BestEduAppReceiptService bestEduAppReceiptService) {
         this.properties = properties;
         this.conversationService = conversationService;
         this.objectMapper = objectMapper;
         this.messageStatusFactory = messageStatusFactory;
         this.noarkClient = noarkClient.getIfAvailable();
         this.documentConverter = documentConverter;
-        this.bestEduErrorAppReceiptService = bestEduErrorAppReceiptService;
+        this.bestEduAppReceiptService = bestEduAppReceiptService;
     }
 
     void handleDlqMessage(byte[] message) {
@@ -61,7 +61,7 @@ public class DeadLetterQueueHandler {
             messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
             if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && noarkClient != null) {
-                bestEduErrorAppReceiptService.sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
+                bestEduAppReceiptService.sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
         } catch (IOException e) {
             // NOOP
@@ -73,7 +73,7 @@ public class DeadLetterQueueHandler {
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
             Audit.error(errorMsg, markerFrom(sbd));
             messageId = sbd.getDocumentId();
-            bestEduErrorAppReceiptService.sendBestEduErrorAppReceipt(sbd);
+            bestEduAppReceiptService.sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
             // NOOP
         }
