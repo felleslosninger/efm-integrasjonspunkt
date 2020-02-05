@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Maps;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -28,4 +31,6 @@ public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
     @NotNull
     @Valid
     private DpiNotification varsler;
+
+    private Map<String, String> metadataFiler = Maps.newHashMap();
 }

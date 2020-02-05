@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.sdp.client2.domain.MetadataDokument;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
@@ -48,13 +49,25 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         return message.getFiles()
                 .stream()
                 .filter(f -> !f.getPrimaryDocument())
-                .map(this::getDocument)
+                .filter(f -> !isMetadataFile(f.getFilename()))
+                .map(this::createDocument)
                 .collect(Collectors.toList());
     }
 
-    private Document getDocument(BusinessMessageFile file) {
+    private Document createDocument(BusinessMessageFile file) {
         String title = StringUtils.hasText(file.getTitle()) ? file.getTitle() : MISSING_TXT;
-        return new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
+        Document document = new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
+        if (isDigitalMessage() && getDigitalMessage().getMetadataFiler().containsKey(file.getFilename())) {
+            String metadataFilename = getDigitalMessage().getMetadataFiler().get(file.getFilename());
+            BusinessMessageFile metadataFile = message.getFiles().stream()
+                    .filter(f -> f.getFilename().equals(metadataFilename))
+                    .findFirst()
+                    .orElseThrow(() -> new NextMoveRuntimeException(
+                            String.format("Metadata document \"%s\" specified for \"%s\", but is not attached", metadataFilename, file.getFilename())));
+            MetadataDokument md = new MetadataDokument(metadataFilename, metadataFile.getMimetype(), getContent(metadataFile.getIdentifier()));
+            document.setMetadataDokument(md);
+        }
+        return document;
     }
 
     private byte[] getContent(String fileName) {
@@ -63,6 +76,13 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file \"%s\"", fileName), e);
         }
+    }
+
+    private boolean isMetadataFile(String filename) {
+        if (isPrintMessage()) {
+            return false;
+        }
+        return getDigitalMessage().getMetadataFiler().containsValue(filename);
     }
 
     private boolean isDigitalMessage() {
