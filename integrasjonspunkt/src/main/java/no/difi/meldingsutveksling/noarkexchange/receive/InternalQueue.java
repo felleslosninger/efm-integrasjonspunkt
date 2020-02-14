@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -10,6 +11,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
+import no.difi.meldingsutveksling.pipes.PromiseRuntimeException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -68,6 +70,13 @@ public class InternalQueue {
         }
         try {
             nextMoveSender.send(nextMoveMessage);
+        } catch (PromiseRuntimeException e) {
+            if (e.getCause() instanceof QueueInterruptException) {
+                log.error("Caught interrupting exception, registering error and removing message from queue. Error was: {}", e.getCause().getMessage());
+                deadLetterQueueHandler.handleNextMoveMessage(nextMoveMessage, e.getCause().getMessage());
+            } else {
+                throw e;
+            }
         } catch (NextMoveException e) {
             throw new NextMoveRuntimeException("Unable to send NextMove message", e);
         }
