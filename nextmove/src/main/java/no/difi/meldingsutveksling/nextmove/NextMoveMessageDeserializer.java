@@ -20,6 +20,9 @@ public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage
         if (DocumentType.ARKIVMELDING.getType().equals(p.getCurrentName())) {
             return p.getCodec().treeToValue(node, ArkivmeldingMessage.class);
         }
+        if (DocumentType.AVTALT.getType().equals(p.getCurrentName())) {
+            return p.getCodec().treeToValue(node, AvtaltMessage.class);
+        }
         if (DocumentType.DIGITAL.getType().equals(p.getCurrentName())) {
             return p.getCodec().treeToValue(node, DpiDigitalMessage.class);
         }
