@@ -27,7 +27,7 @@ Feature: Sending a Next Move DPO message of forretningstype avtalt
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952c916",
                 "standard": "urn:no:difi:avtalt:xsd::avtalt",
                 "type": "avtalt",
                 "typeVersion": "2.0"
@@ -145,7 +145,7 @@ Feature: Sending a Next Move DPO message of forretningstype avtalt
         "documentIdentification" : {
           "standard" : "urn:no:difi:avtalt:xsd::avtalt",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b916",
+          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952c916",
           "type" : "avtalt",
           "creationDateAndTime" : "2019-03-25T11:35:00+01:00"
         },
@@ -191,7 +191,7 @@ Feature: Sending a Next Move DPO message of forretningstype avtalt
     """
     Testing 1 2 3
     """
-    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b916" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952c916" are:
     """
     {
       "content" : [ {
@@ -199,14 +199,14 @@ Feature: Sending a Next Move DPO message of forretningstype avtalt
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952c916",
         "convId" : 166
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952c916",
         "convId" : 166
       } ],
       "pageable" : {
