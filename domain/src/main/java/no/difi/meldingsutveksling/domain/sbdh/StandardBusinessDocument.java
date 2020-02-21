@@ -20,20 +20,14 @@ import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.validation.InstanceOf;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.validation.group.sequenceprovider.StandardBusinessDocumentGroupSequenceProvider;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.hibernate.validator.group.GroupSequenceProvider;
-import org.w3c.dom.Node;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -196,31 +190,6 @@ public class StandardBusinessDocument {
     @JsonIgnore
     public Optional<String> getOptionalMessageId() {
         return Optional.ofNullable(getDocumentId());
-    }
-
-    @JsonIgnore
-    public Payload getPayload() {
-        if (getAny() instanceof Payload) {
-            return (Payload) getAny();
-        } else if (getAny() instanceof Node) {
-            return unmarshallAnyElement(getAny());
-        } else {
-            throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + getAny() + " from " + StandardBusinessDocument.class + " to " + Payload.class);
-        }
-    }
-
-    private Payload unmarshallAnyElement(Object any) {
-        JAXBContext jaxbContextP;
-        Unmarshaller unMarshallerP;
-        Payload payload;
-        try {
-            jaxbContextP = JAXBContextFactory.createContext(new Class[]{Payload.class}, null);
-            unMarshallerP = jaxbContextP.createUnmarshaller();
-            payload = unMarshallerP.unmarshal((org.w3c.dom.Node) any, Payload.class).getValue();
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return payload;
     }
 
     public LogstashMarker createLogstashMarkers() {

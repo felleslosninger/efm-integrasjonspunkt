@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.transport;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -29,7 +28,7 @@ public class FileTransport implements Transport {
 
         File f = new File(fileName);
         try {
-            JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Payload.class, Kvittering.class}, null);
+            JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class, Kvittering.class}, null);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(new ObjectFactory().createStandardBusinessDocument(sbd), new FileOutputStream(f));

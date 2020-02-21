@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
@@ -35,7 +34,6 @@ class DocumentConverter {
                     InnsynskravMessage.class,
                     PubliseringMessage.class,
                     StatusMessage.class,
-                    Payload.class,
                     Kvittering.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + DocumentConverter.class, e);
