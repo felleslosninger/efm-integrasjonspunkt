@@ -13,9 +13,18 @@ import java.io.OutputStream;
 @UtilityClass
 public final class MarshalManifest {
 
+    private JAXBContext jaxbContext;
+
+    static {
+        try {
+            jaxbContext = JAXBContextFactory.createContext(new Class[]{Manifest.class}, null);
+        } catch (JAXBException e) {
+            log.error("Could not create JAXBContext", e);
+        }
+    }
+
     public static void marshal(Manifest doc, OutputStream os) {
         try {
-            JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Manifest.class}, null);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(doc, os);
