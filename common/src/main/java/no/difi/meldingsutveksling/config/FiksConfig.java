@@ -18,6 +18,15 @@ public class FiksConfig {
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();
+    IO io = new IO();
+
+    @Data
+    @ToString(exclude = "integrasjonsPassord")
+    public static class IO {
+        private String kontoId;
+        private String integrasjonsId;
+        private String integrasjonsPassord;
+    }
 
     @Data
     @ToString(exclude = "password")
