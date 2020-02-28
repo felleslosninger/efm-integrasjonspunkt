@@ -50,6 +50,11 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
+    public Optional<String> getAvsenderIdentifikator() {
+        return Optional.empty();
+    }
+
+    @Override
     public String getConversationId() {
         return null;
     }

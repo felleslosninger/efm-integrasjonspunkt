@@ -51,6 +51,11 @@ public interface MeldingsformidlerRequest {
     Optional<String> getOnBehalfOfOrgnr();
 
     /**
+     * @return avsenderIdentifikator
+     */
+    Optional<String> getAvsenderIdentifikator();
+
+    /**
      *
      * @return an ID that uniquely identifies this message conversation. Must be in UIID format
      */
