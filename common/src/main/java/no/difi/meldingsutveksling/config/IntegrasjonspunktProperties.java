@@ -85,6 +85,8 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String defaultProcess;
         @NotNull
+        private String dpvDefaultProcess;
+        @NotNull
         private String receiptProcess;
     }
 
