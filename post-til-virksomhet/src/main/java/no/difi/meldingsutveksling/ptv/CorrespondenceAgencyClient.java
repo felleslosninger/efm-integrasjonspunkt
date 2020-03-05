@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ptv;
 
 import lombok.SneakyThrows;
 import no.altinn.services._2009._10.Test;
+import no.altinn.services.serviceengine.correspondence._2009._10.CorrespondenceStatusHistoryResult;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -141,6 +142,11 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     public Object sendStatusRequest(Object payload) {
         final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusDetailsV2";
         return getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
+    }
+
+    public CorrespondenceStatusHistoryResult sendStatusHistoryRequest(Object payload) {
+        final String soapAction = "http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10/ICorrespondenceAgencyExternal/GetCorrespondenceStatusHistory";
+        return (CorrespondenceStatusHistoryResult) getWebServiceTemplate().marshalSendAndReceive(this.endpointUrl, payload, getActionCallback(soapAction));
     }
 
     public Object sendTestRequest() {

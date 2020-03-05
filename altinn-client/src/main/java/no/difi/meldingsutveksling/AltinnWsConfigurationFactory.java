@@ -26,7 +26,9 @@ public class AltinnWsConfigurationFactory {
                 .streamingServiceUrl(streamingserviceUrl)
                 .brokerServiceUrl(brokerserviceUrl)
                 .externalServiceCode(config.getServiceCode())
-                .externalServiceEditionCode(Integer.valueOf(config.getServiceEditionCode()))
+                .externalServiceEditionCode(Integer.parseInt(config.getServiceEditionCode()))
+                .connectTimeout(config.getConnectTimeout())
+                .requestTimeout(config.getRequestTimeout())
                 .build();
     }
 

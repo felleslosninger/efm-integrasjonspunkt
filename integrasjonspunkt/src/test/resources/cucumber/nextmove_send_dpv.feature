@@ -6,6 +6,7 @@ Feature: Sending a Next Move DPV message
     And a "GET" request to "http://localhost:9099/identifier/910075946/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=45efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946-administrasjon.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/info/974720760" will respond with status "200" and the following "application/json" in "/restmocks/info/974720760.json"
+    And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And the Noark System is disabled
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """
@@ -178,70 +179,57 @@ Feature: Sending a Next Move DPV message
     Then the CorrespondenceAgencyClient is called with the following payload:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <altinn9:InsertCorrespondenceV2 xmlns:altinn9="http://www.altinn.no/services/ServiceEngine/Correspondence/2009/10"
-                                    xmlns:altinn1="http://www.altinn.no/services/2009/10"
-                                    xmlns:altinn10="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10"
-                                    xmlns:altinn11="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2010/10"
-                                    xmlns:altinn12="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2009/10"
-                                    xmlns:altinn13="http://schemas.altinn.no/services/ServiceEngine/Notification/2009/10"
-                                    xmlns:altinn14="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2016/02"
-                                    xmlns:altinn15="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2014/10"
-                                    xmlns:altinn16="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/11"
-                                    xmlns:altinn5="http://schemas.altinn.no/services/Intermediary/Receipt/2009/10"
-                                    xmlns:altinn6="http://www.altinn.no/services/ServiceEngine/ReporteeElementList/2009/10"
-                                    xmlns:altinn7="http://schemas.altinn.no/services/ServiceEngine/Correspondence/2013/06"
-                                    xmlns:altinn8="http://schemas.altinn.no/serviceengine/formsengine/2009/10"
-                                    xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
-        <altinn9:SystemUserCode>stuntman</altinn9:SystemUserCode>
-        <altinn9:ExternalShipmentReference>abc8849c-e281-4809-8555-7cd54952b926</altinn9:ExternalShipmentReference>
-        <altinn9:Correspondence>
-            <altinn10:ServiceCode>4255</altinn10:ServiceCode>
-            <altinn10:ServiceEdition>10</altinn10:ServiceEdition>
-            <altinn10:Reportee>910075946</altinn10:Reportee>
-            <altinn10:Content>
-                <altinn10:LanguageCode>1044</altinn10:LanguageCode>
-                <altinn10:MessageTitle>Nye lysrør</altinn10:MessageTitle>
-                <altinn10:MessageSummary>Nye lysrør</altinn10:MessageSummary>
-                <altinn10:MessageBody>Nye lysrør</altinn10:MessageBody>
-                <altinn10:Attachments>
-                    <altinn10:BinaryAttachments>
-                        <altinn11:BinaryAttachmentV2>
-                            <altinn11:FunctionType>Unspecified</altinn11:FunctionType>
-                            <altinn11:FileName>test.txt</altinn11:FileName>
-                            <altinn11:Name>Test</altinn11:Name>
-                            <altinn11:Encrypted>false</altinn11:Encrypted>
-                            <altinn11:Data></altinn11:Data>
-                            <altinn11:SendersReference>AttachmentReference_as123452</altinn11:SendersReference>
-                        </altinn11:BinaryAttachmentV2>
-                    </altinn10:BinaryAttachments>
-                </altinn10:Attachments>
-            </altinn10:Content>
-            <altinn10:VisibleDateTime>2019-03-25T12:38:23.000+01:00</altinn10:VisibleDateTime>
-            <altinn10:AllowSystemDeleteDateTime>2019-03-25T12:43:23.000+01:00</altinn10:AllowSystemDeleteDateTime>
-            <altinn10:DueDateTime>2019-04-01T12:38:23.000+01:00</altinn10:DueDateTime>
-            <altinn10:Notifications>
-                <altinn13:Notification>
-                    <altinn13:FromAddress>no-reply@altinn.no</altinn13:FromAddress>
-                    <altinn13:ShipmentDateTime>2019-03-25T12:43:23.000+01:00</altinn13:ShipmentDateTime>
-                    <altinn13:LanguageCode>1044</altinn13:LanguageCode>
-                    <altinn13:NotificationType>VarselDPVMedRevarsel</altinn13:NotificationType>
-                    <altinn13:TextTokens>
-                        <altinn13:TextToken>
-                            <altinn13:TokenNum>1</altinn13:TokenNum>
-                            <altinn13:TokenValue>$reporteeName$: Du har mottatt en melding fra TEST - C4.</altinn13:TokenValue>
-                        </altinn13:TextToken>
-                    </altinn13:TextTokens>
-                    <altinn13:ReceiverEndPoints>
-                        <altinn13:ReceiverEndPoint>
-                            <altinn13:TransportType>Both</altinn13:TransportType>
-                        </altinn13:ReceiverEndPoint>
-                    </altinn13:ReceiverEndPoints>
-                </altinn13:Notification>
-            </altinn10:Notifications>
-            <altinn10:AllowForwarding>true</altinn10:AllowForwarding>
-            <altinn10:MessageSender>TEST - C4</altinn10:MessageSender>
-        </altinn9:Correspondence>
-    </altinn9:InsertCorrespondenceV2>
+    <InsertCorrespondenceV2 >
+        <SystemUserCode>stuntman</SystemUserCode>
+        <ExternalShipmentReference>abc8849c-e281-4809-8555-7cd54952b926</ExternalShipmentReference>
+        <Correspondence>
+            <ServiceCode>4255</ServiceCode>
+            <ServiceEdition>10</ServiceEdition>
+            <Reportee>910075946</Reportee>
+            <Content>
+                <LanguageCode>1044</LanguageCode>
+                <MessageTitle>Nye lysrør</MessageTitle>
+                <MessageSummary>Nye lysrør</MessageSummary>
+                <MessageBody>Nye lysrør</MessageBody>
+                <Attachments>
+                    <BinaryAttachments>
+                        <BinaryAttachmentV2>
+                            <FunctionType>Unspecified</FunctionType>
+                            <FileName>test.txt</FileName>
+                            <Name>Test</Name>
+                            <Encrypted>false</Encrypted>
+                            <Data></Data>
+                            <SendersReference>AttachmentReference_as123452</SendersReference>
+                        </BinaryAttachmentV2>
+                    </BinaryAttachments>
+                </Attachments>
+            </Content>
+            <VisibleDateTime>2019-03-25T12:38:23.000+01:00</VisibleDateTime>
+            <AllowSystemDeleteDateTime>2019-03-25T12:43:23.000+01:00</AllowSystemDeleteDateTime>
+            <DueDateTime>2019-04-01T12:38:23.000+01:00</DueDateTime>
+            <Notifications>
+                <Notification>
+                    <FromAddress>no-reply@altinn.no</FromAddress>
+                    <ShipmentDateTime>2019-03-25T12:43:23.000+01:00</ShipmentDateTime>
+                    <LanguageCode>1044</LanguageCode>
+                    <NotificationType>VarselDPVMedRevarsel</NotificationType>
+                    <TextTokens>
+                        <TextToken>
+                            <TokenNum>1</TokenNum>
+                            <TokenValue>$reporteeName$: Du har mottatt en melding fra TEST - C4.</TokenValue>
+                        </TextToken>
+                    </TextTokens>
+                    <ReceiverEndPoints>
+                        <ReceiverEndPoint>
+                            <TransportType>Both</TransportType>
+                        </ReceiverEndPoint>
+                    </ReceiverEndPoints>
+                </Notification>
+            </Notifications>
+            <AllowForwarding>true</AllowForwarding>
+            <MessageSender>TEST - C4</MessageSender>
+        </Correspondence>
+    </InsertCorrespondenceV2>
     """
     And the sent message contains the following files:
       | filename         | content type |

@@ -38,6 +38,6 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
     }
 
     private String getStrippedIdentifier(String s) {
-        return Organisasjonsnummer.isIso6523(s) ? Organisasjonsnummer.fromIso6523(s).toString() : s;
+        return Organisasjonsnummer.isIso6523(s) ? Organisasjonsnummer.fromIso6523(s).getOrgNummer() : s;
     }
 }

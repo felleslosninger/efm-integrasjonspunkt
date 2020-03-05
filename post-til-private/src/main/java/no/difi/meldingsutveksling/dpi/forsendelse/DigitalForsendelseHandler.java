@@ -28,14 +28,16 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
 
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber());
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(request.getVirkningsdato())
                 .aapningskvittering(request.isAapningskvittering())
                 .sikkerhetsnivaa(request.getSecurityLevel());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
-        Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
+        Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
+        request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
+        Avsender behandlingsansvarlig = avsenderBuilder.build();
         return Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke);
     }
 }

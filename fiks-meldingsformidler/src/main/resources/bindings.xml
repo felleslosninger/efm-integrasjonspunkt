@@ -27,10 +27,16 @@
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatus']">
       <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
+    <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatuser']">
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+    </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retreiveForsendelseTyper']">
       <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatusResponse']">
+      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+    </jaxb:bindings>
+    <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatuserResponse']">
       <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
   </jaxb:bindings>

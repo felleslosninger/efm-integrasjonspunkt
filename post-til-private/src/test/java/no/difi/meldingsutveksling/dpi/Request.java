@@ -9,6 +9,7 @@ import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class Request implements MeldingsformidlerRequest {
     private boolean notifiable;
@@ -41,6 +42,16 @@ public class Request implements MeldingsformidlerRequest {
     @Override
     public String getSenderOrgnumber() {
         return null;
+    }
+
+    @Override
+    public Optional<String> getOnBehalfOfOrgnr() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getAvsenderIdentifikator() {
+        return Optional.empty();
     }
 
     @Override

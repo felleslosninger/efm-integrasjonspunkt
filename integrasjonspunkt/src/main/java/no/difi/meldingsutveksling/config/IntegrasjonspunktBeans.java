@@ -11,13 +11,12 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
+import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.receipt.DpiReceiptService;
-import no.difi.meldingsutveksling.receipt.StatusStrategy;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;
@@ -42,7 +41,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.time.Clock;
-import java.util.List;
 import java.util.Optional;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
@@ -50,6 +48,15 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+    public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
+                                            AltinnWsConfigurationFactory altinnWsConfigurationFactory,
+                                            Plumber plumber,
+                                            PromiseMaker promiseMaker) {
+        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker).getAltinnWsClient();
+    }
 
     @Bean
     public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
@@ -60,8 +67,9 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public TransportFactory serviceRegistryTransportFactory(AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
-        return new ServiceRegistryTransportFactory(altinnWsClientFactory, uuidGenerator);
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+    public TransportFactory serviceRegistryTransportFactory(AltinnWsClient altinnWsClient, UUIDGenerator uuidGenerator) {
+        return new ServiceRegistryTransportFactory(altinnWsClient, uuidGenerator);
     }
 
     @Bean
@@ -76,18 +84,6 @@ public class IntegrasjonspunktBeans {
         } catch (KeystoreProviderException e) {
             throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
         }
-    }
-
-    @Bean
-    public StatusStrategyFactory statusStrategyFactory(List<StatusStrategy> statusStrategies) {
-        StatusStrategyFactory statusStrategyFactory = new StatusStrategyFactory();
-        statusStrategies.forEach(statusStrategyFactory::registerStrategy);
-        return statusStrategyFactory;
-    }
-
-    @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, MeldingsformidlerClient meldingsformidlerClient) {
-        return new DpiReceiptService(integrasjonspunktProperties, meldingsformidlerClient);
     }
 
     @Bean(name = "fiksMailClient")
@@ -176,8 +172,8 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public AltinnConnectionCheck altinnConnectionCheck(
             IntegrasjonspunktProperties properties,
-            AltinnWsClientFactory altinnWsClientFactory ) {
-        return new AltinnConnectionCheck(properties, altinnWsClientFactory);
+            AltinnWsClient altinnWsClient) {
+        return new AltinnConnectionCheck(properties, altinnWsClient);
     }
 
     @Bean

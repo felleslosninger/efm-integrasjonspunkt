@@ -15,4 +15,6 @@ public class AltinnWsConfiguration {
     private String password;
     private String externalServiceCode;
     private int externalServiceEditionCode;
+    private Integer connectTimeout;
+    private Integer requestTimeout;
 }

@@ -103,11 +103,17 @@ public class NextMoveAdapter {
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
         }
+        String process;
+        if (receiverServiceRecord.getServiceIdentifier() == ServiceIdentifier.DPV) {
+            process = properties.getArkivmelding().getDpvDefaultProcess();
+        } else {
+            process = properties.getArkivmelding().getDefaultProcess();
+        }
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
                 Organisasjonsnummer.from(message.getReceiverPartyNumber()),
                 conversationId,
                 conversationId,
-                properties.getArkivmelding().getDefaultProcess(),
+                process,
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage()
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())

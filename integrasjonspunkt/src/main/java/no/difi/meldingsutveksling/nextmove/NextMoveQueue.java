@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
@@ -13,7 +12,6 @@ import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -44,9 +42,7 @@ public class NextMoveQueue {
             return message;
 
         } else {
-            String errorMsg = String.format("SBD payload not of known types: %s, %s", Payload.class.getName(), BusinessMessage.class.getName());
-            log.error(errorMsg);
-            throw new MeldingsUtvekslingRuntimeException(errorMsg);
+            throw new MeldingsUtvekslingRuntimeException("SBD payload not of a known type");
         }
     }
 
