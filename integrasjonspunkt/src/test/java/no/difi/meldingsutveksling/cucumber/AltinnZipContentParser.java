@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 import java.util.List;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @Component
@@ -47,7 +47,7 @@ public class AltinnZipContentParser {
     }
 
     private StandardBusinessDocument getSbd(ZipContent zipContent) throws java.io.IOException {
-        return objectMapper.readValue(zipContent.getFile(ALTINN_SBD_FILE).getInputStream(), StandardBusinessDocument.class);
+        return objectMapper.readValue(zipContent.getFile(SBD_FILE).getInputStream(), StandardBusinessDocument.class);
     }
 
     private List<Attachment> getAttachments(InputStream is) {

@@ -1,9 +1,14 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel
+import no.difi.meldingsutveksling.NextMoveConsts
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.pipes.Plumber
 import no.difi.meldingsutveksling.pipes.PromiseMaker
 import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
@@ -14,11 +19,14 @@ import no.ks.fiks.io.client.model.*
 import org.springframework.stereotype.Component
 import java.security.KeyStore
 import java.util.*
+import java.util.function.Consumer
 
 @Component
 class FiksIoService(props: IntegrasjonspunktProperties,
                     ipNokkel: IntegrasjonspunktNokkel,
                     private val persister: OptionalCryptoMessagePersister,
+                    private val objectMapper: ObjectMapper,
+                    private val plumber: Plumber,
                     private val promise: PromiseMaker) {
     val log = logger()
 
@@ -59,11 +67,16 @@ class FiksIoService(props: IntegrasjonspunktProperties,
 
     fun sendMessage(msg: NextMoveMessage) {
         promise.promise { reject ->
-            sendMessage(payloads = msg.files.map {
+            val payloads = msg.files.map {
                 StreamPayload(persister.readStream(msg.messageId, it.identifier, reject).inputStream, it.filename)
-            }.toCollection(arrayListOf()))
+            }.toCollection(arrayListOf())
+            objectMapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false)
+            val outlet = plumber.pipe("Write SBD to FiksIO StreamPayload", Consumer {
+                objectMapper.writeValue(it, msg.sbd)
+            }, reject).outlet()
+            payloads.add(StreamPayload(outlet, NextMoveConsts.SBD_FILE))
+            sendMessage(payloads = payloads)
         }
-
     }
 
     fun sendMessage(meldingType: String = "no.difi.einnsyn.innsynskrav.v1", payloads: List<Payload>) {
@@ -72,17 +85,21 @@ class FiksIoService(props: IntegrasjonspunktProperties,
                 .mottakerKontoId(KontoId(kontoId))
                 .meldingType(meldingType)
                 .build()
-        fiksIoKlient.send(request, payloads)
+        val sentMessage = fiksIoKlient.send(request, payloads)
+        log.debug("FiksIO: Sent message with fiksId=${sentMessage.meldingId}")
     }
 
     private fun handleMessage(mottattMelding: MottattMelding, svarSender: SvarSender) {
-        println("Mottatt melding med id=${mottattMelding.meldingId} meldingType=${mottattMelding.meldingType}")
+        log.debug("FiksIO: Received message with fiksId=${mottattMelding.meldingId} messageType=${mottattMelding.meldingType}")
         mottattMelding.dekryptertZipStream.let {
             var entry = it.nextEntry
             while (entry != null) {
-                println("File name: ${entry.name}")
-                println("File content:")
-                println(String(it.readBytes()))
+                log.debug("File name: ${entry.name}")
+                log.debug("File content:")
+                log.debug(String(it.readBytes()))
+                if (entry.name == NextMoveConsts.SBD_FILE) {
+                    val sbd = objectMapper.readValue(it.readBytes(), StandardBusinessDocument::class.java)
+                }
                 it.closeEntry()
                 entry = it.nextEntry
             }

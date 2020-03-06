@@ -16,7 +16,7 @@ import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
 
@@ -51,7 +51,7 @@ public class AltinnZipFactory {
     private byte[] getBytes(Message message, Reject reject) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bos);
-        out.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
+        out.putNextEntry(new ZipEntry(SBD_FILE));
         out.write(objectMapper.writeValueAsString(message.getSbd()).getBytes());
         out.closeEntry();
 
