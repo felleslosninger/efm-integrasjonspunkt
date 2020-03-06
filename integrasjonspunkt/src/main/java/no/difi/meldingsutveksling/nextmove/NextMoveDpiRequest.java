@@ -108,6 +108,14 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     }
 
     @Override
+    public Optional<String> getAvsenderIdentifikator() {
+        if (isDigitalMessage()) {
+            return Optional.ofNullable(getDigitalMessage().getAvsenderId());
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public String getConversationId() {
         return message.getMessageId();
     }
