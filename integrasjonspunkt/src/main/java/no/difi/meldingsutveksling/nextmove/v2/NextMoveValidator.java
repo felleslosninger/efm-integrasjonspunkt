@@ -112,10 +112,10 @@ public class NextMoveValidator {
             }
         });
 
-        Set<String> messageFilenames = message.getFiles().stream()
-                .map(BusinessMessageFile::getFilename)
-                .collect(Collectors.toSet());
         if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
+            Set<String> messageFilenames = message.getFiles().stream()
+                    .map(BusinessMessageFile::getFilename)
+                    .collect(Collectors.toSet());
             // Verify each file referenced in arkivmelding is uploaded
             List<String> arkivmeldingFiles = arkivmeldingUtil.getFilenames(getArkivmelding(message));
 
@@ -130,6 +130,9 @@ public class NextMoveValidator {
 
         // Validate that files given in metadata mapping exist
         if (sbdUtil.isType(message.getSbd(), DIGITAL)) {
+            Set<String> messageFilenames = message.getFiles().stream()
+                    .map(BusinessMessageFile::getFilename)
+                    .collect(Collectors.toSet());
             DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
             Set<String> filerefs = Stream.of(bmsg.getMetadataFiler().keySet(), bmsg.getMetadataFiler().values())
                     .flatMap(Collection::stream)
