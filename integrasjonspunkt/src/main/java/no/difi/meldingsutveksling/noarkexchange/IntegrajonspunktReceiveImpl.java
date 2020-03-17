@@ -55,9 +55,9 @@ public class IntegrajonspunktReceiveImpl {
     private static final String OKEY_TYPE = "OK";
     private static final String OK_TYPE = OKEY_TYPE;
 
+    private final JAXBContext jaxbContext;
+
     private final NoarkClient localNoark;
-    private final Adresseregister adresseregisterService;
-    private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
     private final ConversationService conversationService;
     private final MessagePersister messagePersister;
@@ -71,8 +71,6 @@ public class IntegrajonspunktReceiveImpl {
     private final MeldingFactory meldingFactory;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-                                       Adresseregister adresseregisterService,
-                                       IntegrasjonspunktProperties properties,
                                        IntegrasjonspunktNokkel keyInfo,
                                        ConversationService conversationService,
                                        ObjectProvider<MessagePersister> messagePersister,
@@ -83,10 +81,8 @@ public class IntegrajonspunktReceiveImpl {
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
                                        ConversationIdEntityRepo conversationIdEntityRepo,
-                                       MeldingFactory meldingFactory) {
+                                       MeldingFactory meldingFactory) throws JAXBException {
         this.localNoark = localNoark.getIfAvailable();
-        this.adresseregisterService = adresseregisterService;
-        this.properties = properties;
         this.keyInfo = keyInfo;
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
@@ -98,6 +94,8 @@ public class IntegrajonspunktReceiveImpl {
         this.internalQueue = internalQueue;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
         this.meldingFactory = meldingFactory;
+
+        this.jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
@@ -182,7 +180,6 @@ public class IntegrajonspunktReceiveImpl {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (NextMoveConsts.ARKIVMELDING_FILE.equals(entry.getName())) {
-                    JAXBContext jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
                     Unmarshaller unMarshaller = jaxbContext.createUnmarshaller();
                     return unMarshaller.unmarshal(new StreamSource(zipInputStream), Arkivmelding.class).getValue();
                 }

@@ -35,7 +35,9 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
                 .sikkerhetsnivaa(request.getSecurityLevel());
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
-        Avsender behandlingsansvarlig = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
+        Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
+        request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
+        Avsender behandlingsansvarlig = avsenderBuilder.build();
         return Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke);
     }
 }

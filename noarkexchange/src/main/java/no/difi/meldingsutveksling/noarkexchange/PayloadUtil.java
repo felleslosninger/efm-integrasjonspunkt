@@ -42,6 +42,16 @@ public class PayloadUtil {
     private static final String APP_RECEIPT_INDICATOR = "AppReceipt";
     private static final String PAYLOAD_UNKNOWN_TYPE = "Payload is of unknown type cannot determine what type of message it is";
 
+    JAXBContext jaxbContext;
+
+    static {
+        try {
+            jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
+        } catch (JAXBException e) {
+            log.error("Could not create JAXBContext", e);
+        }
+    }
+
     public static boolean isAppReceipt(Object payload) {
         if (payload instanceof AppReceiptType) {
             return true;
@@ -83,7 +93,6 @@ public class PayloadUtil {
         final String payloadAsString = payloadAsString(payload);
 
         StringSource source = new StringSource(payloadAsString);
-        JAXBContext jaxbContext = JAXBContext.newInstance("no.difi.meldingsutveksling.noarkexchange.schema");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         JAXBElement<AppReceiptType> r = unmarshaller.unmarshal(source, AppReceiptType.class);
         return r.getValue();

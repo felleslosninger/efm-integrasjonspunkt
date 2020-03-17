@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
-import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import org.slf4j.Logger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -49,7 +47,7 @@ public class SvarUtWebServiceBeans {
     }
 
     @Bean
-    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
+    public SvarUtWebServiceClientImpl svarUtClient(Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender, SvarUtFaultInterceptor interceptor) {
         SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
         client.setDefaultUri("http://localhost:8080");
         client.setMarshaller(marshaller);
@@ -59,7 +57,7 @@ public class SvarUtWebServiceBeans {
         client.setMessageSender(svarUtMessageSender);
 
         final ClientInterceptor[] interceptors = new ClientInterceptor[1];
-        interceptors[0] = SoapFaultInterceptorLogger.withLogMarkers(Markers.append("serviceidentifier", "fiks"));
+        interceptors[0] = interceptor;
         client.setInterceptors(interceptors);
 
         return client;

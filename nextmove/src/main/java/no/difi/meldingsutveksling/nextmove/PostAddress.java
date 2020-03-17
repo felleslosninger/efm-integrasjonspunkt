@@ -27,8 +27,6 @@ public class PostAddress implements Serializable {
     @NotNull
     private String poststed;
     @NotNull
-    private String landkode;
-    @NotNull
     private String land;
 
     @JsonIgnore

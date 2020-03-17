@@ -188,26 +188,26 @@ Feature: Sending a Next Move DPO multipart/form message
     And the content of the Altinn ZIP file named "manifest.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <ns0:BrokerServiceManifest xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
-       <ns0:ExternalServiceCode>v3888</ns0:ExternalServiceCode>
-       <ns0:ExternalServiceEditionCode>70515</ns0:ExternalServiceEditionCode>
-       <ns0:SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</ns0:SendersReference>
-       <ns0:Reportee>910077473</ns0:Reportee>
-       <ns0:FileList>
-          <ns0:File>
-             <ns0:FileName>sbd.json</ns0:FileName>
-          </ns0:File>
-       </ns0:FileList>
-    </ns0:BrokerServiceManifest>
+    <BrokerServiceManifest xmlns="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
+       <ExternalServiceCode>v3888</ExternalServiceCode>
+       <ExternalServiceEditionCode>70515</ExternalServiceEditionCode>
+       <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
+       <Reportee>910077473</Reportee>
+       <FileList>
+          <File>
+             <FileName>sbd.json</FileName>
+          </File>
+       </FileList>
+    </BrokerServiceManifest>
     """
     And the content of the Altinn ZIP file named "recipients.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <ns0:BrokerServiceRecipientList xmlns:ns0="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
-       <ns0:Recipient>
-          <ns0:PartyNumber>910075918</ns0:PartyNumber>
-       </ns0:Recipient>
-    </ns0:BrokerServiceRecipientList>
+    <BrokerServiceRecipientList xmlns="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
+       <Recipient>
+          <PartyNumber>910075918</PartyNumber>
+       </Recipient>
+    </BrokerServiceRecipientList>
     """
     And the JSON content of the Altinn ZIP file named "sbd.json" is:
     """

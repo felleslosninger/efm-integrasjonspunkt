@@ -12,6 +12,9 @@ public interface ValidationGroups {
         interface ArkivmeldingKvittering extends DocumentType {
         }
 
+        interface Avtalt extends DocumentType {
+        }
+
         interface Digital extends DocumentType {
         }
 

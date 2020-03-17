@@ -19,6 +19,7 @@ import java.util.Map;
 @ApiModel(value = "digital", parent = BusinessMessage.class)
 public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
 
+    private String avsenderId;
     @NotNull
     private String tittel;
     @NotNull

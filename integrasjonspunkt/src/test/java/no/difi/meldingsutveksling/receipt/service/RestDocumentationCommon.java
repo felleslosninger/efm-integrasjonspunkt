@@ -583,9 +583,6 @@ class RestDocumentationCommon {
                 fields.withPath("poststed")
                         .type(JsonFieldType.STRING)
                         .description("City / Postal area."),
-                fields.withPath("landkode")
-                        .type(JsonFieldType.STRING)
-                        .description("Country code."),
                 fields.withPath("land")
                         .type(JsonFieldType.STRING)
                         .description("Name of country.")
