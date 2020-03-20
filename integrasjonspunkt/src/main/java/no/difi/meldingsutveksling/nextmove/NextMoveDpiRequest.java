@@ -35,13 +35,11 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
 
     @Override
     public Document getDocument() {
-        BusinessMessageFile primary = message.getFiles().stream()
+        return message.getFiles().stream()
                 .filter(BusinessMessageFile::getPrimaryDocument)
                 .findFirst()
+                .map(this::createDocument)
                 .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
-
-        String title = StringUtils.hasText(primary.getTitle()) ? primary.getTitle() : MISSING_TXT;
-        return new Document(getContent(primary.getIdentifier()), primary.getMimetype(), primary.getFilename(), title);
     }
 
     @Override
@@ -55,7 +53,12 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
     }
 
     private Document createDocument(BusinessMessageFile file) {
-        String title = StringUtils.hasText(file.getTitle()) ? file.getTitle() : MISSING_TXT;
+        String title;
+        if (file.getPrimaryDocument()) {
+            title = file.getTitle();
+        } else {
+            title = StringUtils.hasText(file.getTitle()) ? file.getTitle() : MISSING_TXT;
+        }
         Document document = new Document(getContent(file.getIdentifier()), file.getMimetype(), file.getFilename(), title);
         if (isDigitalMessage() && getDigitalMessage().getMetadataFiler().containsKey(file.getFilename())) {
             String metadataFilename = getDigitalMessage().getMetadataFiler().get(file.getFilename());

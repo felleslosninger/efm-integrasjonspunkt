@@ -181,12 +181,22 @@ public class NextMoveValidator {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
-        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
-        if (requiredTitleCapabilities.contains(message.getServiceIdentifier())
-                && !StringUtils.hasText(file.getName())) {
-            throw new MissingFileTitleException(requiredTitleCapabilities.stream()
-                    .map(ServiceIdentifier::toString)
-                    .collect(Collectors.joining(",")));
+        if (message.getServiceIdentifier() == DPV && !StringUtils.hasText(file.getName())) {
+            throw new MissingFileTitleException(DPV.toString());
         }
+
+        if (message.getServiceIdentifier() == DPI && !StringUtils.hasText(file.getName())) {
+            if (!message.isPrimaryDocument(file.getOriginalFilename())) {
+                if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
+                    DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
+                    if (!bmsg.getMetadataFiler().containsValue(file.getOriginalFilename())) {
+                        throw new MissingFileTitleException(DPI.toString());
+                    }
+                } else {
+                    throw new MissingFileTitleException(DPI.toString());
+                }
+            }
+        }
+
     }
 }
