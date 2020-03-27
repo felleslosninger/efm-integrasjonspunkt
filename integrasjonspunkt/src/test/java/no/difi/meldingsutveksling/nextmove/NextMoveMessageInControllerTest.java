@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.asic.AsicUtils;
@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;

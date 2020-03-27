@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.service.MessageStatusController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus1;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus2;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

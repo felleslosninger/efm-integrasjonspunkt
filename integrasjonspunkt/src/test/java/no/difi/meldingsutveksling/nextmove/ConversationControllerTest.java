@@ -1,13 +1,13 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.service.ConversationController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +32,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpiConversation;
-import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpoConversation;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpiConversation;
+import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;

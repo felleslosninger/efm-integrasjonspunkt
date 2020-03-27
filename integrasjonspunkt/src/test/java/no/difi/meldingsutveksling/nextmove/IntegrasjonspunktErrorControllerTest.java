@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
@@ -36,13 +36,13 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Set;
 
-import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpoConversation;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.errorFieldDescriptors;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getDefaultHeaderDescriptors;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.getInputSbd;
-import static no.difi.meldingsutveksling.receipt.service.SubscriptionTestData.incomingMessages;
-import static no.difi.meldingsutveksling.receipt.service.SubscriptionTestData.incomingMessagesInput;
+import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.errorFieldDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.getInputSbd;
+import static no.difi.meldingsutveksling.nextmove.SubscriptionTestData.incomingMessages;
+import static no.difi.meldingsutveksling.nextmove.SubscriptionTestData.incomingMessagesInput;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
@@ -17,9 +17,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import static no.difi.meldingsutveksling.receipt.service.CapabilityTestData.*;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.capabilitiesDescriptors;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getDefaultHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.CapabilityTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.capabilitiesDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
