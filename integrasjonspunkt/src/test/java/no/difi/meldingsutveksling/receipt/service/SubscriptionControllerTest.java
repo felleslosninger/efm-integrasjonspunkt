@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -45,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(SubscriptionController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class SubscriptionControllerTest {
@@ -64,7 +66,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -97,7 +99,7 @@ public class SubscriptionControllerTest {
                 get("/api/subscriptions")
                         .param("page", "1")
                         .param("size", "1")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -113,7 +115,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions/{id}", subscription.getId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -141,8 +143,8 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 post("/api/subscriptions")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
 
         )
@@ -172,8 +174,8 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 put("/api/subscriptions/{id}", subscription.getId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -202,7 +204,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 delete("/api/subscriptions/{id}", subscription.getId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -225,7 +227,7 @@ public class SubscriptionControllerTest {
     public void deleteAllSubscriptions() throws Exception {
         mvc.perform(
                 delete("/api/subscriptions")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())

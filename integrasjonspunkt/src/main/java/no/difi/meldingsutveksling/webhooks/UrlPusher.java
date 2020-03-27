@@ -20,7 +20,7 @@ public class UrlPusher {
 
     void push(String uri, String jsonPayload) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         log.debug("Pushing to {}", uri);
         try {
             ResponseEntity<String> responseEntity = restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(jsonPayload, headers), String.class);

@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -60,6 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ValidationConfig.class})
 @WebMvcTest(IntegrasjonspunktErrorController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class IntegrasjonspunktErrorControllerTest {
@@ -87,7 +89,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/statuses/peek")
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, "No content")
                         .requestAttr(ERROR_ATTRIBUTE, new NoContentException())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent())
@@ -128,7 +130,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/messages/out")
                         .requestAttr(ERROR_ATTRIBUTE, constraintViolationException)
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
@@ -171,7 +173,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, "Service DPI is not enabled")
                         .requestAttr(ERROR_ATTRIBUTE, new ServiceNotEnabledException(ServiceIdentifier.DPI)
                         )
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
@@ -207,7 +209,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Subscription with id = %d was not found", id))
                         .requestAttr(ERROR_ATTRIBUTE, new SubscriptionNotFoundException(id)
                         )
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
@@ -246,7 +248,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/subscriptions")
                         .requestAttr(ERROR_ATTRIBUTE, constraintViolationException)
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
@@ -291,7 +293,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with id = %d was not found", id))
                         .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(id)
                         )
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
@@ -327,7 +329,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with messageId = %s was not found", messageId))
                         .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(messageId)
                         )
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
@@ -361,7 +363,7 @@ public class IntegrasjonspunktErrorControllerTest {
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/messages/in/peek")
                         .requestAttr(RequestDispatcher.ERROR_MESSAGE, "No content")
                         .requestAttr(ERROR_ATTRIBUTE, new NoContentException())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent())
