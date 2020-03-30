@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.receipt.MessageStatus;
 import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.service.MessageStatusController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -26,9 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus1;
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus2;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus1;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus2;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(MessageStatusController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 public class MessageStatusControllerTest {
 
@@ -66,7 +69,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -113,7 +116,7 @@ public class MessageStatusControllerTest {
                 get("/api/statuses")
                         .param("messageId", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
                         .param("status", "MOTTATT")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -133,7 +136,7 @@ public class MessageStatusControllerTest {
         mvc.perform(
                 get("/api/statuses")
                         .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -154,7 +157,7 @@ public class MessageStatusControllerTest {
                 get("/api/statuses")
                         .param("page", "3")
                         .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -173,7 +176,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/{messageId}", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -210,7 +213,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/peek")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.asic.AsicUtils;
@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -38,8 +39,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -58,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, ValidationConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 public class NextMoveMessageInControllerTest {
 
@@ -85,7 +87,7 @@ public class NextMoveMessageInControllerTest {
 
         mvc.perform(
                 get("/api/messages/in")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -130,7 +132,7 @@ public class NextMoveMessageInControllerTest {
         mvc.perform(
                 get("/api/messages/in")
                         .param("serviceIdentifier", "DPO")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -150,7 +152,7 @@ public class NextMoveMessageInControllerTest {
         mvc.perform(
                 get("/api/messages/in")
                         .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -171,7 +173,7 @@ public class NextMoveMessageInControllerTest {
                 get("/api/messages/in")
                         .param("page", "3")
                         .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -186,7 +188,7 @@ public class NextMoveMessageInControllerTest {
 
         mvc.perform(
                 get("/api/messages/in/peek")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -223,7 +225,7 @@ public class NextMoveMessageInControllerTest {
         mvc.perform(
                 get("/api/messages/in/peek")
                         .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -290,7 +292,7 @@ public class NextMoveMessageInControllerTest {
 
         mvc.perform(
                 delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())

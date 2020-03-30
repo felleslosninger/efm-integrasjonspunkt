@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import org.springframework.restdocs.payload.FieldDescriptor;
 

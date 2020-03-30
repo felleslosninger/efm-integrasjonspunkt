@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
@@ -12,13 +12,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import static no.difi.meldingsutveksling.receipt.service.CapabilityTestData.*;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.capabilitiesDescriptors;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.getDefaultHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.CapabilityTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.capabilitiesDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(CapabilitiesController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 public class CapabilitiesControllerTest {
 
@@ -49,7 +51,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -79,7 +81,7 @@ public class CapabilitiesControllerTest {
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
                         .param("securityLevel", "4")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -108,7 +110,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -138,7 +140,7 @@ public class CapabilitiesControllerTest {
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
                         .param("securityLevel", "4")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())

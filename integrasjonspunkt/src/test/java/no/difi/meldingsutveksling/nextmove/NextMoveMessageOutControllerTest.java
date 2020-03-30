@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
@@ -8,8 +8,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
@@ -29,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -40,8 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.receipt.service.StandardBusinessDocumentTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -60,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, ValidationConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(NextMoveMessageOutController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 public class NextMoveMessageOutControllerTest {
 
@@ -87,9 +87,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 MockMvcRequestBuilders.multipart("/api/messages/out/multipart")
-                        .file(new MockMultipartFile("sbd", null, MediaType.APPLICATION_JSON_UTF8_VALUE, objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT)))
+                        .file(new MockMultipartFile("sbd", null, MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT)))
                         .file(new MockMultipartFile("Before The Law", "before_the_law.txt", MediaType.TEXT_PLAIN_VALUE, "Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...".getBytes(StandardCharsets.UTF_8)))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -124,9 +124,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -156,9 +156,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(DPI_DIGITAL_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -188,9 +188,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(DIGITAL_DPV_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -220,9 +220,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(DPI_PRINT_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -252,9 +252,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(INNSYNSKRAV_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -284,9 +284,9 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out")
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(PUBLISERING_INPUT))
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -319,7 +319,7 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 get("/api/messages/out")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -364,7 +364,7 @@ public class NextMoveMessageOutControllerTest {
         mvc.perform(
                 get("/api/messages/out")
                         .param("serviceIdentifier", "DPO")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -384,7 +384,7 @@ public class NextMoveMessageOutControllerTest {
         mvc.perform(
                 get("/api/messages/out")
                         .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -405,7 +405,7 @@ public class NextMoveMessageOutControllerTest {
                 get("/api/messages/out")
                         .param("page", "3")
                         .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -420,7 +420,7 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 get("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -449,7 +449,7 @@ public class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                 post("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -473,7 +473,7 @@ public class NextMoveMessageOutControllerTest {
     public void deleteMessage() throws Exception {
         mvc.perform(
                 delete("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -500,7 +500,7 @@ public class NextMoveMessageOutControllerTest {
                 put("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
                         .contentType(MediaType.TEXT_PLAIN)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; name=Before The Law; filename=before_the_law.txt")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content("Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...".getBytes(StandardCharsets.UTF_8))
         )
                 .andDo(MockMvcResultHandlers.print())
