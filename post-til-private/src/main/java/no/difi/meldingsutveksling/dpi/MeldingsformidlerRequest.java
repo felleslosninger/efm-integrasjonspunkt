@@ -56,6 +56,11 @@ public interface MeldingsformidlerRequest {
     Optional<String> getAvsenderIdentifikator();
 
     /**
+     * @return fakturaReferanse
+     */
+    Optional<String> getFakturaReferanse();
+
+    /**
      *
      * @return an ID that uniquely identifies this message conversation. Must be in UIID format
      */

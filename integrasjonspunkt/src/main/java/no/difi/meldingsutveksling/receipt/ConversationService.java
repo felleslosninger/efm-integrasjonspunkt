@@ -37,6 +37,7 @@ public class ConversationService {
     private final MessageStatusFactory messageStatusFactory;
     private final MailSender mailSender;
     private final Clock clock;
+    private final StatusQueue statusQueue;
 
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
@@ -83,6 +84,7 @@ public class ConversationService {
                 MessageStatusMarker.from(status));
         repo.save(conversation);
         webhookPublisher.publish(conversation, status);
+        statusQueue.enqueueStatus(status, conversation);
 
         return conversation;
     }
@@ -176,6 +178,7 @@ public class ConversationService {
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
         repo.save(c);
         webhookPublisher.publish(c, ms);
+        statusQueue.enqueueStatus(ms, c);
         return c;
     }
 }

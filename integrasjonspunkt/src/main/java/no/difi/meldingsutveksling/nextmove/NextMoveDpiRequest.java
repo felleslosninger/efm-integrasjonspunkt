@@ -135,6 +135,20 @@ public class NextMoveDpiRequest implements MeldingsformidlerRequest {
         if (isDigitalMessage()) {
             return Optional.ofNullable(getDigitalMessage().getAvsenderId());
         }
+        if (isPrintMessage()) {
+            return Optional.ofNullable(getPrintMessage().getAvsenderId());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getFakturaReferanse() {
+        if (isDigitalMessage()) {
+            return Optional.ofNullable(getDigitalMessage().getFakturaReferanse());
+        }
+        if (isPrintMessage()) {
+            return Optional.ofNullable(getPrintMessage().getFakturaReferanse());
+        }
         return Optional.empty();
     }
 

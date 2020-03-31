@@ -37,6 +37,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
         request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
+        request.getFakturaReferanse().ifPresent(avsenderBuilder::fakturaReferanse);
         Avsender behandlingsansvarlig = avsenderBuilder.build();
         return Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke);
     }

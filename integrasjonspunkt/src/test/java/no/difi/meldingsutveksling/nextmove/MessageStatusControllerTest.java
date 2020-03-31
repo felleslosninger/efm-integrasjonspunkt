@@ -2,10 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusQueryInput;
-import no.difi.meldingsutveksling.receipt.MessageStatusRepository;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.receipt.*;
 import no.difi.meldingsutveksling.receipt.service.MessageStatusController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +55,9 @@ public class MessageStatusControllerTest {
 
     @MockBean
     private MessageStatusRepository statusRepo;
+
+    @MockBean
+    private StatusQueue statusQueue;
 
     @Test
     public void find() throws Exception {
@@ -209,7 +209,8 @@ public class MessageStatusControllerTest {
     @Test
     public void peekLatest() throws Exception {
         MessageStatus messageStatus = messageStatus1();
-        given(statusRepo.findFirstByOrderByLastUpdateAsc()).willReturn(Optional.of(messageStatus));
+        given(statusQueue.receiveStatus()).willReturn(Optional.of(1L));
+        given(statusRepo.findById(1L)).willReturn(Optional.of(messageStatus));
 
         mvc.perform(
                 get("/api/statuses/peek")
@@ -233,7 +234,5 @@ public class MessageStatusControllerTest {
                         responseFields(messageStatusDescriptors(""))
                         )
                 );
-
-        verify(statusRepo).findFirstByOrderByLastUpdateAsc();
     }
 }

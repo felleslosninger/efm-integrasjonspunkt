@@ -103,6 +103,11 @@ public class MeldingsformidlerClientMain {
             }
 
             @Override
+            public Optional<String> getFakturaReferanse() {
+                return Optional.empty();
+            }
+
+            @Override
             public String getEmailAddress() {
                 return null;
             }

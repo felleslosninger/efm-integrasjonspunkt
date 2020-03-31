@@ -20,6 +20,7 @@ import java.util.Map;
 public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
 
     private String avsenderId;
+    private String fakturaReferanse;
     @NotNull
     private String tittel;
     @NotNull
