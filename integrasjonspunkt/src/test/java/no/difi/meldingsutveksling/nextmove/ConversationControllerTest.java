@@ -1,13 +1,13 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ConversationQueryInput;
 import no.difi.meldingsutveksling.receipt.ConversationRepository;
+import no.difi.meldingsutveksling.receipt.service.ConversationController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -31,9 +32,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
-import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpiConversation;
-import static no.difi.meldingsutveksling.receipt.service.ConversationTestData.dpoConversation;
-import static no.difi.meldingsutveksling.receipt.service.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpiConversation;
+import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(ConversationController.class)
 @AutoConfigureMoveRestDocs
+@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class ConversationControllerTest {
@@ -68,7 +70,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -113,7 +115,7 @@ public class ConversationControllerTest {
         mvc.perform(
                 get("/api/conversations")
                         .param("serviceIdentifier", ServiceIdentifier.DPO.name())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -133,7 +135,7 @@ public class ConversationControllerTest {
         mvc.perform(
                 get("/api/conversations")
                         .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -155,7 +157,7 @@ public class ConversationControllerTest {
                 get("/api/conversations")
                         .param("page", "3")
                         .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -173,7 +175,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/{id}", conversation.getId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -203,7 +205,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/messageId/{messageId}", conversation.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -234,7 +236,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/queue")
-                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())

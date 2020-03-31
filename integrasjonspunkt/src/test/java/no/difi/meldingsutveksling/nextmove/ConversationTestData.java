@@ -1,8 +1,7 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.Conversation;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
@@ -11,7 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
 
-import static no.difi.meldingsutveksling.receipt.service.MessageStatusTestData.messageStatus;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.spy;
 

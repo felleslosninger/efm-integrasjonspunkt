@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.webhooks.event.WebhookContentBase;

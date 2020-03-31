@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.receipt.service;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
-import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
