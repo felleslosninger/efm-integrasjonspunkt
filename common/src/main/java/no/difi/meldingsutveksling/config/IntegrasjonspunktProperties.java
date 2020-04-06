@@ -1,9 +1,11 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
@@ -14,6 +16,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.net.URL;
+import java.util.Set;
 
 /**
  * Configurable properties for Integrasjonspunkt.
@@ -27,9 +30,9 @@ public class IntegrasjonspunktProperties {
     @Valid
     private Organization org;
 
-    /**
-     * Service registry endpoint.
-     */
+    @Valid
+    private FeatureToggle feature;
+
     @NotNull(message = "Service registry must be configured")
     private String serviceregistryEndpoint;
 
@@ -88,34 +91,29 @@ public class IntegrasjonspunktProperties {
         private String dpvDefaultProcess;
         @NotNull
         private String receiptProcess;
-    }
 
+    }
     @Data
     public static class Einnsyn {
         @NotNull
         private String defaultJournalProcess;
         @NotNull
         private String defaultInnsynskravProcess;
-    }
 
+    }
     @Data
     public static class Ntp {
         @NotNull
         private String host;
         private boolean disable;
-    }
 
+    }
     @Data
     public static class Queue {
         @NotNull
         private Integer maximumRetryHours;
-    }
 
-    /**
-     * Feature toggles.
-     */
-    @Valid
-    private FeatureToggle feature;
+    }
 
     public FeatureToggle getFeature() {
         if (this.feature == null) {
@@ -270,6 +268,7 @@ public class IntegrasjonspunktProperties {
         private boolean mailErrorStatus;
         private boolean retryOnDeadLock;
         private boolean cryptoMessagePersister;
+        private Set<ServiceIdentifier> statusQueueIncludes = Sets.newHashSet();
 
         /**
          * Service toggles

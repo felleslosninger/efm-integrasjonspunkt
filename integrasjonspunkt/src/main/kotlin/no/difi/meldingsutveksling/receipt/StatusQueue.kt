@@ -1,17 +1,21 @@
 package no.difi.meldingsutveksling.receipt
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-open class StatusQueue(private val jmsTemplate: JmsTemplate) {
+open class StatusQueue(private val jmsTemplate: JmsTemplate,
+                       private val props: IntegrasjonspunktProperties) {
 
     private val queueName: String = "STATUS"
 
     fun enqueueStatus(status: MessageStatus, conversation: Conversation) {
-        conversation.messageStatuses.first { it.status == status.status }?.id?.let {
-            jmsTemplate.convertAndSend(queueName, it.toString())
+        if (props.feature.statusQueueIncludes.contains(conversation.serviceIdentifier)) {
+            conversation.messageStatuses.first { it.status == status.status }?.id?.let {
+                jmsTemplate.convertAndSend(queueName, it.toString())
+            }
         }
     }
 
