@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import no.difi.sdp.client2.domain.Prioritet;
+import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -57,6 +58,9 @@ public class DigitalPostInnbyggerConfig {
 
     @NotNull
     private PrintSettings printSettings;
+
+    @NotNull
+    private DataSize uploadSizeLimit;
 
     public KeyStoreProperties getTrustStore() {
         return trustStore;
@@ -144,6 +148,14 @@ public class DigitalPostInnbyggerConfig {
 
     public void setEmail(Email email) {
         this.email = email;
+    }
+
+    public DataSize getUploadSizeLimit() {
+        return uploadSizeLimit;
+    }
+
+    public void setUploadSizeLimit(DataSize uploadSizeLimit) {
+        this.uploadSizeLimit = uploadSizeLimit;
     }
 
     public static class FeatureToggle {

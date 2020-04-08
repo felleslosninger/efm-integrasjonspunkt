@@ -51,6 +51,7 @@ public class NextMoveValidator {
     private final SBDUtil sbdUtil;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final NextMoveFileSizeValidator fileSizeValidator;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalMessageId().ifPresent(messageId -> {
@@ -156,6 +157,8 @@ public class NextMoveValidator {
                 .ifPresent(fn -> {
                     throw new DuplicateFilenameException(file.getOriginalFilename());
                 });
+
+        fileSizeValidator.validate(message, file);
 
         if (message.isPrimaryDocument(file.getOriginalFilename()) && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
             throw new MultiplePrimaryDocumentsNotAllowedException();
