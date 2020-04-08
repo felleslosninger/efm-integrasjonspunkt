@@ -158,6 +158,11 @@ public class NextMoveValidator {
                     throw new DuplicateFilenameException(file.getOriginalFilename());
                 });
 
+        // Uncomplete message pre 2.1.1 might have size null.
+        // Set to '-1' as workaround as validator accumulates total file size for message.
+        message.getFiles().forEach(f -> {
+            if (f.getSize() == null) f.setSize(-1L);
+        });
         fileSizeValidator.validate(message, file);
 
         if (message.isPrimaryDocument(file.getOriginalFilename()) && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
