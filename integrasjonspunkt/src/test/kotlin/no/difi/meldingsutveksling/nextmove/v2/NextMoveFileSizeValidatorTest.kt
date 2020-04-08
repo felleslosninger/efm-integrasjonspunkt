@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.exceptions.MaxFileSizeExceededException
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.springframework.util.unit.DataSize
@@ -37,6 +36,15 @@ class NextMoveFileSizeValidatorTest {
 
     @Test
     fun `test upload is within limit`() {
+        every { req.contentLengthLong } returns DataSize.parse("5MB").toBytes()
+        validator.validate(msg, file)
+    }
+
+    @Test
+    fun `test multiple uploads is within limit size`() {
+        val existingFile = mockk<BusinessMessageFile>()
+        every { existingFile.size } returns DataSize.parse("4MB").toBytes()
+        every { msg.files } returns setOf(existingFile)
         every { req.contentLengthLong } returns DataSize.parse("5MB").toBytes()
         validator.validate(msg, file)
     }
