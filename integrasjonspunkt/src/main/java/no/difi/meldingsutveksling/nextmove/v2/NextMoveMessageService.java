@@ -96,6 +96,12 @@ public class NextMoveMessageService {
     }
 
     public void addFile(NextMoveOutMessage message, MultipartFile file) {
+        // Uncomplete message pre 2.1.1 might have size null.
+        // Set to '-1' as workaround as validator accumulates total file size for message.
+        message.getFiles().forEach(f -> {
+            if (f.getSize() == null) f.setSize(-1L);
+        });
+
         validator.validateFile(message, file);
 
         String identifier = persistFile(message, file);

@@ -33,5 +33,5 @@ public class BusinessMessageFile extends AbstractEntity<Long> {
     @NonNull
     private Integer dokumentnummer;
     @NonNull
-    private Long size = -1L;
+    private Long size;
 }
