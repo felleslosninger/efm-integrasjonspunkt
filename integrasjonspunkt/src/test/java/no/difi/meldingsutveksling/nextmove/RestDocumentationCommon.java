@@ -488,7 +488,10 @@ class RestDocumentationCommon {
                         messageFields.withPath("varsler")
                                 .type(JsonFieldType.VARIES)
                                 .description("Information on how the mailbox supplier should notify the Recipient of the new mail. " +
-                                        "Receiver overrides its own notification preferences")
+                                        "Receiver overrides its own notification preferences"),
+                        messageFields.withPath("metadataFiler")
+                                .type(JsonFieldType.VARIES)
+                                .description("Map of metadatadocuments.")
                 )
                 .fields(digitalPostInfoDescriptors(prefix + "digitalPostInfo."))
                 .fields(dpiNotificationDescriptors(prefix + "varsler."))

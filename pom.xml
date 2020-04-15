@@ -97,7 +97,7 @@
         <jacoco.version>0.8.4</jacoco.version>
         <logback.version>1.2.3</logback.version>
 
-        <sikker-digital-post-klient.version>5.9</sikker-digital-post-klient.version>
+        <sikker-digital-post-klient.version>5.10</sikker-digital-post-klient.version>
         <powermock.version>2.0.0</powermock.version>
         <cucumber.version>2.3.1</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
