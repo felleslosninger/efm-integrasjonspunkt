@@ -33,11 +33,13 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     @EntityGraph(value = "Conversation.messageStatuses")
     default Page<Conversation> findWithMessageStatuses(ConversationQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue(), pageable);
+        Predicate p = createQuery(input).getValue();
+        return p != null ? findAll(p, pageable) : findAll(pageable);
     }
 
     default Page<Conversation> findWithMessageStatuses(String input, String direction, LocalDate date, Pageable pageable) {
-        return findAll(freeSearchQuery(input, direction, date).getValue(), pageable);
+        Predicate p = freeSearchQuery(input, direction, date).getValue();
+        return p != null ? findAll(p, pageable) : findAll(pageable);
     }
 
     @EntityGraph(value = "Conversation.messageStatuses")
@@ -81,8 +83,8 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     }
 
     default Page<Conversation> find(ConversationQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue()
-                , pageable);
+        Predicate p = createQuery(input).getValue();
+        return p != null ? findAll(p, pageable) : findAll(pageable);
     }
 
     default BooleanBuilder freeSearchQuery(String input, String direction, LocalDate date) {

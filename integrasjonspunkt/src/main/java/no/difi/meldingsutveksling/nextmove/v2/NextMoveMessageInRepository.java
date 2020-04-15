@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
@@ -42,18 +43,17 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
     void deleteMessageById(Long messageId);
 
     default Page<StandardBusinessDocument> find(NextMoveInMessageQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue()
-                , pageable)
-                .map(NextMoveInMessage::getSbd);
+        Predicate p = createQuery(input).getValue();
+        Page<NextMoveInMessage> page = p != null ? findAll(p, pageable) : findAll(pageable);
+        return page.map(NextMoveInMessage::getSbd);
     }
 
     default Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
-        return findAll(
-                createQuery(input)
-                        .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
-                        .getValue(),
-                PageRequests.FIRST_BY_LAST_UPDATED_ASC)
-                .getContent()
+        Predicate p = createQuery(input)
+                .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
+                .getValue();
+        Page<NextMoveInMessage> page = p != null ? findAll(p, PageRequests.FIRST_BY_LAST_UPDATED_ASC) : findAll(PageRequests.FIRST_BY_LAST_UPDATED_ASC);
+        return page.getContent()
                 .stream()
                 .findFirst();
     }
