@@ -14,11 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -77,5 +75,13 @@ public class MessageStatusController {
         return statusId.map(s -> statusRepo.findById(s)
                     .orElseThrow(() -> new NextMoveRuntimeException(format("MessageStatus with id=%s not found in DB", s))))
                 .orElseThrow(NoContentException::new);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> removeStatus(@PathVariable Long id) {
+        if (statusQueue.removeStatus(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
