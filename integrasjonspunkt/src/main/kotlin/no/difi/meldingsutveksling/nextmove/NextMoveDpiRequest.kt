@@ -140,7 +140,7 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         } else props.dpi.email.varslingstekst
     }
 
-    override fun getMobileNumber(): String {
+    override fun getMobileNumber(): String? {
         return serviceRecord.mobilnummer
     }
 
