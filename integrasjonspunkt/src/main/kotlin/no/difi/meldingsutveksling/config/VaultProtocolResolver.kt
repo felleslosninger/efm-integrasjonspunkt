@@ -31,6 +31,7 @@ class VaultProtocolResolver : ApplicationContextInitializer<ConfigurableApplicat
                     val path = props.getProperty("vault.resource-path", "")
                     del.isVersioned(path)
                     del.getSecret(path)?.data?.entries?.map {
+                        log.info("Loaded resource with key \'${it.key}\' from vault")
                         val decode = Base64.getDecoder().decode((it.value as String).replace("\n", ""))
                         vaultResources[it.key] = ByteArrayResource(decode)
                     }
