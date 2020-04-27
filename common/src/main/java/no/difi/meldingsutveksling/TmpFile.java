@@ -25,7 +25,7 @@ public class TmpFile {
         tmpFile.setId(UUID.randomUUID().toString());
 
         if (!(new File(getTmpDirPath()).mkdirs())) {
-            log.debug("Path {} no created", getTmpDirPath());
+            log.debug("Path {} not created", getTmpDirPath());
         }
         log.debug("Created tmp file \"{}\" in folder \"{}\"", tmpFile.getId(), getTmpDirPath());
 
