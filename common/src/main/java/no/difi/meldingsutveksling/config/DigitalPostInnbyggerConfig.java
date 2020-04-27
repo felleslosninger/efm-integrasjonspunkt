@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.config.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel;
 import no.difi.meldingsutveksling.config.dpi.securitylevel.ValidSecurityLevel;
 import no.difi.sdp.client2.domain.Prioritet;
+import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -58,17 +59,13 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private PrintSettings printSettings;
 
+    @NotNull
+    private DataSize uploadSizeLimit;
+
+    @Data
     public static class Email {
         @Size(max=500)
         private String varslingstekst;
-
-        public String getVarslingstekst() {
-            return varslingstekst;
-        }
-
-        public void setVarslingstekst(String varslingstekst) {
-            this.varslingstekst = varslingstekst;
-        }
     }
 
 

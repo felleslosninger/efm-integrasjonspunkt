@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
+import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -160,6 +161,9 @@ public class IntegrasjonspunktProperties {
         private String notificationText;
         private boolean allowForwarding;
         private Long daysToReply;
+        @NotNull
+        private DataSize uploadSizeLimit;
+
     }
 
     /**
@@ -247,6 +251,8 @@ public class IntegrasjonspunktProperties {
         private Integer readMaxMessages;
         private boolean batchRead;
         private Integer connectTimeout;
+        @NotNull
+        private DataSize uploadSizeLimit;
     }
 
     @Data

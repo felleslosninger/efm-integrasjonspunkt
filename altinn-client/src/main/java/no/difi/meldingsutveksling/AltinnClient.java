@@ -40,6 +40,7 @@ public class AltinnClient {
         try (SFtpClient.Connection connection = sFtpClient.connect("test_key")) {
             InputStream inputStream = connection.getInputStream(fileName);
             AltinnPackage altinnPackage = AltinnPackage.from(inputStream);
+            inputStream.close();
             printIt(altinnPackage);
         } catch (Exception e) {
             throw new MeldingsUtvekslingRuntimeException("SFTP connection failed", e);
