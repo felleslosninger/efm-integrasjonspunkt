@@ -84,6 +84,13 @@ public class IntegrasjonspunktProperties {
     private DeadLock deadlock;
 
     @Data
+    public static class Vault {
+        private String uri;
+        private String token;
+        private String path;
+    }
+
+    @Data
     public static class Arkivmelding {
         @NotNull
         private String defaultProcess;
