@@ -79,8 +79,8 @@ public class Organisasjonsnummer {
     public static Organisasjonsnummer fromIso6523(final String iso6523Orgnr) {
         Matcher matcher = ISO6523_PATTERN.matcher(iso6523Orgnr);
         if (!matcher.matches()) {
-            // Personal identification number if no match
-            return new Organisasjonsnummer(iso6523Orgnr);
+            throw new IllegalArgumentException("Invalid organization number. " +
+                    "Expected format is ISO 6523, got following organization number: " + iso6523Orgnr);
         }
         if (!isNullOrEmpty(matcher.group(3))) {
             return new Organisasjonsnummer(matcher.group(2), matcher.group(3));
