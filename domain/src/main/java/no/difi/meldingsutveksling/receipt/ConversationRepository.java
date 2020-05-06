@@ -134,8 +134,16 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
             builder.and(conversation.messageId.eq(input.getMessageId()));
         }
 
+        if (input.getReceiver() != null) {
+            builder.and(conversation.receiver.eq(input.getReceiver()));
+        }
+
         if (input.getReceiverIdentifier() != null) {
             builder.and(conversation.receiverIdentifier.eq(input.getReceiverIdentifier()));
+        }
+
+        if (input.getSender() != null) {
+            builder.and(conversation.sender.eq(input.getSender()));
         }
 
         if (input.getSenderIdentifier() != null) {
