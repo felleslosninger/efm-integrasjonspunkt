@@ -77,7 +77,7 @@ public class PartnerIdentification implements Serializable {
             return null;
         }
 
-        return Organisasjonsnummer.fromIso6523(value);
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value) : Organisasjonsnummer.from(value);
     }
 
     @JsonIgnore
