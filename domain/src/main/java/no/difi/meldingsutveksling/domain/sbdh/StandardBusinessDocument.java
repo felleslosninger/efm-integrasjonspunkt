@@ -20,6 +20,7 @@ import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.validation.InstanceOf;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
@@ -104,15 +105,34 @@ public class StandardBusinessDocument {
     }
 
     @JsonIgnore
+    public Organisasjonsnummer getSender() {
+        return getStandardBusinessDocumentHeader().getFirstSender()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getAsOrganisasjonsnummer)
+                .orElse(null);
+    }
+
+    @JsonIgnore
     public String getSenderIdentifier() {
         return getStandardBusinessDocumentHeader().getFirstSender()
                 .map(Partner::getIdentifier)
                 .map(PartnerIdentification::getStrippedValue)
                 .orElse(null);
     }
+
     @JsonIgnore
     public Optional<String> getOnBehalfOfOrgNr() {
-        return getStandardBusinessDocumentHeader().getFirstSender().map(Partner::getIdentifier).map(PartnerIdentification::getPaaVegneAvValue);
+        return getStandardBusinessDocumentHeader().getFirstSender()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getPaaVegneAvValue);
+    }
+
+    @JsonIgnore
+    public Organisasjonsnummer getReceiver() {
+        return getStandardBusinessDocumentHeader().getFirstReceiver()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getAsOrganisasjonsnummer)
+                .orElse(null);
     }
 
     @JsonIgnore
