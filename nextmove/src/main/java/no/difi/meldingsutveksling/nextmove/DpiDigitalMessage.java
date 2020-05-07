@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
-import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,8 +29,6 @@ public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
     @Valid
     private DigitalPostInfo digitalPostInfo;
 
-    @NotNull
-    @Valid
     private DpiNotification varsler;
 
     private Map<String, String> metadataFiler = Maps.newHashMap();

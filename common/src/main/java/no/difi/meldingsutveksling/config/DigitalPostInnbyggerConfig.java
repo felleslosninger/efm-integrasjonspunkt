@@ -14,7 +14,6 @@ import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import static no.difi.meldingsutveksling.config.dpi.securitylevel.SecurityLevel.INVALID;
 
@@ -32,12 +31,6 @@ public class DigitalPostInnbyggerConfig {
 
     @Valid
     KeyStoreProperties trustStore;
-
-    @Valid
-    private IntegrasjonspunktProperties.Sms sms = new IntegrasjonspunktProperties.Sms();
-
-    @Valid
-    private Email email = new Email();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -61,12 +54,5 @@ public class DigitalPostInnbyggerConfig {
 
     @NotNull
     private DataSize uploadSizeLimit;
-
-    @Data
-    public static class Email {
-        @Size(max=500)
-        private String varslingstekst;
-    }
-
 
 }

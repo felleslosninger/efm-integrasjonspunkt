@@ -128,16 +128,12 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         return serviceRecord.epostAdresse
     }
 
-    override fun getSmsVarslingstekst(): String {
-        return if (isDigitalMessage) {
-            getDigitalMessage().varsler.smsTekst
-        } else props.dpi.sms.varslingstekst
+    override fun getSmsVarslingstekst(): String? {
+        return if (isDigitalMessage) getDigitalMessage().varsler?.smsTekst else null
     }
 
-    override fun getEmailVarslingstekst(): String {
-        return if (isDigitalMessage) {
-            getDigitalMessage().varsler.epostTekst
-        } else props.dpi.email.varslingstekst
+    override fun getEmailVarslingstekst(): String? {
+        return if (isDigitalMessage) getDigitalMessage().varsler?.epostTekst else null
     }
 
     override fun getMobileNumber(): String? {
