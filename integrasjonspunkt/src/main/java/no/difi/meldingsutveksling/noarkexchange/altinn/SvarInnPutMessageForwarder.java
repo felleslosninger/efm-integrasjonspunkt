@@ -6,6 +6,7 @@ import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnFieldValidator;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnPutMessageBuilder;
@@ -78,13 +79,13 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
-            public String getSenderIdentifier() {
-                return putMessage.getEnvelope().getSender().getOrgnr();
+            public Organisasjonsnummer getSender() {
+                return Organisasjonsnummer.from(putMessage.getEnvelope().getSender().getOrgnr());
             }
 
             @Override
-            public String getReceiverIdentifier() {
-                return putMessage.getEnvelope().getReceiver().getOrgnr();
+            public Organisasjonsnummer getReceiver() {
+                return Organisasjonsnummer.from(putMessage.getEnvelope().getReceiver().getOrgnr());
             }
 
             @Override

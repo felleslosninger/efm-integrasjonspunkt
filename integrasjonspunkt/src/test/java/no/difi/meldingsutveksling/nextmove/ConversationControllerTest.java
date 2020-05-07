@@ -83,7 +83,9 @@ public class ConversationControllerTest {
                         requestParameters(
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),
+                                parameterWithName("receiver").optional().description("Filter on receiver (as ISO-6523)"),
                                 parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier"),
+                                parameterWithName("sender").optional().description("Filter on sender (as ISO-6523)"),
                                 parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier"),
                                 parameterWithName("messageReference").optional().description("Filter on messageReference"),
                                 parameterWithName("messageTitle").optional().description("Filter on message title"),

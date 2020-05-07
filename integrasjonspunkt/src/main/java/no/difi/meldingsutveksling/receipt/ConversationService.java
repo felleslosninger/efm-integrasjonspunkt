@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.mail.MailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
@@ -138,13 +139,13 @@ public class ConversationService {
             }
 
             @Override
-            public String getSenderIdentifier() {
-                return sbd.getSenderIdentifier();
+            public Organisasjonsnummer getSender() {
+                return sbd.getSender();
             }
 
             @Override
-            public String getReceiverIdentifier() {
-                return sbd.getReceiverIdentifier();
+            public Organisasjonsnummer getReceiver() {
+                return sbd.getReceiver();
             }
 
             @Override

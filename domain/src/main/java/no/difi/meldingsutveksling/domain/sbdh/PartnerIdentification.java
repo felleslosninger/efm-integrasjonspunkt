@@ -19,7 +19,6 @@ import org.hibernate.annotations.Parent;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
-import java.util.Optional;
 
 
 /**
@@ -71,6 +70,15 @@ public class PartnerIdentification implements Serializable {
             required = true
     )
     protected String authority;
+
+    @JsonIgnore
+    Organisasjonsnummer getAsOrganisasjonsnummer() {
+        if (value == null) {
+            return null;
+        }
+
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value) : Organisasjonsnummer.from(value);
+    }
 
     @JsonIgnore
     String getStrippedValue() {
