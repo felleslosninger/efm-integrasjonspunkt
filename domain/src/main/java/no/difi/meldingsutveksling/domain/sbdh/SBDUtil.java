@@ -55,6 +55,8 @@ public class SBDUtil {
     }
 
     public boolean isFileRequired(StandardBusinessDocument sbd) {
-        return !isStatus(sbd) && !isType(sbd, DocumentType.AVTALT);
+        return !isStatus(sbd) &&
+                !isReceipt(sbd) &&
+                !isType(sbd, DocumentType.AVTALT);
     }
 }

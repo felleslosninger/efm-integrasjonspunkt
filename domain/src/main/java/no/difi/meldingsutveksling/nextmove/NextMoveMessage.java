@@ -47,7 +47,7 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdated;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
     private Set<BusinessMessageFile> files;
 
     @NonNull
