@@ -82,6 +82,7 @@ class NextMoveValidatorTest {
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.empty()
         every { sbdUtil.isStatus(sbd) } returns false
         every { sbdUtil.isReceipt(sbd) } returns false
+        every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
         every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
