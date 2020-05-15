@@ -53,4 +53,8 @@ public class SBDUtil {
     public boolean isArkivmelding(StandardBusinessDocument sbd) {
         return (isType(sbd, DocumentType.ARKIVMELDING)) || (isType(sbd, DocumentType.ARKIVMELDING_KVITTERING));
     }
+
+    public boolean isFileRequired(StandardBusinessDocument sbd) {
+        return !isStatus(sbd) && !isType(sbd, DocumentType.AVTALT);
+    }
 }

@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
@@ -102,7 +101,7 @@ public class NextMoveValidator {
     public void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
-        if (!sbdUtil.isReceipt(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
