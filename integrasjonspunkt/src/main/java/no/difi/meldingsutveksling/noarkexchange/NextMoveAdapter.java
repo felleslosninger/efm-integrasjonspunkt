@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,12 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
+import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
@@ -119,6 +123,12 @@ public class NextMoveAdapter {
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)
         );
+        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getSender().getRef())) {
+            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.SENDER_REF, message.getRequest().getEnvelope().getSender().getRef()));
+        }
+        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getReceiver().getRef())) {
+            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, message.getRequest().getEnvelope().getReceiver().getRef()));
+        }
 
         return nextMoveMessageService.createMessage(sbd, getFiles(message));
     }

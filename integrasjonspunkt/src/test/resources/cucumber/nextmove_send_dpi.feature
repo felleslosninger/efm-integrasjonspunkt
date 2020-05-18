@@ -58,6 +58,8 @@ Feature: Sending a Next Move DPI message
         "digital": {
           "sikkerhetsnivaa": 3,
           "hoveddokument": "arkivmelding.xml",
+          "avsenderId": "avsender910077473",
+          "fakturaReferanse": "faktura910077473",
           "tittel" : "Min supertittel",
           "spraak": "NO",
           "digitalPostInfo": {
@@ -67,6 +69,9 @@ Feature: Sending a Next Move DPI message
           "varsler": {
             "epostTekst": "Varseltekst",
             "smsTekst": "Varseltekst"
+          },
+          "metadataFiler": {
+            "arkivmelding.xml": "test.txt"
           }
        }
     }
@@ -227,6 +232,8 @@ Feature: Sending a Next Move DPI message
             </Signature>
             <ns9:avsender>
                 <ns9:organisasjon authority="iso6523-actorid-upis">9908:910077473</ns9:organisasjon>
+                <ns9:avsenderidentifikator>avsender910077473</ns9:avsenderidentifikator>
+                <ns9:fakturaReferanse>faktura910077473</ns9:fakturaReferanse>
             </ns9:avsender>
             <ns9:mottaker>
                 <ns9:person>
@@ -266,13 +273,13 @@ Feature: Sending a Next Move DPI message
         </mottaker>
         <avsender>
             <organisasjon authority="iso6523-actorid-upis">9908:910077473</organisasjon>
+            <avsenderidentifikator>avsender910077473</avsenderidentifikator>
+            <fakturaReferanse>faktura910077473</fakturaReferanse>
         </avsender>
         <hoveddokument href="arkivmelding.xml" mime="application/xml">
             <tittel lang="NO">Arkivmelding</tittel>
+            <data href="test.txt" mime="text/plain"/>
         </hoveddokument>
-        <vedlegg href="test.txt" mime="text/plain">
-            <tittel lang="NO">Test</tittel>
-        </vedlegg>
     </manifest>
     """
     And the XML content of the file named "arkivmelding.xml" is:

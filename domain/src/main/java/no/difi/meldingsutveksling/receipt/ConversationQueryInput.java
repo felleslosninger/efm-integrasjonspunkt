@@ -21,11 +21,15 @@ public class ConversationQueryInput {
     )
     String messageId;
 
+    String receiver;
+
     @ApiModelProperty(
             value = "Receiver identifier",
             example = "0192:987654321"
     )
     String receiverIdentifier;
+
+    String sender;
 
     @ApiModelProperty(
             value = "Sender Identifier",

@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
 import lombok.extern.slf4j.Slf4j
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
@@ -44,6 +42,8 @@ class NextMoveValidatorTest {
     lateinit var conversationService : ConversationService
     @MockK
     lateinit var arkivmeldingUtil: ArkivmeldingUtil
+    @MockK
+    lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
 
     private lateinit var nextMoveValidator : NextMoveValidator
 
@@ -65,7 +65,8 @@ class NextMoveValidatorTest {
                 timeToLiveHelper,
                 sbdUtil,
                 conversationService,
-                arkivmeldingUtil)
+                arkivmeldingUtil,
+                nextMoveFileSizeValidator)
 
         val bmf = BusinessMessageFile()
                 .setFilename("foo.txt")
@@ -77,9 +78,11 @@ class NextMoveValidatorTest {
         every { message.messageId } returns messageId
         every { message.sbd } returns sbd
         every { message.serviceIdentifier } returns ServiceIdentifier.DPO
+        every { message.files } returns emptySet()
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.empty()
         every { sbdUtil.isStatus(sbd) } returns false
         every { sbdUtil.isReceipt(sbd) } returns false
+        every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
         every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
@@ -88,6 +91,7 @@ class NextMoveValidatorTest {
         every { sbd.standard } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
         every { serviceRecord.hasStandard(any()) } returns true
+        every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
     @Test(expected = ReceiverDoNotAcceptDocumentStandard::class)

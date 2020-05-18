@@ -16,8 +16,10 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
-        Avsender avsender = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender()).build();
-
+        Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
+        request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
+        request.getFakturaReferanse().ifPresent(avsenderBuilder::fakturaReferanse);
+        Avsender avsender = avsenderBuilder.build();
 
         KonvoluttAdresseHandler konvoluttAdresseHandler;
         if (request.getPostAddress().isNorge()) {

@@ -55,6 +55,11 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
+    public Optional<String> getFakturaReferanse() {
+        return Optional.empty();
+    }
+
+    @Override
     public String getConversationId() {
         return null;
     }

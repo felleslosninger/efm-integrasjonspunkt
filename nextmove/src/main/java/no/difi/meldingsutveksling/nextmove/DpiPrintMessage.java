@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @ApiModel(value = "print", parent = BusinessMessage.class)
 public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
 
+    private String avsenderId;
+    private String fakturaReferanse;
     @NotNull
     @Valid
     private PostAddress mottaker;

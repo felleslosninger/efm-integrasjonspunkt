@@ -89,7 +89,7 @@ public class WebhooksSteps {
     @Then("^the following ping message is posted to \"([^\"]*)\":$")
     public void theFollowingPingMessageIsPostedTo(String url, String body) {
         wireMockServer.verify(1, postRequestedFor(urlEqualTo(url))
-                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withRequestBody(equalToJson(body))
         );
     }
@@ -101,7 +101,7 @@ public class WebhooksSteps {
                 .untilTrue(pushed);
 
         wireMockServer.verify(1, postRequestedFor(urlEqualTo(url))
-                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withRequestBody(equalToJson(body))
         );
     }

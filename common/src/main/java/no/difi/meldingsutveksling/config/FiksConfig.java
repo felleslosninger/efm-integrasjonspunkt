@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ public class FiksConfig {
         private String username;
         private String password;
         private URL endpointUrl;
+        private DataSize uploadSizeLimit;
     }
 
     @Data

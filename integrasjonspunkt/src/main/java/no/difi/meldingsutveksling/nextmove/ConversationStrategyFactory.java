@@ -12,7 +12,7 @@ import java.util.Optional;
 @Component
 public class ConversationStrategyFactory {
 
-    private Map<ServiceIdentifier, ConversationStrategy> strategies;
+    private final Map<ServiceIdentifier, ConversationStrategy> strategies;
 
     public ConversationStrategyFactory(IntegrasjonspunktProperties props,
                                        ObjectProvider<DpoConversationStrategy> dpoStrat,
