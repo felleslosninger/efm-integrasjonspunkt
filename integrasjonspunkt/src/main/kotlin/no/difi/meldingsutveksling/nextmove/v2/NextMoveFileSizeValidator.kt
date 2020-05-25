@@ -23,6 +23,9 @@ class NextMoveFileSizeValidator(private val props: IntegrasjonspunktProperties) 
             else -> throw NextMoveRuntimeException("Unknown Service Identifier")
         }
         if (total > limit) {
+            if (total < DataSize.ofMegabytes(1L)) {
+                throw MaxFileSizeExceededException("${total.toBytes()}b", msg.serviceIdentifier.toString(), "${limit.toBytes()}b")
+            }
             throw MaxFileSizeExceededException("${total.toMegabytes()}MB", msg.serviceIdentifier.toString(), "${limit.toMegabytes()}MB")
         }
     }
