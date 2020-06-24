@@ -33,13 +33,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.time.Clock;
 import java.util.Optional;
 
@@ -107,15 +104,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public PublicKey publicKey(IntegrasjonspunktProperties props) throws CertificateException, IOException {
-        return CertificateFactory.getInstance("X.509")
-                .generateCertificate(props.getSign().getCertificate().getInputStream())
-                .getPublicKey();
-    }
-
-    @Bean
-    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil, PublicKey publicKey) throws MalformedURLException, URISyntaxException {
-        return new RestClient(props, restTemplate, cmsUtil, publicKey, new URL(props.getServiceregistryEndpoint()).toURI());
+    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil) throws MalformedURLException, URISyntaxException {
+        return new RestClient(props, restTemplate, cmsUtil, new URL(props.getServiceregistryEndpoint()).toURI());
     }
 
     @Bean
