@@ -13,10 +13,7 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.security.PublicKey;
 import java.util.Collections;
-
-import static java.util.Arrays.asList;
 
 /**
  * RestClient using simple http requests to manipulate services
@@ -33,7 +30,6 @@ public class RestClient {
     private final IntegrasjonspunktProperties props;
     @Getter private final RestOperations restTemplate;
     private final JWTDecoder jwtDecoder;
-    private final PublicKey pk;
     private final URI baseUrl;
 
     /**
@@ -61,7 +57,7 @@ public class RestClient {
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
-            return jwtDecoder.getPayload(response.getBody(), pk);
+            return jwtDecoder.getPayload(response.getBody(), props.getSign().getJwkUrl());
         }
 
         return restTemplate.getForObject(uri, String.class);

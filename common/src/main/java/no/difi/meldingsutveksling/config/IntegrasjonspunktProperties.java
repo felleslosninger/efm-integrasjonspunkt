@@ -8,7 +8,6 @@ import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
@@ -188,7 +187,7 @@ public class IntegrasjonspunktProperties {
     public static class Sign {
 
         private boolean enable;
-        private Resource certificate;
+        private URL jwkUrl;
     }
 
     /**
