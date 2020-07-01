@@ -553,7 +553,10 @@ class RestDocumentationCommon {
                                         .collect(Collectors.joining(", ")))),
                         messageFields.withPath("retur")
                                 .type(JsonFieldType.OBJECT)
-                                .description("Return address to be placed on the back of the envelope.")
+                                .description("Return address to be placed on the back of the envelope."),
+                        messageFields.withPath("printinstruksjoner")
+                                .type(JsonFieldType.OBJECT)
+                                .description("Map of print instructions")
                 )
                 .fields(postAddressDescriptors(prefix + "mottaker."))
                 .fields(mailReturnDescriptors(prefix + "retur."))
