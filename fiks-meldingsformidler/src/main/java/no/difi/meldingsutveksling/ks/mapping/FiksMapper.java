@@ -36,6 +36,7 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -66,9 +67,20 @@ public class FiksMapper {
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
+        Optional<String> senderRef = message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier);
+        // Confirm that SenderRef is a valid UUID, else use messageId
+        if (senderRef.isPresent()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                UUID.fromString(senderRef.get());
+            } catch (IllegalArgumentException e) {
+                senderRef = Optional.empty();
+            }
+        }
+        String forsendelsesid = senderRef.orElse(message.getMessageId());
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate, reject))
-                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getMessageId()))
+                .withForsendelsesid(forsendelsesid)
                 .build();
     }
 
