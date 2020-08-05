@@ -1,43 +1,15 @@
 package no.difi.meldingsutveksling.dpi;
 
+import lombok.Data;
+import no.difi.sdp.client2.domain.MetadataDokument;
+
+@Data
 public class Document {
-    private byte[] contents;
-    private String mimeType;
-    private String fileName;
-    private String title;
 
-    public Document(byte[] contents, String mimeType, String fileName, String title) {
-        this.contents = contents;
-        this.mimeType = mimeType;
-        this.fileName = fileName;
-        this.title = title;
-    }
+    private final byte[] contents;
+    private final String mimeType;
+    private final String fileName;
+    private final String title;
+    private MetadataDokument metadataDokument;
 
-    public byte[] getContents() {
-        return contents;
-    }
-    /**
-     *
-     * @return MIME type of the document
-     */
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    /**
-     *
-     * @return typically the prefix in the filename
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     *
-     * @return this title will be used to display the post in the target portal
-     */
-
-    public String getTitle() {
-        return title;
-    }
 }

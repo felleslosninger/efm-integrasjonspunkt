@@ -125,6 +125,7 @@ public class AltinnPackage {
         }
 
         zipOutputStream.finish();
+        zipOutputStream.close();
     }
 
     public static AltinnPackage from(File f, MessagePersister messagePersister, ApplicationContext context) throws IOException, JAXBException {

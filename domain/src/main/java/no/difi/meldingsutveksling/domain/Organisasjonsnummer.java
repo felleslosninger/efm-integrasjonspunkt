@@ -15,7 +15,9 @@
  */
 package no.difi.meldingsutveksling.domain;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -23,7 +25,9 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 public class Organisasjonsnummer {
     private static final Pattern ISO6523_PATTERN = Pattern.compile("^([0-9]{4}:)?([0-9]{9})?(?::)?([0-9]{9})?$");
     private static final String ISO6523_AUTHORITY = "iso6523-actorid-upis";
@@ -86,6 +90,11 @@ public class Organisasjonsnummer {
 
     public static boolean isIso6523(final String iso6523Orgnr) {
         return ISO6523_PATTERN.matcher(iso6523Orgnr).matches();
+    }
+
+    @Override
+    public String toString() {
+        return this.asIso6523();
     }
 
 }

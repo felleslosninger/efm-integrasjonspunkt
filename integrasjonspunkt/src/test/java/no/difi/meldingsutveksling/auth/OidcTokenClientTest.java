@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +43,7 @@ public class OidcTokenClientTest {
     @Before
     public void setup() throws MalformedURLException {
         props = new IntegrasjonspunktProperties();
-        props.setServiceregistryEndpoint("http://localhost:9099/");
+        props.setServiceregistryEndpoint("http://localhost:9099");
 
         props.setOidc(new IntegrasjonspunktProperties.Oidc());
         props.getOidc().setEnable(true);
@@ -53,14 +51,14 @@ public class OidcTokenClientTest {
         props.getOidc().setAudience("https://oidc-ver2.difi.no/idporten-oidc-provider/");
         props.getOidc().setClientId("test_move");
         props.getOidc().setKeystore(new KeyStoreProperties());
-        props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setLockProvider(false);
+        props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setPassword("changeit");
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
 
         props.setSign(new IntegrasjonspunktProperties.Sign());
         props.getSign().setEnable(true);
-        props.getSign().setCertificate(new FileSystemResource("src/test/resources/kontaktinfo-client.cer"));
+        props.getSign().setJwkUrl(new URL(props.getServiceregistryEndpoint()+"/jwk"));
 
         props.setFeature(new IntegrasjonspunktProperties.FeatureToggle());
         props.getFeature().setEnableDPO(true);
@@ -92,11 +90,12 @@ public class OidcTokenClientTest {
 
     @Test
     @Ignore("Manual test")
-    public void testOathRestTemplate() throws URISyntaxException {
+    public void testOathRestTemplate() throws URISyntaxException, MalformedURLException, CertificateException, BadJWSException {
         OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
         RestOperations ops = config.restTemplate();
-        String response = ops.getForObject("http://localhost:9099/identifier/06068700602", String.class);
+        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        String response = restClient.getResource("identifier/06068700602");
         System.out.println(response);
     }
 
@@ -106,14 +105,9 @@ public class OidcTokenClientTest {
         OidcTokenClient oidcTokenClient = new OidcTokenClient(props);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, oidcTokenClient);
         RestOperations ops = config.restTemplate();
-        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), publicKey(props), new URL(props.getServiceregistryEndpoint()).toURI());
+        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
         String response = restClient.getResource("sastoken");
         System.out.println(response);
     }
 
-    private PublicKey publicKey(IntegrasjonspunktProperties props) throws CertificateException, IOException {
-        return CertificateFactory.getInstance("X.509")
-                .generateCertificate(props.getSign().getCertificate().getInputStream())
-                .getPublicKey();
-    }
 }

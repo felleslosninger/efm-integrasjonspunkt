@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
@@ -46,7 +47,7 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdated;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
     private Set<BusinessMessageFile> files;
 
     @NonNull
@@ -85,4 +86,15 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     public OffsetDateTime getExpiry() {
         return getSbd().getExpectedResponseDateTime().orElse(null);
     }
+
+    @Override
+    public Organisasjonsnummer getSender() {
+        return getSbd().getSender();
+    }
+
+    @Override
+    public Organisasjonsnummer getReceiver() {
+        return getSbd().getReceiver();
+    }
+
 }

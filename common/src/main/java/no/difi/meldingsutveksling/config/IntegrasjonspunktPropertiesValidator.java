@@ -25,8 +25,7 @@ public class IntegrasjonspunktPropertiesValidator implements Validator {
         }
 
         if (props.getSign().isEnable()) {
-            ValidationUtils.rejectIfEmpty(errors, "sign.certificate", EMPTY_FIELD, "Sign verification enabled, must" +
-                    " specify certificate");
+            ValidationUtils.rejectIfEmpty(errors, "sign.jwkUrl", EMPTY_FIELD, "Must not be null if JWS is enabled");
         }
 
         if (props.getNoarkSystem() != null && "mail".equals(props.getNoarkSystem().getType())) {
