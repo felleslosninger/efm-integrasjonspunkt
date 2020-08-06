@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.difi.meldingsutveksling.NextMoveConsts
 import no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE
 import no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE
 import no.difi.meldingsutveksling.ServiceIdentifier.DPF
@@ -12,10 +11,12 @@ import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
 import no.ks.fiks.io.client.model.MottattMelding
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.io.IOException
 
 @Component
+@ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
                        private val objectMapper: ObjectMapper,
                        private val nextMoveQueue: NextMoveQueue,

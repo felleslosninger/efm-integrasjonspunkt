@@ -6,12 +6,14 @@ import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.FiksIOKlientFactory
 import no.ks.fiks.io.client.konfigurasjon.*
 import no.ks.fiks.io.client.model.KontoId
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.security.KeyStore
 import java.util.*
 
 @Configuration
+@ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 open class FiksIoConfig(private val props: IntegrasjonspunktProperties,
                         private val ipNokkel: IntegrasjonspunktNokkel) {
 

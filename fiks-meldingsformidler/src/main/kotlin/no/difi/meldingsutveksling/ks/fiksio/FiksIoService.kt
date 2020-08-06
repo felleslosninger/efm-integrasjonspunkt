@@ -8,19 +8,25 @@ import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.pipes.Plumber
 import no.difi.meldingsutveksling.pipes.PromiseMaker
+import no.difi.meldingsutveksling.serviceregistry.SRParameter
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.KontoId
 import no.ks.fiks.io.client.model.MeldingRequest
 import no.ks.fiks.io.client.model.Payload
 import no.ks.fiks.io.client.model.StreamPayload
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.function.Consumer
 
 @Component
+@ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 class FiksIoService(private val props: IntegrasjonspunktProperties,
                     private val fiksIoKlient: FiksIOKlient,
+                    private val serviceRegistryLookup: ServiceRegistryLookup,
                     private val persister: OptionalCryptoMessagePersister,
                     private val objectMapper: ObjectMapper,
                     private val plumber: Plumber,
@@ -38,15 +44,18 @@ class FiksIoService(private val props: IntegrasjonspunktProperties,
                 objectMapper.writeValue(it, msg.sbd)
             }, reject).outlet()
             payloads.add(StreamPayload(outlet, NextMoveConsts.SBD_FILE))
-            sendMessage(payloads = payloads)
+            createRequest(payloads = payloads, msg = msg)
         }
     }
 
-    fun sendMessage(meldingType: String = "no.difi.einnsyn.innsynskrav.v1", payloads: List<Payload>) {
-        val kontoId: UUID = UUID.fromString(props.fiks.io.kontoId)
+    private fun createRequest(meldingType: String = "no.difi.einnsyn.innsynskrav.v1", msg: NextMoveMessage, payloads: List<Payload>) {
+        val serviceRecord: ServiceRecord = serviceRegistryLookup.getServiceRecord(
+                SRParameter.builder(msg.receiverIdentifier)
+                        .process(msg.sbd.process)
+                        .conversationId(msg.conversationId).build(),
+                msg.sbd.standard)
         val request = MeldingRequest.builder()
-                // TODO receive kontoId
-                .mottakerKontoId(KontoId(kontoId))
+                .mottakerKontoId(KontoId(UUID.fromString(serviceRecord.service.endpointUrl)))
                 .meldingType(meldingType)
                 .build()
         val sentMessage = fiksIoKlient.send(request, payloads)
