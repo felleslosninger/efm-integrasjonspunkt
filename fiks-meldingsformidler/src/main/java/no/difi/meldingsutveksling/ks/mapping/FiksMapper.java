@@ -89,10 +89,20 @@ public class FiksMapper {
         Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = arkivmeldingUtil.getJournalpost(am);
 
+        Optional<String> receiverRef = message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier);
+        if (receiverRef.isPresent()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                UUID.fromString(receiverRef.get());
+            } catch (IllegalArgumentException e) {
+                receiverRef = Optional.empty();
+            }
+        }
+
         return Forsendelse.builder()
                 .withEksternref(message.getMessageId())
                 .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null))
+                .withSvarPaForsendelse(receiverRef.orElse(null))
                 .withTittel(journalpost.getOffentligTittel())
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())
