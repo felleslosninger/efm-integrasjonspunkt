@@ -36,6 +36,7 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -66,9 +67,20 @@ public class FiksMapper {
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
+        Optional<String> senderRef = message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier);
+        // Confirm that SenderRef is a valid UUID, else use messageId
+        if (senderRef.isPresent()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                UUID.fromString(senderRef.get());
+            } catch (IllegalArgumentException e) {
+                senderRef = Optional.empty();
+            }
+        }
+        String forsendelsesid = senderRef.orElse(message.getMessageId());
         return SendForsendelseMedId.builder()
                 .withForsendelse(getForsendelse(message, certificate, reject))
-                .withForsendelsesid(message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(message.getMessageId()))
+                .withForsendelsesid(forsendelsesid)
                 .build();
     }
 
@@ -77,10 +89,20 @@ public class FiksMapper {
         Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = arkivmeldingUtil.getJournalpost(am);
 
+        Optional<String> receiverRef = message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier);
+        if (receiverRef.isPresent()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                UUID.fromString(receiverRef.get());
+            } catch (IllegalArgumentException e) {
+                receiverRef = Optional.empty();
+            }
+        }
+
         return Forsendelse.builder()
                 .withEksternref(message.getMessageId())
                 .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null))
+                .withSvarPaForsendelse(receiverRef.orElse(null))
                 .withTittel(journalpost.getOffentligTittel())
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())

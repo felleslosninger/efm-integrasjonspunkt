@@ -32,13 +32,11 @@ class ConversationWebController(
         model.addAttribute("direction", direction)
         model.addAttribute("page", findAll)
 
-        val lastStatusMap = mutableMapOf<String, String>()
-        findAll.content.forEach {
-            val lastStatus = it.messageStatuses.maxBy { st -> st.lastUpdate }?.status
-            lastStatusMap[it.messageId] = lastStatus ?: "none"
-        }
+        val lastStatusMap = findAll.content.map {
+            it.messageId to (it.messageStatuses.maxBy { st -> st.lastUpdate }?.status ?: "none")
+        }.toMap()
         model.addAttribute("statusMap", lastStatusMap)
 
-        return "index"
+        return "conversations/index"
     }
 }

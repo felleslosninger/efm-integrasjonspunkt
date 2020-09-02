@@ -20,20 +20,15 @@ import lombok.ToString;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.Payload;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.validation.InstanceOf;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.validation.group.sequenceprovider.StandardBusinessDocumentGroupSequenceProvider;
-import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.hibernate.validator.group.GroupSequenceProvider;
-import org.w3c.dom.Node;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -82,9 +77,10 @@ public class StandardBusinessDocument {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
+    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @NotNull
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
+    @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.DocumentType.Avtalt.class)
     @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
     @InstanceOf(value = DigitalDpvMessage.class, groups = ValidationGroups.DocumentType.DigitalDpv.class)
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
@@ -92,7 +88,7 @@ public class StandardBusinessDocument {
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
     @ApiModelProperty(
             value = "The business message. Please note that the property name is not 'any'. "
-                    + "It is one of the following: arkivmelding, digital, digital_dpv, print, innsynskrav or publisering.",
+                    + "It is one of the following: arkivmelding, avtalt, digital, digital_dpv, print, innsynskrav or publisering.",
             dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage",
             required = true
     )
@@ -109,10 +105,33 @@ public class StandardBusinessDocument {
     }
 
     @JsonIgnore
+    public Organisasjonsnummer getSender() {
+        return getStandardBusinessDocumentHeader().getFirstSender()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getAsOrganisasjonsnummer)
+                .orElse(null);
+    }
+
+    @JsonIgnore
     public String getSenderIdentifier() {
         return getStandardBusinessDocumentHeader().getFirstSender()
                 .map(Partner::getIdentifier)
                 .map(PartnerIdentification::getStrippedValue)
+                .orElse(null);
+    }
+
+    @JsonIgnore
+    public Optional<String> getOnBehalfOfOrgNr() {
+        return getStandardBusinessDocumentHeader().getFirstSender()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getPaaVegneAvValue);
+    }
+
+    @JsonIgnore
+    public Organisasjonsnummer getReceiver() {
+        return getStandardBusinessDocumentHeader().getFirstReceiver()
+                .map(Partner::getIdentifier)
+                .map(PartnerIdentification::getAsOrganisasjonsnummer)
                 .orElse(null);
     }
 
@@ -191,31 +210,6 @@ public class StandardBusinessDocument {
     @JsonIgnore
     public Optional<String> getOptionalMessageId() {
         return Optional.ofNullable(getDocumentId());
-    }
-
-    @JsonIgnore
-    public Payload getPayload() {
-        if (getAny() instanceof Payload) {
-            return (Payload) getAny();
-        } else if (getAny() instanceof Node) {
-            return unmarshallAnyElement(getAny());
-        } else {
-            throw new MeldingsUtvekslingRuntimeException("Could not cast any element " + getAny() + " from " + StandardBusinessDocument.class + " to " + Payload.class);
-        }
-    }
-
-    private Payload unmarshallAnyElement(Object any) {
-        JAXBContext jaxbContextP;
-        Unmarshaller unMarshallerP;
-        Payload payload;
-        try {
-            jaxbContextP = JAXBContextFactory.createContext(new Class[]{Payload.class}, null);
-            unMarshallerP = jaxbContextP.createUnmarshaller();
-            payload = unMarshallerP.unmarshal((org.w3c.dom.Node) any, Payload.class).getValue();
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        return payload;
     }
 
     public LogstashMarker createLogstashMarkers() {

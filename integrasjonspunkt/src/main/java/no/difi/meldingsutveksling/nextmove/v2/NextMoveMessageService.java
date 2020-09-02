@@ -104,6 +104,7 @@ public class NextMoveMessageService {
                 .setIdentifier(identifier)
                 .setTitle(getTitle(file.getName()))
                 .setFilename(file.getOriginalFilename())
+                .setSize(file.getSize())
                 .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
                 .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 

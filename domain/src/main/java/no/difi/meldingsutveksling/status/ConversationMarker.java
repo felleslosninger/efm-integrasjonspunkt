@@ -4,6 +4,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 
 /**
@@ -23,12 +24,21 @@ public class ConversationMarker {
     public static LogstashMarker markerFrom(Conversation conversation) {
         LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(conversation.getConversationId());
         LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(conversation.getMessageId());
-        LogstashMarker senderMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
-        LogstashMarker receiverMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
+        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(conversation.getSender());
+        LogstashMarker senderIdentifierMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
+        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(conversation.getReceiver());
+        LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
         LogstashMarker processMarker = processIdentifierMarker(conversation.getProcessIdentifier());
         LogstashMarker serviceIdentifierMarker = serviceIdentifierMarker(conversation.getServiceIdentifier());
         LogstashMarker directionMarker = directionMarker(conversation.getDirection());
-        return conversationIdMarker.and(messageIdMarker).and(senderMarker).and(receiverMarker).and(processMarker).and(serviceIdentifierMarker).and(directionMarker);
+        return conversationIdMarker.and(messageIdMarker)
+                .and(senderMarker)
+                .and(senderIdentifierMarker)
+                .and(receiverMarker)
+                .and(receiverIdentifierMarker)
+                .and(processMarker)
+                .and(serviceIdentifierMarker)
+                .and(directionMarker);
     }
 
     public static LogstashMarker markerFrom(MessageStatus status) {

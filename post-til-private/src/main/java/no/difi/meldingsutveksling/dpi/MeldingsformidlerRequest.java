@@ -8,6 +8,7 @@ import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Object to hold parameters used to send messages to sikker digital post
@@ -43,6 +44,21 @@ public interface MeldingsformidlerRequest {
      * @return virksomhetens organization number
      */
     String getSenderOrgnumber();
+
+    /**
+     * @return orgnr to send on behalf of
+     */
+    Optional<String> getOnBehalfOfOrgnr();
+
+    /**
+     * @return avsenderIdentifikator
+     */
+    Optional<String> getAvsenderIdentifikator();
+
+    /**
+     * @return fakturaReferanse
+     */
+    Optional<String> getFakturaReferanse();
 
     /**
      *

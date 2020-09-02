@@ -12,7 +12,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import java.io.IOException;
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient.CACHE_GET_SAS_KEY;
+import static no.difi.meldingsutveksling.config.CacheConfig.CACHE_GET_SAS_KEY;
 
 @Component
 @Slf4j

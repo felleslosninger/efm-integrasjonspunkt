@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.status.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -31,6 +32,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final Clock clock;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MeldingsformidlerClient meldingsformidlerClient;
+    private final ConversationService conversationService;
 
     @Override
     public void send(NextMoveOutMessage message) throws NextMoveException {
@@ -47,6 +49,14 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                             message.getReceiverIdentifier(),
                             message.getProcessIdentifier(),
                             message.getSbd().getStandard()));
+        }
+
+        if (message.getSbd().getBusinessMessage() instanceof DpiDigitalMessage) {
+            DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getSbd().getBusinessMessage();
+            conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
+                c.setMessageTitle(bmsg.getTittel());
+                conversationService.save(c);
+            });
         }
 
         NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, optionalCryptoMessagePersister);

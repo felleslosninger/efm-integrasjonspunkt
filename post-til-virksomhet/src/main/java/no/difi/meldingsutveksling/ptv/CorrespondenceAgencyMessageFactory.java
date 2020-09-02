@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.ptv;
 
-import com.google.common.collect.Lists;
+import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.schemas.serviceengine.formsengine._2009._10.TransportType;
@@ -8,10 +8,9 @@ import no.altinn.schemas.services.serviceengine.correspondence._2010._10.Attachm
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ExternalContentV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.MyInsertCorrespondenceV2;
 import no.altinn.schemas.services.serviceengine.correspondence._2010._10.ObjectFactory;
-import no.altinn.schemas.services.serviceengine.correspondence._2014._10.CorrespondenceStatusFilterV2;
 import no.altinn.schemas.services.serviceengine.notification._2009._10.*;
 import no.altinn.schemas.services.serviceengine.subscription._2009._10.AttachmentFunctionType;
-import no.altinn.services.serviceengine.correspondence._2009._10.GetCorrespondenceStatusDetailsV2;
+import no.altinn.services.serviceengine.correspondence._2009._10.CorrespondenceStatusHistoryRequest;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentExternalBEV2List;
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
@@ -102,11 +101,10 @@ public class CorrespondenceAgencyMessageFactory {
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        List<BusinessMessageFile> files = Lists.newArrayList(arkivmeldingUtil.getFilenames(arkivmelding)
+        List<BusinessMessageFile> files = arkivmeldingUtil.getFilenames(arkivmelding)
                 .stream()
                 .map(fileMap::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+                .filter(Objects::nonNull).collect(Collectors.toList());
 
         attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files, reject));
 
@@ -179,8 +177,11 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setServiceEdition(objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceRecord.getService().getServiceEditionCode()));
         // Should the user be allowed to forward the message from portal
         correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
-        // Name of the message sender, always "Avsender"
-        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
+        if (message.getSbd().getOnBehalfOfOrgNr().isPresent()) {
+            correspondence.setOnBehalfOfOrgNr(objectFactory.createMyInsertCorrespondenceV2OnBehalfOfOrgNr(message.getSbd().getOnBehalfOfOrgNr().get()));
+        } else {
+            correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
+        }
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
         correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
@@ -275,9 +276,9 @@ public class CorrespondenceAgencyMessageFactory {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
         if (StringUtils.hasText(config.getNotificationText())) {
-            tokens.getTextToken().add(createTextToken(1, config.getNotificationText()));
+            tokens.getTextToken().add(createTextToken(config.getNotificationText()));
         } else {
-            tokens.getTextToken().add(createTextToken(1, String.format("$reporteeName$: Du har mottatt en melding fra %s.", getSender())));
+            tokens.getTextToken().add(createTextToken(String.format("$reporteeName$: Du har mottatt en melding fra %s.", getSender())));
         }
 
         return tokens;
@@ -292,28 +293,26 @@ public class CorrespondenceAgencyMessageFactory {
         return OffsetDateTime.now(clock).plusMinutes(5);
     }
 
-    public GetCorrespondenceStatusDetailsV2 createReceiptRequest(Conversation conversation) {
-
+    public CorrespondenceStatusHistoryRequest createReceiptRequest(Set<Conversation> conversations) {
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
                 .serviceengine.correspondence._2009._10.ObjectFactory();
-        GetCorrespondenceStatusDetailsV2 statusRequest = of.createGetCorrespondenceStatusDetailsV2();
+        CorrespondenceStatusHistoryRequest historyRequest = of.createCorrespondenceStatusHistoryRequest();
 
-        CorrespondenceStatusFilterV2 filter = new CorrespondenceStatusFilterV2();
-        no.altinn.schemas.services.serviceengine.correspondence._2014._10.ObjectFactory filterOF = new no.altinn
-                .schemas.services.serviceengine.correspondence._2014._10.ObjectFactory();
-        JAXBElement<String> sendersReference = filterOF.createCorrespondenceStatusFilterV2SendersReference
-                (conversation.getMessageId());
-        filter.setSendersReference(sendersReference);
-        filter.setServiceCode(conversation.getServiceCode());
-        filter.setServiceEditionCode(Integer.parseInt(conversation.getServiceEditionCode()));
-        statusRequest.setFilterCriteria(filter);
+        com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory arrayOf = new com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory();
+        ArrayOfstring arrayOfstring = arrayOf.createArrayOfstring();
 
-        return statusRequest;
+        conversations.stream()
+                .map(Conversation::getMessageId)
+                .forEach(id -> arrayOfstring.getString().add(id));
+
+        JAXBElement<ArrayOfstring> strings = of.createCorrespondenceStatusHistoryRequestCorrespondenceSendersReferences(arrayOfstring);
+        historyRequest.setCorrespondenceSendersReferences(strings);
+        return historyRequest;
     }
 
-    private TextToken createTextToken(int num, String value) {
+    private TextToken createTextToken(String value) {
         TextToken textToken = new TextToken();
-        textToken.setTokenNum(num);
+        textToken.setTokenNum(1);
         textToken.setTokenValue(notificationObjectFactory.createTextTokenTokenValue(value));
 
         return textToken;

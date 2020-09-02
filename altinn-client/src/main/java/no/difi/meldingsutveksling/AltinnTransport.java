@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.springframework.stereotype.Component;
@@ -10,15 +11,11 @@ import java.io.InputStream;
  * Transport implementation for Altinn message service.
  */
 @Component
+@RequiredArgsConstructor
 public class AltinnTransport {
 
     private final UUIDGenerator uuidGenerator;
     private final AltinnWsClient client;
-
-    public AltinnTransport(AltinnWsClientFactory altinnWsClientFactory, UUIDGenerator uuidGenerator) {
-        this.uuidGenerator = uuidGenerator;
-        this.client = altinnWsClientFactory.getAltinnWsClient();
-    }
 
     /**
      * @param sbd     An sbd with a payload consisting of an CMS encrypted ASIC package

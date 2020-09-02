@@ -1,11 +1,15 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.google.common.collect.Maps;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -16,6 +20,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @ApiModel(value = "print", parent = BusinessMessage.class)
 public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
 
+    private String avsenderId;
+    private String fakturaReferanse;
     @NotNull
     @Valid
     private PostAddress mottaker;
@@ -29,4 +35,6 @@ public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
     @NotNull
     @Valid
     private MailReturn retur;
+
+    private Map<String, String> printinstruksjoner = Maps.newHashMap();
 }

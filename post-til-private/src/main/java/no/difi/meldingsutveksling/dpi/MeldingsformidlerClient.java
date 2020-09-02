@@ -56,12 +56,15 @@ public class MeldingsformidlerClient {
     }
 
     private Dokument dokumentFromDocument(Document document) {
-        return Dokument.builder(
+        Dokument.Builder builder = Dokument.builder(
                 document.getTitle(),
                 document.getFileName(),
-                document.getContents()
-        ).mimeType(document.getMimeType())
-                .build();
+                document.getContents())
+                .mimeType(document.getMimeType());
+        if (document.getMetadataDokument() != null) {
+            builder.metadataDocument(document.getMetadataDokument());
+        }
+        return builder.build();
     }
 
     public Optional<ExternalReceipt> sjekkEtterKvittering(String orgnr) {

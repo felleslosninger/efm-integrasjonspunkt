@@ -1,22 +1,20 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.status.ConversationService;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.status.ConversationService;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.stereotype.Component;
@@ -28,17 +26,20 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
+import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class NextMoveValidator {
 
@@ -51,6 +52,7 @@ public class NextMoveValidator {
     private final SBDUtil sbdUtil;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final NextMoveFileSizeValidator fileSizeValidator;
 
     void validate(StandardBusinessDocument sbd) {
         sbd.getOptionalMessageId().ifPresent(messageId -> {
@@ -99,7 +101,7 @@ public class NextMoveValidator {
     public void validate(NextMoveOutMessage message) {
         // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
-        if (!sbdUtil.isReceipt(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
@@ -111,18 +113,36 @@ public class NextMoveValidator {
         });
 
         if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
-            // Verify each file referenced in arkivmelding is uploaded
-            List<String> arkivmeldingFiles = arkivmeldingUtil.getFilenames(getArkivmelding(message));
-            Set<String> messageFiles = message.getFiles().stream()
+            Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
+            // Verify each file referenced in arkivmelding is uploaded
+            List<String> arkivmeldingFiles = arkivmeldingUtil.getFilenames(getArkivmelding(message));
 
             List<String> missingFiles = arkivmeldingFiles.stream()
-                    .filter(p -> !messageFiles.contains(p))
+                    .filter(p -> !messageFilenames.contains(p))
                     .collect(Collectors.toList());
 
             if (!missingFiles.isEmpty()) {
                 throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
+            }
+        }
+
+        // Validate that files given in metadata mapping exist
+        if (sbdUtil.isType(message.getSbd(), DIGITAL)) {
+            Set<String> messageFilenames = message.getFiles().stream()
+                    .map(BusinessMessageFile::getFilename)
+                    .collect(Collectors.toSet());
+            DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
+            Set<String> filerefs = Stream.of(bmsg.getMetadataFiler().keySet(), bmsg.getMetadataFiler().values())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+            if (!messageFilenames.containsAll(filerefs)) {
+                String missing = filerefs.stream()
+                        .filter(f -> !messageFilenames.contains(f))
+                        .collect(Collectors.joining(", "));
+                log.error("The following files were defined in metadata, but are missing as attachments: {}", missing);
+                throw new FileNotFoundException(missing);
             }
         }
 
@@ -157,16 +177,33 @@ public class NextMoveValidator {
                     throw new DuplicateFilenameException(file.getOriginalFilename());
                 });
 
+        // Uncomplete message pre 2.1.1 might have size null.
+        // Set to '-1' as workaround as validator accumulates total file size for message.
+        message.getFiles().forEach(f -> {
+            if (f.getSize() == null) f.setSize(-1L);
+        });
+        fileSizeValidator.validate(message, file);
+
         if (message.isPrimaryDocument(file.getOriginalFilename()) && files.stream().anyMatch(BusinessMessageFile::getPrimaryDocument)) {
             throw new MultiplePrimaryDocumentsNotAllowedException();
         }
 
-        List<ServiceIdentifier> requiredTitleCapabilities = asList(DPV, DPI);
-        if (requiredTitleCapabilities.contains(message.getServiceIdentifier())
-                && !StringUtils.hasText(file.getName())) {
-            throw new MissingFileTitleException(requiredTitleCapabilities.stream()
-                    .map(ServiceIdentifier::toString)
-                    .collect(Collectors.joining(",")));
+        if (message.getServiceIdentifier() == DPV && !StringUtils.hasText(file.getName())) {
+            throw new MissingFileTitleException(DPV.toString());
         }
+
+        if (message.getServiceIdentifier() == DPI && !StringUtils.hasText(file.getName())) {
+            if (!message.isPrimaryDocument(file.getOriginalFilename())) {
+                if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
+                    DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
+                    if (!bmsg.getMetadataFiler().containsValue(file.getOriginalFilename())) {
+                        throw new MissingFileTitleException(DPI.toString());
+                    }
+                } else {
+                    throw new MissingFileTitleException(DPI.toString());
+                }
+            }
+        }
+
     }
 }

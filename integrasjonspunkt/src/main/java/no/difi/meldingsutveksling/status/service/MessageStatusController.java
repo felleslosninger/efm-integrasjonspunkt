@@ -7,18 +7,21 @@ import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.status.MessageStatusRepository;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.view.Views;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
+
+import static java.lang.String.format;
 
 @RestController
 @Validated
@@ -28,6 +31,7 @@ import javax.validation.Valid;
 public class MessageStatusController {
 
     private final MessageStatusRepository statusRepo;
+    private final StatusQueue statusQueue;
 
     @GetMapping
     @ApiOperation(value = "Get all statuses", notes = "Get a list of all statuses with given parameters")
@@ -67,7 +71,17 @@ public class MessageStatusController {
     })
     @JsonView(Views.MessageStatus.class)
     public MessageStatus peekLatest() {
-        return statusRepo.findFirstByOrderByLastUpdateAsc()
+        Optional<Long> statusId = statusQueue.receiveStatus();
+        return statusId.map(s -> statusRepo.findById(s)
+                    .orElseThrow(() -> new NextMoveRuntimeException(format("MessageStatus with id=%s not found in DB", s))))
                 .orElseThrow(NoContentException::new);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> removeStatus(@PathVariable Long id) {
+        if (statusQueue.removeStatus(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

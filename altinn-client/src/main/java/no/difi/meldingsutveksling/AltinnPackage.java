@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Payload;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
@@ -55,7 +54,7 @@ public class AltinnPackage {
     static {
         try {
             ctx = JAXBContextFactory.createContext(new Class[]{BrokerServiceManifest.class,
-                    BrokerServiceRecipientList.class, StandardBusinessDocument.class, Payload.class, Kvittering.class}, new HashMap());
+                    BrokerServiceRecipientList.class, StandardBusinessDocument.class, Kvittering.class}, new HashMap());
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext", e);
         }
@@ -111,22 +110,6 @@ public class AltinnPackage {
         marshallObject(recipient, zipOutputStream);
         zipOutputStream.closeEntry();
 
-        if (sbd.getAny() instanceof Payload || sbd.getAny() instanceof JAXBElement) {
-            zipOutputStream.putNextEntry(new ZipEntry(CONTENT_XML));
-            no.difi.meldingsutveksling.domain.sbdh.ObjectFactory objectFactory = new no.difi.meldingsutveksling.domain.sbdh.ObjectFactory();
-            marshallObject(objectFactory.createStandardBusinessDocument(sbd), zipOutputStream);
-            zipOutputStream.closeEntry();
-
-            if (sbd.getAny() instanceof Payload) {
-                Payload payload = (Payload) sbd.getAny();
-                if (payload.getInputStream() != null) {
-                    zipOutputStream.putNextEntry(new ZipEntry(ASIC_FILE));
-                    IOUtils.copy(payload.getInputStream(), zipOutputStream);
-                    zipOutputStream.closeEntry();
-                }
-            }
-        }
-
         if (sbd.getAny() instanceof BusinessMessage) {
             zipOutputStream.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
             ObjectMapper om = context.getBean(ObjectMapper.class);
@@ -142,6 +125,7 @@ public class AltinnPackage {
         }
 
         zipOutputStream.finish();
+        zipOutputStream.close();
     }
 
     public static AltinnPackage from(File f, MessagePersister messagePersister, ApplicationContext context) throws IOException, JAXBException {

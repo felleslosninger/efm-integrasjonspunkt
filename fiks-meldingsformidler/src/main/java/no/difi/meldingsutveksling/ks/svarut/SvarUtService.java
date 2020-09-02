@@ -1,18 +1,16 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
-import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.meldingsutveksling.status.Conversation;
-import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -22,9 +20,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
-import java.util.List;
 
 @Component
+@Slf4j
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @RequiredArgsConstructor
 public class SvarUtService {
@@ -34,8 +32,8 @@ public class SvarUtService {
     private final FiksMapper fiksMapper;
     private final IntegrasjonspunktProperties props;
     private final CertificateParser certificateParser;
-    private final FiksStatusMapper fiksStatusMapper;
     private final PromiseMaker promiseMaker;
+    private final ForsendelseIdService forsendelseIdService;
 
     @Transactional
     public String send(NextMoveOutMessage message) throws NextMoveException {
@@ -53,6 +51,7 @@ public class SvarUtService {
         return promiseMaker.promise(reject -> {
             try {
                 SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
+                forsendelseIdService.newEntry(message.getMessageId(), forsendelse.getForsendelsesid());
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
                 return client.sendMessage(svarUtRequest);
             } catch (NextMoveException e) {
@@ -70,22 +69,8 @@ public class SvarUtService {
         return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
-    public MessageStatus getMessageReceipt(final Conversation conversation) {
-        final String forsendelseId = client.getForsendelseId(getFiksUtUrl(), conversation.getMessageId());
-        return getMessageReceipt(forsendelseId);
-    }
-
-    public MessageStatus getMessageReceipt(String forsendelseId) {
-        if (forsendelseId != null) {
-            final ForsendelseStatus forsendelseStatus = client.getForsendelseStatus(getFiksUtUrl(), forsendelseId);
-            return fiksStatusMapper.mapFrom(forsendelseStatus);
-        } else {
-            return fiksStatusMapper.noForsendelseId();
-        }
-    }
-
-    public List<String> retreiveForsendelseTyper() {
-        return client.retreiveForsendelseTyper(getFiksUtUrl());
+    public void retreiveForsendelseTyper() {
+        client.retreiveForsendelseTyper(getFiksUtUrl());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {

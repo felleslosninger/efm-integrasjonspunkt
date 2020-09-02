@@ -5,16 +5,19 @@
  */
 package no.difi.meldingsutveksling.config;
 
+import lombok.Data;
+import no.difi.meldingsutveksling.config.dpi.dpi.PrintSettings;
 import no.difi.sdp.client2.domain.Prioritet;
+import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  *
  * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
  */
+@Data
 public class DigitalPostInnbyggerConfig {
 
     private String endpoint;
@@ -24,14 +27,6 @@ public class DigitalPostInnbyggerConfig {
 
     @Valid
     KeyStoreProperties trustStore;
-
-    private FeatureToggle feature = new FeatureToggle();
-
-    @Valid
-    private IntegrasjonspunktProperties.Sms sms = new IntegrasjonspunktProperties.Sms();
-
-    @Valid
-    private Email email = new Email();
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
@@ -46,102 +41,10 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private Prioritet priority;
 
-    public KeyStoreProperties getTrustStore() {
-        return trustStore;
-    }
+    @NotNull
+    private PrintSettings printSettings;
 
-    public void setTrustStore(KeyStoreProperties trustStore) {
-        this.trustStore = trustStore;
-    }
-
-    public String getMpcId() {
-        return mpcId;
-    }
-
-    public void setMpcId(String mpcId) {
-        this.mpcId = mpcId;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public KeyStoreProperties getKeystore() {
-        return keystore;
-    }
-
-    public void setKeystore(KeyStoreProperties keystore) {
-        this.keystore = keystore;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public Prioritet getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Prioritet priority) {
-        this.priority = priority;
-    }
-
-    public void setFeature(FeatureToggle feature) {
-        this.feature = feature;
-    }
-
-    public FeatureToggle getFeature() {
-        return feature;
-    }
-
-    public IntegrasjonspunktProperties.Sms getSms() {
-        return sms;
-    }
-
-    public void setSms(IntegrasjonspunktProperties.Sms sms) {
-        this.sms = sms;
-    }
-
-    public Email getEmail() {
-        return email;
-    }
-
-    public void setEmail(Email email) {
-        this.email = email;
-    }
-
-    public static class FeatureToggle {
-        private boolean enablePrint = false;
-
-        public boolean isEnablePrint() {
-            return enablePrint;
-        }
-
-        public void setEnablePrint(boolean enablePrint) {
-            this.enablePrint = enablePrint;
-        }
-    }
-
-    public static class Email {
-        @Size(max=500)
-        private String varslingstekst;
-
-        public String getVarslingstekst() {
-            return varslingstekst;
-        }
-
-        public void setVarslingstekst(String varslingstekst) {
-            this.varslingstekst = varslingstekst;
-        }
-    }
-
+    @NotNull
+    private DataSize uploadSizeLimit;
 
 }

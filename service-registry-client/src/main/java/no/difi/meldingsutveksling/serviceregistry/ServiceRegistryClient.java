@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,14 +22,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ServiceRegistryClient {
 
-    public static final String CACHE_LOAD_IDENTIFIER_RESOURCE = "loadIdentifierResource";
-    public static final String CACHE_GET_SAS_KEY = "getSasKey";
-
     private final RestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
 
-    @Cacheable(CACHE_LOAD_IDENTIFIER_RESOURCE)
+    @Cacheable(CacheConfig.CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
         String identifierResourceString = getIdentifierResourceString(parameter);
 
@@ -71,7 +69,7 @@ public class ServiceRegistryClient {
         }
     }
 
-    @Cacheable(CACHE_GET_SAS_KEY)
+    @Cacheable(CacheConfig.CACHE_GET_SAS_KEY)
     public String getSasKey() {
         try {
             String sasKey = client.getResource("sastoken");

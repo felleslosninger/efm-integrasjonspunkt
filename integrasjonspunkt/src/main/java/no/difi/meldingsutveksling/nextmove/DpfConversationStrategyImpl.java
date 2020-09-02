@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.*;
+import no.difi.meldingsutveksling.noarkexchange.receive.BestEduAppReceiptService;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.jetbrains.annotations.NotNull;
@@ -28,9 +29,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
 
     private final SvarUtService svarUtService;
     private final IntegrasjonspunktProperties props;
-    private final NoarkClient localNoark;
-    private final PutMessageRequestFactory putMessageRequestFactory;
-    private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final BestEduAppReceiptService bestEduAppReceiptService;
 
     @Override
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
@@ -41,22 +40,8 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
                 markerFrom(message));
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
-            sendAppReceipt(message);
+            bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);
         }
     }
 
-    private void sendAppReceipt(NextMoveOutMessage message) {
-        String conversationId = message.getConversationId();
-        ConversationIdEntity convId = conversationIdEntityRepo.findByNewConversationId(message.getConversationId());
-        if (convId != null) {
-            log.warn("Found {} which maps to conversation {} with invalid UUID - overriding in AppReceipt.", message.getConversationId(), convId.getOldConversationId());
-            conversationId = convId.getOldConversationId();
-            conversationIdEntityRepo.delete(convId);
-        }
-        AppReceiptType appReceipt = AppReceiptFactory.from("OK", "None", "OK");
-        PutMessageRequestType putMessage = putMessageRequestFactory.createAndSwitchSenderReceiver(message.getSbd(),
-                BestEduConverter.appReceiptAsString(appReceipt),
-                conversationId);
-        localNoark.sendEduMelding(putMessage);
-    }
 }

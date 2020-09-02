@@ -49,4 +49,14 @@ public class SBDUtil {
         OffsetDateTime currentDateTime = OffsetDateTime.now(clock);
         return currentDateTime.isAfter(expectedResponseDateTime);
     }
+
+    public boolean isArkivmelding(StandardBusinessDocument sbd) {
+        return (isType(sbd, DocumentType.ARKIVMELDING)) || (isType(sbd, DocumentType.ARKIVMELDING_KVITTERING));
+    }
+
+    public boolean isFileRequired(StandardBusinessDocument sbd) {
+        return !isStatus(sbd) &&
+                !isReceipt(sbd) &&
+                !isType(sbd, DocumentType.AVTALT);
+    }
 }

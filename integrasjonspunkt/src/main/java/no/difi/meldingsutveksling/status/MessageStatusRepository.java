@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -30,8 +31,8 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
     }
 
     default Page<MessageStatus> find(MessageStatusQueryInput input, Pageable pageable) {
-        return findAll(createQuery(input).getValue()
-                , pageable);
+        Predicate p = createQuery(input).getValue();
+        return p != null ? findAll(p, pageable) : findAll(pageable);
     }
 
     default BooleanBuilder createQuery(MessageStatusQueryInput input) {

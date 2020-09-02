@@ -120,8 +120,8 @@ public class SBDReceiptFactory {
         StandardBusinessDocument unsignedReceipt = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
                 // sender of the receipt is the receiver of the message
-                .from(new Organisasjonsnummer(messageInfo.getReceiverOrgNumber()))
-                .to(new Organisasjonsnummer(messageInfo.getSenderOrgNumber()))
+                .from(Organisasjonsnummer.from(messageInfo.getReceiverOrgNumber()))
+                .to(Organisasjonsnummer.from(messageInfo.getSenderOrgNumber()))
                 .relatedToConversationId(messageInfo.getConversationId())
                 .relatedToMessageId(messageInfo.getMessageId())
                 .relatedToJournalPostId(messageInfo.getJournalPostId())

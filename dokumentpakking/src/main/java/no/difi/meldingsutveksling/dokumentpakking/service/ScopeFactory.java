@@ -8,9 +8,9 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import java.time.OffsetDateTime;
 
 @UtilityClass
-class ScopeFactory {
+public class ScopeFactory {
 
-    static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
+    public static Scope fromConversationId(String conversationId, String process, OffsetDateTime expectedResponseDateTime) {
         return new Scope()
                 .setIdentifier(process)
                 .setType(ScopeType.CONVERSATION_ID.toString())
@@ -18,4 +18,11 @@ class ScopeFactory {
                 .addScopeInformation(new CorrelationInformation()
                         .setExpectedResponseDateTime(expectedResponseDateTime));
     }
+
+    public static Scope fromRef(ScopeType scopeType, String identifier) {
+        return new Scope()
+                .setType(scopeType.toString())
+                .setInstanceIdentifier(identifier);
+    }
+
 }

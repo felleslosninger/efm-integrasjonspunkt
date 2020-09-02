@@ -22,10 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
@@ -92,6 +89,21 @@ public class MeldingsformidlerClientMain {
             @Override
             public String getSenderOrgnumber() {
                 return DIFI_ORGNR;
+            }
+
+            @Override
+            public Optional<String> getOnBehalfOfOrgnr() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<String> getAvsenderIdentifikator() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<String> getFakturaReferanse() {
+                return Optional.empty();
             }
 
             @Override

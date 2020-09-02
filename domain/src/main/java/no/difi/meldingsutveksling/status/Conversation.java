@@ -11,6 +11,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.hibernate.annotations.DynamicUpdate;
@@ -38,7 +39,7 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @ApiModel(description = "Conversation")
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
-public class Conversation extends AbstractEntity<Long> implements MessageInformable {
+public class Conversation extends AbstractEntity<Long> {
 
     public static final Logger statusLogger = LoggerFactory.getLogger("STATUS");
 
@@ -56,7 +57,9 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     private String conversationId;
     @Column(name = "message_id", length = 36)
     private String messageId;
+    private String sender;
     private String senderIdentifier;
+    private String receiver;
     private String receiverIdentifier;
     private String processIdentifier;
     private String messageReference;
@@ -83,8 +86,8 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
     private Conversation(String conversationId,
                          String messageId,
                          String messageReference,
-                         String senderIdentifier,
-                         String receiverIdentifier,
+                         Organisasjonsnummer sender,
+                         Organisasjonsnummer receiver,
                          String processIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
@@ -95,8 +98,10 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
         this.conversationId = conversationId;
         this.messageId = messageId;
         this.messageReference = messageReference;
-        this.senderIdentifier = senderIdentifier;
-        this.receiverIdentifier = receiverIdentifier;
+        this.sender = sender.asIso6523();
+        this.senderIdentifier = sender.getOrgNummer();
+        this.receiver = receiver.asIso6523();
+        this.receiverIdentifier = receiver.getOrgNummer();
         this.processIdentifier = processIdentifier;
         this.direction = direction;
         this.messageTitle = messageTitle;
@@ -115,25 +120,9 @@ public class Conversation extends AbstractEntity<Long> implements MessageInforma
         return this;
     }
 
-    public static Conversation of(String conversationId,
-                                  String messageId,
-                                  String messageReference,
-                                  String senderIdentifier,
-                                  String receiverIdentifier,
-                                  String processIdentifier,
-                                  ConversationDirection direction,
-                                  String messageTitle,
-                                  ServiceIdentifier serviceIdentifier,
-                                  OffsetDateTime expiry,
-                                  OffsetDateTime lastUpdate,
-                                  MessageStatus... statuses) {
-        return new Conversation(conversationId, messageId, messageReference, senderIdentifier, receiverIdentifier, processIdentifier, direction, messageTitle, serviceIdentifier, expiry, lastUpdate)
-                .addMessageStatuses(statuses);
-    }
-
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
-                msg.getSenderIdentifier(), msg.getReceiverIdentifier(), msg.getProcessIdentifier(),
+                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }

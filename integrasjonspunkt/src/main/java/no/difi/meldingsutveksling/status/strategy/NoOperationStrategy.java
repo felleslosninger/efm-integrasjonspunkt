@@ -1,19 +1,21 @@
 package no.difi.meldingsutveksling.status.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.difi.meldingsutveksling.api.StatusStrategy;
+import org.jetbrains.annotations.NotNull;
 
-import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
+import java.util.Set;
 
 public class NoOperationStrategy implements StatusStrategy {
 
     @Override
-    public void checkStatus(Conversation conversation) {
-        Audit.info("Trying to check a receipt that is not handled by receipt strategy", markerFrom(conversation));
+    public void checkStatus(Set<Conversation> conversations) {
+        Audit.info("Trying to check a receipt for a message that is not handled by any receipt strategy");
     }
 
+    @NotNull
     @Override
     public ServiceIdentifier getServiceIdentifier() {
         return ServiceIdentifier.UNKNOWN;

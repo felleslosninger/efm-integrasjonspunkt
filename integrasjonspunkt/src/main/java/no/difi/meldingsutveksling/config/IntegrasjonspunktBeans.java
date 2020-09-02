@@ -1,9 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnWsClientFactory;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
-import no.difi.meldingsutveksling.KeystoreProvider;
-import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.*;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
@@ -14,11 +11,14 @@ import no.difi.meldingsutveksling.lang.KeystoreProviderException;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
+import no.difi.meldingsutveksling.pipes.Plumber;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.status.ConversationService;
 import no.difi.meldingsutveksling.status.DpiReceiptService;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
@@ -34,13 +34,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.time.Clock;
 import java.util.Optional;
 
@@ -49,6 +46,15 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class IntegrasjonspunktBeans {
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+    public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
+                                            AltinnWsConfigurationFactory altinnWsConfigurationFactory,
+                                            Plumber plumber,
+                                            PromiseMaker promiseMaker) {
+        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker).getAltinnWsClient();
+    }
 
     @Bean
     public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
@@ -73,8 +79,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, MeldingsformidlerClient meldingsformidlerClient) {
-        return new DpiReceiptService(integrasjonspunktProperties, meldingsformidlerClient);
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties integrasjonspunktProperties, MeldingsformidlerClient meldingsformidlerClient, ConversationService conversationService) {
+        return new DpiReceiptService(integrasjonspunktProperties, meldingsformidlerClient, conversationService);
     }
 
     @Bean(name = "fiksMailClient")
@@ -98,15 +104,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public PublicKey publicKey(IntegrasjonspunktProperties props) throws CertificateException, IOException {
-        return CertificateFactory.getInstance("X.509")
-                .generateCertificate(props.getSign().getCertificate().getInputStream())
-                .getPublicKey();
-    }
-
-    @Bean
-    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil, PublicKey publicKey) throws MalformedURLException, URISyntaxException {
-        return new RestClient(props, restTemplate, cmsUtil, publicKey, new URL(props.getServiceregistryEndpoint()).toURI());
+    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil) throws MalformedURLException, URISyntaxException {
+        return new RestClient(props, restTemplate, cmsUtil, new URL(props.getServiceregistryEndpoint()).toURI());
     }
 
     @Bean
@@ -163,16 +162,14 @@ public class IntegrasjonspunktBeans {
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
     public AltinnConnectionCheck altinnConnectionCheck(
             IntegrasjonspunktProperties properties,
-            AltinnWsClientFactory altinnWsClientFactory ) {
-        return new AltinnConnectionCheck(properties, altinnWsClientFactory);
+            AltinnWsClient altinnWsClient) {
+        return new AltinnConnectionCheck(properties, altinnWsClient);
     }
 
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(UUIDGenerator uuidGenerator,
-                                                                                   CorrespondenceAgencyClient correspondenceAgencyClient,
-                                                                                   CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory) {
-        return new CorrespondenceAgencyConnectionCheck(uuidGenerator, correspondenceAgencyClient, correspondenceAgencyMessageFactory);
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
+        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
     }
 }
 

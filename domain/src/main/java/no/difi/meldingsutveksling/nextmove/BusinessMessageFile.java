@@ -32,4 +32,6 @@ public class BusinessMessageFile extends AbstractEntity<Long> {
     private String title;
     @NonNull
     private Integer dokumentnummer;
+    @NonNull
+    private Long size;
 }

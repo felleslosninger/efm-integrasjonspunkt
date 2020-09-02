@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
@@ -11,11 +12,13 @@ import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
+import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
@@ -60,6 +63,9 @@ public class SvarInnNextMoveConverter {
                 properties.getFiks().getInn().getProcess(),
                 DocumentType.ARKIVMELDING,
                 new ArkivmeldingMessage());
+        if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
+            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
+        }
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
         promiseMaker.promise(reject -> {
