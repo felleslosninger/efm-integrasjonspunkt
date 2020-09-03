@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpiConversationStrategy;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -9,7 +10,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.status.ConversationService;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;

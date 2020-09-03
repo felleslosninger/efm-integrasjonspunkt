@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -8,10 +9,9 @@ import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.status.ConversationService;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;

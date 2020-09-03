@@ -2,13 +2,13 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.v2.BusinessMessageFileRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
-import no.difi.meldingsutveksling.status.ConversationService;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

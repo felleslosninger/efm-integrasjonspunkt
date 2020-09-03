@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -13,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +34,7 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ConversationService {
+public class DefaultConversationService implements ConversationService {
 
     private final ConversationRepository repo;
     private final IntegrasjonspunktProperties props;
@@ -45,8 +47,9 @@ public class ConversationService {
     private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
 
+    @NotNull
     @Transactional
-    public Optional<Conversation> registerStatus(String messageId, MessageStatus status) {
+    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull MessageStatus status) {
         Optional<Conversation> c = repo.findByMessageId(messageId).stream().findFirst();
         if (c.isPresent()) {
             return Optional.of(registerStatus(c.get(), status));
@@ -56,9 +59,10 @@ public class ConversationService {
         }
     }
 
+    @NotNull
     @SuppressWarnings("squid:S2250")
     @Transactional
-    public Conversation registerStatus(Conversation conversation, MessageStatus status) {
+    public Conversation registerStatus(Conversation conversation, @NotNull MessageStatus status) {
         if (conversation.hasStatus(status)) {
             return conversation;
         }
@@ -113,11 +117,13 @@ public class ConversationService {
                 POLLABLES.contains(conversation.getServiceIdentifier());
     }
 
+    @NotNull
     @Transactional
-    public Conversation save(Conversation conversation) {
+    public Conversation save(@NotNull Conversation conversation) {
         return repo.save(conversation);
     }
 
+    @NotNull
     @Transactional
     public Conversation registerConversation(MessageInformable message) {
         return findConversation(message.getMessageId()).filter(p -> {
@@ -126,8 +132,9 @@ public class ConversationService {
         }).orElseGet(() -> createConversation(message));
     }
 
+    @NotNull
     @Transactional
-    public Conversation registerConversation(StandardBusinessDocument sbd, ServiceIdentifier si, ConversationDirection conversationDirection) {
+    public Conversation registerConversation(StandardBusinessDocument sbd, @NotNull ServiceIdentifier si, @NotNull ConversationDirection conversationDirection) {
         OffsetDateTime ttl = sbd.getExpectedResponseDateTime().orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
         return registerConversation(new MessageInformable() {
             @Override
@@ -172,7 +179,8 @@ public class ConversationService {
         });
     }
 
-    public Optional<Conversation> findConversation(String messageId) {
+    @NotNull
+    public Optional<Conversation> findConversation(@NotNull String messageId) {
         return repo.findByMessageId(messageId).stream().findFirst();
     }
 

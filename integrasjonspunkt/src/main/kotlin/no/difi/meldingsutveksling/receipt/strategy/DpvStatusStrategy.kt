@@ -3,13 +3,13 @@ package no.difi.meldingsutveksling.receipt.strategy
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2
 import no.altinn.schemas.services.serviceentity._2014._10.CorrespondenceStatusTypeV2
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.StatusStrategy
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
-import no.difi.meldingsutveksling.status.ConversationService
 import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.stereotype.Component
