@@ -26,7 +26,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
-public class DpoPolling {
+public class DefaultDpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;

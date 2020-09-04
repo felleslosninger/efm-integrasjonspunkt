@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.DpePolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveServiceBus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,13 +14,14 @@ import java.util.concurrent.CompletableFuture;
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
 @RequiredArgsConstructor
-public class DpePolling {
+public class DefaultDpePolling implements DpePolling {
 
     private final NextMoveServiceBus nextMoveServiceBus;
     private final IntegrasjonspunktProperties properties;
 
     private CompletableFuture<?> batchRead;
 
+    @Override
     public void poll() {
         if (properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {

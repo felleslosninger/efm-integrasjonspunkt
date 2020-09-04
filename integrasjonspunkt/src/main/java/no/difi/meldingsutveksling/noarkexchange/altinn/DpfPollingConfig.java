@@ -28,11 +28,11 @@ import java.time.Clock;
 public class DpfPollingConfig {
 
     @Bean
-    public DpfPolling dpfPolling(IntegrasjonspunktProperties properties,
-                                 SvarInnService svarInnService,
-                                 ObjectProvider<SvarInnPutMessageForwarder> svarInnPutMessageForwarderProvider,
-                                 SvarInnNextMoveForwarder svarInnNextMoveForwarder) {
-        return new DpfPolling(properties, svarInnService, svarInnPutMessageForwarderProvider, svarInnNextMoveForwarder);
+    public DefaultDpfPolling dpfPolling(IntegrasjonspunktProperties properties,
+                                        SvarInnService svarInnService,
+                                        ObjectProvider<SvarInnPutMessageForwarder> svarInnPutMessageForwarderProvider,
+                                        SvarInnNextMoveForwarder svarInnNextMoveForwarder) {
+        return new DefaultDpfPolling(properties, svarInnService, svarInnPutMessageForwarderProvider, svarInnNextMoveForwarder);
     }
 
     @Bean

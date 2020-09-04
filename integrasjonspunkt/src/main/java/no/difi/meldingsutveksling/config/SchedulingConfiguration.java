@@ -3,10 +3,10 @@ package no.difi.meldingsutveksling.config;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessageUnlocker;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpePolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpfPolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpoPolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePolling;
+import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpePolling;
+import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpfPolling;
+import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpoPolling;
+import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePollingScheduler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -36,11 +36,11 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
     }
 
     @Bean
-    public MessagePolling messagePolling(
-            ObjectProvider<DpePolling> dpePolling,
-            ObjectProvider<DpfPolling> dpfPolling,
-            ObjectProvider<DpoPolling> dpoPolling) {
-        return new MessagePolling(dpePolling, dpfPolling, dpoPolling);
+    public MessagePollingScheduler messagePolling(
+            ObjectProvider<DefaultDpePolling> dpePolling,
+            ObjectProvider<DefaultDpfPolling> dpfPolling,
+            ObjectProvider<DefaultDpoPolling> dpoPolling) {
+        return new MessagePollingScheduler(dpePolling, dpfPolling, dpoPolling);
     }
 
     @Override

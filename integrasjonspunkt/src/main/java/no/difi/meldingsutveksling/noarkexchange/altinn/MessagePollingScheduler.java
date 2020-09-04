@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.DpePolling;
+import no.difi.meldingsutveksling.api.DpfPolling;
+import no.difi.meldingsutveksling.api.DpoPolling;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -13,7 +16,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class MessagePolling {
+public class MessagePollingScheduler {
 
     private final ObjectProvider<DpePolling> dpePolling;
     private final ObjectProvider<DpfPolling> dpfPolling;
