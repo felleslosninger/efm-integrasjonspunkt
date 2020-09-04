@@ -29,6 +29,7 @@ public class DefaultDpfPolling implements DpfPolling {
         this.svarInnNextMoveForwarder = svarInnNextMoveForwarder;
     }
 
+    @Override
     public void poll() {
         Consumer<Forsendelse> forwarder = getSvarInnForwarder();
         log.trace("Checking for new DPF messages using {}", forwarder.getClass().getName());

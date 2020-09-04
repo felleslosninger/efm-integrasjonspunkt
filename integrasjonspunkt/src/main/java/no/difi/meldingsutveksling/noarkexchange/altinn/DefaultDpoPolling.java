@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -26,7 +27,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
-public class DefaultDpoPolling {
+public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
@@ -35,6 +36,7 @@ public class DefaultDpoPolling {
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
 
+    @Override
     public void poll() {
         log.trace("Checking for new DPO messages");
 
