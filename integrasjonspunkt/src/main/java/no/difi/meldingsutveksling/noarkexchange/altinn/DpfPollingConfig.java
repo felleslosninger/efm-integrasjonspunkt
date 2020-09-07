@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import java.time.Clock;
 
@@ -28,6 +29,7 @@ import java.time.Clock;
 public class DpfPollingConfig {
 
     @Bean
+    @Order
     public DefaultDpfPolling dpfPolling(IntegrasjonspunktProperties properties,
                                         SvarInnService svarInnService,
                                         ObjectProvider<SvarInnPutMessageForwarder> svarInnPutMessageForwarderProvider,

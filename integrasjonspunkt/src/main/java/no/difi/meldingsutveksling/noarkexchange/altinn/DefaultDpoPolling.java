@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@Order
 @RequiredArgsConstructor
 public class DefaultDpoPolling implements DpoPolling {
 
