@@ -77,10 +77,6 @@ public class DefaultDpoPolling implements DpoPolling {
 
             client.confirmDownload(request);
             log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
-
-            if (!sbdUtil.isStatus(sbd)) {
-                altinnNextMoveMessageHandler.sendReceivedStatusToSender(sbd);
-            }
         } catch (Exception e) {
             log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
         }

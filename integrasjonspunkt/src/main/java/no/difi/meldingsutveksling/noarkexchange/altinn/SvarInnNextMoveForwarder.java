@@ -3,10 +3,10 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
-import no.difi.meldingsutveksling.nextmove.NextMoveQueue;
 
 import java.util.function.Consumer;
 
@@ -21,7 +21,7 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
     @Override
     public void accept(Forsendelse forsendelse) {
         StandardBusinessDocument sbd = svarInnNextMoveConverter.convert(forsendelse);
-        nextMoveQueue.enqueue(sbd, ServiceIdentifier.DPF);
+        nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPF);
         svarInnService.confirmMessage(forsendelse.getId());
     }
 }

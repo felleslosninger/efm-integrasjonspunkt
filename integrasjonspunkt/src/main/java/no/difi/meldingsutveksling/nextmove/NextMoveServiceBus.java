@@ -5,25 +5,19 @@ import com.microsoft.azure.servicebus.*;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
+import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -53,13 +47,9 @@ public class NextMoveServiceBus {
     private final NextMoveQueue nextMoveQueue;
     private final ServiceBusRestClient serviceBusClient;
     private final ObjectMapper om;
-    private final InternalQueue internalQueue;
     private final MessagePersister messagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
-    private final SBDReceiptFactory sbdReceiptFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final ConversationService conversationService;
-    private final MessageStatusFactory messageStatusFactory;
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final TaskExecutor taskExecutor;
@@ -71,13 +61,9 @@ public class NextMoveServiceBus {
                               NextMoveQueue nextMoveQueue,
                               ServiceBusRestClient serviceBusClient,
                               ObjectMapper om,
-                              @Lazy InternalQueue internalQueue,
                               MessagePersister messagePersister,
                               ServiceBusPayloadConverter payloadConverter,
-                              SBDReceiptFactory sbdReceiptFactory,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              ConversationService conversationService,
-                              MessageStatusFactory messageStatusFactory,
                               TimeToLiveHelper timeToLiveHelper,
                               SBDUtil sbdUtil,
                               TaskExecutor taskExecutor,
@@ -88,12 +74,8 @@ public class NextMoveServiceBus {
         this.om = om;
         this.messagePersister = messagePersister;
         this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
-        this.internalQueue = internalQueue;
         this.payloadConverter = payloadConverter;
-        this.sbdReceiptFactory = sbdReceiptFactory;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.conversationService = conversationService;
-        this.messageStatusFactory = messageStatusFactory;
         this.timeToLiveHelper = timeToLiveHelper;
         this.sbdUtil = sbdUtil;
         this.taskExecutor = taskExecutor;
@@ -215,27 +197,7 @@ public class NextMoveServiceBus {
     }
 
     private void handleSbd(StandardBusinessDocument sbd) {
-        if (sbdUtil.isStatus(sbd)) {
-            log.debug(String.format("Message with id=%s is a receipt", sbd.getDocumentId()));
-            StatusMessage msg = (StatusMessage) sbd.getAny();
-            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
-        } else {
-            sendReceiptAsync(nextMoveQueue.enqueue(sbd, DPE));
-        }
-    }
-
-    private void sendReceiptAsync(NextMoveInMessage message) {
-        CompletableFuture.runAsync(() -> sendReceipt(message), taskExecutor);
-    }
-
-    private void sendReceipt(NextMoveInMessage message) {
-        internalQueue.enqueueNextMove(NextMoveOutMessage.of(getReceipt(message), DPE));
-    }
-
-    private StandardBusinessDocument getReceipt(NextMoveInMessage message) {
-        return sbdReceiptFactory.createEinnsynStatusFrom(message.getSbd(),
-                DocumentType.STATUS,
-                ReceiptStatus.MOTTATT);
+        nextMoveQueue.enqueueIncomingMessage(sbd, DPE);
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {
