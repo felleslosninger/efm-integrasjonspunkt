@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -23,8 +22,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -33,7 +34,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
@@ -132,16 +132,8 @@ public class NextMoveServiceBus {
             }
 
             for (ServiceBusMessage msg : messages) {
-                if (msg.getPayload().getAsic() != null) {
-                    try {
-                        messagePersister.write(msg.getPayload().getSbd().getDocumentId(),
-                                ASIC_FILE,
-                                Base64.getDecoder().decode(msg.getPayload().getAsic()));
-                    } catch (IOException e) {
-                        throw new NextMoveRuntimeException("Error persisting ASiC, aborting..", e);
-                    }
-                }
-                handleSbd(msg.getPayload().getSbd());
+                InputStream asicStream = (msg.getPayload().getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(msg.getPayload().getAsic())) : null;
+                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asicStream);
                 serviceBusClient.deleteMessage(msg);
             }
         }
@@ -180,10 +172,8 @@ public class NextMoveServiceBus {
             if (sbdUtil.isExpired(payload.getSbd())) {
                 timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
             } else {
-                if (payload.getAsic() != null) {
-                    messagePersister.write(payload.getSbd().getDocumentId(), ASIC_FILE, Base64.getDecoder().decode(payload.getAsic()));
-                }
-                handleSbd(payload.getSbd());
+                InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
+                nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
             }
             messageReceiver.completeAsync(m.getLockToken());
         } catch (IOException e) {
@@ -194,10 +184,6 @@ public class NextMoveServiceBus {
     private byte[] getBody(IMessage message) {
         MessageBody messageBody = message.getMessageBody();
         return messageBody.getBinaryData().get(0);
-    }
-
-    private void handleSbd(StandardBusinessDocument sbd) {
-        nextMoveQueue.enqueueIncomingMessage(sbd, DPE);
     }
 
     private String getReceiverQueue(NextMoveOutMessage message) {

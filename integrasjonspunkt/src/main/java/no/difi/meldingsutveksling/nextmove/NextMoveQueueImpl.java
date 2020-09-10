@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -20,6 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -35,15 +40,24 @@ public class NextMoveQueueImpl implements NextMoveQueue {
     private final InternalQueue internalQueue;
     private final SBDReceiptFactory receiptFactory;
     private final SBDUtil sbdUtil;
+    private final MessagePersister messagePersister;
 
     @Transactional
-    public void enqueueIncomingMessage(StandardBusinessDocument sbd, @NotNull ServiceIdentifier serviceIdentifier) {
+    public void enqueueIncomingMessage(StandardBusinessDocument sbd, @NotNull ServiceIdentifier serviceIdentifier, InputStream asicStream) {
         if (sbd.getAny() instanceof BusinessMessage) {
             if (sbdUtil.isStatus(sbd)) {
                 log.debug(String.format("Message with id=%s is a receipt", sbd.getDocumentId()));
                 StatusMessage msg = (StatusMessage) sbd.getAny();
                 conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(msg.getStatus()));
                 return;
+            }
+
+            if (asicStream != null) {
+                try {
+                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException("Error persisting ASiC", e);
+                }
             }
 
             NextMoveInMessage message = NextMoveInMessage.of(sbd, serviceIdentifier);

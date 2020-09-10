@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
@@ -33,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.stream.Stream;
@@ -54,7 +54,7 @@ public class SvarInnNextMoveConverter {
     private final ArkivmeldingUtil arkivmeldingUtil;
 
     @Transactional
-    public StandardBusinessDocument convert(Forsendelse forsendelse) {
+    public SvarInnPackage convert(Forsendelse forsendelse) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 Organisasjonsnummer.from(forsendelse.getSvarSendesTil().getOrgnr()),
                 Organisasjonsnummer.from(forsendelse.getMottaker().getOrgnr()),
@@ -68,23 +68,18 @@ public class SvarInnNextMoveConverter {
         }
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
-        promiseMaker.promise(reject -> {
-            Stream<StreamedFile> attachments = Stream.concat(
-                    Stream.of(arkivmeldingFile),
-                    svarInnService.getAttachments(forsendelse, reject));
+        Stream<StreamedFile> attachments = Stream.concat(
+                Stream.of(arkivmeldingFile),
+                svarInnService.getAttachments(forsendelse,
+                        reject -> {throw new NextMoveRuntimeException("Failed to get attachments from SvarInn", reject);}));
 
-            try (InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
-                    attachments,
-                    NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
-                    keyInfo.getX509Certificate(), reject)) {
-                messagePersister.writeStream(forsendelse.getId(), NextMoveConsts.ASIC_FILE, asicStream, -1);
-                return null;
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Failed to create ASIC", e);
-            }
-        }).await();
+        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
+                attachments,
+                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                keyInfo.getX509Certificate(),
+                reject -> {throw new NextMoveRuntimeException("Failed to create ASiC", reject);});
 
-        return sbd;
+        return new SvarInnPackage(sbd, asicStream);
     }
 
     private NextMoveStreamedFile getArkivmeldingFile(Forsendelse forsendelse) {

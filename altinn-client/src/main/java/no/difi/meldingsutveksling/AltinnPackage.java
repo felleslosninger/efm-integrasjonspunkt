@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
@@ -20,7 +19,10 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.context.ApplicationContext;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -45,7 +47,7 @@ public class AltinnPackage {
     private static final String RECIPIENTS_XML = "recipients.xml";
     private static final String MANIFEST_XML = "manifest.xml";
 
-    private static JAXBContext ctx;
+    private static final JAXBContext ctx;
     private final BrokerServiceManifest manifest;
     private final BrokerServiceRecipientList recipient;
     private final StandardBusinessDocument sbd;
@@ -128,52 +130,46 @@ public class AltinnPackage {
         zipOutputStream.close();
     }
 
-    public static AltinnPackage from(File f, MessagePersister messagePersister, ApplicationContext context) throws IOException, JAXBException {
-        try (ZipFile zipFile = new ZipFile(f)) {
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
+    public static AltinnPackage from(File f, ApplicationContext context) throws IOException, JAXBException {
+        ZipFile zipFile = new ZipFile(f);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
-            BrokerServiceManifest manifest = null;
-            BrokerServiceRecipientList recipientList = null;
-            StandardBusinessDocument sbd = null;
-            InputStream asicInputStream = null;
-            long asicSize = 0;
+        BrokerServiceManifest manifest = null;
+        BrokerServiceRecipientList recipientList = null;
+        StandardBusinessDocument sbd = null;
+        InputStream asicInputStream = null;
 
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry zipEntry = entries.nextElement();
-                switch (zipEntry.getName()) {
-                    case MANIFEST_XML:
-                        manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
-                        break;
-                    case RECIPIENTS_XML:
-                        recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
-                        break;
-                    case ALTINN_SBD_FILE:
-                        ObjectMapper om = context.getBean(ObjectMapper.class);
-                        om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-                        sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
-                        break;
-                    case CONTENT_XML:
-                        Source source = new StreamSource(zipFile.getInputStream(zipEntry));
-                        sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
-                        break;
-                    case ASIC_FILE:
-                        asicInputStream = zipFile.getInputStream(zipEntry);
-                        asicSize = zipEntry.getSize();
-                        break;
-                    default:
-                        log.info("Skipping file: {}", zipEntry.getName());
-                }
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry zipEntry = entries.nextElement();
+            switch (zipEntry.getName()) {
+                case MANIFEST_XML:
+                    manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
+                    break;
+                case RECIPIENTS_XML:
+                    recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
+                    break;
+                case ALTINN_SBD_FILE:
+                    ObjectMapper om = context.getBean(ObjectMapper.class);
+                    om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+                    sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
+                    break;
+                case CONTENT_XML:
+                    Source source = new StreamSource(zipFile.getInputStream(zipEntry));
+                    sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
+                    break;
+                case ASIC_FILE:
+                    asicInputStream = zipFile.getInputStream(zipEntry);
+                    break;
+                default:
+                    log.info("Skipping file: {}", zipEntry.getName());
             }
-
-            if (sbd == null) {
-                throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
-            }
-            if (asicInputStream != null) {
-                messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicInputStream, asicSize);
-            }
-            return new AltinnPackage(manifest, recipientList, sbd, null);
         }
+
+        if (sbd == null) {
+            throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
+        }
+        return new AltinnPackage(manifest, recipientList, sbd, asicInputStream);
     }
 
     public static AltinnPackage from(InputStream inputStream) throws IOException, JAXBException {
@@ -222,6 +218,10 @@ public class AltinnPackage {
     }
 
     public StandardBusinessDocument getSbd() {
-        return sbd;
+        return this.sbd;
+    }
+
+    public InputStream getAsicInputStream() {
+        return this.asicInputStream;
     }
 }

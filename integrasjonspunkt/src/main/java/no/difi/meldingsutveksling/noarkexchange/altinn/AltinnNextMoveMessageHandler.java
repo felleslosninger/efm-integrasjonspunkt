@@ -3,19 +3,25 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
@@ -30,18 +36,26 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final ConversationService conversationService;
     private final NextMoveQueue nextMoveQueue;
     private final MessageStatusFactory messageStatusFactory;
+    private final MessagePersister messagePersister;
     private final SBDUtil sbdUtil;
 
     @Override
-    public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
+    public void handleStandardBusinessDocument(StandardBusinessDocument sbd, InputStream asicStream) {
         log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
 
         if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd) && !sbdUtil.isStatus(sbd)) {
+            if (asicStream != null) {
+                try {
+                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException("Error persisting ASiC", e);
+                }
+            }
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
         } else {
-            nextMoveQueue.enqueueIncomingMessage(sbd, DPO);
+            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, asicStream);
         }
         if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
             ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();

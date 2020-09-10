@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.AltinnPackage;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
@@ -56,7 +57,8 @@ public class DefaultDpoPolling implements DpoPolling {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
-            StandardBusinessDocument sbd = client.download(request, messagePersister);
+            AltinnPackage altinnPackage = client.download(request, messagePersister);
+            StandardBusinessDocument sbd = altinnPackage.getSbd();
             Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
 
             try {
@@ -72,7 +74,7 @@ public class DefaultDpoPolling implements DpoPolling {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
                 messagePersister.delete(sbd.getMessageId());
             } else {
-                altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd);
+                altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd, altinnPackage.getAsicInputStream());
             }
 
             client.confirmDownload(request);

@@ -10,7 +10,7 @@ public class NextMoveRuntimeException extends RuntimeException {
         super(s);
     }
 
-    public NextMoveRuntimeException(String s, Exception e) {
+    public NextMoveRuntimeException(String s, Throwable e) {
         super(s, e);
     }
 }
