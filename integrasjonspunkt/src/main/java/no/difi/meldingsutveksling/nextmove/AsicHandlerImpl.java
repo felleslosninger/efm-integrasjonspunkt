@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
@@ -16,6 +17,7 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.services.Adresseregister;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -32,14 +34,16 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AsicHandler {
+public class AsicHandlerImpl implements AsicHandler {
 
     private final IntegrasjonspunktNokkel keyHelper;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Plumber plumber;
     private final Adresseregister adresseregister;
 
-    InputStream createEncryptedAsic(NextMoveOutMessage msg, Reject reject) {
+    @NotNull
+    @Override
+    public InputStream createEncryptedAsic(NextMoveMessage msg, @NotNull Reject reject) {
         List<NextMoveStreamedFile> attachments = msg.getFiles().stream()
                 .sorted((a, b) -> {
                     if (a.getPrimaryDocument()) return -1;
@@ -58,14 +62,17 @@ public class AsicHandler {
             return f.getMimetype();
         }
 
-        String ext = Stream.of(f.getFilename().split(".")).reduce((p, e) -> e).orElse("pdf");
+        String ext = Stream.of(f.getFilename().split("\\.")).reduce((p, e) -> e).orElse("pdf");
         return MimeTypeExtensionMapper.getMimetype(ext);
     }
 
-    public InputStream archiveAndEncryptAttachments(StreamedFile mainAttachment,
-                                                    Stream<? extends StreamedFile> att,
-                                                    NextMoveOutMessage message,
-                                                    X509Certificate certificate, Reject reject) {
+    @NotNull
+    @Override
+    public InputStream archiveAndEncryptAttachments(@NotNull StreamedFile mainAttachment,
+                                                    @NotNull Stream<? extends StreamedFile> att,
+                                                    NextMoveMessage message,
+                                                    @NotNull X509Certificate certificate,
+                                                    @NotNull Reject reject) {
         CmsUtil cmsUtil = getCmsUtil(message.getServiceIdentifier());
 
         return plumber.pipe("create asic", inlet -> createAsic(mainAttachment, att, message, inlet), reject)
@@ -73,11 +80,11 @@ public class AsicHandler {
                 .outlet();
     }
 
-    private X509Certificate getMottakerSertifikat(NextMoveOutMessage message) {
+    private X509Certificate getMottakerSertifikat(NextMoveMessage message) {
         return (X509Certificate) adresseregister.getReceiverCertificate(message);
     }
 
-    private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveOutMessage message, PipedOutputStream pipeOutlet) {
+    private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveMessage message, PipedOutputStream pipeOutlet) {
         try {
             new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keyHelper.getSignatureHelper(), message);
         } catch (IOException e) {

@@ -2,12 +2,13 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.AltinnTransport;
+import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import org.springframework.core.annotation.Order;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

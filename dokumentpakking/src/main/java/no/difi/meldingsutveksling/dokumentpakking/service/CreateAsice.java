@@ -8,7 +8,7 @@ import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.StreamedFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 
 import java.io.*;
@@ -29,7 +29,7 @@ public class CreateAsice {
                                     Stream<? extends StreamedFile> files,
                                     OutputStream archive,
                                     SignatureHelper signatureHelper,
-                                    NextMoveOutMessage message) throws IOException {
+                                    NextMoveMessage message) throws IOException {
         Manifest manifest = manifestFactory.createManifest(message, mainAttachment.getFileName(), mainAttachment.getMimeType());
         AsicWriter asicWriter = AsicWriterFactory.newFactory()
                 .newContainer(archive)

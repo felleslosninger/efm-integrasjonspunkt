@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.apache.commons.io.IOUtils;
