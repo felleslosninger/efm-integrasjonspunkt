@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.AltinnPackage;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -40,22 +41,29 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final SBDUtil sbdUtil;
 
     @Override
-    public void handleStandardBusinessDocument(StandardBusinessDocument sbd, InputStream asicStream) {
+    public void handleAltinnPackage(AltinnPackage altinnPackage) {
+        StandardBusinessDocument sbd = altinnPackage.getSbd();
         log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
 
         if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd) && !sbdUtil.isStatus(sbd)) {
-            if (asicStream != null) {
-                try {
+            if (altinnPackage.getAsicInputStream() != null) {
+                try (InputStream asicStream = altinnPackage.getAsicInputStream()){
                     messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
+                } finally {
+                    altinnPackage.getTmpFile().delete();
                 }
             }
+
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
         } else {
-            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, asicStream);
+            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
+            if (altinnPackage.getTmpFile() != null) {
+                altinnPackage.getTmpFile().delete();
+            }
         }
         if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
             ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();

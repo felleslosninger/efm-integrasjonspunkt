@@ -57,7 +57,7 @@ public class DefaultDpoPolling implements DpoPolling {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), properties.getOrg().getNumber());
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
-            AltinnPackage altinnPackage = client.download(request, messagePersister);
+            AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
 
@@ -72,9 +72,13 @@ public class DefaultDpoPolling implements DpoPolling {
 
             if (sbdUtil.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
+                if (altinnPackage.getAsicInputStream() != null) {
+                    altinnPackage.getAsicInputStream().close();
+                    altinnPackage.getTmpFile().delete();
+                }
                 messagePersister.delete(sbd.getMessageId());
             } else {
-                altinnNextMoveMessageHandler.handleStandardBusinessDocument(sbd, altinnPackage.getAsicInputStream());
+                altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
             }
 
             client.confirmDownload(request);

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -18,6 +17,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,6 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class NextMoveQueueImpl implements NextMoveQueue {
 
@@ -41,6 +40,22 @@ public class NextMoveQueueImpl implements NextMoveQueue {
     private final SBDReceiptFactory receiptFactory;
     private final SBDUtil sbdUtil;
     private final MessagePersister messagePersister;
+
+    public NextMoveQueueImpl(NextMoveMessageInRepository messageRepo,
+                             ConversationService conversationService,
+                             MessageStatusFactory messageStatusFactory,
+                             @Lazy InternalQueue internalQueue,
+                             SBDReceiptFactory receiptFactory,
+                             SBDUtil sbdUtil,
+                             MessagePersister messagePersister) {
+        this.messageRepo = messageRepo;
+        this.conversationService = conversationService;
+        this.messageStatusFactory = messageStatusFactory;
+        this.internalQueue = internalQueue;
+        this.receiptFactory = receiptFactory;
+        this.sbdUtil = sbdUtil;
+        this.messagePersister = messagePersister;
+    }
 
     @Transactional
     public void enqueueIncomingMessage(StandardBusinessDocument sbd, @NotNull ServiceIdentifier serviceIdentifier, InputStream asicStream) {
@@ -53,8 +68,8 @@ public class NextMoveQueueImpl implements NextMoveQueue {
             }
 
             if (asicStream != null) {
-                try {
-                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
+                try (InputStream is = asicStream) {
+                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, is, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
                 }

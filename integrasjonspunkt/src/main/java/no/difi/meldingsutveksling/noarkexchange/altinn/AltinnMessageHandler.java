@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-
-import java.io.InputStream;
+import no.difi.meldingsutveksling.AltinnPackage;
 
 public interface AltinnMessageHandler {
 
-    void handleStandardBusinessDocument(StandardBusinessDocument sbd, InputStream asicStream);
+    void handleAltinnPackage(AltinnPackage altinnPackage);
 }
