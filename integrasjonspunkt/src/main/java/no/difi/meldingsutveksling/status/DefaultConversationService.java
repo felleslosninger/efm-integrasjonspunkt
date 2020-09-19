@@ -125,16 +125,24 @@ public class DefaultConversationService implements ConversationService {
 
     @NotNull
     @Transactional
-    public Conversation registerConversation(MessageInformable message) {
-        return findConversation(message.getMessageId()).filter(p -> {
-            log.debug(String.format("Conversation with id=%s already exists, not recreating", message.getMessageId()));
+    public Conversation registerConversation(MessageInformable message, ReceiptStatus... statuses) {
+        Conversation c = findConversation(message.getMessageId()).filter(p -> {
+            log.debug(format("Conversation with id=%s already exists, not recreating", message.getMessageId()));
             return true;
         }).orElseGet(() -> createConversation(message));
+        for (ReceiptStatus s : statuses) {
+            registerStatus(c, messageStatusFactory.getMessageStatus(s));
+        }
+        return c;
     }
 
     @NotNull
+    @Override
     @Transactional
-    public Conversation registerConversation(StandardBusinessDocument sbd, @NotNull ServiceIdentifier si, @NotNull ConversationDirection conversationDirection) {
+    public Conversation registerConversation(StandardBusinessDocument sbd,
+                                             @NotNull ServiceIdentifier si,
+                                             @NotNull ConversationDirection conversationDirection,
+                                             @NotNull ReceiptStatus... statuses) {
         OffsetDateTime ttl = sbd.getExpectedResponseDateTime().orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
         return registerConversation(new MessageInformable() {
             @Override
@@ -176,7 +184,7 @@ public class DefaultConversationService implements ConversationService {
             public OffsetDateTime getExpiry() {
                 return ttl;
             }
-        });
+        }, statuses);
     }
 
     @NotNull
@@ -184,6 +192,7 @@ public class DefaultConversationService implements ConversationService {
         return repo.findByMessageId(messageId).stream().findFirst();
     }
 
+    @Transactional
     private Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);

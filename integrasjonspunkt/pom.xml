@@ -242,7 +242,6 @@
     </build>
     <dependencies>
 
-
 <!--        <dependency>-->
 <!--            <groupId>no.difi.meldingsutveksling</groupId>-->
 <!--            <artifactId>ip-plugin-test</artifactId>-->

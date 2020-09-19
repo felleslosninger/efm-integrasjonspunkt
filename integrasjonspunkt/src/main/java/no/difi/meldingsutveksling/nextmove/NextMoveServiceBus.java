@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
 
 @Component
@@ -123,12 +122,7 @@ public class NextMoveServiceBus {
                     messagesInQueue = false;
                     break;
                 }
-                if (sbdUtil.isExpired(msg.get().getPayload().getSbd())) {
-                    timeToLiveHelper.registerErrorStatusAndMessage(msg.get().getPayload().getSbd(), DPE, INCOMING);
-                    serviceBusClient.deleteMessage(msg.get());
-                } else {
-                    messages.add(msg.get());
-                }
+                messages.add(msg.get());
             }
 
             for (ServiceBusMessage msg : messages) {
@@ -169,12 +163,8 @@ public class NextMoveServiceBus {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(getBody(m));
-            if (sbdUtil.isExpired(payload.getSbd())) {
-                timeToLiveHelper.registerErrorStatusAndMessage(payload.getSbd(), DPE, INCOMING);
-            } else {
-                InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
-                nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
-            }
+            InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
+            nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
             messageReceiver.completeAsync(m.getLockToken());
         } catch (IOException e) {
             log.error("Failed to put message on local queue", e);

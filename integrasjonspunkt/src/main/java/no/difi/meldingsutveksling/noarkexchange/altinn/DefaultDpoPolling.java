@@ -7,12 +7,12 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.api.DpoPolling;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.api.MessagePersister;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
-import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
 @Slf4j
 @Component
@@ -70,17 +68,7 @@ public class DefaultDpoPolling implements DpoPolling {
                 return;
             }
 
-            if (sbdUtil.isExpired(sbd)) {
-                timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
-                if (altinnPackage.getAsicInputStream() != null) {
-                    altinnPackage.getAsicInputStream().close();
-                    altinnPackage.getTmpFile().delete();
-                }
-                messagePersister.delete(sbd.getMessageId());
-            } else {
-                altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
-            }
-
+            altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
             client.confirmDownload(request);
             log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
         } catch (Exception e) {
