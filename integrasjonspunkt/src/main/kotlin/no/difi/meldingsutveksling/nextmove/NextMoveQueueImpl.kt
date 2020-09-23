@@ -37,6 +37,10 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
 
     val log = logger()
 
+    override fun enqueueIncomingStatus(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier) {
+        enqueueIncomingMessage(sbd, serviceIdentifier, null)
+    }
+
     @Transactional
     override fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asicStream: InputStream?) {
         if (sbd.any !is BusinessMessage<*>) {
@@ -75,4 +79,5 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
 
         Audit.info("Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue", markerFrom(message))
     }
+
 }

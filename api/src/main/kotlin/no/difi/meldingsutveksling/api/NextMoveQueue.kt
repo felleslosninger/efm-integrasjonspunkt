@@ -7,7 +7,12 @@ import java.io.InputStream
 interface NextMoveQueue {
 
     /**
-     * Enqueues an incoming nextmove message. [asicStream] is closed.
+     * Enqueue an incoming nextmove message. [asicStream] is closed.
      */
     fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asicStream: InputStream?)
+
+    /**
+     * Enqueue an incoming status message.
+     */
+    fun enqueueIncomingStatus(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier)
 }
