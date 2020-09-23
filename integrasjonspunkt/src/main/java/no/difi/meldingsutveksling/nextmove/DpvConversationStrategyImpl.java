@@ -6,7 +6,7 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.noarkexchange.receive.BestEduAppReceiptService;
+import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;

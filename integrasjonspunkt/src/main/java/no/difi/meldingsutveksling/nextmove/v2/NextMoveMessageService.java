@@ -18,7 +18,7 @@ import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

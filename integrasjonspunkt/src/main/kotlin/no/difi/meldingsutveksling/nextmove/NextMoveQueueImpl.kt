@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory
 import no.difi.meldingsutveksling.logging.Audit
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger

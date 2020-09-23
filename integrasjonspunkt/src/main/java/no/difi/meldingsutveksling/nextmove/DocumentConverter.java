@@ -1,10 +1,9 @@
-package no.difi.meldingsutveksling.noarkexchange.receive;
+package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
-import no.difi.meldingsutveksling.nextmove.*;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,7 @@ class DocumentConverter {
     private final JAXBContext ctx;
     private final ObjectFactory objectFactory;
 
-    DocumentConverter() {
+    public DocumentConverter() {
         try {
             this.ctx = JAXBContextFactory.createContext(new Class[]{
                     StandardBusinessDocument.class,
@@ -42,7 +41,7 @@ class DocumentConverter {
         this.objectFactory = new ObjectFactory();
     }
 
-    byte[] marshallToBytes(StandardBusinessDocument sbd) {
+    public byte[] marshallToBytes(StandardBusinessDocument sbd) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         try {
@@ -62,7 +61,7 @@ class DocumentConverter {
         }
     }
 
-    StandardBusinessDocument unmarshallFrom(byte[] bytes) {
+    public StandardBusinessDocument unmarshallFrom(byte[] bytes) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         StreamSource streamSource = new StreamSource(inputStream);
 

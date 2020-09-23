@@ -1,10 +1,11 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpfPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
+import no.difi.meldingsutveksling.noarkexchange.SvarInnPutMessageForwarder;
 import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.function.Consumer;

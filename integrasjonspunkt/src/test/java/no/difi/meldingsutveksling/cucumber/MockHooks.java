@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.vefa.peppol.common.model.DocumentTypeIdentifier;
 import no.difi.vefa.peppol.lookup.LookupClient;

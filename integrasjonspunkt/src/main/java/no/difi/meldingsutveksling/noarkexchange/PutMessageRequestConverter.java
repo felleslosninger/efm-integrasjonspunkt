@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.receive;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;

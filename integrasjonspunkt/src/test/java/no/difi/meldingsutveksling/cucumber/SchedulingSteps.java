@@ -3,9 +3,9 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpePolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpfPolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DefaultDpoPolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpePolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpfPolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpoPolling;
 
 @RequiredArgsConstructor
 public class SchedulingSteps {

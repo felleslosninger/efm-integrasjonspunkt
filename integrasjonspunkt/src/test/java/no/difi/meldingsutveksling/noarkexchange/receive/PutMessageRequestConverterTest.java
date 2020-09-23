@@ -1,13 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange.receive;
 
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
+import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
-import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class PutMessageRequestConverterTest {
 

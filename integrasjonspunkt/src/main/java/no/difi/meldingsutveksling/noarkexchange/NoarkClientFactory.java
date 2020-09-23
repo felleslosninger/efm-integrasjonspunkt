@@ -1,9 +1,8 @@
-package no.difi.meldingsutveksling.noark;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.mail.MailClient;
-import no.difi.meldingsutveksling.noarkexchange.*;
 
 import java.util.Optional;
 

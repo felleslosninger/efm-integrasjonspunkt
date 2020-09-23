@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.api.DpfPolling;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessageUnlocker;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.noarkexchange.altinn.MessagePollingScheduler;
+import no.difi.meldingsutveksling.nextmove.MessagePollingScheduler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

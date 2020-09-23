@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnPutMessageBuilder;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;

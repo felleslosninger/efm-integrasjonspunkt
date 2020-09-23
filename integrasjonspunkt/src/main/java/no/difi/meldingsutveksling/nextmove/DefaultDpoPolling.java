@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +7,10 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.DownloadRequest;
 import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.api.DpoPolling;
-import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
+import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -32,10 +30,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final MessagePersister messagePersister;
     private final AltinnWsClient altinnWsClient;
-    private final TimeToLiveHelper timeToLiveHelper;
-    private final SBDUtil sbdUtil;
 
     @Override
     public void poll() {

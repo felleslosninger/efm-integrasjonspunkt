@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.ConditionContext;

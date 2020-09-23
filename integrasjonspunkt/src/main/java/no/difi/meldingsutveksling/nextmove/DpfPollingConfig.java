@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.altinn;
+package no.difi.meldingsutveksling.nextmove;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
+import no.difi.meldingsutveksling.noarkexchange.LocalNorarkExistsCondition;
+import no.difi.meldingsutveksling.noarkexchange.SvarInnPutMessageForwarder;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.beans.factory.ObjectProvider;

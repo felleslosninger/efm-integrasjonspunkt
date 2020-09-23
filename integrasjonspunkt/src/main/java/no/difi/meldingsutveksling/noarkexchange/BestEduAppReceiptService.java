@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noarkexchange.receive;
+package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
@@ -55,13 +55,13 @@ public class BestEduAppReceiptService {
         this.conversationIdEntityRepo = conversationIdEntityRepo;
     }
 
-    void sendBestEduErrorAppReceipt(NextMoveOutMessage message, String errorText) {
+    public void sendBestEduErrorAppReceipt(NextMoveOutMessage message, String errorText) {
         AppReceiptType appReceipt = AppReceiptFactory.from("ERROR", "Unknown", errorText);
         PutMessageRequestType putMessage = putMessageRequestFactory.create(message.getSbd(), BestEduConverter.appReceiptAsString(appReceipt));
         noarkClient.sendEduMelding(putMessage);
     }
 
-    void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
+    public void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
         String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", sbd.getReceiverIdentifier());
         ArkivmeldingKvitteringMessage kvittering = new ArkivmeldingKvitteringMessage()
                 .setReceiptType("ERROR")

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 import no.difi.meldingsutveksling.config.JmsConfiguration;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

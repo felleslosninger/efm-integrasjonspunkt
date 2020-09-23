@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.noark;
+package no.difi.meldingsutveksling.noarkexchange;
 
 public class UnknownArchiveSystemException extends RuntimeException {
     public UnknownArchiveSystemException(String archiveSystemName) {
