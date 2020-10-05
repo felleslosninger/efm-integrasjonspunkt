@@ -67,7 +67,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
             builder.and(nextMoveInMessage.conversationId.eq(input.getConversationId()));
         }
 
-        if (input.getConversationId() != null) {
+        if (input.getMessageId() != null) {
             builder.and(nextMoveInMessage.messageId.eq(input.getMessageId()));
         }
 

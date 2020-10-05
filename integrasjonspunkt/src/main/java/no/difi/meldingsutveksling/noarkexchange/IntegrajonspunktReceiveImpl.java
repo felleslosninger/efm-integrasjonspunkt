@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -25,7 +24,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.ConversationService;
 import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.services.Adresseregister;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -164,7 +162,9 @@ public class IntegrajonspunktReceiveImpl {
                 }
             } else {
                 Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
-                log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                if (!response.getResult().getMessage().isEmpty()) {
+                    log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                }
             }
         }
     }
