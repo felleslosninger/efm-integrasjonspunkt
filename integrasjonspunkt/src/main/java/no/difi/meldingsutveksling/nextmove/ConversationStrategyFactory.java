@@ -19,13 +19,17 @@ public class ConversationStrategyFactory {
                                        ObjectProvider<DpfConversationStrategy> dpfStrat,
                                        ObjectProvider<DpeConversationStrategy> dpeStrat,
                                        ObjectProvider<DpvConversationStrategy> dpvStrat,
-                                       ObjectProvider<DpiConversationStrategy> dpiStrat) {
+                                       ObjectProvider<DpiConversationStrategy> dpiStrat,
+                                       ObjectProvider<DpfIoConversationStrategy> dpfioStrat) {
         strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             strategies.put(ServiceIdentifier.DPO, dpoStrat.getIfAvailable());
         }
         if (props.getFeature().isEnableDPF()) {
             strategies.put(ServiceIdentifier.DPF, dpfStrat.getIfAvailable());
+        }
+        if (props.getFeature().isEnableDPFIO()) {
+            strategies.put(ServiceIdentifier.DPFIO, dpfioStrat.getIfAvailable());
         }
         if (props.getFeature().isEnableDPV()) {
             strategies.put(ServiceIdentifier.DPV, dpvStrat.getIfAvailable());

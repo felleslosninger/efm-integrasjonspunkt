@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
-class DpfioConversationStrategy(private val fiksIoService: FiksIoService) : ConversationStrategy {
+class DpfIoConversationStrategy(private val fiksIoService: FiksIoService) : ConversationStrategy {
 
     override fun send(message: NextMoveOutMessage) {
         fiksIoService.sendMessage(message)
