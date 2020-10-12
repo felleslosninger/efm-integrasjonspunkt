@@ -24,8 +24,7 @@ import java.util.function.Consumer
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
-class FiksIoService(private val props: IntegrasjonspunktProperties,
-                    private val fiksIoKlient: FiksIOKlient,
+class FiksIoService(private val fiksIoKlient: FiksIOKlient,
                     private val serviceRegistryLookup: ServiceRegistryLookup,
                     private val persister: OptionalCryptoMessagePersister,
                     private val objectMapper: ObjectMapper,
@@ -48,7 +47,7 @@ class FiksIoService(private val props: IntegrasjonspunktProperties,
         }
     }
 
-    private fun createRequest(meldingType: String = "no.difi.einnsyn.innsynskrav.v1", msg: NextMoveMessage, payloads: List<Payload>) {
+    private fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {
         val serviceRecord: ServiceRecord = serviceRegistryLookup.getServiceRecord(
                 SRParameter.builder(msg.receiverIdentifier)
                         .process(msg.sbd.process)
@@ -56,7 +55,7 @@ class FiksIoService(private val props: IntegrasjonspunktProperties,
                 msg.sbd.standard)
         val request = MeldingRequest.builder()
                 .mottakerKontoId(KontoId(UUID.fromString(serviceRecord.service.endpointUrl)))
-                .meldingType(meldingType)
+                .meldingType(serviceRecord.service.serviceCode)
                 .build()
         val sentMessage = fiksIoKlient.send(request, payloads)
         log.debug("FiksIO: Sent message with fiksId=${sentMessage.meldingId}")
