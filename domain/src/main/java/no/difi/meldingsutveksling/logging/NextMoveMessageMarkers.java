@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.logging;
 
+import com.google.common.base.Strings;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.move.common.IdentifierHasher;
 
 public class NextMoveMessageMarkers {
 
@@ -34,7 +36,7 @@ public class NextMoveMessageMarkers {
     }
 
     public static LogstashMarker receiverMarker(String receiver) {
-        return Markers.append("receiver", receiver);
+        return Markers.append("receiver", Strings.isNullOrEmpty(receiver) ? receiver : IdentifierHasher.hashIfPersonnr(receiver));
     }
 
     public static LogstashMarker processMarker(String processIdentifier) {

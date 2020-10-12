@@ -16,9 +16,9 @@ import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
@@ -163,7 +163,9 @@ public class IntegrajonspunktReceiveImpl {
                 }
             } else {
                 Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
-                log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                if (!response.getResult().getMessage().isEmpty()) {
+                    log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
+                }
             }
         }
     }

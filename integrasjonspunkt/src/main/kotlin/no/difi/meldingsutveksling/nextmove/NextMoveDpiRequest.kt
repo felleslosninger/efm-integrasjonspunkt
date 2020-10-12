@@ -122,7 +122,7 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         return serviceRecord.orgnrPostkasse
     }
 
-    override fun getEmailAddress(): String {
+    override fun getEmailAddress(): String? {
         return serviceRecord.epostAdresse
     }
 
