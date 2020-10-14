@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.webhooks;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.webhooks.event.WebhookContentFactory;
 import no.difi.meldingsutveksling.webhooks.event.WebhookEvent;
 import org.springframework.context.ApplicationEventPublisher;

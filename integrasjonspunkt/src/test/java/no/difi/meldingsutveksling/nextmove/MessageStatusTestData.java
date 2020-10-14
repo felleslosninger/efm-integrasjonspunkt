@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Data;
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 import java.time.OffsetDateTime;

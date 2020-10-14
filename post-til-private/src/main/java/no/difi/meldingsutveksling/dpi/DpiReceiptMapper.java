@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import org.springframework.stereotype.Component;

@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ks.svarut.ForsendelseStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 

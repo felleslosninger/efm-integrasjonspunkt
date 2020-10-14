@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 public class ConversationStrategyFactory {
@@ -22,19 +25,19 @@ public class ConversationStrategyFactory {
                                        ObjectProvider<DpiConversationStrategy> dpiStrat) {
         strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
-            strategies.put(ServiceIdentifier.DPO, dpoStrat.getIfAvailable());
+            dpoStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPO, s));
         }
         if (props.getFeature().isEnableDPF()) {
-            strategies.put(ServiceIdentifier.DPF, dpfStrat.getIfAvailable());
+            dpfStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPF, s));
         }
         if (props.getFeature().isEnableDPV()) {
-            strategies.put(ServiceIdentifier.DPV, dpvStrat.getIfAvailable());
+            dpvStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPV, s));
         }
         if (props.getFeature().isEnableDPI()) {
-            strategies.put(ServiceIdentifier.DPI, dpiStrat.getIfAvailable());
+            dpiStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPI, s));
         }
         if (props.getFeature().isEnableDPE()) {
-            strategies.put(ServiceIdentifier.DPE, dpeStrat.getIfAvailable());
+            dpeStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPE, s));
         }
     }
 

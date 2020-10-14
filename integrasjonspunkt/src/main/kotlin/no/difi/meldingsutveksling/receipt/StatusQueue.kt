@@ -1,11 +1,10 @@
 package no.difi.meldingsutveksling.receipt
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.status.Conversation
+import no.difi.meldingsutveksling.status.MessageStatus
 import no.difi.meldingsutveksling.util.logger
-import org.apache.activemq.ActiveMQSession
 import org.springframework.jms.core.JmsTemplate
-import org.springframework.jms.core.MessagePostProcessor
-import org.springframework.jms.support.JmsUtils
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.jms.TextMessage

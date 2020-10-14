@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.webhooks.event;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.receipt.Conversation;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
+import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;

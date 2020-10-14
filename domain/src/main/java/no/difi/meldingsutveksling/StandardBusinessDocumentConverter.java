@@ -20,7 +20,7 @@ public class StandardBusinessDocumentConverter {
 
     StandardBusinessDocumentConverter() {
         try {
-            this.ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class}, null);
+            this.ctx = JAXBContext.newInstance(StandardBusinessDocument.class);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + StandardBusinessDocumentConverter.class, e);
         }
