@@ -2,9 +2,13 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.auth.IdportenOidcTokenResponse;
 import no.difi.meldingsutveksling.auth.OidcTokenClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
@@ -35,8 +39,8 @@ import static java.util.Arrays.asList;
 @EnableOAuth2Client
 public class OauthRestTemplateConfig {
 
-    private IntegrasjonspunktProperties props;
-    private OidcTokenClient oidcTokenClient;
+    private final IntegrasjonspunktProperties props;
+    private final OidcTokenClient oidcTokenClient;
 
     @Autowired
     public OauthRestTemplateConfig(IntegrasjonspunktProperties props, OidcTokenClient oidcTokenClient) {
@@ -46,6 +50,16 @@ public class OauthRestTemplateConfig {
 
     @Bean
     public RestOperations restTemplate() throws URISyntaxException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .useSystemProperties()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(3000)
+                        .setConnectionRequestTimeout(3000)
+                        .setSocketTimeout(3000)
+                        .build())
+                .build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+
         if (props.getOidc().isEnable()) {
             DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
             BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
@@ -54,10 +68,12 @@ public class OauthRestTemplateConfig {
             resource.setClientId(props.getOidc().getClientId());
 
             OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
+            rt.setRequestFactory(requestFactory);
             rt.setAccessTokenProvider(new OidcAccessTokenProvider());
             return rt;
         }
-        return new RestTemplate();
+
+        return new RestTemplate(requestFactory);
     }
 
     public class OidcAccessTokenProvider implements AccessTokenProvider {
