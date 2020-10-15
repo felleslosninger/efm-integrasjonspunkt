@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

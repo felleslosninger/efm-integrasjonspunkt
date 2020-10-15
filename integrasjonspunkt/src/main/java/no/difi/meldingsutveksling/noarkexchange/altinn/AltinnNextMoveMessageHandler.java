@@ -2,22 +2,28 @@ package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.AltinnPackage;
+import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.api.MessagePersister;
+import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
-import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.noarkexchange.receive.InternalQueue;
-import no.difi.meldingsutveksling.receipt.ConversationService;
-import no.difi.meldingsutveksling.receipt.MessageStatus;
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 
@@ -31,40 +37,49 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
     private final NextMoveQueue nextMoveQueue;
-    private final SBDReceiptFactory sbdReceiptFactory;
     private final MessageStatusFactory messageStatusFactory;
+    private final MessagePersister messagePersister;
     private final SBDUtil sbdUtil;
+    private final TimeToLiveHelper timeToLiveHelper;
 
     @Override
-    public void handleStandardBusinessDocument(StandardBusinessDocument sbd) {
+    public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
+        StandardBusinessDocument sbd = altinnPackage.getSbd();
         log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
 
-        if (sbdUtil.isStatus(sbd)) {
-            handleStatus(sbd);
+        if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd) && !sbdUtil.isStatus(sbd)) {
+            if (sbdUtil.isExpired(sbd)) {
+                timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
+                if (altinnPackage.getAsicInputStream() != null) {
+                    altinnPackage.getAsicInputStream().close();
+                    altinnPackage.getTmpFile().delete();
+                }
+                return;
+            }
+            if (altinnPackage.getAsicInputStream() != null) {
+                try (InputStream asicStream = altinnPackage.getAsicInputStream()){
+                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
+                } catch (IOException e) {
+                    throw new NextMoveRuntimeException("Error persisting ASiC", e);
+                } finally {
+                    altinnPackage.getTmpFile().delete();
+                }
+            }
+
+            conversationService.registerConversation(sbd, DPO, INCOMING);
+            internalQueue.enqueueNoark(sbd);
+            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
         } else {
-            if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd)) {
-                conversationService.registerConversation(sbd, DPO, INCOMING);
-                internalQueue.enqueueNoark(sbd);
-                conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
-            } else {
-                nextMoveQueue.enqueue(sbd, DPO);
+            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
+            if (altinnPackage.getTmpFile() != null) {
+                altinnPackage.getTmpFile().delete();
             }
-            if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
-                ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
-                conversationService.registerStatus(receipt.getRelatedToMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
-            }
+        }
+
+        if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
+            ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
+            conversationService.registerStatus(receipt.getRelatedToMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
         }
     }
 
-    private void handleStatus(StandardBusinessDocument sbd) {
-        StatusMessage status = (StatusMessage) sbd.getAny();
-        MessageStatus ms = messageStatusFactory.getMessageStatus(status.getStatus());
-        conversationService.registerStatus(sbd.getDocumentId(), ms);
-    }
-
-    public void sendReceivedStatusToSender(StandardBusinessDocument sbd) {
-        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.MOTTATT);
-        NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
-        internalQueue.enqueueNextMove(msg);
-    }
 }

@@ -15,10 +15,8 @@ import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
-import no.difi.meldingsutveksling.transport.TransportFactory;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -61,12 +59,6 @@ public class IntegrasjonspunktBeans {
                 .locator(new StaticLocator(properties.getElma().getUrl()))
                 .certificateValidator(EmptyCertificateValidator.INSTANCE)
                 .build();
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public TransportFactory serviceRegistryTransportFactory(AltinnWsClient altinnWsClient, UUIDGenerator uuidGenerator) {
-        return new ServiceRegistryTransportFactory(altinnWsClient, uuidGenerator);
     }
 
     @Bean
@@ -168,10 +160,8 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(UUIDGenerator uuidGenerator,
-                                                                                   CorrespondenceAgencyClient correspondenceAgencyClient,
-                                                                                   CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory) {
-        return new CorrespondenceAgencyConnectionCheck(uuidGenerator, correspondenceAgencyClient, correspondenceAgencyMessageFactory);
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
+        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
     }
 }
 

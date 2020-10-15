@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling;
 
+import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import org.springframework.util.StringUtils;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -32,7 +32,7 @@ public class DateTimeUtil {
     }
 
     public static XMLGregorianCalendar toXMLGregorianCalendar(String in) {
-        if (StringUtils.isEmpty(in)) {
+        if (Strings.isNullOrEmpty(in)) {
             return null;
         }
 

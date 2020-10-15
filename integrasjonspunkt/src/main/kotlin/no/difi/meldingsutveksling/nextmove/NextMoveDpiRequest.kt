@@ -1,18 +1,16 @@
 package no.difi.meldingsutveksling.nextmove
 
 import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.dpi.Document
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest
-import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.sdp.client2.domain.MetadataDokument
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa
 import no.difi.sdp.client2.domain.fysisk_post.Posttype
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge
-import java.io.IOException
-import java.nio.charset.StandardCharsets
 import java.time.Clock
 import java.util.*
 
@@ -124,7 +122,7 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         return serviceRecord.orgnrPostkasse
     }
 
-    override fun getEmailAddress(): String {
+    override fun getEmailAddress(): String? {
         return serviceRecord.epostAdresse
     }
 

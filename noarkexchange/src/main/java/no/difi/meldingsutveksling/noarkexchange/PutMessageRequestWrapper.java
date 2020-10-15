@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
+import com.google.common.base.Strings;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.springframework.util.StringUtils;
 
 public class PutMessageRequestWrapper {
     private PutMessageRequestType requestType;
@@ -37,11 +37,11 @@ public class PutMessageRequestWrapper {
     }
 
     public boolean hasSenderPartyNumber() {
-        return hasSender() && StringUtils.hasText(requestType.getEnvelope().getSender().getOrgnr());
+        return hasSender() && !Strings.isNullOrEmpty(requestType.getEnvelope().getSender().getOrgnr());
     }
 
     public boolean hasRecieverPartyNumber() {
-        return hasReciever() && StringUtils.hasLength(getReceiverPartyNumber());
+        return hasReciever() && !Strings.isNullOrEmpty(getReceiverPartyNumber());
     }
 
     private boolean hasReciever() {

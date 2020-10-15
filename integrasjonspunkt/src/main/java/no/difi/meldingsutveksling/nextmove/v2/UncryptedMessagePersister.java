@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.api.MessagePersister;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.nextmove.message.*;
 import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

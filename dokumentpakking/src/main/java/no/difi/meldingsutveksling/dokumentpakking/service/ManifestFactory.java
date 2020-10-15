@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.dokumentpakking.xml.*;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
 
 class ManifestFactory {
 
-    no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveOutMessage message, String fileName, String mimeType) {
+    no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, String fileName, String mimeType) {
 
         Avsender avsender = new Avsender(new Organisasjon(Organisasjonsnummer.from(message.getSenderIdentifier())));
         Mottaker mottaker = new Mottaker(new Organisasjon(Organisasjonsnummer.from(message.getReceiverIdentifier())));

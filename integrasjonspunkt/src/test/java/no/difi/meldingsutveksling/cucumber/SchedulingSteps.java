@@ -3,16 +3,16 @@ package no.difi.meldingsutveksling.cucumber;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpePolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpfPolling;
-import no.difi.meldingsutveksling.noarkexchange.altinn.DpoPolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpePolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpfPolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDpoPolling;
 
 @RequiredArgsConstructor
 public class SchedulingSteps {
 
-    private final DpoPolling dpoPolling;
-    private final DpePolling dpePolling;
-    private final DpfPolling dpfPolling;
+    private final DefaultDpoPolling dpoPolling;
+    private final DefaultDpePolling dpePolling;
+    private final DefaultDpfPolling dpfPolling;
 
     @Given("^the application checks for new DPO messages$")
     public void theApplicationChecksForNewNextMoveDPOMessages() {

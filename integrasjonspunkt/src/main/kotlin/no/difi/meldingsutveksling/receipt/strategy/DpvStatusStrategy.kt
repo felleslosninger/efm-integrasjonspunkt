@@ -3,14 +3,14 @@ package no.difi.meldingsutveksling.receipt.strategy
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2
 import no.altinn.schemas.services.serviceentity._2014._10.CorrespondenceStatusTypeV2
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.api.ConversationService
+import no.difi.meldingsutveksling.api.StatusStrategy
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory
-import no.difi.meldingsutveksling.receipt.Conversation
-import no.difi.meldingsutveksling.receipt.ConversationMarker.markerFrom
-import no.difi.meldingsutveksling.receipt.ConversationService
-import no.difi.meldingsutveksling.receipt.MessageStatusFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
-import no.difi.meldingsutveksling.receipt.StatusStrategy
+import no.difi.meldingsutveksling.status.Conversation
+import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
+import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
@@ -24,7 +24,7 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
 
     val log = logger()
 
-    override fun checkStatus(conversations: Set<Conversation>) {
+    override fun checkStatus(conversations: MutableSet<Conversation>) {
         log.debug("Checking status for ${conversations.size} DPV messages..")
         conversations.chunked(10_000).forEach { chunk ->
             val request = correspondencyAgencyMessageFactory.createReceiptRequest(chunk.toSet())

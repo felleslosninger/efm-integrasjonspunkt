@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.AltinnPackage;
+
+import java.io.IOException;
 
 public interface AltinnMessageHandler {
 
-    void handleStandardBusinessDocument(StandardBusinessDocument sbd);
+    void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException;
 }
