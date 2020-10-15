@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextmove;
+package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.apache.http.client.config.RequestConfig;

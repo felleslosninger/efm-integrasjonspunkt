@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextmove;
+package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.servicebus.*;
@@ -6,12 +6,12 @@ import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
-import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.nextmove.ServiceBusQueueMode.*;
+import static no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusQueueMode.*;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
@@ -46,10 +46,8 @@ public class NextMoveServiceBus {
     private final NextMoveQueue nextMoveQueue;
     private final ServiceBusRestClient serviceBusClient;
     private final ObjectMapper om;
-    private final MessagePersister messagePersister;
     private final ServiceBusPayloadConverter payloadConverter;
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final TaskExecutor taskExecutor;
     private final NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory;
@@ -60,10 +58,8 @@ public class NextMoveServiceBus {
                               NextMoveQueue nextMoveQueue,
                               ServiceBusRestClient serviceBusClient,
                               ObjectMapper om,
-                              MessagePersister messagePersister,
                               ServiceBusPayloadConverter payloadConverter,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              TimeToLiveHelper timeToLiveHelper,
                               SBDUtil sbdUtil,
                               TaskExecutor taskExecutor,
                               NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory) {
@@ -71,11 +67,9 @@ public class NextMoveServiceBus {
         this.nextMoveQueue = nextMoveQueue;
         this.serviceBusClient = serviceBusClient;
         this.om = om;
-        this.messagePersister = messagePersister;
         this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
         this.payloadConverter = payloadConverter;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.timeToLiveHelper = timeToLiveHelper;
         this.sbdUtil = sbdUtil;
         this.taskExecutor = taskExecutor;
     }

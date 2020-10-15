@@ -1,8 +1,9 @@
-package no.difi.meldingsutveksling.nextmove;
+package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.api.AsicHandler;
-import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,7 +21,7 @@ public class NextMoveServiceBusPayloadFactory {
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
 
-    ServiceBusPayload toServiceBusPayload(NextMoveOutMessage message) {
+    public ServiceBusPayload toServiceBusPayload(NextMoveOutMessage message) {
         return ServiceBusPayload.of(message.getSbd(), getAsicBytes(message));
     }
 

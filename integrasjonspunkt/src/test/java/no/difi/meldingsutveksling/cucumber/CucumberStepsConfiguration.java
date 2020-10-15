@@ -17,7 +17,7 @@ import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
-import no.difi.meldingsutveksling.nextmove.ServiceBusRestTemplate;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientFactory;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;

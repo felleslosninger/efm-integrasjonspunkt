@@ -1,12 +1,11 @@
-package no.difi.meldingsutveksling.nextmove;
+package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
-import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayloadConverter;
+import no.difi.meldingsutveksling.nextmove.BrokerProperties;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
@@ -63,7 +62,7 @@ public class ServiceBusRestClient {
                 props.getNextmove().getServiceBus().getBaseUrl());
     }
 
-    void sendMessage(byte[] message, String queuePath) {
+    public void sendMessage(byte[] message, String queuePath) {
         String resourceUri = format("%s/%s/messages",
                 getBase(),
                 queuePath);
@@ -81,7 +80,7 @@ public class ServiceBusRestClient {
         }
     }
 
-    Optional<ServiceBusMessage> receiveMessage() {
+    public Optional<ServiceBusMessage> receiveMessage() {
         String resourceUri = format("%s/%s/messages/head",
                 getBase(),
                 localQueuePath);
@@ -128,7 +127,7 @@ public class ServiceBusRestClient {
         return objectMapper.readValue(brokerPropertiesJson, BrokerProperties.class);
     }
 
-    void deleteMessage(ServiceBusMessage message) {
+    public void deleteMessage(ServiceBusMessage message) {
         String resourceUri = format("%s/%s/messages/%s/%s",
                 getBase(),
                 localQueuePath,
@@ -195,7 +194,7 @@ public class ServiceBusRestClient {
         }
     }
 
-    String getSasKey() {
+    public String getSasKey() {
         if (props.getOidc().isEnable()) {
             return sr.getSasKey();
         } else {

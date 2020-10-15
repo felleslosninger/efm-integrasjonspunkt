@@ -7,7 +7,7 @@ import cucumber.api.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
-import no.difi.meldingsutveksling.nextmove.ServiceBusRestClient;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
