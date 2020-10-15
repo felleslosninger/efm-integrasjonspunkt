@@ -3,9 +3,8 @@ package no.difi.meldingsutveksling.ks.fiksio
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.difi.meldingsutveksling.NextMoveConsts
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
-import no.difi.meldingsutveksling.nextmove.message.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.pipes.Plumber
 import no.difi.meldingsutveksling.pipes.PromiseMaker
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
