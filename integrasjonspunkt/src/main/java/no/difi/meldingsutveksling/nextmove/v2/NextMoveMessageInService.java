@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -11,14 +10,12 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -35,8 +32,6 @@ import java.time.OffsetDateTime;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
@@ -48,8 +43,7 @@ public class NextMoveMessageInService {
     private final ConversationService conversationService;
     private final NextMoveMessageInRepository messageRepo;
     private final CryptoMessagePersister cryptoMessagePersister;
-    private final InternalQueue internalQueue;
-    private final SBDReceiptFactory receiptFactory;
+    private final ResponseStatusSender responseStatusSender;
     private final MessageStatusFactory messageStatusFactory;
     private final Clock clock;
 
@@ -127,19 +121,10 @@ public class NextMoveMessageInService {
         conversationService.registerStatus(messageId,
                 messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
 
-        Audit.info(format("Message with id=%s deleted from queue", messageId),
+        Audit.info(format("Message [id=%s, serviceIdentifier=%s] deleted from queue", messageId, message.getServiceIdentifier()),
                 markerFrom(message));
 
-        if (message.getServiceIdentifier() == DPO) {
-            StandardBusinessDocument statusSbd = receiptFactory.createArkivmeldingStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
-            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
-            internalQueue.enqueueNextMove(msg);
-        }
-        if (message.getServiceIdentifier() == DPE) {
-            StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
-            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
-            internalQueue.enqueueNextMove(msg);
-        }
+        responseStatusSender.queue(message.getSbd(), message.getServiceIdentifier(), ReceiptStatus.LEVERT);
 
         return message.getSbd();
     }
