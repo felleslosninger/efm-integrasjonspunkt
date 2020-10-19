@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
+import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
@@ -17,7 +17,6 @@ import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +43,6 @@ public class NextMoveMessageInService {
     private final NextMoveMessageInRepository messageRepo;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
-    private final MessageStatusFactory messageStatusFactory;
     private final Clock clock;
 
     @Transactional
@@ -61,12 +59,12 @@ public class NextMoveMessageInService {
         messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
 
-        Audit.info(String.format("Message with id=%s locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
+        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
 
     @Transactional
-    public InputStreamResource popMessage(String messageId) {
+    public InputStreamResource popMessage(String messageId) throws AsicPersistenceException {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
 
@@ -83,9 +81,13 @@ public class NextMoveMessageInService {
             return new InputStreamResource(getInputStream(fileEntry, messageId));
 
         } catch (PersistenceException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
-                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
-            throw new FileNotFoundException(ASIC_FILE);
+            String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
+            Audit.error(errorMsg, markerFrom(message), e);
+            messageRepo.delete(message);
+            conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
+            // throw checked AsicPersistanceException so that deletion transaction is not rolled back
+            throw new AsicPersistenceException();
         }
     }
 
@@ -117,10 +119,7 @@ public class NextMoveMessageInService {
         }
 
         messageRepo.delete(message);
-
-        conversationService.registerStatus(messageId,
-                messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
-
+        conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_LEVERT);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] deleted from queue", messageId, message.getServiceIdentifier()),
                 markerFrom(message));
 
