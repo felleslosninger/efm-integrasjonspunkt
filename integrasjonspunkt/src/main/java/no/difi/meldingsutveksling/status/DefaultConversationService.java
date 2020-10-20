@@ -60,6 +60,19 @@ public class DefaultConversationService implements ConversationService {
     }
 
     @NotNull
+    @Override
+    @Transactional
+    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status) {
+        return registerStatus(messageId, messageStatusFactory.getMessageStatus(status));
+    }
+
+    @NotNull
+    @Override
+    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status, @NotNull String description) {
+        return registerStatus(messageId, messageStatusFactory.getMessageStatus(status, description));
+    }
+
+    @NotNull
     @SuppressWarnings("squid:S2250")
     @Transactional
     public Conversation registerStatus(Conversation conversation, @NotNull MessageStatus status) {
@@ -193,7 +206,7 @@ public class DefaultConversationService implements ConversationService {
     }
 
     @Transactional
-    private Conversation createConversation(MessageInformable message) {
+    Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
         repo.save(c);

@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class TimeToLiveHelper {
 
     private final ConversationService conversationService;
-    private final MessageStatusFactory messageStatusFactory;
 
     @Transactional
     public void registerErrorStatusAndMessage(Conversation c) {
-        conversationService.registerStatus(c.getMessageId(),
-                messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT,
-                        "Levetiden for meldingen er utgått. Må sendes på nytt"));
+        conversationService.registerStatus(c.getMessageId(), ReceiptStatus.LEVETID_UTLOPT, "Levetiden for meldingen er utgått. Må sendes på nytt");
     }
 
     @Transactional

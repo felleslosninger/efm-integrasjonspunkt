@@ -21,11 +21,9 @@ import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +57,6 @@ public class MessageInController {
     private final IntegrasjonspunktProperties props;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ConversationService conversationService;
-    private final MessageStatusFactory messageStatusFactory;
     private final InternalQueue internalQueue;
     private final SBDReceiptFactory receiptFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
@@ -142,8 +139,7 @@ public class MessageInController {
             byte[] asicBytes = cryptoMessagePersister.read(conversationId, ASIC_FILE);
             cryptoMessagePersister.delete(conversationId);
             inRepo.delete(message);
-            conversationService.registerStatus(conversationId,
-                    messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(conversationId, ReceiptStatus.INNKOMMENDE_LEVERT);
 
             if (message.getServiceIdentifier() == DPE) {
                 StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);

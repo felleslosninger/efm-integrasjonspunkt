@@ -11,6 +11,8 @@ import java.util.*
 
 interface ConversationService {
     fun registerStatus(messageId: String, status: MessageStatus): Optional<Conversation>
+    fun registerStatus(messageId: String, status: ReceiptStatus): Optional<Conversation>
+    fun registerStatus(messageId: String, status: ReceiptStatus, description: String): Optional<Conversation>
     fun registerStatus(conversation: Conversation, status: MessageStatus): Conversation
     fun save(conversation: Conversation): Conversation
     fun registerConversation(message: MessageInformable, vararg statuses: ReceiptStatus): Conversation

@@ -51,7 +51,7 @@ public class OidcTokenClient {
 
     private final IntegrasjonspunktProperties props;
 
-    @Retryable(value = HttpClientErrorException.class, maxAttempts = -1,
+    @Retryable(value = HttpClientErrorException.class, maxAttempts = Integer.MAX_VALUE,
             backoff = @Backoff(delay = 5000, maxDelay = 1000*60*60, multiplier = 3))
     public IdportenOidcTokenResponse fetchToken() {
         RestTemplate restTemplate = new RestTemplate();
