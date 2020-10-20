@@ -22,7 +22,6 @@ import java.io.InputStream
 @Component
 open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepository,
                              private val conversationService: ConversationService,
-                             private val messageStatusFactory: MessageStatusFactory,
                              private val sbdUtil: SBDUtil,
                              private val messagePersister: MessagePersister,
                              private val timeToLiveHelper: TimeToLiveHelper,
@@ -45,7 +44,7 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
             }
             sbdUtil.isStatus(sbd) -> {
                 log.debug("Message with id=${sbd.documentId} is a receipt")
-                conversationService.registerStatus(sbd.documentId, messageStatusFactory.getMessageStatus((sbd.any as StatusMessage).status))
+                conversationService.registerStatus(sbd.documentId, (sbd.any as StatusMessage).status)
                 return
             }
         }

@@ -10,11 +10,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +36,6 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
     private final NextMoveQueue nextMoveQueue;
-    private final MessageStatusFactory messageStatusFactory;
     private final MessagePersister messagePersister;
     private final SBDUtil sbdUtil;
     private final TimeToLiveHelper timeToLiveHelper;
@@ -68,7 +66,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
 
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
-            conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_MOTTATT));
+            conversationService.registerStatus(sbd.getDocumentId(), ReceiptStatus.INNKOMMENDE_MOTTATT);
         } else {
             nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
             if (altinnPackage.getTmpFile() != null) {
@@ -78,7 +76,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
 
         if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
             ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
-            conversationService.registerStatus(receipt.getRelatedToMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.LEST));
+            conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
         }
     }
 

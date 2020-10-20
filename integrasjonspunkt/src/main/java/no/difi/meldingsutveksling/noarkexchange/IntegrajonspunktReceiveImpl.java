@@ -24,7 +24,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,7 +60,6 @@ public class IntegrajonspunktReceiveImpl {
     private final ConversationService conversationService;
     private final MessagePersister messagePersister;
     private final SBDReceiptFactory sbdReceiptFactory;
-    private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final NextMoveAdapter nextMoveAdapter;
@@ -74,7 +72,6 @@ public class IntegrajonspunktReceiveImpl {
                                        ConversationService conversationService,
                                        ObjectProvider<MessagePersister> messagePersister,
                                        SBDReceiptFactory sbdReceiptFactory,
-                                       MessageStatusFactory messageStatusFactory,
                                        SBDUtil sbdUtil,
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
@@ -86,7 +83,6 @@ public class IntegrajonspunktReceiveImpl {
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
         this.sbdReceiptFactory = sbdReceiptFactory;
-        this.messageStatusFactory = messageStatusFactory;
         this.sbdUtil = sbdUtil;
         this.putMessageRequestFactory = putMessageRequestFactory;
         this.nextMoveAdapter = nextMoveAdapter;
@@ -99,8 +95,7 @@ public class IntegrajonspunktReceiveImpl {
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
         if (sbdUtil.isExpired(sbd)) {
-            conversationService.registerStatus(sbd.getMessageId(),
-                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVETID_UTLOPT));
+            conversationService.registerStatus(sbd.getMessageId(), ReceiptStatus.LEVETID_UTLOPT);
             try {
                 messagePersister.delete(sbd.getMessageId());
             } catch (IOException e) {
@@ -147,7 +142,7 @@ public class IntegrajonspunktReceiveImpl {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
                 Audit.info(String.format("Message [id=%s] delivered archive", sbd.getMessageId()), markerFrom(response));
-                conversationService.registerStatus(sbd.getDocumentId(), messageStatusFactory.getMessageStatus(ReceiptStatus.INNKOMMENDE_LEVERT));
+                conversationService.registerStatus(sbd.getDocumentId(), ReceiptStatus.INNKOMMENDE_LEVERT);
                 sendLevertStatus(sbd);
                 if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
                     // Need to send AppReceipt manually in case receiver is mail

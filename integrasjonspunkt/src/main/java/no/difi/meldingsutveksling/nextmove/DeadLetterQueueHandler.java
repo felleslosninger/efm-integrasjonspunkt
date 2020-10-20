@@ -65,7 +65,6 @@ public class DeadLetterQueueHandler {
     }
 
     void handleDlqMessage(byte[] message) {
-        MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL);
         String messageId = "";
         String errorMsg = "";
 
@@ -95,7 +94,6 @@ public class DeadLetterQueueHandler {
             // NOOP
         }
 
-        ms.setDescription(errorMsg);
-        conversationService.registerStatus(messageId, ms);
+        conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
     }
 }
