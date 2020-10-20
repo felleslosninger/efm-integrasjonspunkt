@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.microsoft.azure.servicebus.*;
 import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -86,7 +87,7 @@ public class NextMoveServiceBus {
                 this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
             } catch (InterruptedException e) {
                 log.error("Error while constructing message receiver. Thread was interrupted", e);
-                // Restore interrupted state...      T
+                // Restore interrupted state..
                 Thread.currentThread().interrupt();
             } catch (ServiceBusException e) {
                 throw new NextMoveException(e);
@@ -143,8 +144,12 @@ public class NextMoveServiceBus {
                         hasQueuedMessages = false;
                     }
                 } catch (InterruptedException e) {
-                    log.error("Error while processing messages from service bus. Thread was interrupted", e);
-                    // Restore interrupted state...      T
+                    if (!Strings.isNullOrEmpty(e.getMessage())) {
+                        log.error("Error while processing messages from service bus. Thread was interrupted", e);
+                    } else {
+                        log.trace("Error while processing messages from service bus. Thread was interrupted", e);
+                    }
+                    // Restore interrupted state..
                     Thread.currentThread().interrupt();
                 } catch (ServiceBusException e) {
                     log.error("Error while processing messages from service bus", e);
