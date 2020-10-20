@@ -33,7 +33,6 @@ open class ResponseStatusSenderProxy(@Lazy val internalQueue: InternalQueue,
                                      val receiptFactory: SBDReceiptFactory) {
 
     @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000*60*10))
-    @Throws(MeldingsUtvekslingRuntimeException::class)
     open fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         when (si) {
             ServiceIdentifier.DPO -> {
