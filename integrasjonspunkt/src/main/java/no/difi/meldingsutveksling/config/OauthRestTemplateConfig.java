@@ -53,9 +53,9 @@ public class OauthRestTemplateConfig {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .useSystemProperties()
                 .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(3000)
-                        .setConnectionRequestTimeout(3000)
-                        .setSocketTimeout(3000)
+                        .setConnectTimeout(5000)
+                        .setConnectionRequestTimeout(5000)
+                        .setSocketTimeout(5000)
                         .build())
                 .build();
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
