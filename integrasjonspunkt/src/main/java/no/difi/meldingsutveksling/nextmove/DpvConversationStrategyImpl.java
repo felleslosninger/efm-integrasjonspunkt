@@ -58,7 +58,12 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
         }).await();
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
-            bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);
+            // Only log exceptions here to avoid sending message multiple times due to retry
+            try {
+                bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);
+            } catch (Exception e) {
+                log.error(markerFrom(message), "Error sending AppReceipt for DPV message", e);
+            }
         }
     }
 
