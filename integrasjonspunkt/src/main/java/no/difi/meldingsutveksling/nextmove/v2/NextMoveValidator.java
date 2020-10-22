@@ -51,7 +51,6 @@ public class NextMoveValidator {
     private final TimeToLiveHelper timeToLiveHelper;
     private final SBDUtil sbdUtil;
     private final ConversationService conversationService;
-    private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
 
     void validate(StandardBusinessDocument sbd) {
@@ -117,7 +116,7 @@ public class NextMoveValidator {
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
             // Verify each file referenced in arkivmelding is uploaded
-            List<String> arkivmeldingFiles = arkivmeldingUtil.getFilenames(getArkivmelding(message));
+            List<String> arkivmeldingFiles = ArkivmeldingUtil.getFilenames(getArkivmelding(message));
 
             List<String> missingFiles = arkivmeldingFiles.stream()
                     .filter(p -> !messageFilenames.contains(p))
@@ -161,7 +160,7 @@ public class NextMoveValidator {
 
 
         try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+            return ArkivmeldingUtil.unmarshalArkivmelding(is);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }

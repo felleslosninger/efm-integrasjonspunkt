@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.domain.arkivmelding;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import no.arkivverket.standarder.noark5.metadatakatalog.Saksstatus;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Saksstatus;
 
 import java.util.HashMap;
 import java.util.Map;

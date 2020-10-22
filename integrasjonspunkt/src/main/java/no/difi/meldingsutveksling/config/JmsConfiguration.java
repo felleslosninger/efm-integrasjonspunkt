@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.activemq.RedeliveryPolicy;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +63,7 @@ public class JmsConfiguration {
     }
 
     @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory connectionFactory) {
+    DefaultJmsListenerContainerFactory myJmsContainerFactory(@Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(connectionFactory);

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.RequiredArgsConstructor;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.*;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -25,11 +26,9 @@ import static no.difi.meldingsutveksling.MimeTypeExtensionMapper.getMimetype;
 @RequiredArgsConstructor
 public class MeldingFactory {
 
-    private final ArkivmeldingUtil arkivmeldingUtil;
-
     public MeldingType create(Arkivmelding am, byte[] asic) {
-        Saksmappe sm = arkivmeldingUtil.getSaksmappe(am);
-        Journalpost jp = arkivmeldingUtil.getJournalpost(am);
+        Saksmappe sm = ArkivmeldingUtil.getSaksmappe(am);
+        Journalpost jp = ArkivmeldingUtil.getJournalpost(am);
 
         ObjectFactory of = new ObjectFactory();
         NoarksakType noarksakType = of.createNoarksakType();
@@ -41,14 +40,14 @@ public class MeldingFactory {
         noarksakType.setSaId(sm.getSystemID());
         ofNullable(sm.getSaksdato()).map(DateTimeUtil::toString).ifPresent(noarksakType::setSaDato);
         noarksakType.setSaTittel(sm.getTittel());
-        ofNullable(sm.getSaksstatus()).map(SaksstatusMapper::getNoarkType).ifPresent(noarksakType::setSaStatus);
+        ofNullable(sm.getSaksstatus()).map(Saksstatus::fromValue).map(SaksstatusMapper::getNoarkType).ifPresent(noarksakType::setSaStatus);
         ofNullable(sm.getJournalenhet()).ifPresent(noarksakType::setSaJenhet);
         if (!sm.getReferanseArkivdel().isEmpty()) {
             noarksakType.setSaArkdel(sm.getReferanseArkivdel().get(0));
         }
 
         JournpostType journpostType = of.createJournpostType();
-        ofNullable(jp.getSystemID()).ifPresent(journpostType::setJpId);
+        ofNullable(jp.getRegistreringsID()).ifPresent(journpostType::setJpId);
         ofNullable(jp.getTittel()).ifPresent(journpostType::setJpInnhold);
         ofNullable(jp.getJournalaar()).map(BigInteger::toString).ifPresent(journpostType::setJpJaar);
         ofNullable(jp.getJournalsekvensnummer()).map(BigInteger::toString).ifPresent(journpostType::setJpSeknr);
@@ -56,9 +55,9 @@ public class MeldingFactory {
         ofNullable(jp.getJournaldato()).map(DateTimeUtil::toString).ifPresent(journpostType::setJpJdato);
         ofNullable(jp.getJournaldato()).map(DateTimeUtil::toString).ifPresent(journpostType::setJpJdato);
         ofNullable(jp.getForfallsdato()).map(DateTimeUtil::toString).ifPresent(journpostType::setJpForfdato);
-        ofNullable(jp.getJournalposttype()).map(JournalposttypeMapper::getNoarkType).ifPresent(journpostType::setJpNdoktype);
+        ofNullable(jp.getJournalposttype()).map(Journalposttype::fromValue).map(JournalposttypeMapper::getNoarkType).ifPresent(journpostType::setJpNdoktype);
         ofNullable(jp.getDokumentetsDato()).map(DateTimeUtil::toString).ifPresent(journpostType::setJpDokdato);
-        ofNullable(jp.getJournalstatus()).map(JournalstatusMapper::getNoarkType).ifPresent(journpostType::setJpStatus);
+        ofNullable(jp.getJournalstatus()).map(Journalstatus::fromValue).map(JournalstatusMapper::getNoarkType).ifPresent(journpostType::setJpStatus);
         ofNullable(jp.getReferanseArkivdel()).ifPresent(journpostType::setJpArkdel);
         ofNullable(jp.getAntallVedlegg()).map(BigInteger::toString).ifPresent(journpostType::setJpAntved);
         ofNullable(jp.getOffentligTittel()).ifPresent(journpostType::setJpOffinnhold);
@@ -69,10 +68,10 @@ public class MeldingFactory {
         jp.getKorrespondansepart().forEach(k -> {
             AvsmotType avsmotType = of.createAvsmotType();
             avsmotType.setAmNavn(k.getKorrespondansepartNavn());
-            if ("avsender".equalsIgnoreCase(k.getKorrespondanseparttype().value())) {
+            if ("avsender".equalsIgnoreCase(k.getKorrespondanseparttype())) {
                 avsmotType.setAmIhtype("0");
             }
-            if ("mottaker".equalsIgnoreCase(k.getKorrespondanseparttype().value())) {
+            if ("mottaker".equalsIgnoreCase(k.getKorrespondanseparttype())) {
                 avsmotType.setAmIhtype("1");
             }
 
@@ -85,7 +84,7 @@ public class MeldingFactory {
             avsmotType.setAmSbhinit(k.getSaksbehandler());
             if (!jp.getAvskrivning().isEmpty()) {
                 Avskrivning avs = jp.getAvskrivning().get(0);
-                ofNullable(avs.getAvskrivningsmaate()).map(AvskrivningsmaateMapper::getNoarkType).ifPresent(avsmotType::setAmAvskm);
+                ofNullable(avs.getAvskrivningsmaate()).map(Avskrivningsmaate::fromValue).map(AvskrivningsmaateMapper::getNoarkType).ifPresent(avsmotType::setAmAvskm);
                 ofNullable(avs.getAvskrivningsdato()).map(DateTimeUtil::toString).ifPresent(avsmotType::setAmAvskdato);
                 avsmotType.setAmAvsavdok(avs.getReferanseAvskrivesAvJournalpost());
             }
@@ -93,13 +92,11 @@ public class MeldingFactory {
             journpostType.getAvsmot().add(avsmotType);
         });
 
-        jp.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(Dokumentbeskrivelse.class::isInstance)
-                .map(Dokumentbeskrivelse.class::cast)
-                .forEach(db -> db.getDokumentobjekt().forEach(dobj ->
-                                journpostType.getDokument().add(createDokumentType(db, dobj, asic))
-                        )
-                );
+        jp.getDokumentbeskrivelse().forEach(
+                db -> db.getDokumentobjekt().forEach(dobj ->
+                        journpostType.getDokument().add(createDokumentType(db, dobj, asic))
+                )
+        );
 
         MeldingType meldingType = of.createMeldingType();
         meldingType.setJournpost(journpostType);
@@ -115,13 +112,13 @@ public class MeldingFactory {
         dokumentType.setVeFilnavn(filename);
         dokumentType.setDbTittel(db.getTittel());
         dokumentType.setDlRnr(db.getDokumentnummer().toString());
-        dokumentType.setDlType(TilknyttetRegistreringSomMapper.getNoarkType(db.getTilknyttetRegistreringSom()));
+        dokumentType.setDlType(TilknyttetRegistreringSomMapper.getNoarkType(TilknyttetRegistreringSom.fromValue(db.getTilknyttetRegistreringSom())));
 
-        String[] split = dobj.getReferanseDokumentfil().split(".");
+        String[] split = dobj.getReferanseDokumentfil().split("\\.");
         String ext = Stream.of(split).reduce((p, e) -> e).orElse("pdf");
         dokumentType.setVeDokformat(ext);
         dokumentType.setVeMimeType(getMimetype(ext));
-        dokumentType.setVeVariant(VariantformatMapper.getNoarkType(dobj.getVariantformat()));
+        dokumentType.setVeVariant(VariantformatMapper.getNoarkType(Variantformat.fromValue(dobj.getVariantformat())));
 
         FilType filType = of.createFilType();
         try {

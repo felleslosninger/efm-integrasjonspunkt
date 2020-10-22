@@ -50,7 +50,6 @@ public class NextMoveMessageService {
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
-    private final ArkivmeldingUtil arkivmeldingUtil;
     private final MessagePersister messagePersister;
     private final BusinessMessageFileRepository businessMessageFileRepository;
 
@@ -110,8 +109,8 @@ public class NextMoveMessageService {
 
         if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
             Arkivmelding arkivmelding = getArkivmelding(message, identifier);
-            Journalpost journalpost = arkivmeldingUtil.getJournalpost(arkivmelding);
-            Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(arkivmelding);
+            Journalpost journalpost = ArkivmeldingUtil.getJournalpost(arkivmelding);
+            Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(arkivmelding);
             Optional<Conversation> conversation = conversationService.findConversation(message.getMessageId());
             conversation.ifPresent(c -> {
                 c.setMessageTitle(journalpost.getOffentligTittel());
@@ -127,7 +126,7 @@ public class NextMoveMessageService {
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
         try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), identifier))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+            return ArkivmeldingUtil.unmarshalArkivmelding(is);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }

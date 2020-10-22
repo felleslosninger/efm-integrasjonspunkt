@@ -7,10 +7,9 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
-import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Korrespondanseparttype;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.api.AsicHandler;
-import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
@@ -25,10 +24,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +39,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @RequiredArgsConstructor
 public class SvarInnNextMoveConverter {
 
-    private final MessagePersister messagePersister;
     private final SvarInnService svarInnService;
     private final AsicHandler asicHandler;
     private final SBDFactory createSBD;
     private final IntegrasjonspunktProperties properties;
     private final IntegrasjonspunktNokkel keyInfo;
-    private final PromiseMaker promiseMaker;
-    private final ArkivmeldingUtil arkivmeldingUtil;
 
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
@@ -91,7 +83,7 @@ public class SvarInnNextMoveConverter {
         Arkivmelding arkivmelding = toArkivmelding(forsendelse);
         byte[] arkivmeldingBytes;
         try {
-            arkivmeldingBytes = arkivmeldingUtil.marshalArkivmelding(arkivmelding);
+            arkivmeldingBytes = ArkivmeldingUtil.marshalArkivmelding(arkivmelding);
         } catch (JAXBException e) {
             log.error("Error marshalling arkivmelding", e);
             throw new NextMoveRuntimeException("Error marshalling arkivmelding");
@@ -107,7 +99,7 @@ public class SvarInnNextMoveConverter {
         journalpost.setOffentligTittel(forsendelse.getTittel());
 
         Korrespondansepart avsender = of.createKorrespondansepart();
-        avsender.setKorrespondanseparttype(Korrespondanseparttype.AVSENDER);
+        avsender.setKorrespondanseparttype(Korrespondanseparttype.AVSENDER.value());
         Forsendelse.SvarSendesTil sst = forsendelse.getSvarSendesTil();
         avsender.setKorrespondansepartNavn(sst.getNavn());
         avsender.getPostadresse().add(sst.getAdresse1());
@@ -122,20 +114,20 @@ public class SvarInnNextMoveConverter {
         saksmappe.setSaksaar(BigInteger.valueOf(metadata.getSaksaar()));
         saksmappe.setSaksansvarlig(metadata.getSaksBehandler());
 
-        journalpost.setJournalaar(BigInteger.valueOf(Long.valueOf(metadata.getJournalaar())));
-        journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalsekvensnummer())));
-        journalpost.setJournalpostnummer(BigInteger.valueOf(Long.valueOf(metadata.getJournalpostnummer())));
-        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
-        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+        journalpost.setJournalaar(BigInteger.valueOf(Long.parseLong(metadata.getJournalaar())));
+        journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalsekvensnummer())));
+        journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
+        journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()).value());
+        journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()).value());
         if (!isNullOrEmpty(metadata.getJournaldato())) {
-            journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getJournaldato())));
+            journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getJournaldato())));
         }
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
-            journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.valueOf(metadata.getDokumentetsDato())));
+            journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getDokumentetsDato())));
         }
         journalpost.setOffentligTittel(metadata.getTittel());
 
-        saksmappe.getBasisregistrering().add(journalpost);
+        saksmappe.getRegistrering().add(journalpost);
         Arkivmelding arkivmelding = of.createArkivmelding();
         arkivmelding.getMappe().add(saksmappe);
 

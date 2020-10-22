@@ -60,7 +60,6 @@ public class CorrespondenceAgencyMessageFactory {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Clock clock;
     private final ReporteeFactory reporteeFactory;
-    private final ArkivmeldingUtil arkivmeldingUtil;
     private final ObjectFactory objectFactory = new ObjectFactory();
     private final no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory correspondenceObjectFactory = new no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory();
     private final no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationObjectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
@@ -97,11 +96,11 @@ public class CorrespondenceAgencyMessageFactory {
                 .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
         Arkivmelding arkivmelding = getArkivmelding(message, fileMap);
-        Journalpost jp = arkivmeldingUtil.getJournalpost(arkivmelding);
+        Journalpost jp = ArkivmeldingUtil.getJournalpost(arkivmelding);
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
-        List<BusinessMessageFile> files = arkivmeldingUtil.getFilenames(arkivmelding)
+        List<BusinessMessageFile> files = ArkivmeldingUtil.getFilenames(arkivmelding)
                 .stream()
                 .map(fileMap::get)
                 .filter(Objects::nonNull).collect(Collectors.toList());
@@ -121,7 +120,7 @@ public class CorrespondenceAgencyMessageFactory {
 
 
         try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+            return ArkivmeldingUtil.unmarshalArkivmelding(is);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }

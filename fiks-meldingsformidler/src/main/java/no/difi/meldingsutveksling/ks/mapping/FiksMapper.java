@@ -2,9 +2,12 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
-import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Journalposttype;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Journalstatus;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -18,7 +21,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -34,6 +36,7 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -49,21 +52,19 @@ public class FiksMapper {
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
-    private final ObjectProvider<CmsUtil> cmsUtilProvider;
+    private final CmsUtil cmsUtil;
     private final Plumber plumber;
-    private final ArkivmeldingUtil arkivmeldingUtil;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       OptionalCryptoMessagePersister optionalCryptoMessagePersister,
                       ObjectProvider<CmsUtil> cmsUtilProvider,
-                      Plumber plumber, ArkivmeldingUtil arkivmeldingUtil) {
+                      Plumber plumber) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
-        this.cmsUtilProvider = cmsUtilProvider;
+        this.cmsUtil = cmsUtilProvider.getIfAvailable(CmsUtil::new);
         this.plumber = plumber;
-        this.arkivmeldingUtil = arkivmeldingUtil;
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
@@ -86,8 +87,8 @@ public class FiksMapper {
 
     private Forsendelse getForsendelse(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
         Arkivmelding am = getArkivmelding(message);
-        Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(am);
-        Journalpost journalpost = arkivmeldingUtil.getJournalpost(am);
+        Saksmappe saksmappe = ArkivmeldingUtil.getSaksmappe(am);
+        Journalpost journalpost = ArkivmeldingUtil.getJournalpost(am);
 
         Optional<String> receiverRef = message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier);
         if (receiverRef.isPresent()) {
@@ -112,7 +113,7 @@ public class FiksMapper {
                 .withMottaker(getMottaker(message))
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
-                .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
+                .withDokumenter(mapArkivmeldingDokumenter(message, journalpost.getDokumentbeskrivelse(), certificate, reject))
                 .build();
     }
 
@@ -125,7 +126,7 @@ public class FiksMapper {
 
     private Adresse getSvarSendesTil(NextMoveOutMessage message, Journalpost journalpost) {
         return journalpost.getKorrespondansepart().stream()
-                .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
+                .filter(k -> Korrespondanseparttype.AVSENDER.value().equals(k.getKorrespondanseparttype()))
                 .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
                 .findFirst()
                 .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
@@ -134,13 +135,6 @@ public class FiksMapper {
     private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
         Integer sikkerhetsnivaa = message.getBusinessMessage().getSikkerhetsnivaa();
         return sikkerhetsnivaa != null && sikkerhetsnivaa == 4;
-    }
-
-    private Set<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
-        return journalpost.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(Dokumentbeskrivelse.class::isInstance)
-                .map(Dokumentbeskrivelse.class::cast)
-                .collect(Collectors.toSet());
     }
 
     private Adresse getMottaker(NextMoveOutMessage message) {
@@ -152,7 +146,7 @@ public class FiksMapper {
         String identifier = getArkivmeldingIdentifier(message);
 
         try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), identifier))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+            return ArkivmeldingUtil.unmarshalArkivmelding(is);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
@@ -166,7 +160,7 @@ public class FiksMapper {
                 .orElseThrow(() -> new NextMoveException(format("No attachement \"%s\" found", ARKIVMELDING_FILE)));
     }
 
-    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
+    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, List<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
         return docs.stream()
                 .flatMap(p -> p.getDokumentobjekt().stream())
                 .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
@@ -194,7 +188,7 @@ public class FiksMapper {
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {
         PipedInputStream encrypted = plumber.pipe("encrypt attachment for FIKS forsendelse",
-                inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert), reject)
+                inlet -> cmsUtil.createCMSStreamed(is, inlet, cert), reject)
                 .outlet();
 
         return new DataHandler(InputStreamDataSource.of(encrypted));
@@ -207,8 +201,8 @@ public class FiksMapper {
                 .withJournalaar(toInt(jp.getJournalaar()))
                 .withJournalsekvensnummer(toInt(jp.getJournalsekvensnummer()))
                 .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
-                .withJournalposttype(JournalposttypeMapper.getNoarkType(jp.getJournalposttype()))
-                .withJournalstatus(JournalstatusMapper.getNoarkType(jp.getJournalstatus()))
+                .withJournalposttype(JournalposttypeMapper.getNoarkType(Journalposttype.fromValue(jp.getJournalposttype())))
+                .withJournalstatus(JournalstatusMapper.getNoarkType(Journalstatus.fromValue(jp.getJournalstatus())))
                 .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
                 .withDokumentetsDato(DateTimeUtil.atStartOfDay(jp.getDokumentetsDato()))
                 .withTittel(jp.getOffentligTittel())
@@ -218,7 +212,7 @@ public class FiksMapper {
 
     private Optional<String> getSaksbehandler(Journalpost jp) {
         return jp.getKorrespondansepart().stream()
-                .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
+                .filter(k -> Korrespondanseparttype.AVSENDER.value().equals(k.getKorrespondanseparttype()))
                 .findFirst()
                 .map(Korrespondansepart::getSaksbehandler);
     }

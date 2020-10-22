@@ -65,7 +65,6 @@ class NextMoveValidatorTest {
                 timeToLiveHelper,
                 sbdUtil,
                 conversationService,
-                arkivmeldingUtil,
                 nextMoveFileSizeValidator)
 
         val bmf = BusinessMessageFile()

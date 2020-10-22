@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings version="2.1" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:simplify="http://jaxb2-commons.dev.java.net/basic/simplify"
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:annox="http://annox.dev.java.net"
+               jaxb:extensionBindingPrefixes="xjc annox simplify">
+
+
+    <jaxb:globalBindings generateMixedExtensions="false">
+        <xjc:serializable uid="1" />
+    </jaxb:globalBindings>
+
+      <jaxb:bindings schemaLocation="arkivmelding.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+            <jaxb:package name="no.arkivverket.standarder.noark5.arkivmelding"/>
+        </jaxb:schemaBindings>
+        <jaxb:bindings node="xs:complexType[@name='arkivmelding']">
+          <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+<!--          <jaxb:class name="Arkivmelding"/>-->
+        </jaxb:bindings>
+      </jaxb:bindings>
+
+      <jaxb:bindings schemaLocation="metadatakatalog.xsd" node="/xs:schema">
+        <jaxb:schemaBindings>
+          <jaxb:package name="no.arkivverket.standarder.noark5.metadatakatalog"/>
+        </jaxb:schemaBindings>
+      </jaxb:bindings>
+
+
+</jaxb:bindings>

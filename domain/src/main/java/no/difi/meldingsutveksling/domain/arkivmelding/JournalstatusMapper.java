@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
 import lombok.extern.slf4j.Slf4j;
-import no.arkivverket.standarder.noark5.metadatakatalog.Journalstatus;
+import no.arkivverket.standarder.noark5.metadatakatalog.beta.Journalstatus;
 import no.difi.meldingsutveksling.HashBiMap;
 
 @Slf4j

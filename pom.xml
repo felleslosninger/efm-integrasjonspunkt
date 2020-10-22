@@ -112,6 +112,7 @@
 
     <modules>
         <module>api</module>
+        <module>arkivmelding</module>
         <module>bestedu</module>
         <module>common</module>
         <module>common-spring</module>
@@ -154,6 +155,11 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>arkivmelding</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -151,15 +151,8 @@ Feature: Receiving a Next Move DPF message
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
-            <basisregistrering xsi:type="journalpost">
+            <registrering xsi:type="journalpost">
                 <offentligTittel>Test4 - liten fil - 22.04.16</offentligTittel>
-                <journalaar>2016</journalaar>
-                <journalsekvensnummer>25</journalsekvensnummer>
-                <journalpostnummer>13</journalpostnummer>
-                <journalposttype>Utgående dokument</journalposttype>
-                <journalstatus>Godkjent av leder</journalstatus>
-                <journaldato>2016-03-21+01:00</journaldato>
-                <dokumentetsDato>2016-03-21+01:00</dokumentetsDato>
                 <korrespondansepart>
                     <korrespondanseparttype>Avsender</korrespondanseparttype>
                     <korrespondansepartNavn>Kontoret for voldsoffererstatning</korrespondansepartNavn>
@@ -168,7 +161,14 @@ Feature: Receiving a Next Move DPF message
                     <poststed>VARDØ</poststed>
                     <land></land>
                 </korrespondansepart>
-            </basisregistrering>
+                <journalaar>2016</journalaar>
+                <journalsekvensnummer>25</journalsekvensnummer>
+                <journalpostnummer>13</journalpostnummer>
+                <journalposttype>Utgående dokument</journalposttype>
+                <journalstatus>Godkjent av leder</journalstatus>
+                <journaldato>2016-03-21+01:00</journaldato>
+                <dokumentetsDato>2016-03-21+01:00</dokumentetsDato>
+            </registrering>
             <saksaar>2016</saksaar>
             <sakssekvensnummer>1</sakssekvensnummer>
         </mappe>

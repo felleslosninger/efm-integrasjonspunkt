@@ -86,7 +86,7 @@ Feature: Sending a Next Move DPO multipart/form message
                 <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
                 <opprettetAv>Knut Hansen</opprettetAv>
             </klassifikasjon>
-            <basisregistrering xsi:type="journalpost">
+            <registrering xsi:type="journalpost">
                 <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
                 <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
                 <opprettetAv>LandLord</opprettetAv>
@@ -131,7 +131,7 @@ Feature: Sending a Next Move DPO multipart/form message
                     <korrespondanseparttype>Mottaker</korrespondanseparttype>
                     <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
                 </korrespondansepart>
-            </basisregistrering>
+            </registrering>
             <saksdato>2017-06-01</saksdato>
             <administrativEnhet>Blah</administrativEnhet>
             <saksansvarlig>KNUTKÅRE</saksansvarlig>
@@ -300,7 +300,7 @@ Feature: Sending a Next Move DPO multipart/form message
                 <opprettetDato>2017-05-23T21:56:12.000+01:00</opprettetDato>
                 <opprettetAv>Knut Hansen</opprettetAv>
             </klassifikasjon>
-            <basisregistrering xsi:type="journalpost">
+            <registrering xsi:type="journalpost">
                 <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
                 <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
                 <opprettetAv>LandLord</opprettetAv>
@@ -345,7 +345,7 @@ Feature: Sending a Next Move DPO multipart/form message
                     <korrespondanseparttype>Mottaker</korrespondanseparttype>
                     <korrespondansepartNavn>elektrikeren AS, Veien 100, Oslo</korrespondansepartNavn>
                 </korrespondansepart>
-            </basisregistrering>
+            </registrering>
             <saksdato>2017-06-01</saksdato>
             <administrativEnhet>Blah</administrativEnhet>
             <saksansvarlig>KNUTKÅRE</saksansvarlig>
