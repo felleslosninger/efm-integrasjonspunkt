@@ -82,7 +82,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         final ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(orgnr).build());
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(orgnr).build());
         } catch (Exception e) {
             log.warn("Exception during service registry lookup: {}", e.getLocalizedMessage());
             response.setResult(false);
@@ -121,7 +121,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         ServiceRecord receiverRecord;
         try {
-            receiverRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+            receiverRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                     .conversationId(message.getConversationId())
                     .build());
         } catch (ServiceRegistryLookupException e) {

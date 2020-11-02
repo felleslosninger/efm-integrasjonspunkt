@@ -31,7 +31,7 @@ public class Adresseregister {
     public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
         ServiceRecord receiverServiceRecord;
         try {
-            receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getReceiverIdentifier())
+            receiverServiceRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(sbd.getReceiverIdentifier())
                     .conversationId(sbd.getConversationId()).build());
         } catch (ServiceRegistryLookupException e) {
             throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
@@ -44,7 +44,7 @@ public class Adresseregister {
 
         ServiceRecord senderServiceRecord;
         try {
-            senderServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getSenderIdentifier()).build());
+            senderServiceRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(sbd.getSenderIdentifier()).build());
         } catch (ServiceRegistryLookupException e) {
             throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
         }
@@ -57,11 +57,11 @@ public class Adresseregister {
 
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
-            return getCertificate(serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+            return getCertificate(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
-                    message.getSbd().getStandard()));
+                    message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));

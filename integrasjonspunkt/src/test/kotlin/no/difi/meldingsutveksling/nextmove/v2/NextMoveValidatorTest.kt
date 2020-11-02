@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
@@ -25,7 +26,7 @@ import java.util.*
 class NextMoveValidatorTest {
 
     @MockK
-    lateinit var nextMoveServiceRecordProvider: NextMoveServiceRecordProvider
+    lateinit var serviceRegistryLookup: ServiceRegistryLookup
     @MockK
     lateinit var nextMoveMessageOutRepository: NextMoveMessageOutRepository
     @MockK
@@ -57,7 +58,7 @@ class NextMoveValidatorTest {
     @Before
     fun before() {
         MockKAnnotations.init(this)
-        nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
+        nextMoveValidator = NextMoveValidator(serviceRegistryLookup,
                 nextMoveMessageOutRepository,
                 serviceIdentifierService,
                 asserter,
@@ -84,10 +85,10 @@ class NextMoveValidatorTest {
         every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRegistryLookup.getReceiverServiceRecord(sbd) } returns serviceRecord
         every { serviceIdentifierService.isEnabled(ServiceIdentifier.DPO) } returns true
         every { sbd.messageType } returns "arkivmelding"
-        every { sbd.standard } returns "standard::arkivmelding"
+        every { sbd.documentType } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
         every { serviceRecord.hasStandard(any()) } returns true
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
@@ -101,7 +102,7 @@ class NextMoveValidatorTest {
 
     @Test(expected = DocumentTypeDoNotFitDocumentStandardException::class)
     fun `standard must fit document type`() {
-        every { sbd.standard } returns "foo::bar"
+        every { sbd.documentType } returns "foo::bar"
         nextMoveValidator.validate(sbd)
     }
 

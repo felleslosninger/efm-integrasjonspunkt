@@ -222,12 +222,12 @@ public class CorrespondenceAgencyMessageFactory {
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(
                     SRParameter.builder(message.getReceiverIdentifier())
                             .conversationId(message.getConversationId())
                             .process(message.getSbd().getProcess())
                             .build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()));
         }

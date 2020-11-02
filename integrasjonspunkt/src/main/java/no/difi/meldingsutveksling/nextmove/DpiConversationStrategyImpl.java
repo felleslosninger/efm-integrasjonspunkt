@@ -38,17 +38,17 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     public void send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+            serviceRecord = sr.getReceiverServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                             .conversationId(message.getConversationId())
                             .process(message.getProcessIdentifier())
                             .build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(
                     String.format("Could not find service record[receiver=%s, process=%s, documentType=%s]",
                             message.getReceiverIdentifier(),
                             message.getProcessIdentifier(),
-                            message.getSbd().getStandard()));
+                            message.getSbd().getDocumentType()));
         }
 
         if (message.getSbd().getBusinessMessage() instanceof DpiDigitalMessage) {

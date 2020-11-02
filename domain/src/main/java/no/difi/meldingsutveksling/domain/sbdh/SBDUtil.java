@@ -54,6 +54,10 @@ public class SBDUtil {
         return (isType(sbd, DocumentType.ARKIVMELDING)) || (isType(sbd, DocumentType.ARKIVMELDING_KVITTERING));
     }
 
+    public boolean hasVersion(StandardBusinessDocument sbd, String version) {
+        return sbd.getProcess().contains(version);
+    }
+
     public boolean isFileRequired(StandardBusinessDocument sbd) {
         return !isStatus(sbd) &&
                 !isReceipt(sbd) &&

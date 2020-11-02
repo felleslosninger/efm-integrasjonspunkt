@@ -44,17 +44,17 @@ public class AdresseregisterTest {
         when(sbdMock.getSenderIdentifier()).thenReturn(SENDER_PARTY_NUMBER);
         when(sbdMock.getReceiverIdentifier()).thenReturn(RECIEVER_PARTY_NUMBER);
         when(sbdMock.getConversationId()).thenReturn(CONVERSATION_ID);
-        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+        when(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
                 .conversationId(CONVERSATION_ID).build()))
                 .thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
-        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     @Test
     public void senderCertificateIsMissing() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_SENDER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(SENDER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
         adresseregister.validateCertificates(sbdMock);
     }
@@ -63,7 +63,7 @@ public class AdresseregisterTest {
     public void recieverCertificateIsInValid() throws Exception {
         expectedException.expect(MessageException.class);
         expectedException.expect(new StatusMatches(StatusMessage.MISSING_RECIEVER_CERTIFICATE));
-        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
+        when(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER)
                 .conversationId(CONVERSATION_ID).build()))
                 .thenReturn(new ServiceRecord(null, RECIEVER_PARTY_NUMBER, emptyCertificate, "http://localhost:123"));
 
@@ -73,7 +73,7 @@ public class AdresseregisterTest {
     @Test
     public void certificatesAreValid() throws MessageException, ServiceRegistryLookupException {
         adresseregister.validateCertificates(sbdMock);
-        when(serviceRegistryLookup.getServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
+        when(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(RECIEVER_PARTY_NUMBER).build())).thenReturn(new ServiceRecord(null, SENDER_PARTY_NUMBER, TestConstants.certificate, "http://localhost:123"));
     }
 
     private class StatusMatches extends TypeSafeMatcher<MessageException> {

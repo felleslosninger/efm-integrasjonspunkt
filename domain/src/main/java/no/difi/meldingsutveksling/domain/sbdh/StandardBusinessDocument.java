@@ -187,7 +187,7 @@ public class StandardBusinessDocument {
     }
 
     @JsonIgnore
-    public String getStandard() {
+    public String getDocumentType() {
         return getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard();
     }
 

@@ -6,12 +6,15 @@ import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.hasDocumentType;
 
@@ -23,7 +26,22 @@ public class ServiceRegistryLookup {
     private final ServiceRegistryClient serviceRegistryClient;
     private final IntegrasjonspunktProperties properties;
 
-    public ServiceRecord getServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
+    public ServiceRecord getReceiverServiceRecord(StandardBusinessDocument sbd) throws ServiceRegistryLookupException {
+        BusinessMessage<?> businessMessage = sbd.getBusinessMessage();
+        SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
+                .process(sbd.getProcess());
+        sbd.getOptionalConversationId().ifPresent(parameterBuilder::conversationId);
+        if (businessMessage.getSikkerhetsnivaa() != null) {
+            parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
+        }
+
+        return getReceiverServiceRecord(
+                parameterBuilder.build(),
+                sbd.getDocumentType());
+    }
+
+
+    public ServiceRecord getReceiverServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         return loadServiceRecord(parameter);
     }
 
@@ -51,15 +69,16 @@ public class ServiceRegistryLookup {
 
     }
 
-    public ServiceRecord getServiceRecord(SRParameter parameter, String documentType) throws ServiceRegistryLookupException {
+    public ServiceRecord getReceiverServiceRecord(SRParameter parameter, String documentType) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
+        Predicate<ServiceRecord> hasBetaArkivmelding = s -> documentType.contains("arkivmelding55") && s.getDocumentTypes().contains("urn:no:difi:arkivmelding:xsd::arkivmelding");
         return serviceRecords.stream()
-                .filter(hasDocumentType(documentType))
+                .filter(hasDocumentType(documentType).or(hasBetaArkivmelding))
                 .findFirst()
                 .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), parameter.getProcess())));
     }
 
-    public ServiceRecord getServiceRecord(SRParameter parameter, DocumentType documentType) throws ServiceRegistryLookupException {
+    public ServiceRecord getReceiverServiceRecord(SRParameter parameter, DocumentType documentType) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
@@ -92,7 +111,20 @@ public class ServiceRegistryLookup {
     }
 
     private List<ServiceRecord> loadServiceRecords(SRParameter parameter) throws ServiceRegistryLookupException {
-        return serviceRegistryClient.loadIdentifierResource(parameter).getServiceRecords();
+        try {
+            return serviceRegistryClient.loadIdentifierResource(parameter).getServiceRecords();
+        } catch (ServiceRegistryLookupException e) {
+            // Temporary hack to support old "arkivmelding" beta receivers - will be removed in a future update.
+            // Integrasjonspunktet will in this case downgrade "arkivmelding" to beta format before sending.
+            // See https://difino.atlassian.net/browse/MOVE-1952
+            if (e instanceof NotFoundInServiceRegistryException &&
+                    parameter.getProcess().contains(DocumentType.ARKIVMELDING.getType()) &&
+                    parameter.getProcess().contains("ver5.5")) {
+                parameter.setProcess(parameter.getProcess().replace("ver5.5", "ver1.0"));
+                return serviceRegistryClient.loadIdentifierResource(parameter).getServiceRecords();
+            }
+            throw e;
+        }
     }
 
     /**

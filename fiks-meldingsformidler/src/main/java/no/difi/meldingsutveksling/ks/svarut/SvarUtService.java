@@ -36,14 +36,14 @@ public class SvarUtService {
     private final ForsendelseIdService forsendelseIdService;
 
     @Transactional
-    public String send(NextMoveOutMessage message) throws NextMoveException {
+    public String send(NextMoveOutMessage message) {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                             .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
         }

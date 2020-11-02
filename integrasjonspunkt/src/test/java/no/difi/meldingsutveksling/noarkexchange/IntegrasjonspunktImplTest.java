@@ -42,7 +42,7 @@ public class IntegrasjonspunktImplTest {
     public void setUp() throws ServiceRegistryLookupException {
         initMocks(this);
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
-        when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
+        when(serviceRegistryLookup.getReceiverServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
         when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategyImpl.class)));
     }

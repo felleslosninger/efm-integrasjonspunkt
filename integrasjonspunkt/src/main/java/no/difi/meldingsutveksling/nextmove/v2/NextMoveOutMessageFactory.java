@@ -8,10 +8,13 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.exceptions.ReceiverDoNotAcceptProcessException;
 import no.difi.meldingsutveksling.exceptions.UnknownNextMoveDocumentTypeException;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -24,12 +27,17 @@ import java.time.OffsetDateTime;
 public class NextMoveOutMessageFactory {
 
     private final IntegrasjonspunktProperties properties;
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRegistryLookup serviceRegistryLookup;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(sbd);
+        } catch (ServiceRegistryLookupException e) {
+            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
+        }
 
         setDefaults(sbd, serviceRecord);
 

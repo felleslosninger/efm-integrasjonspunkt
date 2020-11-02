@@ -19,11 +19,16 @@ public class IdentifierRelayController {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
+    @GetMapping(value = "/servicerecord/{identifier}/{process}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getServiceRecord(@PathVariable String identifier, @PathVariable String process) throws ServiceRegistryLookupException {
+        return ResponseEntity.ok(serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(identifier).process(process).build()));
+    }
+
     @GetMapping(value = "/servicerecord/{identifier}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
+    public ResponseEntity<?> getServiceRecords(@PathVariable("identifier") String identifier) {
         ServiceRecord serviceRecord = null;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(identifier).build());
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(SRParameter.builder(identifier).build());
         } catch (ServiceRegistryLookupException e) {
             log.error("Error while looking up service record for {}", identifier, e);
             return ResponseEntity.notFound().build();

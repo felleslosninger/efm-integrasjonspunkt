@@ -99,7 +99,7 @@ public class NextMoveAdapter {
         }
         ServiceRecord receiverServiceRecord;
         try {
-            receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+            receiverServiceRecord = srLookup.getReceiverServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {
@@ -148,7 +148,7 @@ public class NextMoveAdapter {
         // Need to check if receiver is on FIKS platform. If so, reject if documents are not PDF.
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+            serviceRecord = srLookup.getReceiverServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
                     DocumentType.ARKIVMELDING);
         } catch (ServiceRegistryLookupException e) {

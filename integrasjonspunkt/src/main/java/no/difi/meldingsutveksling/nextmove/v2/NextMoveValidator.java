@@ -14,6 +14,8 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -43,7 +45,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 @RequiredArgsConstructor
 public class NextMoveValidator {
 
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRegistryLookup serviceRegistryLookup;
     private final NextMoveMessageOutRepository messageRepo;
     private final ServiceIdentifierService serviceIdentifierService;
     private final Asserter asserter;
@@ -68,7 +70,12 @@ public class NextMoveValidator {
                 }
         );
 
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+        ServiceRecord serviceRecord;
+        try {
+            serviceRecord = serviceRegistryLookup.getReceiverServiceRecord(sbd);
+        } catch (ServiceRegistryLookupException e) {
+            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
+        }
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
         if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
@@ -78,7 +85,7 @@ public class NextMoveValidator {
         DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
 
-        String standard = sbd.getStandard();
+        String standard = sbd.getDocumentType();
 
         if (!documentType.fitsDocumentIdentifier(standard)) {
             throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);

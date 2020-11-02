@@ -4,6 +4,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.*
 import no.arkivverket.standarder.noark5.arkivmelding.Gradering
 import no.arkivverket.standarder.noark5.arkivmelding.beta.ObjectFactory
 import no.arkivverket.standarder.noark5.metadatakatalog.beta.*
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import javax.xml.bind.JAXBContext
@@ -13,11 +14,47 @@ import javax.xml.transform.stream.StreamSource
 object ArkivmeldingUtil {
 
     val jaxbContext: JAXBContext = JAXBContext.newInstance(Arkivmelding::class.java)
+    val jaxbBetaContext: JAXBContext = JAXBContext.newInstance(no.arkivverket.standarder.noark5.arkivmelding.beta.Arkivmelding::class.java)
 
     val dokumentmediumMap = mapOf(
             "Fysisk arkiv" to Dokumentmedium.FYSISK_MEDIUM,
             "Elektronisk arkiv" to Dokumentmedium.ELEKTRONISK_ARKIV,
             "Blandet fysisk og elektronisk arkiv" to Dokumentmedium.BLANDET_FYSISK_OG_ELEKTRONISK_ARKIV)
+
+    @JvmStatic
+    @Throws(JAXBException::class)
+    fun marshalArkivmelding(am: Arkivmelding): ByteArray {
+        return ByteArrayOutputStream().also { jaxbContext.createMarshaller().marshal(am, it) }.toByteArray()
+    }
+
+    @JvmStatic
+    @Throws(JAXBException::class)
+    fun unmarshalArkivmelding(ins: InputStream): Arkivmelding {
+        return jaxbContext.createUnmarshaller().unmarshal(StreamSource(ins), Arkivmelding::class.java).value
+    }
+
+    @JvmStatic
+    @Throws(JAXBException::class)
+    fun unmarshalArkivmelding(bytes: ByteArray): Arkivmelding {
+        return jaxbContext.createUnmarshaller().unmarshal(StreamSource(ByteArrayInputStream(bytes)), Arkivmelding::class.java).value
+    }
+
+    @JvmStatic
+    fun convertToBetaBytes(am: ByteArray): ByteArray {
+        return marshalArkivmeldingBeta(convertToBeta(unmarshalArkivmelding(am)))
+    }
+
+    @JvmStatic
+    @Throws(JAXBException::class)
+    fun marshalArkivmeldingBeta(am: no.arkivverket.standarder.noark5.arkivmelding.beta.Arkivmelding): ByteArray {
+        return ByteArrayOutputStream().also { jaxbBetaContext.createMarshaller().marshal(am, it) }.toByteArray()
+    }
+
+    @JvmStatic
+    @Throws(JAXBException::class)
+    fun unmarshalArkivmeldingBeta(ins: InputStream): no.arkivverket.standarder.noark5.arkivmelding.beta.Arkivmelding {
+        return jaxbBetaContext.createUnmarshaller().unmarshal(StreamSource(ins), no.arkivverket.standarder.noark5.arkivmelding.beta.Arkivmelding::class.java).value
+    }
 
     @JvmStatic
     fun getFilenames(am: Arkivmelding): List<String> {
@@ -36,18 +73,6 @@ object ArkivmeldingUtil {
     fun getSaksmappe(am: Arkivmelding): Saksmappe {
         return am.mappe.filterIsInstance<Saksmappe>()
                 .firstOrNull() ?: throw ArkivmeldingRuntimeException("No \"Saksmappe\" found in Arkivmelding")
-    }
-
-    @JvmStatic
-    @Throws(JAXBException::class)
-    fun marshalArkivmelding(am: Arkivmelding): ByteArray {
-        return ByteArrayOutputStream().also { jaxbContext.createMarshaller().marshal(am, it) }.toByteArray()
-    }
-
-    @JvmStatic
-    @Throws(JAXBException::class)
-    fun unmarshalArkivmelding(ins: InputStream): Arkivmelding {
-        return jaxbContext.createUnmarshaller().unmarshal(StreamSource(ins), Arkivmelding::class.java).value
     }
 
     @JvmStatic

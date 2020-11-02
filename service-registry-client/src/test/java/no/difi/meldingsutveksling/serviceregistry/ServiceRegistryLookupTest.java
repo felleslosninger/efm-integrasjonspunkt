@@ -108,14 +108,14 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().build();
         when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
-        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        this.service.getReceiverServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
     public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource("identifier/" + ORGNR, "")).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        this.service.getReceiverServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class ServiceRegistryLookupTest {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
         when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
 
-        final ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        final ServiceRecord serviceRecord = service.getReceiverServiceRecord(SRParameter.builder(ORGNR).build());
 
         assertThat(serviceRecord, is(dpo));
     }
@@ -135,11 +135,11 @@ public class ServiceRegistryLookupTest {
 
         String conversationId1 = UUID.randomUUID().toString();
         String conversationId2 = UUID.randomUUID().toString();
-        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
-        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
-        service.getServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId2).build());
-        service.getServiceRecord(SRParameter.builder(ORGNR).build());
-        service.getServiceRecord(SRParameter.builder(ORGNR2).build());
+        service.getReceiverServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getReceiverServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId1).build());
+        service.getReceiverServiceRecord(SRParameter.builder(ORGNR).conversationId(conversationId2).build());
+        service.getReceiverServiceRecord(SRParameter.builder(ORGNR).build());
+        service.getReceiverServiceRecord(SRParameter.builder(ORGNR2).build());
 
         verify(client, times(1)).getResource(endsWith(ORGNR), any());
         verify(client, times(1)).getResource(endsWith(ORGNR2), any());
