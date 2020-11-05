@@ -25,10 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
@@ -40,6 +37,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -218,7 +216,7 @@ public class ConversationControllerTest {
                                 getDefaultHeaderDescriptors()
                         ),
                         pathParameters(
-                                parameterWithName("messageId").description("The messageId. Typically a UUID.")
+                                parameterWithName("messageId").description("The messageId. Typically an UUID.")
                         ),
                         responseFields()
                                 .and(conversationDescriptors(""))
@@ -258,4 +256,50 @@ public class ConversationControllerTest {
 
         verify(conversationRepository).findByPollable(eq(true), any(Pageable.class));
     }
+
+    @Test
+    public void deleteById() throws Exception {
+        mvc.perform(
+                delete("/api/conversations/{id}", 42)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("conversations/delete",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("The numeric id of the conversation to be deleted.")
+                        ))
+                );
+
+        verify(conversationRepository).deleteById(42L);
+    }
+
+    @Test
+    public void deleteByMessageId() throws Exception {
+        String messageId = UUID.randomUUID().toString();
+        mvc.perform(
+                delete("/api/conversations/messageId/{messageId}", messageId)
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("conversations/delete-by-message-id",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        pathParameters(
+                                parameterWithName("messageId").description("The messageId of the conversation to be deleted. Typically an UUID.")
+                        ))
+                );
+
+        verify(conversationRepository).deleteByMessageId(messageId);
+    }
+
 }
