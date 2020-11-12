@@ -48,4 +48,8 @@ public class ConversationStrategyFactory {
     public Optional<ConversationStrategy> getStrategy(ServiceIdentifier serviceIdentifier) {
         return Optional.ofNullable(strategies.get(serviceIdentifier));
     }
+
+    public boolean isEnabled(ServiceIdentifier serviceIdentifier) {
+        return strategies.containsKey(serviceIdentifier);
+    }
 }

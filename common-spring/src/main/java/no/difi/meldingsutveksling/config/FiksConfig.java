@@ -27,6 +27,7 @@ public class FiksConfig {
         private String kontoId;
         private String integrasjonsId;
         private String integrasjonsPassord;
+        private DataSize uploadSizeLimit;
     }
 
     @Data

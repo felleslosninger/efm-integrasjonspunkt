@@ -44,6 +44,6 @@ open class FiksIoConfig(private val props: IntegrasjonspunktProperties,
                         .keyStorePassword(props.oidc.keystore.password)
                         .build())
                 .build()
-        return FiksIOKlientFactory.build(fiksIOConfig)
+        return FiksIOKlientFactory(fiksIOConfig).build()
     }
 }
