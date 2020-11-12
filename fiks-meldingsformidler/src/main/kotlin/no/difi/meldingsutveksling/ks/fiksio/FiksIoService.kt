@@ -46,7 +46,7 @@ class FiksIoService(private val fiksIoKlient: FiksIOKlient,
         }
     }
 
-    private fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {
+    fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {
         val serviceRecord: ServiceRecord = serviceRegistryLookup.getServiceRecord(
                 SRParameter.builder(msg.receiverIdentifier)
                         .process(msg.sbd.process)
