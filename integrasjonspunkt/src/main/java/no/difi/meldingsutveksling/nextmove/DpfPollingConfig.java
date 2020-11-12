@@ -43,7 +43,7 @@ public class DpfPollingConfig {
     @Conditional(LocalNorarkExistsCondition.class)
     public SvarInnPutMessageForwarder svarInnPutMessageForwarder(IntegrasjonspunktProperties properties, ConversationService conversationService, SvarInnService svarInnService, NoarkClient localNoark, NoarkClient fiksMailClient, MessageStatusFactory messageStatusFactory, PutMessageRequestFactory putMessageRequestFactory, Clock clock, PromiseMaker promiseMaker) {
         log.info("SvarInnPutMessageForwarder created");
-        return new SvarInnPutMessageForwarder(properties, conversationService, svarInnService, localNoark, fiksMailClient, messageStatusFactory, putMessageRequestFactory, clock, promiseMaker);
+        return new SvarInnPutMessageForwarder(properties, conversationService, svarInnService, localNoark, fiksMailClient, putMessageRequestFactory, clock, promiseMaker);
     }
 
     @Bean

@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.v2.BusinessMessageFileRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ public class NextMoveSender {
     private final ConversationService conversationService;
     private final NextMoveMessageOutRepository messageRepo;
     private final BusinessMessageFileRepository businessMessageFileRepository;
-    private final MessageStatusFactory messageStatusFactory;
     private final SBDUtil sbdUtil;
     private final TimeToLiveHelper timeToLiveHelper;
     private final MessagePersister messagePersister;
@@ -50,7 +48,7 @@ public class NextMoveSender {
                 return;
             }
 
-            conversationService.registerStatus(msg.getMessageId(), messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT));
+            conversationService.registerStatus(msg.getMessageId(), ReceiptStatus.SENDT);
         }
 
         try {

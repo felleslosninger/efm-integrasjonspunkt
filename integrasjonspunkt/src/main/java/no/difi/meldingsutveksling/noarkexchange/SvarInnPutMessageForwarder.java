@@ -22,7 +22,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.difi.meldingsutveksling.status.MessageStatusFactory;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -40,7 +39,6 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     private final SvarInnService svarInnService;
     private final NoarkClient localNoark;
     private final NoarkClient fiksMailClient;
-    private final MessageStatusFactory messageStatusFactory;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final Clock clock;
     private final PromiseMaker promiseMaker;
@@ -107,7 +105,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
                 return OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
             }
         });
-        conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_MOTTATT));
+        conversationService.registerStatus(c.getMessageId(), INNKOMMENDE_MOTTATT);
 
         String missingFields = getMissingFields(forsendelse, putMessage, builder.getDokumentTypeList());
         if (!missingFields.isEmpty()) {
@@ -118,12 +116,12 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         final PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         if ("OK".equals(response.getResult().getType())) {
             Audit.info("Message successfully forwarded");
-            conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c.getMessageId(), INNKOMMENDE_LEVERT);
             svarInnService.confirmMessage(forsendelse.getId());
         } else if ("WARNING".equals(response.getResult().getType())) {
             Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                     forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            conversationService.registerStatus(c.getMessageId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(c.getMessageId(), INNKOMMENDE_LEVERT);
             svarInnService.confirmMessage(forsendelse.getId());
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
@@ -135,11 +133,11 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         if (properties.getFiks().getInn().isMailOnError()) {
             Audit.info(format("Sending message with id=%s by mail", fiksId));
             fiksMailClient.sendEduMelding(message);
-            conversationService.registerStatus(message.getEnvelope().getConversationId(), messageStatusFactory.getMessageStatus(INNKOMMENDE_LEVERT));
+            conversationService.registerStatus(message.getEnvelope().getConversationId(), INNKOMMENDE_LEVERT);
             svarInnService.confirmMessage(fiksId);
         } else {
             svarInnService.setErrorStateForMessage(fiksId, errorMsg);
-            conversationService.registerStatus(message.getEnvelope().getConversationId(), messageStatusFactory.getMessageStatus(FEIL, errorMsg));
+            conversationService.registerStatus(message.getEnvelope().getConversationId(), FEIL, errorMsg);
         }
     }
 

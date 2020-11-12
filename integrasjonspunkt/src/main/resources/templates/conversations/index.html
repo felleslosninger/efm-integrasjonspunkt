@@ -3,7 +3,8 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
-    <link th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/webjars/font-awesome/css/all.min.css}" rel="stylesheet"/>
     <title>Conversations</title>
 </head>
 <body>
@@ -36,8 +37,21 @@
         <th>Date</th>
         <th>Type</th>
         <th>Last status</th>
+        <th></th>
     </tr>
     </thead>
+
+    <script th:inline="javascript">
+        function sendDelete(id) {
+            let xhttp = new XMLHttpRequest();
+            xhttp.open("DELETE", "/api/conversations/"+id, true);
+            xhttp.onload = function () {
+                location.reload();
+            };
+            xhttp.send();
+        }
+    </script>
+
     <tbody>
     <tr th:each="c : ${page.content}" >
         <td th:with="s=${statusMap.get(c.messageId)}" th:class="${s eq 'LEVERT' or s eq 'LEST' or s eq 'INNKOMMENDE_LEVERT'} ? 'table-success' : (${s eq 'FEIL' or s eq 'LEVETID_UTLOPT'} ? 'table-danger' : 'table-warning')">   </td>
@@ -49,6 +63,9 @@
         <td th:text="${c.lastUpdate}">Date</td>
         <td th:text="${c.serviceIdentifier}">Type</td>
         <td th:text="${statusMap.get(c.messageId)}">Last status</td>
+        <td>
+            <button th:onclick="sendDelete([[${c.id}]])" class="btn btn-danger btn-sm rounded-0"><i class="far fa-trash-alt" aria-hidden="true"></i></button>
+        </td>
     </tr>
     </tbody>
 </table>

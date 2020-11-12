@@ -106,7 +106,7 @@
         <lombok.version>1.18.6</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
-        <kotlin.version>1.3.61</kotlin.version>
+        <kotlin.version>1.3.72</kotlin.version>
     </properties>
 
 
@@ -442,8 +442,18 @@
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
+                <artifactId>webjars-locator</artifactId>
+                <version>0.40</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
                 <artifactId>bootstrap</artifactId>
                 <version>4.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>font-awesome</artifactId>
+                <version>5.15.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -455,13 +465,13 @@
             <version>${kotlin.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
             <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -474,6 +484,10 @@
             <artifactId>mockk</artifactId>
             <version>1.9.3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
     </dependencies>
 

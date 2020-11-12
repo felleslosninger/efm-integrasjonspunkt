@@ -175,6 +175,42 @@ include::{snippets}/conversations/get-by-message-id/path-parameters.adoc[]
 include::{snippets}/conversations/get-by-message-id/response-fields.adoc[]
 --
 
+[#conversations-delete-by-id]
+== Delete conversation by id
+This service is used to delete a conversation based on its database id.
+
+=== Example: delete conversation by id
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/delete/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/delete/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/delete/http-response.adoc[]
+
+[#conversations-delete-by-message-id]
+== Delete conversation by messageId
+This service is used to delete a conversation based on its messageId.
+
+=== Example: delete conversation by messageId
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/conversations/delete-by-message-id/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/conversations/delete-by-message-id/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/conversations/delete-by-message-id/http-response.adoc[]
+
 [#conversations-queue]
 == Queued conversations
 

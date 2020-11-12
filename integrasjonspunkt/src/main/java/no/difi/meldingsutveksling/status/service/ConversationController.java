@@ -14,10 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -25,7 +22,6 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 
 @RestController
 @Validated
-@Api(tags = "Conversations")
 @RequiredArgsConstructor
 @RequestMapping("/api/conversations")
 public class ConversationController {
@@ -33,13 +29,6 @@ public class ConversationController {
     private final ConversationRepository conversationRepository;
 
     @GetMapping
-    @ApiOperation(
-            value = "Get all conversations",
-            notes = "Gets a list of all outgoing conversations")
-    @ApiResponses({
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 200, message = "Success", response = Conversation[].class),
-    })
     @JsonView(Views.Conversation.class)
     public Page<Conversation> find(
             @Valid ConversationQueryInput input,
@@ -49,12 +38,6 @@ public class ConversationController {
     }
 
     @GetMapping("{id}")
-    @ApiOperation(value = "Get conversation", notes = "Find conversation based on id")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 404, message = "Not Found", response = String.class)
-    })
     @JsonView(Views.Conversation.class)
     public Conversation getById(
             @ApiParam(value = "id", required = true, example = "1")
@@ -63,13 +46,12 @@ public class ConversationController {
                 .orElseThrow(() -> new ConversationNotFoundException(id));
     }
 
+    @DeleteMapping("{id}")
+    public void deleteById(@PathVariable("id") Long id) {
+        conversationRepository.deleteById(id);
+    }
+
     @GetMapping("messageId/{messageId}")
-    @ApiOperation(value = "Get conversation", notes = "Find conversation based on messageId")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 404, message = "Not Found", response = String.class)
-    })
     @JsonView(Views.Conversation.class)
     public Conversation getByMessageId(
             @ApiParam(value = "messageId", required = true)
@@ -80,11 +62,12 @@ public class ConversationController {
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
+    @DeleteMapping("messageId/{messageId}")
+    public void deleteByMessageId(@PathVariable("messageId") String messageId) {
+        conversationRepository.deleteByMessageId(messageId);
+    }
+
     @GetMapping("queue")
-    @ApiOperation(value = "Queued conversations", notes = "Get all conversations with not-finished state")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = Conversation[].class)
-    })
     @JsonView(Views.Conversation.class)
     public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
         return conversationRepository.findByPollable(true, pageable);

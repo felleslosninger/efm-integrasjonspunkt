@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.nextmove;
+package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
