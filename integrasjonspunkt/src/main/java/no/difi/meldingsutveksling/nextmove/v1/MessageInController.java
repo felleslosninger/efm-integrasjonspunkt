@@ -142,9 +142,11 @@ public class MessageInController {
             conversationService.registerStatus(conversationId, ReceiptStatus.INNKOMMENDE_LEVERT);
 
             if (message.getServiceIdentifier() == DPE) {
-                StandardBusinessDocument statusSbd = receiptFactory.createEinnsynStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
-                NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
-                internalQueue.enqueueNextMove(msg);
+                StandardBusinessDocument statusSbd = receiptFactory.createStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+                if (statusSbd != null) {
+                    NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
+                    internalQueue.enqueueNextMove(msg);
+                }
             }
 
             InputStreamResource isr = new InputStreamResource(new ByteArrayInputStream(asicBytes));

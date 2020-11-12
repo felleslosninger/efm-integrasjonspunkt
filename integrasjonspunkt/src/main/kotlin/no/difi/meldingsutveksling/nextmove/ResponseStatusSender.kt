@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.difi.meldingsutveksling.DocumentType
 import no.difi.meldingsutveksling.ServiceIdentifier
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
@@ -21,7 +20,7 @@ class ResponseStatusSender(val proxy: ResponseStatusSenderProxy) {
     val log = logger()
 
     fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
-        GlobalScope.launch( CoroutineExceptionHandler { _, t -> log.error("Error sending status message", t) }) {
+        GlobalScope.launch(CoroutineExceptionHandler { _, t -> log.error("Error sending status message", t) }) {
             proxy.queue(sbd, si, status)
         }
     }
@@ -32,18 +31,10 @@ class ResponseStatusSender(val proxy: ResponseStatusSenderProxy) {
 open class ResponseStatusSenderProxy(@Lazy val internalQueue: InternalQueue,
                                      val receiptFactory: SBDReceiptFactory) {
 
-    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000*60*10))
+    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000 * 60 * 10))
     open fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
-        when (si) {
-            ServiceIdentifier.DPO -> {
-                receiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, status)
-                        .let { NextMoveOutMessage.of(it, ServiceIdentifier.DPO) }
-            }
-            ServiceIdentifier.DPE -> {
-                receiptFactory.createEinnsynStatusFrom(sbd, DocumentType.STATUS, status)
-                        .let { NextMoveOutMessage.of(it, ServiceIdentifier.DPE) }
-            }
-            else -> null
-        }?.let(internalQueue::enqueueNextMove)
+        receiptFactory.createStatusFrom(sbd, DocumentType.STATUS, status)
+                ?.let { NextMoveOutMessage.of(it, si) }
+                ?.let(internalQueue::enqueueNextMove)
     }
 }

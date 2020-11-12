@@ -54,6 +54,10 @@ public class SBDUtil {
         return (isType(sbd, DocumentType.ARKIVMELDING)) || (isType(sbd, DocumentType.ARKIVMELDING_KVITTERING));
     }
 
+    public boolean isEinnsyn(StandardBusinessDocument sbd) {
+        return isType(sbd, DocumentType.INNSYNSKRAV) || isType(sbd, DocumentType.PUBLISERING) || isType(sbd, DocumentType.EINNSYN_KVITTERING);
+    }
+
     public boolean isFileRequired(StandardBusinessDocument sbd) {
         return !isStatus(sbd) &&
                 !isReceipt(sbd) &&
