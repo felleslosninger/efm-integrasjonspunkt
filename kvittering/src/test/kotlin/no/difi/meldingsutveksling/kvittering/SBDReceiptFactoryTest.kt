@@ -20,11 +20,10 @@ class SBDReceiptFactoryTest {
 
     @MockK
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
-
     @MockK
     lateinit var sbdUtil: SBDUtil
 
-    lateinit var sbdReceiptFactory: SBDReceiptFactory
+    private lateinit var sbdReceiptFactory: SBDReceiptFactory
 
     private val status = "urn:no:difi:eformidling:xsd::status"
     private val senderOrgnr = "910076787"
