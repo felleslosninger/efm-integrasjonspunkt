@@ -10,10 +10,7 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper
+import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
@@ -29,7 +26,7 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var nextMoveMessageOutRepository: NextMoveMessageOutRepository
     @MockK
-    lateinit var serviceIdentifierService: ServiceIdentifierService
+    lateinit var conversationStrategyFactory: ConversationStrategyFactory
     @MockK
     lateinit var asserter: Asserter
     @MockK
@@ -59,7 +56,7 @@ class NextMoveValidatorTest {
         MockKAnnotations.init(this)
         nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
                 nextMoveMessageOutRepository,
-                serviceIdentifierService,
+                conversationStrategyFactory,
                 asserter,
                 optionalCryptoMessagePersister,
                 timeToLiveHelper,
@@ -86,7 +83,7 @@ class NextMoveValidatorTest {
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
         every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
-        every { serviceIdentifierService.isEnabled(ServiceIdentifier.DPO) } returns true
+        every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { sbd.messageType } returns "arkivmelding"
         every { sbd.standard } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
@@ -114,7 +111,7 @@ class NextMoveValidatorTest {
 
     @Test(expected = ServiceNotEnabledException::class)
     fun `service not enabled should throw exception`() {
-        every { serviceIdentifierService.isEnabled(ServiceIdentifier.DPO) } returns false
+        every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns false
         nextMoveValidator.validate(sbd)
     }
 

@@ -289,6 +289,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableDPV;
         private boolean enableDPI;
         private boolean enableDPF;
+        private boolean enableDPFIO;
         private boolean enableDPE;
 
     }

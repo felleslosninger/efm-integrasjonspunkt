@@ -19,6 +19,17 @@ public class FiksConfig {
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();
+    FiksIO io = new FiksIO();
+
+    @Data
+    @ToString(exclude = "integrasjonsPassord")
+    public static class FiksIO {
+        private String host;
+        private String kontoId;
+        private String integrasjonsId;
+        private String integrasjonsPassord;
+        private DataSize uploadSizeLimit;
+    }
 
     @Data
     @ToString(exclude = "password")

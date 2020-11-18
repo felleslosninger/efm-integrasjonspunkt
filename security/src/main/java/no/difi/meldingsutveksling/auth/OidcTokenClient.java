@@ -41,6 +41,7 @@ public class OidcTokenClient {
     private static final String SCOPE_DPE = "move/dpe.read";
     private static final String SCOPE_DPV = "move/dpv.read";
     private static final String SCOPE_DPF = "move/dpf.read";
+    private static final String SCOPE_DPFIO = "ks:fiks";
     private static final List<String> SCOPES_DPI = Arrays.asList("move/dpi.read",
             "global/kontaktinformasjon.read",
             "global/sikkerdigitalpost.read",
@@ -142,6 +143,9 @@ public class OidcTokenClient {
         }
         if (props.getFeature().isEnableDPF()) {
             scopeList.add(SCOPE_DPF);
+        }
+        if (props.getFeature().isEnableDPFIO()) {
+            scopeList.add(SCOPE_DPFIO);
         }
         if (props.getFeature().isEnableDPI()) {
             scopeList.addAll(SCOPES_DPI);

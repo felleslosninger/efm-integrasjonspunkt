@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.XMLTimeStamp;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.kvittering.xsd.Aapning;
@@ -42,6 +43,7 @@ import static no.difi.meldingsutveksling.kvittering.DocumentToDocumentConverter.
 public class SBDReceiptFactory {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final SBDUtil sbdUtil;
 
     public StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
         Kvittering k = new Kvittering();
@@ -59,14 +61,23 @@ public class SBDReceiptFactory {
                 k);
     }
 
-    public StandardBusinessDocument createArkivmeldingStatusFrom(StandardBusinessDocument sbd,
-                                                                 DocumentType documentType,
-                                                                 ReceiptStatus status) {
+    public StandardBusinessDocument createStatusFrom(StandardBusinessDocument sbd,
+                                                     DocumentType documentType,
+                                                     ReceiptStatus status) {
+        Process process;
+        if (sbdUtil.isArkivmelding(sbd)) {
+            process = Process.ARKIVMELDING_RESPONSE;
+        } else if (sbdUtil.isEinnsyn(sbd)) {
+            process = Process.EINNSYN_RESPONSE;
+        } else {
+            return null;
+        }
+
         String standard;
         try {
             standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
                     .conversationId(sbd.getConversationId())
-                    .process(Process.ARKIVMELDING_RESPONSE.getValue())
+                    .process(process.getValue())
                     .build(), documentType);
         } catch (ServiceRegistryLookupException e) {
             log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
@@ -80,35 +91,7 @@ public class SBDReceiptFactory {
                         .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
                         .relatedToConversationId(sbd.getConversationId())
                         .relatedToMessageId(sbd.getMessageId())
-                        .process(Process.ARKIVMELDING_RESPONSE)
-                        .standard(standard)
-                        .type(documentType)
-                        .build())
-                .setAny(statusMessage);
-    }
-
-    public StandardBusinessDocument createEinnsynStatusFrom(StandardBusinessDocument sbd,
-                                                            DocumentType documentType,
-                                                            ReceiptStatus status) {
-        String standard;
-        try {
-            standard = serviceRegistryLookup.getDocumentIdentifier(SRParameter.builder(sbd.getSenderIdentifier())
-                    .conversationId(sbd.getConversationId())
-                    .process(Process.EINNSYN_RESPONSE.getValue())
-                    .build(), documentType);
-        } catch (ServiceRegistryLookupException e) {
-            log.error("Error looking up service record for {}", sbd.getSenderIdentifier(), e);
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
-        StatusMessage statusMessage = new StatusMessage(status);
-
-        return new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader.Builder()
-                        .from(Organisasjonsnummer.from(sbd.getReceiverIdentifier()))
-                        .to(Organisasjonsnummer.from(sbd.getSenderIdentifier()))
-                        .relatedToConversationId(sbd.getConversationId())
-                        .relatedToMessageId(sbd.getMessageId())
-                        .process(Process.EINNSYN_RESPONSE)
+                        .process(process)
                         .standard(standard)
                         .type(documentType)
                         .build())
