@@ -16,7 +16,6 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 
 @Component
-@Slf4j
 class SvarUtFaultInterceptor : ClientInterceptor {
 
     val log = logger()

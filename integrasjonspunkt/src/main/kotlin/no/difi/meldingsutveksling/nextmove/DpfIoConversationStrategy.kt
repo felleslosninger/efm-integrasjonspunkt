@@ -1,0 +1,21 @@
+package no.difi.meldingsutveksling.nextmove
+
+import no.difi.meldingsutveksling.api.DpfioConversationStrategy
+import no.difi.meldingsutveksling.ks.fiksio.FiksIoService
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
+import no.difi.meldingsutveksling.util.logger
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.stereotype.Component
+
+@Component
+@ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
+class DpfIoConversationStrategyImpl(private val fiksIoService: FiksIoService) : DpfioConversationStrategy {
+
+    val log = logger()
+
+    override fun send(message: NextMoveOutMessage) {
+        fiksIoService.sendMessage(message)
+        log.info("Message [id=${message.messageId}, serviceIdentifier=${message.serviceIdentifier}] sent to FIKS IO", markerFrom(message))
+    }
+
+}

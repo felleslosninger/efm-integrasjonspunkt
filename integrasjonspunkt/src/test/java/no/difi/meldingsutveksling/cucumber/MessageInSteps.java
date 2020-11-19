@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 
 import java.io.IOException;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +43,7 @@ public class MessageInSteps {
 
         if ("Altinn".equals(who)) {
             message.attachment(new Attachment(body.getBytes())
-                    .setFileName(ALTINN_SBD_FILE)
+                    .setFileName(SBD_FILE)
                     .setMimeType(MediaType.APPLICATION_JSON_VALUE));
         }
 

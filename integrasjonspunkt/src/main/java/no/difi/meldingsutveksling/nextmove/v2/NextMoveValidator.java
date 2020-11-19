@@ -47,7 +47,7 @@ public class NextMoveValidator {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final NextMoveMessageOutRepository messageRepo;
-    private final ServiceIdentifierService serviceIdentifierService;
+    private final ConversationStrategyFactory conversationStrategyFactory;
     private final Asserter asserter;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
@@ -78,7 +78,7 @@ public class NextMoveValidator {
         }
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
-        if (!serviceIdentifierService.isEnabled(serviceIdentifier)) {
+        if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 

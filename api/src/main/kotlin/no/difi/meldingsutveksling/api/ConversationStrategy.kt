@@ -8,13 +8,15 @@ interface ConversationStrategy {
     fun send(message: NextMoveOutMessage)
 }
 
-interface DpvConversationStrategy: ConversationStrategy {}
+interface DpvConversationStrategy: ConversationStrategy
 
-interface DpoConversationStrategy: ConversationStrategy {}
+interface DpoConversationStrategy: ConversationStrategy
 
-interface DpeConversationStrategy: ConversationStrategy {}
+interface DpeConversationStrategy: ConversationStrategy
 
-interface DpfConversationStrategy: ConversationStrategy {}
+interface DpfConversationStrategy: ConversationStrategy
 
-interface DpiConversationStrategy: ConversationStrategy {}
+interface DpiConversationStrategy: ConversationStrategy
+
+interface DpfioConversationStrategy: ConversationStrategy
 

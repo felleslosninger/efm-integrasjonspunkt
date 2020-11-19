@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.v2.ServiceIdentifierService;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class StatusPolling {
     private final ConversationRepository conversationRepository;
     private final StatusStrategyFactory statusStrategyFactory;
     private final DpiReceiptService dpiReceiptService;
-    private final ServiceIdentifierService serviceIdentifierService;
+    private final ConversationStrategyFactory conversationStrategyFactory;
 
     @Scheduled(fixedRate = 60000)
     public void checkReceiptStatus() {
@@ -39,7 +39,7 @@ public class StatusPolling {
 
         conversationRepository.findByPollable(true)
                 .stream()
-                .filter(c -> serviceIdentifierService.isEnabled(c.getServiceIdentifier()))
+                .filter(c -> conversationStrategyFactory.isEnabled(c.getServiceIdentifier()))
                 .collect(groupingBy(Conversation::getServiceIdentifier, toSet()))
                 .forEach(this::checkReceiptForType);
     }

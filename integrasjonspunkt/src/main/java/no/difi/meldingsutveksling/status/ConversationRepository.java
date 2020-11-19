@@ -66,6 +66,8 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByDirection(ConversationDirection direction);
 
+    void deleteByMessageId(String messageId);
+
     @Transactional(readOnly = true)
     @Query("SELECT id FROM Conversation WHERE expiry < :time AND finished = false")
     Iterable<Long> findIdsForExpiredConversations(@Param("time") OffsetDateTime time);

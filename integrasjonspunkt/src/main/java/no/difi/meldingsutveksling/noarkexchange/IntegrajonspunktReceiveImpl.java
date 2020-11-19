@@ -166,9 +166,11 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private void sendLevertStatus(StandardBusinessDocument sbd) {
-        StandardBusinessDocument statusSbd = sbdReceiptFactory.createArkivmeldingStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT);
-        NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
-        internalQueue.enqueueNextMove(msg);
+        StandardBusinessDocument statusSbd = sbdReceiptFactory.createStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT);
+        if (statusSbd != null) {
+            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
+            internalQueue.enqueueNextMove(msg);
+        }
     }
 
     private Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) {

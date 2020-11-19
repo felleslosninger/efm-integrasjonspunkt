@@ -118,6 +118,7 @@ public class ServiceRegistryLookup {
             // Integrasjonspunktet will in this case downgrade "arkivmelding" to beta format before sending.
             // See https://difino.atlassian.net/browse/MOVE-1952
             if (e instanceof NotFoundInServiceRegistryException &&
+                    parameter.getProcess() != null &&
                     parameter.getProcess().contains(DocumentType.ARKIVMELDING.getType()) &&
                     parameter.getProcess().contains("ver5.5")) {
                 parameter.setProcess(parameter.getProcess().replace("ver5.5", "ver1.0"));

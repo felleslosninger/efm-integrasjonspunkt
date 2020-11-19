@@ -33,7 +33,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.ALTINN_SBD_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 /**
@@ -93,7 +93,7 @@ public class AltinnPackage {
 
     private static String getFileName(UploadRequest document) {
         if (document.getPayload().getAny() instanceof BusinessMessage) {
-            return ALTINN_SBD_FILE;
+            return SBD_FILE;
         }
 
         return CONTENT_XML;
@@ -116,7 +116,7 @@ public class AltinnPackage {
         zipOutputStream.closeEntry();
 
         if (sbd.getAny() instanceof BusinessMessage) {
-            zipOutputStream.putNextEntry(new ZipEntry(ALTINN_SBD_FILE));
+            zipOutputStream.putNextEntry(new ZipEntry(SBD_FILE));
             ObjectMapper om = context.getBean(ObjectMapper.class);
             om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
             om.writeValue(zipOutputStream, sbd);
@@ -153,7 +153,7 @@ public class AltinnPackage {
                     case RECIPIENTS_XML:
                         recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
                         break;
-                    case ALTINN_SBD_FILE:
+                    case SBD_FILE:
                         ObjectMapper om = context.getBean(ObjectMapper.class);
                         om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
                         sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);

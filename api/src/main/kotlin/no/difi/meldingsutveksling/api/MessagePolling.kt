@@ -9,3 +9,5 @@ interface DpoPolling: MessagePolling
 interface DpePolling: MessagePolling
 
 interface DpfPolling: MessagePolling
+
+interface DpfioPolling: MessagePolling
