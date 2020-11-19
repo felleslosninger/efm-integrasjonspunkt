@@ -3,7 +3,7 @@ Feature: Receiving a Next Move DPO message
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/974720760?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
+    And a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver5.5?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
     And the Noark System is disabled
     And Altinn prepares a message with the following SBD:
     """
@@ -17,7 +17,7 @@ Feature: Receiving a Next Move DPO message
                                 "expectedResponseDateTime": "2019-05-10T01:31:52+02:00"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver5.5",
                         "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
                         "type": "ConversationId"
                     }
@@ -26,7 +26,7 @@ Feature: Receiving a Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b919",
-                "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
+                "standard": "urn:no:difi:arkivmelding:xsd:arkivmelding55::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
             },

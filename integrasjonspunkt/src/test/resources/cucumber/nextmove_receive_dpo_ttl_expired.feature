@@ -16,7 +16,7 @@ Feature: Receiving an expired Next Move DPO message
                                 "expectedResponseDateTime": "2019-03-25T11:00:00+01:00"
                             }
                         ],
-                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+                        "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver5.5",
                         "instanceIdentifier": "2507fcb8-6543-4c5f-ac06-f5df75bb677e",
                         "type": "ConversationId"
                     }
@@ -25,7 +25,7 @@ Feature: Receiving an expired Next Move DPO message
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b924",
-                "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
+                "standard": "urn:no:difi:arkivmelding:xsd:arkivmelding55::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
             },

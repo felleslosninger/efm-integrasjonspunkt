@@ -4,7 +4,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
 
     Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     Given a "GET" request to "http://localhost:9099/identifier/910077473?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver5.5?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
 
   Scenario: As a user I want to send a BEST/EDU AppReceipt message
 
@@ -105,7 +105,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
           "contactInformation" : [ ]
         } ],
         "documentIdentification" : {
-          "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering",
+          "standard" : "urn:no:difi:arkivmelding:xsd:arkivmelding55::arkivmelding_kvittering",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding_kvittering",
@@ -115,7 +115,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
           "scope" : [ {
             "type" : "ConversationId",
             "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
-            "identifier" : "urn:no:difi:profile:arkivmelding:response:ver1.0",
+            "identifier" : "urn:no:difi:profile:arkivmelding:response:ver5.5",
             "scopeInformation" : [ {
               "expectedResponseDateTime" : "2019-03-26T12:38:23+01:00"
             } ]

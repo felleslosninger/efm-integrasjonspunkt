@@ -11,24 +11,24 @@ Feature: Capabilities
       """
       {
         "capabilities" : [ {
-          "process" : "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+          "process" : "urn:no:difi:profile:arkivmelding:administrasjon:ver5.5",
           "serviceIdentifier" : "DPO",
           "documentTypes" : [ {
             "type" : "arkivmelding",
-            "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding"
+            "standard" : "urn:no:difi:arkivmelding:xsd:arkivmelding55::arkivmelding"
           } ]
         }, {
-          "process" : "urn:no:difi:profile:arkivmelding:response:ver1.0",
+          "process" : "urn:no:difi:profile:arkivmelding:response:ver5.5",
           "serviceIdentifier" : "DPO",
           "documentTypes" : [ {
             "type" : "arkivmelding_kvittering",
-            "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering"
+            "standard" : "urn:no:difi:arkivmelding:xsd:arkivmelding55::arkivmelding_kvittering"
           }, {
             "type" : "status",
-            "standard" : "urn:no:difi:arkivmelding:xsd::status"
+            "standard" : "urn:no:difi:arkivmelding:xsd:arkivmelding55::status"
           }, {
             "type" : "feil",
-            "standard" : "urn:no:difi:arkivmelding:xsd::feil"
+            "standard" : "urn:no:difi:arkivmelding:xsd:arkivmelding55::feil"
           } ]
         }, {
           "process" : "urn:no:difi:profile:einnsyn:response:ver1.0",
