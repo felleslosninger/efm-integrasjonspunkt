@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.fiksio
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.api.DpfioPolling
 import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.util.logger
@@ -17,7 +18,7 @@ import java.io.IOException
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
                        private val objectMapper: ObjectMapper,
-                       private val nextMoveQueue: NextMoveQueue) {
+                       private val nextMoveQueue: NextMoveQueue): DpfioPolling {
 
     val log = logger()
 
@@ -51,5 +52,9 @@ class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
             }
         }
         svarSender.ack()
+    }
+
+    override fun poll() {
+        // noop
     }
 }
