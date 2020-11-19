@@ -7,12 +7,16 @@ import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.noarkexchange.SvarInnPutMessageForwarder;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 
 import java.util.function.Consumer;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
+@Order
+@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 public class DefaultDpfPolling implements DpfPolling {
 
     private final IntegrasjonspunktProperties properties;
@@ -45,3 +49,4 @@ public class DefaultDpfPolling implements DpfPolling {
         return svarInnNextMoveForwarder;
     }
 }
+
