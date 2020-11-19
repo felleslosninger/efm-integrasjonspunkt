@@ -43,7 +43,7 @@ class FiksIoService(private val fiksIoKlient: FiksIOKlient,
             }, reject).outlet()
             payloads.add(StreamPayload(outlet, NextMoveConsts.SBD_FILE))
             createRequest(payloads = payloads, msg = msg)
-        }
+        }.await()
     }
 
     fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {

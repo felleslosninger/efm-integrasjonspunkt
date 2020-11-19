@@ -28,7 +28,7 @@ open class FiksIoConfig(private val props: IntegrasjonspunktProperties,
                         .host(props.fiks.io.host)
                         .build())
                 .fiksApiKonfigurasjon(FiksApiKonfigurasjon.builder()
-                        .host(props.fiks.io.host)
+                        .host(props.fiks.io.apiHost)
                         .port(443)
                         .scheme("https")
                         .build())
