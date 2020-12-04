@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import lombok.ToString;
+import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
@@ -15,7 +16,7 @@ public class FiksConfig {
 
     @Valid
     @NotNull(message = "Certificate properties for FIKS not set.")
-    private KeyStoreProperties keystore;
+    private KeystoreProperties keystore;
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();

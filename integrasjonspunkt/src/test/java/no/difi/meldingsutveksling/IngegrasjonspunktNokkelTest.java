@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.move.common.config.KeystoreProperties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class IngegrasjonspunktNokkelTest {
 
     @Before
     public void init() {
-        KeyStoreProperties keystore = new KeyStoreProperties();
+        KeystoreProperties keystore = new KeystoreProperties();
 
         keystore.setAlias("974720760");
         keystore.setPassword("changeit");

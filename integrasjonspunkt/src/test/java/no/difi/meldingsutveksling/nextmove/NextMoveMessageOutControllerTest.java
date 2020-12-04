@@ -526,7 +526,7 @@ public class NextMoveMessageOutControllerTest {
         verify(messageService).addFile(same(ARKIVMELDING_MESSAGE), nextMoveUploadedFileArgumentCaptor.capture());
 
         NextMoveUploadedFile value = nextMoveUploadedFileArgumentCaptor.getValue();
-        assertThat(value.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+        assertThat(value.getContentType()).isEqualTo("text/plain;charset=UTF-8");
         assertThat(value.getOriginalFilename()).isEqualTo("before_the_law.txt");
         assertThat(value.getName()).isEqualTo("Before The Law");
         assertThat(new String(value.getBytes(), StandardCharsets.UTF_8)).isEqualTo("Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...");

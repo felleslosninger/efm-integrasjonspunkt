@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.logging.Audit
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
-import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

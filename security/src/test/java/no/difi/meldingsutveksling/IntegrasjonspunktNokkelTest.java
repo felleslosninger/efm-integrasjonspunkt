@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling;
 
 import no.difi.asic.*;
 import no.difi.commons.asic.jaxb.asic.Certificate;
-import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.move.common.config.KeystoreProperties;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -35,7 +35,7 @@ public class IntegrasjonspunktNokkelTest {
     @BeforeClass
     public static void before() throws Exception {
 
-        KeyStoreProperties properties = new KeyStoreProperties();
+        KeystoreProperties properties = new KeystoreProperties();
         properties.setAlias(ALIAS);
         properties.setPassword("changeit");
         properties.setPath(new ClassPathResource("/test.jks"));

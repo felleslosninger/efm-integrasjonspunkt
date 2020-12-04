@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import no.difi.meldingsutveksling.KeystoreProvider;
-import no.difi.meldingsutveksling.config.KeyStoreProperties;
-import no.difi.meldingsutveksling.lang.KeystoreProviderException;
+import no.difi.move.common.cert.KeystoreProvider;
+import no.difi.move.common.cert.KeystoreProviderException;
+import no.difi.move.common.config.KeystoreProperties;
 
 import java.security.*;
 
@@ -11,11 +11,11 @@ public class CucumberKeyStore {
     private static final String ERR_MISSING_PRIVATE_KEY = "No PrivateKey with alias \"%s\" found in the KeyStore";
     private static final String ERR_GENERAL = "Unexpected problem occurred when operating KeyStore";
 
-    protected final KeyStoreProperties properties;
+    protected final KeystoreProperties properties;
 
     private final KeyStore keyStore;
 
-    public CucumberKeyStore(KeyStoreProperties properties) {
+    public CucumberKeyStore(KeystoreProperties properties) {
 
         this.properties = properties;
 

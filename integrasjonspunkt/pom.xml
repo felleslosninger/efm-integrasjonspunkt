@@ -57,6 +57,70 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>restdocs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-docs</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>html5</backend>
+                                    <doctype>book</doctype>
+                                    <attributes>
+                                        <project-version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</project-version>
+                                    </attributes>
+                                    <extensions>
+                                        <extension>
+                                            <className>com.bmuschko.asciidoctorj.tabbedcode.TabbedCodeBlockExtension</className>
+                                        </extension>
+                                        <extension>
+                                            <className>com.puravida.asciidoctor.collapsable.CollapsablePostProcessor</className>
+                                        </extension>
+                                    </extensions>
+                                    <requires>
+                                        <require>asciidoctor-diagram</require>
+                                    </requires>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.springframework.restdocs</groupId>
+                                <artifactId>spring-restdocs-asciidoctor</artifactId>
+                                <version>2.0.4.RELEASE</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.bmuschko</groupId>
+                                <artifactId>asciidoctorj-tabbed-code-extension</artifactId>
+                                <version>0.2</version>
+                                <scope>runtime</scope>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-diagram</artifactId>
+                                <version>1.5.18</version>
+                                <scope>runtime</scope>
+                            </dependency>
+                            <dependency>
+                                <groupId>com.puravida.asciidoctor</groupId>
+                                <artifactId>asciidoctor-extensions</artifactId>
+                                <version>2.3.0</version>
+                                <scope>runtime</scope>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -139,63 +203,6 @@
                         </resource>
                     </resources>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-docs</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <backend>html5</backend>
-                            <doctype>book</doctype>
-                            <attributes>
-                                <project-version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</project-version>
-                            </attributes>
-                            <extensions>
-                                <extension>
-                                    <className>com.bmuschko.asciidoctorj.tabbedcode.TabbedCodeBlockExtension</className>
-                                </extension>
-                                <extension>
-                                    <className>com.puravida.asciidoctor.collapsable.CollapsablePostProcessor</className>
-                                </extension>
-                            </extensions>
-                            <requires>
-                                <require>asciidoctor-diagram</require>
-                            </requires>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.springframework.restdocs</groupId>
-                        <artifactId>spring-restdocs-asciidoctor</artifactId>
-                        <version>2.0.4.RELEASE</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.bmuschko</groupId>
-                        <artifactId>asciidoctorj-tabbed-code-extension</artifactId>
-                        <version>0.2</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctorj-diagram</artifactId>
-                        <version>1.5.18</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.puravida.asciidoctor</groupId>
-                        <artifactId>asciidoctor-extensions</artifactId>
-                        <version>2.3.0</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
