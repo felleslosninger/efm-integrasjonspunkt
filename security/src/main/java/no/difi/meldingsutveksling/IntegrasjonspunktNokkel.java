@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.asic.SignatureHelper;
-import no.difi.meldingsutveksling.config.KeyStoreProperties;
-import no.difi.meldingsutveksling.lang.KeystoreProviderException;
+import no.difi.move.common.cert.KeystoreProvider;
+import no.difi.move.common.cert.KeystoreProviderException;
+import no.difi.move.common.config.KeystoreProperties;
 
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -19,10 +20,10 @@ public class IntegrasjonspunktNokkel {
     private static final String ERR_MISSING_CERTIFICATE = "No Certificate with alias \"%s\" found in the KeyStore";
     private static final String ERR_GENERAL = "Unexpected problem occurred when operating KeyStore";
 
-    private final KeyStoreProperties properties;
+    private final KeystoreProperties properties;
     private final KeyStore keyStore;
 
-    public IntegrasjonspunktNokkel(KeyStoreProperties properties) {
+    public IntegrasjonspunktNokkel(KeystoreProperties properties) {
 
         this.properties = properties;
 

@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.config.KeyStoreProperties;
+import no.difi.move.common.config.KeystoreProperties;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -35,7 +35,7 @@ public class IntegrasjonspunktNokkelTest_WindowsIT {
     @BeforeClass
     public static void before()throws Exception{
 
-        KeyStoreProperties properties = new KeyStoreProperties();
+        KeystoreProperties properties = new KeystoreProperties();
         properties.setAlias(ALIAS);
         properties.setType("Windows-MY");
         properties.setLockProvider(true);

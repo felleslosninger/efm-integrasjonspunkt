@@ -1,55 +1,71 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.auth.IdportenOidcTokenResponse;
-import no.difi.meldingsutveksling.auth.OidcTokenClient;
+import com.google.common.base.Strings;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import no.difi.move.common.oauth.JwtTokenClient;
+import no.difi.move.common.oauth.JwtTokenConfig;
+import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.resource.UserApprovalRequiredException;
-import org.springframework.security.oauth2.client.resource.UserRedirectRequiredException;
-import org.springframework.security.oauth2.client.token.AccessTokenProvider;
-import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URISyntaxException;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-
-import static java.util.Arrays.asList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableRetry
 @EnableOAuth2Client
+@RequiredArgsConstructor
 public class OauthRestTemplateConfig {
 
-    private final IntegrasjonspunktProperties props;
-    private final OidcTokenClient oidcTokenClient;
+    private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
 
-    @Autowired
-    public OauthRestTemplateConfig(IntegrasjonspunktProperties props, OidcTokenClient oidcTokenClient) {
-        this.props = props;
-        this.oidcTokenClient = oidcTokenClient;
+    private static final String SCOPE_DPO = "move/dpo.read";
+    private static final String SCOPE_DPE = "move/dpe.read";
+    private static final String SCOPE_DPV = "move/dpv.read";
+    private static final String SCOPE_DPF = "move/dpf.read";
+    private static final String SCOPE_DPFIO = "ks:fiks";
+    private static final List<String> SCOPES_DPI = Arrays.asList("move/dpi.read",
+            "global/kontaktinformasjon.read",
+            "global/sikkerdigitalpost.read",
+            "global/varslingsstatus.read",
+            "global/sertifikat.read",
+            "global/navn.read",
+            "global/postadresse.read");
+
+    private final IntegrasjonspunktProperties props;
+
+    @SneakyThrows
+    @Bean
+    public JwtTokenClient jwtTokenClient() {
+        JwtTokenConfig config = new JwtTokenConfig(
+                !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
+                        props.getOidc().getClientId() : CLIENT_ID_PREFIX+props.getOrg().getNumber(),
+                props.getOidc().getUrl().toURI(),
+                props.getOidc().getAudience(),
+                getCurrentScopes(),
+                props.getOidc().getKeystore()
+        );
+
+        return new JwtTokenClient(config);
     }
 
     @Bean
-    public RestOperations restTemplate() throws URISyntaxException {
+    public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .useSystemProperties()
                 .setDefaultRequestConfig(RequestConfig.custom()
@@ -64,46 +80,40 @@ public class OauthRestTemplateConfig {
             DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
             BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
             resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
-            resource.setScope(asList(oidcTokenClient.getCurrentScopes().split(" ")));
+            resource.setScope(getCurrentScopes());
             resource.setClientId(props.getOidc().getClientId());
 
             OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
             rt.setRequestFactory(requestFactory);
-            rt.setAccessTokenProvider(new OidcAccessTokenProvider());
+            rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
             return rt;
         }
 
         return new RestTemplate(requestFactory);
     }
 
-    public class OidcAccessTokenProvider implements AccessTokenProvider {
+    private ArrayList<String> getCurrentScopes() {
 
-        private DefaultOAuth2AccessToken getAccessToken() {
-            IdportenOidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
-            DefaultOAuth2AccessToken oa2at = new DefaultOAuth2AccessToken(oidcTokenResponse.getAccessToken());
-            oa2at.setExpiration(Date.from(Instant.now().plusSeconds(oidcTokenResponse.getExpiresIn())));
-            oa2at.setScope(Collections.singleton(oidcTokenResponse.getScope()));
-            return oa2at;
+        ArrayList<String> scopeList = new ArrayList<>();
+        if (props.getFeature().isEnableDPO()) {
+            scopeList.add(SCOPE_DPO);
+        }
+        if (props.getFeature().isEnableDPE()) {
+            scopeList.add(SCOPE_DPE);
+        }
+        if (props.getFeature().isEnableDPV()) {
+            scopeList.add(SCOPE_DPV);
+        }
+        if (props.getFeature().isEnableDPF()) {
+            scopeList.add(SCOPE_DPF);
+        }
+        if (props.getFeature().isEnableDPFIO()) {
+            scopeList.add(SCOPE_DPFIO);
+        }
+        if (props.getFeature().isEnableDPI()) {
+            scopeList.addAll(SCOPES_DPI);
         }
 
-        @Override
-        public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest parameters) throws UserRedirectRequiredException, UserApprovalRequiredException, AccessDeniedException {
-            return getAccessToken();
-        }
-
-        @Override
-        public boolean supportsResource(OAuth2ProtectedResourceDetails resource) {
-            return false;
-        }
-
-        @Override
-        public OAuth2AccessToken refreshAccessToken(OAuth2ProtectedResourceDetails resource, OAuth2RefreshToken refreshToken, AccessTokenRequest request) throws UserRedirectRequiredException {
-            return getAccessToken();
-        }
-
-        @Override
-        public boolean supportsRefresh(OAuth2ProtectedResourceDetails resource) {
-            return false;
-        }
+        return scopeList;
     }
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
@@ -145,7 +146,7 @@ public class IntegrasjonspunktProperties {
         @Valid
         @NotNull(message = "Certificate properties not set.")
         @NestedConfigurationProperty
-        private KeyStoreProperties keystore;
+        private KeystoreProperties keystore;
     }
 
     @Data
@@ -177,7 +178,7 @@ public class IntegrasjonspunktProperties {
         private String audience;
         private String clientId;
         @NestedConfigurationProperty
-        private KeyStoreProperties keystore;
+        private KeystoreProperties keystore;
     }
 
     /**

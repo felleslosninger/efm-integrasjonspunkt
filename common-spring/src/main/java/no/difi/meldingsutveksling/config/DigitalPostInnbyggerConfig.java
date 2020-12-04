@@ -7,6 +7,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.config.dpi.dpi.PrintSettings;
+import no.difi.move.common.config.KeystoreProperties;
 import no.difi.sdp.client2.domain.Prioritet;
 import org.springframework.util.unit.DataSize;
 
@@ -23,10 +24,10 @@ public class DigitalPostInnbyggerConfig {
     private String endpoint;
 
     @Valid
-    private KeyStoreProperties keystore;
+    private KeystoreProperties keystore;
 
     @Valid
-    KeyStoreProperties trustStore;
+    KeystoreProperties trustStore;
 
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.

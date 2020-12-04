@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.dpi;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.KeystoreProvider;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.lang.KeystoreProviderException;
+import no.difi.move.common.cert.KeystoreProvider;
+import no.difi.move.common.cert.KeystoreProviderException;
 import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
