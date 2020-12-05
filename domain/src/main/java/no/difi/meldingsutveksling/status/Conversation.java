@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.status;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +34,6 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
             @Index(columnList = "conversation_id"),
             @Index(columnList = "message_id")
 })
-@ApiModel(description = "Conversation")
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
 public class Conversation extends AbstractEntity<Long> {
@@ -45,10 +42,6 @@ public class Conversation extends AbstractEntity<Long> {
 
     @Override
     @JsonProperty
-    @ApiModelProperty(
-            position = 2,
-            value = "Id",
-            example = "1")
     public Long getId() {
         return super.getId();
     }

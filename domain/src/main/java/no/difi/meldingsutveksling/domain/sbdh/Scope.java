@@ -8,7 +8,6 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -59,27 +58,13 @@ public class Scope {
     @XmlElement(name = "Type", required = true)
     @NotNull
     @OneOf({"ConversationId", "SenderRef", "ReceiverRef"})
-    @ApiModelProperty(
-            value = "Type of scope",
-            example = "ConversationId",
-            allowableValues = "ConversationId, SenderRef, ReceiverRef"
-    )
     protected String type;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     @UUID
-    @ApiModelProperty(
-            value = "The conversation ID. Usually a UUID",
-            example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
-    )
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")
-    @ApiModelProperty(
-            value = "The document process",
-            example = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
-            required = true
-    )
     protected String identifier;
 
     @XmlElement(name = "ScopeInformation")

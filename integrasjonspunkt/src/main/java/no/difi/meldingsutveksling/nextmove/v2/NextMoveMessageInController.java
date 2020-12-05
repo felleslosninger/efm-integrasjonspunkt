@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
@@ -23,7 +22,6 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 @RestController
 @Validated
-@Api(tags = "Incoming messages")
 @RequestMapping("/api/messages/in")
 @Slf4j
 @RequiredArgsConstructor
@@ -36,13 +34,6 @@ public class NextMoveMessageInController {
     private final NextMoveMessageInService messageService;
 
     @GetMapping
-    @ApiOperation(value = "Find incoming messages")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument[].class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 404, message = "Not found", response = String.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class)
-    })
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
             @Valid NextMoveInMessageQueryInput input,
@@ -51,28 +42,13 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "peek")
-    @ApiOperation(value = "Peek and lock incoming queue", notes = "Gets the first message in the incoming queue, then locks the message")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
-    })
     @Transactional
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
         return messageService.peek(input);
     }
 
     @GetMapping(value = "pop/{messageId}")
-    @ApiOperation(value = "Pop incoming queue", notes = "Gets the ASiC for the first locked message in the queue, " +
-            "unless messageId is specified.")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = InputStreamResource.class),
-            @ApiResponse(code = 204, message = "No content", response = String.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class)
-    })
-    public ResponseEntity<InputStreamResource> popMessage(
-            @ApiParam(value = "MessageId", required = true)
-            @PathVariable("messageId") String messageId) {
+    public ResponseEntity<InputStreamResource> popMessage(@PathVariable("messageId") String messageId) {
 
         try {
             InputStreamResource asic = messageService.popMessage(messageId);
@@ -86,16 +62,8 @@ public class NextMoveMessageInController {
     }
 
     @DeleteMapping(value = "/{messageId}")
-    @ApiOperation(value = "Remove message", notes = "Delete message")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success", response = StandardBusinessDocument.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = String.class),
-            @ApiResponse(code = 404, message = "Not Found", response = String.class)
-    })
     @Transactional
-    public StandardBusinessDocument deleteMessage(
-            @ApiParam(value = "MessageId", required = true)
-            @PathVariable("messageId") String messageId) {
+    public StandardBusinessDocument deleteMessage(@PathVariable("messageId") String messageId) {
         return messageService.deleteMessage(messageId);
     }
 }

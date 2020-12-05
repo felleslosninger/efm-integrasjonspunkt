@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Maps;
-import io.swagger.annotations.ApiModel;
 import lombok.*;
 
 import javax.validation.Valid;
@@ -15,7 +14,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-@ApiModel(value = "digital", parent = BusinessMessage.class)
 public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
 
     private String avsenderId;

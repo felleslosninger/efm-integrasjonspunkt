@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -63,16 +61,11 @@ import java.util.Set;
 @ToString
 @JsonSerialize(using = NextMoveMessageSerializer.class)
 @GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
-@ApiModel(description = "Standard Business Document")
 public class StandardBusinessDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
     @NotNull
     @Valid
-    @ApiModelProperty(
-            value = "SBDH",
-            required = true
-    )
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
     @XmlAnyElement(lax = true)
@@ -86,12 +79,6 @@ public class StandardBusinessDocument {
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
     @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
-    @ApiModelProperty(
-            value = "The business message. Please note that the property name is not 'any'. "
-                    + "It is one of the following: arkivmelding, avtalt, digital, digital_dpv, print, innsynskrav or publisering.",
-            dataType = "no.difi.meldingsutveksling.nextmove.BusinessMessage",
-            required = true
-    )
     private Object any;
 
     @JsonIgnore

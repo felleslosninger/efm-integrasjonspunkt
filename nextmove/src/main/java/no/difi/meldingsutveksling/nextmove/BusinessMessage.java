@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModel;
 import lombok.*;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 
@@ -12,14 +11,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(subTypes = {
-        ArkivmeldingMessage.class,
-        DigitalDpvMessage.class,
-        DpiDigitalMessage.class,
-        DpiPrintMessage.class,
-        InnsynskravMessage.class,
-        PubliseringMessage.class
-}, discriminator = "type")
 public abstract class BusinessMessage<T extends BusinessMessage<T>> extends AbstractEntity<Long> {
 
     @JsonIgnore

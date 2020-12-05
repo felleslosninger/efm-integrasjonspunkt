@@ -9,7 +9,6 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.validation.IsDocumentType;
@@ -60,37 +59,19 @@ public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "Standard", required = true)
     @NotNull
-    @ApiModelProperty(
-            value = "Document standard",
-            example = "urn:no:difi:arkivmelding:xsd::arkivmelding",
-            required = true
-    )
     protected String standard;
 
     @XmlElement(name = "TypeVersion", required = true)
     @NotNull
-    @ApiModelProperty(
-            example = "2.0",
-            required = true
-    )
     protected String typeVersion;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
     @UUID
-    @ApiModelProperty(
-            value = "The conversation ID. Usually a UUID",
-            example = "90c0bacf-c233-4a54-96fc-e205b79862d9"
-    )
     protected String instanceIdentifier;
 
     @XmlElement(name = "Type", required = true)
     @NotNull
     @IsDocumentType(ApiType.NEXTMOVE)
-    @ApiModelProperty(
-            value = "Document type. This is always identical to the last part of the standard and must correspond with the name of the payload property.",
-            example = "arkivmelding",
-            required = true
-    )
     protected String type;
 
     @XmlElement(name = "MultipleType")
@@ -101,9 +82,6 @@ public class DocumentIdentification implements Serializable {
     @XmlJavaTypeAdapter(OffsetDateTimeAdapter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Past
-    @ApiModelProperty(
-            value = "When the message was created.",
-            example = "2019-05-10T01:31:52+02:00"
-    )
     protected OffsetDateTime creationDateAndTime;
+
 }

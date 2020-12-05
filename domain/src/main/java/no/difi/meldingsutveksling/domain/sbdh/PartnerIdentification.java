@@ -9,7 +9,6 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktOrganization;
@@ -55,20 +54,10 @@ public class PartnerIdentification implements Serializable {
     @XmlValue
     @IntegrasjonspunktOrganization(groups = ValidationGroups.Partner.Sender.class)
     @NotNull
-    @ApiModelProperty(
-            value = "Identifier",
-            example = "0192:987654321",
-            required = true
-    )
     protected String value;
 
     @XmlAttribute(name = "Authority")
     @NotNull
-    @ApiModelProperty(
-            value = "Authority",
-            example = "iso6523-actorid-upis",
-            required = true
-    )
     protected String authority;
 
     @JsonIgnore

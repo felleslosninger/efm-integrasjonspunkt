@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
@@ -40,7 +39,6 @@ public class ConversationController {
     @GetMapping("{id}")
     @JsonView(Views.Conversation.class)
     public Conversation getById(
-            @ApiParam(value = "id", required = true, example = "1")
             @PathVariable("id") Long id) {
         return conversationRepository.findByIdAndDirection(id, OUTGOING)
                 .orElseThrow(() -> new ConversationNotFoundException(id));
@@ -54,7 +52,6 @@ public class ConversationController {
     @GetMapping("messageId/{messageId}")
     @JsonView(Views.Conversation.class)
     public Conversation getByMessageId(
-            @ApiParam(value = "messageId", required = true)
             @PathVariable("messageId") String messageId) {
         return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()

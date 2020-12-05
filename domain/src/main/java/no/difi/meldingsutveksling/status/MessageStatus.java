@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
@@ -26,10 +25,6 @@ public class MessageStatus extends AbstractEntity<Long> {
 
     @Override
     @JsonProperty
-    @ApiModelProperty(
-            position = 2,
-            value = "Id",
-            example = "1")
     @JsonView({Views.Conversation.class, Views.MessageStatus.class})
     public Long getId() {
         return super.getId();
