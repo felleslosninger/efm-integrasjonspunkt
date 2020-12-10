@@ -55,7 +55,7 @@ public class OauthRestTemplateConfig {
         JwtTokenConfig config = new JwtTokenConfig(
                 !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
                         props.getOidc().getClientId() : CLIENT_ID_PREFIX+props.getOrg().getNumber(),
-                props.getOidc().getUrl().toURI(),
+                props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 getCurrentScopes(),
                 props.getOidc().getKeystore()

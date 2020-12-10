@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true">
+<configuration scan="false">
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
-    <!-- Logstash destination -->
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
+    <springProperty name="enableLoggingProxy" source="app.logger.enableLoggingProxy"/>
     <springProperty name="destination" source="app.logger.destination"/>
     <springProperty name="destination2" source="app.logger.destination2"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
-    <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
+    <springProperty name="clientId" source="difi.move.oidc.clientId"/>
+    <springProperty name="tokenUri" source="difi.move.oidc.url"/>
+    <springProperty name="audience" source="difi.move.oidc.audience"/>
+    <springProperty name="keystore" source="difi.move.oidc.keystore"/>
+    <springProperty name="kspass" source="difi.move.oidc.keystore.password"/>
+    <springProperty name="ksalias" source="difi.move.oidc.keystore.alias"/>
+    <springProperty name="kspath" source="difi.move.oidc.keystore.path"/>
+    <springProperty name="proxy-host" source="app.logger.proxy-host"/>
+    <springProperty name="proxy-rsocket-port" source="app.logger.proxy-rsocket-port"/>
 
     <if condition='property("enableLogstash").contains("true")'>
         <then>
@@ -16,7 +26,9 @@
                 <droppedWarnFrequency>5</droppedWarnFrequency>
                 <!-- encoder is required -->
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                    <customFields>{"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}</customFields>
+                    <customFields>
+                        {"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}
+                    </customFields>
                     <fieldNames>
                         <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
                         <message>[ignore]</message>
@@ -39,13 +51,16 @@
                         <droppedWarnFrequency>5</droppedWarnFrequency>
                         <!-- encoder is required -->
                         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                            <customFields>{"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}</customFields>
+                            <customFields>
+                                {"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}
+                            </customFields>
                             <fieldNames>
                                 <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
                                 <message>[ignore]</message>
                                 <stackTrace>[ignore]</stackTrace>
                             </fieldNames>
-                            <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                            <provider
+                                    class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
                                 <pattern>
                                     {
                                     "message": "%replace(%msg){'[0-9]{11}','**********'}",
@@ -66,17 +81,55 @@
                     </then>
                 </if>
             </root>
-
-            <logger name="STATUS" level="INFO" additivity="false">
-                <appender-ref ref="stash"/>
-                <if condition='isDefined("destination2")'>
-                    <then>
-                        <appender-ref ref="stash2"/>
-                    </then>
-                </if>
-            </logger>
         </then>
     </if>
+
+
+    <if condition='property("enableLoggingProxy").contains("true")'>
+        <then>
+            <appender name="loggingProxy" class="no.difi.meldingsutveksling.logging.LoggingProxyAppender">
+                <proxyHost>${proxy-host}</proxyHost>
+                <proxyRSocketPort>${proxy-rsocket-port}</proxyRSocketPort>
+                <orgnr>${orgnr}</orgnr>
+                <kspath>${kspath}</kspath>
+
+                <jwtTokenConfig class="no.difi.move.common.oauth.JwtTokenConfig">
+                    <clientId>${clientId}</clientId>
+                    <tokenUri>${tokenUri}</tokenUri>
+                    <audience>${audience}</audience>
+                    <keystore class="no.difi.move.common.config.KeystoreProperties">
+                        <alias>${ksalias}</alias>
+                        <password>${kspass}</password>
+                    </keystore>
+                </jwtTokenConfig>
+
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <customFields>
+                        {"appname":"${project.artifactId}","buildinfo.version":"${project.version}","buildinfo.lastcommit":"${buildNumber}",
+                        "build.branch": "${scmBranch}"}
+                    </customFields>
+                    <fieldNames>
+                        <!-- Ignore message and stackTrace field here due to possible sensitive data (personal identity number), replaced in pattern below. -->
+                        <message>[ignore]</message>
+                        <stackTrace>[ignore]</stackTrace>
+                    </fieldNames>
+                    <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                        <pattern>
+                            {
+                            "message": "%replace(%msg){'[0-9]{11}','**********'}",
+                            "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}"
+                            }
+                        </pattern>
+                    </provider>
+                </encoder>
+            </appender>
+
+            <root level="INFO">
+                <appender-ref ref="loggingProxy"/>
+            </root>
+        </then>
+    </if>
+
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
