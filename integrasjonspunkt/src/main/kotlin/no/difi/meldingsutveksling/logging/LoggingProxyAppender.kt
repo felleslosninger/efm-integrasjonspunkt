@@ -77,7 +77,7 @@ class LoggingProxyAppender : AppenderBase<ILoggingEvent>() {
 
             job = CoroutineScope(Dispatchers.IO).launch {
                 while (this.isActive) {
-                    queue.poll()?.let {
+                    queue.peek()?.let {
                         try {
                             postEvent(it, token)
                         } catch (e: Exception) {
@@ -86,6 +86,7 @@ class LoggingProxyAppender : AppenderBase<ILoggingEvent>() {
                                 else -> addWarn("Dropped event, unrecoverable exception: ", e)
                             }
                         }
+                        queue.poll()
                     } ?: delay(500L)
                 }
             }
