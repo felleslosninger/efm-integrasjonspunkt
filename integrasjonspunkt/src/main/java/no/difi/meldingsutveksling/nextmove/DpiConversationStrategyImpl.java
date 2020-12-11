@@ -44,11 +44,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                             .build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(
-                    String.format("Could not find service record[receiver=%s, process=%s, documentType=%s]",
-                            message.getReceiverIdentifier(),
-                            message.getProcessIdentifier(),
-                            message.getSbd().getStandard()));
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
 
         if (message.getSbd().getBusinessMessage() instanceof DpiDigitalMessage) {

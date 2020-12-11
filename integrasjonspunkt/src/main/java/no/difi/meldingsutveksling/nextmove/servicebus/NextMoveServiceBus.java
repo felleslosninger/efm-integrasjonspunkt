@@ -194,7 +194,7 @@ public class NextMoveServiceBus {
             }
             return prefix + serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {
-            throw new NextMoveRuntimeException(String.format("Unable to get service record for %s", message.getReceiverIdentifier()), e);
+            throw new NextMoveRuntimeException(e);
         }
     }
 

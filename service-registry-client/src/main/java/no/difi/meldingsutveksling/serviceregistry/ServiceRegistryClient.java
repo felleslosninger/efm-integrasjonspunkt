@@ -51,17 +51,17 @@ public class ServiceRegistryClient {
             }
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundInServiceRegistryException(parameter.getIdentifier());
+                throw new NotFoundInServiceRegistryException(parameter);
             }
             byte[] errorBody = httpException.getResponseBodyAsByteArray();
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
-                        parameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status %s (%s): %s",
+                        parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
-                        parameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status: %s (%s)",
+                        parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);

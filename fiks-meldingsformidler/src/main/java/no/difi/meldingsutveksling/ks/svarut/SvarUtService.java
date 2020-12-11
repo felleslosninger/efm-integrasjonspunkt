@@ -45,7 +45,7 @@ public class SvarUtService {
                             .conversationId(message.getConversationId()).build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
-            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
+            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()), e);
         }
 
         return promiseMaker.promise(reject -> {

@@ -230,7 +230,7 @@ public class CorrespondenceAgencyMessageFactory {
                             .build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()));
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }
         return serviceRecord;
     }
