@@ -1,36 +1,36 @@
-FROM openjdk:8-jre-alpine
-MAINTAINER DIFI <espen.korra@difi.no>
+FROM openjdk:8-jre-slim
 
-LABEL package="no.difi" artifact="meldingsutveksling" version="1.0" description="Direktoratet for forvaltning og IKT (Difi)"
+RUN groupadd -o -g 1000 java \
+    && useradd -o -r -m -u 1000 -g 1000 java
 
 ENV APP_DIR=/var/lib/difi \
     HOST=tt02.altinn.no \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
-    KEYSTOREPASS=changeit \
-    DOCKERIZE_VERSION=v0.2.0
+    KEYSTOREPASS=changeit
 
-RUN apk add --update \
+RUN apt-get update && apt-get install -y \
     ca-certificates \
-    tini \
-    curl \
     openssl  && \
     update-ca-certificates && \
     rm -rf /var/cache/apk/* && \
     openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
     mkdir ${APP_DIR} && \
-    touch ${APP_DIR}/integrasjonspunkt-local.properties && \
-    wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
-    tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+    touch ${APP_DIR}/integrasjonspunkt-local.properties
+
 
 WORKDIR ${APP_DIR}
-
-# Use tini to reap processes and signal handling
-ENTRYPOINT ["/sbin/tini", "-g", "--", "sh", "-c", "./run.sh"]
 
 # Add jar last, since this changes the most
 ADD *.jar ${APP_DIR}/app.jar
 ADD run.sh ${APP_DIR}/
 
+RUN chown -R java:java ${APP_DIR}
+RUN chmod +x ${APP_DIR}/*
+
+USER java
+
 HEALTHCHECK CMD curl -s --fail http://localhost:9093/manage/health > /dev/null || exit 1
+
+ENTRYPOINT ["sh", "-c", "java -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS}", "$@"]
