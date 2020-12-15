@@ -25,7 +25,7 @@ public class JmsConfiguration {
 
 
     @Bean
-    ConnectionFactory jmsConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
+    ConnectionFactory myJmsConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(activeMQProps.getBrokerUrl());
         if (StringUtils.hasText(activeMQProps.getUser())) {
             connectionFactory.setUserName(activeMQProps.getUser());
@@ -44,8 +44,8 @@ public class JmsConfiguration {
 
     private ActiveMQPrefetchPolicy getActiveMQPrefetchPolicy() {
         ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
-        prefetchPolicy.setQueuePrefetch(1);
-        prefetchPolicy.setTopicPrefetch(1);
+        prefetchPolicy.setQueuePrefetch(0);
+        prefetchPolicy.setTopicPrefetch(0);
         return prefetchPolicy;
     }
 
@@ -62,10 +62,10 @@ public class JmsConfiguration {
     }
 
     @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory connectionFactory) {
+    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory myJmsConnectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-        factory.setConnectionFactory(connectionFactory);
+        factory.setConnectionFactory(myJmsConnectionFactory);
         factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(false));
         return factory;
     }
