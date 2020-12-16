@@ -32,4 +32,4 @@ USER java
 
 HEALTHCHECK CMD curl -s --fail http://localhost:9093/manage/health > /dev/null || exit 1
 
-ENTRYPOINT ["sh", "-c", "java -jar ${APP_DIR}/app.jar", "$@"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar ${APP_DIR}/app.jar", "$@"]
