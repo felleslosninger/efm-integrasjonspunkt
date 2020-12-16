@@ -24,7 +24,6 @@ WORKDIR ${APP_DIR}
 
 # Add jar last, since this changes the most
 ADD *.jar ${APP_DIR}/app.jar
-ADD run.sh ${APP_DIR}/
 
 RUN chown -R java:java ${APP_DIR}
 RUN chmod +x ${APP_DIR}/*
@@ -33,4 +32,4 @@ USER java
 
 HEALTHCHECK CMD curl -s --fail http://localhost:9093/manage/health > /dev/null || exit 1
 
-ENTRYPOINT ["sh", "-c", "java -jar ${APP_JAVA_PARAMS} ${APP_DIR}/app.jar ${APP_MAIN_CLASS}", "$@"]
+ENTRYPOINT ["sh", "-c", "java -jar ${APP_DIR}/app.jar", "$@"]
