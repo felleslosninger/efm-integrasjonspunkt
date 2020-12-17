@@ -1,7 +1,10 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.capabilities.Capabilities;
+import no.difi.meldingsutveksling.exceptions.IdentifierNotFoundException;
+import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +24,15 @@ public class CapabilitiesController {
     @ResponseBody
     public Capabilities capabilities(
             @PathVariable @NotNull String receiverIdentifier,
-            @RequestParam(required = false) Integer securityLevel) {
-        return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel);
+            @RequestParam(required = false) Integer securityLevel) throws NotFoundInServiceRegistryException {
+        try {
+            return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel);
+        } catch (MeldingsUtvekslingRuntimeException e) {
+            if (e.getCause() instanceof NotFoundInServiceRegistryException) {
+                throw new IdentifierNotFoundException(e.getCause().getMessage());
+            }
+            throw e;
+        }
     }
+
 }

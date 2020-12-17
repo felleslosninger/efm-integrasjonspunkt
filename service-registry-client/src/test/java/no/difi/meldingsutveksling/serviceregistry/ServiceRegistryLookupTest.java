@@ -12,9 +12,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,8 +32,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -79,9 +77,6 @@ public class ServiceRegistryLookupTest {
 
     @MockBean
     private RestClient client;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
 

@@ -31,7 +31,7 @@ import javax.xml.transform.dom.DOMSource;
 @UtilityClass
 class DocumentToDocumentConverter {
 
-    private static JAXBContext jaxBContext;
+    private static final JAXBContext jaxBContext;
 
     static {
         try {

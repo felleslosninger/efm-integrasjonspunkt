@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.exceptions.ErrorDescriber;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -23,13 +24,12 @@ public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
     private final Clock clock;
 
     public IntegrasjonspunktErrorAttributes(Clock clock) {
-        super(true);
         this.clock = clock;
     }
 
     @Override
-    public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
-        final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
+    public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+        final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, options);
         errorAttributes.put("timestamp", OffsetDateTime.now(clock));
 
         final Throwable error = super.getError(webRequest);
