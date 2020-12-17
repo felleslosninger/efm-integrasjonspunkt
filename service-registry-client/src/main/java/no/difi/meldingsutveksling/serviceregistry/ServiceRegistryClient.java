@@ -6,6 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
@@ -66,6 +67,20 @@ public class ServiceRegistryClient {
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+        }
+    }
+
+    @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
+    public String getCertificate(String identifier) throws ServiceRegistryLookupException {
+        try {
+            return client.getResource("virksert/" + identifier);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);
+            }
+            throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier);
+        } catch (BadJWSException e) {
+            throw new NextMoveRuntimeException("Bad signature in response from service registry", e);
         }
     }
 
