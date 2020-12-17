@@ -75,7 +75,7 @@ public class OidcTokenClientTest {
 
         config = new JwtTokenConfig(
                 props.getOidc().getClientId(),
-                props.getOidc().getUrl().toURI(),
+                props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 scopes,
                 props.getOidc().getKeystore()
