@@ -78,7 +78,7 @@ public class Adresseregister {
             throw new CertificateException("ServiceRegistry does not have public certificate for " + serviceRecord.getOrganisationNumber());
         }
         try {
-            return new CertificateParser().parse(pemCertificate);
+            return CertificateParser.parse(pemCertificate);
         } catch (CertificateParserException e) {
             throw new CertificateException(String.format("Failed to parse pem certificate: invalid certificate for " +
                     "organization %s? ", serviceRecord.getOrganisationNumber()), e);

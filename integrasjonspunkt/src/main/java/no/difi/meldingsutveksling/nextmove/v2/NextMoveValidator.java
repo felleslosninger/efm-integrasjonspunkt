@@ -3,17 +3,17 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +54,13 @@ public class NextMoveValidator {
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
+    private final IntegrasjonspunktProperties props;
+    private final ServiceRegistryClient srClient;
+    private final IntegrasjonspunktNokkel ipNokkel;
 
     void validate(StandardBusinessDocument sbd) {
+        validateOwnCertificate();
+
         sbd.getOptionalMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
                             .map(p -> {
@@ -99,6 +105,8 @@ public class NextMoveValidator {
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
+        validateOwnCertificate();
+
         // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
@@ -150,6 +158,31 @@ public class NextMoveValidator {
                 .noneMatch(BusinessMessageFile::getPrimaryDocument)) {
             throw new MissingPrimaryDocumentException();
         }
+    }
+
+    private void validateOwnCertificate() {
+        String certificate;
+        try {
+            certificate = srClient.getCertificate(props.getOrg().getNumber());
+        } catch (ServiceRegistryLookupException e) {
+            log.error("Failed to fetch own certificate from Virksert", e);
+            throw new VirksertCertificateInvalidException(e.getMessage());
+        }
+
+        X509Certificate x509;
+        try {
+            x509 = CertificateParser.parse(certificate);
+        } catch (CertificateParserException e) {
+            log.error("Failed to parse certificate", e);
+            throw new VirksertCertificateInvalidException("Failed to parse own certificate from Virksert: " + e.getMessage());
+        }
+
+        if (!x509.getSerialNumber().equals(ipNokkel.getX509Certificate().getSerialNumber())) {
+            throw new VirksertCertificateInvalidException(
+                    String.format("Serial numbers for certificates from keystore (%s) and Virksert (%s) does not match. Update outdated certificate.",
+                            ipNokkel.getX509Certificate().getSerialNumber(), x509.getSerialNumber()));
+        }
+
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) {

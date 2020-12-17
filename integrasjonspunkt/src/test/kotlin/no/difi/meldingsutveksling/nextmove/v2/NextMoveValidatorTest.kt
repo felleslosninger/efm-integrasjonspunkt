@@ -3,14 +3,19 @@ package no.difi.meldingsutveksling.nextmove.v2
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import lombok.extern.slf4j.Slf4j
+import no.difi.meldingsutveksling.CertificateParser
+import no.difi.meldingsutveksling.IntegrasjonspunktNokkel
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
+import no.difi.meldingsutveksling.noarkexchange.TestConstants
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
@@ -41,6 +46,12 @@ class NextMoveValidatorTest {
     lateinit var arkivmeldingUtil: ArkivmeldingUtil
     @MockK
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
+    @MockK
+    lateinit var props: IntegrasjonspunktProperties
+    @MockK
+    lateinit var srClient: ServiceRegistryClient
+    @MockK
+    lateinit var ipNokkel: IntegrasjonspunktNokkel
 
     private lateinit var nextMoveValidator : NextMoveValidator
 
@@ -55,15 +66,26 @@ class NextMoveValidatorTest {
     fun before() {
         MockKAnnotations.init(this)
         nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
-                nextMoveMessageOutRepository,
-                conversationStrategyFactory,
-                asserter,
-                optionalCryptoMessagePersister,
-                timeToLiveHelper,
-                sbdUtil,
-                conversationService,
-                arkivmeldingUtil,
-                nextMoveFileSizeValidator)
+            nextMoveMessageOutRepository,
+            conversationStrategyFactory,
+            asserter,
+            optionalCryptoMessagePersister,
+            timeToLiveHelper,
+            sbdUtil,
+            conversationService,
+            arkivmeldingUtil,
+            nextMoveFileSizeValidator,
+            props,
+            srClient,
+            ipNokkel)
+
+        with(props) {
+            every { org } returns mockk {
+                every { number } returns "123123123"
+            }
+        }
+        every { srClient.getCertificate(any()) } returns TestConstants.certificate
+        every { ipNokkel.x509Certificate } returns CertificateParser.parse(TestConstants.certificate)
 
         val bmf = BusinessMessageFile()
                 .setFilename("foo.txt")

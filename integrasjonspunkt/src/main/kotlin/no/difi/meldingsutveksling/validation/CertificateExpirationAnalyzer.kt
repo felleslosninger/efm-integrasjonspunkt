@@ -12,9 +12,9 @@ class CertificateExpirationAnalyzer : AbstractFailureAnalyzer<CertificateExpired
 
 }
 
-class CertNotInVirksertAnalyzer : AbstractFailureAnalyzer<CertificateNotInVirksertException>() {
+class VirksertCertificateAnalyzer : AbstractFailureAnalyzer<VirksertCertificateException>() {
 
-    override fun analyze(rootFailure: Throwable, cause: CertificateNotInVirksertException): FailureAnalysis {
+    override fun analyze(rootFailure: Throwable, cause: VirksertCertificateException): FailureAnalysis {
         return FailureAnalysis("Certificate expired or not found in virksert: ${cause.message}", "Contact servicedesk@digdir.no and supply a valid certificate", cause)
     }
 

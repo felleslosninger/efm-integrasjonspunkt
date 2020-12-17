@@ -10,22 +10,27 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
 @Component
-@Profile("!test")
+@Profile("{!(test | cucumber)}")
 class CertificateExpirationValidator(
-    val integrasjonspunktNokkel: IntegrasjonspunktNokkel,
-    val props: IntegrasjonspunktProperties,
-    val srClient: ServiceRegistryClient
+    private val ipNokkel: IntegrasjonspunktNokkel,
+    private val props: IntegrasjonspunktProperties,
+    private val srClient: ServiceRegistryClient
 ) {
 
     @PostConstruct
     fun validateCertificate() {
-        integrasjonspunktNokkel.x509Certificate.checkValidity()
+        ipNokkel.x509Certificate.checkValidity()
 
-        try {
-            val certificate = srClient.getCertificate(props.org.number)
-            CertificateParser().parse(certificate).checkValidity()
+        val pem = try {
+            srClient.getCertificate(props.org.number)
         } catch (e: ServiceRegistryLookupException) {
-            throw CertificateNotInVirksertException(e)
+            throw VirksertCertificateException(e)
+        }
+        val cert = CertificateParser.parse(pem)
+        cert.checkValidity()
+
+        if (ipNokkel.x509Certificate.serialNumber != cert.serialNumber) {
+            throw VirksertCertificateException("Keystore certificate serial number (${ipNokkel.x509Certificate.serialNumber}) does not match certificate in Virksert (${cert.serialNumber})")
         }
     }
 
