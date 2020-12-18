@@ -2,7 +2,10 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.*;
+import no.difi.meldingsutveksling.dpi.DpiReceiptMapper;
+import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -16,8 +19,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
-import no.difi.move.common.cert.KeystoreProvider;
-import no.difi.move.common.cert.KeystoreProviderException;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -67,15 +68,6 @@ public class IntegrasjonspunktBeans {
         return new IntegrasjonspunktNokkel(properties.getOrg().getKeystore());
     }
 
-    @Bean
-    public KeystoreProvider meldingsformidlerKeystoreProvider(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
-        try {
-            return KeystoreProvider.from(properties.getDpi().getKeystore());
-        } catch (KeystoreProviderException e) {
-            throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
-        }
-    }
-
     @Bean(name = "fiksMailClient")
     public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
         return new MailClient(properties, properties.getFiks().getInn().getMailSubject());
@@ -119,11 +111,6 @@ public class IntegrasjonspunktBeans {
                 .setNextmoveFiledir(properties.getNextmove().getFiledir())
                 .setAllowForwarding(properties.getDpv().isAllowForwarding())
                 .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
-    public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
-        return new SikkerDigitalPostKlientFactory(properties.getDpi(), keystoreProvider.getKeyStore());
     }
 
     @Bean
