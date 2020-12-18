@@ -1,2 +1,3 @@
 org.springframework.boot.env.EnvironmentPostProcessor=no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=no.difi.move.common.config.SpringCloudConfigConfiguration
+org.springframework.boot.diagnostics.FailureAnalyzer=no.difi.meldingsutveksling.validation.CertificateExpirationAnalyzer, no.difi.meldingsutveksling.validation.VirksertCertificateAnalyzer

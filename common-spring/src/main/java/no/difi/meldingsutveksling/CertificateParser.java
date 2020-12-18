@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMParser;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,14 +10,13 @@ import java.io.StringReader;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-@Component
 public class CertificateParser {
 
-    public X509Certificate parse(String certificate) throws CertificateParserException {
+    public static X509Certificate parse(String certificate) throws CertificateParserException {
         return parse(new StringReader(certificate));
     }
 
-    public X509Certificate parse(Reader reader) throws CertificateParserException {
+    public static X509Certificate parse(Reader reader) throws CertificateParserException {
         PEMParser pemParser = new PEMParser(reader);
 
         final X509CertificateHolder holder;
