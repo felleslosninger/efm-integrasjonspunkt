@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
 import org.junit.Before
 import org.junit.Test
+import org.springframework.beans.factory.ObjectProvider
 import java.util.*
 
 @Slf4j
@@ -43,7 +44,7 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
     @MockK
-    lateinit var certValidator: IntegrasjonspunktCertificateValidator
+    lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
     private lateinit var nextMoveValidator : NextMoveValidator
 
@@ -75,7 +76,7 @@ class NextMoveValidatorTest {
                 .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
-        every { certValidator.validateCertificate() } just Runs
+        every { certValidator.ifAvailable(any()) } just Runs
         every { message.businessMessage } returns businessMessage
         every { sbd.optionalMessageId } returns Optional.of(messageId)
         every { message.messageId } returns messageId

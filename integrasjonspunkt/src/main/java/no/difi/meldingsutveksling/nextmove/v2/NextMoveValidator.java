@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -56,7 +57,7 @@ public class NextMoveValidator {
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
-    private final IntegrasjonspunktCertificateValidator certificateValidator;
+    private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
 
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
@@ -161,12 +162,14 @@ public class NextMoveValidator {
     }
 
     private void validateCertificate() {
-        try {
-            certificateValidator.validateCertificate();
-        } catch (CertificateExpiredException | VirksertCertificateException e) {
-            log.error("Certificate validation failed", e);
-            throw new InvalidCertificateException(e.getMessage());
-        }
+        certificateValidator.ifAvailable(v -> {
+            try {
+                v.validateCertificate();
+            } catch (CertificateExpiredException | VirksertCertificateException e) {
+                log.error("Certificate validation failed", e);
+                throw new InvalidCertificateException(e.getMessage());
+            }
+        });
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) {
