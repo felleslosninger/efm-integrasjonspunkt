@@ -78,7 +78,7 @@ public class ServiceRegistryClient {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);
             }
-            throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier);
+            throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier, e);
         } catch (BadJWSException e) {
             throw new NextMoveRuntimeException("Bad signature in response from service registry", e);
         }

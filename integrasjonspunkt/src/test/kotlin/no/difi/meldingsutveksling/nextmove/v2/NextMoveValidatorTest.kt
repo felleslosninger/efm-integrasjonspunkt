@@ -3,22 +3,18 @@ package no.difi.meldingsutveksling.nextmove.v2
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import lombok.extern.slf4j.Slf4j
-import no.difi.meldingsutveksling.CertificateParser
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
-import no.difi.meldingsutveksling.noarkexchange.TestConstants
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
+import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
 import org.junit.Before
 import org.junit.Test
 import java.util.*
@@ -47,11 +43,7 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
     @MockK
-    lateinit var props: IntegrasjonspunktProperties
-    @MockK
-    lateinit var srClient: ServiceRegistryClient
-    @MockK
-    lateinit var ipNokkel: IntegrasjonspunktNokkel
+    lateinit var certValidator: IntegrasjonspunktCertificateValidator
 
     private lateinit var nextMoveValidator : NextMoveValidator
 
@@ -75,23 +67,15 @@ class NextMoveValidatorTest {
             conversationService,
             arkivmeldingUtil,
             nextMoveFileSizeValidator,
-            props,
-            srClient,
-            ipNokkel)
+            certValidator)
 
-        with(props) {
-            every { org } returns mockk {
-                every { number } returns "123123123"
-            }
-        }
-        every { srClient.getCertificate(any()) } returns TestConstants.certificate
-        every { ipNokkel.x509Certificate } returns CertificateParser.parse(TestConstants.certificate)
 
         val bmf = BusinessMessageFile()
                 .setFilename("foo.txt")
                 .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
+        every { certValidator.validateCertificate() } just Runs
         every { message.businessMessage } returns businessMessage
         every { sbd.optionalMessageId } returns Optional.of(messageId)
         every { message.messageId } returns messageId
