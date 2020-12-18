@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.Decryptor;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -15,6 +14,7 @@ import no.difi.meldingsutveksling.pipes.Pipe;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
 
     private final MessagePersister delegate;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
-    private final IntegrasjonspunktNokkel keyInfo;
+    private final KeystoreHelper keystoreHelper;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
     private final IntegrasjonspunktProperties props;
@@ -42,14 +42,14 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
             BugFix610.applyPatch(message, messageId);
         }
-        byte[] encryptedMessage = getCmsUtil().createCMS(message, keyInfo.getX509Certificate());
+        byte[] encryptedMessage = getCmsUtil().createCMS(message, keystoreHelper.getX509Certificate());
         delegate.write(messageId, filename, encryptedMessage);
     }
 
     public void writeStream(String messageId, String filename, InputStream stream) {
         promiseMaker.promise(reject -> {
             try {
-                Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keyInfo.getX509Certificate()), reject);
+                Pipe pipe = plumber.pipe("CMS encrypt", inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(stream, inlet, keystoreHelper.getX509Certificate()), reject);
                 try (PipedInputStream is = pipe.outlet()) {
                     delegate.writeStream(messageId, filename, is, -1L);
                 }
@@ -61,13 +61,13 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     }
 
     public byte[] read(String messageId, String filename) throws IOException {
-        return getCmsUtil().decryptCMS(delegate.read(messageId, filename), keyInfo.loadPrivateKey());
+        return getCmsUtil().decryptCMS(delegate.read(messageId, filename), keystoreHelper.loadPrivateKey());
     }
 
     public FileEntryStream readStream(String messageId, String filename, Reject reject) {
         InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
         PipedInputStream pipedInputStream = plumber.pipe("Reading file", copy(inputStream).andThen(close(inputStream)), reject).outlet();
-        return FileEntryStream.of(new Decryptor(keyInfo).decryptCMSStreamed(pipedInputStream), -1);
+        return FileEntryStream.of(new Decryptor(keystoreHelper).decryptCMSStreamed(pipedInputStream), -1);
     }
 
     public void delete(String messageId) throws IOException {

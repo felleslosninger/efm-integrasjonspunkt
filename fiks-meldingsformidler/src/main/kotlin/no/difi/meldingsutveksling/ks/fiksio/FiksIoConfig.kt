@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.move.common.cert.KeystoreHelper
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.FiksIOKlientFactory
 import no.ks.fiks.io.client.konfigurasjon.*
@@ -15,7 +15,7 @@ import java.util.*
 @Configuration
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 open class FiksIoConfig(private val props: IntegrasjonspunktProperties,
-                        private val ipNokkel: IntegrasjonspunktNokkel) {
+                        private val keystoreHelper: KeystoreHelper) {
 
     @Bean
     open fun fiksIoKlient(): FiksIOKlient {
@@ -34,7 +34,7 @@ open class FiksIoConfig(private val props: IntegrasjonspunktProperties,
                         .build())
                 .kontoKonfigurasjon(KontoKonfigurasjon.builder()
                         .kontoId(KontoId(kontoId))
-                        .privatNokkel(ipNokkel.loadPrivateKey())
+                        .privatNokkel(keystoreHelper.loadPrivateKey())
                         .build())
                 .fiksIntegrasjonKonfigurasjon(FiksIntegrasjonKonfigurasjon.builder()
                         .integrasjonId(UUID.fromString(props.fiks.io.integrasjonsId))

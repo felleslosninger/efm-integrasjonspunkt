@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -64,8 +65,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public IntegrasjonspunktNokkel integrasjonspunktNokkel(IntegrasjonspunktProperties properties) {
-        return new IntegrasjonspunktNokkel(properties.getOrg().getKeystore());
+    public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
+        return new KeystoreHelper(properties.getOrg().getKeystore());
     }
 
     @Bean(name = "fiksMailClient")

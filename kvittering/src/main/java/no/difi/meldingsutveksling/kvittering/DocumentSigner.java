@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.kvittering;
 
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,10 +36,10 @@ class DocumentSigner {
      * Creates a standard business document that contains a domain object "kvittering" and a digital signature the
      * receiver can verify to make sure it was not tampered with
      *
-     * @param ipNokkel the IntegrasjonspunktNokkel managing private and public key for the signer
+     * @param keystoreHelper the IntegrasjonspunktNokkel managing private and public key for the signer
      * @param doc      the document to sign
      */
-    public static Document sign(Document doc, IntegrasjonspunktNokkel ipNokkel) {
+    public static Document sign(Document doc, KeystoreHelper keystoreHelper) {
 
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -47,8 +47,8 @@ class DocumentSigner {
             documentBuilderFactory.setNamespaceAware(true);
 
             XMLSignatureFactory xmlSignatureFactory;
-            if (ipNokkel.shouldLockProvider()) {
-                xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", ipNokkel.getKeyStore().getProvider());
+            if (keystoreHelper.shouldLockProvider()) {
+                xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", keystoreHelper.getKeyStore().getProvider());
             } else {
                 xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
             }
@@ -67,7 +67,7 @@ class DocumentSigner {
                     Collections.singletonList(ref));
 
             KeyInfoFactory keyInfoFactory = xmlSignatureFactory.getKeyInfoFactory();
-            KeyValue keyValue = keyInfoFactory.newKeyValue(ipNokkel.getKeyPair().getPublic());
+            KeyValue keyValue = keyInfoFactory.newKeyValue(keystoreHelper.getKeyPair().getPublic());
             KeyInfo keyInfo = keyInfoFactory.newKeyInfo(Collections.singletonList(keyValue));
 
             XMLSignature signature = xmlSignatureFactory.newXMLSignature(signedIno, keyInfo);
@@ -82,7 +82,7 @@ class DocumentSigner {
                 throw new MeldingsUtvekslingRuntimeException("StandardBusinessDocument is missing the 'kvittering' " +
                         "element, this is the parent of the signature to be inserted");
             }
-            DOMSignContext domSignContext = new DOMSignContext(ipNokkel.getKeyPair().getPrivate(), kvitteringElement);
+            DOMSignContext domSignContext = new DOMSignContext(keystoreHelper.getKeyPair().getPrivate(), kvitteringElement);
             signature.sign(domSignContext);
             return doc;
 

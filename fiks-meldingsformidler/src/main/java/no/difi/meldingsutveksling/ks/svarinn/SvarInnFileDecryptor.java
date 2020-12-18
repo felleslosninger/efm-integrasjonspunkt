@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.Decryptor;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -13,7 +13,7 @@ public class SvarInnFileDecryptor {
     private final Decryptor decryptor;
 
     public SvarInnFileDecryptor(IntegrasjonspunktProperties props) {
-        this.decryptor = new Decryptor(new IntegrasjonspunktNokkel(props.getFiks().getKeystore()));
+        this.decryptor = new Decryptor(new KeystoreHelper(props.getFiks().getKeystore()));
     }
 
     /**

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -37,7 +37,7 @@ public class ServiceBusInSteps {
     private final Holder<Message> messageInHolder;
     private final ObjectMapper objectMapper;
     private final AsicFactory asicFactory;
-    private final IntegrasjonspunktNokkel keyInfo;
+    private final KeystoreHelper keystoreHelper;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
@@ -83,7 +83,7 @@ public class ServiceBusInSteps {
     private byte[] getAsic(Message message) {
         return promiseMaker.promise(reject -> {
             try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
-                    .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate())).outlet()) {
+                    .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate())).outlet()) {
                 return IOUtils.toByteArray(is);
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Couldn't get ASIC", e);

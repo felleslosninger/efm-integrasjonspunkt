@@ -2,10 +2,10 @@ package no.difi.meldingsutveksling.validation
 
 import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.CertificateParserException
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
+import no.difi.move.common.cert.KeystoreHelper
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.security.cert.CertificateExpiredException
@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct
 @Component
 @Profile("{!(test | cucumber)}")
 class IntegrasjonspunktCertificateValidator(
-    private val ipNokkel: IntegrasjonspunktNokkel,
+    private val keystoreHelper: KeystoreHelper,
     private val props: IntegrasjonspunktProperties,
     private val srClient: ServiceRegistryClient
 ) {
@@ -22,7 +22,7 @@ class IntegrasjonspunktCertificateValidator(
     @PostConstruct
     @Throws(VirksertCertificateException::class, CertificateExpiredException::class)
     fun validateCertificate() {
-        ipNokkel.x509Certificate.checkValidity()
+        keystoreHelper.x509Certificate.checkValidity()
 
         val pem = try {
             srClient.getCertificate(props.org.number)
@@ -37,8 +37,8 @@ class IntegrasjonspunktCertificateValidator(
         }
         cert.checkValidity()
 
-        if (ipNokkel.x509Certificate.serialNumber != cert.serialNumber) {
-            throw VirksertCertificateException("Keystore certificate serial number (${ipNokkel.x509Certificate.serialNumber}) does not match certificate in Virksert (${cert.serialNumber})")
+        if (keystoreHelper.x509Certificate.serialNumber != cert.serialNumber) {
+            throw VirksertCertificateException("Keystore certificate serial number (${keystoreHelper.x509Certificate.serialNumber}) does not match certificate in Virksert (${cert.serialNumber})")
         }
     }
 
