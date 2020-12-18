@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.difi.meldingsutveksling</groupId>
@@ -12,7 +13,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.5.RELEASE</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <scm>
@@ -22,7 +23,24 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>MavenArtifactFeed</id>
+            <url>https://pkgs.dev.azure.com/dificloud/_packaging/MavenArtifactFeed/maven/v1</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
+        <repository>
+            <id>MavenArtifactFeed</id>
+            <url>https://pkgs.dev.azure.com/dificloud/_packaging/MavenArtifactFeed/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>DIFI MOVE</id>
             <name>DIFI MOVE Nexus 3rd party</name>

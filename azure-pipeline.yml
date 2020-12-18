@@ -8,7 +8,6 @@ resources:
 extends:
   template: build-and-deploy-template.yml@efm-eproc-pipeline
   parameters:
-    includeDatetimeInTag: false
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
 
