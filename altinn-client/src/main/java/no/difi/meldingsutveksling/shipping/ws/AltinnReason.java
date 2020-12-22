@@ -1,19 +1,17 @@
 package no.difi.meldingsutveksling.shipping.ws;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 /**
  * Class to contain error String messages from Altinn soap faults
  */
-@RequiredArgsConstructor
-@Getter
+@Value
 public class AltinnReason {
 
-    private final Integer id;
-    private final String message;
-    private final String userId;
-    private final String localized;
+    Integer id;
+    String message;
+    String userId;
+    String localized;
 
     @Override
     public String toString() {
