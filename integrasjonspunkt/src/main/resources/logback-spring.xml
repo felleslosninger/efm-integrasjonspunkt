@@ -58,6 +58,27 @@
                 </then>
             </if>
 
+            <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                    <providers>
+                        <timestamp/>
+                        <logstashMarkers/>
+                        <pattern>
+                            <pattern>
+                                {
+                                "level": "%level",
+                                "message": "%replace(%msg){'[0-9]{11}','**********'}",
+                                "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}",
+                                "class": "%class",
+                                "method": "%method",
+                                "appname": "@project.artifactId@"
+                                }
+                            </pattern>
+                        </pattern>
+                    </providers>
+                </encoder>
+            </appender>
+
             <root level="INFO">
                 <appender-ref ref="stash"/>
                 <if condition='isDefined("destination2")'>
