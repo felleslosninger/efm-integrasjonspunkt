@@ -8,6 +8,7 @@
     <!-- Logstash destination -->
     <springProperty name="destination" source="app.logger.destination"/>
     <springProperty name="destination2" source="app.logger.destination2"/>
+    <springProperty name="appender" source="app.logger.appender"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
     <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
@@ -103,7 +104,7 @@
     </if>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="${appender:-CONSOLE}"/>
         <appender-ref ref="FILE"/>
     </root>
 
