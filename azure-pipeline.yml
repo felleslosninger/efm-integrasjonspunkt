@@ -5,13 +5,6 @@ resources:
       name: felleslosninger/efm-eproc-pipeline
       endpoint: felleslosninger
 
-extends:
-  template: build-and-deploy-template.yml@efm-eproc-pipeline
-  parameters:
-    environmentRepository: git://eformidling/eformidling
-    jdkVersion: 1.8
-    buildDockerArtifact: false
-
 trigger:
   batch: true
   branches:
@@ -19,3 +12,14 @@ trigger:
       - development
       - release-*
       - master
+
+steps:
+  - template: build-and-deploy-template.yml@efm-eproc-pipeline
+    parameters:
+      environmentRepository: git://eformidling/eformidling
+      jdkVersion: 1.8
+      buildDockerArtifact: false
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'JaCoCo'
+      summaryFileLocation: 'jacoco.exec'
