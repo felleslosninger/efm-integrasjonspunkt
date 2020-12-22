@@ -9,12 +9,13 @@ import java.net.URL;
 @Builder
 public class AltinnWsConfiguration {
 
-    private URL streamingServiceUrl;
-    private URL brokerServiceUrl;
-    private String username;
-    private String password;
-    private String externalServiceCode;
-    private int externalServiceEditionCode;
-    private Integer connectTimeout;
-    private Integer requestTimeout;
+    URL streamingServiceUrl;
+    URL brokerServiceUrl;
+    String orgnr;
+    String username;
+    String password;
+    String externalServiceCode;
+    int externalServiceEditionCode;
+    Integer connectTimeout;
+    Integer requestTimeout;
 }

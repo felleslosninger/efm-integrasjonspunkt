@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.AltinnWsClient;
+import no.difi.meldingsutveksling.AltinnWsClientFactory;
+import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.dpi.DpiReceiptMapper;
 import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
@@ -12,7 +15,6 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
@@ -140,17 +142,10 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnConnectionCheck altinnConnectionCheck(
-            IntegrasjonspunktProperties properties,
-            AltinnWsClient altinnWsClient) {
-        return new AltinnConnectionCheck(properties, altinnWsClient);
-    }
-
-    @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
         return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
     }
+
 }
 

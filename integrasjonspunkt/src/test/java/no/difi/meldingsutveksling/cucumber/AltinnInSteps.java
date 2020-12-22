@@ -6,9 +6,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFile;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.BrokerServiceAvailableFileList;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.GetAvailableFilesBasicResponse;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class AltinnInSteps {
 
     private final static QName _GetAvailableFilesBasicResponse_QNAME = new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "GetAvailableFilesBasicResponse");
+    private final static QName _CheckIfAvailableFilesBasicResponse_QNAME = new QName("http://www.altinn.no/services/ServiceEngine/Broker/2015/06", "CheckIfAvailableFilesBasicResponse");
     private static final String SOAP_ACTION = "SOAPAction";
 
     private final AltinnZipFactory altinnZipFactory;
@@ -126,9 +125,20 @@ public class AltinnInSteps {
         file.setReceiptID(1);
         filesBasic.getBrokerServiceAvailableFile().add(file);
 
+        CheckIfAvailableFilesBasicResponse checkResponse = new ObjectFactory().createCheckIfAvailableFilesBasicResponse();
+        checkResponse.setCheckIfAvailableFilesBasicResult(true);
+        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
+                .withHeader(SOAP_ACTION, containing("CheckIfAvailableFilesBasic"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONNECTION, "close")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_XML_VALUE)
+                        .withBody(serialize(new JAXBElement<>(_CheckIfAvailableFilesBasicResponse_QNAME, CheckIfAvailableFilesBasicResponse.class, checkResponse)))
+                )
+        );
+
         GetAvailableFilesBasicResponse response = new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponse();
         response.setGetAvailableFilesBasicResult(new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponseGetAvailableFilesBasicResult(filesBasic));
-
         wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
                 .withHeader(SOAP_ACTION, containing("GetAvailableFilesBasic"))
                 .willReturn(aResponse()

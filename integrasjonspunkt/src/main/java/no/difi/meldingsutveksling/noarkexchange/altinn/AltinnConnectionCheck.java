@@ -1,29 +1,30 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.FileReference;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 
 @RequiredArgsConstructor
+@Slf4j
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@Component
 public class AltinnConnectionCheck {
 
-    private final IntegrasjonspunktProperties properties;
     private final AltinnWsClient altinnWsClient;
 
     @PostConstruct
     public void checkTheConnection() {
         try {
-            List<FileReference> fileReferences = altinnWsClient.availableFiles(properties.getOrg().getNumber());
-            if (fileReferences == null) {
-                throw new NextMoveRuntimeException("Couldn't check for new messages from Altinn.");
-            }
-        } catch (Exception e) {
-            throw new NextMoveRuntimeException("Couldn't check for new messages from Altinn.", e);
+            altinnWsClient.checkIfAvailableFiles();
+        } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
+            throw new MeldingsUtvekslingRuntimeException("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
         }
     }
 
