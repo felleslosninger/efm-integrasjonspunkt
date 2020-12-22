@@ -16,7 +16,7 @@ extends:
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: '${System.DefaultWorkingDirectory}/source/**/target/site/jacoco/jacoco.xml'
+          summaryFileLocation: ${Build.SourcesDirectory}/**/target/site/jacoco/jacoco.xml
 
 trigger:
   batch: true
