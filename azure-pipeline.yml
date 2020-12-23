@@ -16,8 +16,8 @@ extends:
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: '$(Build.SourcesDirectory)/jacoco.exec'
-          reportDirectory: '$(Build.SourcesDirectory)/integrasjonspunkt/target/site/jacoco'
+          summaryFileLocation: '$(Build.SourcesDirectory)/jacoco.xml'
+#          reportDirectory: '$(Build.SourcesDirectory)/integrasjonspunkt/target/site/jacoco'
           pathToSources: '$(Build.SourcesDirectory)'
           additionalCodeCoverageFiles: '$(Build.SourcesDirectory)/jacoco.exec'
 

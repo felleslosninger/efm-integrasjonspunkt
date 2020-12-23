@@ -717,6 +717,23 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>jacoco-extras</artifactId>
+                        <version>0.1.4</version>
+                        <configuration>
+                            <execFile>${project.basedir}/../jacoco.exec</execFile>
+                            <xmlFile>${project.basedir}/../jacoco.xml</xmlFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>xml</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
