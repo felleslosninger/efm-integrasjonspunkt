@@ -134,6 +134,7 @@
         <module>bestedu</module>
         <module>common</module>
         <module>common-spring</module>
+        <module>coverage</module>
         <module>security</module>
         <module>noarkexchange</module>
         <module>noarkexchange-template</module>
@@ -168,6 +169,11 @@
                 <artifactId>spring-security-oauth2</artifactId>
                 <version>2.3.6.RELEASE</version>
                 <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>integrasjonspunkt</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
@@ -610,6 +616,11 @@
                     <artifactId>jaxws-maven-plugin</artifactId>
                     <version>2.3</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -717,43 +728,18 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>de.dentrassi.maven</groupId>
-                        <artifactId>jacoco-extras</artifactId>
-                        <version>0.1.4</version>
-                        <configuration>
-                            <execFile>${project.basedir}/../jacoco.exec</execFile>
-                            <xmlFile>${project.basedir}/../jacoco.xml</xmlFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>xml</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${jacoco.version}</version>
                         <configuration>
-                            <destFile>${project.basedir}/../jacoco.exec</destFile>
-                            <dataFile>${project.basedir}/../jacoco.exec</dataFile>
-                            <append>true</append>
+                            <includes>
+                                <include>no/difi/meldingsutveksling/**/*</include>
+                            </includes>
                         </configuration>
                         <executions>
                             <execution>
                                 <id>default-prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default-report</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
                                 </goals>
                             </execution>
                         </executions>
