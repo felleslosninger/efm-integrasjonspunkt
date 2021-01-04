@@ -16,9 +16,9 @@ extends:
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: 'source/coverage/target/site/jacoco-aggregate/jacoco.xml'
-          reportDirectory: 'source/coverage/target/site/jacoco-aggregate'
-          pathToSources: 'source'
+          summaryFileLocation: 'source/${{ parameters.sourceRootPath }}/coverage/target/site/jacoco-aggregate/jacoco.xml'
+          reportDirectory: 'source/${{ parameters.sourceRootPath }}/coverage/target/site/jacoco-aggregate'
+          pathToSources: 'source/${{ parameters.sourceRootPath }}/'
 
 trigger:
   batch: true
