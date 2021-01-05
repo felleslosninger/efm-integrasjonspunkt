@@ -3,7 +3,7 @@ FROM openjdk:8-jre-slim
 RUN groupadd -o -g 1000 java \
     && useradd -o -r -m -u 1000 -g 1000 java
 
-ENV APP_DIR=/var/lib/difi \
+ENV APP_DIR=/opt/digdir \
     HOST=tt02.altinn.no \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     openssl  && \
     update-ca-certificates && \
-    rm -rf /var/cache/apk/* && \
+    rm -rf /var/cache/apt/* && \
     openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
     mkdir ${APP_DIR} && \
