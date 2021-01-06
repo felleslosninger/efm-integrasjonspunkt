@@ -3,7 +3,7 @@ FROM openjdk:8-jre-slim
 RUN groupadd -o -g 1000 java \
     && useradd -o -r -m -u 1000 -g 1000 java
 
-ENV APP_DIR=/opt/digdir \
+ENV APP_DIR=/opt/integrasjonspunkt \
     HOST=tt02.altinn.no \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
