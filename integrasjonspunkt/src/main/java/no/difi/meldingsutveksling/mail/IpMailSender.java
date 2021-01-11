@@ -12,14 +12,11 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.io.output.NullOutputStream;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,43 +26,65 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 @RequiredArgsConstructor
-public class EduMailSender {
+@Component
+public class IpMailSender {
 
     private static final String CHARSET = StandardCharsets.ISO_8859_1.name();
 
-    private final IntegrasjonspunktProperties properties;
-    private final Set<String> conversationIds = ConcurrentHashMap.newKeySet();
+    private final IntegrasjonspunktProperties props;
 
-    public void send(PutMessageRequestType request, String title) {
-        Properties props = new Properties();
-        props.put("mail.smtp.host", properties.getMail().getSmtpHost());
-        props.put("mail.smtp.port", properties.getMail().getSmtpPort());
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.auth", properties.getMail().getEnableAuth());
+    private final Set<String> sessionSentIds = ConcurrentHashMap.newKeySet();
 
-        String trust = properties.getMail().getTrust();
-        if (StringUtils.hasText(trust)) {
-            props.put("mail.smtp.ssl.trust", trust);
+    private MimeMessage createMessage() throws MessagingException {
+        Properties mailProps = new Properties();
+        mailProps.put("mail.smtp.host", props.getMail().getSmtpHost());
+        mailProps.put("mail.smtp.port", props.getMail().getSmtpPort());
+        mailProps.put("mail.smtp.starttls.enable", "true");
+        mailProps.put("mail.smtp.auth", props.getMail().getEnableAuth());
+
+        String trust = props.getMail().getTrust();
+        if (!isNullOrEmpty(trust)) {
+            mailProps.put("mail.smtp.ssl.trust", trust);
         }
 
-        Session session = Session.getDefaultInstance(props,
+        Session session = Session.getDefaultInstance(mailProps,
                 new javax.mail.Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(
-                                properties.getMail().getUsername(),
-                                properties.getMail().getPassword());
+                        return new PasswordAuthentication(props.getMail().getUsername(),
+                                props.getMail().getPassword());
                     }
                 }
         );
 
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(props.getMail().getSenderAddress()));
+        message.setRecipients(Message.RecipientType.TO,
+                InternetAddress.parse(props.getMail().getReceiverAddress()));
+
+        return message;
+    }
+
+    public void send(String title, String body) {
         try {
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(properties.getMail().getSenderAddress()));
-            message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(properties.getMail().getReceiverAddress()));
+            MimeMessage message = createMessage();
+
+            message.setSubject(title, CHARSET);
+            message.setText(body);
+
+            Transport.send(message);
+        } catch (MessagingException e) {
+            log.error("Could not send mail", e);
+        }
+    }
+
+    public void send(PutMessageRequestType request, String title) {
+        try {
+            MimeMessage message = createMessage();
             message.setSubject(title, CHARSET);
 
             MimeMultipart mimeMultipart = new MimeMultipart();
@@ -98,17 +117,15 @@ public class EduMailSender {
             mimeMultipart.addBodyPart(mimeBodyPart);
             message.setContent(mimeMultipart);
 
-            Transport transport = session.getTransport("smtps");
-
+            Transport transport = message.getSession().getTransport("smtps");
             Long maxMessageSize = getMaxMessageSize(transport);
-
             if (maxMessageSize != null) {
+
                 long messageSize = getMessageSize(message);
-
                 if (messageSize > maxMessageSize) {
-                    String conversationId = request.getEnvelope().getConversationId();
 
-                    if (conversationIds.add(conversationId)) {
+                    String conversationId = request.getEnvelope().getConversationId();
+                    if (sessionSentIds.add(conversationId)) {
                         message.setText("Du har mottatt en BestEdu melding. Denne er for stor for å kunne sendes over e-post. Vennligst logg deg inn på FIKS portalen for å laste den ned.",
                                 CHARSET);
                     } else {
@@ -119,15 +136,14 @@ public class EduMailSender {
             }
 
             Transport.send(message);
-        } catch (
-                MessagingException e) {
+        } catch (MessagingException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 
     private Long getMaxMessageSize(Transport transport) {
         return getMaxSizeFromMailServer(transport)
-                .orElseGet(() -> properties.getMail().getMaxSize());
+                .orElseGet(() -> props.getMail().getMaxSize());
     }
 
     private Optional<Long> getMaxSizeFromMailServer(Transport transport) {

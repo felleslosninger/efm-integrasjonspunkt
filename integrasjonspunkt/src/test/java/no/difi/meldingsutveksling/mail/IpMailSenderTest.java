@@ -23,15 +23,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EduMailSenderTest {
+public class IpMailSenderTest {
 
     @Mock private IntegrasjonspunktProperties props;
 
-    @InjectMocks private EduMailSender mailSender;
+    @InjectMocks private IpMailSender ipMailSender;
 
     private Unmarshaller unmarshaller;
 
@@ -62,7 +61,7 @@ public class EduMailSenderTest {
 
         when(props.getMail()).thenReturn(mail);
 
-        mailSender = new EduMailSender(props);
+        ipMailSender = new IpMailSender(props);
 
         JAXBContext putMessageJaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
         this.unmarshaller = putMessageJaxbContext.createUnmarshaller();
@@ -116,7 +115,7 @@ public class EduMailSenderTest {
     private void send() throws JAXBException, IOException {
         PutMessageRequestType putMessage = createPutMessageCdataXml(FileUtils.readFileToString(new File
                 ("src/test/resources/putmessage_test.xml"), StandardCharsets.UTF_8));
-        mailSender.send(putMessage, "foo");
+        ipMailSender.send(putMessage, "foo");
     }
 
     private PutMessageRequestType createPutMessageCdataXml(String payload) throws JAXBException {
