@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.io.output.NullOutputStream;
+import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -29,6 +30,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class IpMailSender {
 
     private static final String CHARSET = StandardCharsets.ISO_8859_1.name();
