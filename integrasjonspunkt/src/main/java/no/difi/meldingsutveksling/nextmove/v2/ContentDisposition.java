@@ -25,7 +25,8 @@ public final class ContentDisposition {
     private final String type;
     private final String name;
     private final String filename;
-    private final Charset charset;
+    private final Charset filenameCharset;
+    private final Charset nameCharset;
     private final Long size;
     private final OffsetDateTime creationDate;
     private final OffsetDateTime modificationDate;
@@ -44,16 +45,21 @@ public final class ContentDisposition {
             sb.append(this.type);
         }
         if (this.name != null) {
-            sb.append("; name=\"");
-            sb.append(this.name).append('\"');
+            if (this.nameCharset == null || StandardCharsets.US_ASCII.equals(this.nameCharset)) {
+                sb.append("; name=\"");
+                sb.append(this.name).append('\"');
+            } else {
+                sb.append("; name*=");
+                sb.append(encodeHeaderFieldParam(this.name, this.nameCharset));
+            }
         }
         if (this.filename != null) {
-            if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
+            if (this.filenameCharset == null || StandardCharsets.US_ASCII.equals(this.filenameCharset)) {
                 sb.append("; filename=\"");
                 sb.append(this.filename).append('\"');
             } else {
                 sb.append("; filename*=");
-                sb.append(encodeHeaderFieldParam(this.filename, this.charset));
+                sb.append(encodeHeaderFieldParam(this.filename, this.filenameCharset));
             }
         }
         if (this.size != null) {
@@ -82,7 +88,7 @@ public final class ContentDisposition {
      * Return an empty content disposition.
      */
     public static ContentDisposition empty() {
-        return new ContentDisposition("", null, null, null, null, null, null, null);
+        return new ContentDisposition("", null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -100,6 +106,7 @@ public final class ContentDisposition {
                 .type(parts.get(0));
 
         String filename = null;
+        String name = null;
         for (int i = 1; i < parts.size(); i++) {
             String part = parts.get(i);
             int eqIndex = part.indexOf('=');
@@ -108,13 +115,21 @@ public final class ContentDisposition {
                 String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
                         part.substring(eqIndex + 2, part.length() - 1) :
                         part.substring(eqIndex + 1));
-                if (attribute.equals("name")) {
-                    builder.name(value);
+                if (attribute.equals("name*")) {
+                    name = decodeHeaderFieldParam(value);
+                    builder.name(name);
+                    Charset charset = Charset.forName(value.substring(0, value.indexOf('\'')));
+                    builder.nameCharset(charset);
+                    Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+                            CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1);
+                } else if (attribute.equals("name") && (name ==  null)) {
+                    name = value;
+                    builder.name(name);
                 } else if (attribute.equals("filename*")) {
                     filename = decodeHeaderFieldParam(value);
                     builder.filename(filename);
                     Charset charset = Charset.forName(value.substring(0, value.indexOf('\'')));
-                    builder.charset(charset);
+                    builder.filenameCharset(charset);
                     Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
                             CHARSET_SHOULD_BE_UTF_8_OR_ISO_8859_1);
                 } else if (attribute.equals("filename") && (filename == null)) {

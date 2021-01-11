@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.mail.MailSender;
+import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -40,7 +40,7 @@ public class DefaultConversationService implements ConversationService {
     private final IntegrasjonspunktProperties props;
     private final WebhookPublisher webhookPublisher;
     private final MessageStatusFactory messageStatusFactory;
-    private final MailSender mailSender;
+    private final IpMailSender ipMailSender;
     private final Clock clock;
     private final StatusQueue statusQueue;
 
@@ -117,7 +117,7 @@ public class DefaultConversationService implements ConversationService {
             String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : format("og messageReference %s ", conversation.getMessageReference());
             String body = format("%s forsendelse med conversationId %s (messageId %s) %shar registrert status '%s'. Se statusgrensesnitt for detaljer.",
                     direction, conversation.getConversationId(), conversation.getMessageId(), messageRef, FEIL.toString());
-            mailSender.send(title, body);
+            ipMailSender.send(title, body);
         } catch (Exception e) {
             log.error(format("Error sending status mail for messageId %s", conversation.getMessageId()), e);
         }
