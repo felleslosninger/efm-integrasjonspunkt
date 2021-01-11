@@ -35,7 +35,7 @@ public class MailClient implements NoarkClient {
 
     @Override
     public PutMessageResponseType sendEduMelding(PutMessageRequestType request) {
-        new EduMailSender(props).send(request, getSubject(request));
+        new IpMailSender(props).send(request, getSubject(request));
         return PutMessageResponseFactory.createOkResponse();
     }
 
