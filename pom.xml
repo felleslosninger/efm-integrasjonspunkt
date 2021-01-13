@@ -125,6 +125,8 @@
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.3.72</kotlin.version>
         <bouncycastle.version>1.62</bouncycastle.version>
+
+        <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
 
 
