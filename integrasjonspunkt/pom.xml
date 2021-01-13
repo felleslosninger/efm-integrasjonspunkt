@@ -271,25 +271,6 @@
             <artifactId>service-registry-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>security</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.mail</artifactId>
-                    <groupId>com.sun.mail</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>json-smart</artifactId>
-                    <groupId>net.minidev</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>asm</artifactId>
-                    <groupId>org.ow2.asm</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-certvalidator</artifactId>
             <exclusions>

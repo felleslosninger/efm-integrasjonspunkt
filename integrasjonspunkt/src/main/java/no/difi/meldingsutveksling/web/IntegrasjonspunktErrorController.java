@@ -32,6 +32,7 @@ public class IntegrasjonspunktErrorController implements ErrorController {
         this.errorAttributes = errorAttributes;
     }
 
+    @Deprecated
     @Override
     public String getErrorPath() {
         return this.errorProperties.getPath();

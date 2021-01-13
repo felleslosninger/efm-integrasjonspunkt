@@ -65,16 +65,6 @@
             <artifactId>service-registry-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>security</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>json-smart</artifactId>
-                    <groupId>net.minidev</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-asic</artifactId>
         </dependency>

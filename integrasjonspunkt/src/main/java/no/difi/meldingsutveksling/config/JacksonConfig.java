@@ -24,6 +24,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 public class JacksonConfig {
 
     @Bean
+    @SuppressWarnings("deprecation") // JsonReadFeature not yet supported by builder
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer(Clock clock) {
 
         return builder ->

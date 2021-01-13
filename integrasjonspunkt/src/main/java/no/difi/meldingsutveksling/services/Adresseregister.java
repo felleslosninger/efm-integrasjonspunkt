@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.noarkexchange.MessageException;
-import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -27,33 +24,6 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 public class Adresseregister {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
-
-    public void validateCertificates(StandardBusinessDocument sbd) throws MessageException {
-        ServiceRecord receiverServiceRecord;
-        try {
-            receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getReceiverIdentifier())
-                    .conversationId(sbd.getConversationId()).build());
-        } catch (ServiceRegistryLookupException e) {
-            throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
-        }
-        try {
-            getCertificate(receiverServiceRecord);
-        } catch (CertificateException e) {
-            throw new MessageException(e, StatusMessage.MISSING_RECIEVER_CERTIFICATE);
-        }
-
-        ServiceRecord senderServiceRecord;
-        try {
-            senderServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(sbd.getSenderIdentifier()).build());
-        } catch (ServiceRegistryLookupException e) {
-            throw new MessageException(e, StatusMessage.MISSING_SERVICE_RECORD);
-        }
-        try {
-            getCertificate(senderServiceRecord);
-        } catch (CertificateException e) {
-            throw new MessageException(e, StatusMessage.MISSING_SENDER_CERTIFICATE);
-        }
-    }
 
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
