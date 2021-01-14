@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.metadatakatalog.Journalposttype;
 import no.difi.meldingsutveksling.HashBiMap;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 public class JournalposttypeMapper {
 
@@ -21,8 +23,8 @@ public class JournalposttypeMapper {
     }
 
     public static String getNoarkType(Journalposttype jpType) {
-        if (!mapper.containsValue(jpType)) {
-            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType.value(), Journalposttype.INNGÅENDE_DOKUMENT.value());
+        if (jpType == null || !mapper.containsValue(jpType)) {
+            log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType != null ? jpType.value() : "<none>", Journalposttype.INNGÅENDE_DOKUMENT.value());
             return mapper.inverse().get(Journalposttype.INNGÅENDE_DOKUMENT);
         }
 
@@ -30,7 +32,7 @@ public class JournalposttypeMapper {
     }
 
     public static Journalposttype getArkivmeldingType(String jpType) {
-        if (!mapper.containsKey(jpType)) {
+        if (isNullOrEmpty(jpType) || !mapper.containsKey(jpType)) {
             log.warn("Journalposttype \"{}\" not registered in map, defaulting to \"{}\"", jpType, mapper.inverse().get(Journalposttype.INNGÅENDE_DOKUMENT));
             return Journalposttype.INNGÅENDE_DOKUMENT;
         }
