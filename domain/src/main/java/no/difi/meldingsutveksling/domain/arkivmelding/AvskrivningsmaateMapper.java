@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.metadatakatalog.Avskrivningsmaate;
 import no.difi.meldingsutveksling.HashBiMap;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 public class AvskrivningsmaateMapper {
 
@@ -22,15 +24,15 @@ public class AvskrivningsmaateMapper {
     }
 
     public static String getNoarkType(Avskrivningsmaate am) {
-        if (!mapper.containsValue(am)) {
-            log.warn("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", am.value(), Avskrivningsmaate.BESVART_MED_BREV.value());
+        if (am == null || !mapper.containsValue(am)) {
+            log.warn("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", am != null ? am.value() : "<none>", Avskrivningsmaate.BESVART_MED_BREV.value());
             return mapper.inverse().get(Avskrivningsmaate.BESVART_MED_BREV);
         }
         return mapper.inverse().get(am);
     }
 
     public static Avskrivningsmaate getArkivmeldingType(String amAvskm) {
-        if (!mapper.containsKey(amAvskm)) {
+        if (isNullOrEmpty(amAvskm) || !mapper.containsKey(amAvskm)) {
             log.warn("Avskrivningsmaate \"{}\" not found in map, defaulting to \"{}\"", amAvskm, Avskrivningsmaate.BESVART_MED_BREV.value());
             return Avskrivningsmaate.BESVART_MED_BREV;
         }
