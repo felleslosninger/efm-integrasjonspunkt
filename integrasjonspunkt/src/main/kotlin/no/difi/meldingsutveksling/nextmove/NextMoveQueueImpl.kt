@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.util.logger
+import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -34,6 +35,7 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
 
     @Transactional
     override fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asicStream: InputStream?) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.messageId)
         when {
             sbd.any !is BusinessMessage<*> -> throw MeldingsUtvekslingRuntimeException("SBD payload not of a known type")
             sbdUtil.isExpired(sbd) -> {
