@@ -2,13 +2,14 @@ package no.difi.meldingsutveksling;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.move.common.cert.KeystoreHelper;
 
 import java.io.InputStream;
 
 @RequiredArgsConstructor
 public class Decryptor {
 
-    private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
+    private final KeystoreHelper keystore;
 
     /**
      * Decrypts input using cipher algorithms in CMS Util and the integrasjonspunkt integrasjonspunktNokkel
@@ -20,9 +21,9 @@ public class Decryptor {
         final CmsUtil cmsUtil = new CmsUtil();
         return cmsUtil.decryptCMS(
                 input,
-                integrasjonspunktNokkel.loadPrivateKey(),
-                integrasjonspunktNokkel.shouldLockProvider() ?
-                        integrasjonspunktNokkel.getKeyStore().getProvider() :
+                keystore.loadPrivateKey(),
+                keystore.shouldLockProvider() ?
+                        keystore.getKeyStore().getProvider() :
                         null
         );
     }
@@ -31,9 +32,9 @@ public class Decryptor {
         final CmsUtil cmsUtil = new CmsUtil();
         return cmsUtil.decryptCMSStreamed(
                 encrypted,
-                integrasjonspunktNokkel.loadPrivateKey(),
-                integrasjonspunktNokkel.shouldLockProvider() ?
-                        integrasjonspunktNokkel.getKeyStore().getProvider() :
+                keystore.loadPrivateKey(),
+                keystore.shouldLockProvider() ?
+                        keystore.getKeyStore().getProvider() :
                         null
         );
     }

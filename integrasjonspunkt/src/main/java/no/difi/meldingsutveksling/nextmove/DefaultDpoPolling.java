@@ -2,15 +2,15 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.AltinnPackage;
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.DownloadRequest;
-import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
+import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
+import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,13 +36,15 @@ public class DefaultDpoPolling implements DpoPolling {
     public void poll() {
         log.trace("Checking for new DPO messages");
 
-        List<FileReference> fileReferences = altinnWsClient.availableFiles(properties.getOrg().getNumber());
-
-        if (!fileReferences.isEmpty()) {
-            log.debug("New DPO message(s) detected");
+        try {
+            if (altinnWsClient.checkIfAvailableFiles()) {
+                log.debug("New DPO message(s) detected");
+                List<FileReference> fileReferences = altinnWsClient.availableFiles();
+                fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference));
+            }
+        } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
+            log.error("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
         }
-
-        fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference));
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -52,6 +54,7 @@ public class DefaultDpoPolling implements DpoPolling {
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
             AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
+            MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
 
             try {

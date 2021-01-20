@@ -1,23 +1,27 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.*;
+import no.difi.meldingsutveksling.AltinnWsClient;
+import no.difi.meldingsutveksling.AltinnWsClientFactory;
+import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
+import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.*;
+import no.difi.meldingsutveksling.dpi.DpiReceiptMapper;
+import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
-import no.difi.move.common.cert.KeystoreProvider;
-import no.difi.move.common.cert.KeystoreProviderException;
+import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -63,17 +67,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public IntegrasjonspunktNokkel integrasjonspunktNokkel(IntegrasjonspunktProperties properties) {
-        return new IntegrasjonspunktNokkel(properties.getOrg().getKeystore());
-    }
-
-    @Bean
-    public KeystoreProvider meldingsformidlerKeystoreProvider(IntegrasjonspunktProperties properties) throws MeldingsformidlerException {
-        try {
-            return KeystoreProvider.from(properties.getDpi().getKeystore());
-        } catch (KeystoreProviderException e) {
-            throw new MeldingsformidlerException("Unable to create keystore for DPI", e);
-        }
+    public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
+        return new KeystoreHelper(properties.getOrg().getKeystore());
     }
 
     @Bean(name = "fiksMailClient")
@@ -122,11 +117,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory(IntegrasjonspunktProperties properties, KeystoreProvider keystoreProvider) {
-        return new SikkerDigitalPostKlientFactory(properties.getDpi(), keystoreProvider.getKeyStore());
-    }
-
-    @Bean
     public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
         return new ForsendelseHandlerFactory(properties.getDpi());
     }
@@ -152,17 +142,10 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnConnectionCheck altinnConnectionCheck(
-            IntegrasjonspunktProperties properties,
-            AltinnWsClient altinnWsClient) {
-        return new AltinnConnectionCheck(properties, altinnWsClient);
-    }
-
-    @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
         return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
     }
+
 }
 

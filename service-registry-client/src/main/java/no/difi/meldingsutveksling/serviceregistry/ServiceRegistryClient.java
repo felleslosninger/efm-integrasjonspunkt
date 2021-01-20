@@ -6,6 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
@@ -51,21 +52,35 @@ public class ServiceRegistryClient {
             }
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundInServiceRegistryException(parameter.getIdentifier());
+                throw new NotFoundInServiceRegistryException(parameter);
             }
             byte[] errorBody = httpException.getResponseBodyAsByteArray();
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status %s (%s): %s",
-                        parameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status %s (%s): %s",
+                        parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with identifier %s, http status: %s (%s)",
-                        parameter.getIdentifier(), httpException.getStatusCode(), httpException.getStatusText()), httpException);
+                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status: %s (%s)",
+                        parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
+        }
+    }
+
+    @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
+    public String getCertificate(String identifier) throws ServiceRegistryLookupException {
+        try {
+            return client.getResource("virksert/" + identifier);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);
+            }
+            throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier, e);
+        } catch (BadJWSException e) {
+            throw new NextMoveRuntimeException("Bad signature in response from service registry", e);
         }
     }
 

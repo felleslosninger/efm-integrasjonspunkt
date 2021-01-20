@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,11 @@ import java.util.zip.ZipOutputStream;
 public class SvarInnZipFactory {
 
     private final CmsUtil cmsUtil;
-    private final IntegrasjonspunktNokkel integrasjonspunktNokkel;
+    private final KeystoreHelper keystoreHelper;
 
     public SvarInnZipFactory(CmsUtil cmsUtil, IntegrasjonspunktProperties properties) {
         this.cmsUtil = cmsUtil;
-        this.integrasjonspunktNokkel = new IntegrasjonspunktNokkel(properties.getFiks().getKeystore());
+        this.keystoreHelper = new KeystoreHelper(properties.getFiks().getKeystore());
     }
 
     @SneakyThrows
@@ -41,7 +41,7 @@ public class SvarInnZipFactory {
     }
 
     private byte[] encrypt(byte[] in) {
-        return cmsUtil.createCMS(in, integrasjonspunktNokkel.getX509Certificate());
+        return cmsUtil.createCMS(in, keystoreHelper.getX509Certificate());
     }
 
 }

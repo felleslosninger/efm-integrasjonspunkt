@@ -5,7 +5,6 @@
 
 pom.xml.versionsBackup
 
-jacoco.exec
 *.orig
 *.class
 *.log
@@ -146,3 +145,12 @@ integrasjonspunkt-logs/*.log
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.jks
 !/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache

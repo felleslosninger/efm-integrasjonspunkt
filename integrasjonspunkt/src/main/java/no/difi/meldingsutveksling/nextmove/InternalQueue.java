@@ -2,12 +2,14 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.pipes.PromiseRuntimeException;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -65,6 +67,7 @@ public class InternalQueue {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
         try {
+            MDC.put(NextMoveConsts.CORRELATION_ID, nextMoveMessage.getMessageId());
             nextMoveSender.send(nextMoveMessage);
         } catch (PromiseRuntimeException e) {
             if (e.getCause() instanceof QueueInterruptException) {
@@ -81,6 +84,7 @@ public class InternalQueue {
     @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         try {
             integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
@@ -24,6 +23,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,7 +56,7 @@ public class IntegrajonspunktReceiveImpl {
     private final JAXBContext jaxbContext;
 
     private final NoarkClient localNoark;
-    private final IntegrasjonspunktNokkel keyInfo;
+    private final KeystoreHelper keystoreHelper;
     private final ConversationService conversationService;
     private final MessagePersister messagePersister;
     private final SBDReceiptFactory sbdReceiptFactory;
@@ -68,7 +68,7 @@ public class IntegrajonspunktReceiveImpl {
     private final MeldingFactory meldingFactory;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
-                                       IntegrasjonspunktNokkel keyInfo,
+                                       KeystoreHelper keystoreHelper,
                                        ConversationService conversationService,
                                        ObjectProvider<MessagePersister> messagePersister,
                                        SBDReceiptFactory sbdReceiptFactory,
@@ -79,7 +79,7 @@ public class IntegrajonspunktReceiveImpl {
                                        ConversationIdEntityRepo conversationIdEntityRepo,
                                        MeldingFactory meldingFactory) throws JAXBException {
         this.localNoark = localNoark.getIfAvailable();
-        this.keyInfo = keyInfo;
+        this.keystoreHelper = keystoreHelper;
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
         this.sbdReceiptFactory = sbdReceiptFactory;
@@ -127,7 +127,7 @@ public class IntegrajonspunktReceiveImpl {
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
             }
-            byte[] asic = new Decryptor(keyInfo).decrypt(asicBytes);
+            byte[] asic = new Decryptor(keystoreHelper).decrypt(asicBytes);
             Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
             MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
             return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));

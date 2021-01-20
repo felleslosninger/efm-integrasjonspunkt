@@ -31,7 +31,6 @@ public class SvarUtService {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final FiksMapper fiksMapper;
     private final IntegrasjonspunktProperties props;
-    private final CertificateParser certificateParser;
     private final PromiseMaker promiseMaker;
     private final ForsendelseIdService forsendelseIdService;
 
@@ -45,7 +44,7 @@ public class SvarUtService {
                             .conversationId(message.getConversationId()).build(),
                     message.getSbd().getStandard());
         } catch (ServiceRegistryLookupException e) {
-            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()));
+            throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()), e);
         }
 
         return promiseMaker.promise(reject -> {
@@ -75,7 +74,7 @@ public class SvarUtService {
 
     private X509Certificate toX509Certificate(String pemCertificate) {
         try {
-            return certificateParser.parse(pemCertificate);
+            return CertificateParser.parse(pemCertificate);
         } catch (CertificateParserException e) {
             throw new SvarUtServiceException("Certificate is invalid", e);
         }

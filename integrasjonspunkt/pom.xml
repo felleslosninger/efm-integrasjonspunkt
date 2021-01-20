@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>integrasjonspunkt</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>2.2.1-SNAPSHOT</version>
 
     <name>Meldingsutveksling Integrasjonspunkt</name>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>2.2.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -21,42 +21,6 @@
     </properties>
 
     <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.4.11</version>
-                        <configuration>
-                            <imageName>${docker.registry}/${project.artifactId}:${project.parent.version}</imageName>
-                            <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
-                            <imageTags>
-                                <imageTag>latest</imageTag>
-                            </imageTags>
-                            <resources>
-                                <resource>
-                                    <targetPath>/</targetPath>
-                                    <directory>${project.build.directory}</directory>
-                                    <include>${project.build.finalName}.jar</include>
-                                </resource>
-                            </resources>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-image</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                    <goal>push</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>restdocs</id>
             <build>
@@ -188,23 +152,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
-                <configuration>
-                    <serverId>docker-hub</serverId>
-                    <imageName>${docker.registry}/${project.artifactId}:${docker.build.version}</imageName>
-                    <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.jar</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.0.0</version>
@@ -323,25 +270,6 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>service-registry-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>security</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.mail</artifactId>
-                    <groupId>com.sun.mail</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>json-smart</artifactId>
-                    <groupId>net.minidev</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>asm</artifactId>
-                    <groupId>org.ow2.asm</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-certvalidator</artifactId>

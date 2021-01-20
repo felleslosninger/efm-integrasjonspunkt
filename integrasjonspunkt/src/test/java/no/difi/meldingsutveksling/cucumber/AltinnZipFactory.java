@@ -3,11 +3,11 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class AltinnZipFactory {
 
     private final ObjectMapper objectMapper;
     private final AsicFactory asicFactory;
-    private final IntegrasjonspunktNokkel keyInfo;
+    private final KeystoreHelper keystoreHelper;
     private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
@@ -58,7 +58,7 @@ public class AltinnZipFactory {
         out.putNextEntry(new ZipEntry(ASIC_FILE));
 
         plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
-                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keyInfo.getX509Certificate()))
+                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate()))
                 .andFinally(copyTo(new BufferedOutputStream(out)));
 
         out.closeEntry();

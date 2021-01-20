@@ -7,6 +7,8 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Saksstatus;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 @Slf4j
 @UtilityClass
 public class SaksstatusMapper {
@@ -27,8 +29,8 @@ public class SaksstatusMapper {
     }
 
     public static String getNoarkType(Saksstatus status) {
-        if (!string2Status.containsValue(status)) {
-            log.warn("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status.value(), Saksstatus.UNDER_BEHANDLING.value());
+        if (status == null || !string2Status.containsValue(status)) {
+            log.warn("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status != null ? status.value() : "<none>", Saksstatus.UNDER_BEHANDLING.value());
             return status2string.get(Saksstatus.UNDER_BEHANDLING);
         }
 
@@ -36,7 +38,7 @@ public class SaksstatusMapper {
     }
 
     static Saksstatus getArkivmeldingType(String status) {
-        if (!string2Status.containsKey(status)) {
+        if (isNullOrEmpty(status) || !string2Status.containsKey(status)) {
             log.warn("Saksstatus \"{}\" not registered in map, defaulting to \"{}\"", status, status2string.get(Saksstatus.UNDER_BEHANDLING));
             return Saksstatus.UNDER_BEHANDLING;
         }

@@ -1,2 +1,0 @@
-File1
-Second and final line of content for file1.txt

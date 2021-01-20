@@ -3,11 +3,13 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -43,6 +45,7 @@ public class NextMoveMessageOutController {
     public StandardBusinessDocument createAndSendMessage(
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
             MultipartRequest multipartRequest) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -73,6 +76,7 @@ public class NextMoveMessageOutController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
     }
@@ -89,12 +93,14 @@ public class NextMoveMessageOutController {
     @GetMapping("/{messageId}")
     @Transactional
     public StandardBusinessDocument getMessage(@PathVariable("messageId") String messageId) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         return messageService.getMessage(messageId).getSbd();
     }
 
     @DeleteMapping("/{messageId}")
     @Transactional
     public void deleteMessage(@PathVariable("messageId") String messageId) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         messageService.deleteMessage(messageId);
     }
 
@@ -106,12 +112,14 @@ public class NextMoveMessageOutController {
             @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
             @RequestParam(value = "title", required = false) String title,
             HttpServletRequest request) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.addFile(message, new NextMoveUploadedFile(contentType, contentDisposition, title, request));
     }
 
     @PostMapping("/{messageId}")
     public void sendMessage(@PathVariable("messageId") String messageId) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.sendMessage(message);
     }

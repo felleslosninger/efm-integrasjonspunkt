@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.kvittering;
 
 
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,12 +38,12 @@ public class StandardBusinessDocumentWrapperTest {
         kpg.initialize(512);
         KeyPair kp = kpg.generateKeyPair();
 
-        IntegrasjonspunktNokkel integrasjonspunktNokkel = Mockito.mock(IntegrasjonspunktNokkel.class);
-        Mockito.when(integrasjonspunktNokkel.getKeyPair()).thenReturn(kp);
-        Mockito.when(integrasjonspunktNokkel.shouldLockProvider()).thenReturn(false);
+        KeystoreHelper keystoreHelper = Mockito.mock(KeystoreHelper.class);
+        Mockito.when(keystoreHelper.getKeyPair()).thenReturn(kp);
+        Mockito.when(keystoreHelper.shouldLockProvider()).thenReturn(false);
 
         MessageInfo mi = new MessageInfo(DocumentType.BESTEDU_KVITTERING.getType(), SENDER, RECEIVER, "", "", "");
-        StandardBusinessDocument beforeConversion = sbdReceiptFactory.createAapningskvittering(mi, integrasjonspunktNokkel);
+        StandardBusinessDocument beforeConversion = sbdReceiptFactory.createAapningskvittering(mi, keystoreHelper);
         Document xmlDocVersion = DocumentToDocumentConverter.toXMLDocument(beforeConversion);
         StandardBusinessDocument afterConversion = DocumentToDocumentConverter.toDomainDocument(xmlDocVersion);
 

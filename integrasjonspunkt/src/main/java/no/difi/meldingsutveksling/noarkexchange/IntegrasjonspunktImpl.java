@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import com.google.common.base.Strings;
 import net.logstash.logback.marker.LogstashMarker;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -14,6 +15,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -106,6 +108,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
     @Override
     public PutMessageResponseType putMessage(PutMessageRequestType request) {
         PutMessageRequestWrapper message = new PutMessageRequestWrapper(request);
+        MDC.put(NextMoveConsts.CORRELATION_ID, message.getConversationId());
         if (PayloadUtil.isAppReceipt(message.getPayload())) {
             if ("p360".equalsIgnoreCase(properties.getNoarkSystem().getType())) {
                 message.swapSenderAndReceiver();

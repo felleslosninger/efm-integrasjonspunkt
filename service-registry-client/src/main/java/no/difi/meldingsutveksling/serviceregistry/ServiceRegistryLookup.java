@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static no.difi.meldingsutveksling.serviceregistry.SRMarkers.markerFrom;
 import static no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.hasDocumentType;
 
 @Slf4j
@@ -31,6 +32,7 @@ public class ServiceRegistryLookup {
         try {
             return loadServiceRecords(parameter);
         } catch (ServiceRegistryLookupException e) {
+            log.error(markerFrom(parameter), formatErrorMsg(parameter));
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
@@ -45,9 +47,10 @@ public class ServiceRegistryLookup {
                 .flatMap(r -> r.getDocumentTypes().stream())
                 .filter(documentType::fitsDocumentIdentifier)
                 .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(
-                        String.format("Standard not found for process '%s' and documentType '%s' for identifier '%s'",
-                                parameter.getProcess(), documentType.getType(), parameter.getIdentifier())));
+                .orElseThrow(() -> {
+                    log.error(markerFrom(parameter, documentType.getType()), formatErrorMsg(parameter, documentType.getType()));
+                    return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType.getType()));
+                });
 
     }
 
@@ -56,7 +59,10 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), parameter.getProcess())));
+                .orElseThrow(() -> {
+                    log.error(markerFrom(parameter, documentType), formatErrorMsg(parameter, documentType));
+                    return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType));
+                });
     }
 
     public ServiceRecord getServiceRecord(SRParameter parameter, DocumentType documentType) throws ServiceRegistryLookupException {
@@ -64,7 +70,10 @@ public class ServiceRegistryLookup {
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
                 .findFirst()
-                .orElseThrow(() -> new ServiceRegistryLookupException(String.format("Service record for identifier=%s with process=%s not found", parameter.getIdentifier(), parameter.getProcess())));
+                .orElseThrow(() -> {
+                    log.error(markerFrom(parameter, documentType.getType()), formatErrorMsg(parameter, documentType.getType()));
+                    return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType.getType()));
+                });
     }
 
 
@@ -88,7 +97,10 @@ public class ServiceRegistryLookup {
                     .findFirst();
         }
 
-        return serviceRecord.orElseThrow(() -> new ServiceRegistryLookupException(String.format("Could not find service record for receiver '%s'", parameter.getIdentifier())));
+        return serviceRecord.orElseThrow(() -> {
+            log.error(markerFrom(parameter), formatErrorMsg(parameter));
+            return new ServiceRegistryLookupException(formatErrorMsg(parameter));
+        });
     }
 
     private List<ServiceRecord> loadServiceRecords(SRParameter parameter) throws ServiceRegistryLookupException {
@@ -115,5 +127,13 @@ public class ServiceRegistryLookup {
 
     public String getSasKey() {
         return serviceRegistryClient.getSasKey();
+    }
+
+    private String formatErrorMsg(SRParameter parameters) {
+        return String.format("Error looking up service record with parameters: %s", parameters);
+    }
+
+    private String formatErrorMsg(SRParameter parameters, String doctype) {
+        return String.format("Error looking up service record with document type '%s' and parameters: %s", doctype, parameters);
     }
 }

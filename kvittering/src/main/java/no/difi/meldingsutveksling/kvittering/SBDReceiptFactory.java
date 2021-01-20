@@ -4,7 +4,6 @@ package no.difi.meldingsutveksling.kvittering;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.Standard;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -23,6 +22,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.springframework.stereotype.Component;
 
@@ -45,19 +45,19 @@ public class SBDReceiptFactory {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final SBDUtil sbdUtil;
 
-    public StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public StandardBusinessDocument createAapningskvittering(MessageInfo messageInfo, KeystoreHelper keystoreHelper) {
         Kvittering k = new Kvittering();
         k.setAapning(new Aapning());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
-        return signAndWrapDocument(messageInfo, keyInfo, k);
+        return signAndWrapDocument(messageInfo, keystoreHelper, k);
     }
 
-    public StandardBusinessDocument createLeveringsKvittering(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo) {
+    public StandardBusinessDocument createLeveringsKvittering(MessageInfo messageInfo, KeystoreHelper keystoreHelper) {
         Kvittering k = new Kvittering();
         k.setLevering(new Levering());
         k.setTidspunkt(XMLTimeStamp.createTimeStamp());
         return signAndWrapDocument(messageInfo,
-                keyInfo,
+                keystoreHelper,
                 k);
     }
 
@@ -98,7 +98,7 @@ public class SBDReceiptFactory {
                 .setAny(statusMessage);
     }
 
-    private StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, IntegrasjonspunktNokkel keyInfo, Kvittering kvittering) {
+    private StandardBusinessDocument signAndWrapDocument(MessageInfo messageInfo, KeystoreHelper keystoreHelper, Kvittering kvittering) {
 
         StandardBusinessDocument unsignedReceipt = new StandardBusinessDocument();
         StandardBusinessDocumentHeader header = new StandardBusinessDocumentHeader.Builder()
@@ -117,7 +117,7 @@ public class SBDReceiptFactory {
         unsignedReceipt.setAny(new ObjectFactory().createKvittering(kvittering));
 
         org.w3c.dom.Document xmlDoc = toXMLDocument(unsignedReceipt);
-        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keyInfo);
+        org.w3c.dom.Document signedXmlDoc = DocumentSigner.sign(xmlDoc, keystoreHelper);
         try {
             if (!DocumentValidator.validate(signedXmlDoc)) {
                 throw new MeldingsUtvekslingRuntimeException("created non validating document");

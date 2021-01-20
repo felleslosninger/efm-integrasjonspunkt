@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.move.common.cert.KeystoreProvider;
 import no.difi.move.common.cert.KeystoreProviderException;
@@ -9,6 +9,7 @@ import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.internal.TrustedCertificates;
+import org.springframework.stereotype.Component;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.net.URI;
@@ -18,11 +19,11 @@ import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
+@Component
 @RequiredArgsConstructor
 public class SikkerDigitalPostKlientFactory {
 
-    private final DigitalPostInnbyggerConfig config;
-    private final KeyStore keyStore;
+    private final IntegrasjonspunktProperties props;
 
     public SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
         KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().build();
@@ -36,10 +37,18 @@ public class SikkerDigitalPostKlientFactory {
 
     private SikkerDigitalPostKlient createSikkerDigitalPostKlient(KlientKonfigurasjon klientKonfigurasjon, AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
         Databehandler tekniskAvsender;
-        if (this.config.getTrustStore() != null) {
+
+        KeyStore keyStore;
+        try {
+            keyStore = KeystoreProvider.loadKeyStore(props.getDpi().getKeystore());
+        } catch (KeystoreProviderException e) {
+            throw new MeldingsUtvekslingRuntimeException("Cannot load DPI keystore", e);
+        }
+
+        if (props.getDpi().getTrustStore() != null) {
             KeyStore trustStore;
             try {
-                trustStore = KeystoreProvider.loadKeyStore(this.config.getTrustStore());
+                trustStore = KeystoreProvider.loadKeyStore(props.getDpi().getTrustStore());
             } catch (KeystoreProviderException e) {
                 throw new MeldingsUtvekslingRuntimeException("Cannot load DPI trust store", e);
             }
@@ -56,10 +65,17 @@ public class SikkerDigitalPostKlientFactory {
                 throw new MeldingsUtvekslingRuntimeException("Could not get SDP truststore aliases", e);
             }
 
-            NoekkelparOverride noekkelparOverride = new NoekkelparOverride(keyStore, trustStore, config.getKeystore().getAlias(), config.getKeystore().getPassword(), false);
+            NoekkelparOverride noekkelparOverride = new NoekkelparOverride(keyStore, trustStore,
+                    props.getDpi().getKeystore().getAlias(),
+                    props.getDpi().getKeystore().getPassword(),
+                    false);
             tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), noekkelparOverride).build();
         } else {
-            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(), Noekkelpar.fraKeyStoreUtenTrustStore(keyStore, config.getKeystore().getAlias(), config.getKeystore().getPassword())).build();
+            tekniskAvsender = Databehandler.builder(aktoerOrganisasjonsnummer.forfremTilDatabehandler(),
+                    Noekkelpar.fraKeyStoreUtenTrustStore(keyStore,
+                            props.getDpi().getKeystore().getAlias(),
+                            props.getDpi().getKeystore().getPassword()))
+                    .build();
         }
         return new SikkerDigitalPostKlient(tekniskAvsender, klientKonfigurasjon);
     }
@@ -70,6 +86,6 @@ public class SikkerDigitalPostKlientFactory {
     }
 
     private Miljo getMiljo() {
-        return new Miljo(null, URI.create(config.getEndpoint()));
+        return new Miljo(null, URI.create(props.getDpi().getEndpoint()));
     }
 }

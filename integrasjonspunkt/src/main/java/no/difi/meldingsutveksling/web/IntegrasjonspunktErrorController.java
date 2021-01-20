@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.web;
 
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,8 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+
+import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.*;
 
 @RestController
 @RequestMapping("${server.error.path:${error.path:/error}}")
@@ -29,6 +32,7 @@ public class IntegrasjonspunktErrorController implements ErrorController {
         this.errorAttributes = errorAttributes;
     }
 
+    @Deprecated
     @Override
     public String getErrorPath() {
         return this.errorProperties.getPath();
@@ -63,11 +67,14 @@ public class IntegrasjonspunktErrorController implements ErrorController {
         if (parameter == null) {
             return false;
         }
-        return !"false".equals(parameter.toLowerCase());
+        return !"false".equalsIgnoreCase(parameter);
     }
 
     private Map<String, Object> getErrorAttributes(HttpServletRequest request, boolean includeStackTrace) {
         WebRequest webRequest = new ServletWebRequest(request);
-        return this.errorAttributes.getErrorAttributes(webRequest, includeStackTrace);
+        if (includeStackTrace) {
+            return this.errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.of(ErrorAttributeOptions.Include.values()));
+        }
+        return this.errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.of(MESSAGE, EXCEPTION, BINDING_ERRORS));
     }
 }

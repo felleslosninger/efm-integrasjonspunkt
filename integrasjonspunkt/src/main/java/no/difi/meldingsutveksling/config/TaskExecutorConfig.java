@@ -21,6 +21,7 @@ public class TaskExecutorConfig {
          */
         taskExecutor.setQueueCapacity(0);
         taskExecutor.initialize();
+        taskExecutor.setTaskDecorator(new MdcTaskDecorator());
         return taskExecutor;
     }
 

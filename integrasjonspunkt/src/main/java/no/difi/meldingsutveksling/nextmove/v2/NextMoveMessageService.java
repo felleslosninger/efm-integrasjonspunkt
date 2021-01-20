@@ -7,6 +7,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
@@ -20,6 +21,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.status.Conversation;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -74,6 +76,7 @@ public class NextMoveMessageService {
     public NextMoveOutMessage createMessage(StandardBusinessDocument sbd) {
         validator.validate(sbd);
         NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd);
+        MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         messageRepo.save(message);
         conversationService.registerConversation(message);
         return message;

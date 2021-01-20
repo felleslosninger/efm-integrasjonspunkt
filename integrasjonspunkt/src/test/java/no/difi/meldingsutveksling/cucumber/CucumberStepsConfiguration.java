@@ -26,7 +26,6 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
-import no.difi.move.common.cert.KeystoreProvider;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -116,9 +115,8 @@ public class CucumberStepsConfiguration {
         @Primary
         @Bean
         public SikkerDigitalPostKlient sikkerDigitalPostKlient(IntegrasjonspunktProperties properties,
-                                                               KeystoreProvider keystoreProvider,
                                                                RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
-            SikkerDigitalPostKlientFactory factory = new SikkerDigitalPostKlientFactory(properties.getDpi(), keystoreProvider.getKeyStore());
+            SikkerDigitalPostKlientFactory factory = new SikkerDigitalPostKlientFactory(properties);
             SikkerDigitalPostKlient klient = factory.createSikkerDigitalPostKlient(
                     AktoerOrganisasjonsnummer.of("910077473"));
             klient.getMeldingTemplate().setInterceptors(new ClientInterceptor[]{

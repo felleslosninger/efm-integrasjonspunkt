@@ -14,8 +14,10 @@ import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
+import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
 import org.junit.Before
 import org.junit.Test
+import org.springframework.beans.factory.ObjectProvider
 import java.util.*
 
 @Slf4j
@@ -41,6 +43,8 @@ class NextMoveValidatorTest {
     lateinit var arkivmeldingUtil: ArkivmeldingUtil
     @MockK
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
+    @MockK
+    lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
     private lateinit var nextMoveValidator : NextMoveValidator
 
@@ -55,21 +59,24 @@ class NextMoveValidatorTest {
     fun before() {
         MockKAnnotations.init(this)
         nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
-                nextMoveMessageOutRepository,
-                conversationStrategyFactory,
-                asserter,
-                optionalCryptoMessagePersister,
-                timeToLiveHelper,
-                sbdUtil,
-                conversationService,
-                arkivmeldingUtil,
-                nextMoveFileSizeValidator)
+            nextMoveMessageOutRepository,
+            conversationStrategyFactory,
+            asserter,
+            optionalCryptoMessagePersister,
+            timeToLiveHelper,
+            sbdUtil,
+            conversationService,
+            arkivmeldingUtil,
+            nextMoveFileSizeValidator,
+            certValidator)
+
 
         val bmf = BusinessMessageFile()
                 .setFilename("foo.txt")
                 .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
+        every { certValidator.ifAvailable(any()) } just Runs
         every { message.businessMessage } returns businessMessage
         every { sbd.optionalMessageId } returns Optional.of(messageId)
         every { message.messageId } returns messageId

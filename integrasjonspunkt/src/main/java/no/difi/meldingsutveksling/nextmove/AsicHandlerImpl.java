@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.IntegrasjonspunktNokkel;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.AsicHandler;
@@ -17,6 +16,7 @@ import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.services.Adresseregister;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -36,7 +36,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 @RequiredArgsConstructor
 public class AsicHandlerImpl implements AsicHandler {
 
-    private final IntegrasjonspunktNokkel keyHelper;
+    private final KeystoreHelper keystoreHelper;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final Plumber plumber;
     private final Adresseregister adresseregister;
@@ -86,7 +86,7 @@ public class AsicHandlerImpl implements AsicHandler {
 
     private void createAsic(StreamedFile mainAttachment, Stream<? extends StreamedFile> att, NextMoveMessage message, PipedOutputStream pipeOutlet) {
         try {
-            new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keyHelper.getSignatureHelper(), message);
+            new CreateAsice().createAsiceStreamed(mainAttachment, att, pipeOutlet, keystoreHelper.getSignatureHelper(), message);
         } catch (IOException e) {
             throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
         }

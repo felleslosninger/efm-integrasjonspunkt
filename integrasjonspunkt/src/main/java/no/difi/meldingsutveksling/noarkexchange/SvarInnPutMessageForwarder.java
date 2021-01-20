@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.MessageInformable;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
@@ -22,6 +23,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.status.Conversation;
+import org.slf4j.MDC;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -52,6 +54,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
     }
 
     private void forward(Forsendelse forsendelse, Reject reject) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, forsendelse.getId());
         SvarInnPutMessageBuilder builder = new SvarInnPutMessageBuilder(forsendelse, clock, putMessageRequestFactory);
         svarInnService.getAttachments(forsendelse, reject).forEach(builder::streamedFile);
         if (!Strings.isNullOrEmpty(properties.getFiks().getInn().getFallbackSenderOrgNr())) {

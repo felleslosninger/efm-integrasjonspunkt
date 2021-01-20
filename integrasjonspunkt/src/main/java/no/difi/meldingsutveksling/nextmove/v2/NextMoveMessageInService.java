@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -17,6 +18,7 @@ import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +57,7 @@ public class NextMoveMessageInService {
     public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
         NextMoveInMessage message = messageRepo.peek(input)
                 .orElseThrow(NoContentException::new);
+        MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
 
         messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));

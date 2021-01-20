@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="false">
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
 
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
     <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
     <springProperty name="enableLoggingProxy" source="app.logger.enableLoggingProxy"/>
     <springProperty name="destination" source="app.logger.destination"/>
     <springProperty name="destination2" source="app.logger.destination2"/>
+    <springProperty name="stdoutAppender" source="app.logger.stdoutAppender"/>
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
     <springProperty name="clientId" source="difi.move.oidc.clientId"/>
@@ -130,9 +136,29 @@
         </then>
     </if>
 
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <logstashMarkers/>
+                <pattern>
+                    <pattern>
+                        {
+                        "level": "%level",
+                        "message": "%replace(%msg){'[0-9]{11}','**********'}",
+                        "stack_trace": "%replace(%ex{full}){'[0-9]{11}','**********'}",
+                        "class": "%class",
+                        "method": "%method",
+                        "appname": "@project.artifactId@"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
         <appender-ref ref="FILE"/>
     </root>
 

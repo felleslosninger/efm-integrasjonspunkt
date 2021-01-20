@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.PipedOutputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,8 +54,10 @@ public class AltinnWsClient {
     private final ApplicationContext context;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
-    @Getter(lazy = true, value = AccessLevel.PRIVATE) private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic = brokerServiceExternalBasicSF();
-    @Getter(lazy = true, value = AccessLevel.PRIVATE) private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed = brokerServiceExternalBasicStreamedSF();
+    @Getter(lazy = true, value = AccessLevel.PRIVATE)
+    private final IBrokerServiceExternalBasic iBrokerServiceExternalBasic = brokerServiceExternalBasicSF();
+    @Getter(lazy = true, value = AccessLevel.PRIVATE)
+    private final IBrokerServiceExternalBasicStreamed iBrokerServiceExternalBasicStreamed = brokerServiceExternalBasicStreamedSF();
 
     public void send(UploadRequest request) {
         String senderReference = initiateBrokerService(request);
@@ -126,8 +129,8 @@ public class AltinnWsClient {
         return idMarker.and(statusCodeMarker).and(textMarker);
     }
 
-    public List<FileReference> availableFiles(String orgnr) {
-        return getBrokerServiceAvailableFileList(orgnr)
+    public List<FileReference> availableFiles() {
+        return getBrokerServiceAvailableFileList()
                 .map(BrokerServiceAvailableFileList::getBrokerServiceAvailableFile)
                 .orElse(Collections.emptyList())
                 .stream()
@@ -135,19 +138,33 @@ public class AltinnWsClient {
                 .collect(Collectors.toList());
     }
 
-    private Optional<BrokerServiceAvailableFileList> getBrokerServiceAvailableFileList(String orgnr) {
+    public boolean checkIfAvailableFiles() throws IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage {
+        BrokerServicePoll params = new BrokerServicePoll();
+        ArrayOfstring recipients = new ArrayOfstring();
+        recipients.getString().add(configuration.getOrgnr());
+        params.setRecipients(recipients);
+
+        ObjectFactory of = new ObjectFactory();
+        JAXBElement<String> serviceCode = of.createBrokerServicePollExternalServiceCode(configuration.getExternalServiceCode());
+        params.setExternalServiceCode(serviceCode);
+        params.setExternalServiceEditionCode(configuration.getExternalServiceEditionCode());
+
+        return getIBrokerServiceExternalBasic().checkIfAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), params);
+    }
+
+    private Optional<BrokerServiceAvailableFileList> getBrokerServiceAvailableFileList() {
         try {
-            return Optional.of(getIBrokerServiceExternalBasic().getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch(orgnr)));
+            return Optional.of(getIBrokerServiceExternalBasic().getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch()));
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             log.error(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReasonFactory.from(e));
             return Optional.empty();
         }
     }
 
-    private BrokerServiceSearch getBrokerServiceSearch(String orgnr) {
+    private BrokerServiceSearch getBrokerServiceSearch() {
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
-        searchParameters.setReportee(orgnr);
+        searchParameters.setReportee(configuration.getOrgnr());
         ObjectFactory of = new ObjectFactory();
         JAXBElement<String> serviceCode = of.createBrokerServiceAvailableFileExternalServiceCode(configuration.getExternalServiceCode());
         searchParameters.setExternalServiceCode(serviceCode);
@@ -209,7 +226,7 @@ public class AltinnWsClient {
 
     private IBrokerServiceExternalBasic brokerServiceExternalBasicSF() {
         BrokerServiceExternalBasicSF brokerServiceExternalBasicSF;
-        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(configuration.getBrokerServiceUrl());
+        brokerServiceExternalBasicSF = new BrokerServiceExternalBasicSF(Objects.requireNonNull(configuration).getBrokerServiceUrl());
         IBrokerServiceExternalBasic service = brokerServiceExternalBasicSF.getBasicHttpBindingIBrokerServiceExternalBasic();
         BindingProvider bp = (BindingProvider) service;
         bp.getRequestContext().put(JAXWSProperties.REQUEST_TIMEOUT, configuration.getRequestTimeout());
@@ -220,7 +237,7 @@ public class AltinnWsClient {
 
     private IBrokerServiceExternalBasicStreamed brokerServiceExternalBasicStreamedSF() {
         BrokerServiceExternalBasicStreamedSF brokerServiceExternalBasicStreamedSF;
-        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(configuration.getStreamingServiceUrl());
+        brokerServiceExternalBasicStreamedSF = new BrokerServiceExternalBasicStreamedSF(Objects.requireNonNull(configuration).getStreamingServiceUrl());
         IBrokerServiceExternalBasicStreamed streamingService = brokerServiceExternalBasicStreamedSF.getBasicHttpBindingIBrokerServiceExternalBasicStreamed(new MTOMFeature(true));
 
         BindingProvider bp = (BindingProvider) streamingService;

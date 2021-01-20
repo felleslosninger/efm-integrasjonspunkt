@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.domain.kvittering.KvitteringsInfo;
 import no.difi.sdp.client2.domain.kvittering.LeveringsKvittering;
 import org.junit.Before;
@@ -15,7 +15,7 @@ import java.time.Instant;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReceiptTypeTest {

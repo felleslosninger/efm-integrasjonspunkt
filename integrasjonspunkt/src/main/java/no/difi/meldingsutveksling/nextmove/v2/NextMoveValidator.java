@@ -16,7 +16,10 @@ import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
+import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
+import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -26,6 +29,7 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateExpiredException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +57,11 @@ public class NextMoveValidator {
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
+    private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
 
     void validate(StandardBusinessDocument sbd) {
+        validateCertificate();
+
         sbd.getOptionalMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
                             .map(p -> {
@@ -99,6 +106,8 @@ public class NextMoveValidator {
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
+        validateCertificate();
+
         // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
@@ -150,6 +159,17 @@ public class NextMoveValidator {
                 .noneMatch(BusinessMessageFile::getPrimaryDocument)) {
             throw new MissingPrimaryDocumentException();
         }
+    }
+
+    private void validateCertificate() {
+        certificateValidator.ifAvailable(v -> {
+            try {
+                v.validateCertificate();
+            } catch (CertificateExpiredException | VirksertCertificateException e) {
+                log.error("Certificate validation failed", e);
+                throw new InvalidCertificateException(e.getMessage());
+            }
+        });
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) {
