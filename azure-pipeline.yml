@@ -15,6 +15,7 @@ extends:
     dockerhubPush: true
     dockerhubRepo: difi/integrasjonspunkt
     dockerfile: integrasjonspunkt/Dockerfile
+    coverageTool: none
 
 trigger:
   batch: true
