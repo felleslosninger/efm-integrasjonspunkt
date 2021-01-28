@@ -222,6 +222,8 @@ public class IntegrasjonspunktProperties {
         private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
         private ServiceBus serviceBus;
+        @NotNull
+        private Set<ServiceIdentifier> statusServices;
 
     }
 
