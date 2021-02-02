@@ -4,7 +4,6 @@ services:
   integrasjonspunkt:
     build: integrasjonspunkt
     image: digdir/integrasjonspunkt
-  difitag:
-    extends:
-      service: integrasjonspunkt
-      image: difi/integrasjonspunkt
+  integrasjonspunkt_difitag:
+    build: integrasjonspunkt
+    image: difi/integrasjonspunkt
