@@ -14,6 +14,7 @@ extends:
     coverageTool: none
     buildDockerArtifact: true
     dockerhubPush: true
+    dockerRegistryEndpoint: dockerhub-difi
 
 trigger:
   batch: true
