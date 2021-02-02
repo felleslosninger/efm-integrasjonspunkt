@@ -1,0 +1,10 @@
+version: '3.3'
+
+services:
+  integrasjonspunkt:
+    build: integrasjonspunkt
+    image: digdir/integrasjonspunkt
+  difitag:
+    extends:
+      service: integrasjonspunkt
+      image: difi/integrasjonspunkt

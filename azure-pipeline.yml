@@ -4,18 +4,16 @@ resources:
       type: github
       name: felleslosninger/efm-eproc-pipeline
       endpoint: felleslosninger
-      ref: feature-dockerhub_push
+      ref: feature-dockerhub_compose
 
 extends:
   template: build-and-deploy-template.yml@efm-eproc-pipeline
   parameters:
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
-    buildDockerArtifact: false
-    dockerhubPush: true
-    dockerhubRepo: difi/integrasjonspunkt
-    dockerfile: integrasjonspunkt/Dockerfile
     coverageTool: none
+    buildDockerArtifact: true
+    dockerhubPush: true
 
 trigger:
   batch: true
