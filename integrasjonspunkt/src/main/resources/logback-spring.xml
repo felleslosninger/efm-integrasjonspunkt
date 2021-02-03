@@ -71,14 +71,6 @@
                 </if>
             </root>
 
-            <logger name="STATUS" level="INFO" additivity="false">
-                <appender-ref ref="stash"/>
-                <if condition='isDefined("destination2")'>
-                    <then>
-                        <appender-ref ref="stash2"/>
-                    </then>
-                </if>
-            </logger>
         </then>
     </if>
 
