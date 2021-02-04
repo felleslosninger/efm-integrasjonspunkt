@@ -11,7 +11,10 @@ extends:
   parameters:
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
-    buildDockerArtifact: false
+    coverageTool: none
+    buildDockerArtifact: true
+    dockerhubPush: true
+    dockerRegistryEndpoint: dockerhub-difi
 
 trigger:
   batch: true
