@@ -4,7 +4,7 @@ resources:
       type: github
       name: felleslosninger/efm-eproc-pipeline
       endpoint: felleslosninger
-      ref: feature-dockerhub_compose
+      ref: development
 
 extends:
   template: build-and-deploy-template.yml@efm-eproc-pipeline
