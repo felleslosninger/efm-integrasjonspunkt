@@ -16,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +47,9 @@ public class IpMailSender {
         mailProps.put("mail.smtp.host", props.getMail().getSmtpHost());
         mailProps.put("mail.smtp.port", props.getMail().getSmtpPort());
         mailProps.put("mail.smtp.starttls.enable", "true");
-        mailProps.put("mail.smtp.auth", props.getMail().getEnableAuth());
+        if (!isNullOrEmpty(props.getMail().getEnableAuth())) {
+            mailProps.put("mail.smtp.auth", props.getMail().getEnableAuth());
+        }
 
         String trust = props.getMail().getTrust();
         if (!isNullOrEmpty(trust)) {

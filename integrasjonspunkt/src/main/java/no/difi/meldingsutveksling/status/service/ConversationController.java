@@ -15,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
@@ -45,6 +46,7 @@ public class ConversationController {
     }
 
     @DeleteMapping("{id}")
+    @Transactional
     public void deleteById(@PathVariable("id") Long id) {
         conversationRepository.deleteById(id);
     }
@@ -59,6 +61,7 @@ public class ConversationController {
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
+    @Transactional
     @DeleteMapping("messageId/{messageId}")
     public void deleteByMessageId(@PathVariable("messageId") String messageId) {
         conversationRepository.deleteByMessageId(messageId);

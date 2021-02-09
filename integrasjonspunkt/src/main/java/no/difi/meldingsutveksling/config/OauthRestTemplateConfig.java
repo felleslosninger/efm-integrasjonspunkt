@@ -6,12 +6,9 @@ import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -66,15 +63,9 @@ public class OauthRestTemplateConfig {
 
     @Bean
     public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .useSystemProperties()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(5000)
-                        .setConnectionRequestTimeout(5000)
-                        .setSocketTimeout(5000)
-                        .build())
-                .build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
 
         if (props.getOidc().isEnable()) {
             DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.ks.svarut
 
-import lombok.extern.slf4j.Slf4j
 import net.logstash.logback.marker.LogstashMarker
 import net.logstash.logback.marker.Markers
 import no.difi.meldingsutveksling.QueueInterruptException
@@ -19,7 +18,6 @@ import javax.xml.transform.stream.StreamResult
 class SvarUtFaultInterceptor : ClientInterceptor {
 
     val log = logger()
-    private val logMarkers: LogstashMarker = Markers.append("service_identifier", "DPF")
 
     /**
      * Processes the incoming response fault. Called for response fault messages before payload handling in the [ ].
@@ -36,11 +34,15 @@ class SvarUtFaultInterceptor : ClientInterceptor {
      */
     override fun handleFault(messageContext: MessageContext): Boolean {
         val soapFault = formatSoapFault(messageContext.response.payloadSource)
-        log.error(logMarkers.and<LogstashMarker>(Markers.append("soap_fault", soapFault)), "Failed to send message");
-        if (soapFault.contains("Duplikat") || soapFault.contains("Forsendelse med samme mottaker")) {
-            throw QueueInterruptException(soapFault)
+        val markers = Markers.append("service_identifier", "DPF")
+            .and<LogstashMarker>(Markers.append("soap_fault", soapFault))
+        log.error(markers, "Failed to send message")
+        when {
+            soapFault.contains("Duplikat") ||
+                    soapFault.contains("Forsendelse med samme mottaker") ||
+                    soapFault.contains("Ugyldig innhold") -> throw QueueInterruptException(soapFault)
+            else -> throw SoapFaultException("Failed to send message")
         }
-        throw SoapFaultException("Failed to send message")
     }
 
     private fun formatSoapFault(source: Source): String {
@@ -52,8 +54,7 @@ class SvarUtFaultInterceptor : ClientInterceptor {
         try {
             transformer.transform(source, sr)
         } catch (e: TransformerException) {
-            log.error(this.logMarkers, "Failed to marshall webservice response to XML string", e)
-            return ""
+            throw SoapFaultException("Failed to marshall webservice response to XML string", e)
         }
         return sw.toString()
     }
@@ -81,5 +82,8 @@ class SvarUtFaultInterceptor : ClientInterceptor {
     override fun afterCompletion(messageContext: MessageContext?, ex: Exception?) {
     }
 
-    internal class SoapFaultException(msg: String) : WebServiceClientException(msg)
+    internal class SoapFaultException : WebServiceClientException {
+        constructor(msg: String, t: Throwable) : super(msg, t)
+        constructor(msg: String) : super(msg)
+    }
 }
