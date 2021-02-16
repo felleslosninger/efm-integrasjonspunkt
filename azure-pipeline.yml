@@ -12,10 +12,11 @@ extends:
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
     coverageTool: none
-    buildDockerArtifact: true
-    dockerhubPush: true
+    buildDockerArtifact: false
+    dockerhubPush: false
     dockerRegistryEndpoint: dockerhub-difi
     gpgSignJars: true
+    mavenGoals: deploy
 
 trigger:
   batch: true
