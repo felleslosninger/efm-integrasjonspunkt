@@ -4,7 +4,7 @@ resources:
       type: github
       name: felleslosninger/efm-eproc-pipeline
       endpoint: felleslosninger
-      ref: development
+      ref: feature-MOVE-2212_ossrh
 
 extends:
   template: build-and-deploy-template.yml@efm-eproc-pipeline
@@ -15,6 +15,7 @@ extends:
     buildDockerArtifact: true
     dockerhubPush: true
     dockerRegistryEndpoint: dockerhub-difi
+    gpgSignJars: true
 
 trigger:
   batch: true
