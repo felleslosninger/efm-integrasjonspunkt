@@ -17,28 +17,28 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ServiceTransaction complex type.
+ * Java class for ServiceTransaction complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="ServiceTransaction">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="TypeOfServiceTransaction" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}TypeOfServiceTransaction" />
- *       &lt;attribute name="IsNonRepudiationRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="IsAuthenticationRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="IsNonRepudiationOfReceiptRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="IsIntelligibleCheckRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="IsApplicationErrorResponseRequested" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="TimeToAcknowledgeReceipt" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="TimeToAcknowledgeAcceptance" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="TimeToPerform" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="Recurrence" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="ServiceTransaction">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <attribute name="TypeOfServiceTransaction" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}TypeOfServiceTransaction" />
+ *       <attribute name="IsNonRepudiationRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="IsAuthenticationRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="IsNonRepudiationOfReceiptRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="IsIntelligibleCheckRequired" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="IsApplicationErrorResponseRequested" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="TimeToAcknowledgeReceipt" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="TimeToAcknowledgeAcceptance" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="TimeToPerform" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       <attribute name="Recurrence" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ServiceTransaction")

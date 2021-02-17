@@ -15,7 +15,7 @@ extends:
     buildDockerArtifact: false
     dockerhubPush: false
     dockerRegistryEndpoint: dockerhub-difi
-    gpgSignJars: true
+    deployOssrh: true
     mavenGoals: deploy
 
 trigger:

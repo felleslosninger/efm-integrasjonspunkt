@@ -26,22 +26,22 @@ import java.util.Set;
 
 
 /**
- * <p>Java class for Scope complex type.
+ * Java class for Scope complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="Scope">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;group ref="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ScopeAttributes"/>
- *         &lt;element ref="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ScopeInformation" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="Scope">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <group ref="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ScopeAttributes"/>
+ *         <element ref="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ScopeInformation" maxOccurs="unbounded" minOccurs="0"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Scope", propOrder = {
@@ -92,6 +92,8 @@ public class Scope {
      * {@link JAXBElement }{@code <}{@link BusinessService }{@code >}
      * {@link JAXBElement }{@code <}{@link CorrelationInformation }{@code >}
      * {@link JAXBElement }{@code <}{@link Object }{@code >}
+     *
+     * @return scope information
      */
     public Set<CorrelationInformation> getScopeInformation() {
         if (scopeInformation == null) {

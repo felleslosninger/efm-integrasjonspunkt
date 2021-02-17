@@ -38,7 +38,6 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
 /**
  * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
- * <p/>
  * Has factory methods of writing/reading from to zip files via input/output streams.
  */
 @Slf4j
@@ -103,6 +102,9 @@ public class AltinnPackage {
      * Writes the Altinn package as a Zip file
      *
      * @param outputStream where the Zip file is written
+     * @param context {@link ApplicationContext}
+     *
+     * @throws IOException
      */
     public void write(OutputStream outputStream, ApplicationContext context) throws IOException {
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);

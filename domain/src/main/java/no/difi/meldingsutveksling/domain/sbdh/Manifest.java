@@ -24,22 +24,22 @@ import java.util.Set;
 
 
 /**
- * <p>Java class for Manifest complex type.
+ * Java class for Manifest complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="Manifest">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="NumberOfItems" type="{http://www.w3.org/2001/XMLSchema}integer"/>
- *         &lt;element name="ManifestItem" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ManifestItem" maxOccurs="unbounded"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="Manifest">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <element name="NumberOfItems" type="{http://www.w3.org/2001/XMLSchema}integer"/>
+ *         <element name="ManifestItem" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ManifestItem" maxOccurs="unbounded"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Manifest", propOrder = {
@@ -83,6 +83,8 @@ public class Manifest {
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ManifestItem }
+     *
+     * @return Set of {@link ManifestItem}
      */
     public Set<ManifestItem> getManifestItem() {
         if (manifestItem == null) {

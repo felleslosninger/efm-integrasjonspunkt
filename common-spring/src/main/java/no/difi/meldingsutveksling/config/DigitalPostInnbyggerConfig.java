@@ -14,10 +14,6 @@ import org.springframework.util.unit.DataSize;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-/**
- *
- * @author Nikolai Luthman <nikolai dot luthman at inmeta dot no>
- */
 @Data
 public class DigitalPostInnbyggerConfig {
 

@@ -24,26 +24,26 @@ import java.time.OffsetDateTime;
 
 
 /**
- * <p>Java class for DocumentIdentification complex type.
+ * Java class for DocumentIdentification complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="DocumentIdentification">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Standard" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="TypeVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="InstanceIdentifier" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="Type" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="MultipleType" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="CreationDateAndTime" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="DocumentIdentification">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <element name="Standard" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <element name="TypeVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <element name="InstanceIdentifier" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <element name="Type" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <element name="MultipleType" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         <element name="CreationDateAndTime" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DocumentIdentification", propOrder = {
