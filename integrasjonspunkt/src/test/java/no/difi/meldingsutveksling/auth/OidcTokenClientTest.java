@@ -54,8 +54,8 @@ public class OidcTokenClientTest {
 
         props.setOidc(new IntegrasjonspunktProperties.Oidc());
         props.getOidc().setEnable(true);
-        props.getOidc().setUrl(new URL("https://oidc-ver2.difi.no/idporten-oidc-provider/token"));
-        props.getOidc().setAudience("https://oidc-ver2.difi.no/idporten-oidc-provider/");
+        props.getOidc().setUrl(new URL("https://ver2.maskinporten.no/token"));
+        props.getOidc().setAudience("https://ver2.maskinporten.no/");
         props.getOidc().setClientId("test_move");
         props.getOidc().setKeystore(new KeystoreProperties());
         props.getOidc().getKeystore().setLockProvider(false);
