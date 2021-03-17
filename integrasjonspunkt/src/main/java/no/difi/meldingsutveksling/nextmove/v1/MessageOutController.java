@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v1;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -46,7 +45,7 @@ public class MessageOutController {
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultInnsynskravProcess(),
-                    DocumentType.INNSYNSKRAV,
+                    properties.getEinnsyn().getDefaultInnsynskravDocumentType(),
                     new InnsynskravMessage()
                             .setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
                             .setEpost(message.getCustomProperties().getOrDefault("epost", ""))
@@ -58,7 +57,7 @@ public class MessageOutController {
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultJournalProcess(),
-                    DocumentType.PUBLISERING,
+                    properties.getEinnsyn().getDefaultJournalDocumentType(),
                     new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
             );
         }

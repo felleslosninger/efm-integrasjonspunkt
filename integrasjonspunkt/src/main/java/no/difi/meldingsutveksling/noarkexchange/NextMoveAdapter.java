@@ -17,7 +17,6 @@ import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
@@ -85,7 +84,7 @@ public class NextMoveAdapter {
                 message.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
-                DocumentType.ARKIVMELDING_KVITTERING,
+                properties.getArkivmelding().getReceiptDocumentType(),
                 receipt);
         return nextMoveMessageService.createMessage(sbd);
     }
@@ -118,7 +117,7 @@ public class NextMoveAdapter {
                 conversationId,
                 conversationId,
                 process,
-                DocumentType.ARKIVMELDING,
+                properties.getArkivmelding().getDefaultDocumentType(),
                 new ArkivmeldingMessage()
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)

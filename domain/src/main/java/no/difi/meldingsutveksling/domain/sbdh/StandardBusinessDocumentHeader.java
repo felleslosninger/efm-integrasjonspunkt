@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import no.difi.meldingsutveksling.DocumentType;
-import no.difi.meldingsutveksling.Process;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
@@ -170,9 +168,9 @@ public class StandardBusinessDocumentHeader {
         private String journalPostId;
         private String conversationId;
         private String messageId;
-        private DocumentType documentType;
-        private String standard;
-        private Process process;
+        private String type;
+        private String documentType;
+        private String process;
 
         public Builder from(Organisasjonsnummer avsender) {
             this.avsender = avsender;
@@ -189,17 +187,17 @@ public class StandardBusinessDocumentHeader {
             return this;
         }
 
-        public Builder type(DocumentType documentType) {
+        public Builder documentType(String documentType) {
             this.documentType = documentType;
             return this;
         }
 
-        public Builder standard(String standard) {
-            this.standard = standard;
+        public Builder type(String type) {
+            this.type = type;
             return this;
         }
 
-        public Builder process(Process process) {
+        public Builder process(String process) {
             this.process = process;
             return this;
         }
@@ -220,7 +218,7 @@ public class StandardBusinessDocumentHeader {
                     .addSender(createSender(avsender))
                     .addReceiver(createReciever(mottaker))
                     .setBusinessScope(createBusinessScope(fromConversationId(conversationId)))
-                    .setDocumentIdentification(createDocumentIdentification(messageId, documentType, standard));
+                    .setDocumentIdentification(createDocumentIdentification(messageId, type, documentType));
             if (StringUtils.hasText(journalPostId)) {
                 sbdh.getBusinessScope().getScope().add(fromJournalPostId(journalPostId));
             }
@@ -241,15 +239,15 @@ public class StandardBusinessDocumentHeader {
                             .setAuthority(orgNummer.authority()));
         }
 
-        private DocumentIdentification createDocumentIdentification(String messageId, DocumentType documentType, String standard) {
+        private DocumentIdentification createDocumentIdentification(String messageId, String type, String documentType) {
             if (documentType == null) {
-                throw new MeldingsUtvekslingRuntimeException("IsDocumentType must be set");
+                throw new MeldingsUtvekslingRuntimeException("DocumentType must be set");
             }
 
             return new DocumentIdentification()
                     .setCreationDateAndTime(OffsetDateTime.now())
-                    .setStandard(standard)
-                    .setType(documentType.getType())
+                    .setStandard(documentType)
+                    .setType(type)
                     .setTypeVersion(TYPE_VERSION)
                     .setInstanceIdentifier(messageId);
         }
@@ -276,7 +274,7 @@ public class StandardBusinessDocumentHeader {
                 throw new MeldingsUtvekslingRuntimeException("Process must be set");
             }
 
-            return new Scope().setIdentifier(process.getValue());
+            return new Scope().setIdentifier(process);
         }
     }
 }

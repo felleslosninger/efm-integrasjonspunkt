@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Getter
 public enum DocumentType {
+
+    FIKSIO("fiksio", ApiType.NEXTMOVE),
 
     STATUS("status", ApiType.NEXTMOVE),
 
@@ -59,6 +62,15 @@ public enum DocumentType {
         return Arrays.stream(DocumentType.values())
                 .filter(p -> p.type.equalsIgnoreCase(type))
                 .findAny();
+    }
+
+    public static Optional<DocumentType> valueOfDocumentType(String documentType) {
+        if (Strings.isNullOrEmpty(documentType)) {
+            return Optional.empty();
+        }
+        return Arrays.stream(DocumentType.values())
+            .filter(d -> documentType.endsWith("::"+d.getType()))
+            .findFirst();
     }
 
     public static Optional<DocumentType> valueOf(String type, ApiType api) {

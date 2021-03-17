@@ -98,7 +98,6 @@ public class NextMoveValidator {
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
-
                 {
                         group
                 } : new Class<?>[0]);

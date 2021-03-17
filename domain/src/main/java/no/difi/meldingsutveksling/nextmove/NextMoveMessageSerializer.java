@@ -39,6 +39,8 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
             gen.writeFieldName(DocumentType.ARKIVMELDING_KVITTERING.getType());
         } else if (value.getAny() instanceof EinnsynKvitteringMessage) {
             gen.writeFieldName(DocumentType.EINNSYN_KVITTERING.getType());
+        } else if (value.getAny() instanceof FiksIoMessage) {
+            gen.writeFieldName(DocumentType.FIKSIO.getType());
         }
         gen.writeObject(value.getAny());
         gen.writeEndObject();

@@ -1,11 +1,13 @@
-package no.difi.meldingsutveksling.kvittering
+package no.difi.meldingsutveksling.dokumentpakking.service
 
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import no.difi.meldingsutveksling.DocumentType
-import no.difi.meldingsutveksling.Process
+import no.difi.meldingsutveksling.DateTimeUtil
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory
+import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.StatusMessage
@@ -13,25 +15,34 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SBDReceiptFactoryTest {
+class SbdFactoryTest {
 
     @MockK
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
     @MockK
     lateinit var sbdUtil: SBDUtil
+    @MockK
+    lateinit var props: IntegrasjonspunktProperties
 
-    private lateinit var sbdReceiptFactory: SBDReceiptFactory
+    val clock: Clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DateTimeUtil.DEFAULT_ZONE_ID)
+    private lateinit var sbdFactory: SBDFactory
 
-    private val status = "urn:no:difi:eformidling:xsd::status"
+    private val arkivmeldingResponseProcess = "urn:no:difi:profile:arkivmelding:response:ver1.0"
+    private val einnsynResponseProcess = "urn:no:difi:profile:einnsyn:response:ver1.0"
+    private val statusDocType = "urn:no:difi:eformidling:xsd::status"
     private val senderOrgnr = "910076787"
     private val receiverOrgnr = "991825827"
     private val convId = "e3016cb7-39de-4166-a935-3a574cd2a2db"
     private val msgId = "4653f436-8921-4224-b824-068f2cc6232f"
 
     val sbd: StandardBusinessDocument = mockk {
+        every { receiver } returns Organisasjonsnummer.from(receiverOrgnr)
+        every { sender } returns Organisasjonsnummer.from(senderOrgnr)
         every { senderIdentifier } returns senderOrgnr
         every { receiverIdentifier } returns receiverOrgnr
         every { conversationId } returns convId
@@ -41,20 +52,29 @@ class SBDReceiptFactoryTest {
     @Before
     fun before() {
         MockKAnnotations.init(this)
-        sbdReceiptFactory = SBDReceiptFactory(serviceRegistryLookup, sbdUtil)
+        sbdFactory = SBDFactory(serviceRegistryLookup, sbdUtil, clock, props)
 
-        every { serviceRegistryLookup.getDocumentIdentifier(any(), any()) } returns status
+        every { props.arkivmelding } returns mockk {
+            every { receiptProcess } returns arkivmeldingResponseProcess
+        }
+        every { props.einnsyn } returns mockk {
+            every { receiptProcess } returns einnsynResponseProcess
+        }
+        every { props.nextmove } returns mockk {
+            every { statusDocumentType } returns statusDocType
+            every { defaultTtlHours } returns 24
+        }
     }
 
     @Test
     fun `test status creation from arkivmelding message`() {
         every { sbdUtil.isArkivmelding(sbd) } returns true
 
-        val statusSbd = sbdReceiptFactory.createStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT)
+        val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
 
         assertEquals(statusSbd.receiverIdentifier, senderOrgnr)
         assertEquals(statusSbd.senderIdentifier, receiverOrgnr)
-        assertEquals(Process.ARKIVMELDING_RESPONSE.value, statusSbd.process)
+        assertEquals(arkivmeldingResponseProcess, statusSbd.process)
         assertTrue(statusSbd.any is StatusMessage)
         assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessage).status)
     }
@@ -64,7 +84,7 @@ class SBDReceiptFactoryTest {
         every { sbdUtil.isArkivmelding(sbd) } returns false
         every { sbdUtil.isEinnsyn(sbd) } returns true
 
-        val statusSbd = sbdReceiptFactory.createStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT)
-        assertEquals(Process.EINNSYN_RESPONSE.value, statusSbd.process)
+        val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
+        assertEquals(einnsynResponseProcess, statusSbd.process)
     }
 }

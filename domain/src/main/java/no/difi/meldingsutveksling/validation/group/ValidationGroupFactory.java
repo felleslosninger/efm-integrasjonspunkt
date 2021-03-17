@@ -9,6 +9,8 @@ public class ValidationGroupFactory {
 
     public static Class<?> toDocumentType(DocumentType in) {
         switch (in) {
+            case FIKSIO:
+                return ValidationGroups.DocumentType.FiksIo.class;
             case ARKIVMELDING:
                 return ValidationGroups.DocumentType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
@@ -44,6 +46,8 @@ public class ValidationGroupFactory {
                 return ValidationGroups.ServiceIdentifier.DPO.class;
             case DPV:
                 return ValidationGroups.ServiceIdentifier.DPV.class;
+            case DPFIO:
+                return ValidationGroups.ServiceIdentifier.DPFIO.class;
             default:
                 return null;
         }

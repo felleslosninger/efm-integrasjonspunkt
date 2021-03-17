@@ -58,6 +58,8 @@ public class FiksConfig {
         @NotNull
         private String process;
         @NotNull
+        private String documentType;
+        @NotNull
         private Integer connectTimeout;
         @NotNull
         private Integer readTimeout;

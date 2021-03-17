@@ -3,11 +3,10 @@ package no.difi.meldingsutveksling.nextmove
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import no.difi.meldingsutveksling.DocumentType
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.context.annotation.Lazy
@@ -35,12 +34,12 @@ class ResponseStatusSender(
 @Component
 open class ResponseStatusSenderProxy(
     @Lazy val internalQueue: InternalQueue,
-    private val receiptFactory: SBDReceiptFactory
+    private val sbdFactory: SBDFactory
 ) {
 
     @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000 * 60 * 10))
     open fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
-        receiptFactory.createStatusFrom(sbd, DocumentType.STATUS, status)
+        sbdFactory.createStatusFrom(sbd, status)
             ?.let { NextMoveOutMessage.of(it, si) }
             ?.let(internalQueue::enqueueNextMove)
     }

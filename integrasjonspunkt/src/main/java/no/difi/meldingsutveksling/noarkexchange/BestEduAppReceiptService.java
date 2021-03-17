@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -13,10 +12,6 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.KvitteringStatusMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
-import no.difi.meldingsutveksling.noarkexchange.ConversationIdEntity;
-import no.difi.meldingsutveksling.noarkexchange.ConversationIdEntityRepo;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,7 +67,7 @@ public class BestEduAppReceiptService {
                 sbd.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
-                DocumentType.ARKIVMELDING_KVITTERING,
+                properties.getArkivmelding().getReceiptDocumentType(),
                 kvittering);
 
         NextMoveOutMessage message = nextMoveMessageService.createMessage(receiptSbd);

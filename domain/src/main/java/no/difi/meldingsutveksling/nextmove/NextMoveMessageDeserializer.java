@@ -47,6 +47,9 @@ public class NextMoveMessageDeserializer extends StdDeserializer<BusinessMessage
         if (DocumentType.EINNSYN_KVITTERING.getType().equals(p.getCurrentName())) {
             return p.getCodec().treeToValue(node, ArkivmeldingKvitteringMessage.class);
         }
+        if (DocumentType.FIKSIO.getType().equals(p.getCurrentName())) {
+            return p.getCodec().treeToValue(node, FiksIoMessage.class);
+        }
         return null;
     }
 }

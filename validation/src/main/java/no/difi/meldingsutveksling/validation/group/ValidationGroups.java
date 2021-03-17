@@ -6,6 +6,9 @@ public interface ValidationGroups {
 
     interface DocumentType extends Default {
 
+        interface FiksIo extends DocumentType {
+        }
+
         interface Arkivmelding extends DocumentType {
         }
 
@@ -49,6 +52,9 @@ public interface ValidationGroups {
         }
 
         interface DPV extends ServiceIdentifier {
+        }
+
+        interface DPFIO extends ServiceIdentifier {
         }
     }
 

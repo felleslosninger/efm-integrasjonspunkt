@@ -70,8 +70,9 @@ public class StandardBusinessDocument {
 
     @XmlAnyElement(lax = true)
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
+    @JsonAlias({"fiksio", "arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @NotNull
+    @InstanceOf(value = FiksIoMessage.class, groups = ValidationGroups.DocumentType.FiksIo.class)
     @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
     @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.DocumentType.Avtalt.class)
     @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
