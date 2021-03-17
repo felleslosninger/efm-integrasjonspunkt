@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -39,25 +39,26 @@ public class SBDFactory {
                                                       String process,
                                                       String documentType,
                                                       Object any) {
-        Optional<DocumentType> type = DocumentType.valueOfDocumentType(documentType);
+        Optional<MessageType> type = MessageType.valueOfDocumentType(documentType);
         if (!type.isPresent()) {
             try {
                 ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrgNummer())
                     .process(process).conversationId(conversationId).build(), documentType);
                 if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPFIO) {
-                    type = Optional.of(DocumentType.FIKSIO);
+                    type = Optional.of(MessageType.FIKSIO);
                 }
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker.getOrgNummer()), e);
             }
         }
+        String messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: "+documentType)).getType();
 
         return new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setHeaderVersion(HEADER_VERSION)
                 .addSender(createSender(avsender))
                 .addReceiver(createReceiver(mottaker))
-                .setDocumentIdentification(createDocumentIdentification(documentType, type.get().getType(), messageId))
+                .setDocumentIdentification(createDocumentIdentification(documentType, messageType, messageId))
                 .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
             ).setAny(any);
     }
@@ -104,12 +105,12 @@ public class SBDFactory {
     }
 
     private DocumentIdentification createDocumentIdentification(String documentType,
-                                                                String type,
+                                                                String messageType,
                                                                 String messageId) {
         return new DocumentIdentification()
             .setCreationDateAndTime(OffsetDateTime.now(clock))
             .setStandard(documentType)
-            .setType(type)
+            .setType(messageType)
             .setTypeVersion(TYPE_VERSION_2)
             .setInstanceIdentifier(messageId);
     }

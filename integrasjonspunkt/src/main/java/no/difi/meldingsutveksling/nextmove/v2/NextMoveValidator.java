@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
@@ -36,8 +36,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
-import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
+import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
+import static no.difi.meldingsutveksling.MessageType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 
@@ -82,14 +82,13 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        DocumentType type = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
         String documentType = sbd.getDocumentType();
 
-        // TODO messagetype -> documenttype validation
-        if (!type.fitsDocumentIdentifier(documentType) || serviceRecord.getServiceIdentifier() == DPFIO) {
-            throw new DocumentTypeDoNotFitDocumentStandardException(type, documentType);
+        if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
+            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
         }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);

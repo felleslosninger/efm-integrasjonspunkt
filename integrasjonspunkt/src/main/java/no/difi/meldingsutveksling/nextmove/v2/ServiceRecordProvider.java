@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ReceiverDoNotAcceptProcessException;
+import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -31,7 +31,7 @@ public class ServiceRecordProvider {
                     parameterBuilder.build(),
                     sbd.getDocumentType());
         } catch (ServiceRegistryLookupException e) {
-            throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
+            throw new ReceiverDoesNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }
     }
 }

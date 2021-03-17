@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -15,27 +15,27 @@ public class SBDUtil {
     private final Clock clock;
 
     public boolean isNextMove(StandardBusinessDocument sbd) {
-        return DocumentType.valueOfType(sbd.getMessageType())
-                .map(DocumentType::getApi)
+        return MessageType.valueOfType(sbd.getMessageType())
+                .map(MessageType::getApi)
                 .map(p -> p == ApiType.NEXTMOVE)
                 .orElse(false);
     }
 
     public boolean isReceipt(StandardBusinessDocument sbd) {
-        return DocumentType.valueOfType(sbd.getMessageType())
-                .map(DocumentType::isReceipt)
+        return MessageType.valueOfType(sbd.getMessageType())
+                .map(MessageType::isReceipt)
                 .orElse(false);
     }
 
     public boolean isStatus(StandardBusinessDocument sbd) {
-        return DocumentType.valueOfType(sbd.getMessageType())
-                .map(dt -> dt == DocumentType.STATUS)
+        return MessageType.valueOfType(sbd.getMessageType())
+                .map(dt -> dt == MessageType.STATUS)
                 .orElse(false);
     }
 
-    public boolean isType(StandardBusinessDocument sbd, DocumentType documentType) {
-        return DocumentType.valueOfType(sbd.getMessageType())
-                .map(dt -> dt == documentType)
+    public boolean isType(StandardBusinessDocument sbd, MessageType messageType) {
+        return MessageType.valueOfType(sbd.getMessageType())
+                .map(dt -> dt == messageType)
                 .orElse(false);
     }
 
@@ -51,16 +51,16 @@ public class SBDUtil {
     }
 
     public boolean isArkivmelding(StandardBusinessDocument sbd) {
-        return (isType(sbd, DocumentType.ARKIVMELDING)) || (isType(sbd, DocumentType.ARKIVMELDING_KVITTERING));
+        return (isType(sbd, MessageType.ARKIVMELDING)) || (isType(sbd, MessageType.ARKIVMELDING_KVITTERING));
     }
 
     public boolean isEinnsyn(StandardBusinessDocument sbd) {
-        return isType(sbd, DocumentType.INNSYNSKRAV) || isType(sbd, DocumentType.PUBLISERING) || isType(sbd, DocumentType.EINNSYN_KVITTERING);
+        return isType(sbd, MessageType.INNSYNSKRAV) || isType(sbd, MessageType.PUBLISERING) || isType(sbd, MessageType.EINNSYN_KVITTERING);
     }
 
     public boolean isFileRequired(StandardBusinessDocument sbd) {
         return !isStatus(sbd) &&
                 !isReceipt(sbd) &&
-                !isType(sbd, DocumentType.AVTALT);
+                !isType(sbd, MessageType.AVTALT);
     }
 }

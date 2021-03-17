@@ -97,14 +97,8 @@ class NextMoveValidatorTest {
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
-    @Test(expected = ReceiverDoNotAcceptDocumentStandard::class)
-    fun `receiver must accept standard`() {
-        every { serviceRecord.documentTypes } returns emptyList()
-        nextMoveValidator.validate(sbd)
-    }
-
-    @Test(expected = DocumentTypeDoNotFitDocumentStandardException::class)
-    fun `standard must fit document type`() {
+    @Test(expected = MessageTypeDoesNotFitDocumentTypeException::class)
+    fun `message type must fit document type`() {
         every { sbd.documentType } returns "foo::bar"
         nextMoveValidator.validate(sbd)
     }
@@ -144,6 +138,18 @@ class NextMoveValidatorTest {
         val file = BasicNextMoveFile.of("title", "foo.txt", "text", "foo".toByteArray())
         nextMoveValidator.validateFile(message, file)
     }
+
+    @Test
+    fun `unknown document type allowed for fiksio message`() {
+        every { sbd.documentType } returns "foo::bar"
+        every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
+        every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
+        every { sbd.any } returns mockkClass(FiksIoMessage::class)
+        every { asserter.isValid(any<FiksIoMessage>(), any()) } just Runs
+
+        nextMoveValidator.validate(sbd)
+    }
+
 
     @Test
     fun `dpo message does not require title`() {

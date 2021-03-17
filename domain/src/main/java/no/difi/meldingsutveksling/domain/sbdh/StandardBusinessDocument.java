@@ -72,14 +72,14 @@ public class StandardBusinessDocument {
     @JsonDeserialize(using = NextMoveMessageDeserializer.class)
     @JsonAlias({"fiksio", "arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @NotNull
-    @InstanceOf(value = FiksIoMessage.class, groups = ValidationGroups.DocumentType.FiksIo.class)
-    @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.DocumentType.Arkivmelding.class)
-    @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.DocumentType.Avtalt.class)
-    @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.DocumentType.Digital.class)
-    @InstanceOf(value = DigitalDpvMessage.class, groups = ValidationGroups.DocumentType.DigitalDpv.class)
-    @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.DocumentType.Print.class)
-    @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.DocumentType.Innsynskrav.class)
-    @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.DocumentType.Publisering.class)
+    @InstanceOf(value = FiksIoMessage.class, groups = ValidationGroups.MessageType.FiksIo.class)
+    @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.MessageType.Arkivmelding.class)
+    @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.MessageType.Avtalt.class)
+    @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.MessageType.Digital.class)
+    @InstanceOf(value = DigitalDpvMessage.class, groups = ValidationGroups.MessageType.DigitalDpv.class)
+    @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.MessageType.Print.class)
+    @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.MessageType.Innsynskrav.class)
+    @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.MessageType.Publisering.class)
     private Object any;
 
     @JsonIgnore

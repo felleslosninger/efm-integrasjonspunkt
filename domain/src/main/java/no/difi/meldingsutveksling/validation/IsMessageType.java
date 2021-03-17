@@ -15,9 +15,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 @Target({FIELD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
-public @interface IsDocumentType {
+public @interface IsMessageType {
 
-    String message() default "{no.difi.meldingsutveksling.validation.IsDocumentType}";
+    String message() default "{no.difi.meldingsutveksling.validation.IsMessageType}";
 
     Class<?>[] groups() default {};
 

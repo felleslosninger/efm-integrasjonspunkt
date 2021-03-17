@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling;
 
 import com.google.common.base.Strings;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,31 +11,31 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Getter
-public enum DocumentType {
+public enum MessageType {
 
-    FIKSIO("fiksio", ApiType.NEXTMOVE),
 
     STATUS("status", ApiType.NEXTMOVE),
+    FEIL("feil", ApiType.NEXTMOVE),
 
-    ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
     ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE),
+    ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
 
     AVTALT("avtalt", ApiType.NEXTMOVE),
 
+    FIKSIO("fiksio", ApiType.NEXTMOVE),
     DIGITAL("digital", ApiType.NEXTMOVE),
     DIGITAL_DPV("digital_dpv", ApiType.NEXTMOVE),
     PRINT("print", ApiType.NEXTMOVE),
 
-    EINNSYN_KVITTERING("einnsyn_kvittering", ApiType.NEXTMOVE),
     INNSYNSKRAV("innsynskrav", ApiType.NEXTMOVE),
     PUBLISERING("publisering", ApiType.NEXTMOVE),
+    EINNSYN_KVITTERING("einnsyn_kvittering", ApiType.NEXTMOVE),
 
     BESTEDU_KVITTERING("kvittering", ApiType.BESTEDU),
     BESTEDU_MELDING("melding", ApiType.BESTEDU);
 
-    private static final Set<DocumentType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING, BESTEDU_KVITTERING);
+    private static final Set<MessageType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING, BESTEDU_KVITTERING);
 
     private final String type;
     private final ApiType api;
@@ -49,30 +48,30 @@ public enum DocumentType {
         return documentIdentifier.endsWith("::" + type);
     }
 
-    public static DocumentType[] values(ApiType api) {
+    public static MessageType[] values(ApiType api) {
         return stream(api)
-                .toArray(DocumentType[]::new);
+                .toArray(MessageType[]::new);
     }
 
-    public static Optional<DocumentType> valueOfType(String type) {
+    public static Optional<MessageType> valueOfType(String type) {
         if (type == null) {
             return Optional.empty();
         }
-        return Arrays.stream(DocumentType.values())
+        return Arrays.stream(MessageType.values())
                 .filter(p -> p.type.equalsIgnoreCase(type))
                 .findAny();
     }
 
-    public static Optional<DocumentType> valueOfDocumentType(String documentType) {
+    public static Optional<MessageType> valueOfDocumentType(String documentType) {
         if (Strings.isNullOrEmpty(documentType)) {
             return Optional.empty();
         }
-        return Arrays.stream(DocumentType.values())
+        return Arrays.stream(MessageType.values())
             .filter(d -> documentType.endsWith("::"+d.getType()))
             .findFirst();
     }
 
-    public static Optional<DocumentType> valueOf(String type, ApiType api) {
+    public static Optional<MessageType> valueOf(String type, ApiType api) {
         if (type == null) {
             return Optional.empty();
         }
@@ -81,8 +80,8 @@ public enum DocumentType {
                 .findAny();
     }
 
-    public static Stream<DocumentType> stream(ApiType api) {
-        return Arrays.stream(DocumentType.values())
+    public static Stream<MessageType> stream(ApiType api) {
+        return Arrays.stream(MessageType.values())
                 .filter(p -> p.api == api);
     }
 }

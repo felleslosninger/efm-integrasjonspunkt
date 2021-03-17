@@ -4,12 +4,15 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.mockkClass
 import no.difi.meldingsutveksling.DateTimeUtil
+import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory
+import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
@@ -32,6 +35,7 @@ class SbdFactoryTest {
     val clock: Clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DateTimeUtil.DEFAULT_ZONE_ID)
     private lateinit var sbdFactory: SBDFactory
 
+    private val arkivmeldingProcess = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0"
     private val arkivmeldingResponseProcess = "urn:no:difi:profile:arkivmelding:response:ver1.0"
     private val einnsynResponseProcess = "urn:no:difi:profile:einnsyn:response:ver1.0"
     private val statusDocType = "urn:no:difi:eformidling:xsd::status"
@@ -86,5 +90,35 @@ class SbdFactoryTest {
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
         assertEquals(einnsynResponseProcess, statusSbd.process)
+    }
+
+    @Test(expected = MeldingsUtvekslingRuntimeException::class)
+    fun `test message type validation`() {
+        every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns mockk {
+            every { serviceIdentifier } returns ServiceIdentifier.DPO
+            every { documentTypes } returns listOf("foo::bar")
+        }
+
+        sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(senderOrgnr),
+            Organisasjonsnummer.from(receiverOrgnr),
+            convId, msgId,
+            arkivmeldingProcess,
+            "foo::bar",
+            mockkClass(ArkivmeldingMessage::class))
+    }
+
+    @Test
+    fun `unknown document type allowed for fiksio message type`() {
+        every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns mockk {
+            every { serviceIdentifier } returns ServiceIdentifier.DPFIO
+            every { documentTypes } returns listOf("foo::bar")
+        }
+
+        sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(senderOrgnr),
+            Organisasjonsnummer.from(receiverOrgnr),
+            convId, msgId,
+            arkivmeldingProcess,
+            "foo::bar",
+            mockkClass(ArkivmeldingMessage::class))
     }
 }
