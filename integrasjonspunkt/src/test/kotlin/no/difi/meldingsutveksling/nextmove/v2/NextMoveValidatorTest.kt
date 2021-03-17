@@ -24,7 +24,7 @@ import java.util.*
 class NextMoveValidatorTest {
 
     @MockK
-    lateinit var nextMoveServiceRecordProvider: NextMoveServiceRecordProvider
+    lateinit var serviceRecordProvider: ServiceRecordProvider
     @MockK
     lateinit var nextMoveMessageOutRepository: NextMoveMessageOutRepository
     @MockK
@@ -58,7 +58,7 @@ class NextMoveValidatorTest {
     @Before
     fun before() {
         MockKAnnotations.init(this)
-        nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
+        nextMoveValidator = NextMoveValidator(serviceRecordProvider,
             nextMoveMessageOutRepository,
             conversationStrategyFactory,
             asserter,
@@ -89,28 +89,27 @@ class NextMoveValidatorTest {
         every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { sbd.messageType } returns "arkivmelding"
-        every { sbd.standard } returns "standard::arkivmelding"
+        every { sbd.documentType } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
-        every { serviceRecord.hasStandard(any()) } returns true
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
     @Test(expected = ReceiverDoNotAcceptDocumentStandard::class)
     fun `receiver must accept standard`() {
-        every { serviceRecord.hasStandard(any()) } returns false
+        every { serviceRecord.documentTypes } returns emptyList()
         nextMoveValidator.validate(sbd)
     }
 
     @Test(expected = DocumentTypeDoNotFitDocumentStandardException::class)
     fun `standard must fit document type`() {
-        every { sbd.standard } returns "foo::bar"
+        every { sbd.documentType } returns "foo::bar"
         nextMoveValidator.validate(sbd)
     }
 
-    @Test(expected = UnknownNextMoveDocumentTypeException::class)
+    @Test(expected = UnknownMessageTypeException::class)
     fun `document type must be valid`() {
         every { sbd.messageType } returns "foo"
         nextMoveValidator.validate(sbd)

@@ -228,7 +228,7 @@ public class CorrespondenceAgencyMessageFactory {
                             .conversationId(message.getConversationId())
                             .process(message.getSbd().getProcess())
                             .build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }

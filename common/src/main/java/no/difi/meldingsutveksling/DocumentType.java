@@ -21,7 +21,7 @@ public enum DocumentType {
     STATUS("status", ApiType.NEXTMOVE),
 
     ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
-    ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE, ARKIVMELDING_KVITTERING),
+    ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE),
 
     AVTALT("avtalt", ApiType.NEXTMOVE),
 
@@ -30,17 +30,16 @@ public enum DocumentType {
     PRINT("print", ApiType.NEXTMOVE),
 
     EINNSYN_KVITTERING("einnsyn_kvittering", ApiType.NEXTMOVE),
-    INNSYNSKRAV("innsynskrav", ApiType.NEXTMOVE, EINNSYN_KVITTERING),
-    PUBLISERING("publisering", ApiType.NEXTMOVE, EINNSYN_KVITTERING),
+    INNSYNSKRAV("innsynskrav", ApiType.NEXTMOVE),
+    PUBLISERING("publisering", ApiType.NEXTMOVE),
 
     BESTEDU_KVITTERING("kvittering", ApiType.BESTEDU),
-    BESTEDU_MELDING("melding", ApiType.BESTEDU, BESTEDU_KVITTERING);
+    BESTEDU_MELDING("melding", ApiType.BESTEDU);
 
     private static final Set<DocumentType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING, BESTEDU_KVITTERING);
 
     private final String type;
     private final ApiType api;
-    private DocumentType receipt;
 
     public boolean isReceipt() {
         return RECEIPTS.contains(this);

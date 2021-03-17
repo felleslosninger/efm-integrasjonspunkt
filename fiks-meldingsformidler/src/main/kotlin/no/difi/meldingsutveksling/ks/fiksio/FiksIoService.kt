@@ -51,7 +51,8 @@ class FiksIoService(private val fiksIoKlient: FiksIOKlient,
                 SRParameter.builder(msg.receiverIdentifier)
                         .process(msg.sbd.process)
                         .conversationId(msg.conversationId).build(),
-                msg.sbd.standard)
+                msg.sbd.documentType
+        )
         val request = MeldingRequest.builder()
                 .mottakerKontoId(KontoId(UUID.fromString(serviceRecord.service.endpointUrl)))
                 .meldingType(serviceRecord.service.serviceCode)

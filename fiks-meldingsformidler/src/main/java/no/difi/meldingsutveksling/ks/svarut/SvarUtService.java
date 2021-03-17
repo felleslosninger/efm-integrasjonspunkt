@@ -42,7 +42,7 @@ public class SvarUtService {
                             .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()), e);
         }

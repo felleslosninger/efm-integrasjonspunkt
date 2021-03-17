@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 
 import java.util.stream.Collectors;
 
-public class UnknownNextMoveDocumentTypeException extends HttpStatusCodeException {
+public class UnknownMessageTypeException extends HttpStatusCodeException {
 
-    public UnknownNextMoveDocumentTypeException(String value) {
+    public UnknownMessageTypeException(String value) {
         super(HttpStatus.BAD_REQUEST,
-                UnknownNextMoveDocumentTypeException.class.getName(),
+                UnknownMessageTypeException.class.getName(),
                 value, DocumentType.stream(ApiType.NEXTMOVE)
                         .filter(p -> !p.isReceipt())
                         .map(DocumentType::getType)

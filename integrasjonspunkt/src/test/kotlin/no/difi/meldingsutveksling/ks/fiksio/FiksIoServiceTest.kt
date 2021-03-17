@@ -64,7 +64,7 @@ internal class FiksIoServiceTest {
         every { sbd.process } returns process
         every { sbd.receiverIdentifier } returns orgnr
         every { sbd.senderIdentifier } returns orgnr
-        every { sbd.standard } returns documenttype
+        every { sbd.documentType } returns documenttype
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
 
         val payload = StringPayload("foo", "foo.txt")

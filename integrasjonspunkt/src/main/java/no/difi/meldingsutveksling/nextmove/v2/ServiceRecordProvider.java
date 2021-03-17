@@ -12,24 +12,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class NextMoveServiceRecordProvider {
+public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
-        BusinessMessage businessMessage = sbd.getBusinessMessage();
+        BusinessMessage<?> businessMessage = sbd.getBusinessMessage();
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier());
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
+                .process(sbd.getProcess());
 
             sbd.getOptionalConversationId().ifPresent(parameterBuilder::conversationId);
 
             if (businessMessage.getSikkerhetsnivaa() != null) {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
-            parameterBuilder.process(sbd.getProcess());
             return serviceRegistryLookup.getServiceRecord(
                     parameterBuilder.build(),
-                    sbd.getStandard());
+                    sbd.getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }

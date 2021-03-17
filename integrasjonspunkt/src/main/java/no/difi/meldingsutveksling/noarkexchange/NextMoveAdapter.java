@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
@@ -102,7 +101,7 @@ public class NextMoveAdapter {
         try {
             receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
         }
@@ -151,7 +150,7 @@ public class NextMoveAdapter {
         try {
             serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
         }

@@ -38,8 +38,7 @@ import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 
 @Component
@@ -47,7 +46,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 @RequiredArgsConstructor
 public class NextMoveValidator {
 
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRecordProvider serviceRecordProvider;
     private final NextMoveMessageOutRepository messageRepo;
     private final ConversationStrategyFactory conversationStrategyFactory;
     private final Asserter asserter;
@@ -83,17 +82,14 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
+        DocumentType type = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
-        String standard = sbd.getStandard();
+        String documentType = sbd.getDocumentType();
 
-        if (!documentType.fitsDocumentIdentifier(standard)) {
-            throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
-        }
-
-        if (!serviceRecord.hasStandard(standard)) {
-            throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
+        // TODO messagetype -> documenttype validation
+        if (!type.fitsDocumentIdentifier(documentType) || serviceRecord.getServiceIdentifier() == DPFIO) {
+            throw new DocumentTypeDoNotFitDocumentStandardException(type, documentType);
         }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
