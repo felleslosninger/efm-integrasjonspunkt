@@ -25,7 +25,7 @@ import java.time.Clock;
 
 @Slf4j
 @Configuration
-@ConditionalOnProperty({"difi.move.feature.enableDPF", "difi.move.fiks.inn.enabled"})
+@ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
 public class DpfPollingConfig {
 
     @Bean
