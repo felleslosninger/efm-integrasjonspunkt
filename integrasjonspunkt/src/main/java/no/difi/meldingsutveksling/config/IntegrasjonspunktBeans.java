@@ -130,7 +130,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    @ConditionalOnProperty({"difi.move.feature.enableDPF", "difi.move.fiks.inn.enabled"})
+    @ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
     public SvarInnConnectionCheck svarInnConnectionCheck(SvarInnClient svarInnClient) {
         return new SvarInnConnectionCheck(svarInnClient);
     }
