@@ -24,6 +24,7 @@ class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
     val log = logger()
 
     init {
+        if (props.fiks.io.senderOrgnr.isNullOrBlank()) throw IllegalArgumentException("difi.move.fiks.io.sender-orgnr must not be null")
         fiksIOKlient.newSubscription { mottattMelding, svarSender ->
             handleMessage(mottattMelding, svarSender)
         }
@@ -31,9 +32,8 @@ class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
 
     private fun handleMessage(mottattMelding: MottattMelding, svarSender: SvarSender) {
         log.debug("FiksIO: Received message with fiksId=${mottattMelding.meldingId} protocol=${mottattMelding.meldingType}")
-        // TODO sender orgnr
         val sbd = sbdFactory.createNextMoveSBD(
-            Organisasjonsnummer.from("TODO"),
+            Organisasjonsnummer.from(props.fiks.io.senderOrgnr),
             Organisasjonsnummer.from(props.org.number),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingId.toString(),

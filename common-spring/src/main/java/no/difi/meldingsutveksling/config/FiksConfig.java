@@ -25,6 +25,7 @@ public class FiksConfig {
     @Data
     @ToString(exclude = "integrasjonsPassord")
     public static class FiksIO {
+        private String senderOrgnr;
         private String host;
         private String apiHost;
         private String kontoId;

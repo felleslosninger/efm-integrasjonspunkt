@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.NextMoveQueue
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
@@ -20,20 +20,18 @@ import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
-import kotlin.test.assertEquals
 
 class FiksIoSubscriberTest {
 
     @MockK
     lateinit var fiksIOKlient: FiksIOKlient
-
-    @MockK
-    lateinit var objectMapper: ObjectMapper
-
     @MockK
     lateinit var nextMoveQueue: NextMoveQueue
+    @MockK
+    lateinit var sbdFactory: SBDFactory
+    @MockK
+    lateinit var props: IntegrasjonspunktProperties
 
-    lateinit var sbdCapture: CapturingSlot<StandardBusinessDocument>
     lateinit var zipInputStream: ZipInputStream
     lateinit var sbd: StandardBusinessDocument
     lateinit var fiksIoSubscriber: FiksIoSubscriber
@@ -48,19 +46,18 @@ class FiksIoSubscriberTest {
         val zos = ZipOutputStream(bos)
         zos.putNextEntry(ZipEntry(SBD_FILE))
         val sbdBytes = sbdStream.readBytes()
-        sbd = ObjectMapper().registerModule(JavaTimeModule()).readValue(sbdBytes, StandardBusinessDocument::class.java)
         zos.write(sbdBytes)
         zos.closeEntry()
         zos.close()
         zipInputStream = ZipInputStream(bos.toByteArray().inputStream())
 
-        sbdCapture = slot()
-
         every { fiksIOKlient.newSubscription(any()) } just Runs
-        every { objectMapper.readValue(any<ByteArray>(), StandardBusinessDocument::class.java) } returns sbd
-        every { nextMoveQueue.enqueueIncomingMessage(capture(sbdCapture), ServiceIdentifier.DPFIO, any()) } just Runs
+        every { props.org.number } returns "123123123"
+        every { props.fiks.io.senderOrgnr } returns "321321321"
+        every { sbdFactory.createNextMoveSBD(any(), any(), any(), any(), any(),  any(), any()) } returns mockkClass(StandardBusinessDocument::class)
+        every { nextMoveQueue.enqueueIncomingMessage(any(), any(), any()) } just Runs
 
-        fiksIoSubscriber = FiksIoSubscriber(fiksIOKlient, objectMapper, nextMoveQueue)
+        fiksIoSubscriber = FiksIoSubscriber(fiksIOKlient, sbdFactory, props, nextMoveQueue)
     }
 
     @Test
@@ -79,7 +76,6 @@ class FiksIoSubscriberTest {
         m.isAccessible = true
         m.invoke(fiksIoSubscriber, mottattMelding, svarSender)
 
-        assertEquals("ff88849c-e281-4809-8555-7cd54952b916", sbdCapture.captured.messageId)
         verify { nextMoveQueue.enqueueIncomingMessage(any(), ServiceIdentifier.DPFIO, any()) }
         verify { svarSender.ack() }
     }

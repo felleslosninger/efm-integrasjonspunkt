@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
+import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.pipes.PromiseMaker
+import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
@@ -22,6 +24,7 @@ class FiksIoService(
     private val fiksIoKlient: FiksIOKlient,
     private val serviceRegistryLookup: ServiceRegistryLookup,
     private val persister: OptionalCryptoMessagePersister,
+    private val conversationService: ConversationService,
     private val promise: PromiseMaker
 ) {
     val log = logger()
@@ -49,7 +52,7 @@ class FiksIoService(
             .meldingType(serviceRecord.process)
             .build()
         val sentMessage = fiksIoKlient.send(request, payloads)
-        // TODO register mottatt/levert statuses?
+        conversationService.registerStatus(msg.messageId, ReceiptStatus.LEVERT)
         log.debug("FiksIO: Sent message with fiksId=${sentMessage.meldingId}")
     }
 
