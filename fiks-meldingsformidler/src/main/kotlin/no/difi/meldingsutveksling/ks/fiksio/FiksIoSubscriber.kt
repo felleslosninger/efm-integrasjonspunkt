@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.fiksio
 
+import no.difi.meldingsutveksling.MessageType
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.DpfioPolling
 import no.difi.meldingsutveksling.api.NextMoveQueue
@@ -41,6 +42,7 @@ class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingType,
             mottattMelding.meldingType,
+            MessageType.FIKSIO,
             FiksIoMessage()
         )
         nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPFIO, mottattMelding.kryptertStream)

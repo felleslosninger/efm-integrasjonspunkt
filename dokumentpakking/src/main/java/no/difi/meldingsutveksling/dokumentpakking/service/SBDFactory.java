@@ -51,8 +51,18 @@ public class SBDFactory {
                 throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker.getOrgNummer()), e);
             }
         }
-        String messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: "+documentType)).getType();
+        MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: "+documentType));
+        return createNextMoveSBD(avsender, mottaker, conversationId, messageId, process, documentType, messageType, any);
+    }
 
+    public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
+                                                      Organisasjonsnummer mottaker,
+                                                      String conversationId,
+                                                      String messageId,
+                                                      String process,
+                                                      String documentType,
+                                                      MessageType messageType,
+                                                      Object any) {
         return new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setHeaderVersion(HEADER_VERSION)
@@ -105,12 +115,12 @@ public class SBDFactory {
     }
 
     private DocumentIdentification createDocumentIdentification(String documentType,
-                                                                String messageType,
+                                                                MessageType messageType,
                                                                 String messageId) {
         return new DocumentIdentification()
             .setCreationDateAndTime(OffsetDateTime.now(clock))
             .setStandard(documentType)
-            .setType(messageType)
+            .setType(messageType.getType())
             .setTypeVersion(TYPE_VERSION_2)
             .setInstanceIdentifier(messageId);
     }
