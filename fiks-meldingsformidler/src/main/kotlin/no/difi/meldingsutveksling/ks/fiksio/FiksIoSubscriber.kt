@@ -13,17 +13,19 @@ import no.ks.fiks.io.client.SvarSender
 import no.ks.fiks.io.client.model.MottattMelding
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
-class FiksIoSubscriber(fiksIOKlient: FiksIOKlient,
+class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
                        private val sbdFactory: SBDFactory,
                        private val props: IntegrasjonspunktProperties,
                        private val nextMoveQueue: NextMoveQueue): DpfioPolling {
 
     val log = logger()
 
-    init {
+    @PostConstruct
+    fun registerSubscriber() {
         if (props.fiks.io.senderOrgnr.isNullOrBlank()) throw IllegalArgumentException("difi.move.fiks.io.sender-orgnr must not be null")
         fiksIOKlient.newSubscription { mottattMelding, svarSender ->
             handleMessage(mottattMelding, svarSender)
