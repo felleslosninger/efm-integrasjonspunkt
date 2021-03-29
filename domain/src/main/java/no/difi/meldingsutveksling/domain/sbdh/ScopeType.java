@@ -12,6 +12,10 @@ public enum ScopeType {
         this.fullname = fullname;
     }
 
+    public String getFullname() {
+        return fullname;
+    }
+
     @Override
     public String toString() {
         return this.fullname;
