@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.DocumentType;
@@ -9,13 +10,16 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownNextMoveDocumentTypeException;
-import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.sdp.client2.domain.fysisk_post.Posttype;
+import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
+import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
@@ -95,27 +99,47 @@ public class NextMoveOutMessageFactory {
             if (dpiMessage.getMottaker() == null) {
                 dpiMessage.setMottaker(new PostAddress());
             }
-
             setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
+            if (dpiMessage.getRetur() == null) {
+                dpiMessage.setRetur(new MailReturn()
+                    .setMottaker(new PostAddress())
+                    .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
+            }
             setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
+
+            if (dpiMessage.getUtskriftsfarge() == null) {
+                dpiMessage.setUtskriftsfarge(Utskriftsfarge.SORT_HVIT);
+            }
+
+            if (dpiMessage.getPosttype() == null) {
+                dpiMessage.setPosttype(Posttype.B_OEKONOMI);
+            }
+
         }
     }
 
-    private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srReceiver) {
+    private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srPostAddress) {
         if (!StringUtils.hasText(receiver.getNavn())) {
-            receiver.setNavn(srReceiver.getName());
+            receiver.setNavn(srPostAddress.getName());
         }
-        if (!StringUtils.hasText(receiver.getAdresselinje1())) {
-            receiver.setAdresselinje1(srReceiver.getStreet());
+        if (Strings.isNullOrEmpty(receiver.getAdresselinje1())) {
+            String[] addressLines = srPostAddress.getStreet().split(";");
+            for (int i=0; i < Math.min(addressLines.length, 4); i++) {
+                try {
+                    PropertyUtils.setProperty(receiver, "adresselinje"+(i+1), addressLines[i]);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new NextMoveRuntimeException(e);
+                }
+            }
         }
         if (!StringUtils.hasText(receiver.getPostnummer())) {
-            receiver.setPostnummer(srReceiver.getPostalCode());
+            receiver.setPostnummer(srPostAddress.getPostalCode());
         }
         if (!StringUtils.hasText(receiver.getPoststed())) {
-            receiver.setPoststed(srReceiver.getPostalArea());
+            receiver.setPoststed(srPostAddress.getPostalArea());
         }
         if (!StringUtils.hasText(receiver.getLand())) {
-            receiver.setLand(srReceiver.getCountry());
+            receiver.setLand(srPostAddress.getCountry());
         }
     }
 }
