@@ -25,7 +25,7 @@ Feature: Sending a nextmove DPFIO message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "20c8849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "20c8849c-e281-4809-8555-7cd54952b917",
                 "standard": "no.digdir.einnsyn.v1",
                 "type": "fiksio",
                 "typeVersion": "2.0"

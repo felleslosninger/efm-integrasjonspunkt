@@ -49,6 +49,7 @@ public class FiksConfig {
     @Data
     @ToString(exclude = "password")
     public static class SvarInn {
+        private boolean enable;
         @NotNull
         private String baseUrl;
         private String username;

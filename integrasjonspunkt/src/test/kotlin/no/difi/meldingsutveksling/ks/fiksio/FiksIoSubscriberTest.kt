@@ -37,7 +37,7 @@ class FiksIoSubscriberTest {
         every { fiksIOKlient.newSubscription(any()) } just Runs
         every { props.org.number } returns "123123123"
         every { props.fiks.io.senderOrgnr } returns "321321321"
-        every { sbdFactory.createNextMoveSBD(any(), any(), any(), any(), any(),  any(), any()) } returns mockkClass(StandardBusinessDocument::class)
+        every { sbdFactory.createNextMoveSBD(any(), any(), any(), any(), any(),  any(), any(), any()) } returns mockkClass(StandardBusinessDocument::class)
         every { nextMoveQueue.enqueueIncomingMessage(any(), any(), any()) } just Runs
 
         fiksIoSubscriber = FiksIoSubscriber(fiksIOKlient, sbdFactory, props, nextMoveQueue)

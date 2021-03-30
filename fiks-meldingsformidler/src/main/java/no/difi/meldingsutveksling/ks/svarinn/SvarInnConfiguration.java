@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 @ComponentScan(basePackageClasses = {

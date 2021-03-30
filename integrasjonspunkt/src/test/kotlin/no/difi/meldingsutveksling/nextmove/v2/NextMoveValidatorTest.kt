@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.Scope
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
@@ -94,6 +96,8 @@ class NextMoveValidatorTest {
         every { sbd.messageType } returns "arkivmelding"
         every { sbd.documentType } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
+        every { sbd.optionalConversationId } returns Optional.of(UUID.randomUUID().toString())
+        every { sbd.findScope(ScopeType.SENDER_REF) } returns Optional.empty()
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 

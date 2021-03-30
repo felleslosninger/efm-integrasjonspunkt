@@ -11,12 +11,14 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
+import no.difi.meldingsutveksling.validation.UUIDValidator;
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -60,6 +62,19 @@ public class NextMoveValidator {
 
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
+
+        // Need to validate scopes manually due to ReceiverRef can be non-UUID
+        UUIDValidator uuidValidator = new UUIDValidator();
+        sbd.getOptionalConversationId().ifPresent(cid -> {
+            if (!uuidValidator.isValid(cid, null)) {
+                throw new NotUUIDException(ScopeType.CONVERSATION_ID.getFullname(), cid);
+            }
+        });
+        sbd.findScope(ScopeType.SENDER_REF).ifPresent(sref -> {
+            if (!uuidValidator.isValid(sref.getInstanceIdentifier(), null)) {
+                throw new NotUUIDException(ScopeType.SENDER_REF.getFullname(), sref.getInstanceIdentifier());
+            }
+        });
 
         sbd.getOptionalMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
