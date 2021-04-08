@@ -66,3 +66,55 @@ Feature: Sending a nextmove DPFIO message
     """
     Testing 1 2 3
     """
+    And the message statuses for the conversation with id = "20c8849c-e281-4809-8555-7cd54952b917" are:
+    """
+    {
+      "content" : [ {
+        "id" : 167,
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
+        "status" : "OPPRETTET",
+        "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
+        "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
+        "convId" : 166
+      }, {
+        "id" : 170,
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
+        "status" : "LEVERT",
+        "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
+        "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
+        "convId" : 166
+      }, {
+        "id" : 171,
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
+        "status" : "SENDT",
+        "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
+        "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
+        "convId" : 166
+      } ],
+      "pageable" : {
+        "sort" : {
+          "sorted" : true,
+          "unsorted" : false,
+          "empty" : false
+        },
+        "offset" : 0,
+        "pageSize" : 10,
+        "pageNumber" : 0,
+        "paged" : true,
+        "unpaged" : false
+      },
+      "last" : true,
+      "totalElements" : 3,
+      "totalPages" : 1,
+      "size" : 10,
+      "number" : 0,
+      "first" : true,
+      "sort" : {
+        "sorted" : true,
+        "unsorted" : false,
+        "empty" : false
+      },
+      "numberOfElements" : 3,
+      "empty" : false
+    }
+  """
