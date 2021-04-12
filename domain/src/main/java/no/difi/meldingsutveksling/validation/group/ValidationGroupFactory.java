@@ -1,32 +1,33 @@
 package no.difi.meldingsutveksling.validation.group;
 
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
 @UtilityClass
 public class ValidationGroupFactory {
 
-    public static Class<?> toDocumentType(DocumentType in) {
+    public static Class<?> toDocumentType(no.difi.meldingsutveksling.MessageType in) {
         switch (in) {
+            case FIKSIO:
+                return ValidationGroups.MessageType.FiksIo.class;
             case ARKIVMELDING:
-                return ValidationGroups.DocumentType.Arkivmelding.class;
+                return ValidationGroups.MessageType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
-                return ValidationGroups.DocumentType.ArkivmeldingKvittering.class;
+                return ValidationGroups.MessageType.ArkivmeldingKvittering.class;
             case AVTALT:
-                return ValidationGroups.DocumentType.Avtalt.class;
+                return ValidationGroups.MessageType.Avtalt.class;
             case PRINT:
-                return ValidationGroups.DocumentType.Print.class;
+                return ValidationGroups.MessageType.Print.class;
             case DIGITAL:
-                return ValidationGroups.DocumentType.Digital.class;
+                return ValidationGroups.MessageType.Digital.class;
             case DIGITAL_DPV:
-                return ValidationGroups.DocumentType.DigitalDpv.class;
+                return ValidationGroups.MessageType.DigitalDpv.class;
             case INNSYNSKRAV:
-                return ValidationGroups.DocumentType.Innsynskrav.class;
+                return ValidationGroups.MessageType.Innsynskrav.class;
             case PUBLISERING:
-                return ValidationGroups.DocumentType.Publisering.class;
+                return ValidationGroups.MessageType.Publisering.class;
             case EINNSYN_KVITTERING:
-                return ValidationGroups.DocumentType.EInnsynKvittering.class;
+                return ValidationGroups.MessageType.EInnsynKvittering.class;
             default:
                 return null;
         }
@@ -44,6 +45,8 @@ public class ValidationGroupFactory {
                 return ValidationGroups.ServiceIdentifier.DPO.class;
             case DPV:
                 return ValidationGroups.ServiceIdentifier.DPV.class;
+            case DPFIO:
+                return ValidationGroups.ServiceIdentifier.DPFIO.class;
             default:
                 return null;
         }

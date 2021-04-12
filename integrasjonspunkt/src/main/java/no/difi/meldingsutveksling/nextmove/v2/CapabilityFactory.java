@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.capabilities.Capability;
 import no.difi.meldingsutveksling.domain.capabilities.DocumentType;
@@ -26,7 +27,7 @@ public class CapabilityFactory {
                         .stream()
                         .map(standard -> new DocumentType()
                                 .setStandard(standard)
-                                .setType(getType(standard)))
+                                .setType(getType(standard, serviceRecord)))
                         .collect(Collectors.toList())
                 );
     }
@@ -43,8 +44,9 @@ public class CapabilityFactory {
                 : null;
     }
 
-    private String getType(String standard) {
-        int lastColon = standard.lastIndexOf(':');
-        return lastColon == -1 || lastColon == standard.length() - 1 ? standard : standard.substring(lastColon + 1);
+    String getType(String standard, ServiceRecord record) {
+        return MessageType.valueOfDocumentType(standard)
+            .map(MessageType::getType)
+            .orElseGet(() -> record.getServiceIdentifier() == ServiceIdentifier.DPFIO ? MessageType.FIKSIO.getType() : null);
     }
 }

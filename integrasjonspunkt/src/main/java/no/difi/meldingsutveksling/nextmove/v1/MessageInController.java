@@ -6,16 +6,15 @@ import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
@@ -58,7 +57,7 @@ public class MessageInController {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ConversationService conversationService;
     private final InternalQueue internalQueue;
-    private final SBDReceiptFactory receiptFactory;
+    private final SBDFactory sbdFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
 
     @GetMapping("/peek")
@@ -142,7 +141,7 @@ public class MessageInController {
             conversationService.registerStatus(conversationId, ReceiptStatus.INNKOMMENDE_LEVERT);
 
             if (message.getServiceIdentifier() == DPE) {
-                StandardBusinessDocument statusSbd = receiptFactory.createStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+                StandardBusinessDocument statusSbd = sbdFactory.createStatusFrom(message.getSbd(), ReceiptStatus.LEVERT);
                 if (statusSbd != null) {
                     NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
                     internalQueue.enqueueNextMove(msg);

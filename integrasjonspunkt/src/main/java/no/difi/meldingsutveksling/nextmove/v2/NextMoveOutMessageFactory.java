@@ -3,13 +3,16 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.exceptions.UnknownNextMoveDocumentTypeException;
+import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
+import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
@@ -28,7 +31,7 @@ import java.time.OffsetDateTime;
 public class NextMoveOutMessageFactory {
 
     private final IntegrasjonspunktProperties properties;
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
 
@@ -91,10 +94,10 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
+        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
-        if (documentType == DocumentType.PRINT) {
+        if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
             if (dpiMessage.getMottaker() == null) {
                 dpiMessage.setMottaker(new PostAddress());

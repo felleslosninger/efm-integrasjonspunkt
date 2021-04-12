@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.validation.group.sequenceprovider;
 
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.hibernate.validator.spi.group.DefaultGroupSequenceProvider;
@@ -16,7 +16,7 @@ public class StandardBusinessDocumentGroupSequenceProvider implements DefaultGro
         List<Class<?>> defaultGroupSequence = new ArrayList<>();
         defaultGroupSequence.add(StandardBusinessDocument.class);
 
-        getType(input).flatMap(type -> DocumentType.valueOfType(type).map(ValidationGroupFactory::toDocumentType))
+        getType(input).flatMap(type -> MessageType.valueOfType(type).map(ValidationGroupFactory::toDocumentType))
                 .ifPresent(defaultGroupSequence::add);
 
         return defaultGroupSequence;

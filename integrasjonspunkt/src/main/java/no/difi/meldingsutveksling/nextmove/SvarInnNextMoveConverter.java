@@ -9,7 +9,6 @@ import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.AsicHandler;
@@ -58,7 +57,7 @@ public class SvarInnNextMoveConverter {
                 forsendelse.getId(),
                 forsendelse.getId(),
                 properties.getFiks().getInn().getProcess(),
-                DocumentType.ARKIVMELDING,
+                properties.getFiks().getInn().getDocumentType(),
                 new ArkivmeldingMessage());
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
             sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));

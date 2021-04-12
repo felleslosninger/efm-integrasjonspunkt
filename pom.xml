@@ -146,7 +146,6 @@
         <module>validation</module>
         <module>nextmove</module>
         <module>domain</module>
-        <module>kvittering</module>
         <module>altinn-client</module>
         <module>post-til-virksomhet</module>
         <module>post-til-private</module>
@@ -247,11 +246,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>altinnexchange</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>kvittering</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

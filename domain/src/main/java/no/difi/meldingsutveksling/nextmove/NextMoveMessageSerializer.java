@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.io.IOException;
@@ -20,25 +20,27 @@ public class NextMoveMessageSerializer extends StdSerializer<StandardBusinessDoc
         gen.writeFieldName("standardBusinessDocumentHeader");
         gen.writeObject(value.getStandardBusinessDocumentHeader());
         if (value.getAny() instanceof ArkivmeldingMessage) {
-            gen.writeFieldName(DocumentType.ARKIVMELDING.getType());
+            gen.writeFieldName(MessageType.ARKIVMELDING.getType());
         } else if (value.getAny() instanceof InnsynskravMessage) {
-            gen.writeFieldName(DocumentType.INNSYNSKRAV.getType());
+            gen.writeFieldName(MessageType.INNSYNSKRAV.getType());
         } else if (value.getAny() instanceof AvtaltMessage) {
-            gen.writeFieldName(DocumentType.AVTALT.getType());
+            gen.writeFieldName(MessageType.AVTALT.getType());
         } else if (value.getAny() instanceof PubliseringMessage) {
-            gen.writeFieldName(DocumentType.PUBLISERING.getType());
+            gen.writeFieldName(MessageType.PUBLISERING.getType());
         } else if (value.getAny() instanceof DpiDigitalMessage) {
-            gen.writeFieldName(DocumentType.DIGITAL.getType());
+            gen.writeFieldName(MessageType.DIGITAL.getType());
         } else if (value.getAny() instanceof DigitalDpvMessage) {
-            gen.writeFieldName(DocumentType.DIGITAL_DPV.getType());
+            gen.writeFieldName(MessageType.DIGITAL_DPV.getType());
         } else if (value.getAny() instanceof DpiPrintMessage) {
-            gen.writeFieldName(DocumentType.PRINT.getType());
+            gen.writeFieldName(MessageType.PRINT.getType());
         } else if (value.getAny() instanceof StatusMessage) {
-            gen.writeFieldName(DocumentType.STATUS.getType());
+            gen.writeFieldName(MessageType.STATUS.getType());
         } else if (value.getAny() instanceof ArkivmeldingKvitteringMessage) {
-            gen.writeFieldName(DocumentType.ARKIVMELDING_KVITTERING.getType());
+            gen.writeFieldName(MessageType.ARKIVMELDING_KVITTERING.getType());
         } else if (value.getAny() instanceof EinnsynKvitteringMessage) {
-            gen.writeFieldName(DocumentType.EINNSYN_KVITTERING.getType());
+            gen.writeFieldName(MessageType.EINNSYN_KVITTERING.getType());
+        } else if (value.getAny() instanceof FiksIoMessage) {
+            gen.writeFieldName(MessageType.FIKSIO.getType());
         }
         gen.writeObject(value.getAny());
         gen.writeEndObject();

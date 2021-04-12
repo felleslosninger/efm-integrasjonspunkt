@@ -4,33 +4,36 @@ import javax.validation.groups.Default;
 
 public interface ValidationGroups {
 
-    interface DocumentType extends Default {
+    interface MessageType extends Default {
 
-        interface Arkivmelding extends DocumentType {
+        interface FiksIo extends MessageType {
         }
 
-        interface ArkivmeldingKvittering extends DocumentType {
+        interface Arkivmelding extends MessageType {
         }
 
-        interface Avtalt extends DocumentType {
+        interface ArkivmeldingKvittering extends MessageType {
         }
 
-        interface Digital extends DocumentType {
+        interface Avtalt extends MessageType {
         }
 
-        interface DigitalDpv extends DocumentType {
+        interface Digital extends MessageType {
         }
 
-        interface Print extends DocumentType {
+        interface DigitalDpv extends MessageType {
         }
 
-        interface Innsynskrav extends DocumentType {
+        interface Print extends MessageType {
         }
 
-        interface Publisering extends DocumentType {
+        interface Innsynskrav extends MessageType {
         }
 
-        interface EInnsynKvittering extends DocumentType {
+        interface Publisering extends MessageType {
+        }
+
+        interface EInnsynKvittering extends MessageType {
         }
     }
 
@@ -49,6 +52,9 @@ public interface ValidationGroups {
         }
 
         interface DPV extends ServiceIdentifier {
+        }
+
+        interface DPFIO extends ServiceIdentifier {
         }
     }
 

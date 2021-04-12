@@ -20,7 +20,7 @@ public class NextMoveOutMessageFactoryTest {
     @MockBean
     private IntegrasjonspunktProperties props;
     @MockBean
-    private NextMoveServiceRecordProvider serviceRecordProvider;
+    private ServiceRecordProvider serviceRecordProvider;
     @MockBean
     private UUIDGenerator uuidGenerator;
     @MockBean

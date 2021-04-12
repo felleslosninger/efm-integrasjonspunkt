@@ -53,29 +53,12 @@ public class StandardBusinessDocumentHeaderTest {
                 .relatedToJournalPostId("some journalpost")
                 .relatedToConversationId("some conversation")
                 .relatedToMessageId("some messageId")
-                .process(Process.LEGACY)
-                .standard(Standard.LEGACY.getValue())
-                .type(DocumentType.BESTEDU_KVITTERING)
+                .process("some process")
+                .documentType("some document type")
+                .type("some type")
                 .build();
-        assertThat(h.getDocumentIdentification().getStandard()).isEqualTo(Standard.LEGACY.getValue());
-        assertThat(h.getDocumentIdentification().getType()).isEqualTo(DocumentType.BESTEDU_KVITTERING.getType());
-        assertThat(h.getDocumentIdentification().getTypeVersion()).isEqualTo("2.0");
-    }
-
-    @Test
-    public void testBuildMelding() {
-        StandardBusinessDocumentHeader h = new StandardBusinessDocumentHeader.Builder()
-                .from(Organisasjonsnummer.from("123456789"))
-                .to(Organisasjonsnummer.from("123456789"))
-                .relatedToJournalPostId("some journalpost")
-                .relatedToConversationId("some conversation")
-                .relatedToMessageId("some messageId")
-                .process(Process.LEGACY)
-                .standard(Standard.LEGACY.getValue())
-                .type(DocumentType.BESTEDU_MELDING)
-                .build();
-        assertThat(h.getDocumentIdentification().getStandard()).isEqualTo(Standard.LEGACY.getValue());
-        assertThat(h.getDocumentIdentification().getType()).isEqualTo(DocumentType.BESTEDU_MELDING.getType());
+        assertThat(h.getDocumentIdentification().getStandard()).isEqualTo("some document type");
+        assertThat(h.getDocumentIdentification().getType()).isEqualTo("some type");
         assertThat(h.getDocumentIdentification().getTypeVersion()).isEqualTo("2.0");
     }
 
