@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.validation.OneOf;
-import no.difi.meldingsutveksling.validation.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -61,7 +60,6 @@ public class Scope {
     protected String type;
 
     @XmlElement(name = "InstanceIdentifier", required = true)
-    @UUID
     protected String instanceIdentifier;
 
     @XmlElement(name = "Identifier")

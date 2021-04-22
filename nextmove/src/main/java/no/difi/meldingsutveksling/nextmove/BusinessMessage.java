@@ -18,13 +18,13 @@ public abstract class BusinessMessage<T extends BusinessMessage<T>> extends Abst
 
     @NotNull(groups = {
             ValidationGroups.ServiceIdentifier.DPF.class,
-            ValidationGroups.DocumentType.Digital.class
+            ValidationGroups.MessageType.Digital.class
     })
     private Integer sikkerhetsnivaa;
 
     @NotNull(groups = {
-            ValidationGroups.DocumentType.Digital.class,
-            ValidationGroups.DocumentType.Print.class
+            ValidationGroups.MessageType.Digital.class,
+            ValidationGroups.MessageType.Print.class
     })
     private String hoveddokument;
 

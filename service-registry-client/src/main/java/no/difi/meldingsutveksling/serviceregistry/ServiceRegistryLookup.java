@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -41,20 +41,11 @@ public class ServiceRegistryLookup {
         return !getServiceRecords(SRParameter.builder(identifier).build()).isEmpty();
     }
 
-    public String getDocumentIdentifier(SRParameter parameter, DocumentType documentType) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
-        return serviceRecords.stream()
-                .flatMap(r -> r.getDocumentTypes().stream())
-                .filter(documentType::fitsDocumentIdentifier)
-                .findFirst()
-                .orElseThrow(() -> {
-                    log.error(markerFrom(parameter, documentType.getType()), formatErrorMsg(parameter, documentType.getType()));
-                    return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType.getType()));
-                });
-
-    }
-
     public ServiceRecord getServiceRecord(SRParameter parameter, String documentType) throws ServiceRegistryLookupException {
+        if (Strings.isNullOrEmpty(parameter.getProcess())) {
+            throw new IllegalArgumentException("Cannot determine documentType with missing process parameter");
+        }
+
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
         return serviceRecords.stream()
                 .filter(hasDocumentType(documentType))
@@ -64,18 +55,6 @@ public class ServiceRegistryLookup {
                     return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType));
                 });
     }
-
-    public ServiceRecord getServiceRecord(SRParameter parameter, DocumentType documentType) throws ServiceRegistryLookupException {
-        List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);
-        return serviceRecords.stream()
-                .filter(hasDocumentType(documentType))
-                .findFirst()
-                .orElseThrow(() -> {
-                    log.error(markerFrom(parameter, documentType.getType()), formatErrorMsg(parameter, documentType.getType()));
-                    return new ServiceRegistryLookupException(formatErrorMsg(parameter, documentType.getType()));
-                });
-    }
-
 
     private ServiceRecord loadServiceRecord(SRParameter parameter) throws ServiceRegistryLookupException {
         List<ServiceRecord> serviceRecords = loadServiceRecords(parameter);

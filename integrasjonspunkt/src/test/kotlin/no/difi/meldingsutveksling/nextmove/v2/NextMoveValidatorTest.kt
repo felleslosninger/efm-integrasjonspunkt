@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.Scope
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
@@ -24,7 +26,7 @@ import java.util.*
 class NextMoveValidatorTest {
 
     @MockK
-    lateinit var nextMoveServiceRecordProvider: NextMoveServiceRecordProvider
+    lateinit var serviceRecordProvider: ServiceRecordProvider
     @MockK
     lateinit var nextMoveMessageOutRepository: NextMoveMessageOutRepository
     @MockK
@@ -58,7 +60,7 @@ class NextMoveValidatorTest {
     @Before
     fun before() {
         MockKAnnotations.init(this)
-        nextMoveValidator = NextMoveValidator(nextMoveServiceRecordProvider,
+        nextMoveValidator = NextMoveValidator(serviceRecordProvider,
             nextMoveMessageOutRepository,
             conversationStrategyFactory,
             asserter,
@@ -89,28 +91,23 @@ class NextMoveValidatorTest {
         every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { nextMoveServiceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { sbd.messageType } returns "arkivmelding"
-        every { sbd.standard } returns "standard::arkivmelding"
+        every { sbd.documentType } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
-        every { serviceRecord.hasStandard(any()) } returns true
+        every { sbd.optionalConversationId } returns Optional.of(UUID.randomUUID().toString())
+        every { sbd.findScope(ScopeType.SENDER_REF) } returns Optional.empty()
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
-    @Test(expected = ReceiverDoNotAcceptDocumentStandard::class)
-    fun `receiver must accept standard`() {
-        every { serviceRecord.hasStandard(any()) } returns false
+    @Test(expected = MessageTypeDoesNotFitDocumentTypeException::class)
+    fun `message type must fit document type`() {
+        every { sbd.documentType } returns "foo::bar"
         nextMoveValidator.validate(sbd)
     }
 
-    @Test(expected = DocumentTypeDoNotFitDocumentStandardException::class)
-    fun `standard must fit document type`() {
-        every { sbd.standard } returns "foo::bar"
-        nextMoveValidator.validate(sbd)
-    }
-
-    @Test(expected = UnknownNextMoveDocumentTypeException::class)
+    @Test(expected = UnknownMessageTypeException::class)
     fun `document type must be valid`() {
         every { sbd.messageType } returns "foo"
         nextMoveValidator.validate(sbd)
@@ -145,6 +142,18 @@ class NextMoveValidatorTest {
         val file = BasicNextMoveFile.of("title", "foo.txt", "text", "foo".toByteArray())
         nextMoveValidator.validateFile(message, file)
     }
+
+    @Test
+    fun `unknown document type allowed for fiksio message`() {
+        every { sbd.documentType } returns "foo::bar"
+        every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
+        every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
+        every { sbd.any } returns mockkClass(FiksIoMessage::class)
+        every { asserter.isValid(any<FiksIoMessage>(), any()) } just Runs
+
+        nextMoveValidator.validate(sbd)
+    }
+
 
     @Test
     fun `dpo message does not require title`() {

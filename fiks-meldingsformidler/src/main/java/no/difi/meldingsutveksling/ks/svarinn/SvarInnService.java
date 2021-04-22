@@ -21,7 +21,7 @@ import java.util.zip.ZipInputStream;
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
 @Component
 public class SvarInnService {
 

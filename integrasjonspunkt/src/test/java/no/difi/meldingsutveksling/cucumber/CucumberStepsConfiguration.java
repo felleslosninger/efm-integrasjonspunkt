@@ -30,6 +30,7 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
+import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
@@ -261,6 +262,7 @@ public class CucumberStepsConfiguration {
     @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
     @MockBean public AltinnConnectionCheck altinnConnectionCheck;
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
+    @MockBean public FiksIOKlient fiksIOKlient;
 
     @Before
     @SneakyThrows

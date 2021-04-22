@@ -3,15 +3,14 @@ package no.difi.meldingsutveksling.noarkexchange;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.Decryptor;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.BestEduConverter;
+import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
@@ -59,7 +58,7 @@ public class IntegrajonspunktReceiveImpl {
     private final KeystoreHelper keystoreHelper;
     private final ConversationService conversationService;
     private final MessagePersister messagePersister;
-    private final SBDReceiptFactory sbdReceiptFactory;
+    private final SBDFactory sbdFactory;
     private final SBDUtil sbdUtil;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final NextMoveAdapter nextMoveAdapter;
@@ -71,7 +70,7 @@ public class IntegrajonspunktReceiveImpl {
                                        KeystoreHelper keystoreHelper,
                                        ConversationService conversationService,
                                        ObjectProvider<MessagePersister> messagePersister,
-                                       SBDReceiptFactory sbdReceiptFactory,
+                                       SBDFactory sbdFactory,
                                        SBDUtil sbdUtil,
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
@@ -82,7 +81,7 @@ public class IntegrajonspunktReceiveImpl {
         this.keystoreHelper = keystoreHelper;
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
-        this.sbdReceiptFactory = sbdReceiptFactory;
+        this.sbdFactory = sbdFactory;
         this.sbdUtil = sbdUtil;
         this.putMessageRequestFactory = putMessageRequestFactory;
         this.nextMoveAdapter = nextMoveAdapter;
@@ -166,7 +165,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private void sendLevertStatus(StandardBusinessDocument sbd) {
-        StandardBusinessDocument statusSbd = sbdReceiptFactory.createStatusFrom(sbd, DocumentType.STATUS, ReceiptStatus.LEVERT);
+        StandardBusinessDocument statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT);
         if (statusSbd != null) {
             NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
             internalQueue.enqueueNextMove(msg);

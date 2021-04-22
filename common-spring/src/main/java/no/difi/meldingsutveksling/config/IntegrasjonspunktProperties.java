@@ -98,7 +98,11 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String dpvDefaultProcess;
         @NotNull
+        private String defaultDocumentType;
+        @NotNull
         private String receiptProcess;
+        @NotNull
+        private String receiptDocumentType;
 
     }
     @Data
@@ -106,7 +110,12 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String defaultJournalProcess;
         @NotNull
+        private String defaultJournalDocumentType;
+        @NotNull
         private String defaultInnsynskravProcess;
+        @NotNull
+        private String defaultInnsynskravDocumentType;
+        private String receiptProcess;
 
     }
     @Data
@@ -224,7 +233,8 @@ public class IntegrasjonspunktProperties {
         private ServiceBus serviceBus;
         @NotNull
         private Set<ServiceIdentifier> statusServices;
-
+        @NotNull
+        private String statusDocumentType;
     }
 
     @Data

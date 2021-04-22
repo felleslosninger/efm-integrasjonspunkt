@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
@@ -17,7 +16,6 @@ import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
@@ -85,7 +83,7 @@ public class NextMoveAdapter {
                 message.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
-                DocumentType.ARKIVMELDING_KVITTERING,
+                properties.getArkivmelding().getReceiptDocumentType(),
                 receipt);
         return nextMoveMessageService.createMessage(sbd);
     }
@@ -103,7 +101,7 @@ public class NextMoveAdapter {
         try {
             receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
         }
@@ -118,7 +116,7 @@ public class NextMoveAdapter {
                 conversationId,
                 conversationId,
                 process,
-                DocumentType.ARKIVMELDING,
+                properties.getArkivmelding().getDefaultDocumentType(),
                 new ArkivmeldingMessage()
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)
@@ -152,7 +150,7 @@ public class NextMoveAdapter {
         try {
             serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
         }

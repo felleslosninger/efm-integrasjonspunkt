@@ -25,6 +25,7 @@ public class FiksConfig {
     @Data
     @ToString(exclude = "integrasjonsPassord")
     public static class FiksIO {
+        private String senderOrgnr;
         private String host;
         private String apiHost;
         private String kontoId;
@@ -48,6 +49,7 @@ public class FiksConfig {
     @Data
     @ToString(exclude = "password")
     public static class SvarInn {
+        private boolean enable;
         @NotNull
         private String baseUrl;
         private String username;
@@ -57,6 +59,8 @@ public class FiksConfig {
         private String fallbackSenderOrgNr;
         @NotNull
         private String process;
+        @NotNull
+        private String documentType;
         @NotNull
         private Integer connectTimeout;
         @NotNull

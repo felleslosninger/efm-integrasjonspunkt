@@ -16,7 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
 @Order
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
 public class DefaultDpfPolling implements DpfPolling {
 
     private final IntegrasjonspunktProperties properties;

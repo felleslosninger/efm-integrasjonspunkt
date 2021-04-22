@@ -31,7 +31,7 @@ public class Adresseregister {
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
-                    message.getSbd().getStandard()));
+                    message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));

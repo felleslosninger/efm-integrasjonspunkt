@@ -139,16 +139,16 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"status\" : 400,\n" +
                         "  \"error\" : \"Bad Request\",\n" +
                         "  \"exception\" : \"javax.validation.ConstraintViolationException\",\n" +
-                        "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove document type\",\n" +
+                        "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type\",\n" +
                         "  \"path\" : \"/api/messages/out\",\n" +
                         "  \"errors\" : [ {\n" +
-                        "    \"codes\" : [ \"IsDocumentType\" ],\n" +
-                        "    \"defaultMessage\" : \"Must be a NextMove document type\",\n" +
+                        "    \"codes\" : [ \"IsMessageType\" ],\n" +
+                        "    \"defaultMessage\" : \"Must be a NextMove message type\",\n" +
                         "    \"objectName\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"field\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"rejectedValue\" : \"strange\",\n" +
                         "    \"bindingFailure\" : false,\n" +
-                        "    \"code\" : \"IsDocumentType\"\n" +
+                        "    \"code\" : \"IsMessageType\"\n" +
                         "  } ]\n" +
                         "}"))
                 .andDo(document("messages/out/create/constraint-violation",

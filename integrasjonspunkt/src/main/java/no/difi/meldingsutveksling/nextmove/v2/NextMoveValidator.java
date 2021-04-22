@@ -4,19 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
+import no.difi.meldingsutveksling.validation.UUIDValidator;
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -36,10 +38,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
-import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
+import static no.difi.meldingsutveksling.MessageType.DIGITAL;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 
 @Component
@@ -47,7 +48,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 @RequiredArgsConstructor
 public class NextMoveValidator {
 
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRecordProvider serviceRecordProvider;
     private final NextMoveMessageOutRepository messageRepo;
     private final ConversationStrategyFactory conversationStrategyFactory;
     private final Asserter asserter;
@@ -61,6 +62,19 @@ public class NextMoveValidator {
 
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
+
+        // Need to validate scopes manually due to ReceiverRef can be non-UUID
+        UUIDValidator uuidValidator = new UUIDValidator();
+        sbd.getOptionalConversationId().ifPresent(cid -> {
+            if (!uuidValidator.isValid(cid, null)) {
+                throw new NotUUIDException(ScopeType.CONVERSATION_ID.getFullname(), cid);
+            }
+        });
+        sbd.findScope(ScopeType.SENDER_REF).ifPresent(sref -> {
+            if (!uuidValidator.isValid(sref.getInstanceIdentifier(), null)) {
+                throw new NotUUIDException(ScopeType.SENDER_REF.getFullname(), sref.getInstanceIdentifier());
+            }
+        });
 
         sbd.getOptionalMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
@@ -83,22 +97,17 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
+        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
-        String standard = sbd.getStandard();
+        String documentType = sbd.getDocumentType();
 
-        if (!documentType.fitsDocumentIdentifier(standard)) {
-            throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
-        }
-
-        if (!serviceRecord.hasStandard(standard)) {
-            throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
+        if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
+            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
         }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
-
                 {
                         group
                 } : new Class<?>[0]);

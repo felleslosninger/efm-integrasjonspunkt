@@ -1,0 +1,26 @@
+{
+  "infoRecord": {
+    "identifier": "910075935",
+    "organizationName": "FIKS IO testorg",
+    "postadresse": null,
+    "entityType": {
+      "name": "KOMM"
+    }
+  },
+  "serviceRecords": [
+    {
+      "organisationNumber": "910075935",
+      "pemCertificate": "",
+      "process": "no.digdir.einnsyn.v1",
+      "documentTypes": [
+        "no.digdir.einnsyn.v1"
+      ],
+      "service": {
+        "identifier": "DPFIO",
+        "endpointUrl": "e0a0fba9-b7cf-44f8-99a6-a7f04b9e0347",
+        "serviceCode": "",
+        "serviceEditionCode": ""
+      }
+    }
+  ]
+}

@@ -42,7 +42,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                             .conversationId(message.getConversationId())
                             .process(message.getProcessIdentifier())
                             .build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

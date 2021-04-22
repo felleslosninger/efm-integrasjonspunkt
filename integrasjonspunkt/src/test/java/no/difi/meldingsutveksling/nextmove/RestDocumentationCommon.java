@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
@@ -364,8 +363,8 @@ class RestDocumentationCommon {
                         "contain one or more business documents of a single document type or\n" +
                         "closely related types. The industry standard body (as referenced in the\n" +
                         "‘Standard’ element) is responsible for defining the Type value to be used\n" +
-                        "in this field. Currently NextMove supports the following types: " + DocumentType.stream(ApiType.NEXTMOVE)
-                        .map(DocumentType::getType)
+                        "in this field. Currently NextMove supports the following types: " + no.difi.meldingsutveksling.MessageType.stream(ApiType.NEXTMOVE)
+                        .map(no.difi.meldingsutveksling.MessageType::getType)
                         .collect(Collectors.joining(", "))
                 ),
                 documentIdentificationFields.withPath("creationDateAndTime")
@@ -464,14 +463,14 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, ValidationGroups.DocumentType.Arkivmelding.class);
+        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, ValidationGroups.MessageType.Arkivmelding.class);
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, "Should only be specified for DPF."))
                 .build();
     }
 
     static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, ValidationGroups.DocumentType.Digital.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, ValidationGroups.MessageType.Digital.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""), sikkerhetsnivaaDescriptor(messageFields))
@@ -533,7 +532,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> dpiPrintMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, ValidationGroups.DocumentType.Print.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, ValidationGroups.MessageType.Print.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""))
@@ -629,7 +628,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, ValidationGroups.DocumentType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, ValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(
@@ -644,7 +643,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> publiseringMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, ValidationGroups.DocumentType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, ValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(
@@ -757,10 +756,10 @@ class RestDocumentationCommon {
         return new FieldDescriptor[]{
                 fieldWithPath(prefix + "type")
                         .type(JsonFieldType.STRING)
-                        .description("Document type. This is always identical to the last part of the standard."),
+                        .description("Message type. This is always identical to the last part of the standard."),
                 fieldWithPath(prefix + "standard")
                         .type(JsonFieldType.STRING)
-                        .description("Document standard.")
+                        .description("Document type.")
         };
     }
 }

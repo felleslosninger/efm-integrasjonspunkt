@@ -18,19 +18,18 @@ import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -177,11 +176,7 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setServiceEdition(objectFactory.createMyInsertCorrespondenceV2ServiceEdition(serviceRecord.getService().getServiceEditionCode()));
         // Should the user be allowed to forward the message from portal
         correspondence.setAllowForwarding(objectFactory.createMyInsertCorrespondenceV2AllowForwarding(config.isAllowForwarding()));
-        if (message.getSbd().getOnBehalfOfOrgNr().isPresent()) {
-            correspondence.setOnBehalfOfOrgNr(objectFactory.createMyInsertCorrespondenceV2OnBehalfOfOrgNr(message.getSbd().getOnBehalfOfOrgNr().get()));
-        } else {
-            correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSender()));
-        }
+        correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSenderName(message)));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
         correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
@@ -192,13 +187,13 @@ public class CorrespondenceAgencyMessageFactory {
                         DateTimeUtil.toXMLGregorianCalendar(getAllowSystemDeleteDateTime())));
 
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(getExternalContentV2(messageTitle, messageSummary, messageBody, attachments)));
-        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(getNotificationBEList()));
+        correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(getNotificationBEList(message)));
         return correspondence;
     }
 
-    private NotificationBEList getNotificationBEList() {
+    private NotificationBEList getNotificationBEList(NextMoveOutMessage msg) {
         NotificationBEList notifications = new NotificationBEList();
-        List<Notification2009> notificationList = createNotifications();
+        List<Notification2009> notificationList = createNotifications(msg);
         List<Notification2009> notification = notifications.getNotification();
         notification.addAll(notificationList);
         return notifications;
@@ -228,7 +223,7 @@ public class CorrespondenceAgencyMessageFactory {
                             .conversationId(message.getConversationId())
                             .process(message.getSbd().getProcess())
                             .build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }
@@ -239,22 +234,22 @@ public class CorrespondenceAgencyMessageFactory {
         return Optional.ofNullable(properties.getDpv().getDaysToReply()).orElse(7L);
     }
 
-    private List<Notification2009> createNotifications() {
+    private List<Notification2009> createNotifications(NextMoveOutMessage msg) {
 
         List<Notification2009> notifications = new ArrayList<>();
 
         if (config.isNotifyEmail() && config.isNotifySms()) {
-            notifications.add(createNotification(TransportType.BOTH));
+            notifications.add(createNotification(msg, TransportType.BOTH));
         } else if (config.isNotifySms()) {
-            notifications.add(createNotification(TransportType.SMS));
+            notifications.add(createNotification(msg, TransportType.SMS));
         } else if (config.isNotifyEmail()) {
-            notifications.add(createNotification(TransportType.EMAIL));
+            notifications.add(createNotification(msg, TransportType.EMAIL));
         }
 
         return notifications;
     }
 
-    private Notification2009 createNotification(TransportType type) {
+    private Notification2009 createNotification(NextMoveOutMessage msg, TransportType type) {
 
         Notification2009 notification = new Notification2009();
         no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
@@ -265,28 +260,28 @@ public class CorrespondenceAgencyMessageFactory {
         notification.setLanguageCode(notificationFactory.createNotification2009LanguageCode("1044"));
         // Notification type
         notification.setNotificationType(notificationFactory.createNotification2009NotificationType("VarselDPVMedRevarsel"));
-        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens()));
+        notification.setTextTokens(notificationFactory.createNotification2009TextTokens(createTokens(msg)));
         JAXBElement<ReceiverEndPointBEList> receiverEndpoints = createReceiverEndPoint(type);
         notification.setReceiverEndPoints(receiverEndpoints);
 
         return notification;
     }
 
-    private TextTokenSubstitutionBEList createTokens() {
+    private TextTokenSubstitutionBEList createTokens(NextMoveOutMessage msg) {
 
         TextTokenSubstitutionBEList tokens = new TextTokenSubstitutionBEList();
         if (StringUtils.hasText(config.getNotificationText())) {
-            tokens.getTextToken().add(createTextToken(config.getNotificationText()));
+            tokens.getTextToken().add(createTextToken(config.getNotificationText().replace("$reporterName$", getSenderName(msg))));
         } else {
-            tokens.getTextToken().add(createTextToken(String.format("$reporteeName$: Du har mottatt en melding fra %s.", getSender())));
+            tokens.getTextToken().add(createTextToken(String.format("$reporteeName$: Du har mottatt en melding fra %s.", getSenderName(msg))));
         }
 
         return tokens;
     }
 
-    private String getSender() {
-        InfoRecord infoRecord = serviceRegistryLookup.getInfoRecord(properties.getOrg().getNumber());
-        return infoRecord.getOrganizationName();
+    private String getSenderName(NextMoveOutMessage msg) {
+        String orgnr = msg.getSbd().getOnBehalfOfOrgNr().orElse(properties.getOrg().getNumber());
+        return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();
     }
 
     private OffsetDateTime getAllowSystemDeleteDateTime() {

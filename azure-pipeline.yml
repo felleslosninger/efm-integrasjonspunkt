@@ -17,11 +17,12 @@ extends:
     dockerRegistryEndpoint: dockerhub-difi
     deployOssrh: true
     mavenGoals: deploy
+    jiraVersionPrefix: IP
 
 trigger:
   batch: true
   branches:
     include:
-      - development
-      - release-*
-      - master
+      - '*'
+
+pr: none
