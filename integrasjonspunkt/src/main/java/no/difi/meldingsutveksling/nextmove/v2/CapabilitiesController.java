@@ -24,9 +24,10 @@ public class CapabilitiesController {
     @ResponseBody
     public Capabilities capabilities(
             @PathVariable @NotNull String receiverIdentifier,
-            @RequestParam(required = false) Integer securityLevel) throws NotFoundInServiceRegistryException {
+            @RequestParam(required = false) Integer securityLevel,
+            @RequestParam(required = false) String process) throws NotFoundInServiceRegistryException {
         try {
-            return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel);
+            return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel, process);
         } catch (MeldingsUtvekslingRuntimeException e) {
             if (e.getCause() instanceof NotFoundInServiceRegistryException) {
                 throw new IdentifierNotFoundException(e.getCause().getMessage());
