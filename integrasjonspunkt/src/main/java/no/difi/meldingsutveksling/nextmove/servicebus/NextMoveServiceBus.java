@@ -203,7 +203,7 @@ public class NextMoveServiceBus {
         if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
         }
-        if (k.getKvitteringFor() == EinnsynType.INNSYNSKRAV) {
+        if (k.getReferanseType() == EinnsynType.INNSYNSKRAV) {
             return DATA.fullname();
         }
         return INNSYN.fullname();

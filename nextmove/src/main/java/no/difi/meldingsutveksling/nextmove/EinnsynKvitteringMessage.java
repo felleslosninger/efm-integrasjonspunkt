@@ -18,5 +18,5 @@ public class EinnsynKvitteringMessage extends BusinessMessage<EinnsynKvitteringM
     @NotNull
     private String status;
     @NotNull
-    private EinnsynType kvitteringFor;
+    private EinnsynType referanseType;
 }
