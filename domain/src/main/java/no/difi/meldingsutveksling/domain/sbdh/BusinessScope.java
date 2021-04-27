@@ -24,21 +24,21 @@ import java.util.Set;
 
 
 /**
- * <p>Java class for BusinessScope complex type.
+ * Java class for BusinessScope complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="BusinessScope">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Scope" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Scope" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="BusinessScope">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <element name="Scope" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Scope" maxOccurs="unbounded" minOccurs="0"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BusinessScope", propOrder = {
@@ -71,7 +71,9 @@ public class BusinessScope implements Serializable {
      *
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Scope }
+     * {@link Scope}
+     *
+     * @return Set of {@link Scope}
      */
     public Set<Scope> getScope() {
         if (scope == null) {

@@ -34,26 +34,26 @@ import java.util.Set;
 
 
 /**
- * <p>Java class for StandardBusinessDocumentHeader complex type.
- * <p>
- * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
- * <pre>
- * &lt;complexType name="StandardBusinessDocumentHeader">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="HeaderVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="Sender" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Partner" maxOccurs="unbounded"/>
- *         &lt;element name="Receiver" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Partner" maxOccurs="unbounded"/>
- *         &lt;element name="DocumentIdentification" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}DocumentIdentification"/>
- *         &lt;element name="Manifest" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Manifest" minOccurs="0"/>
- *         &lt;element name="BusinessScope" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}BusinessScope" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * Java class for StandardBusinessDocumentHeader complex type.
+ * 
+ * The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>{@code
+ * <complexType name="StandardBusinessDocumentHeader">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <element name="HeaderVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         <element name="Sender" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Partner" maxOccurs="unbounded"/>
+ *         <element name="Receiver" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Partner" maxOccurs="unbounded"/>
+ *         <element name="DocumentIdentification" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}DocumentIdentification"/>
+ *         <element name="Manifest" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}Manifest" minOccurs="0"/>
+ *         <element name="BusinessScope" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}BusinessScope" minOccurs="0"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StandardBusinessDocumentHeader", propOrder = {

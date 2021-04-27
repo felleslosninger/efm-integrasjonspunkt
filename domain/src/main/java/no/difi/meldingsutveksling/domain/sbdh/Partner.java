@@ -24,22 +24,22 @@ import java.util.Set;
 
 
 /**
- * <p>Java class for Partner complex type.
+ * Java class for Partner complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="Partner">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Identifier" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}PartnerIdentification"/>
- *         &lt;element name="ContactInformation" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ContactInformation" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="Partner">
+ *   <complexContent>
+ *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       <sequence>
+ *         <element name="Identifier" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}PartnerIdentification"/>
+ *         <element name="ContactInformation" type="{http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader}ContactInformation" maxOccurs="unbounded" minOccurs="0"/>
+ *       </sequence>
+ *     </restriction>
+ *   </complexContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Partner", propOrder = {
@@ -86,6 +86,8 @@ public class Partner {
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ContactInformation }
+     *
+     * @return contact information
      */
     public Set<ContactInformation> getContactInformation() {
         if (contactInformation == null) {

@@ -95,6 +95,9 @@ public class InternalQueue {
 
     /**
      * Log failed messages as errors
+     *
+     * @param message the message
+     * @param session {@link Session}
      */
     @JmsListener(destination = DLQ)
     public void dlqListener(byte[] message, Session session) {
