@@ -125,7 +125,7 @@ public class CapabilitiesControllerTest {
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for - Should not include ICD.")
                         ),
                         requestParameters(
-                                parameterWithName("process").optional().description("An optional parameter to retrieve an specific process.")
+                                parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())
                         )
@@ -214,7 +214,7 @@ public class CapabilitiesControllerTest {
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
                         requestParameters(
-                                parameterWithName("process").optional().description("An optional parameter to retrieve an specific process.")
+                                parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())
                         )
