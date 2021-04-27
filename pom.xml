@@ -62,16 +62,6 @@
             </snapshots>
         </repository>
         <repository>
-            <id>MavenArtifactFeed</id>
-            <url>https://pkgs.dev.azure.com/dificloud/_packaging/MavenArtifactFeed/maven/v1</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>DIFI MOVE</id>
             <name>DIFI MOVE Nexus 3rd party</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/thirdparty/</url>
