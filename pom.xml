@@ -17,11 +17,27 @@
     </parent>
 
     <scm>
-        <connection>scm:git:https://github.com/difi/move-integrasjonspunkt</connection>
-        <developerConnection>scm:git:https://github.com/difi/move-integrasjonspunkt</developerConnection>
-        <url>https://github.com/difi/move-integrasjonspunkt</url>
+        <connection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</connection>
+        <developerConnection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</developerConnection>
+        <url>https://github.com/felleslosninger/efm-integrasjonspunkt</url>
         <tag>HEAD</tag>
     </scm>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Digdir</name>
+            <email>servicedesk@digdir.no</email>
+            <organization>Digdir</organization>
+            <organizationUrl>https://www.digdir.no</organizationUrl>
+        </developer>
+    </developers>
 
     <distributionManagement>
         <snapshotRepository>
