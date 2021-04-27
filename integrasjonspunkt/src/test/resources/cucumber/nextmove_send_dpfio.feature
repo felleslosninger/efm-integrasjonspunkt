@@ -79,14 +79,21 @@ Feature: Sending a nextmove DPFIO message
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "LEVERT",
+        "status" : "SENDT",
         "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
         "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
         "convId" : 166
       }, {
         "id" : 171,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
-        "status" : "SENDT",
+        "status" : "MOTTATT",
+        "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
+        "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
+        "convId" : 166
+      }, {
+        "id" : 172,
+        "lastUpdate" : "2019-03-25T12:38:23+01:00",
+        "status" : "LEVERT",
         "conversationId" : "21efbd4c-413d-4e2c-bbc5-257ef4a65a91",
         "messageId" : "20c8849c-e281-4809-8555-7cd54952b917",
         "convId" : 166
@@ -104,7 +111,7 @@ Feature: Sending a nextmove DPFIO message
         "unpaged" : false
       },
       "last" : true,
-      "totalElements" : 3,
+      "totalElements" : 4,
       "totalPages" : 1,
       "size" : 10,
       "number" : 0,
@@ -114,7 +121,7 @@ Feature: Sending a nextmove DPFIO message
         "unsorted" : false,
         "empty" : false
       },
-      "numberOfElements" : 3,
+      "numberOfElements" : 4,
       "empty" : false
     }
   """
