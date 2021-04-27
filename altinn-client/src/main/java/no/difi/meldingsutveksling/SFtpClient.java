@@ -24,8 +24,6 @@ public class SFtpClient {
 
     /**
      * Attempts to connect via SFTP. The keyFileName is the name of the SSH key that must be located on the classpath.
-     * <p>
-     * The keyfile is a SSH private key file
      *
      * @param keyFileName filename for the private key
      */

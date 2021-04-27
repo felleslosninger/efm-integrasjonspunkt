@@ -21,19 +21,19 @@ import java.io.Serializable;
 
 
 /**
- * <p>Java class for PartnerIdentification complex type.
+ * Java class for PartnerIdentification complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within this class.
  *
- * <pre>
- * &lt;complexType name="PartnerIdentification">
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="Authority" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
- * &lt;/complexType>
- * </pre>
+ * <pre>{@code
+ * <complexType name="PartnerIdentification">
+ *   <simpleContent>
+ *     <extension base="<http://www.w3.org/2001/XMLSchema>string">
+ *       <attribute name="Authority" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     </extension>
+ *   </simpleContent>
+ * </complexType>
+ * }</pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PartnerIdentification", propOrder = {

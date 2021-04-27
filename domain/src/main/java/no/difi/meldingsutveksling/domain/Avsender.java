@@ -8,8 +8,8 @@ public class Avsender extends Aktor {
     }
 
     /**
-     * @param organisasjonsnummer Pakk
-     *                            Organisasjonsnummeret til avsender av brevet.
+     * @param organisasjonsnummer Organisasjonsnummeret til avsender av brevet.
+     * @return Builder
      */
     public static Builder builder(Organisasjonsnummer organisasjonsnummer) {
         return new Builder(organisasjonsnummer);

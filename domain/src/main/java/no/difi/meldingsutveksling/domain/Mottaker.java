@@ -9,6 +9,7 @@ public class Mottaker extends Aktor {
     /**
      * @param organisasjonsnummer Organisasjonsnummeret til avsender av brevet.
      * @param certificate         Sertifikat
+     * @return Builder
      */
     public static Builder builder(Organisasjonsnummer organisasjonsnummer, Certificate certificate) {
         return new Builder(organisasjonsnummer, certificate);

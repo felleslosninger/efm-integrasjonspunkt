@@ -33,7 +33,7 @@ class ConversationWebController(
         model.addAttribute("page", findAll)
 
         val lastStatusMap = findAll.content.map {
-            it.messageId to (it.messageStatuses.maxBy { st -> st.lastUpdate }?.status ?: "none")
+            it.messageId to (it.messageStatuses.maxByOrNull { st -> st.lastUpdate }?.status ?: "none")
         }.toMap()
         model.addAttribute("statusMap", lastStatusMap)
 

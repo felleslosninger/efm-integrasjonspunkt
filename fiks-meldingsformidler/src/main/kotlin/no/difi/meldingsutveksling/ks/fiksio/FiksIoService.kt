@@ -52,6 +52,9 @@ class FiksIoService(
             .meldingType(serviceRecord.process)
             .build()
         val sentMessage = fiksIoKlient.send(request, payloads)
+        // No status API, so need to register all statuses at once
+        conversationService.registerStatus(msg.messageId, ReceiptStatus.SENDT)
+        conversationService.registerStatus(msg.messageId, ReceiptStatus.MOTTATT)
         conversationService.registerStatus(msg.messageId, ReceiptStatus.LEVERT)
         log.debug("FiksIO: Sent message with fiksId=${sentMessage.meldingId}")
     }
