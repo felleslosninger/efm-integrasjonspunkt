@@ -27,18 +27,21 @@ public class ServiceBusMessageParser {
     @SneakyThrows
     public Message parse(byte[] in) {
         ServiceBusPayload serviceBusPayload = objectMapper.readValue(in, ServiceBusPayload.class);
+        Message message = new Message()
+            .setServiceIdentifier(ServiceIdentifier.DPE)
+            .setSbd(serviceBusPayload.getSbd());
 
-        String receiverOrgNumber = serviceBusPayload.getSbd().getReceiverIdentifier();
-        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
+        if (serviceBusPayload.getAsic() != null) {
+            String receiverOrgNumber = serviceBusPayload.getSbd().getReceiverIdentifier();
+            PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
-        byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
-        byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
+            byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
+            byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
 
-        List<Attachment> attachments = asicParser.parse(new ByteArrayInputStream(asic));
+            List<Attachment> attachments = asicParser.parse(new ByteArrayInputStream(asic));
+            message.setAttachments(attachments);
+        }
 
-        return new Message()
-                .setServiceIdentifier(ServiceIdentifier.DPE)
-                .setSbd(serviceBusPayload.getSbd())
-                .attachments(attachments);
+        return message;
     }
 }
