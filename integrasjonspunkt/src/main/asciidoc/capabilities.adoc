@@ -33,7 +33,21 @@ include::{snippets}/capabilities/dpo/security-level/http-request.adoc[]
 .Response
 include::{snippets}/capabilities/dpo/security-level/http-response.adoc[]
 
-=== Example 3 - Get all capabilities for an individual
+=== Example 3 - Get capabilities for an organization with a specific process
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpo/process/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpo/process/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpo/process/http-response.adoc[]
+
+=== Example 4 - Get all capabilities for an individual
 
 [source,http,role="primary"]
 .Curl
@@ -47,7 +61,7 @@ include::{snippets}/capabilities/dpi/http-request.adoc[]
 .Response
 include::{snippets}/capabilities/dpi/http-response.adoc[]
 
-=== Example 4 - Get capabilities for an individual with security level
+=== Example 5 - Get capabilities for an individual with security level
 
 [source,http,role="primary"]
 .Curl
@@ -60,6 +74,20 @@ include::{snippets}/capabilities/dpi/security-level/http-request.adoc[]
 [source,http,role="secondary"]
 .Response
 include::{snippets}/capabilities/dpi/security-level/http-response.adoc[]
+
+=== Example 6 - Get capabilities for an individual with a specific process
+
+[source,http,role="primary"]
+.Curl
+include::{snippets}/capabilities/dpi/process/curl-request.adoc[]
+
+[source,http,role="secondary"]
+.Request
+include::{snippets}/capabilities/dpi/process/http-request.adoc[]
+
+[source,http,role="secondary"]
+.Response
+include::{snippets}/capabilities/dpi/process/http-response.adoc[]
 
 === About the service
 [role="primary"]
