@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 @UtilityClass
 public class ValidationGroupFactory {
 
-    public static Class<?> toDocumentType(no.difi.meldingsutveksling.MessageType in) {
+    public static Class<?> toMessageType(no.difi.meldingsutveksling.MessageType in) {
         switch (in) {
             case FIKSIO:
                 return ValidationGroups.MessageType.FiksIo.class;

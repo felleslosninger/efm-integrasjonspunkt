@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -97,7 +96,7 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+        MessageType messageType = MessageType.valueOfType(sbd.getMessageType())
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
         String documentType = sbd.getDocumentType();
@@ -106,11 +105,13 @@ public class NextMoveValidator {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
         }
 
-        Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
-        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
-                {
-                        group
-                } : new Class<?>[0]);
+        // Run validation for serviceIdentifiers
+        Class<?> siGroup = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
+        asserter.isValid(sbd.getAny(), siGroup != null ? new Class<?>[] { siGroup } : new Class<?>[0]);
+
+        // Run validation for internal message types
+        Class<?> mtGroup = ValidationGroupFactory.toMessageType(messageType);
+        asserter.isValid(sbd.getAny(), mtGroup != null ? new Class<?>[] { mtGroup } : new Class<?>[0]);
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)

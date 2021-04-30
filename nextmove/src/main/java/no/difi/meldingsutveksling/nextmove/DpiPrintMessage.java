@@ -6,7 +6,6 @@ import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.validation.Valid;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Map;
 
 @Getter
@@ -14,7 +13,7 @@ import java.util.Map;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@NextMoveBusinessMessage("print")
 public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
 
     private String avsenderId;

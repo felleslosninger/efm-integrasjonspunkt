@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +11,7 @@ import java.util.Set;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "arkivmelding_kvittering", namespace = "urn:no:difi:meldingsutveksling:2.0")
+@NextMoveBusinessMessage("arkivmelding_kvittering")
 public class ArkivmeldingKvitteringMessage extends BusinessMessage<ArkivmeldingKvitteringMessage> {
 
     private String receiptType;

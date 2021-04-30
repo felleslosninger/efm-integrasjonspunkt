@@ -5,7 +5,6 @@ import lombok.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Map;
 
 @Getter
@@ -13,7 +12,7 @@ import java.util.Map;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
+@NextMoveBusinessMessage("digital")
 public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> {
 
     private String avsenderId;

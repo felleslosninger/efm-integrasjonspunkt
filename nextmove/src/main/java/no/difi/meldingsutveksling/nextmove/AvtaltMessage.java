@@ -5,13 +5,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-@XmlRootElement(name = "avtalt", namespace = "urn:no:difi:meldingsutveksling:2.0")
+@NextMoveBusinessMessage("avtalt")
 public class AvtaltMessage extends BusinessMessage<AvtaltMessage> {
     String identifier;
     Object content;

@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 @Getter
 public enum MessageType {
 
-
     STATUS("status", ApiType.NEXTMOVE),
     FEIL("feil", ApiType.NEXTMOVE),
 
@@ -69,15 +68,6 @@ public enum MessageType {
         return Arrays.stream(MessageType.values())
             .filter(d -> documentType.endsWith("::"+d.getType()))
             .findFirst();
-    }
-
-    public static Optional<MessageType> valueOf(String type, ApiType api) {
-        if (type == null) {
-            return Optional.empty();
-        }
-        return stream(api)
-                .filter(p -> p.type.equalsIgnoreCase(type))
-                .findAny();
     }
 
     public static Stream<MessageType> stream(ApiType api) {

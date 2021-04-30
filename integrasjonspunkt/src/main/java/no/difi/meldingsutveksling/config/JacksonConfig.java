@@ -29,6 +29,7 @@ public class JacksonConfig {
 
         return builder ->
                 builder.modulesToInstall(new JavaTimeModule())
+                    .annotationIntrospector(new BusinessMessageAliasIntrospector())
                         .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
                         .serializationInclusion(JsonInclude.Include.NON_NULL)
                         .featuresToEnable(

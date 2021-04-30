@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
@@ -10,9 +9,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
@@ -94,7 +90,7 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
+        MessageType messageType = MessageType.valueOfType(sbd.getMessageType())
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
         if (messageType == MessageType.PRINT) {

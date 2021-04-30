@@ -17,14 +17,14 @@ public abstract class BusinessMessage<T extends BusinessMessage<T>> extends Abst
     private String type;
 
     @NotNull(groups = {
-            ValidationGroups.ServiceIdentifier.DPF.class,
-            ValidationGroups.MessageType.Digital.class
+        ValidationGroups.ServiceIdentifier.DPF.class,
+        ValidationGroups.MessageType.Digital.class
     })
     private Integer sikkerhetsnivaa;
 
     @NotNull(groups = {
-            ValidationGroups.MessageType.Digital.class,
-            ValidationGroups.MessageType.Print.class
+        ValidationGroups.MessageType.Digital.class,
+        ValidationGroups.MessageType.Print.class
     })
     private String hoveddokument;
 
