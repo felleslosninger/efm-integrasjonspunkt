@@ -1,24 +1,17 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.MessageType;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFiller;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
-import org.apache.commons.beanutils.PropertyUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
@@ -30,6 +23,7 @@ public class NextMoveOutMessageFactory {
     private final ServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final ObjectProvider<BusinessMessageFiller<?>> fillers;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
@@ -84,61 +78,11 @@ public class NextMoveOutMessageFactory {
             }
         }
 
-        if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI) {
-            setDpiDefaults(sbd, serviceRecord);
-        }
+        // set defaults for business message if filler is provided
+        fillers.orderedStream().filter(f -> f.getType() == sbd.getBusinessMessage().getClass())
+            .findFirst()
+            .ifPresent(f -> f.setDefaults(sbd.getBusinessMessage(), serviceRecord));
+
     }
 
-    private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        MessageType messageType = MessageType.valueOfType(sbd.getMessageType())
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
-
-        if (messageType == MessageType.PRINT) {
-            DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
-            if (dpiMessage.getMottaker() == null) {
-                dpiMessage.setMottaker(new PostAddress());
-            }
-            setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
-            if (dpiMessage.getRetur() == null) {
-                dpiMessage.setRetur(new MailReturn()
-                    .setMottaker(new PostAddress())
-                    .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
-            }
-            setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
-
-            if (dpiMessage.getUtskriftsfarge() == null) {
-                dpiMessage.setUtskriftsfarge(Utskriftsfarge.SORT_HVIT);
-            }
-
-            if (dpiMessage.getPosttype() == null) {
-                dpiMessage.setPosttype(Posttype.B_OEKONOMI);
-            }
-
-        }
-    }
-
-    private void setReceiverDefaults(PostAddress receiver, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srPostAddress) {
-        if (!StringUtils.hasText(receiver.getNavn())) {
-            receiver.setNavn(srPostAddress.getName());
-        }
-        if (Strings.isNullOrEmpty(receiver.getAdresselinje1())) {
-            String[] addressLines = srPostAddress.getStreet().split(";");
-            for (int i=0; i < Math.min(addressLines.length, 4); i++) {
-                try {
-                    PropertyUtils.setProperty(receiver, "adresselinje"+(i+1), addressLines[i]);
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new NextMoveRuntimeException(e);
-                }
-            }
-        }
-        if (!StringUtils.hasText(receiver.getPostnummer())) {
-            receiver.setPostnummer(srPostAddress.getPostalCode());
-        }
-        if (!StringUtils.hasText(receiver.getPoststed())) {
-            receiver.setPoststed(srPostAddress.getPostalArea());
-        }
-        if (!StringUtils.hasText(receiver.getLand())) {
-            receiver.setLand(srPostAddress.getCountry());
-        }
-    }
 }
