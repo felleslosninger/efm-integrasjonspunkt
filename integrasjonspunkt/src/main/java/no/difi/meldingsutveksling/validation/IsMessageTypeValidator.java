@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.validation;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.MessageType;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageUtil;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -10,8 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 public class IsMessageTypeValidator implements ConstraintValidator<IsMessageType, String> {
 
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        // TODO: check for external types via reflection
-        return MessageType.valueOfType(s).isPresent();
+        return BusinessMessageUtil.getMessageTypes().contains(s);
     }
 
 }

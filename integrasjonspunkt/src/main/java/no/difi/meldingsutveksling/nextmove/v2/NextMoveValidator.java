@@ -96,7 +96,11 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        if (!sbd.getDocumentType().endsWith(sbd.getMessageType()) && serviceRecord.getServiceIdentifier() != DPFIO) {
+        if (!BusinessMessageUtil.getMessageTypes().contains(sbd.getMessageType())) {
+            throw new UnknownMessageTypeException(sbd.getMessageType());
+        }
+
+        if (!sbd.getDocumentType().endsWith("::"+sbd.getMessageType()) && serviceRecord.getServiceIdentifier() != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(sbd.getMessageType(), sbd.getDocumentType());
         }
 

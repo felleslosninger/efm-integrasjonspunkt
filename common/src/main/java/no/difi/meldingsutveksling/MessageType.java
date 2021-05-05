@@ -14,42 +14,30 @@ import java.util.stream.Stream;
 @Getter
 public enum MessageType {
 
-    STATUS("status", ApiType.NEXTMOVE),
-    FEIL("feil", ApiType.NEXTMOVE),
+    STATUS("status"),
+    FEIL("feil"),
 
-    ARKIVMELDING("arkivmelding", ApiType.NEXTMOVE),
-    ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ApiType.NEXTMOVE),
+    ARKIVMELDING("arkivmelding"),
+    ARKIVMELDING_KVITTERING("arkivmelding_kvittering"),
 
-    AVTALT("avtalt", ApiType.NEXTMOVE),
+    AVTALT("avtalt"),
 
-    FIKSIO("fiksio", ApiType.NEXTMOVE),
-    DIGITAL("digital", ApiType.NEXTMOVE),
-    DIGITAL_DPV("digital_dpv", ApiType.NEXTMOVE),
-    PRINT("print", ApiType.NEXTMOVE),
+    FIKSIO("fiksio"),
 
-    INNSYNSKRAV("innsynskrav", ApiType.NEXTMOVE),
-    PUBLISERING("publisering", ApiType.NEXTMOVE),
-    EINNSYN_KVITTERING("einnsyn_kvittering", ApiType.NEXTMOVE),
+    DIGITAL("digital"),
+    DIGITAL_DPV("digital_dpv"),
+    PRINT("print"),
 
-    BESTEDU_KVITTERING("kvittering", ApiType.BESTEDU),
-    BESTEDU_MELDING("melding", ApiType.BESTEDU);
+    INNSYNSKRAV("innsynskrav"),
+    PUBLISERING("publisering"),
+    EINNSYN_KVITTERING("einnsyn_kvittering");
 
-    private static final Set<MessageType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING, BESTEDU_KVITTERING);
+    private static final Set<MessageType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING);
 
     private final String type;
-    private final ApiType api;
 
     public boolean isReceipt() {
         return RECEIPTS.contains(this);
-    }
-
-    public boolean fitsDocumentIdentifier(String documentIdentifier) {
-        return documentIdentifier.endsWith("::" + type);
-    }
-
-    public static MessageType[] values(ApiType api) {
-        return stream(api)
-                .toArray(MessageType[]::new);
     }
 
     public static Optional<MessageType> valueOfType(String type) {
@@ -70,8 +58,7 @@ public enum MessageType {
             .findFirst();
     }
 
-    public static Stream<MessageType> stream(ApiType api) {
-        return Arrays.stream(MessageType.values())
-                .filter(p -> p.api == api);
+    public static Stream<MessageType> stream() {
+        return Arrays.stream(MessageType.values());
     }
 }

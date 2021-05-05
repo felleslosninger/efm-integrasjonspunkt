@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
@@ -363,7 +362,7 @@ class RestDocumentationCommon {
                         "contain one or more business documents of a single document type or\n" +
                         "closely related types. The industry standard body (as referenced in the\n" +
                         "‘Standard’ element) is responsible for defining the Type value to be used\n" +
-                        "in this field. Currently NextMove supports the following types: " + no.difi.meldingsutveksling.MessageType.stream(ApiType.NEXTMOVE)
+                        "in this field. Currently NextMove supports the following types: " + no.difi.meldingsutveksling.MessageType.stream()
                         .map(no.difi.meldingsutveksling.MessageType::getType)
                         .collect(Collectors.joining(", "))
                 ),

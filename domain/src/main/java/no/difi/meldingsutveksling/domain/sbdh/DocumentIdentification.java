@@ -10,7 +10,6 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.validation.IsMessageType;
 import no.difi.meldingsutveksling.validation.UUID;
 import no.difi.meldingsutveksling.xml.OffsetDateTimeAdapter;
@@ -71,7 +70,7 @@ public class DocumentIdentification implements Serializable {
 
     @XmlElement(name = "Type", required = true)
     @NotNull
-    @IsMessageType(ApiType.NEXTMOVE)
+    @IsMessageType
     protected String type;
 
     @XmlElement(name = "MultipleType")

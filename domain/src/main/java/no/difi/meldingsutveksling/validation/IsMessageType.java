@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.validation;
 
-import no.difi.meldingsutveksling.ApiType;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
@@ -23,6 +21,5 @@ public @interface IsMessageType {
 
     Class<? extends Payload>[] payload() default {};
 
-    ApiType value();
 }
 
