@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +12,6 @@ import java.time.OffsetDateTime;
 public class SBDUtil {
 
     private final Clock clock;
-
-    public boolean isNextMove(StandardBusinessDocument sbd) {
-        return MessageType.valueOfType(sbd.getMessageType())
-                .map(MessageType::getApi)
-                .map(p -> p == ApiType.NEXTMOVE)
-                .orElse(false);
-    }
 
     public boolean isReceipt(StandardBusinessDocument sbd) {
         return MessageType.valueOfType(sbd.getMessageType())

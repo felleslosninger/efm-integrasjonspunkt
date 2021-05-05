@@ -96,13 +96,8 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        MessageType messageType = MessageType.valueOfType(sbd.getMessageType())
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
-
-        String documentType = sbd.getDocumentType();
-
-        if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
-            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
+        if (!sbd.getDocumentType().endsWith(sbd.getMessageType()) && serviceRecord.getServiceIdentifier() != DPFIO) {
+            throw new MessageTypeDoesNotFitDocumentTypeException(sbd.getMessageType(), sbd.getDocumentType());
         }
 
         // Run validation for serviceIdentifiers
@@ -110,8 +105,11 @@ public class NextMoveValidator {
         asserter.isValid(sbd.getAny(), siGroup != null ? new Class<?>[] { siGroup } : new Class<?>[0]);
 
         // Run validation for internal message types
-        Class<?> mtGroup = ValidationGroupFactory.toMessageType(messageType);
-        asserter.isValid(sbd.getAny(), mtGroup != null ? new Class<?>[] { mtGroup } : new Class<?>[0]);
+        // TODO: extendable validation groups for external message types
+        MessageType.valueOfType(sbd.getMessageType()).ifPresent(mt -> {
+            Class<?> mtGroup = ValidationGroupFactory.toMessageType(mt);
+            asserter.isValid(sbd.getAny(), mtGroup != null ? new Class<?>[] { mtGroup } : new Class<?>[0]);
+        });
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)

@@ -8,4 +8,8 @@ public class MessageTypeDoesNotFitDocumentTypeException extends HttpStatusCodeEx
     public MessageTypeDoesNotFitDocumentTypeException(MessageType messageType, String documentType) {
         super(HttpStatus.BAD_REQUEST, MessageTypeDoesNotFitDocumentTypeException.class.getName(), messageType.getType(), documentType);
     }
+
+    public MessageTypeDoesNotFitDocumentTypeException(String messageType, String documentType) {
+        super(HttpStatus.BAD_REQUEST, MessageTypeDoesNotFitDocumentTypeException.class.getName(), messageType, documentType);
+    }
 }
