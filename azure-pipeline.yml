@@ -12,8 +12,8 @@ extends:
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
     coverageTool: none
-    buildDockerArtifact: false
-    dockerhubPush: false
+    buildDockerArtifact: true
+    dockerhubPush: true
     dockerRegistryEndpoint: dockerhub-difi
     deployOssrh: true
     mavenGoals: deploy
