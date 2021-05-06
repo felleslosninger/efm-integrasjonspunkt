@@ -71,9 +71,12 @@
             <name>DIFI MOVE releases on Nexus</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
         </repository>
+        <repository>
+            <id>kotlinx-html</id>
+            <name>kotlinx-html</name>
+            <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
+        </repository>
     </repositories>
-    <pluginRepositories>
-    </pluginRepositories>
 
     <properties>
         <spring.cloud.version>Hoxton.SR9</spring.cloud.version>
