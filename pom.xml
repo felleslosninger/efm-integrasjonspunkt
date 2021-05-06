@@ -71,11 +71,6 @@
             <name>DIFI MOVE releases on Nexus</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
         </repository>
-        <repository>
-            <id>kotlinx-html</id>
-            <name>kotlinx-html</name>
-            <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
-        </repository>
     </repositories>
 
     <properties>
@@ -625,7 +620,7 @@
             <plugin>
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>
-                <version>1.4.10.2</version>
+                <version>1.4.32</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
