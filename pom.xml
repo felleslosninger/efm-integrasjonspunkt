@@ -71,57 +71,7 @@
             <name>DIFI MOVE releases on Nexus</name>
             <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
         </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter-releases</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>asciidoctor-releases</id>
-            <name>asciidoctor</name>
-            <url>https://dl.bintray.com/asciidoctor/maven/</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-puravida-software-repo</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/puravida-software/repo</url>
-        </repository>
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter-releases</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>asciidoctor-releases</id>
-            <name>asciidoctor</name>
-            <url>https://dl.bintray.com/asciidoctor/maven/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-puravida-software-repo</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/puravida-software/repo</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
         <spring.cloud.version>Hoxton.SR9</spring.cloud.version>
@@ -670,7 +620,7 @@
             <plugin>
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>
-                <version>1.4.10.2</version>
+                <version>1.4.32</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
