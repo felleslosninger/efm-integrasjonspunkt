@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.validation.OneOf;
+import no.difi.meldingsutveksling.validation.SbdScopeConditionalInstanceIdentifierUuid;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -52,6 +53,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+@SbdScopeConditionalInstanceIdentifierUuid
 public class Scope {
 
     @XmlElement(name = "Type", required = true)
