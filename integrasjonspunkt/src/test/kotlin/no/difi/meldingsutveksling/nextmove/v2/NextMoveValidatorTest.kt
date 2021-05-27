@@ -172,5 +172,4 @@ class NextMoveValidatorTest {
         val file = BasicNextMoveFile.of("", "bar.txt", "text", "foo".toByteArray())
         nextMoveValidator.validateFile(message, file)
     }
-    //TODO burde eg teste for noko med print funksjonaliteten her? feks false. default = true
 }
