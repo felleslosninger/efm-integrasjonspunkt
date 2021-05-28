@@ -35,11 +35,14 @@ public class SRParameter {
         if (!isNullOrEmpty(conversationId)) {
             query.add(format("conversationId=%s", conversationId));
         }
-        if (print != null) {
+        if (print == null) {
+            return query.toString();
+        }
+        if (!print) {
             query.add(format("print=%s", print));
         }
 
-        return query.toString();
+            return query.toString();
     }
 
     private static SRParameterBuilder builder() {
