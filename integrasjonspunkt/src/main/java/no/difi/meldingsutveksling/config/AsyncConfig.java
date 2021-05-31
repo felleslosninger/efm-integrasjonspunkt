@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -34,5 +36,10 @@ public class AsyncConfig implements AsyncConfigurer {
             Logger logger = LoggerFactory.getLogger(targetClass);
             logger.error(ex.getMessage(), ex);
         };
+    }
+
+    @Bean
+    public Executor dpiReceiptExecutor() {
+        return new SimpleAsyncTaskExecutor();
     }
 }

@@ -17,6 +17,7 @@ import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,16 @@ public class MeldingsformidlerClient {
     private final ForsendelseHandlerFactory forsendelseHandlerFactory;
     private final DpiReceiptMapper dpiReceiptMapper;
 
+    private String nextMpcId() {
+        if (config.getMpcConcurrency() > 1) {
+            int i = ThreadLocalRandom
+                    .current()
+                    .nextInt(0, config.getMpcConcurrency());
+            return config.getMpcId() + "-" + i;
+        }
+        return config.getMpcId();
+    }
+
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
         Dokument dokument = dokumentFromDocument(request.getDocument());
         Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(request.getAttachments())).build();
@@ -39,7 +50,7 @@ public class MeldingsformidlerClient {
         Forsendelse.Builder forsendelseBuilder = forsendelseBuilderHandler.handle(request, dokumentpakke);
 
         Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
-                .mpcId(config.getMpcId())
+                .mpcId(nextMpcId())
                 .spraakkode(request.getLanguage())
                 .prioritet(config.getPriority()).build();
 
@@ -67,20 +78,20 @@ public class MeldingsformidlerClient {
         return builder.build();
     }
 
-    public Optional<ExternalReceipt> sjekkEtterKvittering(String orgnr) {
+    public Optional<ExternalReceipt> sjekkEtterKvittering(String orgnr, String mpcId) {
         Kvittering kvittering = new Kvittering();
 
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(kvittering::setRawReceipt);
         SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
-        return getForretningsKvittering(klient)
+        return getForretningsKvittering(klient, mpcId)
                 .map(forretningsKvittering -> kvittering.setEksternKvittering(forretningsKvittering)
                         .withCallback(klient::bekreft)
                 );
     }
 
-    private Optional<ForretningsKvittering> getForretningsKvittering(SikkerDigitalPostKlient klient) {
+    private Optional<ForretningsKvittering> getForretningsKvittering(SikkerDigitalPostKlient klient, String mpcId) {
         try {
-            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(config.getMpcId()).build()));
+            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(mpcId).build()));
         } catch (SendException e) {
             log.warn("Polling of DPI receipts failed with: {}", e.getLocalizedMessage());
             return Optional.empty();
