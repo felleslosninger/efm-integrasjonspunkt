@@ -16,7 +16,7 @@ public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
-    ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
+    ServiceRecord getServiceRecord(StandardBusinessDocument sbd, boolean print) {
         BusinessMessage<?> businessMessage = sbd.getBusinessMessage();
         try {
             SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
@@ -28,7 +28,7 @@ public class ServiceRecordProvider {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
             return serviceRegistryLookup.getServiceRecord(
-                    parameterBuilder.build(),
+                    parameterBuilder.build().setPrint(print),
                     sbd.getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoesNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
