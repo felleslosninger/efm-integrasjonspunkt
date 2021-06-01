@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
 public class AsyncConfig implements AsyncConfigurer {
 
     private final TaskExecutor threadPoolTaskExecutor;
+    private final IntegrasjonspunktProperties props;
 
     @Override
     public Executor getAsyncExecutor() {
@@ -41,6 +42,11 @@ public class AsyncConfig implements AsyncConfigurer {
 
     @Bean
     public Executor dpiReceiptExecutor() {
-        return new ThreadPoolTaskExecutor();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(props.getDpi().getMpcConcurrency());
+        executor.setMaxPoolSize(props.getDpi().getMpcConcurrency());
+        executor.setQueueCapacity(0);
+
+        return executor;
     }
 }
