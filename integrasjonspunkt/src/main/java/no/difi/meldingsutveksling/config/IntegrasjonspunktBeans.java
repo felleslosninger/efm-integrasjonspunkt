@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -125,8 +126,10 @@ public class IntegrasjonspunktBeans {
     public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
                                                            SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
                                                            ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                           DpiReceiptMapper dpiReceiptMapper) {
-        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory, forsendelseHandlerFactory, dpiReceiptMapper);
+                                                           DpiReceiptMapper dpiReceiptMapper,
+                                                           ClientInterceptor metricsEndpointInterceptor) {
+        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
+                forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor);
     }
 
     @Bean
