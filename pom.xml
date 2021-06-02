@@ -61,16 +61,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>DIFI MOVE</id>
-            <name>DIFI MOVE Nexus 3rd party</name>
-            <url>https://beta-meldingsutveksling.difi.no/content/repositories/thirdparty/</url>
-        </repository>
-        <repository>
-            <id>DIFI Move releases</id>
-            <name>DIFI MOVE releases on Nexus</name>
-            <url>https://beta-meldingsutveksling.difi.no/content/repositories/releases/</url>
-        </repository>
     </repositories>
 
     <properties>
