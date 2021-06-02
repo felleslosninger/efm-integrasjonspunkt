@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.status;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
@@ -18,10 +19,12 @@ public class DpiReceiptService {
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
 
+    @Timed
     Optional<ExternalReceipt> checkForReceipts() {
         return meldingsformidlerClient.sjekkEtterKvittering(properties.getOrg().getNumber());
     }
 
+    @Timed
     public void handleReceipt(ExternalReceipt externalReceipt) {
         final String id = externalReceipt.getId();
         MessageStatus status = externalReceipt.toMessageStatus();

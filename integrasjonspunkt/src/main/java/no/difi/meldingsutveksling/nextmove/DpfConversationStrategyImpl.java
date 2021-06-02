@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpfConversationStrategy;
@@ -27,6 +28,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
     private final BestEduAppReceiptService bestEduAppReceiptService;
 
     @Override
+    @Timed
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         svarUtService.send(message);
 
