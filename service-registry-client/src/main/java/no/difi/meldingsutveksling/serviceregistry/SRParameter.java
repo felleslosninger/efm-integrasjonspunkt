@@ -61,6 +61,9 @@ public class SRParameter {
         if (! isNullOrEmpty(conversationId)) {
             queryParamTemplates.add("conversationId={conversationId}");
         }
+        if (print != null && !print) {
+            queryParamTemplates.add("print=false");
+        }
         if (! queryParamTemplates.isEmpty()) {
             urlTemplateBuilder.append("?");
             urlTemplateBuilder.append(String.join("&", queryParamTemplates));
