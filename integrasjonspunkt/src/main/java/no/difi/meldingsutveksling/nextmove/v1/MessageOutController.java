@@ -61,7 +61,9 @@ public class MessageOutController {
                     new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
             );
         }
-        messageService.createMessage(sbd);
+        //To allow SR to avoid DSF-lookup sending print=false as a @RequestParam to improve performance.
+        boolean print = true;
+        messageService.createMessage(sbd, print);
         return ResponseEntity.ok(message);
     }
 

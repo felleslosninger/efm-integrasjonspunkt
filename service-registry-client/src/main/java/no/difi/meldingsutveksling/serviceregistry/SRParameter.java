@@ -18,6 +18,7 @@ public class SRParameter {
     private String identifier;
     private String process;
     private Integer securityLevel;
+    private Boolean print;
     @NonNull
     @Builder.Default
     private Boolean infoOnly = Boolean.FALSE;
@@ -34,8 +35,14 @@ public class SRParameter {
         if (!isNullOrEmpty(conversationId)) {
             query.add(format("conversationId=%s", conversationId));
         }
+        if (print == null) {
+            return query.toString();
+        }
+        if (!print) {
+            query.add(format("print=%s", print));
+        }
 
-        return query.toString();
+            return query.toString();
     }
 
     private static SRParameterBuilder builder() {

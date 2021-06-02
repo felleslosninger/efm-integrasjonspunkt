@@ -25,7 +25,8 @@ public class CapabilitiesController {
     public Capabilities capabilities(
             @PathVariable @NotNull String receiverIdentifier,
             @RequestParam(required = false) Integer securityLevel,
-            @RequestParam(required = false) String process) throws NotFoundInServiceRegistryException {
+            @RequestParam(required = false) String process,
+            @RequestParam(name = "print", defaultValue = "true") boolean print) throws NotFoundInServiceRegistryException {
         try {
             return capabilitiesFactory.getCapabilities(receiverIdentifier, securityLevel, process);
         } catch (MeldingsUtvekslingRuntimeException e) {

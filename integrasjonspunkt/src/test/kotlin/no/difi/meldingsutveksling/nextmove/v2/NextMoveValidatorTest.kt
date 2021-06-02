@@ -56,6 +56,7 @@ class NextMoveValidatorTest {
     val serviceRecord = mockk<ServiceRecord>()
     val businessMessage = ArkivmeldingMessage()
             .setHoveddokument("foo.txt")
+    val print = true
 
     @Before
     fun before() {
@@ -91,7 +92,7 @@ class NextMoveValidatorTest {
         every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRecordProvider.getServiceRecord(sbd, print) } returns serviceRecord
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { sbd.messageType } returns "arkivmelding"
         every { sbd.documentType } returns "standard::arkivmelding"
@@ -104,31 +105,31 @@ class NextMoveValidatorTest {
     @Test(expected = MessageTypeDoesNotFitDocumentTypeException::class)
     fun `message type must fit document type`() {
         every { sbd.documentType } returns "foo::bar"
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
     @Test(expected = UnknownMessageTypeException::class)
     fun `document type must be valid`() {
         every { sbd.messageType } returns "foo"
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
     @Test(expected = ServiceNotEnabledException::class)
     fun `service not enabled should throw exception`() {
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns false
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
     @Test(expected = MessageAlreadyExistsException::class)
     fun `duplicate messageId not allowed`() {
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.of(message)
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
     @Test(expected = MessageAlreadyExistsException::class)
     fun `conversation cannot exist with same messageId`() {
         every { conversationService.findConversation(messageId) } returns Optional.of(mockk<Conversation>())
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
     @Test(expected = MissingFileException::class)
@@ -151,7 +152,7 @@ class NextMoveValidatorTest {
         every { sbd.any } returns mockkClass(FiksIoMessage::class)
         every { asserter.isValid(any<FiksIoMessage>(), any()) } just Runs
 
-        nextMoveValidator.validate(sbd)
+        nextMoveValidator.validate(sbd, print)
     }
 
 

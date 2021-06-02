@@ -69,8 +69,10 @@ public class BestEduAppReceiptService {
                 properties.getArkivmelding().getReceiptProcess(),
                 properties.getArkivmelding().getReceiptDocumentType(),
                 kvittering);
+        //To allow SR to avoid DSF-lookup sending print=false as a @RequestParam to improve performance.
+        boolean print = true;
 
-        NextMoveOutMessage message = nextMoveMessageService.createMessage(receiptSbd);
+        NextMoveOutMessage message = nextMoveMessageService.createMessage(receiptSbd, print);
         nextMoveMessageService.sendMessage(message);
     }
 

@@ -82,7 +82,7 @@ public class NextMoveMessageOutControllerTest {
 
     @Test
     public void multipart() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class), anyList())).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyList(), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(ARKIVMELDING_MESSAGE.getSbd());
 
         mvc.perform(
@@ -114,12 +114,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyList());
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyList(), anyBoolean());
     }
 
     @Test
     public void createArkivmeldingMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(ARKIVMELDING_MESSAGE.getSbd());
 
         mvc.perform(
@@ -146,12 +146,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test
     public void createDpiDigitalMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(DPI_DIGITAL_MESSAGE.getSbd());
 
         mvc.perform(
@@ -178,12 +178,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test
     public void createDigitalDpvMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(DIGITAL_DPV_MESSAGE.getSbd());
 
         mvc.perform(
@@ -210,12 +210,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test
     public void createDpiPrintMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(DPI_PRINT_MESSAGE.getSbd());
 
         mvc.perform(
@@ -242,12 +242,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test
     public void createInnsynskravMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(INNSYNSKRAV_MESSAGE.getSbd());
 
         mvc.perform(
@@ -274,12 +274,12 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test
     public void createPubliseringMessage() throws Exception {
-        given(messageService.createMessage(any(StandardBusinessDocument.class))).willReturn(messageMock);
+        given(messageService.createMessage(any(StandardBusinessDocument.class), anyBoolean())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(PUBLISERING_MESSAGE.getSbd());
 
         mvc.perform(
@@ -306,7 +306,7 @@ public class NextMoveMessageOutControllerTest {
                         )
                 );
 
-        verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(messageService).createMessage(any(StandardBusinessDocument.class), anyBoolean());
     }
 
     @Test

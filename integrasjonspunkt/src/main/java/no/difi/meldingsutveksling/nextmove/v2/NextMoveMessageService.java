@@ -67,15 +67,15 @@ public class NextMoveMessageService {
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
-    public NextMoveOutMessage createMessage(StandardBusinessDocument sbd, List<? extends MultipartFile> files) {
-        NextMoveOutMessage message = createMessage(sbd);
+    public NextMoveOutMessage createMessage(StandardBusinessDocument sbd, List<? extends MultipartFile> files, boolean print) {
+        NextMoveOutMessage message = createMessage(sbd, print);
         files.forEach(file -> addFile(message, file));
         return message;
     }
 
-    public NextMoveOutMessage createMessage(StandardBusinessDocument sbd) {
-        validator.validate(sbd);
-        NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd);
+    public NextMoveOutMessage createMessage(StandardBusinessDocument sbd, boolean print) {
+        validator.validate(sbd, print);
+        NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd, print);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         messageRepo.save(message);
         conversationService.registerConversation(message);
