@@ -129,7 +129,8 @@ public class IntegrasjonspunktProperties {
     public static class Queue {
         @NotNull
         private Integer maximumRetryHours;
-
+        @NotNull
+        private Integer concurrency;
     }
 
     public FeatureToggle getFeature() {
