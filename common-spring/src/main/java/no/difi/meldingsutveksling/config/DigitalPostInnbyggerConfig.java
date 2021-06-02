@@ -32,6 +32,18 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String mpcId;
 
+    /**
+     * The number of concurrent message partition channels (MPCs) to send messages to and consume receipts from.
+     * An integer increment is postfixed to the MPC id if the MPC concurrency is greater than 1.
+     *
+     * MPC concurrency of 3 will use the following MPCs:
+     * - {mpcId}-0
+     * - {mpcId}-1
+     * - {mpcId}-2
+     */
+    @NotNull
+    private Integer mpcConcurrency;
+
     @NotNull
     private String language;
 

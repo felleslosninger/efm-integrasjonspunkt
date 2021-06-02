@@ -10,8 +10,11 @@ import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
@@ -54,13 +57,24 @@ public class StatusPolling {
     }
 
     @Scheduled(fixedRate = 10000)
-    public void dpiReceiptsScheduledTask() {
+    public void dpiReceiptsScheduledTask() throws InterruptedException, ExecutionException {
         if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
-            Optional<ExternalReceipt> externalReceipt = dpiReceiptService.checkForReceipts();
+            int mpcConcurrency = props.getDpi().getMpcConcurrency();
+            List<Future<Void>> futures = new ArrayList<>();
+            if (mpcConcurrency > 1) {
+                for (int i = 0; i < mpcConcurrency; i++) {
+                    String mpcId = props.getDpi().getMpcId() + "-" + i;
+                    futures.add(dpiReceiptService.handleReceipts(mpcId));
+                }
 
-            while (externalReceipt.isPresent()) {
-                externalReceipt.ifPresent(dpiReceiptService::handleReceipt);
-                externalReceipt = dpiReceiptService.checkForReceipts();
+            } else {
+                String mpcId = props.getDpi().getMpcId();
+                futures.add(dpiReceiptService.handleReceipts(mpcId));
+            }
+            for (Future<Void> future : futures) {
+                // Waits for the async handleReceipts to complete in order to avoid the schedule to fire again and cause
+                // concurrent consumption of the MPC(s).
+                future.get();
             }
         }
     }

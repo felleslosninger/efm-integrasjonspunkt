@@ -35,8 +35,8 @@ public class NextMoveOutMessageFactory {
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
 
-    NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+    NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd, boolean print) {
+        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd, print);
 
         setDefaults(sbd, serviceRecord);
 

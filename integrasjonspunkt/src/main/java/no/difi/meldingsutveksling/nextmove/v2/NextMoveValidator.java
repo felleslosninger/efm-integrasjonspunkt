@@ -60,7 +60,7 @@ public class NextMoveValidator {
     private final NextMoveFileSizeValidator fileSizeValidator;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
 
-    void validate(StandardBusinessDocument sbd) {
+    void validate(StandardBusinessDocument sbd, boolean print) {
         validateCertificate();
 
         // Need to validate scopes manually due to ReceiverRef can be non-UUID
@@ -90,7 +90,7 @@ public class NextMoveValidator {
                 }
         );
 
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd, print);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
@@ -117,7 +117,6 @@ public class NextMoveValidator {
     public void validate(NextMoveOutMessage message) {
         validateCertificate();
 
-        // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
