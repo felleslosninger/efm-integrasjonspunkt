@@ -14,6 +14,8 @@ import no.difi.sdp.client2.domain.Forsendelse;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.server.EndpointInterceptor;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +33,7 @@ public class MeldingsformidlerClient {
     private final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
     private final ForsendelseHandlerFactory forsendelseHandlerFactory;
     private final DpiReceiptMapper dpiReceiptMapper;
+    private final ClientInterceptor metricsEndpointInterceptor;
 
     private String nextMpcId() {
         if (config.getMpcConcurrency() > 1) {
@@ -82,7 +85,7 @@ public class MeldingsformidlerClient {
         Kvittering kvittering = new Kvittering();
 
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(kvittering::setRawReceipt);
-        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor);
+        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor, metricsEndpointInterceptor);
         return getForretningsKvittering(klient, mpcId)
                 .map(forretningsKvittering -> kvittering.setEksternKvittering(forretningsKvittering)
                         .withCallback(klient::bekreft)

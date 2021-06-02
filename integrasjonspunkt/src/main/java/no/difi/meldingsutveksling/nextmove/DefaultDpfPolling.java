@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpfPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -35,6 +36,7 @@ public class DefaultDpfPolling implements DpfPolling {
     }
 
     @Override
+    @Timed
     public void poll() {
         Consumer<Forsendelse> forwarder = getSvarInnForwarder();
         log.trace("Checking for new DPF messages using {}", forwarder.getClass().getName());

@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
+import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -17,10 +18,12 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Configuration
@@ -45,6 +48,7 @@ public class OauthRestTemplateConfig {
             "global/postadresse.read");
 
     private final IntegrasjonspunktProperties props;
+    private final MetricsRestTemplateCustomizer metricsRestTemplateCustomizer;
 
     @SneakyThrows
     @Bean
@@ -77,10 +81,13 @@ public class OauthRestTemplateConfig {
             OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
             rt.setRequestFactory(requestFactory);
             rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
+            rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
+            metricsRestTemplateCustomizer.customize(rt);
             return rt;
         }
-
-        return new RestTemplate(requestFactory);
+        RestTemplate rt = new RestTemplate(requestFactory);
+        metricsRestTemplateCustomizer.customize(rt);
+        return rt;
     }
 
     private ArrayList<String> getCurrentScopes() {

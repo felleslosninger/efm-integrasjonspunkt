@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpeConversationStrategy;
@@ -25,6 +26,7 @@ public class DpeConversationStrategyImpl implements DpeConversationStrategy {
 
     @Override
     @Transactional
+    @Timed
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         serviceBus.putMessage(message);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",

@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -42,14 +43,7 @@ public class ServiceRegistryClient {
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
         try {
-            if (parameter.getInfoOnly()) {
-                return client.getResource("info/" + parameter.getIdentifier());
-            }
-            if (!Strings.isNullOrEmpty(parameter.getProcess())) {
-                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + parameter.getProcess(), parameter.getQuery());
-            } else {
-                return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
-            }
+            return client.getResource(parameter.getUrlTemplate(), parameter.getUrlVariables());
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundInServiceRegistryException(parameter);
@@ -73,7 +67,7 @@ public class ServiceRegistryClient {
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
     public String getCertificate(String identifier) throws ServiceRegistryLookupException {
         try {
-            return client.getResource("virksert/" + identifier);
+            return client.getResource("virksert/{identifier}", Collections.singletonMap("identifier", identifier));
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);

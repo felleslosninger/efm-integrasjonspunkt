@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.status;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
@@ -20,6 +21,7 @@ public class DpiReceiptService {
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
 
+    @Timed
     @Async("dpiReceiptExecutor")
     public CompletableFuture<Void> handleReceipts(String mpcId) {
         Optional<ExternalReceipt> externalReceipt = checkForReceipts(mpcId);
