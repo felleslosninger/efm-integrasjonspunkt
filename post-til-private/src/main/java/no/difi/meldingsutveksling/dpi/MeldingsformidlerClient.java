@@ -57,7 +57,7 @@ public class MeldingsformidlerClient {
                 .spraakkode(request.getLanguage())
                 .prioritet(config.getPriority()).build();
 
-        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()));
+        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()), metricsEndpointInterceptor);
         try {
             klient.send(forsendelse);
         } catch (SendException e) {
