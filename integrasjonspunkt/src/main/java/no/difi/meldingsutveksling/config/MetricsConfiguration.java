@@ -71,12 +71,12 @@ public class MetricsConfiguration {
             @Override
             public boolean handleRequest(MessageContext messageContext) throws WebServiceClientException {
                 messageContext.setProperty(START_TIME_IN_MS, System.currentTimeMillis());
+                messageContext.setProperty(OUTCOME, "SUCCESS");
                 return true;
             }
 
             @Override
             public boolean handleResponse(MessageContext messageContext) throws WebServiceClientException {
-                messageContext.setProperty(OUTCOME, "SUCCESS");
                 return true;
             }
 
@@ -92,6 +92,10 @@ public class MetricsConfiguration {
                 long startTimeInMs = (long) messageContext.getProperty(START_TIME_IN_MS);
                 long timeInMs = stopTimeInMs - startTimeInMs;
                 double timeInS = (double) timeInMs / 1000;
+
+                if (ex != null) {
+                    messageContext.setProperty(OUTCOME, "FAULT");
+                }
 
                 URI uri;
                 try {
