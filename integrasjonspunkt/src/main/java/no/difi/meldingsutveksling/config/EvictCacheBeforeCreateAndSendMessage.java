@@ -36,18 +36,12 @@ public class EvictCacheBeforeCreateAndSendMessage {
 
     private final CacheManager cacheManager;
 
-    @Before("execution(* no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController.createAndSendMessage(..)) && args(sbd, print, ..)")
-    public void evictCacheBeforeCreateAndSendMessage(StandardBusinessDocument sbd, boolean print) {
-        SRParameter srParameter = SRParameter
-                .builder(sbd.getReceiverIdentifier())
-                .process(sbd.getProcess())
-                .securityLevel(sbd.getBusinessMessage().getSikkerhetsnivaa())
-                .print(print)
-                .build();
-
+    @Before("execution(* no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController.createAndSendMessage(..)) && args(sbd, ..)")
+    public void evictCacheBeforeCreateAndSendMessage(StandardBusinessDocument sbd) {
+        System.out.println("Evicting cache");
         Cache cache = cacheManager.getCache(CacheConfig.CACHE_LOAD_IDENTIFIER_RESOURCE);
         if (cache != null) {
-            cache.evictIfPresent(srParameter);
+            cache.invalidate();
         }
     }
 
