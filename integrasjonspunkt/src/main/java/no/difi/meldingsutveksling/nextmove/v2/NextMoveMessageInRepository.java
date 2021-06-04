@@ -48,6 +48,7 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
         return page.map(NextMoveInMessage::getSbd);
     }
 
+    @Transactional(readOnly = true)
     default Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
         Predicate p = createQuery(input)
                 .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
@@ -89,4 +90,9 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
 
         return builder;
     }
+
+    @Transactional
+    @Modifying
+    @Query("update NextMoveInMessage set lockTimeout = :lockTimeout where messageId = :messageId and lockTimeout is null")
+    int lock(String messageId, OffsetDateTime lockTimeout);
 }

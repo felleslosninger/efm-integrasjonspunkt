@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ public class NextMoveMessageInService {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
     private final Clock clock;
+    private final EntityManager entityManager;
 
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
@@ -53,16 +55,15 @@ public class NextMoveMessageInService {
         return messageRepo.find(input, pageable);
     }
 
-    @Transactional
     public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
+        OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
+                .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
         NextMoveInMessage message = messageRepo.peek(input)
+                .filter(p -> messageRepo.lock(p.getMessageId(), lockTimeout) == 1)
                 .orElseThrow(NoContentException::new);
+        entityManager.detach(message);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
-
-        messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
-
-        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
+        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), lockTimeout), markerFrom(message));
         return message.getSbd();
     }
 
