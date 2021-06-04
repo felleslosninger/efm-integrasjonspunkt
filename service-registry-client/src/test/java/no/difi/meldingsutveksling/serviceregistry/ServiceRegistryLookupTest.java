@@ -86,8 +86,11 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
         when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
+        IntegrasjonspunktProperties.FeatureToggle feature = mock(IntegrasjonspunktProperties.FeatureToggle.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
+        when(properties.getFeature()).thenReturn(feature);
+        when(properties.getFeature().isEnableDsfPrintLookup()).thenReturn(true);
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
