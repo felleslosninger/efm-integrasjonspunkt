@@ -85,10 +85,8 @@ public class NextMoveAdapter {
                 properties.getArkivmelding().getReceiptProcess(),
                 properties.getArkivmelding().getReceiptDocumentType(),
                 receipt);
-        //To allow SR to avoid DSF-lookup sending print=false as a @RequestParam to improve performance.
-        boolean print = true;
 
-        return nextMoveMessageService.createMessage(sbd, print);
+        return nextMoveMessageService.createMessage(sbd);
     }
 
     private NextMoveOutMessage convertEduMessage(PutMessageRequestWrapper message) throws PayloadException, JAXBException {
@@ -130,10 +128,8 @@ public class NextMoveAdapter {
         if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getReceiver().getRef())) {
             sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, message.getRequest().getEnvelope().getReceiver().getRef()));
         }
-        //To allow SR to avoid DSF-lookup sending print=false as a @RequestParam to improve performance.
-        boolean print = true;
 
-        return nextMoveMessageService.createMessage(sbd, getFiles(message), print);
+        return nextMoveMessageService.createMessage(sbd, getFiles(message));
     }
 
     private List<BasicNextMoveFile> getFiles(PutMessageRequestWrapper message) throws JAXBException, PayloadException {

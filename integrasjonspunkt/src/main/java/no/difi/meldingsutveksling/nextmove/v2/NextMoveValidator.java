@@ -60,7 +60,7 @@ public class NextMoveValidator {
     private final NextMoveFileSizeValidator fileSizeValidator;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
 
-    void validate(StandardBusinessDocument sbd, boolean print) {
+    void validate(StandardBusinessDocument sbd) {
         validateCertificate();
 
         // Need to validate scopes manually due to ReceiverRef can be non-UUID
@@ -90,7 +90,7 @@ public class NextMoveValidator {
                 }
         );
 
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd, print);
+        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
