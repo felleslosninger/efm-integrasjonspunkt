@@ -85,7 +85,8 @@ public class SikkerDigitalPostKlientFactory {
 
     private KlientKonfigurasjon.Builder createKlientKonfigurasjonBuilder() {
         return KlientKonfigurasjon.builder(getMiljo())
-                .connectionTimeout(20, TimeUnit.SECONDS);
+                .connectionTimeout(20, TimeUnit.SECONDS)
+                .maxConnectionPoolSize(props.getDpi().getClientMaxConnectionPoolSize());
     }
 
     private Miljo getMiljo() {
