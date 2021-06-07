@@ -8,7 +8,6 @@ import lombok.NonNull;
 import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 
 @Data
 @Builder
@@ -25,18 +24,6 @@ public class SRParameter {
     // Used as correlation id - no need for this to affect caching
     @EqualsAndHashCode.Exclude
     private String conversationId;
-
-    public String getQuery() {
-        StringJoiner query = new StringJoiner("&");
-
-        if (securityLevel != null) {
-            query.add(format("securityLevel=%s", securityLevel));
-        }
-        if (!isNullOrEmpty(conversationId)) {
-            query.add(format("conversationId=%s", conversationId));
-        }
-            return query.toString();
-    }
 
     public String getUrlTemplate() {
         if (infoOnly) {
