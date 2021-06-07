@@ -44,8 +44,7 @@ public class NextMoveMessageOutController {
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public StandardBusinessDocument createAndSendMessage(
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
-            MultipartRequest multipartRequest,
-            @RequestParam(name = "print", defaultValue = "true") boolean print) {
+            MultipartRequest multipartRequest) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
                 .flatMap(Collection::stream)
@@ -69,17 +68,16 @@ public class NextMoveMessageOutController {
                     throw new DuplicateFilenameException(d);
                 });
 
-        NextMoveOutMessage message = messageService.createMessage(sbd, files, print);
+        NextMoveOutMessage message = messageService.createMessage(sbd, files);
         messageService.sendMessage(message.getId());
         return message.getSbd();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(noRollbackFor = TimeToLiveException.class)
-    public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd,
-                                                  @RequestParam(name = "print", defaultValue = "true") boolean print) {
+    public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
-        NextMoveOutMessage message = messageService.createMessage(sbd, print);
+        NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
     }
 

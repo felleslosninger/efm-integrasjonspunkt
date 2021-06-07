@@ -6,6 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -27,6 +28,7 @@ public class ServiceRegistryClient {
     private final RestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
+    private final IntegrasjonspunktProperties props;
 
     @Cacheable(CacheConfig.CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
@@ -42,6 +44,10 @@ public class ServiceRegistryClient {
     }
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
+        if(!props.getFeature().isEnableDsfPrintLookup()) {
+            //Default value in SR is true. If you want to avoid DSF lookup set this property to false.
+            parameter.setPrint(props.getFeature().isEnableDsfPrintLookup());
+        }
         try {
             return client.getResource(parameter.getUrlTemplate(), parameter.getUrlVariables());
         } catch (HttpClientErrorException httpException) {
