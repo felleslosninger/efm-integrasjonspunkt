@@ -56,4 +56,7 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private DataSize uploadSizeLimit;
 
+    @NotNull
+    private int clientMaxConnectionPoolSize;
+
 }
