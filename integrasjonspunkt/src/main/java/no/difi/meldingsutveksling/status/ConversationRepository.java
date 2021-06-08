@@ -60,6 +60,10 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     @EntityGraph(value = "Conversation.messageStatuses")
     Page<Conversation> findByPollable(boolean pollable, Pageable pageable);
 
+    @Override
+    @EntityGraph(value = "Conversation.messageStatuses")
+    Iterable<Conversation> findAllById(Iterable<Long> longs);
+
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByReceiverIdentifierAndDirection(String receiverIdentifier, ConversationDirection direction);
 
@@ -67,6 +71,9 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     List<Conversation> findByDirection(ConversationDirection direction);
 
     void deleteByMessageId(String messageId);
+
+    @Query("SELECT id FROM Conversation WHERE pollable = true")
+    Page<Long> findIdsForPollableConversations(Pageable pageable);
 
     @Transactional(readOnly = true)
     @Query("SELECT id FROM Conversation WHERE expiry < :time AND finished = false")
