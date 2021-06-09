@@ -34,7 +34,7 @@ public class StatusPolling {
     private final DpiReceiptService dpiReceiptService;
     private final ConversationStrategyFactory conversationStrategyFactory;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
     public void checkReceiptStatus() {
         if (!props.getFeature().isEnableReceipts()) {
             return;
