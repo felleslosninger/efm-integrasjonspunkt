@@ -55,7 +55,12 @@ public class NextMoveMessageInService {
         return messageRepo.find(input, pageable);
     }
 
-    public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
+    public synchronized StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
+        // It's necessary to peek and lock as an atomic operation. Otherwise concurrent message consumption is likely to
+        // peek the same message mulitple times causing all kinds of errors. It is difficult to mangage at the database
+        // level. We therefore ensure atomicity by synchronizing at Java level instead. Peek+lock is an inexpensive
+        // operation compared to pop+delete so synchronization shouldn't be very limiting for concurrent message
+        // consumption doing peek+lock+pop+delete.
         OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
         NextMoveInMessage message = messageRepo.peek(input)
