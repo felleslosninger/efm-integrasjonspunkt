@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnTransport;
@@ -30,6 +31,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
     @Override
     @Transactional
+    @Timed
     public void send(NextMoveOutMessage message) {
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());

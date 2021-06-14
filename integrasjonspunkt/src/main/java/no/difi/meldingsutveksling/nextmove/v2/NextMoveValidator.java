@@ -117,7 +117,6 @@ public class NextMoveValidator {
     public void validate(NextMoveOutMessage message) {
         validateCertificate();
 
-        // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();

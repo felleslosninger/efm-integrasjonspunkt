@@ -129,7 +129,8 @@ public class IntegrasjonspunktProperties {
     public static class Queue {
         @NotNull
         private Integer maximumRetryHours;
-
+        @NotNull
+        private Integer concurrency;
     }
 
     public FeatureToggle getFeature() {
@@ -286,6 +287,7 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class FeatureToggle {
+        private boolean enableDsfPrintLookup;
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;

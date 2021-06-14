@@ -85,6 +85,7 @@ public class NextMoveAdapter {
                 properties.getArkivmelding().getReceiptProcess(),
                 properties.getArkivmelding().getReceiptDocumentType(),
                 receipt);
+
         return nextMoveMessageService.createMessage(sbd);
     }
 

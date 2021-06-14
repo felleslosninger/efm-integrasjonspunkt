@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.*;
@@ -33,6 +34,7 @@ public class DefaultDpoPolling implements DpoPolling {
     private final AltinnWsClient altinnWsClient;
 
     @Override
+    @Timed
     public void poll() {
         log.trace("Checking for new DPO messages");
 

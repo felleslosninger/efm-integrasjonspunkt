@@ -5,10 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
-import java.util.StringJoiner;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 
 @Data
 @Builder
@@ -18,6 +17,7 @@ public class SRParameter {
     private String identifier;
     private String process;
     private Integer securityLevel;
+    private Boolean print;
     @NonNull
     @Builder.Default
     private Boolean infoOnly = Boolean.FALSE;
@@ -25,17 +25,48 @@ public class SRParameter {
     @EqualsAndHashCode.Exclude
     private String conversationId;
 
-    public String getQuery() {
-        StringJoiner query = new StringJoiner("&");
-
+    public String getUrlTemplate() {
+        if (infoOnly) {
+            return "info/{identifier}";
+        }
+        StringBuilder urlTemplateBuilder = new StringBuilder();
+        urlTemplateBuilder.append("identifier/{identifier}");
+        if (! isNullOrEmpty(process)) {
+            urlTemplateBuilder.append(("/process/{process}"));
+        }
+        List<String> queryParamTemplates = new ArrayList<>();
         if (securityLevel != null) {
-            query.add(format("securityLevel=%s", securityLevel));
+            queryParamTemplates.add("securityLevel={securityLevel}");
         }
-        if (!isNullOrEmpty(conversationId)) {
-            query.add(format("conversationId=%s", conversationId));
+        if (! isNullOrEmpty(conversationId)) {
+            queryParamTemplates.add("conversationId={conversationId}");
         }
+        if (print != null && !print) {
+            queryParamTemplates.add("print=false");
+        }
+        if (! queryParamTemplates.isEmpty()) {
+            urlTemplateBuilder.append("?");
+            urlTemplateBuilder.append(String.join("&", queryParamTemplates));
+        }
+        return urlTemplateBuilder.toString();
+    }
 
-        return query.toString();
+    public Map<String, String> getUrlVariables() {
+        Map<String, String> urlVariables = new HashMap<>();
+        urlVariables.put("identifier", identifier);
+        if (infoOnly) {
+            return urlVariables;
+        }
+        if (! isNullOrEmpty(process)) {
+            urlVariables.put("process", process);
+        }
+        if (securityLevel != null) {
+            urlVariables.put("securityLevel", String.valueOf(securityLevel));
+        }
+        if (! isNullOrEmpty(conversationId)) {
+            urlVariables.put("conversationId", conversationId);
+        }
+        return urlVariables;
     }
 
     private static SRParameterBuilder builder() {

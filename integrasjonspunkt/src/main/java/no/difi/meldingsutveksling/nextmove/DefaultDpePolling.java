@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpePolling;
@@ -24,6 +25,7 @@ public class DefaultDpePolling implements DpePolling {
     private CompletableFuture<?> batchRead;
 
     @Override
+    @Timed
     public void poll() {
         if (properties.getNextmove().getServiceBus().isBatchRead()) {
             if (this.batchRead == null || this.batchRead.isDone()) {

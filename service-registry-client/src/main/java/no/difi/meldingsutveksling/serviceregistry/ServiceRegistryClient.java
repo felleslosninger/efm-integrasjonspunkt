@@ -6,6 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -16,6 +17,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -26,6 +28,7 @@ public class ServiceRegistryClient {
     private final RestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
+    private final IntegrasjonspunktProperties props;
 
     @Cacheable(CacheConfig.CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
@@ -41,15 +44,12 @@ public class ServiceRegistryClient {
     }
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
+        if(!props.getFeature().isEnableDsfPrintLookup()) {
+            //Default value in SR is true. If you want to avoid DSF lookup set this property to false.
+            parameter.setPrint(props.getFeature().isEnableDsfPrintLookup());
+        }
         try {
-            if (parameter.getInfoOnly()) {
-                return client.getResource("info/" + parameter.getIdentifier());
-            }
-            if (!Strings.isNullOrEmpty(parameter.getProcess())) {
-                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + parameter.getProcess(), parameter.getQuery());
-            } else {
-                return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
-            }
+            return client.getResource(parameter.getUrlTemplate(), parameter.getUrlVariables());
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundInServiceRegistryException(parameter);
@@ -73,7 +73,7 @@ public class ServiceRegistryClient {
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
     public String getCertificate(String identifier) throws ServiceRegistryLookupException {
         try {
-            return client.getResource("virksert/" + identifier);
+            return client.getResource("virksert/{identifier}", Collections.singletonMap("identifier", identifier));
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);

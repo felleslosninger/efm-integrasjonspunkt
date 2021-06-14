@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dpi;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -25,12 +26,14 @@ public class SikkerDigitalPostKlientFactory {
 
     private final IntegrasjonspunktProperties props;
 
+    @Timed
     public SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer) {
         KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().build();
         return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
     }
 
-    public SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer, ClientInterceptor clientInterceptor) {
+    @Timed
+    public SikkerDigitalPostKlient createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer, ClientInterceptor... clientInterceptor) {
         KlientKonfigurasjon klientKonfigurasjon = createKlientKonfigurasjonBuilder().soapInterceptors(clientInterceptor).build();
         return createSikkerDigitalPostKlient(klientKonfigurasjon, aktoerOrganisasjonsnummer);
     }
@@ -82,7 +85,8 @@ public class SikkerDigitalPostKlientFactory {
 
     private KlientKonfigurasjon.Builder createKlientKonfigurasjonBuilder() {
         return KlientKonfigurasjon.builder(getMiljo())
-                .connectionTimeout(20, TimeUnit.SECONDS);
+                .connectionTimeout(20, TimeUnit.SECONDS)
+                .maxConnectionPoolSize(props.getDpi().getClientMaxConnectionPoolSize());
     }
 
     private Miljo getMiljo() {

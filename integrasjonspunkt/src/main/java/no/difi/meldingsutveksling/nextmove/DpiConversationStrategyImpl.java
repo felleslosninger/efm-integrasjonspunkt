@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
@@ -35,6 +36,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final ConversationService conversationService;
 
     @Override
+    @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {

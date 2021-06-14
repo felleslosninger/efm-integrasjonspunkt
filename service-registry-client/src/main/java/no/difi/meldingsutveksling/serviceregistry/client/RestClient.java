@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * RestClient using simple http requests to manipulate services
@@ -39,28 +40,23 @@ public class RestClient {
      * @return response body
      */
     public String getResource(String resourcePath) throws BadJWSException {
-        return getResource(resourcePath, null);
+        return getResource(resourcePath, Collections.emptyMap());
     }
 
-    /**
-     * Performs HTTP GET against baseUrl/resourcePath
-     *
-     * @param resourcePath which is resolved against baseUrl
-     * @return response body
-     */
-    public String getResource(String resourcePath, String query) throws BadJWSException {
-        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).query(query).build().toUri();
-
+    public String getResource(String urlTemplate, Map<String, String> urlVariables) throws BadJWSException {
+        urlTemplate = baseUrl.toString().concat("/").concat(urlTemplate);
         if (props.getSign().isEnable()) {
             HttpHeaders headers = new HttpHeaders();
             headers.put("Accept", Collections.singletonList("application/jose, application/json"));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
+
+            ResponseEntity<String> response = restTemplate.exchange(urlTemplate, HttpMethod.GET, httpEntity,
+                    String.class, urlVariables);
             return jwtDecoder.getPayload(response.getBody(), props.getSign().getJwkUrl());
         }
 
-        return restTemplate.getForObject(uri, String.class);
+        return restTemplate.getForObject(urlTemplate, String.class, urlVariables);
     }
 
     public void putResource(String resourcePath) {

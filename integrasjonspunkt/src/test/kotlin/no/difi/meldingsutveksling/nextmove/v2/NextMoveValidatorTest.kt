@@ -56,6 +56,7 @@ class NextMoveValidatorTest {
     val serviceRecord = mockk<ServiceRecord>()
     val businessMessage = ArkivmeldingMessage()
             .setHoveddokument("foo.txt")
+    val print = true
 
     @Before
     fun before() {

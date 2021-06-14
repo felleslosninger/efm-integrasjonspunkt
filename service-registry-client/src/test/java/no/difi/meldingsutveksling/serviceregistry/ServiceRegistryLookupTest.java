@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
@@ -85,8 +86,11 @@ public class ServiceRegistryLookupTest {
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
         when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
         IntegrasjonspunktProperties.Arkivmelding arkivmelding = mock(IntegrasjonspunktProperties.Arkivmelding.class);
+        IntegrasjonspunktProperties.FeatureToggle feature = mock(IntegrasjonspunktProperties.FeatureToggle.class);
         when(arkivmelding.getDefaultProcess()).thenReturn(DEFAULT_PROCESS);
         when(properties.getArkivmelding()).thenReturn(arkivmelding);
+        when(properties.getFeature()).thenReturn(feature);
+        when(properties.getFeature().isEnableDsfPrintLookup()).thenReturn(true);
         dpo.setProcess(DEFAULT_PROCESS);
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
@@ -101,14 +105,14 @@ public class ServiceRegistryLookupTest {
     @Test(expected = ServiceRegistryLookupException.class)
     public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().build();
-        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
+        when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenReturn(json);
 
         this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
 
     @Test(expected = ServiceRegistryLookupException.class)
     public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
-        when(client.getResource("identifier/" + ORGNR, "")).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
     }
@@ -116,7 +120,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void organizationWithSingleServiceRecordHasServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
-        when(client.getResource("identifier/" + ORGNR, "")).thenReturn(json);
+        when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenReturn(json);
 
         final ServiceRecord serviceRecord = service.getServiceRecord(SRParameter.builder(ORGNR).build());
 
@@ -126,7 +130,7 @@ public class ServiceRegistryLookupTest {
     @Test
     public void testThatConversationIdIsNotInCacheKey() throws BadJWSException, ServiceRegistryLookupException {
         final String json = new SRContentBuilder().withServiceRecord(dpo).build();
-        when(client.getResource(any(), any())).thenReturn(json);
+        when(client.getResource(any(), anyMap())).thenReturn(json);
 
         String conversationId1 = UUID.randomUUID().toString();
         String conversationId2 = UUID.randomUUID().toString();
@@ -136,13 +140,12 @@ public class ServiceRegistryLookupTest {
         service.getServiceRecord(SRParameter.builder(ORGNR).build());
         service.getServiceRecord(SRParameter.builder(ORGNR2).build());
 
-        verify(client, times(1)).getResource(endsWith(ORGNR), any());
-        verify(client, times(1)).getResource(endsWith(ORGNR2), any());
+        verify(client, times(2)).getResource(anyString(), anyMap());
     }
 
     @Test
     public void testSasKeyCacheInvalidation() throws BadJWSException {
-        when(client.getResource("sastoken")).thenReturn("123").thenReturn("456");
+        when(client.getResource(eq("sastoken"))).thenReturn("123").thenReturn("456");
 
         assertThat(service.getSasKey(), is("123"));
         cacheManager.getCache(CacheConfig.CACHE_GET_SAS_KEY).clear();

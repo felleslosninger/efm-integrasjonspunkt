@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
@@ -36,6 +37,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
     @Override
     @Transactional
+    @Timed
     public void send(@NotNull NextMoveOutMessage message) {
 
         promiseMaker.promise(reject -> {
