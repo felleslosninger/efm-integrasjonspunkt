@@ -179,7 +179,9 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSenderName(message)));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
-        correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
+        if(properties.getFeature().isEnableDueDate()) {
+            correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
+        }
 
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
