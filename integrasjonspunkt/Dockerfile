@@ -11,6 +11,7 @@ ENV APP_DIR=/opt/integrasjonspunkt \
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
     openssl  && \
     update-ca-certificates && \
     rm -rf /var/cache/apt/* && \
