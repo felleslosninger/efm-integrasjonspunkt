@@ -170,6 +170,7 @@ public class IntegrasjonspunktProperties {
         private boolean notifySms;
         private String notificationText;
         private boolean allowForwarding;
+        private boolean enableDueDate;
         private Long daysToReply;
         @NotNull
         private DataSize uploadSizeLimit;
