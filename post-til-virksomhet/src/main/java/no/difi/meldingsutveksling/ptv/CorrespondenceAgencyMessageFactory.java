@@ -179,7 +179,7 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSenderName(message)));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
-        if(properties.getFeature().isEnableDueDate()) {
+        if(properties.getDpv().isEnableDueDate()) {
             correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
         }
 

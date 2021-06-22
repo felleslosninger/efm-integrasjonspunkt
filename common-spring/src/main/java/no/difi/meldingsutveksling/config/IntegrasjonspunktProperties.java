@@ -170,6 +170,7 @@ public class IntegrasjonspunktProperties {
         private boolean notifySms;
         private String notificationText;
         private boolean allowForwarding;
+        private boolean enableDueDate;
         private Long daysToReply;
         @NotNull
         private DataSize uploadSizeLimit;
@@ -288,7 +289,6 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class FeatureToggle {
         private boolean enableDsfPrintLookup;
-        private boolean enableDueDate;
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;
