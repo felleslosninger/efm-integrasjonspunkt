@@ -10,9 +10,7 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -79,9 +77,9 @@ public class NextMoveServiceBus {
     public void init() throws NextMoveException {
         if (props.getNextmove().getServiceBus().isBatchRead()) {
             String connectionString = String.format("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
-                    props.getNextmove().getServiceBus().getBaseUrl(),
-                    props.getNextmove().getServiceBus().getSasKeyName(),
-                    serviceBusClient.getSasKey());
+                props.getNextmove().getServiceBus().getBaseUrl(),
+                props.getNextmove().getServiceBus().getSasKeyName(),
+                serviceBusClient.getSasKey());
             ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
             try {
                 this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
@@ -179,15 +177,18 @@ public class NextMoveServiceBus {
         String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
 
         if (sbdUtil.isStatus(message.getSbd())) {
-            return prefix + receiptTarget();
+            return prefix + statusSuffix();
+        }
+        if (message.getBusinessMessage() instanceof EinnsynKvitteringMessage) {
+            return prefix + receiptSuffix((EinnsynKvitteringMessage) message.getBusinessMessage());
         }
 
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
-                    SRParameter.builder(message.getReceiverIdentifier())
-                            .process(message.getSbd().getProcess())
-                            .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getDocumentType());
+                SRParameter.builder(message.getReceiverIdentifier())
+                    .process(message.getSbd().getProcess())
+                    .conversationId(message.getConversationId()).build(),
+                message.getSbd().getDocumentType());
 
             if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
                 throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
@@ -198,7 +199,17 @@ public class NextMoveServiceBus {
         }
     }
 
-    private String receiptTarget() {
+    private String receiptSuffix(EinnsynKvitteringMessage k) {
+        if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
+            return props.getNextmove().getServiceBus().getReceiptQueue();
+        }
+        if (k.getReferanseType() == EinnsynType.INNSYNSKRAV) {
+            return DATA.fullname();
+        }
+        return INNSYN.fullname();
+    }
+
+    private String statusSuffix() {
         if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
         }
