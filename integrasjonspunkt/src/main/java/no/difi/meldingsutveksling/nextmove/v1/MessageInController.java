@@ -36,6 +36,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
@@ -65,11 +66,10 @@ public class MessageInController {
     public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
 
         NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
-        NextMoveInMessage message = inRepo.peek(query)
+
+        NextMoveInMessage message = peek(query)
                 .orElseThrow(NoContentException::new);
 
-        inRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
         log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
 
         Map<String, String> customProperties = Maps.newHashMap();
@@ -103,6 +103,21 @@ public class MessageInController {
                 .setFileRefs(fileRefs)
                 .setCustomProperties(customProperties);
         return ResponseEntity.ok(peekMessage);
+    }
+
+    private Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput query) {
+        OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
+                .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
+
+        for (Long id : inRepo.peek(query, 20)) {
+            Optional<NextMoveInMessage> lockedMessage = inRepo.lock(id, lockTimeout);
+            if (lockedMessage.isPresent()) {
+                NextMoveInMessage message = lockedMessage.get();
+                return Optional.of(message);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @PostMapping("/pop")

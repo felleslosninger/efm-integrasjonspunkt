@@ -44,7 +44,6 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "peek")
-    @Transactional
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
         return messageService.peek(input);
     }

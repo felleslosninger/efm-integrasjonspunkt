@@ -25,12 +25,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -47,7 +47,6 @@ public class NextMoveMessageInService {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
     private final Clock clock;
-    private final EntityManager entityManager;
 
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
@@ -55,21 +54,21 @@ public class NextMoveMessageInService {
         return messageRepo.find(input, pageable);
     }
 
-    public synchronized StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
-        // It's necessary to peek and lock as an atomic operation. Otherwise concurrent message consumption is likely to
-        // peek the same message mulitple times causing all kinds of errors. It is difficult to mangage at the database
-        // level. We therefore ensure atomicity by synchronizing at Java level instead. Peek+lock is an inexpensive
-        // operation compared to pop+delete so synchronization shouldn't be very limiting for concurrent message
-        // consumption doing peek+lock+pop+delete.
+    public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
         OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
-        NextMoveInMessage message = messageRepo.peek(input)
-                .filter(p -> messageRepo.lock(p.getMessageId(), lockTimeout) == 1)
-                .orElseThrow(NoContentException::new);
-        entityManager.detach(message);
-        MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
-        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), lockTimeout), markerFrom(message));
-        return message.getSbd();
+
+        for (Long id : messageRepo.peek(input, 20)) {
+            Optional<NextMoveInMessage> lockedMessage = messageRepo.lock(id, lockTimeout);
+            if (lockedMessage.isPresent()) {
+                NextMoveInMessage message = lockedMessage.get();
+                MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
+                Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
+                return message.getSbd();
+            }
+        }
+
+        throw new NoContentException();
     }
 
     @Transactional

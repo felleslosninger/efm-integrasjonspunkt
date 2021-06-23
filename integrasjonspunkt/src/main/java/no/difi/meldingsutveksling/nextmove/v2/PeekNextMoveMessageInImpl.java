@@ -1,0 +1,99 @@
+package no.difi.meldingsutveksling.nextmove.v2;
+
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import org.hibernate.CacheMode;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PessimisticLockException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+@Slf4j
+public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<Long> peek(NextMoveInMessageQueryInput input, int maxResults) {
+        try {
+            return em.createQuery(getQuery(input))
+                    .setMaxResults(maxResults)
+                    .setHint("org.hibernate.cacheMode", CacheMode.IGNORE)
+                    .setLockMode(LockModeType.NONE)
+                    .getResultList();
+        } catch (PessimisticLockException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    @Transactional
+    public Optional<NextMoveInMessage> lock(long id, OffsetDateTime lockTimeout) {
+        int updateCount = em.createQuery("update NextMoveInMessage set lockTimeout = :lockTimeout " +
+                "where id = :id and lockTimeout is null")
+                .setParameter("lockTimeout", lockTimeout)
+                .setParameter("id", id)
+                .executeUpdate();
+
+        if (updateCount == 1) {
+            return Optional.ofNullable(getMessage(id));
+        }
+
+        return Optional.empty();
+    }
+
+    private NextMoveInMessage getMessage(long id) {
+        return em.find(NextMoveInMessage.class, id);
+    }
+
+    private CriteriaQuery<Long> getQuery(NextMoveInMessageQueryInput input) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cr = cb.createQuery(Long.class);
+        Root<NextMoveInMessage> root = cr.from(NextMoveInMessage.class);
+
+        Predicate conjunction = cb.conjunction();
+
+        if (input.getConversationId() != null) {
+            conjunction = cb.and(cb.equal(root.get("conversationId"), input.getConversationId()));
+        }
+
+        if (input.getMessageId() != null) {
+            conjunction = cb.and(cb.equal(root.get("messageId"), input.getMessageId()));
+        }
+
+        if (input.getReceiverIdentifier() != null) {
+            conjunction = cb.and(cb.equal(root.get("receiverIdentifier"), input.getReceiverIdentifier()));
+        }
+
+        if (input.getSenderIdentifier() != null) {
+            conjunction = cb.and(cb.equal(root.get("senderIdentifier"), input.getSenderIdentifier()));
+        }
+
+        if (input.getServiceIdentifier() != null) {
+            conjunction = cb.and(cb.equal(root.get("serviceIdentifier"), input.getServiceIdentifier()));
+        }
+
+        if (input.getProcess() != null) {
+            conjunction = cb.and(cb.equal(root.get("processIdentifier"), input.getProcess()));
+        }
+
+        cr.select(root.get("id"))
+                .where(cb.and(cb.isNull(root.get("lockTimeout")), conjunction))
+                .orderBy(cb.asc(root.get("lastUpdated")));
+
+        return cr;
+    }
+}
