@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -18,7 +17,6 @@ import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,17 +52,14 @@ public class NextMoveMessageInService {
         return messageRepo.find(input, pageable);
     }
 
-    public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
+    public Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
         OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
                 .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
 
-        for (Long id : messageRepo.peek(input, 20)) {
+        for (Long id : messageRepo.findIdsForUnlockedMessages(input, 20)) {
             Optional<NextMoveInMessage> lockedMessage = messageRepo.lock(id, lockTimeout);
             if (lockedMessage.isPresent()) {
-                NextMoveInMessage message = lockedMessage.get();
-                MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
-                Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
-                return message.getSbd();
+                return lockedMessage;
             }
         }
 

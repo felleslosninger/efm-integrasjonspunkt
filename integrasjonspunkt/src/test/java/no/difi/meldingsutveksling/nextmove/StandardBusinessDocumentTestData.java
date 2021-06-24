@@ -136,6 +136,7 @@ class StandardBusinessDocumentTestData {
     static final StandardBusinessDocument PUBLISERING_INPUT = getInputSbd(PUBLISERING_MESSAGE_DATA);
     static final StandardBusinessDocument PUBLISERING_SBD = getResponseSbd(PUBLISERING_MESSAGE_DATA);
     static final NextMoveOutMessage PUBLISERING_MESSAGE = NextMoveOutMessage.of(PUBLISERING_SBD, ServiceIdentifier.DPE);
+    static final NextMoveInMessage PUBLISERING_MESSAGE_RESPONSE = NextMoveInMessage.of(getResponseSbd(PUBLISERING_MESSAGE_DATA), ServiceIdentifier.DPE);
 
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();

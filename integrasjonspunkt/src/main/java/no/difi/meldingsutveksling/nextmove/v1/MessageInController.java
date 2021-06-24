@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -34,9 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
@@ -60,14 +59,14 @@ public class MessageInController {
     private final InternalQueue internalQueue;
     private final SBDFactory sbdFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final NextMoveMessageInService messageService;
 
     @GetMapping("/peek")
-    @Transactional
     public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
 
         NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
 
-        NextMoveInMessage message = peek(query)
+        NextMoveInMessage message = messageService.peek(query)
                 .orElseThrow(NoContentException::new);
 
         log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
@@ -103,21 +102,6 @@ public class MessageInController {
                 .setFileRefs(fileRefs)
                 .setCustomProperties(customProperties);
         return ResponseEntity.ok(peekMessage);
-    }
-
-    private Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput query) {
-        OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
-
-        for (Long id : inRepo.peek(query, 20)) {
-            Optional<NextMoveInMessage> lockedMessage = inRepo.lock(id, lockTimeout);
-            if (lockedMessage.isPresent()) {
-                NextMoveInMessage message = lockedMessage.get();
-                return Optional.of(message);
-            }
-        }
-
-        return Optional.empty();
     }
 
     @PostMapping("/pop")

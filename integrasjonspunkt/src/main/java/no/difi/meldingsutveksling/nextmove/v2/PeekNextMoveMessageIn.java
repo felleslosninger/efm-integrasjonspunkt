@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface PeekNextMoveMessageIn {
 
-    List<Long> peek(NextMoveInMessageQueryInput input, int maxResults);
+    List<Long> findIdsForUnlockedMessages(NextMoveInMessageQueryInput input, int maxResults);
 
     Optional<NextMoveInMessage> lock(long id, OffsetDateTime lockTimeout);
 }

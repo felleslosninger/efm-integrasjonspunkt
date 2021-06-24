@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.hibernate.CacheMode;
 import org.springframework.transaction.annotation.Isolation;
@@ -9,13 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PessimisticLockException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,16 +26,12 @@ public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<Long> peek(NextMoveInMessageQueryInput input, int maxResults) {
-        try {
-            return em.createQuery(getQuery(input))
-                    .setMaxResults(maxResults)
-                    .setHint("org.hibernate.cacheMode", CacheMode.IGNORE)
-                    .setLockMode(LockModeType.NONE)
-                    .getResultList();
-        } catch (PessimisticLockException e) {
-            return Collections.emptyList();
-        }
+    public List<Long> findIdsForUnlockedMessages(NextMoveInMessageQueryInput input, int maxResults) {
+        return em.createQuery(getQuery(input))
+                .setMaxResults(maxResults)
+                .setHint("org.hibernate.cacheMode", CacheMode.IGNORE)
+                .setLockMode(LockModeType.NONE)
+                .getResultList();
     }
 
     @Override
@@ -83,7 +78,7 @@ public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
         }
 
         if (input.getServiceIdentifier() != null) {
-            conjunction = cb.and(cb.equal(root.get("serviceIdentifier"), input.getServiceIdentifier()));
+            conjunction = cb.and(cb.equal(root.get("serviceIdentifier"), ServiceIdentifier.valueOf(input.getServiceIdentifier())));
         }
 
         if (input.getProcess() != null) {
