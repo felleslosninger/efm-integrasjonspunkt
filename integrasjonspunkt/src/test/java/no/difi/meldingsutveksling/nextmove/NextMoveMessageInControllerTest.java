@@ -31,10 +31,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -184,7 +181,7 @@ public class NextMoveMessageInControllerTest {
 
     @Test
     public void peek() throws Exception {
-        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(PUBLISERING_SBD);
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
                 get("/api/messages/in/peek")
@@ -220,7 +217,7 @@ public class NextMoveMessageInControllerTest {
 
     @Test
     public void peekDPE() throws Exception {
-        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(PUBLISERING_SBD);
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
                 get("/api/messages/in/peek")

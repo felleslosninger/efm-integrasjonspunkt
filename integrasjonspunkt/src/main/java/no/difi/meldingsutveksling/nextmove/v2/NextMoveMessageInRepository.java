@@ -22,7 +22,8 @@ import java.util.Optional;
 
 public interface NextMoveMessageInRepository extends PagingAndSortingRepository<NextMoveInMessage, Long>,
         QuerydslPredicateExecutor<NextMoveInMessage>,
-        QuerydslBinderCustomizer<QNextMoveInMessage> {
+        QuerydslBinderCustomizer<QNextMoveInMessage>,
+        PeekNextMoveMessageIn {
 
     @Override
     default void customize(QuerydslBindings bindings, QNextMoveInMessage root) {
@@ -46,16 +47,6 @@ public interface NextMoveMessageInRepository extends PagingAndSortingRepository<
         Predicate p = createQuery(input).getValue();
         Page<NextMoveInMessage> page = p != null ? findAll(p, pageable) : findAll(pageable);
         return page.map(NextMoveInMessage::getSbd);
-    }
-
-    default Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
-        Predicate p = createQuery(input)
-                .and(QNextMoveInMessage.nextMoveInMessage.lockTimeout.isNull())
-                .getValue();
-        Page<NextMoveInMessage> page = p != null ? findAll(p, PageRequests.FIRST_BY_LAST_UPDATED_ASC) : findAll(PageRequests.FIRST_BY_LAST_UPDATED_ASC);
-        return page.getContent()
-                .stream()
-                .findFirst();
     }
 
     default BooleanBuilder createQuery(NextMoveInMessageQueryInput input) {

@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -34,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -59,17 +59,16 @@ public class MessageInController {
     private final InternalQueue internalQueue;
     private final SBDFactory sbdFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final NextMoveMessageInService messageService;
 
     @GetMapping("/peek")
-    @Transactional
     public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
 
         NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
-        NextMoveInMessage message = inRepo.peek(query)
+
+        NextMoveInMessage message = messageService.peek(query)
                 .orElseThrow(NoContentException::new);
 
-        inRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
         log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
 
         Map<String, String> customProperties = Maps.newHashMap();
