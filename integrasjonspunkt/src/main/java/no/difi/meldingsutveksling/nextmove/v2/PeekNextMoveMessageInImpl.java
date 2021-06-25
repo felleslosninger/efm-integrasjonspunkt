@@ -18,6 +18,13 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * EntityManager direkte for å unngå diverse caching og locking i Spring data
+ * READ_UNCOMMITTED og cache disabled for at lock skal reflekteres i uthenta id-er så kjapt som mulig (og ikkje vente på heile lock-transaksjonen)
+ * Hente opp til 20 kandidater for å tåle nokre kollisjoner på lock utan å måtte hente fleire fra database
+ * Loop gjennom kandidater til ein fakisk får LOCK ok
+ * ber i praksis konsument om å vente litt mha å returnere NO_CONTENT dersom ein ikkje får LOCK på nokon av kandidatane
+ */
 @Slf4j
 public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
 
