@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
@@ -142,6 +143,7 @@ class RestDocumentationCommon {
                                 .type(JsonFieldType.STRING)
                                 .description("The name/path of the field where the constraint validation occurred."),
                         fieldWithPath(prefix + "rejectedValue")
+                                .optional()
                                 .type(JsonFieldType.STRING)
                                 .description("The rejected field value."),
                         fieldWithPath(prefix + "bindingFailure")
@@ -311,6 +313,7 @@ class RestDocumentationCommon {
                         .type(JsonFieldType.STRING)
                         .description("Descriptor that qualifies the identifier used to identify the sending party."),
                 senderFields.withPath("contactInformation[]")
+                        .optional()
                         .ignored()
         };
     }
@@ -326,6 +329,7 @@ class RestDocumentationCommon {
                         .type(JsonFieldType.STRING)
                         .description("Descriptor that qualifies the identifier used to identify the receiving party."),
                 receiverFields.withPath("contactInformation[]")
+                        .optional()
                         .ignored()
         };
     }
@@ -463,14 +467,14 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, ValidationGroups.MessageType.Arkivmelding.class);
+        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, NextMoveValidationGroups.MessageType.Arkivmelding.class);
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, "Should only be specified for DPF."))
                 .build();
     }
 
     static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, ValidationGroups.MessageType.Digital.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, NextMoveValidationGroups.MessageType.Digital.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""), sikkerhetsnivaaDescriptor(messageFields))
@@ -532,7 +536,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> dpiPrintMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, ValidationGroups.MessageType.Print.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, NextMoveValidationGroups.MessageType.Print.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""))
@@ -628,7 +632,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, ValidationGroups.MessageType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(
@@ -643,7 +647,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> publiseringMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, ValidationGroups.MessageType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(

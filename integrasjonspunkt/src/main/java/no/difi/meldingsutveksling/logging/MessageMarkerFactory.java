@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.logging;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
 
@@ -44,16 +45,16 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
-        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
-        LogstashMarker messageIdMarker = messageIdMarker(sbd.getDocumentId());
-        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getMessageType());
-        LogstashMarker journalPostIdMarker = journalPostIdMarker(sbd.getJournalPostId());
-        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(sbd.getSender().asIso6523());
-        LogstashMarker senderIdentifierMarker = senderMarker(sbd.getSenderIdentifier());
-        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(sbd.getReceiver().asIso6523());
-        LogstashMarker receiverIdentifierMarker = receiverMarker(sbd.getReceiverIdentifier());
-        LogstashMarker documentTypeMarker = documentTypeMarker(sbd.getDocumentId());
-        LogstashMarker processMarker = processMarker(sbd.getProcess());
+        LogstashMarker conversationIdMarker = conversationIdMarker(SBDUtil.getConversationId(sbd));
+        LogstashMarker messageIdMarker = messageIdMarker(SBDUtil.getMessageId(sbd));
+        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(SBDUtil.getMessageType(sbd).getType());
+        LogstashMarker journalPostIdMarker = journalPostIdMarker(SBDUtil.getJournalPostId(sbd));
+        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(SBDUtil.getSender(sbd).asIso6523());
+        LogstashMarker senderIdentifierMarker = senderMarker(SBDUtil.getSenderIdentifier(sbd));
+        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(SBDUtil.getReceiver(sbd).asIso6523());
+        LogstashMarker receiverIdentifierMarker = receiverMarker(SBDUtil.getReceiverIdentifier(sbd));
+        LogstashMarker documentTypeMarker = documentTypeMarker(SBDUtil.getDocumentType(sbd));
+        LogstashMarker processMarker = processMarker(SBDUtil.getProcess(sbd));
         return conversationIdMarker.and(messageTypeMarker)
                 .and(messageIdMarker)
                 .and(journalPostIdMarker)

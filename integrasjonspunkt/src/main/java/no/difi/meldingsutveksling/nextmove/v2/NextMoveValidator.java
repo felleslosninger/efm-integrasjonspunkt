@@ -10,8 +10,10 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -52,7 +54,7 @@ public class NextMoveValidator {
     private final Asserter asserter;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
@@ -61,12 +63,12 @@ public class NextMoveValidator {
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
 
-        sbd.getOptionalMessageId().ifPresent(messageId -> {
+        StandardBusinessDocumentUtils.getMessageId(sbd).ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
                             .map(p -> {
                                 throw new MessageAlreadyExistsException(messageId);
                             });
-                    if (!sbdUtil.isStatus(sbd)) {
+                    if (!SBDUtil.isStatus(sbd)) {
                         conversationService.findConversation(messageId)
                                 .map(c -> {
                                     throw new MessageAlreadyExistsException(messageId);
@@ -82,10 +84,11 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
+        MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
+                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(StandardBusinessDocumentUtils.getType(sbd).orElse("null")));
 
-        String documentType = sbd.getDocumentType();
+        String documentType = SBDUtil.getDocumentType(sbd);
 
         if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
@@ -103,18 +106,18 @@ public class NextMoveValidator {
         validateCertificate();
 
         StandardBusinessDocument sbd = message.getSbd();
-        if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (SBDUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
-        sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
-            if (sbdUtil.isExpired(sbd)) {
+        StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd).ifPresent(expectedResponseDateTime -> {
+            if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
                 throw new TimeToLiveException(expectedResponseDateTime);
             }
         });
 
-        if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
+        if (SBDUtil.isType(message.getSbd(), ARKIVMELDING)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -131,7 +134,7 @@ public class NextMoveValidator {
         }
 
         // Validate that files given in metadata mapping exist
-        if (sbdUtil.isType(message.getSbd(), DIGITAL)) {
+        if (SBDUtil.isType(message.getSbd(), DIGITAL)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());

@@ -10,9 +10,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.sdp.client2.domain.fysisk_post.Posttype;
@@ -41,22 +38,22 @@ public class NextMoveOutMessageFactory {
         setDefaults(sbd, serviceRecord);
 
         return new NextMoveOutMessage(
-                sbd.getConversationId(),
-                sbd.getDocumentId(),
-                sbd.getProcess(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
+                SBDUtil.getConversationId(sbd),
+                SBDUtil.getMessageId(sbd),
+                SBDUtil.getProcess(sbd),
+                SBDUtil.getReceiverIdentifier(sbd),
+                SBDUtil.getSenderIdentifier(sbd),
                 serviceRecord.getServiceIdentifier(),
                 sbd);
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        sbd.getScopes()
+        StandardBusinessDocumentUtils.getScopes(sbd)
                 .stream()
                 .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
-        if (sbd.getSenderIdentifier() == null) {
+        if (SBDUtil.getSenderIdentifier(sbd) == null) {
             Organisasjonsnummer org = Organisasjonsnummer.from(properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
                     new Sender()
@@ -76,13 +73,17 @@ public class NextMoveOutMessageFactory {
             documentIdentification.setCreationDateAndTime(OffsetDateTime.now(clock));
         }
 
-        if (!sbd.getExpectedResponseDateTime().isPresent()) {
+        if (!StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd).isPresent()) {
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
-            if (sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().isEmpty()) {
+
+            Scope scope = StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
+                    .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
+
+            if (scope.getScopeInformation().isEmpty()) {
                 CorrelationInformation ci = new CorrelationInformation().setExpectedResponseDateTime(ttl);
-                sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().add(ci);
+                scope.getScopeInformation().add(ci);
             } else {
-                sbd.getScope(ScopeType.CONVERSATION_ID).getScopeInformation().stream()
+                scope.getScopeInformation().stream()
                         .findFirst()
                         .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
             }
@@ -94,8 +95,9 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
+        MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
+                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(StandardBusinessDocumentUtils.getType(sbd).orElse("null")));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
@@ -105,8 +107,8 @@ public class NextMoveOutMessageFactory {
             setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
             if (dpiMessage.getRetur() == null) {
                 dpiMessage.setRetur(new MailReturn()
-                    .setMottaker(new PostAddress())
-                    .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
+                        .setMottaker(new PostAddress())
+                        .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
             }
             setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
 
@@ -127,9 +129,9 @@ public class NextMoveOutMessageFactory {
         }
         if (Strings.isNullOrEmpty(receiver.getAdresselinje1())) {
             String[] addressLines = srPostAddress.getStreet().split(";");
-            for (int i=0; i < Math.min(addressLines.length, 4); i++) {
+            for (int i = 0; i < Math.min(addressLines.length, 4); i++) {
                 try {
-                    PropertyUtils.setProperty(receiver, "adresselinje"+(i+1), addressLines[i]);
+                    PropertyUtils.setProperty(receiver, "adresselinje" + (i + 1), addressLines[i]);
                 } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     throw new NextMoveRuntimeException(e);
                 }

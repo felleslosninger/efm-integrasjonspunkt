@@ -46,7 +46,7 @@ class PeekNextMoveMessageInImplTest {
         NextMoveInMessage message3 = entityManager.persistAndFlush(getNextMoveMessage());
 
         assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput(), 10))
-                .containsExactly(message1.getId(), message3.getId());
+                .containsExactlyInAnyOrder(message1.getId(), message3.getId());
     }
 
     @Test

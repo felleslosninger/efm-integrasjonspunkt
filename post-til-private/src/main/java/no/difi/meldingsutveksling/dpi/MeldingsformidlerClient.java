@@ -15,7 +15,6 @@ import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
-import org.springframework.ws.server.EndpointInterceptor;
 
 import java.util.List;
 import java.util.Optional;

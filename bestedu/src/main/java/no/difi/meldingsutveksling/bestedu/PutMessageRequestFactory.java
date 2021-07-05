@@ -3,8 +3,7 @@ package no.difi.meldingsutveksling.bestedu;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
 import no.difi.meldingsutveksling.noarkexchange.schema.EnvelopeType;
@@ -20,36 +19,36 @@ public class PutMessageRequestFactory {
     private final ServiceRegistryLookup srLookup;
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
-        return create(sbd, payload, sbd.getConversationId());
+        return create(sbd, payload, SBDUtil.getConversationId(sbd));
     }
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {
-        String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
-        String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
-        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
-        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
+        String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
+        String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
+        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getReceiverIdentifier(sbd));
+        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getSenderIdentifier(sbd));
         return create(conversationId,
-                Sender.of(sbd.getSenderIdentifier(), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(sbd.getReceiverIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(SBDUtil.getSenderIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(SBDUtil.getReceiverIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
     public PutMessageRequestType createAndSwitchSenderReceiver(StandardBusinessDocument sbd, Object payload, String conversationId) {
-        String senderRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
-        String receiverRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
-        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
-        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
+        String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
+        String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
+        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getReceiverIdentifier(sbd));
+        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getSenderIdentifier(sbd));
         return create(conversationId,
-                Sender.of(sbd.getReceiverIdentifier(), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(sbd.getSenderIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(SBDUtil.getReceiverIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(SBDUtil.getSenderIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
 
     public PutMessageRequestType create(String conversationId,
-                                         Sender sender,
-                                         Receiver receiver,
-                                         Object payload) {
+                                        Sender sender,
+                                        Receiver receiver,
+                                        Object payload) {
 
         no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory of = new no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory();
 

@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.pipes.Reject;
@@ -179,7 +180,7 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setMessageSender(objectFactory.createMyInsertCorrespondenceV2MessageSender(getSenderName(message)));
         // The date and time the message should be visible in the Portal
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
-        if(properties.getDpv().isEnableDueDate()) {
+        if (properties.getDpv().isEnableDueDate()) {
             correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(getDaysToReply())));
         }
 
@@ -223,9 +224,9 @@ public class CorrespondenceAgencyMessageFactory {
             serviceRecord = serviceRegistryLookup.getServiceRecord(
                     SRParameter.builder(message.getReceiverIdentifier())
                             .conversationId(message.getConversationId())
-                            .process(message.getSbd().getProcess())
+                            .process(SBDUtil.getProcess(message.getSbd()))
                             .build(),
-                    message.getSbd().getDocumentType());
+                    SBDUtil.getDocumentType(message.getSbd()));
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }
@@ -282,7 +283,7 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
-        String orgnr = msg.getSbd().getOnBehalfOfOrgNr().orElse(properties.getOrg().getNumber());
+        String orgnr = SBDUtil.getOnBehalfOfOrgNr(msg.getSbd()).orElse(properties.getOrg().getNumber());
         return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();
     }
 

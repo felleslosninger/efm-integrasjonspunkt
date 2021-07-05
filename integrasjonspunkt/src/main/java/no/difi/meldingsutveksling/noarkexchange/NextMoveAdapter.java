@@ -18,6 +18,7 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.KvitteringStatusMessage;
@@ -122,11 +123,17 @@ public class NextMoveAdapter {
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)
         );
-        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getSender().getRef())) {
-            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.SENDER_REF, message.getRequest().getEnvelope().getSender().getRef()));
+
+        String senderRef = message.getRequest().getEnvelope().getSender().getRef();
+
+        if (!Strings.isNullOrEmpty(senderRef)) {
+            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.SENDER_REF, senderRef));
         }
-        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getReceiver().getRef())) {
-            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, message.getRequest().getEnvelope().getReceiver().getRef()));
+
+        String receiverRef = message.getRequest().getEnvelope().getReceiver().getRef();
+
+        if (!Strings.isNullOrEmpty(receiverRef)) {
+            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, receiverRef));
         }
 
         return nextMoveMessageService.createMessage(sbd, getFiles(message));

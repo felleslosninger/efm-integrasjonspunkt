@@ -6,7 +6,9 @@ import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.nextmove.BusinessMessage
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 import no.difi.meldingsutveksling.pipes.PromiseMaker
@@ -63,17 +65,18 @@ internal class FiksIoServiceTest {
 
         every { conversationService.registerStatus(any(), ofType(ReceiptStatus::class)) } returns Optional.empty()
 
-        val sbd = mockkClass(StandardBusinessDocument::class) {
-            every { conversationId } returns convId
-            every { documentId } returns messageId
-            every { process } returns protocol
-            every { receiverIdentifier } returns orgnr
-            every { senderIdentifier } returns orgnr
-            every { documentType } returns protocol
-            every { any } returns mockkClass(FiksIoMessage::class) {
-                every { sikkerhetsnivaa } returns 3
-            }
-        }
+        val sbd = StandardBusinessDocument()
+            .setAny(FiksIoMessage()
+                .setSikkerhetsnivaa(3))
+
+        mockkStatic(SBDUtil::class)
+        every { SBDUtil.getConversationId(sbd) } returns convId
+        every { SBDUtil.getMessageId(sbd) } returns messageId
+        every { SBDUtil.getProcess(sbd) } returns protocol
+        every { SBDUtil.getReceiverIdentifier(sbd) } returns orgnr
+        every { SBDUtil.getSenderIdentifier(sbd) } returns orgnr
+        every { SBDUtil.getDocumentType(sbd) } returns protocol
+
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
 
         val payload = StringPayload("foo", "foo.txt")

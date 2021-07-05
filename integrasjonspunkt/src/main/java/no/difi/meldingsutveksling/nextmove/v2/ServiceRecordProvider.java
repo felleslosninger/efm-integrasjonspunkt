@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
@@ -25,19 +26,19 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
-                    .process(sbd.getProcess());
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(SBDUtil.getReceiverIdentifier(sbd))
+                    .process(SBDUtil.getProcess(sbd));
 
-            sbd.getOptionalConversationId().ifPresent(parameterBuilder::conversationId);
+            SBDUtil.getOptionalConversationId(sbd).ifPresent(parameterBuilder::conversationId);
 
             if (businessMessage.getSikkerhetsnivaa() != null) {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
             }
             return serviceRegistryLookup.getServiceRecord(
                     parameterBuilder.build(),
-                    sbd.getDocumentType());
+                    SBDUtil.getDocumentType(sbd));
         } catch (ServiceRegistryLookupException e) {
-            throw new ReceiverDoesNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
+            throw new ReceiverDoesNotAcceptProcessException(SBDUtil.getProcess(sbd), e.getLocalizedMessage());
         }
     }
 }

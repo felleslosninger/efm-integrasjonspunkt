@@ -23,6 +23,7 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
@@ -60,20 +61,24 @@ public class SvarInnNextMoveConverter {
                 properties.getFiks().getInn().getDocumentType(),
                 new ArkivmeldingMessage());
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
-            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
+            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
         Stream<StreamedFile> attachments = Stream.concat(
                 Stream.of(arkivmeldingFile),
                 svarInnService.getAttachments(forsendelse,
-                        reject -> {throw new NextMoveRuntimeException("Failed to get attachments from SvarInn", reject);}));
+                        reject -> {
+                            throw new NextMoveRuntimeException("Failed to get attachments from SvarInn", reject);
+                        }));
 
         InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
                 attachments,
                 NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
                 keystoreHelper.getX509Certificate(),
-                reject -> {throw new NextMoveRuntimeException("Failed to create ASiC", reject);});
+                reject -> {
+                    throw new NextMoveRuntimeException("Failed to create ASiC", reject);
+                });
 
         return new SvarInnPackage(sbd, asicStream);
     }

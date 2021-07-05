@@ -142,13 +142,13 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type\",\n" +
                         "  \"path\" : \"/api/messages/out\",\n" +
                         "  \"errors\" : [ {\n" +
-                        "    \"codes\" : [ \"IsMessageType\" ],\n" +
+                        "    \"codes\" : [ \"MessageType\" ],\n" +
                         "    \"defaultMessage\" : \"Must be a NextMove message type\",\n" +
                         "    \"objectName\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"field\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"rejectedValue\" : \"strange\",\n" +
                         "    \"bindingFailure\" : false,\n" +
-                        "    \"code\" : \"IsMessageType\"\n" +
+                        "    \"code\" : \"MessageType\"\n" +
                         "  } ]\n" +
                         "}"))
                 .andDo(document("messages/out/create/constraint-violation",

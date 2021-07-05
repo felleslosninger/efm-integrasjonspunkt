@@ -28,7 +28,6 @@ public class SBDFactory {
     private static final String TYPE_VERSION_2 = "2.0";
 
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final SBDUtil sbdUtil;
     private final Clock clock;
     private final IntegrasjonspunktProperties props;
 
@@ -43,7 +42,7 @@ public class SBDFactory {
         if (!type.isPresent()) {
             try {
                 ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrgNummer())
-                    .process(process).conversationId(conversationId).build(), documentType);
+                        .process(process).conversationId(conversationId).build(), documentType);
                 if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPFIO) {
                     type = Optional.of(MessageType.FIKSIO);
                 }
@@ -51,7 +50,7 @@ public class SBDFactory {
                 throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker.getOrgNummer()), e);
             }
         }
-        MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: "+documentType));
+        MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: " + documentType));
         return createNextMoveSBD(avsender, mottaker, conversationId, messageId, process, documentType, messageType, any);
     }
 
@@ -64,37 +63,39 @@ public class SBDFactory {
                                                       MessageType messageType,
                                                       Object any) {
         return new StandardBusinessDocument()
-            .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                .setHeaderVersion(HEADER_VERSION)
-                .addSender(createSender(avsender))
-                .addReceiver(createReceiver(mottaker))
-                .setDocumentIdentification(createDocumentIdentification(documentType, messageType, messageId))
-                .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
-            ).setAny(any);
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                        .setHeaderVersion(HEADER_VERSION)
+                        .addSender(createSender(avsender))
+                        .addReceiver(createReceiver(mottaker))
+                        .setDocumentIdentification(createDocumentIdentification(documentType, messageType, messageId))
+                        .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
+                ).setAny(any);
     }
 
 
     public StandardBusinessDocument createStatusFrom(StandardBusinessDocument sbd,
                                                      ReceiptStatus status) {
-        String process;
-        if (sbdUtil.isArkivmelding(sbd)) {
-            process = props.getArkivmelding().getReceiptProcess();
-        } else if (sbdUtil.isEinnsyn(sbd)) {
-            process = props.getEinnsyn().getReceiptProcess();
-        } else {
-            return null;
-        }
-
-        StatusMessage statusMessage = new StatusMessage(status);
-        return createNextMoveSBD(sbd.getReceiver(),
-            sbd.getSender(),
-            sbd.getConversationId(),
-            sbd.getMessageId(),
-            process,
-            props.getNextmove().getStatusDocumentType(),
-            statusMessage);
+        return createNextMoveSBD(
+                SBDUtil.getReceiver(sbd),
+                SBDUtil.getSender(sbd),
+                SBDUtil.getConversationId(sbd),
+                SBDUtil.getMessageId(sbd),
+                createProcess(sbd),
+                props.getNextmove().getStatusDocumentType(),
+                new StatusMessage(status));
     }
 
+    private String createProcess(StandardBusinessDocument sbd) {
+        if (SBDUtil.isArkivmelding(sbd)) {
+            return props.getArkivmelding().getReceiptProcess();
+        }
+
+        if (SBDUtil.isEinnsyn(sbd)) {
+            return props.getEinnsyn().getReceiptProcess();
+        }
+
+        return null;
+    }
 
     private Receiver createReceiver(Organisasjonsnummer orgNummer) {
         Receiver sender = new Receiver();
@@ -110,19 +111,19 @@ public class SBDFactory {
 
     private void fillPartner(Partner partner, Organisasjonsnummer orgNummer) {
         partner.setIdentifier(new PartnerIdentification()
-            .setValue(orgNummer.asIso6523())
-            .setAuthority(orgNummer.authority()));
+                .setValue(orgNummer.asIso6523())
+                .setAuthority(orgNummer.authority()));
     }
 
     private DocumentIdentification createDocumentIdentification(String documentType,
                                                                 MessageType messageType,
                                                                 String messageId) {
         return new DocumentIdentification()
-            .setCreationDateAndTime(OffsetDateTime.now(clock))
-            .setStandard(documentType)
-            .setType(messageType.getType())
-            .setTypeVersion(TYPE_VERSION_2)
-            .setInstanceIdentifier(messageId);
+                .setCreationDateAndTime(OffsetDateTime.now(clock))
+                .setStandard(documentType)
+                .setType(messageType.getType())
+                .setTypeVersion(TYPE_VERSION_2)
+                .setInstanceIdentifier(messageId);
     }
 
     private BusinessScope createBusinessScope(Scope... scopes) {

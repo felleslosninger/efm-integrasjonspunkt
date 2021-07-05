@@ -5,20 +5,19 @@ import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -67,7 +66,7 @@ public class FiksMapper {
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
-        Optional<String> senderRef = message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier);
+        Optional<String> senderRef = SBDUtil.getOptionalSenderRef(message.getSbd());
         // Confirm that SenderRef is a valid UUID, else use messageId
         if (senderRef.isPresent()) {
             try {
@@ -89,7 +88,7 @@ public class FiksMapper {
         Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = arkivmeldingUtil.getJournalpost(am);
 
-        Optional<String> receiverRef = message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier);
+        Optional<String> receiverRef = SBDUtil.getOptionalReceiverRef(message.getSbd());
         if (receiverRef.isPresent()) {
             try {
                 //noinspection ResultOfMethodCallIgnored

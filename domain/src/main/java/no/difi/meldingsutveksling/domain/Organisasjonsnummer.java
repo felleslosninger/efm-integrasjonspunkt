@@ -68,6 +68,10 @@ public class Organisasjonsnummer {
         return ISO6523_AUTHORITY;
     }
 
+    public static Organisasjonsnummer parse(final String value) {
+        return Organisasjonsnummer.isIso6523(value) ? Organisasjonsnummer.fromIso6523(value) : Organisasjonsnummer.from(value);
+    }
+
     public static Organisasjonsnummer from(final String orgnr) {
         return new Organisasjonsnummer(orgnr);
     }

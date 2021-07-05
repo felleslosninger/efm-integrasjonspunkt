@@ -7,14 +7,14 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Objects;
 
-public class IntegrasjonspunktOrganizationValidator implements ConstraintValidator<IntegrasjonspunktOrganization, String> {
+public class SenderValueValidator implements ConstraintValidator<SenderValue, String> {
 
     @Autowired
     private IntegrasjonspunktProperties properties;
     private String expectedValue;
 
     @Override
-    public void initialize(IntegrasjonspunktOrganization constraintAnnotation) {
+    public void initialize(SenderValue constraintAnnotation) {
         this.expectedValue = "0192:" + properties.getOrg().getNumber();
     }
 

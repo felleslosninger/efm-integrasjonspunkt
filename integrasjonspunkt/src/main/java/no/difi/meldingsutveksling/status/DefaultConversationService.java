@@ -8,7 +8,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -68,6 +70,7 @@ public class DefaultConversationService implements ConversationService {
 
     @NotNull
     @Override
+    @Transactional
     public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status, @NotNull String description) {
         return registerStatus(messageId, messageStatusFactory.getMessageStatus(status, description));
     }
@@ -156,31 +159,33 @@ public class DefaultConversationService implements ConversationService {
                                              @NotNull ServiceIdentifier si,
                                              @NotNull ConversationDirection conversationDirection,
                                              @NotNull ReceiptStatus... statuses) {
-        OffsetDateTime ttl = sbd.getExpectedResponseDateTime().orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+        OffsetDateTime ttl = StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd)
+                .orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+
         return registerConversation(new MessageInformable() {
             @Override
             public String getConversationId() {
-                return sbd.getConversationId();
+                return SBDUtil.getConversationId(sbd);
             }
 
             @Override
             public String getMessageId() {
-                return sbd.getDocumentId();
+                return SBDUtil.getMessageId(sbd);
             }
 
             @Override
             public Organisasjonsnummer getSender() {
-                return sbd.getSender();
+                return SBDUtil.getSender(sbd);
             }
 
             @Override
             public Organisasjonsnummer getReceiver() {
-                return sbd.getReceiver();
+                return SBDUtil.getReceiver(sbd);
             }
 
             @Override
             public String getProcessIdentifier() {
-                return sbd.getProcess();
+                return SBDUtil.getProcess(sbd);
             }
 
             @Override
@@ -205,7 +210,6 @@ public class DefaultConversationService implements ConversationService {
         return repo.findByMessageId(messageId).stream().findFirst();
     }
 
-    @Transactional
     Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);

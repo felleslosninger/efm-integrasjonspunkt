@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
@@ -263,7 +264,7 @@ public class NextMoveMessageInControllerTest {
         );
 
         mvc.perform(
-                get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                get("/api/messages/in/pop/{messageId}", SBDUtil.getMessageId(ARKIVMELDING_SBD))
                         .accept(AsicUtils.MIMETYPE_ASICE)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -280,7 +281,7 @@ public class NextMoveMessageInControllerTest {
                         )
                 );
 
-        verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
+        verify(messageService).popMessage(SBDUtil.getMessageId(ARKIVMELDING_SBD));
     }
 
     @Test
@@ -288,7 +289,7 @@ public class NextMoveMessageInControllerTest {
         given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
 
         mvc.perform(
-                delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                delete("/api/messages/in/{messageId}", SBDUtil.getMessageId(ARKIVMELDING_SBD))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -309,6 +310,6 @@ public class NextMoveMessageInControllerTest {
                         )
                 );
 
-        verify(messageService).deleteMessage(ARKIVMELDING_SBD.getMessageId());
+        verify(messageService).deleteMessage(SBDUtil.getMessageId(ARKIVMELDING_SBD));
     }
 }

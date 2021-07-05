@@ -1,5 +1,5 @@
-no.difi.meldingsutveksling.validation.IntegrasjonspunktOrganizationValidator
-no.difi.meldingsutveksling.validation.IsMessageTypeValidator
+no.difi.meldingsutveksling.validation.SenderValueValidator
+no.difi.meldingsutveksling.validation.MessageTypeValidator
 no.difi.meldingsutveksling.validation.InServiceRegistryValidator
 no.difi.meldingsutveksling.validation.InstanceOfValidator
 no.difi.meldingsutveksling.validation.OneOfValidator

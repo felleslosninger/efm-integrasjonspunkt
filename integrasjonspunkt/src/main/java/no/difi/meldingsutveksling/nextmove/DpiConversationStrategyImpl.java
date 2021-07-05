@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.api.DpiConversationStrategy;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -44,7 +45,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                             .conversationId(message.getConversationId())
                             .process(message.getProcessIdentifier())
                             .build(),
-                    message.getSbd().getDocumentType());
+                    SBDUtil.getDocumentType(message.getSbd()));
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

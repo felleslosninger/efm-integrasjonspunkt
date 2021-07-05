@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.BrokerProperties;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -110,7 +111,7 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(response.getBody());
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getDocumentId()));
+                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, SBDUtil.getMessageId(payload.getSbd())));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
                 log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
@@ -144,7 +145,7 @@ public class ServiceBusRestClient {
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, message [messageId={}] was not deleted",
                     resourceUri, response.getStatusCode(),
-                    message.getPayload().getSbd().getDocumentId());
+                    message.getMessageId());
         }
     }
 

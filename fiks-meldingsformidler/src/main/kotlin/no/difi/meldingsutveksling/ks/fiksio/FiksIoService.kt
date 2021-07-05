@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.fiksio
 
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.pipes.PromiseMaker
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
@@ -40,12 +41,13 @@ class FiksIoService(
 
     fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {
         val params = SRParameter.builder(msg.receiverIdentifier)
-            .process(msg.sbd.process)
+            .process(SBDUtil.getProcess(msg.sbd))
             .conversationId(msg.conversationId)
         if (msg.businessMessage.getSikkerhetsnivaa() != null) {
             params.securityLevel(msg.businessMessage.getSikkerhetsnivaa())
         }
-        val serviceRecord: ServiceRecord = serviceRegistryLookup.getServiceRecord(params.build(), msg.sbd.documentType)
+        val serviceRecord: ServiceRecord =
+            serviceRegistryLookup.getServiceRecord(params.build(), SBDUtil.getDocumentType(msg.sbd))
 
         val request = MeldingRequest.builder()
             .mottakerKontoId(KontoId(UUID.fromString(serviceRecord.service.endpointUrl)))

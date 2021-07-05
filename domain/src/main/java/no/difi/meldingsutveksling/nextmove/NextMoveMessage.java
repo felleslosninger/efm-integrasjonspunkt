@@ -5,7 +5,9 @@ import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -72,29 +74,24 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @JsonIgnore
-    public BusinessMessage getBusinessMessage() {
-        if (getSbd().getAny() == null) {
-            throw new NextMoveRuntimeException("SBD missing BusinessMessage");
-        }
-        if (!(getSbd().getAny() instanceof BusinessMessage)) {
-            throw new NextMoveRuntimeException("SBD.any not instance of BusinessMessage");
-        }
-        return (BusinessMessage) getSbd().getAny();
+    public BusinessMessage<?> getBusinessMessage() {
+        return getSbd().getBusinessMessage(BusinessMessage.class)
+                .orElseThrow(() -> new NextMoveRuntimeException("SBD.any not instance of BusinessMessage"));
     }
 
     @Override
     public OffsetDateTime getExpiry() {
-        return getSbd().getExpectedResponseDateTime().orElse(null);
+        return StandardBusinessDocumentUtils.getExpectedResponseDateTime(getSbd()).orElse(null);
     }
 
     @Override
     public Organisasjonsnummer getSender() {
-        return getSbd().getSender();
+        return SBDUtil.getSender(getSbd());
     }
 
     @Override
     public Organisasjonsnummer getReceiver() {
-        return getSbd().getReceiver();
+        return SBDUtil.getReceiver(getSbd());
     }
 
 }

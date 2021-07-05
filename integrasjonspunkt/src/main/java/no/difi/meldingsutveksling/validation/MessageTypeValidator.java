@@ -8,16 +8,14 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Slf4j
-public class IsMessageTypeValidator implements ConstraintValidator<IsMessageType, String> {
-
-    private ApiType api;
+public class MessageTypeValidator implements ConstraintValidator<no.difi.meldingsutveksling.validation.MessageType, String> {
 
     @Override
-    public void initialize(IsMessageType constraint) {
-        this.api = constraint.value();
+    public void initialize(no.difi.meldingsutveksling.validation.MessageType constraint) {
+        // Nothing to initialize
     }
 
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        return MessageType.valueOf(s, api).isPresent();
+        return MessageType.valueOf(s, ApiType.NEXTMOVE).isPresent();
     }
 }

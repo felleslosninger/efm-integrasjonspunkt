@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
@@ -45,7 +46,7 @@ public class NextMoveMessageOutController {
     public StandardBusinessDocument createAndSendMessage(
             @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
             MultipartRequest multipartRequest) {
-        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
+        MDC.put(NextMoveConsts.CORRELATION_ID, SBDUtil.getMessageId(sbd));
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -76,7 +77,7 @@ public class NextMoveMessageOutController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd) {
-        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
+        MDC.put(NextMoveConsts.CORRELATION_ID, SBDUtil.getMessageId(sbd));
         NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
     }
