@@ -11,22 +11,19 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
-@Component
 @Slf4j
-@Order
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
@@ -34,6 +31,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final ServiceRegistryLookup sr;
     private final Clock clock;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
+    private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
     private final PromiseMaker promiseMaker;
@@ -61,7 +59,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, optionalCryptoMessagePersister, reject);
+                MeldingsformidlerRequest request = meldingsformidlerRequestFactory.getMeldingsformidlerRequest(message, serviceRecord, reject);
 
                 try {
                     meldingsformidlerClient.sendMelding(request);

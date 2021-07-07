@@ -23,7 +23,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     @Test
     public void emailFeatureDisabledShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
-        builder = handler.handle(new Request().withNotifiable(true), builder);
+        builder = handler.handle(MeldingsformidlerRequest.builder().notifiable(true).build(), builder);
 
         verify(builder, never()).epostVarsel(any(EpostVarsel.class));
     }
@@ -31,7 +31,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     @Test
     public void notifiableFalseShouldNotSetEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
-        builder = handler.handle(new Request().withNotifiable(false), builder);
+        builder = handler.handle(MeldingsformidlerRequest.builder().notifiable(false).build(), builder);
 
         verify(builder, never()).epostVarsel(any(EpostVarsel.class));
     }
@@ -39,7 +39,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     @Test
     public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
-        builder = handler.handle(new Request().withNotifiable(true).withEmail("foo@foo.com"), builder);
+        builder = handler.handle(MeldingsformidlerRequest.builder().notifiable(true).emailAddress("foo@foo.com").build(), builder);
 
         verify(builder).epostVarsel(any(EpostVarsel.class));
     }
@@ -47,7 +47,7 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     @Test
     public void notifiableAndFeatureEnabledWithoutEmailShouldNotAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
-        builder = handler.handle(new Request().withNotifiable(true), builder);
+        builder = handler.handle(MeldingsformidlerRequest.builder().notifiable(true).build(), builder);
 
         verify(builder, never()).epostVarsel(any(EpostVarsel.class));
     }

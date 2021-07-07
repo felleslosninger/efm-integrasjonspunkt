@@ -8,6 +8,8 @@ import no.difi.sdp.client2.domain.fysisk_post.FysiskPost;
 import no.difi.sdp.client2.domain.fysisk_post.KonvoluttAdresse;
 import no.digipost.api.representations.Organisasjonsnummer;
 
+import java.util.Optional;
+
 public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
     public PrintForsendelseHandler(DigitalPostInnbyggerConfig config) {
         super(config);
@@ -15,10 +17,11 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
 
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
+                Optional.ofNullable(request.getOnBehalfOfOrgnr()).orElse(request.getSenderOrgnumber()));
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
-        request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
-        request.getFakturaReferanse().ifPresent(avsenderBuilder::fakturaReferanse);
+        Optional.ofNullable(request.getAvsenderIdentifikator()).ifPresent(avsenderBuilder::avsenderIdentifikator);
+        Optional.ofNullable(request.getFakturaReferanse()).ifPresent(avsenderBuilder::fakturaReferanse);
         Avsender avsender = avsenderBuilder.build();
 
         KonvoluttAdresseHandler konvoluttAdresseHandler;

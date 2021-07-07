@@ -11,6 +11,8 @@ import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.digipost.api.representations.Organisasjonsnummer;
 
+import java.util.Optional;
+
 public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
     private final SmsNotificationDigitalPostBuilderHandler smsNotificationHandler;
     private final EmailNotificationDigitalPostBuilderHandler emailNotificationHandler;
@@ -30,7 +32,8 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
                 Organisasjonsnummer.of(request.getOrgnrPostkasse())
         ).build();
 
-        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(request.getOnBehalfOfOrgnr().orElse(request.getSenderOrgnumber()));
+        final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
+                Optional.ofNullable(request.getOnBehalfOfOrgnr()).orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(request.getVirkningsdato())
                 .aapningskvittering(request.isAapningskvittering())
@@ -38,8 +41,8 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
-        request.getAvsenderIdentifikator().ifPresent(avsenderBuilder::avsenderIdentifikator);
-        request.getFakturaReferanse().ifPresent(avsenderBuilder::fakturaReferanse);
+        Optional.ofNullable(request.getAvsenderIdentifikator()).ifPresent(avsenderBuilder::avsenderIdentifikator);
+        Optional.ofNullable(request.getFakturaReferanse()).ifPresent(avsenderBuilder::fakturaReferanse);
         Avsender behandlingsansvarlig = avsenderBuilder.build();
         return Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke);
     }

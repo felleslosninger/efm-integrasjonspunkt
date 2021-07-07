@@ -19,6 +19,7 @@ import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 import no.digdir.dpi.client.domain.Document;
+import no.digdir.dpi.client.domain.Parcel;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import reactor.core.publisher.Flux;
 
@@ -54,8 +55,9 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
 
     @Override
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        Dokument dokument = dokumentFromDocument(request.getDocument());
-        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(request.getAttachments())).build();
+        Parcel parcel = request.getParcel();
+        Dokument dokument = dokumentFromDocument(parcel.getMainDocument());
+        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(parcel.getAttachments())).build();
 
         ForsendelseBuilderHandler forsendelseBuilderHandler = forsendelseHandlerFactory.create(request);
         Forsendelse.Builder forsendelseBuilder = forsendelseBuilderHandler.handle(request, dokumentpakke);

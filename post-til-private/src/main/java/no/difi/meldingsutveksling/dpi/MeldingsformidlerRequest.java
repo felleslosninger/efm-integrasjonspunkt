@@ -1,116 +1,55 @@
 package no.difi.meldingsutveksling.dpi;
 
+import lombok.Builder;
+import lombok.Value;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
-import no.digdir.dpi.client.domain.Document;
+import no.digdir.dpi.client.domain.Parcel;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
-/**
- * Object to hold parameters used to send messages to sikker digital post
- */
-public interface MeldingsformidlerRequest {
+@Value
+@Builder
+public class MeldingsformidlerRequest {
 
-    /**
-     * @return the main document post (mail)
-     */
-    Document getDocument();
-
-
-    /**
-     * @return the attachements for the post (mail). This is the other documents in the JournalPost
-     */
-    List<Document> getAttachments();
-
-    StandardBusinessDocumentHeader getStandardBusinessDocumentHeader();
-
-    /**
-     * @return recipient person identifier
-     */
-    String getMottakerPid();
-
-    /**
-     * @return subject in the post (mail)
-     */
-    String getSubject();
-
-    /**
-     * @return virksomhetens organization number
-     */
-    String getSenderOrgnumber();
-
-    /**
-     * @return orgnr to send on behalf of
-     */
-    Optional<String> getOnBehalfOfOrgnr();
-
-    /**
-     * @return avsenderIdentifikator
-     */
-    Optional<String> getAvsenderIdentifikator();
-
-    /**
-     * @return fakturaReferanse
-     */
-    Optional<String> getFakturaReferanse();
-
-    /**
-     * @return an ID that uniquely identifies this message conversation. Must be in UIID format
-     */
-    String getConversationId();
+    StandardBusinessDocumentHeader standardBusinessDocumentHeader;
+    Parcel parcel;
+    String mottakerPid;
+    String subject;
+    String senderOrgnumber;
+    String onBehalfOfOrgnr;
+    String avsenderIdentifikator;
+    String fakturaReferanse;
+    String conversationId;
 
     /**
      * @return postkasse adresse as defined in KRR for the recipient person
      */
-    String getPostkasseAdresse();
+    String postkasseAdresse;
 
     /**
      * @return virksomhetssertifikat of the sending virksomhet
      */
-    byte[] getCertificate();
+    byte[] certificate;
 
     /**
      * @return the organization number of the postkasse provider as defined in KRR
      */
-    String getOrgnrPostkasse();
+    String orgnrPostkasse;
 
     /**
      * Needed if email notification is enabled
      *
      * @return the email adress of the person(s) to be notified
      */
-    String getEmailAddress();
-
-    /**
-     * Needed if sms notification is enabled
-     *
-     * @return text displayed in notification
-     */
-    String getSmsVarslingstekst();
-
-    /**
-     * Needed if e-mail notification is enabled
-     *
-     * @return text displayed in notification
-     */
-    String getEmailVarslingstekst();
-
-    /**
-     * Needed if sms notification is enabled
-     *
-     * @return mobile phone number of person(s) to be notified
-     */
-    String getMobileNumber();
-
-    /**
-     * @return true if allowed to send notification(s) regarding the message being sent
-     */
-    boolean isNotifiable();
+    String emailAddress;
+    String smsVarslingstekst;
+    String emailVarslingstekst;
+    String mobileNumber;
+    boolean notifiable;
 
     /**
      * The print provider should be used if mailbox cannot be used technically or legally.
@@ -124,23 +63,14 @@ public interface MeldingsformidlerRequest {
      *
      * @return true if DPI print provider should be used instead of the preferred Digital mailbox
      */
-    boolean isPrintProvider();
-
-    PostAddress getPostAddress();
-
-    PostAddress getReturnAddress();
-
-    Integer getSecurityLevel();
-
-    Date getVirkningsdato();
-
-    String getLanguage();
-
-    boolean isAapningskvittering();
-
-    PrintColor getPrintColor();
-
-    PostalCategory getPostalCategory();
-
-    ReturnHandling getReturnHandling();
+    boolean printProvider;
+    PostAddress postAddress;
+    PostAddress returnAddress;
+    Integer securityLevel;
+    Date virkningsdato;
+    String language;
+    boolean aapningskvittering;
+    PrintColor printColor;
+    PostalCategory postalCategory;
+    ReturnHandling returnHandling;
 }

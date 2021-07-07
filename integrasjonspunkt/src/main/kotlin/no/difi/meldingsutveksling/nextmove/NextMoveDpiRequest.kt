@@ -17,11 +17,12 @@ import java.util.*
 class NextMoveDpiRequest(
     private val props: IntegrasjonspunktProperties,
     private val clock: Clock,
-    private val message: NextMoveMessage,
-    private val serviceRecord: ServiceRecord,
     private val optionalCryptoMessagePersister: OptionalCryptoMessagePersister,
     private val reject: Reject
-) : MeldingsformidlerRequest {
+) {
+    private fun getMeldingsformidlerRequest(message: NextMoveMessage, serviceRecord: ServiceRecord) : MeldingsformidlerRequest {
+        return new
+    }
 
     private fun createDocument(file: BusinessMessageFile): Document {
         val title = if (file.title.isNullOrBlank()) "Missing title" else file.title
