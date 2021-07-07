@@ -1,8 +1,8 @@
-package no.difi.meldingsutveksling.dpi.forsendelse;
+package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dpi.ForsendelseBuilderHandler;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.fysisk_post.FysiskPost;
 import no.difi.sdp.client2.domain.fysisk_post.KonvoluttAdresse;
@@ -37,10 +37,13 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
         KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request.getPostAddress());
         TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
 
-        FysiskPost fysiskPost = FysiskPost.builder().adresse(kon)
-                .retur(request.getReturnHandling(),
+        FysiskPost fysiskPost = FysiskPost.builder()
+                .adresse(kon)
+                .retur(SDPEnumUtil.getReturhaandtering(request.getReturnHandling()),
                         returAdresseHandler.handle(request.getReturnAddress()))
-                .sendesMed(request.getPosttype()).utskrift(request.getPrintColor(), utskriftsleverandoer).build();
+                .sendesMed(SDPEnumUtil.getPosttype(request.getPostalCategory()))
+                .utskrift(SDPEnumUtil.getUtskriftsfarge(request.getPrintColor()), utskriftsleverandoer)
+                .build();
 
         return Forsendelse.fysisk(avsender, fysiskPost, dokumentpakke);
     }

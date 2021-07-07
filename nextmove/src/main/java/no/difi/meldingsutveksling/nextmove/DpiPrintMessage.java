@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Maps;
 import lombok.*;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,8 +19,8 @@ public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
     private String fakturaReferanse;
     @Valid
     private PostAddress mottaker;
-    private Utskriftsfarge utskriftsfarge;
-    private Posttype posttype;
+    private PrintColor utskriftsfarge;
+    private PostalCategory posttype;
     @Valid
     private MailReturn retur;
 

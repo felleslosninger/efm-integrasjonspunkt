@@ -4,9 +4,6 @@ import lombok.Data;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -90,8 +87,8 @@ class StandardBusinessDocumentTestData {
                             .land("Norway")
                             .build()
                     )
-                    .setUtskriftsfarge(Utskriftsfarge.FARGE)
-                    .setPosttype(Posttype.A_PRIORITERT)
+                    .setUtskriftsfarge(PrintColor.FARGE)
+                    .setPosttype(PostalCategory.A_PRIORITERT)
                     .setRetur(new MailReturn()
                             .setMottaker(PostAddress.builder()
                                     .navn("Fjellheimen kommune")
@@ -104,7 +101,7 @@ class StandardBusinessDocumentTestData {
                                     .land("Norway")
                                     .build()
                             )
-                            .setReturhaandtering(Returhaandtering.DIREKTE_RETUR)
+                            .setReturhaandtering(ReturnHandling.DIREKTE_RETUR)
                     )
             );
 

@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dpi.forsendelse.DigitalForsendelseHandler;
-import no.difi.meldingsutveksling.dpi.forsendelse.PrintForsendelseHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseHandlerFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.DigitalForsendelseHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.PrintForsendelseHandler;
 import org.junit.Before;
 import org.junit.Test;
 

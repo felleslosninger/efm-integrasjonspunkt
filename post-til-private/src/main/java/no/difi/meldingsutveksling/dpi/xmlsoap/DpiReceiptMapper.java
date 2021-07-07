@@ -1,18 +1,16 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
 
-@Component
 @RequiredArgsConstructor
 public class DpiReceiptMapper {
 

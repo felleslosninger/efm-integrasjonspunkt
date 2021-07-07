@@ -1,11 +1,12 @@
 package no.difi.meldingsutveksling.dpi;
 
 
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
-import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
+import no.difi.meldingsutveksling.nextmove.PostalCategory;
+import no.difi.meldingsutveksling.nextmove.PrintColor;
+import no.difi.meldingsutveksling.nextmove.ReturnHandling;
+import no.digdir.dpi.client.domain.Document;
 
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,8 @@ public class Request implements MeldingsformidlerRequest {
     private String email;
     private String sms;
 
-    Request() {}
+    Request() {
+    }
 
     @Override
     public Document getDocument() {
@@ -26,6 +28,11 @@ public class Request implements MeldingsformidlerRequest {
 
     @Override
     public List<Document> getAttachments() {
+        return null;
+    }
+
+    @Override
+    public StandardBusinessDocumentHeader getStandardBusinessDocumentHeader() {
         return null;
     }
 
@@ -120,7 +127,7 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
-    public Sikkerhetsnivaa getSecurityLevel() {
+    public Integer getSecurityLevel() {
         return null;
     }
 
@@ -140,18 +147,18 @@ public class Request implements MeldingsformidlerRequest {
     }
 
     @Override
-    public Utskriftsfarge getPrintColor() {
-        return Utskriftsfarge.SORT_HVIT;
+    public PrintColor getPrintColor() {
+        return PrintColor.SORT_HVIT;
     }
 
     @Override
-    public Posttype getPosttype() {
-        return Posttype.B_OEKONOMI;
+    public PostalCategory getPostalCategory() {
+        return PostalCategory.B_OEKONOMI;
     }
 
     @Override
-    public Returhaandtering getReturnHandling() {
-        return Returhaandtering.DIREKTE_RETUR;
+    public ReturnHandling getReturnHandling() {
+        return ReturnHandling.DIREKTE_RETUR;
     }
 
     Request withNotifiable(boolean notifiable) {

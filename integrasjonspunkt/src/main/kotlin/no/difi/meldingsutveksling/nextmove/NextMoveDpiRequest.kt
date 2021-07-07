@@ -1,42 +1,51 @@
 package no.difi.meldingsutveksling.nextmove
 
-import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
-import no.difi.meldingsutveksling.dpi.Document
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest
+import no.difi.meldingsutveksling.nextmove.v2.CryptoMessageResource
+import no.difi.meldingsutveksling.pipes.Reject
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
-import no.difi.sdp.client2.domain.MetadataDokument
-import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa
-import no.difi.sdp.client2.domain.fysisk_post.Posttype
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge
+import no.digdir.dpi.client.domain.Document
+import no.digdir.dpi.client.domain.MetadataDocument
+import org.springframework.core.io.Resource
 import java.time.Clock
 import java.util.*
 
-class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
-                         private val clock: Clock,
-                         private val message: NextMoveMessage,
-                         private val serviceRecord: ServiceRecord,
-                         private val optionalCryptoMessagePersister: OptionalCryptoMessagePersister) : MeldingsformidlerRequest {
+class NextMoveDpiRequest(
+    private val props: IntegrasjonspunktProperties,
+    private val clock: Clock,
+    private val message: NextMoveMessage,
+    private val serviceRecord: ServiceRecord,
+    private val optionalCryptoMessagePersister: OptionalCryptoMessagePersister,
+    private val reject: Reject
+) : MeldingsformidlerRequest {
 
     private fun createDocument(file: BusinessMessageFile): Document {
         val title = if (file.title.isNullOrBlank()) "Missing title" else file.title
-        val document = Document(getContent(file.identifier), file.mimetype, file.filename, title)
+        val document = Document()
+            .setResource(getContent(file.identifier))
+            .setMimeType(file.mimetype)
+            .setFilename(file.filename)
+            .setTitle(title)
 
         if (isDigitalMessage && getDigitalMessage().metadataFiler.containsKey(file.filename)) {
             val metadataFilename = getDigitalMessage().metadataFiler[file.filename]
             val metadataFile = message.files.first { it.filename == metadataFilename }
-                    ?: throw NextMoveRuntimeException("Metadata document $metadataFilename specified for ${file.filename}, but is not attached")
-            document.metadataDokument = MetadataDokument(metadataFilename, metadataFile.mimetype, getContent(metadataFile.identifier))
+                ?: throw NextMoveRuntimeException("Metadata document $metadataFilename specified for ${file.filename}, but is not attached")
+            document.metadataDocument = MetadataDocument()
+                .setFilename(metadataFilename)
+                .setMimeType(metadataFile.mimetype)
+                .setResource(getContent(metadataFile.identifier))
         }
 
         return document
     }
 
-    private fun getContent(fileName: String): ByteArray {
-        return optionalCryptoMessagePersister.read(message.messageId, fileName)
+    private fun getContent(fileName: String): Resource {
+        return CryptoMessageResource(message.messageId, fileName, optionalCryptoMessagePersister, reject)
     }
 
     private fun isMetadataFile(filename: String): Boolean {
@@ -61,14 +70,18 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
 
     override fun getDocument(): Document {
         return message.files.first { it.primaryDocument }
-                ?.let { createDocument(it) }
-                ?: throw NextMoveRuntimeException("No primary documents found, aborting send")
+            ?.let { createDocument(it) }
+            ?: throw NextMoveRuntimeException("No primary documents found, aborting send")
     }
 
     override fun getAttachments(): List<Document> {
         return message.files.filter { !it.primaryDocument }
-                .filter { !isMetadataFile(it.filename) }
-                .map { createDocument(it) }
+            .filter { !isMetadataFile(it.filename) }
+            .map { createDocument(it) }
+    }
+
+    override fun getStandardBusinessDocumentHeader(): StandardBusinessDocumentHeader {
+        return message.sbd.standardBusinessDocumentHeader
     }
 
     override fun getMottakerPid(): String {
@@ -159,19 +172,21 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         } else null
     }
 
-    override fun getSecurityLevel(): Sikkerhetsnivaa? {
+    override fun getSecurityLevel(): Int? {
         return if (message.businessMessage is DpiDigitalMessage) {
-            return Sikkerhetsnivaa.valueOf(SDPSikkerhetsnivaa.fromValue(message.businessMessage.getSikkerhetsnivaa().toString()).toString())
+            return message.businessMessage.sikkerhetsnivaa
         } else null
     }
 
     override fun getVirkningsdato(): Date {
         return if (isDigitalMessage) {
-            Date.from(getDigitalMessage().digitalPostInfo
+            Date.from(
+                getDigitalMessage().digitalPostInfo
                     .virkningsdato
                     .atStartOfDay()
                     .atZone(clock.zone)
-                    .toInstant())
+                    .toInstant()
+            )
         } else Date()
     }
 
@@ -187,22 +202,21 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
         } else false
     }
 
-    override fun getPrintColor(): Utskriftsfarge {
+    override fun getPrintColor(): PrintColor {
         return if (isPrintMessage) {
             getPrintMessage().utskriftsfarge
-        } else Utskriftsfarge.SORT_HVIT
+        } else PrintColor.SORT_HVIT
     }
 
-    override fun getPosttype(): Posttype {
+    override fun getPostalCategory(): PostalCategory {
         return if (isPrintMessage) {
             getPrintMessage().posttype
-        } else Posttype.B_OEKONOMI
+        } else PostalCategory.B_OEKONOMI
     }
 
-    override fun getReturnHandling(): Returhaandtering {
+    override fun getReturnHandling(): ReturnHandling {
         return if (isPrintMessage) {
             getPrintMessage().retur.returhaandtering
-        } else Returhaandtering.DIREKTE_RETUR
+        } else ReturnHandling.DIREKTE_RETUR
     }
-
 }

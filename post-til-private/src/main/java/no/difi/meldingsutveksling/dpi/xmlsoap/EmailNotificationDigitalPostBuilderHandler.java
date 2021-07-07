@@ -1,6 +1,7 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.EpostVarsel;
 import org.springframework.util.StringUtils;

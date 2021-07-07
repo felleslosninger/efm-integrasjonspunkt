@@ -1,12 +1,13 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 
 public abstract class DigitalPostBuilderHandler {
     private final DigitalPostInnbyggerConfig config;
 
-    public DigitalPostBuilderHandler(DigitalPostInnbyggerConfig config) {
+    protected DigitalPostBuilderHandler(DigitalPostInnbyggerConfig config) {
         this.config = config;
     }
 

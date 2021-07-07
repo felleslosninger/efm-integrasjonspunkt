@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import no.difi.sdp.client2.KlientKonfigurasjon;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.internal.TrustedCertificates;
-import org.springframework.stereotype.Component;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.net.URI;
@@ -20,7 +19,6 @@ import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
-@Component
 @RequiredArgsConstructor
 public class SikkerDigitalPostKlientFactory {
 

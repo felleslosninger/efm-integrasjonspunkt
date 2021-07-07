@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SmsNotificationDigitalPostBuilderHandler;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.SmsVarsel;
 import org.junit.Before;

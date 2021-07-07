@@ -1,12 +1,14 @@
-package no.difi.meldingsutveksling.dpi.forsendelse;
+package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
+import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dpi.EmailNotificationDigitalPostBuilderHandler;
-import no.difi.meldingsutveksling.dpi.ForsendelseBuilderHandler;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.dpi.SmsNotificationDigitalPostBuilderHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.EmailNotificationDigitalPostBuilderHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SmsNotificationDigitalPostBuilderHandler;
 import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
+import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.digipost.api.representations.Organisasjonsnummer;
 
 public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
@@ -32,7 +34,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(request.getVirkningsdato())
                 .aapningskvittering(request.isAapningskvittering())
-                .sikkerhetsnivaa(request.getSecurityLevel());
+                .sikkerhetsnivaa(getSikkerhetsnivaa(request));
         digitalPost = smsNotificationHandler.handle(request, digitalPost);
         digitalPost = emailNotificationHandler.handle(request, digitalPost);
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
@@ -40,5 +42,13 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         request.getFakturaReferanse().ifPresent(avsenderBuilder::fakturaReferanse);
         Avsender behandlingsansvarlig = avsenderBuilder.build();
         return Forsendelse.digital(behandlingsansvarlig, digitalPost.build(), dokumentpakke);
+    }
+
+    private Sikkerhetsnivaa getSikkerhetsnivaa(MeldingsformidlerRequest request) {
+        Integer securityLevel = request.getSecurityLevel();
+        if (securityLevel == null) {
+            return null;
+        }
+        return Sikkerhetsnivaa.valueOf(SDPSikkerhetsnivaa.fromValue(securityLevel.toString()).toString());
     }
 }

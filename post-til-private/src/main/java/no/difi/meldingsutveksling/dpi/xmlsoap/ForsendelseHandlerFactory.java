@@ -1,9 +1,10 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dpi.forsendelse.DigitalForsendelseHandler;
-import no.difi.meldingsutveksling.dpi.forsendelse.PrintForsendelseHandler;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.DigitalForsendelseHandler;
+import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.PrintForsendelseHandler;
 
 @RequiredArgsConstructor
 public class ForsendelseHandlerFactory {

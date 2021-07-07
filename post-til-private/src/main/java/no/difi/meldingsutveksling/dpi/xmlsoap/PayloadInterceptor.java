@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dpi;
+package no.difi.meldingsutveksling.dpi.xmlsoap;
 
 import org.slf4j.Logger;
 import org.springframework.ws.client.WebServiceClientException;
@@ -24,7 +24,6 @@ public class PayloadInterceptor implements ClientInterceptor {
     public PayloadInterceptor(Consumer<String> payloadConsumer) {
         this.callback = payloadConsumer;
     }
-
 
     @Override
     public boolean handleRequest(MessageContext messageContext) throws WebServiceClientException {

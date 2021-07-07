@@ -12,9 +12,6 @@ import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -108,16 +105,16 @@ public class NextMoveOutMessageFactory {
             if (dpiMessage.getRetur() == null) {
                 dpiMessage.setRetur(new MailReturn()
                         .setMottaker(new PostAddress())
-                        .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
+                        .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
             }
             setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
 
             if (dpiMessage.getUtskriftsfarge() == null) {
-                dpiMessage.setUtskriftsfarge(Utskriftsfarge.SORT_HVIT);
+                dpiMessage.setUtskriftsfarge(PrintColor.SORT_HVIT);
             }
 
             if (dpiMessage.getPosttype() == null) {
-                dpiMessage.setPosttype(Posttype.B_OEKONOMI);
+                dpiMessage.setPosttype(PostalCategory.B_OEKONOMI);
             }
 
         }

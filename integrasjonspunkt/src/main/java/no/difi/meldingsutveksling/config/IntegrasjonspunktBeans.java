@@ -5,10 +5,7 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.DpiReceiptMapper;
-import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.DpiConfig;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -33,9 +30,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
-import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -48,6 +45,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
+@Import(DpiConfig.class)
 public class IntegrasjonspunktBeans {
 
     @Bean
@@ -115,21 +113,6 @@ public class IntegrasjonspunktBeans {
                 .setNextmoveFiledir(properties.getNextmove().getFiledir())
                 .setAllowForwarding(properties.getDpv().isAllowForwarding())
                 .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
-    public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
-        return new ForsendelseHandlerFactory(properties.getDpi());
-    }
-
-    @Bean
-    public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
-                                                           SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
-                                                           ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                           DpiReceiptMapper dpiReceiptMapper,
-                                                           ClientInterceptor metricsEndpointInterceptor) {
-        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
-                forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor);
     }
 
     @Bean

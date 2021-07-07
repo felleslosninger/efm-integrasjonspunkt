@@ -75,6 +75,8 @@
         <logback.version>1.2.3</logback.version>
 
         <sikker-digital-post-klient.version>5.10</sikker-digital-post-klient.version>
+        <efm-dpi-client.version>0.0.1-SNAPSHOT</efm-dpi-client.version>
+
         <powermock.version>2.0.0</powermock.version>
         <cucumber.version>2.3.1</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
@@ -263,6 +265,8 @@
                 <artifactId>peppol-lookup</artifactId>
                 <version>0.9.9</version>
             </dependency>
+
+            <!-- DPI -->
             <dependency>
                 <groupId>no.difi.sdp</groupId>
                 <artifactId>sikker-digital-post-klient-java</artifactId>
@@ -274,6 +278,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>no.digdir</groupId>
+                <artifactId>efm-dpi-client</artifactId>
+                <version>${efm-dpi-client.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.jvnet.jax-ws-commons.spring</groupId>
                 <artifactId>jaxws-spring</artifactId>

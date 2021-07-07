@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;

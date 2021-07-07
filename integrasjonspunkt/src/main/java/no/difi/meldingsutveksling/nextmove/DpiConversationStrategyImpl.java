@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -35,6 +36,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
+    private final PromiseMaker promiseMaker;
 
     @Override
     @Timed
@@ -57,12 +59,20 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                 })
         );
 
-        NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, optionalCryptoMessagePersister);
-
         try {
-            meldingsformidlerClient.sendMelding(request);
-        } catch (MeldingsformidlerException e) {
-            Audit.error("Failed to send message to DPI", markerFrom(message), e);
+            promiseMaker.promise(reject -> {
+                NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, optionalCryptoMessagePersister, reject);
+
+                try {
+                    meldingsformidlerClient.sendMelding(request);
+                } catch (MeldingsformidlerException e) {
+                    Audit.error("Failed to send message to DPI", markerFrom(message), e);
+                    reject.reject(e);
+                }
+
+                return null;
+            }).await();
+        } catch (Exception e) {
             throw new NextMoveException(e);
         }
     }

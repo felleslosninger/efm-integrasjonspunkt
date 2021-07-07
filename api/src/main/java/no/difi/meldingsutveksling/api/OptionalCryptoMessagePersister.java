@@ -12,7 +12,6 @@ public interface OptionalCryptoMessagePersister {
 
     void writeStream(String messageId, String filename, InputStream stream) throws IOException;
 
-
     byte[] read(String messageId, String filename) throws IOException;
 
     FileEntryStream readStream(String messageId, String filename, Reject reject);

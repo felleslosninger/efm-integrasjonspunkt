@@ -8,8 +8,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -24,17 +24,15 @@ public class DpiReceiptService {
     @Timed
     @Async("dpiReceiptExecutor")
     public CompletableFuture<Void> handleReceipts(String mpcId) {
-        Optional<ExternalReceipt> externalReceipt = checkForReceipts(mpcId);
+        checkForReceipts(mpcId)
+                .toStream()
+                .forEach(this::handleReceipt);
 
-        while (externalReceipt.isPresent()) {
-            externalReceipt.ifPresent(this::handleReceipt);
-            externalReceipt = checkForReceipts(mpcId);
-        }
         return CompletableFuture.completedFuture(null);
     }
 
-    private Optional<ExternalReceipt> checkForReceipts(String mpcId) {
-        return meldingsformidlerClient.sjekkEtterKvittering(properties.getOrg().getNumber(), mpcId);
+    private Flux<ExternalReceipt> checkForReceipts(String mpcId) {
+        return meldingsformidlerClient.sjekkEtterKvitteringer(properties.getOrg().getNumber(), mpcId);
     }
 
     private void handleReceipt(ExternalReceipt externalReceipt) {
