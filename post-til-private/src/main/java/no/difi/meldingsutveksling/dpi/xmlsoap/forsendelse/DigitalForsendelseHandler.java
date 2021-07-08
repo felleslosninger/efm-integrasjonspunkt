@@ -11,6 +11,7 @@ import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.digipost.api.representations.Organisasjonsnummer;
 
+import java.sql.Date;
 import java.util.Optional;
 
 public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
@@ -35,7 +36,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
                 Optional.ofNullable(request.getOnBehalfOfOrgnr()).orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(request.getVirkningsdato())
+                .virkningsdato(Date.from(request.getVirkningsdato().toInstant()))
                 .aapningskvittering(request.isAapningskvittering())
                 .sikkerhetsnivaa(getSikkerhetsnivaa(request));
         digitalPost = smsNotificationHandler.handle(request, digitalPost);

@@ -9,10 +9,10 @@ import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 import no.digdir.dpi.client.domain.Parcel;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Value
-@Builder
+@Builder(builderClassName = "Builder")
 public class MeldingsformidlerRequest {
 
     StandardBusinessDocumentHeader standardBusinessDocumentHeader;
@@ -67,7 +67,7 @@ public class MeldingsformidlerRequest {
     PostAddress postAddress;
     PostAddress returnAddress;
     Integer securityLevel;
-    Date virkningsdato;
+    OffsetDateTime virkningsdato;
     String language;
     boolean aapningskvittering;
     PrintColor printColor;

@@ -15,6 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @DiscriminatorColumn(name = "direction", discriminatorType = DiscriminatorType.STRING)
@@ -77,6 +78,11 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     public BusinessMessage<?> getBusinessMessage() {
         return getSbd().getBusinessMessage(BusinessMessage.class)
                 .orElseThrow(() -> new NextMoveRuntimeException("SBD.any not instance of BusinessMessage"));
+    }
+
+    @JsonIgnore
+    public <T> Optional<T> getBusinessMessage(Class<T> clazz) {
+        return getSbd().getBusinessMessage(clazz);
     }
 
     @Override

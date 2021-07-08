@@ -13,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
+public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> implements DpiMessage {
 
     private String avsenderId;
     private String fakturaReferanse;
