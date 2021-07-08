@@ -39,7 +39,11 @@ public class EmailNotificationDigitalPostBuilderHandlerTest {
     @Test
     public void notifiableAndFeatureEnabledWithEmailShouldAddEpostVarsel() {
         EmailNotificationDigitalPostBuilderHandler handler = new EmailNotificationDigitalPostBuilderHandler(config);
-        builder = handler.handle(MeldingsformidlerRequest.builder().notifiable(true).emailAddress("foo@foo.com").build(), builder);
+        builder = handler.handle(MeldingsformidlerRequest.builder()
+                .notifiable(true)
+                .emailAddress("foo@foo.com")
+                .emailVarslingstekst("Notification")
+                .build(), builder);
 
         verify(builder).epostVarsel(any(EpostVarsel.class));
     }
