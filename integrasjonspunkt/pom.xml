@@ -256,6 +256,10 @@
             <artifactId>service-registry-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-certvalidator</artifactId>
             <exclusions>

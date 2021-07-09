@@ -7,20 +7,20 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
-import no.digdir.dpi.client.domain.Parcel;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Value
 @Builder(builderClassName = "Builder")
 public class MeldingsformidlerRequest {
 
     StandardBusinessDocumentHeader standardBusinessDocumentHeader;
-    Parcel parcel;
+    Document document;
+    List<Document> attachments;
     String mottakerPid;
     String subject;
     String senderOrgnumber;
-    String onBehalfOfOrgnr;
     String avsenderIdentifikator;
     String fakturaReferanse;
     String conversationId;

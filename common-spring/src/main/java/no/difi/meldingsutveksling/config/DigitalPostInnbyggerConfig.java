@@ -7,8 +7,8 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.config.dpi.dpi.PrintSettings;
+import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
 import no.difi.move.common.config.KeystoreProperties;
-import no.difi.sdp.client2.domain.Prioritet;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
@@ -35,7 +35,7 @@ public class DigitalPostInnbyggerConfig {
     /**
      * The number of concurrent message partition channels (MPCs) to send messages to and consume receipts from.
      * An integer increment is postfixed to the MPC id if the MPC concurrency is greater than 1.
-     *
+     * <p>
      * MPC concurrency of 3 will use the following MPCs:
      * - {mpcId}-0
      * - {mpcId}-1
@@ -48,7 +48,7 @@ public class DigitalPostInnbyggerConfig {
     private String language;
 
     @NotNull
-    private Prioritet priority;
+    private Priority priority;
 
     @NotNull
     private PrintSettings printSettings;

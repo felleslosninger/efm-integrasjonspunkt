@@ -5,21 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ResourceUtils;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
+import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.status.ExternalReceipt;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
-import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.sdp.client2.domain.Dokument;
-import no.difi.sdp.client2.domain.Dokumentpakke;
-import no.difi.sdp.client2.domain.Forsendelse;
+import no.difi.sdp.client2.domain.*;
 import no.difi.sdp.client2.domain.exceptions.SendException;
 import no.difi.sdp.client2.domain.kvittering.ForretningsKvittering;
 import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
-import no.digdir.dpi.client.domain.Document;
-import no.digdir.dpi.client.domain.Parcel;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import reactor.core.publisher.Flux;
 
@@ -55,24 +52,44 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
 
     @Override
     public void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException {
-        Parcel parcel = request.getParcel();
-        Dokument dokument = dokumentFromDocument(parcel.getMainDocument());
-        Dokumentpakke dokumentpakke = Dokumentpakke.builder(dokument).vedlegg(toVedlegg(parcel.getAttachments())).build();
+        Forsendelse forsendelse = getForsendelse(request);
 
-        ForsendelseBuilderHandler forsendelseBuilderHandler = forsendelseHandlerFactory.create(request);
-        Forsendelse.Builder forsendelseBuilder = forsendelseBuilderHandler.handle(request, dokumentpakke);
-
-        Forsendelse forsendelse = forsendelseBuilder.konversasjonsId(request.getConversationId())
-                .mpcId(nextMpcId())
-                .spraakkode(request.getLanguage())
-                .prioritet(config.getPriority()).build();
-
-        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()), metricsEndpointInterceptor);
         try {
-            klient.send(forsendelse);
+            getSikkerDigitalPostKlient(request).send(forsendelse);
         } catch (SendException e) {
             throw new MeldingsformidlerException("Unable to send message to SDP", e);
         }
+    }
+
+    private Forsendelse getForsendelse(MeldingsformidlerRequest request) {
+        Forsendelse.Builder forsendelseBuilder = getForsendelseBuilderHandler(request)
+                .handle(request, getDokumentpakke(request));
+
+        return forsendelseBuilder.konversasjonsId(request.getConversationId())
+                .mpcId(nextMpcId())
+                .spraakkode(request.getLanguage())
+                .prioritet(getPrioritet()).build();
+    }
+
+    private SikkerDigitalPostKlient getSikkerDigitalPostKlient(MeldingsformidlerRequest request) {
+        return sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()), metricsEndpointInterceptor);
+    }
+
+    private ForsendelseBuilderHandler getForsendelseBuilderHandler(MeldingsformidlerRequest request) {
+        return forsendelseHandlerFactory.create(request);
+    }
+
+    private Dokumentpakke getDokumentpakke(MeldingsformidlerRequest request) {
+        return Dokumentpakke.builder(dokumentFromDocument(request.getDocument()))
+                .vedlegg(toVedlegg(request.getAttachments()))
+                .build();
+    }
+
+    private Prioritet getPrioritet() {
+        if (config.getPriority() == Priority.PRIORITERT) {
+            return Prioritet.PRIORITERT;
+        }
+        return Prioritet.NORMAL;
     }
 
     private List<Dokument> toVedlegg(List<Document> attachements) {
@@ -121,7 +138,7 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
 
     private Optional<ForretningsKvittering> getForretningsKvittering(SikkerDigitalPostKlient klient, String mpcId) {
         try {
-            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(config.getPriority()).mpcId(mpcId).build()));
+            return Optional.ofNullable(klient.hentKvittering(KvitteringForespoersel.builder(getPrioritet()).mpcId(mpcId).build()));
         } catch (SendException e) {
             log.warn("Polling of DPI receipts failed with: {}", e.getLocalizedMessage());
             return Optional.empty();

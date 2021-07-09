@@ -28,17 +28,14 @@ public class DpiConfig {
     @Order
     @Bean
     public DpiConversationStrategyImpl dpiConversationStrategyImpl(
-            IntegrasjonspunktProperties props,
             ServiceRegistryLookup sr,
-            Clock clock,
-            OptionalCryptoMessagePersister optionalCryptoMessagePersister,
             MeldingsformidlerRequestFactory meldingsformidlerRequestFactory,
             MeldingsformidlerClient meldingsformidlerClient,
             ConversationService conversationService,
             PromiseMaker promiseMaker
 
     ) {
-        return new DpiConversationStrategyImpl(props, sr, clock, optionalCryptoMessagePersister, meldingsformidlerRequestFactory, meldingsformidlerClient, conversationService, promiseMaker);
+        return new DpiConversationStrategyImpl(sr, meldingsformidlerRequestFactory, meldingsformidlerClient, conversationService, promiseMaker);
     }
 
     @Bean

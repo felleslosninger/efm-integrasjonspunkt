@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpiConversationStrategy;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
@@ -19,18 +17,13 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 
-import java.time.Clock;
-
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
-    private final IntegrasjonspunktProperties props;
     private final ServiceRegistryLookup sr;
-    private final Clock clock;
-    private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
@@ -39,18 +32,9 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
-        ServiceRecord serviceRecord;
-        try {
-            serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .conversationId(message.getConversationId())
-                            .process(message.getProcessIdentifier())
-                            .build(),
-                    SBDUtil.getDocumentType(message.getSbd()));
-        } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
-        }
+        ServiceRecord serviceRecord = getServiceRecord(message);
 
-        message.getSbd().getBusinessMessage(DpiDigitalMessage.class).ifPresent(bmsg ->
+        message.getBusinessMessage(DpiDigitalMessage.class).ifPresent(bmsg ->
                 conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
                     c.setMessageTitle(bmsg.getTittel());
                     conversationService.save(c);
@@ -72,6 +56,18 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
             }).await();
         } catch (Exception e) {
             throw new NextMoveException(e);
+        }
+    }
+
+    private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
+        try {
+            return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                            .conversationId(message.getConversationId())
+                            .process(message.getProcessIdentifier())
+                            .build(),
+                    SBDUtil.getDocumentType(message.getSbd()));
+        } catch (ServiceRegistryLookupException e) {
+            throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
 }

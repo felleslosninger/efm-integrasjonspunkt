@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.config.dpi.dpi;
 
-public interface EnumMapping<T> {
+public enum Priority {
 
-    T toExternal();
+    NORMAL, PRIORITERT
 }

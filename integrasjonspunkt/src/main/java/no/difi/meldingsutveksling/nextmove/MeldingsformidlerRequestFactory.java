@@ -3,14 +3,12 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
+import no.difi.meldingsutveksling.dpi.MetadataDocument;
 import no.difi.meldingsutveksling.nextmove.v2.CryptoMessageResource;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.digdir.dpi.client.domain.Document;
-import no.digdir.dpi.client.domain.MetadataDocument;
-import no.digdir.dpi.client.domain.Parcel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -34,10 +32,10 @@ public class MeldingsformidlerRequestFactory {
     public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
                 .standardBusinessDocumentHeader(nextMoveMessage.getSbd().getStandardBusinessDocumentHeader())
-                .parcel(getParcel(nextMoveMessage, reject))
+                .document(getMainDocument(nextMoveMessage, reject))
+                .attachments(getAttachments(nextMoveMessage, reject))
                 .mottakerPid(nextMoveMessage.getReceiverIdentifier())
                 .senderOrgnumber(nextMoveMessage.getSenderIdentifier())
-                .onBehalfOfOrgnr(SBDUtil.getOnBehalfOfOrgNr(nextMoveMessage.getSbd()).orElse(null))
                 .conversationId(nextMoveMessage.getConversationId())
                 .postkasseAdresse(serviceRecord.getPostkasseAdresse())
                 .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
@@ -79,12 +77,6 @@ public class MeldingsformidlerRequestFactory {
         return builder.build();
     }
 
-    private Parcel getParcel(NextMoveMessage nextMoveMessage, Reject reject) {
-        return new Parcel()
-                .setMainDocument(getMainDocument(nextMoveMessage, reject))
-                .setAttachments(getAttachments(nextMoveMessage, reject));
-    }
-
     private List<Document> getAttachments(NextMoveMessage nextMoveMessage, Reject reject) {
         return nextMoveMessage.getFiles()
                 .stream()
@@ -96,7 +88,7 @@ public class MeldingsformidlerRequestFactory {
 
     @NotNull
     private Predicate<BusinessMessageFile> isMetadataFile() {
-        return p -> p.getMessage().getBusinessMessage(DpiMessage.class)
+        return p -> p.getMessage().getBusinessMessage(DpiDigitalMessage.class)
                 .map(digital -> digital.getMetadataFiler().containsValue(p.getFilename()))
                 .orElse(false);
     }
@@ -119,19 +111,19 @@ public class MeldingsformidlerRequestFactory {
     }
 
     private MetadataDocument getMetadataDocument(BusinessMessageFile file, Reject reject) {
-        return file.getMessage().getBusinessMessage(DpiMessage.class)
+        return file.getMessage().getBusinessMessage(DpiDigitalMessage.class)
                 .filter(digital -> digital.getMetadataFiler().containsKey(file.getFilename()))
                 .map(digital -> getMetadataDocument(file, reject, digital))
                 .orElse(null);
     }
 
-    private MetadataDocument getMetadataDocument(BusinessMessageFile file, Reject reject, DpiMessage digital) {
+    private MetadataDocument getMetadataDocument(BusinessMessageFile file, Reject reject, DpiDigitalMessage digital) {
         String metadataFilename = digital.getMetadataFiler().get(file.getFilename());
         BusinessMessageFile messageFile = file.getMessage().getFiles()
                 .stream()
                 .filter(p -> p.getFilename().equals(metadataFilename))
                 .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException("Metadata document $metadataFilename specified for ${file.filename}, but is not attached"));
+                .orElseThrow(() -> new NextMoveRuntimeException(String.format("Metadata document %s specified for %s, but is not attached", metadataFilename, file.getFilename())));
 
         return new MetadataDocument()
                 .setFilename(metadataFilename)
@@ -140,6 +132,6 @@ public class MeldingsformidlerRequestFactory {
     }
 
     private Resource getContent(BusinessMessageFile file, Reject reject) {
-        return new CryptoMessageResource(file.getMessage().getMessageId(), file.getFilename(), optionalCryptoMessagePersister, reject);
+        return new CryptoMessageResource(file.getMessage().getMessageId(), file.getIdentifier(), optionalCryptoMessagePersister, reject);
     }
 }

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
 import no.difi.sdp.client2.domain.*;
@@ -8,9 +9,11 @@ import no.difi.sdp.client2.domain.fysisk_post.FysiskPost;
 import no.difi.sdp.client2.domain.fysisk_post.KonvoluttAdresse;
 import no.digipost.api.representations.Organisasjonsnummer;
 
-import java.util.Optional;
+import java.util.*;
 
 public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
+    private static final Set<String> NORWAY_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("NORGE", "NORWAY", "NO", "NOR")));
+
     public PrintForsendelseHandler(DigitalPostInnbyggerConfig config) {
         super(config);
     }
@@ -18,20 +21,20 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                Optional.ofNullable(request.getOnBehalfOfOrgnr()).orElse(request.getSenderOrgnumber()));
+                SBDUtil.getOnBehalfOfOrgNr(request.getStandardBusinessDocumentHeader()).orElse(request.getSenderOrgnumber()));
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
         Optional.ofNullable(request.getAvsenderIdentifikator()).ifPresent(avsenderBuilder::avsenderIdentifikator);
         Optional.ofNullable(request.getFakturaReferanse()).ifPresent(avsenderBuilder::fakturaReferanse);
         Avsender avsender = avsenderBuilder.build();
 
         KonvoluttAdresseHandler konvoluttAdresseHandler;
-        if (request.getPostAddress().isNorge()) {
+        if (isNorge(request.getPostAddress().getLand())) {
             konvoluttAdresseHandler = new NorgeKonvoluttAdresseHandler();
         } else {
             konvoluttAdresseHandler = new UtlandKonvoluttAdresseHandler();
         }
         KonvoluttAdresseHandler returAdresseHandler;
-        if (request.getReturnAddress().isNorge()) {
+        if (isNorge(request.getReturnAddress().getLand())) {
             returAdresseHandler = new NorgeKonvoluttAdresseHandler();
         } else {
             returAdresseHandler = new UtlandKonvoluttAdresseHandler();
@@ -50,4 +53,9 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
 
         return Forsendelse.fysisk(avsender, fysiskPost, dokumentpakke);
     }
+
+    private boolean isNorge(String land) {
+        return (land == null || "".equals(land)) || NORWAY_SET.contains(land.toUpperCase());
+    }
+
 }

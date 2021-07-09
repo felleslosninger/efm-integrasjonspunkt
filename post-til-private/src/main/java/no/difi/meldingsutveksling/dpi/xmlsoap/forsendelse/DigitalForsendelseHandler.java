@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
 import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.xmlsoap.EmailNotificationDigitalPostBuilderHandler;
 import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
@@ -34,7 +35,7 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         ).build();
 
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                Optional.ofNullable(request.getOnBehalfOfOrgnr()).orElse(request.getSenderOrgnumber()));
+                SBDUtil.getOnBehalfOfOrgNr(request.getStandardBusinessDocumentHeader()).orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(Date.from(request.getVirkningsdato().toInstant()))
                 .aapningskvittering(request.isAapningskvittering())

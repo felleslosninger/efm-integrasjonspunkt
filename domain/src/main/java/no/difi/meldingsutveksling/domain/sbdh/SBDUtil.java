@@ -27,6 +27,13 @@ public class SBDUtil {
                 .map(Organisasjonsnummer::parse);
     }
 
+    public static Optional<Organisasjonsnummer> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
+        return sbdh.getFirstSender()
+                .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
+                .flatMap(p -> Optional.ofNullable(p.getValue()))
+                .map(Organisasjonsnummer::parse);
+    }
+
     public static String getSenderIdentifier(StandardBusinessDocument sbd) {
         return getOptionalSender(sbd)
                 .map(Organisasjonsnummer::getOrgNummer)
@@ -53,6 +60,11 @@ public class SBDUtil {
 
     public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocument sbd) {
         return getOptionalSender(sbd)
+                .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
+    }
+
+    public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocumentHeader sbdh) {
+        return getOptionalSender(sbdh)
                 .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
     }
 
