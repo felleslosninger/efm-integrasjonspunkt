@@ -48,6 +48,10 @@ public class CacheConfig extends CachingConfigurerSupport {
                 new CaffeineCache(CACHE_SR_VIRKSERT,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(5, TimeUnit.MINUTES)
+                                .build()),
+                new CaffeineCache("dpiClient.getMaskinportenToken",
+                        Caffeine.newBuilder()
+                                .expireAfterWrite(90, TimeUnit.SECONDS)
                                 .build())
         ));
         return cacheManager;

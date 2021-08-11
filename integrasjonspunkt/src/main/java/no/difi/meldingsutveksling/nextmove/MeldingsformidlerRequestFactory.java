@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class MeldingsformidlerRequestFactory {
                 .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
                 .orgnrPostkasse(serviceRecord.getOrgnrPostkasse())
                 .emailAddress(serviceRecord.getEpostAdresse())
-                .mobileNumber(serviceRecord.getMobilnummer())
+                .mobileNumber(getMobilnummer(serviceRecord))
                 .notifiable(serviceRecord.isKanVarsles())
                 .virkningsdato(OffsetDateTime.now(clock))
                 .language(properties.getDpi().getLanguage())
@@ -57,8 +58,8 @@ public class MeldingsformidlerRequestFactory {
 
         nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class).ifPresent(digital ->
                 builder.subject(digital.getTittel())
-                        .smsVarslingstekst(digital.getVarsler().getSmsTekst())
-                        .emailVarslingstekst(digital.getVarsler().getEpostTekst())
+                        .smsVarslingstekst(getSmsVarslingstekst(digital))
+                        .emailVarslingstekst(getEmailVarslingstekst(digital))
                         .securityLevel(digital.getSikkerhetsnivaa())
                         .virkningsdato(digital.getDigitalPostInfo().getVirkningsdato().atStartOfDay(clock.getZone()).toOffsetDateTime())
                         .language(digital.getSpraak())
@@ -75,6 +76,22 @@ public class MeldingsformidlerRequestFactory {
         );
 
         return builder.build();
+    }
+
+    private String getEmailVarslingstekst(DpiDigitalMessage digital) {
+        return Optional.ofNullable(digital.getVarsler())
+                .map(DpiNotification::getEpostTekst)
+                .orElse(null);
+    }
+
+    private String getSmsVarslingstekst(DpiDigitalMessage digital) {
+        return Optional.ofNullable(digital.getVarsler())
+                .map(DpiNotification::getSmsTekst)
+                .orElse(null);
+    }
+
+    private String getMobilnummer(ServiceRecord serviceRecord) {
+        return StringUtils.hasLength(serviceRecord.getMobilnummer()) ? serviceRecord.getMobilnummer() : null;
     }
 
     private List<Document> getAttachments(NextMoveMessage nextMoveMessage, Reject reject) {

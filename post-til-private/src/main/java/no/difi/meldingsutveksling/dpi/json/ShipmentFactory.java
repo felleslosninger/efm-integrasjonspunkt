@@ -16,6 +16,7 @@ import no.digdir.dpi.client.domain.messagetypes.BusinessMessage;
 import no.digdir.dpi.client.domain.messagetypes.Digital;
 import no.digdir.dpi.client.domain.messagetypes.Utskrift;
 import no.digdir.dpi.client.domain.sbd.*;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -123,16 +124,28 @@ public class ShipmentFactory {
                         .setTittel(request.getSubject())
                         .setSpraak(request.getLanguage()))
                 .setVarsler(new Varsler()
-                        .setSmsvarsel(new Smsvarsel()
-                                .setMobiltelefonnummer(request.getMobileNumber())
-                                .setVarslingstekst(request.getSmsVarslingstekst())
-                                .setRepetisjoner(Arrays.asList(0, 7))
-                                .setSpraak(request.getLanguage()))
-                        .setEpostvarsel(new Epostvarsel()
-                                .setEpostadresse(request.getEmailAddress())
-                                .setVarslingstekst(request.getEmailVarslingstekst())
-                                .setRepetisjoner(Arrays.asList(0, 7))
-                                .setSpraak(request.getLanguage())));
+                        .setSmsvarsel(getSmsvarsel(request))
+                        .setEpostvarsel(getEpostvarsel(request)));
+    }
+
+    private Epostvarsel getEpostvarsel(MeldingsformidlerRequest request) {
+        return StringUtils.hasLength(request.getEmailAddress())
+                ? new Epostvarsel()
+                .setEpostadresse(request.getEmailAddress())
+                .setVarslingstekst(request.getEmailVarslingstekst())
+                .setRepetisjoner(Arrays.asList(0, 7))
+                .setSpraak(request.getLanguage())
+                : null;
+    }
+
+    private Smsvarsel getSmsvarsel(MeldingsformidlerRequest request) {
+        return StringUtils.hasLength(request.getMobileNumber())
+                ? new Smsvarsel()
+                .setMobiltelefonnummer(request.getMobileNumber())
+                .setVarslingstekst(request.getSmsVarslingstekst())
+                .setRepetisjoner(Arrays.asList(0, 7))
+                .setSpraak(request.getLanguage())
+                : null;
     }
 
     private Avsender getAvsender(MeldingsformidlerRequest request) {

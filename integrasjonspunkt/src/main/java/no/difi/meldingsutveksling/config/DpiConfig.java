@@ -3,12 +3,17 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.dpi.json.JsonDpiReceiptMapper;
+import no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient;
+import no.difi.meldingsutveksling.dpi.json.ShipmentFactory;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
+import no.digdir.dpi.client.DpiClient;
+import no.digdir.dpi.client.DpiClientConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +26,8 @@ import java.time.Clock;
 @Configuration
 @ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
 @Import({
-        DpiConfig.XmlSoap.class
+        DpiConfig.XmlSoap.class,
+        DpiConfig.Json.class
 })
 public class DpiConfig {
 
@@ -80,7 +86,27 @@ public class DpiConfig {
         public DpiReceiptMapper dpiReceiptMapper(MessageStatusFactory messageStatusFactory, Clock clock) {
             return new DpiReceiptMapper(messageStatusFactory, clock);
         }
-
     }
 
+    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+    @Import(DpiClientConfig.class)
+    public static class Json {
+
+        @Bean
+        public MeldingsformidlerClient meldingsformidlerClient(DpiClient dpiClient,
+                                                               ShipmentFactory shipmentFactory,
+                                                               JsonDpiReceiptMapper dpiReceiptMapper) {
+            return new JsonMeldingsformidlerClient(dpiClient, shipmentFactory, dpiReceiptMapper);
+        }
+
+        @Bean
+        public ShipmentFactory shipmentFactory() {
+            return new ShipmentFactory();
+        }
+
+        @Bean
+        public JsonDpiReceiptMapper jsonDpiReceiptMapper(MessageStatusFactory messageStatusFactory) {
+            return new JsonDpiReceiptMapper(messageStatusFactory);
+        }
+    }
 }
