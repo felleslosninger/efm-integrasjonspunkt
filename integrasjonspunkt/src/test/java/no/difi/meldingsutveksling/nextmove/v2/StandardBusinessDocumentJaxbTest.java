@@ -48,7 +48,7 @@ public class StandardBusinessDocumentJaxbTest {
         StandardBusinessDocument document = unmarshaller.unmarshal(new StreamSource(
                         getClass().getResourceAsStream("/sbd/StandardBusinessDocument.xml")),
                 StandardBusinessDocument.class).getValue();
-        assertThat(document.toString()).isEqualTo(getDocument().toString());
+        assertThat(document).hasToString(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {
@@ -72,13 +72,13 @@ public class StandardBusinessDocumentJaxbTest {
                                 .setTypeVersion("2.0")
                         )
                         .setHeaderVersion("1.0")
-                        .addReceiver(new Receiver()
+                        .addReceiver(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910075918")
                                 )
                         )
-                        .addSender(new Sender()
+                        .addSender(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910077473")

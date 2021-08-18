@@ -9,9 +9,11 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.digdir.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.digdir.dpi.client.internal.UnpackJWT;
 import no.digdir.dpi.client.internal.UnpackStandardBusinessDocument;
 import org.apache.commons.fileupload.FileItem;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Component
 @Profile("cucumber")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
 public class DpiClientRequestParser {
 
     private final MultipartParser multipartParser;
@@ -49,6 +52,10 @@ public class DpiClientRequestParser {
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
         List<Attachment> attachments = getAttachments(fileItems, privateKey);
+
+        sbd.getBusinessMessage(DokumentpakkefingeravtrykkHolder.class).ifPresent(p -> {
+            p.getDokumentpakkefingeravtrykk().setDigestValue("dummy");
+        });
 
         return new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPI)

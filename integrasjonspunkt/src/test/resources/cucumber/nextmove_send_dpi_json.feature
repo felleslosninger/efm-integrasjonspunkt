@@ -161,6 +161,69 @@ Feature: Sending a Next Move DPI message (JSON)
     """
     And I send the message
     Then a DPI message is sent to corner2
+    And the sent message's SBD is:
+    """
+    {
+      "standardBusinessDocumentHeader" : {
+        "headerVersion" : "1.0",
+        "sender" : [ {
+          "identifier" : {
+            "value" : "0192:910077473",
+            "authority" : "iso6523-actorid-upis"
+          }
+        } ],
+        "receiver" : [ {
+          "identifier" : {
+            "value" : "0192:987464291",
+            "authority" : "iso6523-actorid-upis"
+          }
+        } ],
+        "documentIdentification" : {
+          "standard" : "urn:fdc:digdir.no:2020:innbyggerpost:xsd:digital::digital##urn:fdc:digdir.no:2020:innbyggerpost:schema:digital::1.0",
+          "typeVersion" : "1.0",
+          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
+          "type" : "digital",
+          "creationDateAndTime" : "2019-03-25T11:38:23Z"
+        },
+        "businessScope" : {
+          "scope" : [ {
+            "type" : "ConversationId",
+            "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
+            "identifier" : "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:digital:ver1.0",
+            "scopeInformation" : [ {
+              "expectedResponseDateTime" : "2019-05-09T23:31:52Z"
+            } ]
+          } ]
+        }
+      },
+      "digital" : {
+        "avsender" : {
+          "virksomhetsidentifikator" : {
+            "authority" : "iso6523-actorid-upis",
+            "value" : "0192:910077473"
+          },
+          "avsenderidentifikator" : "avsender910077473",
+          "fakturaReferanse" : "faktura910077473"
+        },
+        "mottaker" : {
+          "postkasseadresse" : "dummy"
+        },
+        "dokumentpakkefingeravtrykk" : {
+          "digestMethod" : "http://www.w3.org/2001/04/xmlenc#sha256",
+          "digestValue" : "dummy"
+        },
+        "maskinportentoken" : "DummyMaskinportenToken",
+        "sikkerhetsnivaa" : 3,
+        "virkningstidspunkt" : "2019-05-11T22:00:00Z",
+        "aapningskvittering" : false,
+        "ikkesensitivtittel" : {
+          "tittel" : "Min supertittel",
+          "spraak" : "NO"
+        },
+        "varsler" : { }
+      }
+    }
+    """
     And the sent message contains the following files:
       | filename         | content type |
       | arkivmelding.xml |              |

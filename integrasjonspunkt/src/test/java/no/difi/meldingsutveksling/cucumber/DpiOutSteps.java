@@ -9,6 +9,8 @@ import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -20,7 +22,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @Slf4j
 public class DpiOutSteps {
 
-    private final DpiClientRequestParser dpiClientRequestParser;
+    private final ObjectProvider<DpiClientRequestParser> dpiClientRequestParserObjectProvider;
     private final Holder<Message> messageSentHolder;
     private final WireMockServer wireMockServer;
 
@@ -58,7 +60,7 @@ public class DpiOutSteps {
         List<LoggedRequest> uploaded = wireMockServer.findAll(requestPatternBuilder);
         LoggedRequest loggedRequest = uploaded.get(0);
 
-        Message message = dpiClientRequestParser.parse(loggedRequest);
+        Message message = dpiClientRequestParserObjectProvider.getObject().parse(loggedRequest);
         messageSentHolder.set(message);
     }
 }

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.DataTable;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -7,8 +8,11 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.util.StringUtil;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,8 +27,17 @@ public class MessageOutSteps {
 
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
+    private final ObjectMapper objectMapper;
+
+    private JacksonTester<StandardBusinessDocument> json;
 
     @Before
+    public void before() {
+        JacksonTester.initFields(this, objectMapper);
+        messageOutHolder.reset();
+        messageSentHolder.reset();
+    }
+
     @After
     public void beforeAndAfter() {
         messageOutHolder.reset();
@@ -99,4 +112,14 @@ public class MessageOutSteps {
         Message message = messageSentHolder.get();
         assertThat(message.getBody()).isXmlEqualTo(expectedPayload);
     }
+
+    @SneakyThrows
+    @Then("^the sent message's SBD is:$")
+    public void theSentMessagesSbdIs(String expectedSBD) {
+        JsonContent<StandardBusinessDocument> actual = json.write(messageSentHolder.get().getSbd());
+        assertThat(actual)
+//                .withFailMessage(actual.getJson())
+                .isStrictlyEqualToJson(expectedSBD);
+    }
+
 }

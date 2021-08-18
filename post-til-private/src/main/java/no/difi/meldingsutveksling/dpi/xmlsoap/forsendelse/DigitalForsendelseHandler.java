@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
 import no.difi.begrep.sdp.schema_v10.SDPSikkerhetsnivaa;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.xmlsoap.EmailNotificationDigitalPostBuilderHandler;
 import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
@@ -12,7 +11,6 @@ import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.Sikkerhetsnivaa;
 import no.digipost.api.representations.Organisasjonsnummer;
 
-import java.sql.Date;
 import java.util.Optional;
 
 public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
@@ -35,9 +33,10 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
         ).build();
 
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                SBDUtil.getOnBehalfOfOrgNr(request.getStandardBusinessDocumentHeader()).orElse(request.getSenderOrgnumber()));
+                Optional.ofNullable(request.getOnBehalfOfOrgnumber())
+                        .orElse(request.getSenderOrgnumber()));
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
-                .virkningsdato(Date.from(request.getVirkningsdato().toInstant()))
+                .virkningsdato(java.util.Date.from(request.getVirkningsdato().toInstant()))
                 .aapningskvittering(request.isAapningskvittering())
                 .sikkerhetsnivaa(getSikkerhetsnivaa(request));
         digitalPost = smsNotificationHandler.handle(request, digitalPost);

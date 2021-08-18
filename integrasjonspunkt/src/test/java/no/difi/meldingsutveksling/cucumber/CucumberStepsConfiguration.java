@@ -30,6 +30,7 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
+import no.digdir.dpi.client.internal.CreateInstanceIdentifier;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -83,6 +84,12 @@ public class CucumberStepsConfiguration {
     @RequiredArgsConstructor
     @SpyBean(WebhookPusher.class)
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public CreateInstanceIdentifier createInstanceIdentifier() {
+            return () -> "ff88849c-e281-4809-8555-7cd54952b921";
+        }
 
         @Primary
         @Bean

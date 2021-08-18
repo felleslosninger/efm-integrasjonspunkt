@@ -48,12 +48,13 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
         private final ReceivedMessage receivedMessage;
 
         @Override
-        public void confirmReceipt() {            dpiClient.markAsRead(UUID.fromString(getId()));
+        public void confirmReceipt() {
+            dpiClient.markAsRead(UUID.fromString(getId()));
         }
 
         @Override
         public String getId() {
-            return SBDUtil.getMessageId(receivedMessage.getStandardBusinessDocument());
+            return SBDUtil.getConversationId(receivedMessage.getStandardBusinessDocument());
         }
 
         @Override

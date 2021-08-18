@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse;
 
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
 import no.difi.sdp.client2.domain.*;
@@ -21,7 +20,8 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                SBDUtil.getOnBehalfOfOrgNr(request.getStandardBusinessDocumentHeader()).orElse(request.getSenderOrgnumber()));
+                Optional.ofNullable(request.getOnBehalfOfOrgnumber())
+                        .orElse(request.getSenderOrgnumber()));
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
         Optional.ofNullable(request.getAvsenderIdentifikator()).ifPresent(avsenderBuilder::avsenderIdentifikator);
         Optional.ofNullable(request.getFakturaReferanse()).ifPresent(avsenderBuilder::fakturaReferanse);

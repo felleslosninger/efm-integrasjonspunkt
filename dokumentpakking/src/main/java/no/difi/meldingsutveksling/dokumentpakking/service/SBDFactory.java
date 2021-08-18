@@ -65,8 +65,8 @@ public class SBDFactory {
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                         .setHeaderVersion(HEADER_VERSION)
-                        .addSender(createSender(avsender))
-                        .addReceiver(createReceiver(mottaker))
+                        .addSender(createPartner(avsender))
+                        .addReceiver(createPartner(mottaker))
                         .setDocumentIdentification(createDocumentIdentification(documentType, messageType, messageId))
                         .setBusinessScope(createBusinessScope(fromConversationId(conversationId, process, OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()))))
                 ).setAny(any);
@@ -97,14 +97,8 @@ public class SBDFactory {
         return null;
     }
 
-    private Receiver createReceiver(Organisasjonsnummer orgNummer) {
-        Receiver sender = new Receiver();
-        fillPartner(sender, orgNummer);
-        return sender;
-    }
-
-    private Sender createSender(Organisasjonsnummer orgNummer) {
-        Sender sender = new Sender();
+    private Partner createPartner(Organisasjonsnummer orgNummer) {
+        Partner sender = new Partner();
         fillPartner(sender, orgNummer);
         return sender;
     }

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
@@ -26,10 +26,21 @@ public class ShipmentFactory {
 
     public Shipment getShipment(MeldingsformidlerRequest request) {
         return new Shipment()
-                .setStandardBusinessDocument(getStandardBusinessDocument(request))
+                .setSenderOrganizationIdentifier(getPartnerIdentification(request.getSenderOrgnumber()))
+                .setReceiverOrganizationIdentifier(getPartnerIdentification(request.getOrgnrPostkasse()))
+                .setConversationId(request.getConversationId())
+                .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
+                .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(getParcel(request))
                 .setReceiverBusinessCertificate(BusinessCertificate.fraByteArray(request.getCertificate()))
                 .setLanguage(request.getLanguage());
+    }
+
+    private PartnerIdentification getPartnerIdentification(String orgnumber) {
+        Organisasjonsnummer organisasjonsnummer = Organisasjonsnummer.parse(orgnumber);
+        return new PartnerIdentification()
+                .setAuthority(organisasjonsnummer.authority())
+                .setValue(organisasjonsnummer.asIso6523());
     }
 
     private Parcel getParcel(MeldingsformidlerRequest request) {
@@ -51,16 +62,13 @@ public class ShipmentFactory {
     }
 
     private MetadataDocument toDpiClientMetadataDocument(no.difi.meldingsutveksling.dpi.MetadataDocument in) {
+        if(in == null) {
+            return null;
+        }
         return new no.digdir.dpi.client.domain.MetadataDocument()
                 .setFilename(in.getFilename())
                 .setMimeType(in.getMimeType())
                 .setResource(in.getResource());
-    }
-
-    private StandardBusinessDocument getStandardBusinessDocument(MeldingsformidlerRequest request) {
-        return new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(request.getStandardBusinessDocumentHeader())
-                .setAny(getBusinessMessage(request));
     }
 
     private BusinessMessage getBusinessMessage(MeldingsformidlerRequest request) {
@@ -156,14 +164,10 @@ public class ShipmentFactory {
     }
 
     private Identifikator getVirksomhetsindikator(MeldingsformidlerRequest request) {
-        return request.getStandardBusinessDocumentHeader()
-                .getFirstSender()
-                .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .map(p -> new Identifikator(p.getAuthority(), p.getValue()))
-                .orElseGet(() -> {
-                    Organisasjonsnummer orgnr = Organisasjonsnummer.from(request.getSenderOrgnumber());
-                    return new Identifikator(orgnr.authority(), orgnr.asIso6523());
-                });
+        Organisasjonsnummer orgnr = Organisasjonsnummer.from(
+                Optional.ofNullable(request.getOnBehalfOfOrgnumber()).orElseGet(request::getSenderOrgnumber)
+        );
+        return new Identifikator(orgnr.authority(), orgnr.asIso6523());
     }
 
 }

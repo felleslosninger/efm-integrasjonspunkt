@@ -53,7 +53,7 @@ public class NextMoveOutMessageFactory {
         if (SBDUtil.getSenderIdentifier(sbd) == null) {
             Organisasjonsnummer org = Organisasjonsnummer.from(properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
-                    new Sender()
+                    new Partner()
                             .setIdentifier(new PartnerIdentification()
                                     .setValue(org.asIso6523())
                                     .setAuthority(org.authority()))

@@ -36,8 +36,8 @@ public class StandardBusinessDocumentJsonTest {
 
     @Test
     public void testDeserialize() throws Exception {
-        assertThat(json.read("/sbd/StandardBusinessDocument.json").getObject().toString())
-                .isEqualTo(getDocument().toString());
+        assertThat(json.read("/sbd/StandardBusinessDocument.json").getObject())
+                .hasToString(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {
@@ -61,13 +61,13 @@ public class StandardBusinessDocumentJsonTest {
                                 .setTypeVersion("2.0")
                         )
                         .setHeaderVersion("1.0")
-                        .addReceiver(new Receiver()
+                        .addReceiver(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910075918")
                                 )
                         )
-                        .addSender(new Sender()
+                        .addSender(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910077473")

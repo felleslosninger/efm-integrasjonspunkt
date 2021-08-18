@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.dpi;
 
 import lombok.Builder;
 import lombok.Value;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
@@ -15,15 +14,16 @@ import java.util.List;
 @Builder(builderClassName = "Builder")
 public class MeldingsformidlerRequest {
 
-    StandardBusinessDocumentHeader standardBusinessDocumentHeader;
     Document document;
     List<Document> attachments;
     String mottakerPid;
     String subject;
     String senderOrgnumber;
+    String onBehalfOfOrgnumber;
     String avsenderIdentifikator;
     String fakturaReferanse;
     String conversationId;
+    OffsetDateTime expectedResponseDateTime;
 
     /**
      * @return postkasse adresse as defined in KRR for the recipient person
