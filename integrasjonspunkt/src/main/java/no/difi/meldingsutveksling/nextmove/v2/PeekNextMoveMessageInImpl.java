@@ -69,27 +69,27 @@ public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
         Predicate conjunction = cb.conjunction();
 
         if (input.getConversationId() != null) {
-            conjunction = cb.and(cb.equal(root.get("conversationId"), input.getConversationId()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("conversationId"), input.getConversationId()));
         }
 
         if (input.getMessageId() != null) {
-            conjunction = cb.and(cb.equal(root.get("messageId"), input.getMessageId()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("messageId"), input.getMessageId()));
         }
 
         if (input.getReceiverIdentifier() != null) {
-            conjunction = cb.and(cb.equal(root.get("receiverIdentifier"), input.getReceiverIdentifier()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("receiverIdentifier"), input.getReceiverIdentifier()));
         }
 
         if (input.getSenderIdentifier() != null) {
-            conjunction = cb.and(cb.equal(root.get("senderIdentifier"), input.getSenderIdentifier()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("senderIdentifier"), input.getSenderIdentifier()));
         }
 
         if (input.getServiceIdentifier() != null) {
-            conjunction = cb.and(cb.equal(root.get("serviceIdentifier"), ServiceIdentifier.valueOf(input.getServiceIdentifier())));
+            conjunction = cb.and(conjunction, cb.equal(root.get("serviceIdentifier"), ServiceIdentifier.valueOf(input.getServiceIdentifier())));
         }
 
         if (input.getProcess() != null) {
-            conjunction = cb.and(cb.equal(root.get("processIdentifier"), input.getProcess()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("processIdentifier"), input.getProcess()));
         }
 
         cr.select(root.get("id"))

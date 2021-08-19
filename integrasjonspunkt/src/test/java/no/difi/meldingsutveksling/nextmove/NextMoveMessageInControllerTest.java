@@ -14,6 +14,8 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +40,7 @@ import java.util.zip.ZipOutputStream;
 
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -68,6 +71,8 @@ public class NextMoveMessageInControllerTest {
 
     @Mock private IntegrasjonspunktProperties.Organization organization;
 
+    @Captor private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;
+
     @Before
     public void before() {
         given(organization.getNumber()).willReturn("910077473");
@@ -83,35 +88,35 @@ public class NextMoveMessageInControllerTest {
                 });
 
         mvc.perform(
-                get("/api/messages/in")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/find",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        requestParameters(
-                                parameterWithName("messageId").optional().description("Filter on messageId."),
-                                parameterWithName("conversationId").optional().description("Filter on conversationId."),
-                                parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
-                                parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
-                                parameterWithName("process").optional().description("Filter on process.")
-                        ).and(getPagingParameterDescriptors()),
-                        responseFields()
-                                .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
-                                .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
-                                .and(subsectionWithPath("content[].publisering.").description("The publisering DPI business message").optional())
-                                .and(publiseringMessageDescriptors("content[].publisering."))
-                                .and(pageDescriptors())
-                                .andWithPrefix("pageable.", pageableDescriptors())
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                requestParameters(
+                                        parameterWithName("messageId").optional().description("Filter on messageId."),
+                                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
+                                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
+                                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
+                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                                .map(Enum::name)
+                                                .collect(Collectors.joining(", ")))),
+                                        parameterWithName("process").optional().description("Filter on process.")
+                                ).and(getPagingParameterDescriptors()),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
+                                        .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
+                                        .and(subsectionWithPath("content[].publisering.").description("The publisering DPI business message").optional())
+                                        .and(publiseringMessageDescriptors("content[].publisering."))
+                                        .and(pageDescriptors())
+                                        .andWithPrefix("pageable.", pageableDescriptors())
                         )
                 );
 
@@ -127,10 +132,10 @@ public class NextMoveMessageInControllerTest {
                 });
 
         mvc.perform(
-                get("/api/messages/in")
-                        .param("serviceIdentifier", "DPO")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in")
+                                .param("serviceIdentifier", "DPO")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/find/search"));
@@ -147,10 +152,10 @@ public class NextMoveMessageInControllerTest {
                 });
 
         mvc.perform(
-                get("/api/messages/in")
-                        .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in")
+                                .param("sort", "lastUpdated,asc")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/find/sorting"));
@@ -167,11 +172,11 @@ public class NextMoveMessageInControllerTest {
                 });
 
         mvc.perform(
-                get("/api/messages/in")
-                        .param("page", "3")
-                        .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in")
+                                .param("page", "3")
+                                .param("size", "10")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/find/paging"));
@@ -184,31 +189,31 @@ public class NextMoveMessageInControllerTest {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
-                get("/api/messages/in/peek")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in/peek")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/peek",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        requestParameters(
-                                parameterWithName("messageId").optional().description("Filter on messageId."),
-                                parameterWithName("conversationId").optional().description("Filter on conversationId."),
-                                parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
-                                parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
-                                parameterWithName("process").optional().description("Filter on process.")
-                        ),
-                        responseFields()
-                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("publisering").description("The DPE business message").optional())
-                                .and(publiseringMessageDescriptors("publisering."))
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                requestParameters(
+                                        parameterWithName("messageId").optional().description("Filter on messageId."),
+                                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
+                                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
+                                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
+                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                                .map(Enum::name)
+                                                .collect(Collectors.joining(", ")))),
+                                        parameterWithName("process").optional().description("Filter on process.")
+                                ),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                        .and(publiseringMessageDescriptors("publisering."))
                         )
                 );
 
@@ -220,31 +225,71 @@ public class NextMoveMessageInControllerTest {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
-                get("/api/messages/in/peek")
-                        .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        get("/api/messages/in/peek")
+                                .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/peek/dpe",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        requestParameters(
-                                parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", "))))
-                        ),
-                        responseFields()
-                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("publisering").description("The DPE business message").optional())
-                                .and(publiseringMessageDescriptors("publisering."))
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                requestParameters(
+                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                                .map(Enum::name)
+                                                .collect(Collectors.joining(", "))))
+                                ),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                        .and(publiseringMessageDescriptors("publisering."))
                         )
                 );
 
         verify(messageService).peek(any(NextMoveInMessageQueryInput.class));
+    }
+
+    @Test
+    public void peekMessageIdAndConversationId() throws Exception {
+        NextMoveInMessage message = PUBLISERING_MESSAGE_RESPONSE;
+
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class)))
+                .willReturn(Optional.of(message));
+
+        mvc.perform(
+                        get("/api/messages/in/peek")
+                                .param("messageId", message.getMessageId())
+                                .param("conversationId", message.getConversationId())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/in/peek/messageIdAndConversationId",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                requestParameters(
+                                        parameterWithName("messageId").optional().description("Filter on messageId"),
+                                        parameterWithName("conversationId").optional().description("Filter on conversationId")
+                                ),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                        .and(publiseringMessageDescriptors("publisering."))
+                        )
+                );
+
+        verify(messageService).peek(nextMoveInMessageQueryInputArgumentCaptor.capture());
+
+        NextMoveInMessageQueryInput input = nextMoveInMessageQueryInputArgumentCaptor.getValue();
+
+        assertThat(input.getMessageId()).isEqualTo(message.getMessageId());
+        assertThat(input.getConversationId()).isEqualTo(message.getConversationId());
     }
 
     @Test
@@ -263,20 +308,20 @@ public class NextMoveMessageInControllerTest {
         );
 
         mvc.perform(
-                get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
-                        .accept(AsicUtils.MIMETYPE_ASICE)
-        )
+                        get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                                .accept(AsicUtils.MIMETYPE_ASICE)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/pop",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        pathParameters(
-                                parameterWithName("messageId").optional().description("The messageId of the message to pop.")
-                        )
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                pathParameters(
+                                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                                )
                         )
                 );
 
@@ -288,24 +333,24 @@ public class NextMoveMessageInControllerTest {
         given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
 
         mvc.perform(
-                delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
-                        .accept(MediaType.APPLICATION_JSON)
-        )
+                        delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("messages/in/delete",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        pathParameters(
-                                parameterWithName("messageId").optional().description("The messageId of the message to pop.")
-                        ),
-                        responseFields()
-                                .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
-                                .and(arkivmeldingMessageDescriptors("arkivmelding."))
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                pathParameters(
+                                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                                ),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
+                                        .and(arkivmeldingMessageDescriptors("arkivmelding."))
                         )
                 );
 
