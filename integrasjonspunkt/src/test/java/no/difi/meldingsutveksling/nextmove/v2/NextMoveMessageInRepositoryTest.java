@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -25,7 +26,7 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 @Transactional(propagation = NOT_SUPPORTED) // we're going to handle transactions manually
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = JacksonTestConfig.class)
-class PeekMultiThreadedTest {
+class NextMoveMessageInRepositoryTest {
 
     @Autowired
     private Clock clock;
@@ -36,6 +37,45 @@ class PeekMultiThreadedTest {
     @AfterEach
     void afterTest() {
         target.deleteAll();
+    }
+
+    @Test
+    void testFindIdsForUnlockedMessages() {
+        NextMoveInMessage message1 = target.save(getNextMoveMessage("M1", "C1"));
+        NextMoveInMessage message2 = target.save(getNextMoveMessage("M2", "C1"));
+        NextMoveInMessage message3 = target.save(getNextMoveMessage("M3", "C2"));
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                , 20)).containsOnly(message1.getId(), message2.getId(), message3.getId());
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                        .setMessageId("M1")
+                        .setConversationId("C1")
+                , 20)).containsOnly(message1.getId());
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                        .setMessageId("M2")
+                        .setConversationId("C2")
+                , 20)).isEmpty();
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                        .setConversationId("C1")
+                , 20)).containsOnly(message1.getId(), message2.getId());
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                        .setMessageId("M3")
+                , 20)).containsOnly(message3.getId());
+    }
+
+    @Test
+    void testLock() {
+        NextMoveInMessage message1 = target.save(getNextMoveMessage("M1", "C1"));
+        NextMoveInMessage message2 = target.save(getNextMoveMessage("M2", "C1"));
+        NextMoveInMessage message3 = target.save(getNextMoveMessage("M3", "C2"));
+
+        assertThat(target.lock(message1.getId(), OffsetDateTime.now().plusMinutes(10))).contains(message1);
+        assertThat(target.lock(message2.getId(), OffsetDateTime.now().plusMinutes(10))).contains(message2);
+        assertThat(target.lock(message3.getId(), OffsetDateTime.now().plusMinutes(10))).contains(message3);
     }
 
     @Test
@@ -65,6 +105,13 @@ class PeekMultiThreadedTest {
         }
 
         return Optional.empty();
+    }
+
+    private NextMoveInMessage getNextMoveMessage(String messageId, String conversationId) {
+        NextMoveInMessage message = getNextMoveMessage();
+        message.setMessageId(messageId);
+        message.setConversationId(conversationId);
+        return message;
     }
 
     private NextMoveInMessage getNextMoveMessage() {

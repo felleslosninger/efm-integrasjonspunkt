@@ -15,6 +15,8 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,6 +41,7 @@ import java.util.zip.ZipOutputStream;
 
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -68,6 +71,8 @@ public class NextMoveMessageInControllerTest {
     @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @Mock private IntegrasjonspunktProperties.Organization organization;
+
+    @Captor private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;
 
     @Before
     public void before() {
@@ -246,6 +251,46 @@ public class NextMoveMessageInControllerTest {
                 );
 
         verify(messageService).peek(any(NextMoveInMessageQueryInput.class));
+    }
+
+    @Test
+    public void peekMessageIdAndConversationId() throws Exception {
+        NextMoveInMessage message = PUBLISERING_MESSAGE_RESPONSE;
+
+        given(messageService.peek(any(NextMoveInMessageQueryInput.class)))
+                .willReturn(Optional.of(message));
+
+        mvc.perform(
+                        get("/api/messages/in/peek")
+                                .param("messageId", message.getMessageId())
+                                .param("conversationId", message.getConversationId())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("messages/in/peek/messageIdAndConversationId",
+                                preprocessRequest(prettyPrint()),
+                                preprocessResponse(prettyPrint()),
+                                requestHeaders(
+                                        getDefaultHeaderDescriptors()
+                                ),
+                                requestParameters(
+                                        parameterWithName("messageId").optional().description("Filter on messageId"),
+                                        parameterWithName("conversationId").optional().description("Filter on conversationId")
+                                ),
+                                responseFields()
+                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                                        .and(publiseringMessageDescriptors("publisering."))
+                        )
+                );
+
+        verify(messageService).peek(nextMoveInMessageQueryInputArgumentCaptor.capture());
+
+        NextMoveInMessageQueryInput input = nextMoveInMessageQueryInputArgumentCaptor.getValue();
+
+        assertThat(input.getMessageId()).isEqualTo(message.getMessageId());
+        assertThat(input.getConversationId()).isEqualTo(message.getConversationId());
     }
 
     @Test

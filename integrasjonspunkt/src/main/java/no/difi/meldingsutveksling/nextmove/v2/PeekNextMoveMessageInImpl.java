@@ -69,7 +69,7 @@ public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
         Predicate conjunction = cb.conjunction();
 
         if (input.getConversationId() != null) {
-            conjunction =cb.and(conjunction, cb.equal(root.get("conversationId"), input.getConversationId()));
+            conjunction = cb.and(conjunction, cb.equal(root.get("conversationId"), input.getConversationId()));
         }
 
         if (input.getMessageId() != null) {
