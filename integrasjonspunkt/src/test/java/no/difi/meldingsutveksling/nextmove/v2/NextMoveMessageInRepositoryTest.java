@@ -46,6 +46,9 @@ class NextMoveMessageInRepositoryTest {
         NextMoveInMessage message3 = target.save(getNextMoveMessage("M3", "C2"));
 
         assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
+                , 20)).containsOnly(message1.getId(), message2.getId(), message3.getId());
+
+        assertThat(target.findIdsForUnlockedMessages(new NextMoveInMessageQueryInput()
                         .setMessageId("M1")
                         .setConversationId("C1")
                 , 20)).containsOnly(message1.getId());
