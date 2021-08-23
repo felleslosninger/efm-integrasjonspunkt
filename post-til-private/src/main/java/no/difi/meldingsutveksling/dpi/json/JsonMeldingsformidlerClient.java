@@ -49,7 +49,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
 
         @Override
         public void confirmReceipt() {
-            dpiClient.markAsRead(UUID.fromString(getId()));
+            dpiClient.markAsRead(UUID.fromString(SBDUtil.getMessageId(receivedMessage.getStandardBusinessDocument())));
         }
 
         @Override
