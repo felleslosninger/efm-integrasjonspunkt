@@ -11,6 +11,8 @@ import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.status.DpiReceiptService;
+import no.difi.meldingsutveksling.status.DpiStatusPolling;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.digdir.dpi.client.DpiClient;
 import no.digdir.dpi.client.DpiClientConfig;
@@ -30,6 +32,18 @@ import java.time.Clock;
         DpiConfig.Json.class
 })
 public class DpiConfig {
+
+    @Bean
+    public DpiStatusPolling dpiStatusPolling(IntegrasjonspunktProperties properties, DpiReceiptService dpiReceiptService) {
+        return new DpiStatusPolling(properties, dpiReceiptService);
+    }
+
+    @Bean
+    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties properties,
+                                               MeldingsformidlerClient meldingsformidlerClient,
+                                               ConversationService conversationService) {
+        return new DpiReceiptService(properties, meldingsformidlerClient, conversationService);
+    }
 
     @Order
     @Bean

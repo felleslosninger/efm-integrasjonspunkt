@@ -62,7 +62,7 @@ public class ShipmentFactory {
     }
 
     private MetadataDocument toDpiClientMetadataDocument(no.difi.meldingsutveksling.dpi.MetadataDocument in) {
-        if(in == null) {
+        if (in == null) {
             return null;
         }
         return new no.digdir.dpi.client.domain.MetadataDocument()
@@ -142,7 +142,6 @@ public class ShipmentFactory {
                 .setEpostadresse(request.getEmailAddress())
                 .setVarslingstekst(request.getEmailVarslingstekst())
                 .setRepetisjoner(Arrays.asList(0, 7))
-                .setSpraak(request.getLanguage())
                 : null;
     }
 
@@ -152,7 +151,6 @@ public class ShipmentFactory {
                 .setMobiltelefonnummer(request.getMobileNumber())
                 .setVarslingstekst(request.getSmsVarslingstekst())
                 .setRepetisjoner(Arrays.asList(0, 7))
-                .setSpraak(request.getLanguage())
                 : null;
     }
 

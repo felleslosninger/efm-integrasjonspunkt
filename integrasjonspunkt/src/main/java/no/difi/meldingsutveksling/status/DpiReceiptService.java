@@ -7,14 +7,12 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.util.concurrent.CompletableFuture;
 
-@Component
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class DpiReceiptService {
 
     private final IntegrasjonspunktProperties properties;
