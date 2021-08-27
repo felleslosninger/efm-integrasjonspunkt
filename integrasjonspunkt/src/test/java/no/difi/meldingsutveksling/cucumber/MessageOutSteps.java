@@ -118,7 +118,6 @@ public class MessageOutSteps {
     public void theSentMessagesSbdIs(String expectedSBD) {
         JsonContent<StandardBusinessDocument> actual = json.write(messageSentHolder.get().getSbd());
         assertThat(actual)
-//                .withFailMessage(actual.getJson())
                 .isStrictlyEqualToJson(expectedSBD);
     }
 

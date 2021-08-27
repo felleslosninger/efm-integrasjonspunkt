@@ -128,9 +128,8 @@ public class ShipmentFactory {
                 .setSikkerhetsnivaa(request.getSecurityLevel())
                 .setVirkningstidspunkt(request.getVirkningsdato())
                 .setAapningskvittering(request.isAapningskvittering())
-                .setIkkesensitivtittel(new Ikkesensitivtittel()
-                        .setTittel(request.getSubject())
-                        .setSpraak(request.getLanguage()))
+                .setIkkesensitivtittel(request.getSubject())
+                .setSpraak(request.getLanguage())
                 .setVarsler(new Varsler()
                         .setSmsvarsel(getSmsvarsel(request))
                         .setEpostvarsel(getEpostvarsel(request)));

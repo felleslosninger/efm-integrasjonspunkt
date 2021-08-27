@@ -1,4 +1,5 @@
-Feature: Sending a Next Move DPI message (JSON)
+@New
+Feature: Sending a Next Move DPI digital message (JSON)
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/09118532322?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
@@ -179,7 +180,7 @@ Feature: Sending a Next Move DPI message (JSON)
           }
         } ],
         "documentIdentification" : {
-          "standard" : "urn:fdc:digdir.no:2020:innbyggerpost:xsd:digital::digital##urn:fdc:digdir.no:2020:innbyggerpost:schema:digital::1.0",
+          "standard" : "urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:digital::1.0",
           "typeVersion" : "1.0",
           "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
           "type" : "digital",
@@ -216,10 +217,8 @@ Feature: Sending a Next Move DPI message (JSON)
         "sikkerhetsnivaa" : 3,
         "virkningstidspunkt" : "2019-05-11T22:00:00Z",
         "aapningskvittering" : false,
-        "ikkesensitivtittel" : {
-          "tittel" : "Min supertittel",
-          "spraak" : "NO"
-        },
+        "ikkesensitivtittel" : "Min supertittel",
+        "spraak" : "NO",
         "varsler" : { }
       }
     }

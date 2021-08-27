@@ -23,7 +23,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 @Configuration
@@ -31,8 +30,6 @@ import java.util.List;
 @EnableOAuth2Client
 @RequiredArgsConstructor
 public class OauthRestTemplateConfig {
-
-    private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
 
     private static final String SCOPE_DPO = "move/dpo.read";
     private static final String SCOPE_DPE = "move/dpe.read";
@@ -55,7 +52,7 @@ public class OauthRestTemplateConfig {
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
                 !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
-                        props.getOidc().getClientId() : CLIENT_ID_PREFIX+props.getOrg().getNumber(),
+                        props.getOidc().getClientId() : props.getOidc().getClientIdPrefix() + props.getOrg().getNumber(),
                 props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 getCurrentScopes(),
