@@ -29,7 +29,7 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b921",
+                "instanceIdentifier": "60b9da9f-c056-430a-936b-3922721086fd",
                 "standard": "urn:no:difi:digitalpost:xsd:fysisk::print",
                 "type": "print",
                 "typeVersion": "2.0"
@@ -198,7 +198,7 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
         "businessScope" : {
           "scope" : [ {
             "type" : "ConversationId",
-            "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
+            "instanceIdentifier" : "60b9da9f-c056-430a-936b-3922721086fd",
             "identifier" : "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:utskrift:ver1.0",
             "scopeInformation" : [ {
               "expectedResponseDateTime" : "2019-05-09T23:31:52Z"

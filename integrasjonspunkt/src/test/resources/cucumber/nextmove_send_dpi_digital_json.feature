@@ -1,4 +1,3 @@
-@New
 Feature: Sending a Next Move DPI digital message (JSON)
 
   Background:

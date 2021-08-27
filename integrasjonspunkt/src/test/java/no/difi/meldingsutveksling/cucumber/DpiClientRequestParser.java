@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.nimbusds.jose.Payload;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +74,7 @@ public class DpiClientRequestParser {
         assertThat(jwtFileItem.getContentType()).isEqualTo("application/jwt");
         assertThat(jwtFileItem.getName()).isEqualTo("sbd.jwt");
         String jwt = new String(jwtFileItem.get(), StandardCharsets.UTF_8);
-        Payload payload = unpackJWT.getPayload(jwt);
+        String payload = unpackJWT.getPayload(jwt);
         return unpackStandardBusinessDocument.unpackStandardBusinessDocument(payload);
     }
 
