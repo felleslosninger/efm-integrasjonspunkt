@@ -7,6 +7,7 @@ import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
 import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -49,6 +50,7 @@ public class OauthRestTemplateConfig {
 
     @SneakyThrows
     @Bean
+    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "true")
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
                 !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
@@ -63,26 +65,33 @@ public class OauthRestTemplateConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "false")
+    public RestOperations restTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
+        RestTemplate rt = new RestTemplate(requestFactory);
+        metricsRestTemplateCustomizer.customize(rt);
+        return rt;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "true")
     public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
 
-        if (props.getOidc().isEnable()) {
-            DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
-            BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
-            resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
-            resource.setScope(getCurrentScopes());
-            resource.setClientId(props.getOidc().getClientId());
+        DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
+        BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+        resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
+        resource.setScope(getCurrentScopes());
+        resource.setClientId(props.getOidc().getClientId());
 
-            OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
-            rt.setRequestFactory(requestFactory);
-            rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
-            rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
-            metricsRestTemplateCustomizer.customize(rt);
-            return rt;
-        }
-        RestTemplate rt = new RestTemplate(requestFactory);
+        OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
+        rt.setRequestFactory(requestFactory);
+        rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
+        rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
         metricsRestTemplateCustomizer.customize(rt);
         return rt;
     }
