@@ -13,8 +13,6 @@ import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
 import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.stereotype.Component
-import java.time.OffsetDateTime
-import javax.xml.datatype.XMLGregorianCalendar
 
 @Component
 class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: CorrespondenceAgencyMessageFactory,
@@ -35,20 +33,15 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
         }
     }
 
-    private fun XMLGregorianCalendar.offsetDateTime(): OffsetDateTime {
-        return this.toGregorianCalendar().toZonedDateTime().toOffsetDateTime()
-    }
-
     private fun updateStatus(c: Conversation, status: StatusV2) {
         log.debug(markerFrom(c), "Checking status for message [id=${c.messageId}, conversationId=${c.conversationId}]")
         status.statusChanges.value.statusChangeV2.forEach {
-            val statusDate = it.statusDate.offsetDateTime()
             val mappedStatus = when (it.statusType.value()) {
                 CorrespondenceStatusTypeV2.CREATED.value() -> LEVERT
                 CorrespondenceStatusTypeV2.READ.value() -> LEST
                 else -> ANNET
             }
-            conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(mappedStatus, statusDate))
+            conversationService.registerStatus(c, messageStatusFactory.getMessageStatus(mappedStatus))
         }
     }
 
