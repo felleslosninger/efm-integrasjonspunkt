@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -15,6 +16,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +78,7 @@ public class DefaultConversationService implements ConversationService {
     @SuppressWarnings("squid:S2250")
     @Transactional
     public Conversation registerStatus(Conversation conversation, @NotNull MessageStatus status) {
+        MDC.put(NextMoveConsts.CORRELATION_ID, conversation.getMessageId());
         if (conversation.hasStatus(status)) {
             return conversation;
         }
