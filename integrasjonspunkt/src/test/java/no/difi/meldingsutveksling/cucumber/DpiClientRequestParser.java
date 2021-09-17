@@ -64,14 +64,14 @@ public class DpiClientRequestParser {
     }
 
     private List<Attachment> getAttachments(Map<String, FileItem> fileItems, PrivateKey privateKey) throws IOException {
-        FileItem cmsFileItem = fileItems.get("cms");
+        FileItem cmsFileItem = fileItems.get("dokumentpakke");
         assertThat(cmsFileItem.getContentType()).isEqualTo("application/cms");
         assertThat(cmsFileItem.getName()).isEqualTo("asic.cms");
         return getAttachments(cmsUtil.decryptCMSStreamed(cmsFileItem.getInputStream(), privateKey));
     }
 
     private StandardBusinessDocument getStandardBusinessDocument(Map<String, FileItem> fileItems) {
-        FileItem jwtFileItem = fileItems.get("sbd");
+        FileItem jwtFileItem = fileItems.get("forretningsmelding");
         assertThat(jwtFileItem.getContentType()).isEqualTo("application/jwt");
         assertThat(jwtFileItem.getName()).isEqualTo("sbd.jwt");
         String jwt = new String(jwtFileItem.get(), StandardCharsets.UTF_8);

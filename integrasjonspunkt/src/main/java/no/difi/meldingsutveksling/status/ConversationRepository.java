@@ -52,6 +52,9 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     List<Conversation> findByConversationId(String conversationId);
 
     @EntityGraph(value = "Conversation.messageStatuses")
+    Optional<Conversation> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
+
+    @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByMessageId(String messageId);
 
     @EntityGraph(value = "Conversation.messageStatuses")

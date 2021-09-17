@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Maps;
 import lombok.*;
+import no.difi.meldingsutveksling.validation.PartitionId;
 
 import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,6 +16,7 @@ import java.util.Map;
 @XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
 public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> implements DpiMessage {
 
+    @PartitionId
     private String avsenderId;
     private String fakturaReferanse;
     @Valid

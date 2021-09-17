@@ -103,7 +103,7 @@ public class DefaultConversationService implements ConversationService {
         }
 
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
-                conversation.getMessageId()),
+                        conversation.getMessageId()),
                 MessageStatusMarker.from(status));
         repo.save(conversation);
         webhookPublisher.publish(conversation, status);
@@ -217,5 +217,11 @@ public class DefaultConversationService implements ConversationService {
         webhookPublisher.publish(c, ms);
         statusQueue.enqueueStatus(ms, c);
         return c;
+    }
+
+    @NotNull
+    @Override
+    public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection direction) {
+        return repo.findByConversationIdAndDirection(conversationId, direction);
     }
 }

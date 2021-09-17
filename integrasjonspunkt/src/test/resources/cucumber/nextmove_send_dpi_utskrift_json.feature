@@ -191,14 +191,14 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
         "documentIdentification" : {
           "standard" : "urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:utskrift::1.0",
           "typeVersion" : "1.0",
-          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
+          "instanceIdentifier" : "60b9da9f-c056-430a-936b-3922721086fd",
           "type" : "utskrift",
           "creationDateAndTime" : "2019-03-25T11:38:23Z"
         },
         "businessScope" : {
           "scope" : [ {
             "type" : "ConversationId",
-            "instanceIdentifier" : "60b9da9f-c056-430a-936b-3922721086fd",
+            "instanceIdentifier" : "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
             "identifier" : "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:utskrift:ver1.0",
             "scopeInformation" : [ {
               "expectedResponseDateTime" : "2019-05-09T23:31:52Z"
@@ -257,7 +257,6 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
     """
     <?xml version="1.0" encoding="UTF-8"?>
     <manifest xmlns="http://begrep.difi.no/sdp/schema_v10">
-        <mottaker/>
         <avsender>
             <organisasjon authority="iso6523-actorid-upis">0192:910077473</organisasjon>
             <avsenderidentifikator>avsender910077473</avsenderidentifikator>

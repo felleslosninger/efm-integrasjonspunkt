@@ -28,11 +28,12 @@ public class ShipmentFactory {
         return new Shipment()
                 .setSenderOrganizationIdentifier(getPartnerIdentification(request.getSenderOrgnumber()))
                 .setReceiverOrganizationIdentifier(getPartnerIdentification(request.getOrgnrPostkasse()))
+                .setMessageId(request.getMessageId())
                 .setConversationId(request.getConversationId())
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(getParcel(request))
-                .setReceiverBusinessCertificate(BusinessCertificate.fraByteArray(request.getCertificate()))
+                .setReceiverBusinessCertificate(BusinessCertificate.of(request.getCertificate()))
                 .setLanguage(request.getLanguage());
     }
 

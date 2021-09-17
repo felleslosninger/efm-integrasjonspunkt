@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.time.Clock;
@@ -39,10 +40,10 @@ public class DpiConfig {
     }
 
     @Bean
-    public DpiReceiptService dpiReceiptService(IntegrasjonspunktProperties properties,
-                                               MeldingsformidlerClient meldingsformidlerClient,
-                                               ConversationService conversationService) {
-        return new DpiReceiptService(properties, meldingsformidlerClient, conversationService);
+    public DpiReceiptService dpiReceiptService(MeldingsformidlerClient meldingsformidlerClient,
+                                               ConversationService conversationService,
+                                               SchedulingTaskExecutor dpiReceiptExecutor) {
+        return new DpiReceiptService(meldingsformidlerClient, conversationService, dpiReceiptExecutor);
     }
 
     @Order
@@ -77,7 +78,7 @@ public class DpiConfig {
                                                                DpiReceiptMapper dpiReceiptMapper,
                                                                ClientInterceptor metricsEndpointInterceptor,
                                                                MetadataDocumentConverter metadataDocumentConverter) {
-            return new XmlSoapMeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
+            return new XmlSoapMeldingsformidlerClient(properties, sikkerDigitalPostKlientFactory,
                     forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor, metadataDocumentConverter);
         }
 
@@ -107,10 +108,11 @@ public class DpiConfig {
     public static class Json {
 
         @Bean
-        public MeldingsformidlerClient meldingsformidlerClient(DpiClient dpiClient,
+        public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
+                                                               DpiClient dpiClient,
                                                                ShipmentFactory shipmentFactory,
                                                                JsonDpiReceiptMapper dpiReceiptMapper) {
-            return new JsonMeldingsformidlerClient(dpiClient, shipmentFactory, dpiReceiptMapper);
+            return new JsonMeldingsformidlerClient(properties, dpiClient, shipmentFactory, dpiReceiptMapper);
         }
 
         @Bean

@@ -22,6 +22,7 @@ public class MeldingsformidlerRequest {
     String onBehalfOfOrgnumber;
     String avsenderIdentifikator;
     String fakturaReferanse;
+    String messageId;
     String conversationId;
     OffsetDateTime expectedResponseDateTime;
 

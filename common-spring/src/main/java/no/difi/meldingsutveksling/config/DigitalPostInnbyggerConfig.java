@@ -13,6 +13,7 @@ import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 public class DigitalPostInnbyggerConfig {
@@ -28,9 +29,19 @@ public class DigitalPostInnbyggerConfig {
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
+     *
+     * @see no.difi.meldingsutveksling.dpi.xmlsoap.XmlSoapMeldingsformidlerClient#getPartitionIds()
      */
     @NotNull
     private String mpcId;
+
+    /**
+     * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
+     * This is to avoid reading receipts from other applications that use the same service
+     *
+     * @see no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient#getPartitionIds()
+     */
+    private List<String> partitionIds;
 
     /**
      * The number of concurrent message partition channels (MPCs) to send messages to and consume receipts from.
@@ -43,6 +54,7 @@ public class DigitalPostInnbyggerConfig {
      */
     @NotNull
     private Integer mpcConcurrency;
+
 
     @NotNull
     private String language;

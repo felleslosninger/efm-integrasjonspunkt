@@ -1,10 +1,16 @@
 package no.difi.meldingsutveksling.dpi;
 
 import no.difi.meldingsutveksling.status.ExternalReceipt;
-import reactor.core.publisher.Flux;
+
+import java.util.Collection;
+import java.util.function.Consumer;
 
 public interface MeldingsformidlerClient {
+    Collection<String> getPartitionIds();
+
+    boolean shouldValidatePartitionId();
+
     void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException;
 
-    Flux<ExternalReceipt> sjekkEtterKvitteringer(String orgnr, String mpcId);
+    void sjekkEtterKvitteringer(String partitionId, Consumer<ExternalReceipt> callback);
 }

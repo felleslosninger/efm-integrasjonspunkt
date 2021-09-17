@@ -8,7 +8,6 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -41,7 +40,7 @@ public class AsyncConfig implements AsyncConfigurer {
     }
 
     @Bean
-    public Executor dpiReceiptExecutor() {
+    public ThreadPoolTaskExecutor dpiReceiptExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(props.getDpi().getMpcConcurrency());
         executor.setMaxPoolSize(props.getDpi().getMpcConcurrency());

@@ -1,10 +1,13 @@
 package no.difi.meldingsutveksling.dpi.xmlsoap;
 
+import com.google.common.collect.ImmutableList;
+import io.micrometer.core.annotation.Timed;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ResourceUtils;
-import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
@@ -20,34 +23,53 @@ import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import reactor.core.publisher.Flux;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
 
 @Slf4j
 @RequiredArgsConstructor
 public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
 
-    private final DigitalPostInnbyggerConfig config;
+    private final IntegrasjonspunktProperties properties;
     private final SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
     private final ForsendelseHandlerFactory forsendelseHandlerFactory;
     private final DpiReceiptMapper dpiReceiptMapper;
     private final ClientInterceptor metricsEndpointInterceptor;
     private final MetadataDocumentConverter metadataDocumentConverter;
+    @Getter(lazy = true) private final List<String> partitionIds = createPartitionIds();
+
+    private List<String> createPartitionIds() {
+        int mpcConcurrency = properties.getDpi().getMpcConcurrency();
+
+        if (mpcConcurrency > 1) {
+            return IntStream.range(0, mpcConcurrency)
+                    .mapToObj(p -> properties.getDpi().getMpcId() + "-" + p)
+                    .collect(collectingAndThen(toList(), ImmutableList::copyOf));
+        } else {
+            return Collections.singletonList(properties.getDpi().getMpcId());
+        }
+    }
 
     private String nextMpcId() {
-        if (config.getMpcConcurrency() > 1) {
-            int i = ThreadLocalRandom
-                    .current()
-                    .nextInt(0, config.getMpcConcurrency());
-            return config.getMpcId() + "-" + i;
-        }
-        return config.getMpcId();
+        List<String> ids = getPartitionIds();
+        int index = ids.size() == 1
+                ? 0
+                : ThreadLocalRandom.current().nextInt(0, ids.size());
+        return ids.get(index);
+    }
+
+    @Override
+    public boolean shouldValidatePartitionId() {
+        return false;
     }
 
     @Override
@@ -86,21 +108,21 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
     }
 
     private Prioritet getPrioritet() {
-        if (config.getPriority() == Priority.PRIORITERT) {
+        if (properties.getDpi().getPriority() == Priority.PRIORITERT) {
             return Prioritet.PRIORITERT;
         }
         return Prioritet.NORMAL;
     }
 
     private List<Dokument> toVedlegg(List<Document> attachements) {
-        return attachements.stream().map(this::dokumentFromDocument).collect(Collectors.toList());
+        return attachements.stream().map(this::dokumentFromDocument).collect(toList());
     }
 
     private Dokument dokumentFromDocument(Document document) {
         Dokument.Builder builder = Dokument.builder(
-                document.getTitle(),
-                document.getFilename(),
-                ResourceUtils.toByteArray(document.getResource()))
+                        document.getTitle(),
+                        document.getFilename(),
+                        ResourceUtils.toByteArray(document.getResource()))
                 .mimeType(document.getMimeType());
         if (document.getMetadataDocument() != null) {
             builder.metadataDocument(metadataDocumentConverter.toMetadataDokument(document.getMetadataDocument()));
@@ -108,8 +130,15 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
         return builder.build();
     }
 
+    @Timed
     @Override
-    public Flux<ExternalReceipt> sjekkEtterKvitteringer(String orgnr, String mpcId) {
+    public void sjekkEtterKvitteringer(String mpcId, Consumer<ExternalReceipt> callback) {
+        sjekkEtterKvitteringer(properties.getOrg().getNumber(), mpcId)
+                .toStream()
+                .forEach(callback);
+    }
+
+    private Flux<ExternalReceipt> sjekkEtterKvitteringer(String orgnr, String mpcId) {
 
         AtomicReference<String> rawReceipt = new AtomicReference<>();
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(rawReceipt::set);
@@ -185,13 +214,13 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
         }
 
         @Override
-        public String getId() {
+        public String getConversationId() {
             return eksternKvittering.getKonversasjonsId();
         }
 
         @Override
         public LogstashMarker logMarkers() {
-            return conversationIdMarker(getId());
+            return conversationIdMarker(getConversationId());
         }
 
         @Override

@@ -188,7 +188,7 @@ Feature: Sending a Next Move DPI digital message (JSON)
         "businessScope" : {
           "scope" : [ {
             "type" : "ConversationId",
-            "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b921",
+            "instanceIdentifier" : "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
             "identifier" : "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:digital:ver1.0",
             "scopeInformation" : [ {
               "expectedResponseDateTime" : "2019-05-09T23:31:52Z"

@@ -18,4 +18,5 @@ interface ConversationService {
     fun registerConversation(message: MessageInformable, vararg statuses: ReceiptStatus): Conversation
     fun registerConversation(sbd: StandardBusinessDocument, si: ServiceIdentifier, direction: ConversationDirection, vararg statuses: ReceiptStatus): Conversation
     fun findConversation(messageId: String): Optional<Conversation>
+    fun findConversation(conversationId: String, direction: ConversationDirection): Optional<Conversation>
 }
