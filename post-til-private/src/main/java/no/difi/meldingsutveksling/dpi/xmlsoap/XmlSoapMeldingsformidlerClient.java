@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.dpi.xmlsoap;
 
-import com.google.common.collect.ImmutableList;
 import io.micrometer.core.annotation.Timed;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
@@ -23,15 +21,12 @@ import no.difi.sdp.client2.domain.kvittering.KvitteringForespoersel;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import reactor.core.publisher.Flux;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static no.difi.meldingsutveksling.logging.MarkerFactory.conversationIdMarker;
 
@@ -45,30 +40,9 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
     private final DpiReceiptMapper dpiReceiptMapper;
     private final ClientInterceptor metricsEndpointInterceptor;
     private final MetadataDocumentConverter metadataDocumentConverter;
-    @Getter(lazy = true) private final List<String> partitionIds = createPartitionIds();
-
-    private List<String> createPartitionIds() {
-        int mpcConcurrency = properties.getDpi().getMpcConcurrency();
-
-        if (mpcConcurrency > 1) {
-            return IntStream.range(0, mpcConcurrency)
-                    .mapToObj(p -> properties.getDpi().getMpcId() + "-" + p)
-                    .collect(collectingAndThen(toList(), ImmutableList::copyOf));
-        } else {
-            return Collections.singletonList(properties.getDpi().getMpcId());
-        }
-    }
-
-    private String nextMpcId() {
-        List<String> ids = getPartitionIds();
-        int index = ids.size() == 1
-                ? 0
-                : ThreadLocalRandom.current().nextInt(0, ids.size());
-        return ids.get(index);
-    }
 
     @Override
-    public boolean shouldValidatePartitionId() {
+    public boolean skalPolleMeldingStatus() {
         return false;
     }
 
@@ -88,7 +62,7 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
                 .handle(request, getDokumentpakke(request));
 
         return forsendelseBuilder.konversasjonsId(request.getConversationId())
-                .mpcId(nextMpcId())
+                .mpcId(request.getMpcId())
                 .spraakkode(request.getLanguage())
                 .prioritet(getPrioritet()).build();
     }
@@ -132,10 +106,15 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
 
     @Timed
     @Override
-    public void sjekkEtterKvitteringer(String mpcId, Consumer<ExternalReceipt> callback) {
+    public void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback) {
         sjekkEtterKvitteringer(properties.getOrg().getNumber(), mpcId)
                 .toStream()
                 .forEach(callback);
+    }
+
+    @Override
+    public Stream<MessageStatus> hentMeldingStatusListe(String messageId) {
+        return Stream.empty();
     }
 
     private Flux<ExternalReceipt> sjekkEtterKvitteringer(String orgnr, String mpcId) {

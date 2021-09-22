@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.dpi.MetadataDocument;
 import no.difi.meldingsutveksling.nextmove.v2.CryptoMessageResource;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.status.MpcIdHolder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,7 @@ public class MeldingsformidlerRequestFactory {
     private final IntegrasjonspunktProperties properties;
     private final Clock clock;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
+    private final MpcIdHolder mpcIdHolder;
 
     public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
@@ -41,6 +43,7 @@ public class MeldingsformidlerRequestFactory {
                 .onBehalfOfOrgnumber(SBDUtil.getOnBehalfOfOrgNr(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
+                .mpcId(mpcIdHolder.getNextMpcId())
                 .expectedResponseDateTime(StandardBusinessDocumentUtils.getExpectedResponseDateTime(nextMoveMessage.getSbd()).orElse(null))
                 .postkasseAdresse(serviceRecord.getPostkasseAdresse())
                 .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))

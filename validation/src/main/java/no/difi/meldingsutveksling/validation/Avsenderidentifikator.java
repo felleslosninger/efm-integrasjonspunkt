@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = {})
 @Target({FIELD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
-public @interface PartitionId {
+public @interface Avsenderidentifikator {
 
     String message() default "{no.difi.meldingsutveksling.validation.PartitionId}";
 

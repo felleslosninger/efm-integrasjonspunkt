@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
 import com.google.common.collect.Sets;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
@@ -11,24 +12,27 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
@@ -45,9 +49,22 @@ public class DefaultConversationService implements ConversationService {
     private final IpMailSender ipMailSender;
     private final Clock clock;
     private final StatusQueue statusQueue;
+    private final ObjectProvider<MeldingsformidlerClient> meldingsformidlerClientObjectProvider;
+    @Getter(lazy = true) private final Set<ServiceIdentifier> pollables = createrPollables();
 
-    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
+
+    private Set<ServiceIdentifier> createrPollables() {
+        Set<ServiceIdentifier> serviceIdentifiers = new HashSet<>();
+        serviceIdentifiers.add(DPV);
+        serviceIdentifiers.add(DPF);
+
+        Optional.ofNullable(meldingsformidlerClientObjectProvider.getIfAvailable())
+                .filter(MeldingsformidlerClient::skalPolleMeldingStatus)
+                .ifPresent(p -> serviceIdentifiers.add(DPI));
+
+        return Collections.unmodifiableSet(serviceIdentifiers);
+    }
 
     @NotNull
     @Transactional
@@ -130,7 +147,7 @@ public class DefaultConversationService implements ConversationService {
         Conversation conversation = status.getConversation();
         return conversation.getDirection() == ConversationDirection.OUTGOING &&
                 ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                POLLABLES.contains(conversation.getServiceIdentifier());
+                getPollables().contains(conversation.getServiceIdentifier());
     }
 
     @NotNull

@@ -5,13 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
-import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,27 +15,18 @@ public class DpiReceiptService {
 
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
-    private final SchedulingTaskExecutor dpiReceiptExecutor;
+    private final AvsenderindikatorHolder avsenderindikatorHolder;
 
-    public void handleReceipts() throws ExecutionException, InterruptedException {
-        List<Future<?>> futures = meldingsformidlerClient.getPartitionIds()
-                .stream()
-                .map(this::submitHandleReceipts)
-                .collect(Collectors.toList());
+    public void handleReceipts(String mpcId) {
+        Set<String> avsenderindikatorListe = avsenderindikatorHolder.getAvsenderindikatorListe();
 
-        for (Future<?> future : futures) {
-            // Waits for the async handleReceipts to complete in order to avoid the schedule to fire again and cause
-            // concurrent consumption of the MPC(s).
-            future.get();
+        if (avsenderindikatorListe.isEmpty()) {
+            meldingsformidlerClient.sjekkEtterKvitteringer(null, mpcId, this::handleReceipt);
+
+        } else {
+            avsenderindikatorListe.forEach(avsenderindikator ->
+                    meldingsformidlerClient.sjekkEtterKvitteringer(avsenderindikator, mpcId, this::handleReceipt));
         }
-    }
-
-    private Future<?> submitHandleReceipts(String partitionId) {
-        return dpiReceiptExecutor.submit(() -> handleReceipts(partitionId));
-    }
-
-    private void handleReceipts(String mpcId) {
-        meldingsformidlerClient.sjekkEtterKvitteringer(mpcId, this::handleReceipt);
     }
 
     @Transactional

@@ -29,8 +29,6 @@ public class DigitalPostInnbyggerConfig {
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
-     *
-     * @see no.difi.meldingsutveksling.dpi.xmlsoap.XmlSoapMeldingsformidlerClient#getPartitionIds()
      */
     @NotNull
     private String mpcId;
@@ -38,10 +36,8 @@ public class DigitalPostInnbyggerConfig {
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
-     *
-     * @see no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient#getPartitionIds()
      */
-    private List<String> partitionIds;
+    private List<String> avsenderindikatorListe;
 
     /**
      * The number of concurrent message partition channels (MPCs) to send messages to and consume receipts from.
