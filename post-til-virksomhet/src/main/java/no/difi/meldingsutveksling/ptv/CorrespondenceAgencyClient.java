@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Used to send messages to Altinn InsertCorrespondence. InsertCorrespondence is used to send information to private companies.
@@ -96,7 +97,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     }
 
     private PoolingHttpClientConnectionManager getConnectionManager() {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(3, TimeUnit.SECONDS);
         cm.setMaxTotal(18);
         cm.setDefaultMaxPerRoute(6);
         return cm;
@@ -104,9 +105,9 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
     private RequestConfig getRequestConfig() {
         return RequestConfig.custom()
-                .setSocketTimeout(30000)
-                .setConnectTimeout(30000)
-                .setConnectionRequestTimeout(30000)
+                .setSocketTimeout(10000)
+                .setConnectTimeout(10000)
+                .setConnectionRequestTimeout(10000)
                 .setCircularRedirectsAllowed(true)
                 .setRedirectsEnabled(true)
                 .setRelativeRedirectsAllowed(true)
