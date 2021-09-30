@@ -162,7 +162,7 @@ public class IpMailSender {
     }
 
     private long getMessageSize(MimeMessage m) {
-        try (CountingOutputStream out = new CountingOutputStream(new NullOutputStream())) {
+        try (CountingOutputStream out = new CountingOutputStream(NullOutputStream.NULL_OUTPUT_STREAM)) {
             m.writeTo(out);
             return out.getByteCount() + 100L;
         } catch (IOException | MessagingException e) {
