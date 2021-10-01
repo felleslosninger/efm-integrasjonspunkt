@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +83,7 @@ public class ServiceRegistryClient {
         }
     }
 
-    @Cacheable(CacheConfig.CACHE_GET_SAS_KEY)
+    @Cacheable(value = CacheConfig.CACHE_GET_SAS_KEY, sync = true)
     public String getSasKey() {
         try {
             String sasKey = client.getResource("sastoken");

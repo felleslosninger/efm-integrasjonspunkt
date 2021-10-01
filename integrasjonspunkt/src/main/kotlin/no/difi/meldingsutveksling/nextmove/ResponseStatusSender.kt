@@ -37,7 +37,7 @@ open class ResponseStatusSenderProxy(
     private val sbdFactory: SBDFactory
 ) {
 
-    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000 * 60 * 10))
+    @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000 * 60 * 10L))
     open fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         sbdFactory.createStatusFrom(sbd, status)
             ?.let { NextMoveOutMessage.of(it, si) }

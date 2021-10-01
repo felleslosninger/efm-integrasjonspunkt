@@ -12,10 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -82,13 +80,12 @@ public class OauthRestTemplateConfig {
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
 
-        DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
         BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
         resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
         resource.setScope(getCurrentScopes());
         resource.setClientId(props.getOidc().getClientId());
 
-        OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
+        OAuth2RestTemplate rt = new SyncedOauth2RestTemplate(resource);
         rt.setRequestFactory(requestFactory);
         rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
         rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
