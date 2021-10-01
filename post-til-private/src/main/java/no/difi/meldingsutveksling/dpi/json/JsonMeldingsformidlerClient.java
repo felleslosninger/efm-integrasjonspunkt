@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.status.ExternalReceipt;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.digdir.dpi.client.DpiClient;
 import no.digdir.dpi.client.DpiException;
+import no.digdir.dpi.client.domain.GetMessagesInput;
 import no.digdir.dpi.client.domain.ReceivedMessage;
 import no.digdir.dpi.client.domain.Shipment;
 
@@ -49,7 +50,10 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     @Timed
     @Override
     public void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback) {
-        dpiClient.getMessages(avsenderidentifikator)
+        dpiClient.getMessages(new GetMessagesInput()
+                        .setSenderId(avsenderidentifikator)
+                        .setChannel(mpcId)
+                )
                 .map(JsonExternalReceipt::new)
                 .toStream()
                 .forEach(callback);

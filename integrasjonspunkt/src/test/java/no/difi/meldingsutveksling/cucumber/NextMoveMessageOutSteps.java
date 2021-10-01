@@ -145,7 +145,7 @@ public class NextMoveMessageOutSteps {
     public void iSendTheMessage() {
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity(null),
+                HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
                 SBDUtil.getMessageId(messageOutHolder.get().getSbd()));
         assertThat(response.getStatusCode())
@@ -157,7 +157,7 @@ public class NextMoveMessageOutSteps {
     public void iSendTheMessageAndGetTheFollowingErrorResponse(String body) {
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity(null),
+                HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
                 SBDUtil.getMessageId(messageOutHolder.get().getSbd()));
 

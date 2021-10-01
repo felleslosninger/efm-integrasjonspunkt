@@ -249,9 +249,9 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
     """
     And the sent message contains the following files:
       | filename         | content type |
+      | manifest.xml     |              |
       | arkivmelding.xml |              |
       | test.txt         |              |
-      | manifest.xml     |              |
 
     And the XML content of the file named "manifest.xml" is:
     """

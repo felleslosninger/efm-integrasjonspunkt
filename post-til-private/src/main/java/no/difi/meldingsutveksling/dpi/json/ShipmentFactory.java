@@ -30,6 +30,7 @@ public class ShipmentFactory {
                 .setReceiverOrganizationIdentifier(getPartnerIdentification(request.getOrgnrPostkasse()))
                 .setMessageId(request.getMessageId())
                 .setConversationId(request.getConversationId())
+                .setChannel(request.getMpcId())
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(getParcel(request))

@@ -36,7 +36,7 @@ public class DpiOutSteps {
                 )
         );
 
-        wireMockServer.givenThat(post(urlEqualTo("/dpi/send"))
+        wireMockServer.givenThat(post(urlEqualTo("/dpi/messages/out?kanal=KANAL"))
                 .willReturn(aResponse()
                         .withStatus(200)
                 )
@@ -52,7 +52,7 @@ public class DpiOutSteps {
     @Then("^a DPI message is sent to corner2$")
     @SneakyThrows
     public void aDpiMessageIsSentToCorner2() {
-        RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlEqualTo("/dpi/send"))
+        RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlEqualTo("/dpi/messages/out?kanal=KANAL"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, containing(MediaType.MULTIPART_FORM_DATA_VALUE));
 
         wireMockServer.verify(1, requestPatternBuilder);
