@@ -34,12 +34,6 @@ public class DigitalPostInnbyggerConfig {
     private String mpcId;
 
     /**
-     * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
-     * This is to avoid reading receipts from other applications that use the same service
-     */
-    private List<String> avsenderindikatorListe;
-
-    /**
      * The number of concurrent message partition channels (MPCs) to send messages to and consume receipts from.
      * An integer increment is postfixed to the MPC id if the MPC concurrency is greater than 1.
      * <p>
@@ -50,6 +44,17 @@ public class DigitalPostInnbyggerConfig {
      */
     @NotNull
     private Integer mpcConcurrency;
+
+    /**
+     *  This list overrides the mpcId + mpcConcurrency
+     */
+    private List<String> mpcIdListe;
+    /**
+     * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
+     * This is to avoid reading receipts from other applications that use the same service
+     */
+    private List<String> avsenderindikatorListe;
+
 
 
     @NotNull

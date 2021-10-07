@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.status;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 
 import java.util.Collections;
@@ -21,14 +22,20 @@ public class MpcIdHolder {
     @Getter(lazy = true) private final List<String> mpcIdList = fetchMpcIdList();
 
     private List<String> fetchMpcIdList() {
-        int mpcConcurrency = properties.getDpi().getMpcConcurrency();
+        DigitalPostInnbyggerConfig dpi = properties.getDpi();
+
+        if (dpi.getMpcIdListe() != null) {
+            return dpi.getMpcIdListe();
+        }
+
+        int mpcConcurrency = dpi.getMpcConcurrency();
 
         if (mpcConcurrency > 1) {
             return IntStream.range(0, mpcConcurrency)
-                    .mapToObj(p -> properties.getDpi().getMpcId() + "-" + p)
+                    .mapToObj(p -> dpi.getMpcId() + "-" + p)
                     .collect(collectingAndThen(toList(), ImmutableList::copyOf));
         } else {
-            return Collections.singletonList(properties.getDpi().getMpcId());
+            return Collections.singletonList(dpi.getMpcId());
         }
     }
 
