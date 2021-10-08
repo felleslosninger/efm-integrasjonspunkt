@@ -37,7 +37,7 @@ public class SvarInnService {
     private Stream<SvarInnStreamedFile> unzip(Forsendelse forsendelse, InputStream decrypted) {
         Map<String, String> mimeTypeMap = forsendelse.getFilmetadata()
                 .stream()
-                .collect(Collectors.toMap(p -> p.get("filnavn"), p -> p.get("mimetype")));
+                .collect(Collectors.toMap(Forsendelse.Filmetadata::getFilnavn, Forsendelse.Filmetadata::getMimetype));
 
         Iterator<SvarInnStreamedFile> sourceIterator = new Iterator<SvarInnStreamedFile>() {
 
