@@ -10,11 +10,11 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.status.ExternalReceipt;
 import no.difi.meldingsutveksling.status.MessageStatus;
-import no.digdir.dpi.client.DpiClient;
-import no.digdir.dpi.client.DpiException;
-import no.digdir.dpi.client.domain.GetMessagesInput;
-import no.digdir.dpi.client.domain.ReceivedMessage;
-import no.digdir.dpi.client.domain.Shipment;
+import no.difi.meldingsutveksling.dpi.client.DpiClient;
+import no.difi.meldingsutveksling.dpi.client.DpiException;
+import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
+import no.difi.meldingsutveksling.dpi.client.domain.ReceivedMessage;
+import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 
 import java.util.UUID;
 import java.util.function.Consumer;

@@ -1,0 +1,57 @@
+{
+  "standardBusinessDocument": {
+    "standardBusinessDocumentHeader": {
+      "headerVersion": "1.0",
+      "sender": [
+        {
+          "identifier": {
+            "authority": "iso6523-actorid-upis",
+            "value": "0192:987654321"
+          }
+        }
+      ],
+      "receiver": [
+        {
+          "identifier": {
+            "authority": "iso6523-actorid-upis",
+            "value": "0192:123456789"
+          }
+        }
+      ],
+      "documentIdentification": {
+        "standard": "urn:fdc:digdir.no:2020:innbyggerpost:xsd:feil::feil##urn:fdc:digdir.no:2020:innbyggerpost:schema:feil::1.0",
+        "typeVersion": "1.0",
+        "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+        "type": "feil",
+        "creationDateAndTime": "2021-04-11T13:29:58.753Z"
+      },
+      "businessScope": {
+        "scope": [
+          {
+            "type": "ConversationId",
+            "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+            "identifier": "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:feil:ver1.0"
+          }
+        ]
+      }
+    },
+    "digital": {
+      "avsender": {
+        "virksomhetsidentifikator": {
+          "authority": "iso6523-actorid-upis",
+          "value": "0192:999888999"
+        }
+      },
+      "mottaker": {
+        "virksomhetsidentifikator": {
+          "authority": "iso6523-actorid-upis",
+          "value": "0192:987654321"
+        },
+        "motakeridentifikator": "ola.nordmann#9YDT"
+      },
+      "maskinportentoken": "DummyMaskinportenToken",
+      "tidspunkt": "2021-01-01T07:00:00Z",
+      "feiltype": "SERVER"
+    }
+  }
+}

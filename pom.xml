@@ -61,6 +61,10 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <properties>
@@ -75,12 +79,11 @@
         <logback.version>1.2.3</logback.version>
 
         <sikker-digital-post-klient.version>5.10</sikker-digital-post-klient.version>
-        <efm-dpi-client.version>0.0.1-SNAPSHOT</efm-dpi-client.version>
 
         <powermock.version>2.0.0</powermock.version>
         <cucumber.version>2.3.1</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
-        <move-common.version>1.2.0-SNAPSHOT</move-common.version>
+        <move-common.version>1.2.1-SNAPSHOT</move-common.version>
         <lombok.version>1.18.16</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
@@ -110,6 +113,7 @@
         <module>domain</module>
         <module>altinn-client</module>
         <module>post-til-virksomhet</module>
+        <module>dpi-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
         <module>fiks-meldingsformidler</module>
@@ -191,6 +195,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>dpi-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+            <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>post-til-private</artifactId>
                 <version>${project.version}</version>
@@ -253,6 +262,11 @@
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>validation</artifactId>
+                <version>${move-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.move-common</groupId>
+                <artifactId>io</artifactId>
                 <version>${move-common.version}</version>
             </dependency>
 
@@ -464,6 +478,31 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>4.9</version>
+            </dependency>
+            <dependency>
+                <groupId>net.jimblackler</groupId>
+                <artifactId>jsonschemafriend</artifactId>
+                <version>0.11.2</version>
+            </dependency>
+
+            <!-- TEST -->
+            <dependency>
+                <groupId>io.github.arkinator</groupId>
+                <artifactId>mockserver-junit-jupiter</artifactId>
+                <version>5.11.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.json-unit</groupId>
+                <artifactId>json-unit-core</artifactId>
+                <version>2.26.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.json-unit</groupId>
+                <artifactId>json-unit-assertj</artifactId>
+                <version>2.26.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

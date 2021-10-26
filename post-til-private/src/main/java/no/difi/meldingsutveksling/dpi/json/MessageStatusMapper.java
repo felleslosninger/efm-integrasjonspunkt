@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.digdir.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
 
 @RequiredArgsConstructor
 public class MessageStatusMapper {
@@ -34,7 +34,7 @@ public class MessageStatusMapper {
         return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Ukjent kvittering");
     }
 
-    public MessageStatus getMessageStatus(no.digdir.dpi.client.domain.MessageStatus in) {
+    public MessageStatus getMessageStatus(no.difi.meldingsutveksling.dpi.client.domain.MessageStatus in) {
         switch (in.getStatus()) {
             case OPPRETTET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT, "Hjørne 2 ha mottatt meldingen");

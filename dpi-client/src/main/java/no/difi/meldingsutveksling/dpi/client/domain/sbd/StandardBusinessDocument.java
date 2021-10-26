@@ -1,0 +1,1 @@
+package no.difi.meldingsutveksling.dpi.client.domain.sbd;

@@ -30,7 +30,7 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
-import no.digdir.dpi.client.internal.CreateInstanceIdentifier;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;

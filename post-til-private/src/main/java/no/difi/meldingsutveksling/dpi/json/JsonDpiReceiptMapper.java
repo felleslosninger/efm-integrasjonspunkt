@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.status.MessageStatus;
-import no.digdir.dpi.client.domain.messagetypes.Kvittering;
-import no.digdir.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
 
 @RequiredArgsConstructor
 public class JsonDpiReceiptMapper {

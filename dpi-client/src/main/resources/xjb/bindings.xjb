@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings version="2.1"
+               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               xmlns:annox="http://annox.dev.java.net">
+
+    <jaxb:globalBindings generateElementProperty="false">
+        <jaxb:javaType name="java.time.ZonedDateTime" xmlType="xs:dateTime"
+                       printMethod="java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME.format"
+                       parseMethod="java.time.ZonedDateTime.parse"/>
+        <jaxb:javaType name="java.time.ZonedDateTime" xmlType="xs:time"
+                       printMethod="java.time.format.DateTimeFormatter.ISO_OFFSET_TIME.format"
+                       parseMethod="java.time.ZonedDateTime.parse"/>
+        <xjc:simple/>
+    </jaxb:globalBindings>
+
+    <jaxb:bindings schemaLocation="../xsd/sdp-manifest.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="no.difi.meldingsutveksling.dpi.client.sdp" />
+            <jaxb:nameXmlTransform>
+                <jaxb:typeName prefix="SDP"/>
+                <jaxb:anonymousTypeName prefix="SDP"/>
+            </jaxb:nameXmlTransform>
+        </jaxb:schemaBindings>
+
+        <jaxb:bindings node="//xs:complexType[@name='Manifest']">
+            <jaxb:class name="SDPManifest"/>
+            <annox:annotate>
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="manifest"/>
+            </annox:annotate>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

@@ -8,14 +8,14 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
-import no.digdir.dpi.client.domain.BusinessCertificate;
-import no.digdir.dpi.client.domain.MetadataDocument;
-import no.digdir.dpi.client.domain.Parcel;
-import no.digdir.dpi.client.domain.Shipment;
-import no.digdir.dpi.client.domain.messagetypes.BusinessMessage;
-import no.digdir.dpi.client.domain.messagetypes.Digital;
-import no.digdir.dpi.client.domain.messagetypes.Utskrift;
-import no.digdir.dpi.client.domain.sbd.*;
+import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
+import no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument;
+import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
+import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Utskrift;
+import no.difi.meldingsutveksling.dpi.client.domain.sbd.*;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -54,8 +54,8 @@ public class ShipmentFactory {
                         .collect(Collectors.toList()));
     }
 
-    private no.digdir.dpi.client.domain.Document toDpiClientDocument(Document in) {
-        return new no.digdir.dpi.client.domain.Document()
+    private no.difi.meldingsutveksling.dpi.client.domain.Document toDpiClientDocument(Document in) {
+        return new no.difi.meldingsutveksling.dpi.client.domain.Document()
                 .setTitle(in.getTitle())
                 .setFilename(in.getFilename())
                 .setMimeType(in.getMimeType())
@@ -67,7 +67,7 @@ public class ShipmentFactory {
         if (in == null) {
             return null;
         }
-        return new no.digdir.dpi.client.domain.MetadataDocument()
+        return new no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument()
                 .setFilename(in.getFilename())
                 .setMimeType(in.getMimeType())
                 .setResource(in.getResource());

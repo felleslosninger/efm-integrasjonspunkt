@@ -1,0 +1,22 @@
+package no.difi.meldingsutveksling.dpi.client.internal;
+
+import com.nimbusds.jose.Payload;
+import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class UnpackStandardBusinessDocument {
+
+    private final no.difi.meldingsutveksling.dpi.client.internal.JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator;
+    private final no.difi.meldingsutveksling.dpi.client.internal.DpiMapper dpiMapper;
+
+    public StandardBusinessDocument unpackStandardBusinessDocument(Payload payload) {
+        StandardBusinessDocument standardBusinessDocument = dpiMapper.readStandardBusinessDocument(payload.toString());
+        String type = StandardBusinessDocumentUtils.getType(standardBusinessDocument).orElse(null);
+        jsonDigitalPostSchemaValidator.validate(payload.toJSONObject(), type);
+        return standardBusinessDocument;
+    }
+}
