@@ -87,7 +87,7 @@
         <lombok.version>1.18.16</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
-        <kotlin.version>1.4.30</kotlin.version>
+        <kotlin.version>1.5.31</kotlin.version>
         <bouncycastle.version>1.67</bouncycastle.version>
         <dokka.skip>true</dokka.skip>
 
