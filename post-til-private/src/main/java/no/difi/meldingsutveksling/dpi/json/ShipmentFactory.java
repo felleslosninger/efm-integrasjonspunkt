@@ -4,10 +4,6 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.nextmove.PostAddress;
-import no.difi.meldingsutveksling.nextmove.PostalCategory;
-import no.difi.meldingsutveksling.nextmove.PrintColor;
-import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
 import no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
@@ -16,6 +12,10 @@ import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Utskrift;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.*;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.nextmove.PostalCategory;
+import no.difi.meldingsutveksling.nextmove.PrintColor;
+import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -111,15 +111,61 @@ public class ShipmentFactory {
     }
 
     private AdresseInformasjon getAddressInformation(PostAddress postAddress) {
-        return new AdresseInformasjon()
+        AdresseInformasjon adresseInformasjon = new AdresseInformasjon()
                 .setNavn(postAddress.getNavn())
                 .setAdresselinje1(postAddress.getAdresselinje1())
                 .setAdresselinje2(postAddress.getAdresselinje2())
                 .setAdresselinje3(postAddress.getAdresselinje3())
-                .setAdresselinje4(postAddress.getAdresselinje4())
-                .setPostnummer(postAddress.getPostnummer())
-                .setPoststed(postAddress.getPoststed())
+                .setAdresselinje4(postAddress.getAdresselinje4());
+
+        if (isNorway(postAddress)) {
+            return adresseInformasjon
+                    .setPostnummer(postAddress.getPostnummer())
+                    .setPoststed(postAddress.getPoststed());
+        }
+
+        getPostal(postAddress).ifPresent(postal -> {
+            if (StringUtils.hasText(adresseInformasjon.getAdresselinje2())) {
+                if (StringUtils.hasText(adresseInformasjon.getAdresselinje3())) {
+                    if (StringUtils.hasText(adresseInformasjon.getAdresselinje4())) {
+                        adresseInformasjon.setAdresselinje4(adresseInformasjon.getAdresselinje4() + " " + postal);
+                    } else {
+                        adresseInformasjon.setAdresselinje4(postal);
+                    }
+                } else {
+                    adresseInformasjon.setAdresselinje3(postal);
+                }
+            } else {
+                adresseInformasjon.setAdresselinje2(postal);
+            }
+        });
+
+        return adresseInformasjon
                 .setLand(postAddress.getLand());
+    }
+
+    private Optional<String> getPostal(PostAddress postAddress) {
+        if (StringUtils.hasText(postAddress.getPostnummer())) {
+            if (StringUtils.hasText(postAddress.getPoststed())) {
+                return Optional.ofNullable(String.format("%s %s", postAddress.getPostnummer(), postAddress.getPoststed()));
+            }
+
+            return Optional.of(postAddress.getPostnummer());
+        }
+
+        if (StringUtils.hasText(postAddress.getPoststed())) {
+            return Optional.ofNullable(postAddress.getPoststed());
+        }
+
+        return Optional.empty();
+    }
+
+    private boolean isNorway(PostAddress postAddress) {
+        if (StringUtils.hasText(postAddress.getLand())) {
+            return "Norway".equalsIgnoreCase(postAddress.getLand()) || "Norge".equalsIgnoreCase(postAddress.getLand());
+        }
+
+        return true;
     }
 
     private Digital getDigital(MeldingsformidlerRequest request) {

@@ -221,8 +221,7 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
           "adresselinje2" : "Langt oppi lia",
           "adresselinje3" : "der trollene bor",
           "postnummer" : "3400",
-          "poststed" : "FJELLET",
-          "land" : "Norway"
+          "poststed" : "FJELLET"
         },
         "dokumentpakkefingeravtrykk" : {
           "digestMethod" : "http://www.w3.org/2001/04/xmlenc#sha256",
@@ -237,8 +236,6 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
             "adresselinje2" : "argh",
             "adresselinje3" : "uff",
             "adresselinje4" : "off",
-            "postnummer" : "",
-            "poststed" : "",
             "land" : "Sweden"
           },
           "returposthaandtering" : "DIREKTE_RETUR"
