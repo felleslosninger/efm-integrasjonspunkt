@@ -36,6 +36,9 @@ public enum Mode {
     @RecipePath("/pki/recipe-dpi-self-signed.xml")
     SELF_SIGNED,
 
+    @RecipePath("/pki/recipe-dpi-move-difiSigned.xml")
+    MOVE,
+
     @RecipePath("/pki/recipe-dpi-norway-test.xml")
     TEST,
 
