@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.ObjectProvider
@@ -103,6 +104,11 @@ class NextMoveValidatorTest {
 //        every { sbd.optionalConversationId } returns Optional.of(UUID.randomUUID().toString())
 //        every { sbd.findScope(ScopeType.SENDER_REF) } returns Optional.empty()
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
+    }
+
+    @After
+    fun after() {
+        clearStaticMockk(StandardBusinessDocumentUtils::class, SBDUtil::class)
     }
 
     @Test(expected = MessageTypeDoesNotFitDocumentTypeException::class)

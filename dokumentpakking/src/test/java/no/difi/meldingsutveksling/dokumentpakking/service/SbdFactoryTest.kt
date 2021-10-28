@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.time.Clock
@@ -73,6 +74,11 @@ class SbdFactoryTest {
         every { SBDUtil.getReceiverIdentifier(sbd) } returns receiverOrgnr
         every { SBDUtil.getConversationId(sbd) } returns convId
         every {  SBDUtil.getMessageId(sbd) } returns msgId
+    }
+
+    @After
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test

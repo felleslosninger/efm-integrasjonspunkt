@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.*
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.util.*
@@ -48,6 +49,11 @@ internal class FiksIoServiceTest {
     fun before() {
         MockKAnnotations.init(this)
         fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService, promiseMaker)
+    }
+
+    @After
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test
