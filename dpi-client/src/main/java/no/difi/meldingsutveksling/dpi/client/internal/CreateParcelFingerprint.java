@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Dokumentpakkefingeravtrykk;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 
-@Component
 @RequiredArgsConstructor
 public class CreateParcelFingerprint {
 

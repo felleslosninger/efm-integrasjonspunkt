@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokument;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokumentData;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -16,13 +15,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 @RequiredArgsConstructor
 public class ParcelParser {
 
     private final AsicParser asicParser;
     private final ManifestParser manifestParser;
-    private final no.difi.meldingsutveksling.dpi.client.DocumentStorage documentStorage;
+    private final DocumentStorage documentStorage;
 
     public Parcel parse(String messageId, InputStream asicInputStream) {
         Map<String, Document> documents = new HashMap<>();

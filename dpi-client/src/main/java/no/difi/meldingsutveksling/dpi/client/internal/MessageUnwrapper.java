@@ -5,14 +5,12 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.Message;
 import no.difi.meldingsutveksling.dpi.client.domain.ReceivedMessage;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class MessageUnwrapper {
 
-    private final no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT unpackJWT;
-    private final no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument unpackStandardBusinessDocument;
+    private final UnpackJWT unpackJWT;
+    private final UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
     public ReceivedMessage unwrap(Message message) {
         return new ReceivedMessage()

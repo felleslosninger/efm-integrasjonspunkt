@@ -5,12 +5,10 @@ import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Direction;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
-@Component
 @RequiredArgsConstructor
 public class CreateStandardBusinessDocument {
 

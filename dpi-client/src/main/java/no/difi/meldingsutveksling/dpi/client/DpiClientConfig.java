@@ -11,13 +11,13 @@ import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
-import no.difi.meldingsutveksling.dpi.client.internal.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERNull;
@@ -31,7 +31,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -44,6 +43,7 @@ import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.Security;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -52,9 +52,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties
-@ComponentScan(basePackages = "no.difi.meldingsutveksling.dpi.client")
 @RequiredArgsConstructor
+@EnableConfigurationProperties(DpiClientProperties.class)
+@ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
 public class DpiClientConfig {
 
     private static final String LOG_MESSAGE = "Response {}: {}";
@@ -63,14 +63,14 @@ public class DpiClientConfig {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private final no.difi.meldingsutveksling.dpi.client.DpiClientProperties properties;
+    private final DpiClientProperties properties;
 
     @Bean
-    public no.difi.meldingsutveksling.dpi.client.DpiClient dpiClient(CreateCmsEncryptedAsice createCmsEncryptedAsice,
-                                                    CreateSendMessageInput createSendMessageInput,
-                                                    Corner2Client corner2Client,
-                                                    MessageUnwrapper messageUnwrapper) {
-        return new no.difi.meldingsutveksling.dpi.client.DpiClientImpl(
+    public DpiClient dpiClient(CreateCmsEncryptedAsice createCmsEncryptedAsice,
+                               CreateSendMessageInput createSendMessageInput,
+                               Corner2Client corner2Client,
+                               MessageUnwrapper messageUnwrapper) {
+        return new DpiClientImpl(
                 createCmsEncryptedAsice,
                 createSendMessageInput,
                 corner2Client,
@@ -263,5 +263,98 @@ public class DpiClientConfig {
     @Bean
     public FileExtensionMapper fileExtensionMapper() {
         return new FileExtensionMapper();
+    }
+
+    @Bean
+    public CreateASiCE createASiCE(
+            CreateManifest createManifest,
+            SignatureHelper signatureHelper) {
+        return new CreateASiCE(createManifest, signatureHelper);
+    }
+
+    @Bean
+    public CreateCmsEncryptedAsice createCmsEncryptedAsice(
+            InMemoryWithTempFileFallbackResourceFactory resourceFactory,
+            CreateASiCE createASiCE,
+            CreateCMSDocument createCMS) {
+        return new CreateCmsEncryptedAsice(resourceFactory, createASiCE, createCMS);
+    }
+
+    @Bean
+    public CreateManifest createManifest(SDPBuilder sdpBuilder) {
+        return new CreateManifest(sdpBuilder);
+    }
+
+    @Bean
+    public CreateMultipart createMultipart() {
+        return new CreateMultipart();
+    }
+
+    @Bean
+    public CreateParcelFingerprint createParcelFingerprint() {
+        return new CreateParcelFingerprint();
+    }
+
+    @Bean
+    public CreateSendMessageInput createSendMessageInput(
+            CreateMaskinportenToken createMaskinportenToken,
+            CreateStandardBusinessDocument createStandardBusinessDocument,
+            CreateStandardBusinessDocumentJWT createStandardBusinessDocumentJWT) {
+        return new CreateSendMessageInput(createMaskinportenToken, createStandardBusinessDocument, createStandardBusinessDocumentJWT);
+    }
+
+    @Bean
+    public CreateStandardBusinessDocument createStandardBusinessDocument(Clock clock) {
+        return new CreateStandardBusinessDocument(clock);
+    }
+
+    @Bean
+    public CreateStandardBusinessDocumentJWT createStandardBusinessDocumentJWT(
+            StandBusinessDocumentJsonFinalizer standBusinessDocumentJsonFinalizer,
+            CreateJWT createJWT) {
+        return new CreateStandardBusinessDocumentJWT(standBusinessDocumentJsonFinalizer, createJWT);
+    }
+
+    @Bean
+    public CreateUUIDInstanceIdentifier createUUIDInstanceIdentifier() {
+        return new CreateUUIDInstanceIdentifier();
+    }
+
+    @Bean
+    public DpiMapper dpiMapper() {
+        return new DpiMapper();
+    }
+
+    @Bean
+    public JwtClaimService jwtClaimService() {
+        return new JwtClaimService();
+    }
+
+    @Bean
+    public MessageUnwrapper messageUnwrapper(
+            UnpackJWT unpackJWT,
+            UnpackStandardBusinessDocument unpackStandardBusinessDocument) {
+        return new MessageUnwrapper(unpackJWT, unpackStandardBusinessDocument);
+    }
+
+    @Bean
+    public SDPBuilder sdpBuilder() {
+        return new SDPBuilder();
+    }
+
+    @Bean
+    public StandBusinessDocumentJsonFinalizer standBusinessDocumentJsonFinalizer(
+            CreateParcelFingerprint createParcelFingerprint,
+            DpiMapper dpiMapper,
+            JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator
+    ) {
+        return new StandBusinessDocumentJsonFinalizer(createParcelFingerprint, dpiMapper, jsonDigitalPostSchemaValidator);
+    }
+
+    @Bean
+    public UnpackStandardBusinessDocument unpackStandardBusinessDocument(
+            JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator,
+            DpiMapper dpiMapper) {
+        return new UnpackStandardBusinessDocument(jsonDigitalPostSchemaValidator, dpiMapper);
     }
 }

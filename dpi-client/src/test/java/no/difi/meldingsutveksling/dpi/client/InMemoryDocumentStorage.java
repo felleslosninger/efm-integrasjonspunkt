@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InMemoryDocumentStorage implements no.difi.meldingsutveksling.dpi.client.DocumentStorage {
+public class InMemoryDocumentStorage implements DocumentStorage {
 
     private final Map<String, Map<String, byte[]>> data = new HashMap<>();
 

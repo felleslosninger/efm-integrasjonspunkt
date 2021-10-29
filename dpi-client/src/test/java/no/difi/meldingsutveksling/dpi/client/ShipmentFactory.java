@@ -7,13 +7,11 @@ import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
-@Component
 @RequiredArgsConstructor
 public class ShipmentFactory {
 

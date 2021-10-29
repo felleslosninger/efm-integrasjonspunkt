@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.meldingsutveksling.dpi.client.Blame;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
 import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
@@ -10,6 +8,8 @@ import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
 import no.difi.meldingsutveksling.dpi.client.domain.Message;
 import no.difi.meldingsutveksling.dpi.client.domain.MessageStatus;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
@@ -25,12 +25,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class Corner2ClientImpl implements no.difi.meldingsutveksling.dpi.client.internal.Corner2Client {
+public class Corner2ClientImpl implements Corner2Client {
 
     private final WebClient webClient;
     private final DpiClientErrorHandler dpiClientErrorHandler;
     private final CreateMaskinportenToken createMaskinportenToken;
-    private final no.difi.meldingsutveksling.dpi.client.internal.CreateMultipart createMultipart;
+    private final CreateMultipart createMultipart;
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
 
     @Override

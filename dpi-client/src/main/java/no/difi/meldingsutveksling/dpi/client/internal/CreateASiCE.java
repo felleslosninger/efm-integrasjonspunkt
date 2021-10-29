@@ -6,7 +6,6 @@ import no.difi.asic.*;
 import no.difi.meldingsutveksling.dpi.client.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.Manifest;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -15,11 +14,10 @@ import java.io.OutputStream;
 import java.util.Optional;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class CreateASiCE {
 
-    private final no.difi.meldingsutveksling.dpi.client.internal.CreateManifest createManifest;
+    private final CreateManifest createManifest;
     private final SignatureHelper signatureHelper;
 
     public void createAsice(Shipment shipment, OutputStream outputStream) {
@@ -36,7 +34,7 @@ public class CreateASiCE {
         sign(asicWriter);
     }
 
-    private void sign(AsicWriter asicWriter)  {
+    private void sign(AsicWriter asicWriter) {
         try {
             asicWriter.sign(signatureHelper);
         } catch (IOException e) {

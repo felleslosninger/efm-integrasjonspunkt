@@ -6,13 +6,11 @@ import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.PersonmottakerH
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Identifikator;
 import no.difi.meldingsutveksling.dpi.client.sdp.*;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class SDPBuilder {
 
     public SDPManifest createManifest(Shipment shipment) {

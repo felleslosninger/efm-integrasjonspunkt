@@ -4,14 +4,12 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Leveringskvittering;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
-import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
 
-@Component
 @RequiredArgsConstructor
-public class CreateLeveringskvittering implements no.difi.meldingsutveksling.dpi.client.ReceiptFactory {
+public class CreateLeveringskvittering implements ReceiptFactory {
 
     private final Clock clock;
 
@@ -21,7 +19,7 @@ public class CreateLeveringskvittering implements no.difi.meldingsutveksling.dpi
     }
 
     @Override
-    public Kvittering getReceipt(no.difi.meldingsutveksling.dpi.client.ReceiptInput input) {
+    public Kvittering getReceipt(ReceiptInput input) {
         Leveringskvittering kvittering = new Leveringskvittering();
         kvittering.setMottaker(input.getMottaker());
         kvittering.setAvsender(input.getAvsender());

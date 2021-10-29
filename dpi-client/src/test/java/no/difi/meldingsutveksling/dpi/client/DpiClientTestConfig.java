@@ -2,30 +2,26 @@ package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
-@TestConfiguration
+@Configuration
 @RequiredArgsConstructor
-@Import({
-        no.difi.meldingsutveksling.dpi.client.DpiServerProperties.class,
-        no.difi.meldingsutveksling.dpi.client.ParcelParser.class,
-        ManifestParser.class
-})
+@EnableConfigurationProperties(DpiServerProperties.class)
 public class DpiClientTestConfig {
 
-    private final no.difi.meldingsutveksling.dpi.client.DpiServerProperties properties;
+    private final DpiServerProperties properties;
 
     @Bean
     @Primary
@@ -39,8 +35,8 @@ public class DpiClientTestConfig {
     }
 
     @Bean
-    public no.difi.meldingsutveksling.dpi.client.DecryptCMSDocument decryptCMSDocument(JceKeyTransRecipient jceKeyTransRecipient) {
-        return new no.difi.meldingsutveksling.dpi.client.DecryptCMSDocument(jceKeyTransRecipient);
+    public DecryptCMSDocument decryptCMSDocument(JceKeyTransRecipient jceKeyTransRecipient) {
+        return new DecryptCMSDocument(jceKeyTransRecipient);
     }
 
     @Bean
@@ -55,8 +51,8 @@ public class DpiClientTestConfig {
     }
 
     @Bean
-    public no.difi.meldingsutveksling.dpi.client.InMemoryDocumentStorage inMemoryDocumentStorage() {
-        return new no.difi.meldingsutveksling.dpi.client.InMemoryDocumentStorage();
+    public InMemoryDocumentStorage inMemoryDocumentStorage() {
+        return new InMemoryDocumentStorage();
     }
 
     @Bean
@@ -71,10 +67,33 @@ public class DpiClientTestConfig {
     }
 
     @Bean
-    public no.difi.meldingsutveksling.dpi.client.CreateReceiptJWT createReceiptJWT(StandBusinessDocumentJsonFinalizer standBusinessDocumentJsonFinalizer,
-                                                                  CreateJWT createJWTServer,
-                                                                  CreateInstanceIdentifier createInstanceIdentifier,
-                                                                  Clock clock) {
-        return new no.difi.meldingsutveksling.dpi.client.CreateReceiptJWT(new CreateStandardBusinessDocumentJWT(standBusinessDocumentJsonFinalizer, createJWTServer), createInstanceIdentifier, clock);
+    public CreateReceiptJWT createReceiptJWT(StandBusinessDocumentJsonFinalizer standBusinessDocumentJsonFinalizer,
+                                             CreateJWT createJWTServer,
+                                             CreateInstanceIdentifier createInstanceIdentifier,
+                                             Clock clock) {
+        return new CreateReceiptJWT(new CreateStandardBusinessDocumentJWT(standBusinessDocumentJsonFinalizer, createJWTServer), createInstanceIdentifier, clock);
+    }
+
+    @Bean
+    public ParcelParser parcelParser(
+            AsicParser asicParser,
+            ManifestParser manifestParser,
+            DocumentStorage documentStorage) {
+        return new ParcelParser(asicParser, manifestParser, documentStorage);
+    }
+
+    @Bean
+    public ShipmentFactory shipmentFactory(FileExtensionMapper fileExtensionMapper) {
+        return new ShipmentFactory(fileExtensionMapper);
+    }
+
+    @Bean
+    public CreateLeveringskvittering createLeveringskvittering(Clock clock) {
+        return new CreateLeveringskvittering(clock);
+    }
+
+    @Bean
+    public ManifestParser manifestParser() {
+        return new ManifestParser();
     }
 }

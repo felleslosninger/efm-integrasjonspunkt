@@ -4,14 +4,12 @@ import com.nimbusds.jose.Payload;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class UnpackStandardBusinessDocument {
 
-    private final no.difi.meldingsutveksling.dpi.client.internal.JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator;
-    private final no.difi.meldingsutveksling.dpi.client.internal.DpiMapper dpiMapper;
+    private final JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator;
+    private final DpiMapper dpiMapper;
 
     public StandardBusinessDocument unpackStandardBusinessDocument(Payload payload) {
         StandardBusinessDocument standardBusinessDocument = dpiMapper.readStandardBusinessDocument(payload.toString());

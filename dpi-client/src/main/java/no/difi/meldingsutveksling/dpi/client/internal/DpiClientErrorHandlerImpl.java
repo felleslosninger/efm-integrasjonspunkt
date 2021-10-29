@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.dpi.client.DpiException;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
-public class DpiClientErrorHandlerImpl implements no.difi.meldingsutveksling.dpi.client.internal.DpiClientErrorHandler {
+public class DpiClientErrorHandlerImpl implements DpiClientErrorHandler {
     @Override
     public Mono<DpiException> apply(ClientResponse response) {
         return response.createException()

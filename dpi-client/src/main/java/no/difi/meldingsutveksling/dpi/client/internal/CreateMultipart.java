@@ -5,10 +5,8 @@ import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
-@Component
 public class CreateMultipart {
 
     private static final MediaType APPLICATION_JWT = MediaType.parseMediaType("application/jwt");

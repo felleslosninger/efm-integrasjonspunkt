@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
-public class DpiClientImpl implements no.difi.meldingsutveksling.dpi.client.DpiClient {
+public class DpiClientImpl implements DpiClient {
 
     private final CreateCmsEncryptedAsice createCmsEncryptedAsice;
     private final CreateSendMessageInput createSendMessageInput;
@@ -32,7 +32,7 @@ public class DpiClientImpl implements no.difi.meldingsutveksling.dpi.client.DpiC
         } catch (DpiException e) {
             throw e;
         } catch (Exception e) {
-            throw new DpiException("Sending failed!", e, no.difi.meldingsutveksling.dpi.client.Blame.CLIENT);
+            throw new DpiException("Sending failed!", e, Blame.CLIENT);
         }
     }
 

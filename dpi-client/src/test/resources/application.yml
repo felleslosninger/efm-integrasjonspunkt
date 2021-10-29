@@ -1,3 +1,7 @@
+difi:
+    move:
+        feature:
+            enableDPI: true
 dpi:
     client:
         initialBufferSize: 100000

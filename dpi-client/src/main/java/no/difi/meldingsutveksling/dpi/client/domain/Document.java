@@ -10,5 +10,5 @@ public class Document implements AsicEAttachable {
     String filename;
     Resource resource;
     String mimeType;
-    no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument metadataDocument;
+    MetadataDocument metadataDocument;
 }

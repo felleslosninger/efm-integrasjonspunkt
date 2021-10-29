@@ -6,6 +6,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 @Data
 public class ReceivedMessage {
 
-    private no.difi.meldingsutveksling.dpi.client.domain.Message message;
+    private Message message;
     private StandardBusinessDocument standardBusinessDocument;
 }

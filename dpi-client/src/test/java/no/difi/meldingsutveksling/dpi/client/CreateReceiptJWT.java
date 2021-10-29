@@ -21,12 +21,12 @@ public class CreateReceiptJWT {
     private final CreateInstanceIdentifier createInstanceIdentifier;
     private final Clock clock;
 
-    String createReceiptJWT(StandardBusinessDocument sbd, no.difi.meldingsutveksling.dpi.client.ReceiptFactory receiptFactory) {
+    String createReceiptJWT(StandardBusinessDocument sbd, ReceiptFactory receiptFactory) {
         return createStandardBusinessDocumentJWT.createStandardBusinessDocumentJWT(
                 createReceiptStandardBusinessDocument(sbd, receiptFactory), null, null);
     }
 
-    private StandardBusinessDocument createReceiptStandardBusinessDocument(StandardBusinessDocument sbd, no.difi.meldingsutveksling.dpi.client.ReceiptFactory receiptFactory) {
+    private StandardBusinessDocument createReceiptStandardBusinessDocument(StandardBusinessDocument sbd, ReceiptFactory receiptFactory) {
         MessageType receiptType = receiptFactory.getMessageType();
 
         PartnerIdentification receiver = StandardBusinessDocumentUtils.getFirstReceiverIdentifier(sbd)
@@ -49,7 +49,7 @@ public class CreateReceiptJWT {
                         .setBusinessScope(new BusinessScope()
                                 .addScope(StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
                                         .orElseThrow(() -> new IllegalArgumentException("Missing conversationId")))))
-                .setAny(receiptFactory.getReceipt(new no.difi.meldingsutveksling.dpi.client.ReceiptInput()
+                .setAny(receiptFactory.getReceipt(new ReceiptInput()
                         .setMottaker(new Virksomhetmottaker()
                                 .setVirksomhetsidentifikator(getAvsender(sbd).getVirksomhetsidentifikator()))
                         .setAvsender(new Avsender()

@@ -2,18 +2,16 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
-import org.springframework.stereotype.Component;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class CreateCmsEncryptedAsice {
 

@@ -12,12 +12,10 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.StandardBusinessDocument
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.StandardBusinessDocumentSerializer;
 import org.springframework.core.io.Resource;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.Map;
 
-@Component
 public class DpiMapper {
 
     @Getter(AccessLevel.PACKAGE)

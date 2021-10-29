@@ -5,13 +5,11 @@ import no.difi.meldingsutveksling.dpi.client.internal.Schemas;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.stereotype.Component;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Component
 public class ManifestParser {
 
     private final Jaxb2Marshaller marshaller;

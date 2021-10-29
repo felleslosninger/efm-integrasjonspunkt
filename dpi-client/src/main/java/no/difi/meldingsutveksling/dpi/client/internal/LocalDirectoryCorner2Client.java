@@ -22,7 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class LocalDirectoryCorner2Client implements no.difi.meldingsutveksling.dpi.client.internal.Corner2Client {
+public class LocalDirectoryCorner2Client implements Corner2Client {
 
     private final DpiClientProperties properties;
 

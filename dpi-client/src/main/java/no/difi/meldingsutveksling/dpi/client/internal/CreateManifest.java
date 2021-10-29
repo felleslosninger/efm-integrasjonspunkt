@@ -6,28 +6,30 @@ import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.stereotype.Component;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 
-@Component
 public class CreateManifest {
 
     private final Jaxb2Marshaller marshaller;
     private final SDPBuilder sdpBuilder;
 
-    public CreateManifest(SDPBuilder sdpBuilder) throws java.lang.Exception {
+    public CreateManifest(SDPBuilder sdpBuilder) {
         this.marshaller = createJaxb2Marshaller();
         this.sdpBuilder = sdpBuilder;
     }
 
-    private Jaxb2Marshaller createJaxb2Marshaller() throws java.lang.Exception {
+    private Jaxb2Marshaller createJaxb2Marshaller() {
         Jaxb2Marshaller m = new Jaxb2Marshaller();
         m.setClassesToBeBound(SDPManifest.class);
         m.setSchema(Schemas.SDP_MANIFEST_SCHEMA);
-        m.afterPropertiesSet();
+        try {
+            m.afterPropertiesSet();
+        } catch (java.lang.Exception e) {
+            throw new CreateManifest.Exception("createJaxb2Marshaller failed!", e);
+        }
         return m;
     }
 

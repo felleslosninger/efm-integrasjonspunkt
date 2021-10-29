@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
-import no.difi.move.common.io.ResourceUtils;
 import no.difi.meldingsutveksling.dpi.client.domain.*;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
@@ -19,6 +18,7 @@ import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
+import no.difi.move.common.io.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
@@ -70,7 +70,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 @ContextConfiguration(
         initializers = ConfigFileApplicationContextInitializer.class,
-        classes = {no.difi.meldingsutveksling.dpi.client.DpiClientTestConfig.class, DpiClientConfig.class})
+        classes = {DpiClientTestConfig.class, DpiClientConfig.class})
 @ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
@@ -79,25 +79,25 @@ class DpiClientTest {
     private DpiClient dpiClient;
 
     @Autowired
-    private no.difi.meldingsutveksling.dpi.client.ShipmentFactory shipmentFactory;
+    private ShipmentFactory shipmentFactory;
 
     @Autowired
-    private no.difi.meldingsutveksling.dpi.client.DecryptCMSDocument decryptCMSDocument;
+    private DecryptCMSDocument decryptCMSDocument;
 
     @Autowired
-    private no.difi.meldingsutveksling.dpi.client.ParcelParser parcelParser;
+    private ParcelParser parcelParser;
 
     @Autowired
     private UnpackJWT unpackJWT;
 
     @Autowired
-    private no.difi.meldingsutveksling.dpi.client.CreateReceiptJWT createReceiptJWT;
+    private CreateReceiptJWT createReceiptJWT;
 
     @Autowired
     private DpiMapper dpiMapper;
 
     @Autowired
-    private no.difi.meldingsutveksling.dpi.client.CreateLeveringskvittering createLeveringskvittering;
+    private CreateLeveringskvittering createLeveringskvittering;
 
     @Autowired
     private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
@@ -145,7 +145,7 @@ class DpiClientTest {
         testSend(client, getDpiDigitalTestInput(), digitalReadyForSendSbd);
     }
 
-    private no.difi.meldingsutveksling.dpi.client.DpiTestInput getDpiDigitalTestInput() {
+    private DpiTestInput getDpiDigitalTestInput() {
         return createDpiTestInput(new Digital()
                 .setAvsender(new Avsender()
                         .setVirksomhetsidentifikator(
@@ -203,8 +203,8 @@ class DpiClientTest {
         ), utskriftReadyForSendSbd);
     }
 
-    private no.difi.meldingsutveksling.dpi.client.DpiTestInput createDpiTestInput(BusinessMessage businessMessage) {
-        return new no.difi.meldingsutveksling.dpi.client.DpiTestInput()
+    private DpiTestInput createDpiTestInput(BusinessMessage businessMessage) {
+        return new DpiTestInput()
                 .setSenderOrganizationIdentifier(new PartnerIdentification()
                         .setAuthority(Authority.ISO6523_ACTORID_UPIS)
                         .setValue("0192:987654321"))
@@ -227,7 +227,7 @@ class DpiClientTest {
                 .withBody("{}")
                 .withStatusCode(400);
 
-        no.difi.meldingsutveksling.dpi.client.DpiTestInput input = getDpiDigitalTestInput();
+        DpiTestInput input = getDpiDigitalTestInput();
 
         assertThatThrownBy(() -> send(client, input, httpResponse))
                 .isInstanceOf(DpiException.class)
@@ -356,7 +356,7 @@ class DpiClientTest {
     }
 
     @SneakyThrows
-    private void testSend(MockServerClient client, no.difi.meldingsutveksling.dpi.client.DpiTestInput input, Resource out) {
+    private void testSend(MockServerClient client, DpiTestInput input, Resource out) {
         MimeMultipart mimeMultipart = send(client, input, response()
                 .withStatusCode(200));
         assertThat(mimeMultipart.getCount()).isEqualTo(2);
@@ -385,7 +385,7 @@ class DpiClientTest {
         return standardBusinessDocument;
     }
 
-    private MimeMultipart send(MockServerClient client, no.difi.meldingsutveksling.dpi.client.DpiTestInput input, HttpResponse httpResponse) throws MessagingException {
+    private MimeMultipart send(MockServerClient client, DpiTestInput input, HttpResponse httpResponse) throws MessagingException {
         HttpRequest requestDefinition = request()
                 .withMethod("POST")
                 .withPath("/dpi/messages/out");
