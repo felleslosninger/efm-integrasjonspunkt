@@ -185,6 +185,7 @@ public class ShipmentFactory {
 
     private Epostvarsel getEpostvarsel(MeldingsformidlerRequest request) {
         return StringUtils.hasLength(request.getEmailAddress())
+                && StringUtils.hasLength(request.getEmailVarslingstekst())
                 ? new Epostvarsel()
                 .setEpostadresse(request.getEmailAddress())
                 .setVarslingstekst(request.getEmailVarslingstekst())
@@ -194,6 +195,7 @@ public class ShipmentFactory {
 
     private Smsvarsel getSmsvarsel(MeldingsformidlerRequest request) {
         return StringUtils.hasLength(request.getMobileNumber())
+                && StringUtils.hasLength(request.getSmsVarslingstekst())
                 ? new Smsvarsel()
                 .setMobiltelefonnummer(request.getMobileNumber())
                 .setVarslingstekst(request.getSmsVarslingstekst())
