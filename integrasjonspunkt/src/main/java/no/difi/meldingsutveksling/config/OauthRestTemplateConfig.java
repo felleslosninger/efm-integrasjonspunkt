@@ -48,7 +48,7 @@ public class OauthRestTemplateConfig {
 
     @SneakyThrows
     @Bean
-    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "true")
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
                 !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
@@ -63,7 +63,7 @@ public class OauthRestTemplateConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "false")
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "false")
     public RestOperations restTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(5000);
@@ -73,9 +73,9 @@ public class OauthRestTemplateConfig {
         return rt;
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "difi.move", value = "oidc.emable", havingValue = "true")
-    public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
+    @Bean(name = "restTemplate")
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
+    public RestOperations oauthRestTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
