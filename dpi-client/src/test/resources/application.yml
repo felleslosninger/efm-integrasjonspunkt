@@ -4,6 +4,8 @@ difi:
             enableDPI: true
 dpi:
     client:
+        asice:
+            type: sikker-digital-post-klient
         initialBufferSize: 100000
         certificate:
             mode: SELF_SIGNED

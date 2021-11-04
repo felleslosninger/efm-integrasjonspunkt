@@ -43,6 +43,12 @@ public class DpiClientProperties {
     private Oidc oidc;
 
     @Data
+    public static class Asice {
+
+        private String type;
+    }
+
+    @Data
     public static class Oidc {
 
         @NotNull

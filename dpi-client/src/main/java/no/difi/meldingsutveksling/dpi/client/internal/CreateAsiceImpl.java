@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CreateASiCE {
+public class CreateAsiceImpl implements CreateAsice {
 
     private final CreateManifest createManifest;
     private final SignatureHelper signatureHelper;

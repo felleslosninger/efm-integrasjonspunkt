@@ -16,7 +16,7 @@ import java.io.OutputStream;
 public class CreateCmsEncryptedAsice {
 
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
-    private final CreateASiCE createASiCE;
+    private final CreateAsice createASiCE;
     private final CreateCMSDocument createCMS;
 
     public CmsEncryptedAsice createCmsEncryptedAsice(Shipment shipment) {

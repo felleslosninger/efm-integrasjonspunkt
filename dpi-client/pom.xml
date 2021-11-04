@@ -37,6 +37,10 @@
             <artifactId>commons-asic</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
@@ -48,7 +52,6 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
-
         <dependency>
             <groupId>net.jimblackler</groupId>
             <artifactId>jsonschemafriend</artifactId>

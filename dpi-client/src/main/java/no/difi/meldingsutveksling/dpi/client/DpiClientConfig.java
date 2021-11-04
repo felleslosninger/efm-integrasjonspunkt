@@ -266,16 +266,50 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public CreateASiCE createASiCE(
+    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "commons-asic")
+    public CreateAsiceImpl createAsiceImpl(
             CreateManifest createManifest,
             SignatureHelper signatureHelper) {
-        return new CreateASiCE(createManifest, signatureHelper);
+        return new CreateAsiceImpl(createManifest, signatureHelper);
+    }
+
+    @Configuration
+    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "sikker-digital-post-klient", matchIfMissing = true)
+    public static class OldStyleAsiceConfiguration {
+
+        @Bean
+        public CreateOldStyleAsice createOldStyleAsice(
+                CreateManifest createManifest,
+                CreateSignature createSignature,
+                CreateZip createZip) {
+            return new CreateOldStyleAsice(createManifest, createSignature, createZip);
+        }
+
+        @Bean
+        public CreateSignature createSignature(DomUtils domUtils, CreateXAdESArtifacts createXAdESArtifacts, KeyPair keyPair) {
+            return new CreateSignature(domUtils, createXAdESArtifacts, keyPair);
+        }
+
+        @Bean
+        public CreateZip createZip() {
+            return new CreateZip();
+        }
+
+        @Bean
+        public DomUtils domUtils() {
+            return new DomUtils();
+        }
+
+        @Bean
+        public CreateXAdESArtifacts createXAdESArtifacts(Clock clock) {
+            return new CreateXAdESArtifacts(clock);
+        }
     }
 
     @Bean
     public CreateCmsEncryptedAsice createCmsEncryptedAsice(
             InMemoryWithTempFileFallbackResourceFactory resourceFactory,
-            CreateASiCE createASiCE,
+            CreateAsice createASiCE,
             CreateCMSDocument createCMS) {
         return new CreateCmsEncryptedAsice(resourceFactory, createASiCE, createCMS);
     }
