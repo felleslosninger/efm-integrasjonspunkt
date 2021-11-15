@@ -1,7 +1,8 @@
 package no.difi.meldingsutveksling.nextmove
 
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
@@ -23,7 +24,7 @@ class ResponseStatusSender(
 
     fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         if (si in props.nextmove.statusServices) {
-            GlobalScope.launch(CoroutineExceptionHandler { _, t -> log.error("Error sending status message", t) }) {
+            CoroutineScope(Dispatchers.IO).launch(CoroutineExceptionHandler { _, t -> log.error("Error sending status message", t) }) {
                 proxy.queue(sbd, si, status)
             }
         }
