@@ -26,7 +26,7 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IntegrasjonspunktImplTest {
@@ -40,7 +40,7 @@ public class IntegrasjonspunktImplTest {
 
     @Before
     public void setUp() throws ServiceRegistryLookupException {
-        initMocks(this);
+        openMocks(this);
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
         when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
         when(propertiesMock.getOrg()).thenReturn(organizationMock);
