@@ -5,7 +5,7 @@ difi:
 dpi:
     client:
         asice:
-            type: sikker-digital-post-klient
+            type: commons-asic
         initialBufferSize: 100000
         certificate:
             mode: SELF_SIGNED

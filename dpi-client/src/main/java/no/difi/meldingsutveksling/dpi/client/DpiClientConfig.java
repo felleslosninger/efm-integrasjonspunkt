@@ -266,7 +266,7 @@ public class DpiClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "commons-asic")
+    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "commons-asic", matchIfMissing = true)
     public CreateAsiceImpl createAsiceImpl(
             CreateManifest createManifest,
             SignatureHelper signatureHelper) {
@@ -274,7 +274,7 @@ public class DpiClientConfig {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "sikker-digital-post-klient", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "sikker-digital-post-klient")
     public static class OldStyleAsiceConfiguration {
 
         @Bean
