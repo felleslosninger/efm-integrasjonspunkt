@@ -15,8 +15,8 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -42,7 +42,7 @@ internal class FiksIoServiceTest {
 
     private lateinit var fiksIoService: FiksIoService
 
-    @Before
+    @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
         fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService, promiseMaker)

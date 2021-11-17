@@ -4,8 +4,8 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import org.hamcrest.MatcherAssert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringResult;
 import org.xmlunit.matchers.CompareMatcher;
 
@@ -25,7 +25,7 @@ public class StandardBusinessDocumentJaxbTest {
     private Unmarshaller unmarshaller;
     private ObjectFactory objectFactory;
 
-    @Before
+    @BeforeEach
     @SneakyThrows
     public void createMarshaller() {
         JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessage.class);

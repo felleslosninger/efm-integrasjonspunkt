@@ -11,9 +11,9 @@ import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.JwtTokenResponse;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.client.RestOperations;
@@ -29,9 +29,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Ignore("Manual testing class")
+@Disabled("Manual testing class")
 public class OidcTokenClientTest {
 
     private IntegrasjonspunktProperties props;
@@ -50,7 +50,7 @@ public class OidcTokenClientTest {
             "global/navn.read",
             "global/postadresse.read");
 
-    @Before
+    @BeforeEach
     @SneakyThrows
     public void setup() throws MalformedURLException {
         props = new IntegrasjonspunktProperties();
@@ -98,7 +98,7 @@ public class OidcTokenClientTest {
     }
 
     @Test
-    @Ignore("Manual test")
+    @Disabled("Manual test")
     public void testTokenFetch() {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
 
@@ -108,7 +108,7 @@ public class OidcTokenClientTest {
 
 
     @Test
-    @Ignore("Manual test")
+    @Disabled("Manual test")
     public void testOathRestTemplate() throws URISyntaxException, MalformedURLException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
@@ -119,7 +119,7 @@ public class OidcTokenClientTest {
     }
 
     @Test
-    @Ignore("Manual test")
+    @Disabled("Manual test")
     public void testSasTokenFetch() throws URISyntaxException, IOException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);

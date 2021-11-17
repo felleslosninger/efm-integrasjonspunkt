@@ -5,14 +5,14 @@ import com.dumbster.smtp.SmtpMessage;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.xml.transform.StringSource;
 
 import javax.xml.bind.JAXBContext;
@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IpMailSenderTest {
 
     @Mock private IntegrasjonspunktProperties props;
@@ -36,17 +36,17 @@ public class IpMailSenderTest {
 
     private static SimpleSmtpServer simpleSmtpServer;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws IOException {
         simpleSmtpServer = SimpleSmtpServer.start(SimpleSmtpServer.AUTO_SMTP_PORT);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         simpleSmtpServer.stop();
     }
 
-    @Before
+    @BeforeEach
     public void init() throws JAXBException {
         simpleSmtpServer.reset();
 
