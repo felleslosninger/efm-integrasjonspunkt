@@ -42,6 +42,9 @@ public class DpiClientProperties {
     @Valid
     private Oidc oidc;
 
+    @Valid
+    private Asice asice;
+
     @Data
     public static class Asice {
 
