@@ -263,14 +263,4 @@ public class CucumberStepsConfiguration {
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockBean public FiksIOKlient fiksIOKlient;
 
-//    @Before
-//    @SneakyThrows
-//    public void before() {
-//        temporaryFolder.create();
-//    }
-//
-//    @After
-//    public void after() {
-//        temporaryFolder.delete();
-//    }
 }
