@@ -36,11 +36,6 @@ public class AsicParser {
 
     private String getMimeType(AsicManifest asicManifest, String filename) {
         return getFile(asicManifest, filename).getMimetype();
-//        if (mimetype == null) {
-//            String ext = Stream.of(filename.split("\\.")).reduce((p, e) -> e).orElse("");
-//            return MimeTypeExtensionMapper.getMimetype(ext);
-//        }
-//        return mimetype;
     }
 
     private AsicFile getFile(AsicManifest asicManifest, String filename) {
