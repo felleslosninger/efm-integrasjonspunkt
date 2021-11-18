@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;

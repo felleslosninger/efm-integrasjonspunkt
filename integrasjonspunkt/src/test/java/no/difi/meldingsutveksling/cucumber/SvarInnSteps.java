@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.And;
+import io.cucumber.java.After;
+import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;

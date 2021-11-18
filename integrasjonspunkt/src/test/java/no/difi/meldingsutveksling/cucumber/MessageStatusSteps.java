@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.Given;
+import io.cucumber.java.After;
+import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpMethod;
@@ -21,7 +21,7 @@ public class MessageStatusSteps {
     private final TestRestTemplate testRestTemplate;
     private ResponseEntity<String> response;
 
-    @Before
+    @BeforeEach
     public void before() {
 
     }

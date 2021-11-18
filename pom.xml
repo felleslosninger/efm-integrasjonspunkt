@@ -72,14 +72,14 @@
         <logback.version>1.2.3</logback.version>
 
         <sikker-digital-post-klient.version>5.10</sikker-digital-post-klient.version>
-        <powermock.version>2.0.0</powermock.version>
-        <cucumber.version>2.3.1</cucumber.version>
+        <junit.platform.version>1.8.1</junit.platform.version>
+        <cucumber.version>7.0.0</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
         <move-common.version>1.5.0</move-common.version>
         <lombok.version>1.18.16</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
-        <kotlin.version>1.4.30</kotlin.version>
+        <kotlin.version>1.6.0</kotlin.version>
         <bouncycastle.version>1.67</bouncycastle.version>
         <dokka.skip>true</dokka.skip>
 
@@ -374,18 +374,6 @@
                 <version>${commons.compress.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
                 <version>${modelmapper.version}</version>
@@ -468,7 +456,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>asm</artifactId>
+                    <groupId>org.ow2.asm</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>android-json</artifactId>
+                    <groupId>com.vaadin.external.google</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
     </dependencies>
 
     <build>

@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.noarkexchange.cangetmessage;
 
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import no.difi.meldingsutveksling.noarkexchange.IntegrasjonspunktImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -12,8 +12,8 @@ import no.difi.meldingsutveksling.services.Adresseregister;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class KanMottaMeldingerSteps {

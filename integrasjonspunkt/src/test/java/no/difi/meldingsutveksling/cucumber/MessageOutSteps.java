@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.DataTable;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.util.StringUtil;
 import org.xmlunit.matchers.CompareMatcher;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor
 public class MessageOutSteps {
@@ -67,7 +66,7 @@ public class MessageOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
-                .map(p -> Arrays.asList(p.getFileName(), StringUtil.nonNull(p.getMimeType())))
+                .map(p -> Arrays.asList(p.getFileName(), p.getMimeType()))
                 .collect(Collectors.toList())
         );
 
