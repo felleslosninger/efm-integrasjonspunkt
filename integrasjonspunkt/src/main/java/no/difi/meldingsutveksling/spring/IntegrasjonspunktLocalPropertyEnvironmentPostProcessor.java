@@ -9,17 +9,12 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.env.VaultPropertySource;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -34,21 +29,6 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (!environment.getProperty("app.local.properties.enable", Boolean.class, true)) {
-            log.info("Disable local properties file for test");
-            return;
-        }
-        try {
-            final FileSystemResource resource = new FileSystemResource("integrasjonspunkt-local.properties");
-            Properties loadAllProperties = PropertiesLoaderUtils.loadProperties(resource);
-            environment.getPropertySources().addFirst(new PropertiesPropertySource("file:integrasjonspunkt-local.properties", loadAllProperties));
-            log.info("Added " + resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-            if (!"mock".equals(environment.getProperty("spring.profiles.active"))) {
-                log.error("Failed to load integrasjonspunkt-local.properties - exiting.", ex);
-            }
-        }
-
         // load vault properties
         String vaultUri = environment.getProperty("vault.uri");
         String vaultToken = environment.getProperty("vault.token");

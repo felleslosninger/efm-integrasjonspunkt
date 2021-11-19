@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;

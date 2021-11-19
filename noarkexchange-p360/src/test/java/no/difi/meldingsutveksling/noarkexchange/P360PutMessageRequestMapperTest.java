@@ -3,9 +3,10 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.noarkexchange.p360.PutMessageRequestMapper;
 import no.difi.meldingsutveksling.noarkexchange.schema.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringSource;
 
 import javax.xml.bind.*;
@@ -15,14 +16,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class P360PutMessageRequestMapperTest {
 
     private TestData<PutMessageRequestType> testData;
 
-    @Before
+    @BeforeEach
     public void setup() throws JAXBException {
         testData = new TestData<>(PutMessageRequestType.class);
     }
@@ -35,10 +35,10 @@ public class P360PutMessageRequestMapperTest {
 
         final JAXBElement<no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType> p360PutMessage = mapper.mapFrom(putMessageRequestType);
 
-        assertNotNull(p360PutMessage.getValue().getPayload());
+        Assertions.assertNotNull(p360PutMessage.getValue().getPayload());
     }
 
-    @Ignore("Work in progress")
+    @Disabled("Work in progress")
     @Test
     public void mapFromEphortePutMessageToP360PutMessage() throws JAXBException, XMLStreamException {
         PutMessageRequestType putMessageRequestType = testData.loadFromClasspath("ephorte/PutMessageMessage.xml");

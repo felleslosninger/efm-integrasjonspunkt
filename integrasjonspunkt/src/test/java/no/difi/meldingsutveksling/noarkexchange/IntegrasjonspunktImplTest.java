@@ -14,21 +14,21 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IntegrasjonspunktImplTest {
 
     @InjectMocks private IntegrasjonspunktImpl integrasjonspunkt;
@@ -38,13 +38,13 @@ public class IntegrasjonspunktImplTest {
     @Mock private ServiceRegistryLookup serviceRegistryLookup;
     @Mock private ConversationStrategyFactory strategyFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() throws ServiceRegistryLookupException {
-        initMocks(this);
+        openMocks(this);
         ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
-        when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
-        when(propertiesMock.getOrg()).thenReturn(organizationMock);
-        when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategyImpl.class)));
+        lenient().when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
+        lenient().when(propertiesMock.getOrg()).thenReturn(organizationMock);
+        lenient().when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategyImpl.class)));
     }
 
     @Test

@@ -1,14 +1,14 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.After;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.noarkexchange.p360.schema.PutMessageRequestType;
+import org.hamcrest.MatcherAssert;
+import org.xmlunit.matchers.CompareMatcher;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 public class NoArkSteps {
@@ -29,8 +29,8 @@ public class NoArkSteps {
         List<String> payloads = webServicePayloadHolder.get();
         String actualPayload = payloads.get(0);
 
-        assertThat(actualPayload.replaceAll("<payload>[^<]*</payload>", "<payload><!--payload--></payload>"))
-                .isXmlEqualTo(expectedPayload);
+        MatcherAssert.assertThat(actualPayload.replaceAll("<payload>[^<]*</payload>", "<payload><!--payload--></payload>"),
+            CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
 
         PutMessageRequestType putMessageRequestType = xmlMarshaller.unmarshall(actualPayload, PutMessageRequestType.class);
 

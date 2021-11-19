@@ -1,11 +1,12 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class PostAddressTest {
+    
     @Test
     public void isNorge() throws Exception {
         PostAddress address = new PostAddress("", "", "", "", "norge");

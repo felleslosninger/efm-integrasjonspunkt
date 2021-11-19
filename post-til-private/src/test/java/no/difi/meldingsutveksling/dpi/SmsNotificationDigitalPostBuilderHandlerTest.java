@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.dpi;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.sdp.client2.domain.digital_post.DigitalPost;
 import no.difi.sdp.client2.domain.digital_post.SmsVarsel;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
@@ -13,7 +13,7 @@ public class SmsNotificationDigitalPostBuilderHandlerTest {
     private DigitalPostInnbyggerConfig config;
     private DigitalPost.Builder builder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         config = mock(DigitalPostInnbyggerConfig.class);
         builder = mock(DigitalPost.Builder.class);

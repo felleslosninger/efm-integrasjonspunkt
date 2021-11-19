@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.proc.BadJWSException;
+import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
@@ -10,11 +11,10 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
@@ -35,9 +35,10 @@ import java.util.UUID;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
@@ -81,7 +82,7 @@ public class ServiceRegistryLookupTest {
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
 
-    @Before
+    @BeforeEach
     public void setup() {
         IntegrasjonspunktProperties.Arkivmelding arkivmeldingProps = new IntegrasjonspunktProperties.Arkivmelding().setDefaultProcess("foo");
         when(properties.getArkivmelding()).thenReturn(arkivmeldingProps);
@@ -95,26 +96,27 @@ public class ServiceRegistryLookupTest {
         dpo.setDocumentTypes(Collections.singletonList(DEFAULT_DOCTYPE));
     }
 
-    @After
+    @AfterEach
     public void after() {
         cacheManager.getCacheNames().forEach(p -> {
             Objects.requireNonNull(cacheManager.getCache(p)).clear();
         });
     }
 
-    @Test(expected = ServiceRegistryLookupException.class)
-    public void organizationWithoutServiceRecord() throws BadJWSException, ServiceRegistryLookupException {
+    @SneakyThrows
+    @Test
+    public void organizationWithoutServiceRecord() {
         final String json = new SRContentBuilder().build();
         when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenReturn(json);
 
-        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        assertThrows(ServiceRegistryLookupException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).build()));
     }
 
-    @Test(expected = ServiceRegistryLookupException.class)
+    @Test
     public void noEntityForOrganization() throws BadJWSException, ServiceRegistryLookupException {
         when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        this.service.getServiceRecord(SRParameter.builder(ORGNR).build());
+        assertThrows(ServiceRegistryLookupException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).build()));
     }
 
     @Test
@@ -165,8 +167,8 @@ public class ServiceRegistryLookupTest {
             InfoRecord infoRecord = new InfoRecord(ORGNR, ORGNAME, entityType);
 
             IdentifierResource resource = new IdentifierResource()
-                    .setInfoRecord(infoRecord)
-                    .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
+                .setInfoRecord(infoRecord)
+                .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
             try {
                 return new ObjectMapper().writeValueAsString(resource);

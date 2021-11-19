@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.Before;
+import io.cucumber.java.Before;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;

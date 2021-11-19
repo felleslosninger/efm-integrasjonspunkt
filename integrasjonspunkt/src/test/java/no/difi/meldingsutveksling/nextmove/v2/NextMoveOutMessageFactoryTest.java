@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Clock;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class NextMoveOutMessageFactoryTest {
@@ -30,7 +30,7 @@ public class NextMoveOutMessageFactoryTest {
 
     private no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress srPostAddress;
 
-    @Before
+    @BeforeEach
     public void setup() {
         factory = new NextMoveOutMessageFactory(props, serviceRecordProvider, uuidGenerator, clock);
 

@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.dpi;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.dpi.forsendelse.DigitalForsendelseHandler;
 import no.difi.meldingsutveksling.dpi.forsendelse.PrintForsendelseHandler;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,7 +17,7 @@ public class ForsendelseHandlerFactoryTest {
     private MeldingsformidlerRequest mock;
     private ForsendelseHandlerFactory factory;
 
-    @Before
+    @BeforeEach
     public void setup() {
         config = new DigitalPostInnbyggerConfig();
         mock = mock(MeldingsformidlerRequest.class);
