@@ -3,15 +3,18 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringResult;
+import org.xmlunit.matchers.CompareMatcher;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
@@ -22,7 +25,7 @@ public class StandardBusinessDocumentJaxbTest {
     private Unmarshaller unmarshaller;
     private ObjectFactory objectFactory;
 
-    @Before
+    @BeforeEach
     @SneakyThrows
     public void createMarshaller() {
         JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessage.class);
@@ -37,9 +40,8 @@ public class StandardBusinessDocumentJaxbTest {
     public void testMarshall() {
         StringResult result = new StringResult();
         marshaller.marshal(objectFactory.createStandardBusinessDocument(getDocument()), result);
-        assertThat(result.toString()).isXmlEqualTo(
-                contentOf(getClass().getResource("/sbd/StandardBusinessDocument.xml"))
-        );
+        MatcherAssert.assertThat(result.toString(),
+            CompareMatcher.isIdenticalTo(contentOf(Objects.requireNonNull(getClass().getResource("/sbd/StandardBusinessDocument.xml")))).ignoreWhitespace());
     }
 
     @Test

@@ -11,8 +11,8 @@ import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
 import no.ks.fiks.io.client.model.MeldingId
 import no.ks.fiks.io.client.model.MottattMelding
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.InputStream
 import java.util.*
 
@@ -30,7 +30,7 @@ class FiksIoSubscriberTest {
     lateinit var sbd: StandardBusinessDocument
     lateinit var fiksIoSubscriber: FiksIoSubscriber
 
-    @Before
+    @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
 

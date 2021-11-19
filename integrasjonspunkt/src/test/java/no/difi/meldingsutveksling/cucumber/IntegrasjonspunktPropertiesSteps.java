@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.Given;
+import io.cucumber.java.After;
+import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;

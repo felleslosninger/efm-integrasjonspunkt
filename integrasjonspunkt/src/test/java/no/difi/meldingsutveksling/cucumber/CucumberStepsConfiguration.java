@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
+import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
@@ -32,8 +30,7 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.ks.fiks.io.client.FiksIOKlient;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +52,7 @@ import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
 import javax.xml.bind.Marshaller;
+import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,6 +68,7 @@ import static org.mockito.Mockito.spy;
         TestClockConfig.class,
         CucumberStepsConfiguration.SpringConfiguration.class,
 }, loader = SpringBootContextLoader.class)
+@CucumberContextConfiguration
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
@@ -257,8 +256,8 @@ public class CucumberStepsConfiguration {
         }
     }
 
-    @Rule
-    private final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @TempDir
+    File temporaryFolder;
 
     @MockBean public UUIDGenerator uuidGenerator;
     @MockBean public LookupClient lookupClient;
@@ -271,14 +270,4 @@ public class CucumberStepsConfiguration {
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockBean public FiksIOKlient fiksIOKlient;
 
-    @Before
-    @SneakyThrows
-    public void before() {
-        temporaryFolder.create();
-    }
-
-    @After
-    public void after() {
-        temporaryFolder.delete();
-    }
 }

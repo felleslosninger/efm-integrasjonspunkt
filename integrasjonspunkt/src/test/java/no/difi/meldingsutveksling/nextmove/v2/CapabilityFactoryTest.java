@@ -3,15 +3,18 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+@ExtendWith(MockitoExtension.class)
 public class CapabilityFactoryTest {
 
     @Mock
@@ -19,7 +22,7 @@ public class CapabilityFactoryTest {
 
     CapabilityFactory capabilityFactory;
 
-    @Before
+    @BeforeEach
     public void before() {
         capabilityFactory = new CapabilityFactory(postalAddressFactory);
     }
@@ -28,7 +31,7 @@ public class CapabilityFactoryTest {
     public void testGetTypeArkivmelding() {
         ServiceRecord serviceRecord = Mockito.mock(ServiceRecord.class);
         String type = capabilityFactory.getType("urn:no:difi:arkivmelding:xsd::arkivmelding", serviceRecord);
-        Assert.assertEquals(MessageType.ARKIVMELDING.getType(), type);
+        assertEquals(MessageType.ARKIVMELDING.getType(), type);
     }
 
     @Test
@@ -36,7 +39,7 @@ public class CapabilityFactoryTest {
         ServiceRecord serviceRecord = Mockito.mock(ServiceRecord.class);
         Mockito.when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPFIO);
         String type = capabilityFactory.getType("no.ks.fiks.some.doctype.v1", serviceRecord);
-        Assert.assertEquals(MessageType.FIKSIO.getType(), type);
+        assertEquals(MessageType.FIKSIO.getType(), type);
     }
 
     @Test
@@ -44,6 +47,6 @@ public class CapabilityFactoryTest {
         ServiceRecord serviceRecord = Mockito.mock(ServiceRecord.class);
         Mockito.when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         String type = capabilityFactory.getType("no.ks.fiks.some.doctype.v1", serviceRecord);
-        Assert.assertNull(type);
+        assertNull(type);
     }
 }

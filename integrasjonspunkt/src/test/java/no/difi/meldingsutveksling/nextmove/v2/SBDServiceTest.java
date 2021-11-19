@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -12,8 +12,8 @@ import java.time.OffsetDateTime;
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SBDServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class SBDUtilTest {
 
     private SBDService target = new SBDService(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
 

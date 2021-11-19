@@ -1,9 +1,11 @@
-package no.difi.meldingsutveksling.noarkexchange;
-
 import net.logstash.logback.marker.LogstashMarker;
-import org.junit.Test;
+import no.difi.meldingsutveksling.noarkexchange.DefaultTemplateFactory;
+import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
+import no.difi.meldingsutveksling.noarkexchange.NtlmTemplateFactory;
+import no.difi.meldingsutveksling.noarkexchange.WebServiceTemplateFactory;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NoarkClientSettingsTest {
 

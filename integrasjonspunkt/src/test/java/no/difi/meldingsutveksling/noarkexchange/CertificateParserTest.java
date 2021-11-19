@@ -3,12 +3,12 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.security.cert.Certificate;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.fail;
 
 public class CertificateParserTest {
 
@@ -19,7 +19,7 @@ public class CertificateParserTest {
             final Certificate cert = CertificateParser.parse(certificate);
             MatcherAssert.assertThat(cert.getType(), is("X.509"));
         } catch (CertificateParserException e) {
-            fail("Failed to parse certificate");
+            Assertions.fail("Failed to parse certificate");
         }
     }
 }

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.clock.TestClock;
 

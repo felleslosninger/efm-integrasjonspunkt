@@ -240,7 +240,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
        </hoveddokument>
     </manifest>
     """
-    And the content of the file named "arkivmelding.xml" is:
+    And the XML content of the file named "arkivmelding.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">

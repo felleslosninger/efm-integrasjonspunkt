@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

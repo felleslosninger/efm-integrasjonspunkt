@@ -15,9 +15,11 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.ObjectProvider
 import java.util.*
 
@@ -26,41 +28,55 @@ class NextMoveValidatorTest {
 
     @MockK
     lateinit var serviceRecordProvider: ServiceRecordProvider
+
     @MockK
     lateinit var nextMoveMessageOutRepository: NextMoveMessageOutRepository
+
     @MockK
     lateinit var conversationStrategyFactory: ConversationStrategyFactory
+
     @MockK
     lateinit var asserter: Asserter
+
     @MockK
     lateinit var optionalCryptoMessagePersister: OptionalCryptoMessagePersister
+
     @MockK
     lateinit var timeToLiveHelper: TimeToLiveHelper
+
     @MockK
     lateinit var sbdService: SBDService
+
     @MockK
-    lateinit var conversationService : ConversationService
+    lateinit var sbdUtil: SBDUtil
+
+    @MockK
+    lateinit var conversationService: ConversationService
+
     @MockK
     lateinit var arkivmeldingUtil: ArkivmeldingUtil
+
     @MockK
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
+
     @MockK
     lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
-    private lateinit var nextMoveValidator : NextMoveValidator
+    private lateinit var nextMoveValidator: NextMoveValidator
 
     val messageId = "123"
     val message = mockk<NextMoveOutMessage>()
     val sbd = mockk<StandardBusinessDocument>()
     val serviceRecord = mockk<ServiceRecord>()
     val businessMessage = ArkivmeldingMessage()
-            .setHoveddokument("foo.txt")
+        .setHoveddokument("foo.txt")
     val print = true
 
-    @Before
+    @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        nextMoveValidator = NextMoveValidator(serviceRecordProvider,
+        nextMoveValidator = NextMoveValidator(
+            serviceRecordProvider,
             nextMoveMessageOutRepository,
             conversationStrategyFactory,
             asserter,
@@ -70,12 +86,13 @@ class NextMoveValidatorTest {
             conversationService,
             arkivmeldingUtil,
             nextMoveFileSizeValidator,
-            certValidator)
+            certValidator
+        )
 
 
         val bmf = BusinessMessageFile()
-                .setFilename("foo.txt")
-                .setPrimaryDocument(true)
+            .setFilename("foo.txt")
+            .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
         every { certValidator.ifAvailable(any()) } just Runs
@@ -106,52 +123,52 @@ class NextMoveValidatorTest {
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
-    @After
+    @AfterEach
     fun after() {
         clearStaticMockk(StandardBusinessDocumentUtils::class, SBDUtil::class)
     }
 
-    @Test(expected = MessageTypeDoesNotFitDocumentTypeException::class)
+    @Test
     fun `message type must fit document type`() {
         every { SBDUtil.getDocumentType(sbd) } returns "foo::bar"
-        nextMoveValidator.validate(sbd)
+        assertThrows(MessageTypeDoesNotFitDocumentTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test(expected = UnknownMessageTypeException::class)
+    @Test
     fun `document type must be valid`() {
         every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.BESTEDU_MELDING)
         every { StandardBusinessDocumentUtils.getType(sbd) } returns Optional.of("melding")
-        nextMoveValidator.validate(sbd)
+        assertThrows(UnknownMessageTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test(expected = ServiceNotEnabledException::class)
+    @Test
     fun `service not enabled should throw exception`() {
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns false
-        nextMoveValidator.validate(sbd)
+        assertThrows(ServiceNotEnabledException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test(expected = MessageAlreadyExistsException::class)
+    @Test
     fun `duplicate messageId not allowed`() {
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.of(message)
-        nextMoveValidator.validate(sbd)
+        assertThrows(MessageAlreadyExistsException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test(expected = MessageAlreadyExistsException::class)
+    @Test
     fun `conversation cannot exist with same messageId`() {
         every { conversationService.findConversation(messageId) } returns Optional.of(mockk<Conversation>())
-        nextMoveValidator.validate(sbd)
+        assertThrows(MessageAlreadyExistsException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test(expected = MissingFileException::class)
+    @Test
     fun `non-receipt messages must have attachments`() {
         every { message.files } returns null
-        nextMoveValidator.validate(message)
+        assertThrows(MissingFileException::class.java) { nextMoveValidator.validate(message) }
     }
 
-    @Test(expected = DuplicateFilenameException::class)
+    @Test
     fun `duplicate filenames not allowed`() {
         val file = BasicNextMoveFile.of("title", "foo.txt", "text", "foo".toByteArray())
-        nextMoveValidator.validateFile(message, file)
+        assertThrows(DuplicateFilenameException::class.java) { nextMoveValidator.validateFile(message, file) }
     }
 
     @Test
@@ -170,16 +187,16 @@ class NextMoveValidatorTest {
     fun `dpo message does not require title`() {
         val filename = "bar.txt"
         every { message.isPrimaryDocument(filename) } returns false
-       val file = BasicNextMoveFile.of("", filename, "text", "foo".toByteArray())
+        val file = BasicNextMoveFile.of("", filename, "text", "foo".toByteArray())
         nextMoveValidator.validateFile(message, file)
     }
 
-    @Test(expected = MissingFileTitleException::class)
+    @Test
     fun `dpv message requires title`() {
         val filename = "bar.txt"
         every { message.serviceIdentifier } returns ServiceIdentifier.DPV
         every { message.isPrimaryDocument(filename) } returns false
         val file = BasicNextMoveFile.of("", "bar.txt", "text", "foo".toByteArray())
-        nextMoveValidator.validateFile(message, file)
+        assertThrows(MissingFileTitleException::class.java) { nextMoveValidator.validateFile(message, file) }
     }
 }

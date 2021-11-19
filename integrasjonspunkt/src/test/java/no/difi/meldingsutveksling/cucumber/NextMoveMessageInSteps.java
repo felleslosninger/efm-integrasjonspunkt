@@ -1,16 +1,17 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.MatcherAssert;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -24,6 +25,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace;
+import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -117,9 +120,9 @@ public class NextMoveMessageInSteps {
         String actual = new String(IOUtils.toByteArray(attachement.getInputStream()));
 
         if (MediaType.APPLICATION_XML_VALUE.equals(mimetype)) {
-            assertThat(actual).isXmlEqualTo(body);
+            MatcherAssert.assertThat(actual, isIdenticalTo(body).ignoreWhitespace());
         } else {
-            assertThat(actual).isEqualTo(body);
+            MatcherAssert.assertThat(actual, equalToCompressingWhiteSpace(body));
         }
     }
 }

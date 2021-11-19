@@ -14,9 +14,10 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -51,7 +52,7 @@ class SbdFactoryTest {
 //        every { messageId } returns msgId
     }
 
-    @Before
+    @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
         sbdFactory = SBDFactory(serviceRegistryLookup, clock, props)
@@ -76,7 +77,7 @@ class SbdFactoryTest {
         every {  SBDUtil.getMessageId(sbd) } returns msgId
     }
 
-    @After
+    @AfterEach
     fun after() {
         clearStaticMockk(SBDUtil::class)
     }
@@ -107,21 +108,23 @@ class SbdFactoryTest {
         assertEquals(einnsynResponseProcess, SBDUtil.getProcess(statusSbd))
     }
 
-    @Test(expected = MeldingsUtvekslingRuntimeException::class)
+    @Test
     fun `test message type validation`() {
         every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns mockk {
             every { serviceIdentifier } returns ServiceIdentifier.DPO
             every { documentTypes } returns listOf("foo::bar")
         }
 
-        sbdFactory.createNextMoveSBD(
-            Organisasjonsnummer.from(senderOrgnr),
-            Organisasjonsnummer.from(receiverOrgnr),
-            convId, msgId,
-            arkivmeldingProcess,
-            "foo::bar",
-            mockkClass(ArkivmeldingMessage::class)
-        )
+        Assertions.assertThrows(MeldingsUtvekslingRuntimeException::class.java) {
+            sbdFactory.createNextMoveSBD(
+                Organisasjonsnummer.from(senderOrgnr),
+                Organisasjonsnummer.from(receiverOrgnr),
+                convId, msgId,
+                arkivmeldingProcess,
+                "foo::bar",
+                mockkClass(ArkivmeldingMessage::class)
+            )
+        }
     }
 
     @Test

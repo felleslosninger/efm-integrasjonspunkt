@@ -5,8 +5,8 @@ import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseBuilderHandler;
 import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseHandlerFactory;
 import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.DigitalForsendelseHandler;
 import no.difi.meldingsutveksling.dpi.xmlsoap.forsendelse.PrintForsendelseHandler;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -16,7 +16,7 @@ public class ForsendelseHandlerFactoryTest {
     private DigitalPostInnbyggerConfig config;
     private ForsendelseHandlerFactory factory;
 
-    @Before
+    @BeforeEach
     public void setup() {
         config = new DigitalPostInnbyggerConfig();
         factory = new ForsendelseHandlerFactory(config);
