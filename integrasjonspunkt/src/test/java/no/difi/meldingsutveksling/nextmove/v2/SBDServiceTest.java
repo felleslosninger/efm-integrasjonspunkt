@@ -13,17 +13,17 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class SBDUtilTest {
+class SBDServiceTest {
 
-    private SBDService target = new SBDService(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
+    private final SBDService target = new SBDService(Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
 
     @Test
-    public void notExpired() {
+    void notExpired() {
         assertThat(target.isExpired(getStandardBusinessDocument("2019-03-25T11:38:24Z"))).isFalse();
     }
 
     @Test
-    public void expired() {
+    void expired() {
         assertThat(target.isExpired(getStandardBusinessDocument("2019-03-25T11:38:22Z"))).isTrue();
     }
 

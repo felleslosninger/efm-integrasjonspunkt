@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.util.StringUtil;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.xmlunit.matchers.CompareMatcher;
@@ -21,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -120,8 +120,7 @@ public class MessageOutSteps {
     @Then("^the sent message's SBD is:$")
     public void theSentMessagesSbdIs(String expectedSBD) {
         JsonContent<StandardBusinessDocument> actual = json.write(messageSentHolder.get().getSbd());
-        assertThat(actual)
-                .isStrictlyEqualToJson(expectedSBD);
+        assertThat(actual.getJson(), jsonEquals(expectedSBD));
     }
 
 }
