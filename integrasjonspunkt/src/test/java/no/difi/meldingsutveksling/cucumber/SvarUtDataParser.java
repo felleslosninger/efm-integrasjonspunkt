@@ -7,15 +7,14 @@ import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.ks.svarut.Dokument;
 import no.difi.meldingsutveksling.ks.svarut.OrganisasjonDigitalAdresse;
 import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtRequest;
-import no.difi.meldingsutveksling.pipes.Plumber;
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.util.Lists;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Profile("cucumber")
@@ -24,32 +23,28 @@ public class SvarUtDataParser {
 
     private final CmsUtil cmsUtil;
     private final CucumberKeyStore cucumberKeyStore;
-    private final Plumber plumber;
+    private final XMLMarshaller xmlMarshaller;
 
     @SneakyThrows
-    Message parse(SvarUtRequest svarUtRequest) {
-        return new Message()
-                .setServiceIdentifier(ServiceIdentifier.DPF)
-                .attachments(getAttachment(svarUtRequest));
-    }
-
-    private List<Attachment> getAttachment(SvarUtRequest svarUtRequest) {
-        SendForsendelseMedId sendForsendelseMedId = svarUtRequest.getForsendelse();
-        OrganisasjonDigitalAdresse digitalAdresse = (OrganisasjonDigitalAdresse) sendForsendelseMedId.getForsendelse().getMottaker().getDigitalAdresse();
+    Message parse(String payload, Iterator<org.springframework.ws.mime.Attachment> soapAttachments) {
+        SendForsendelseMedId forsendelseMedId = xmlMarshaller.unmarshall(payload, SendForsendelseMedId.class);
+        OrganisasjonDigitalAdresse digitalAdresse = (OrganisasjonDigitalAdresse) forsendelseMedId.getForsendelse().getMottaker().getDigitalAdresse();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(digitalAdresse.getOrgnr());
 
-        return sendForsendelseMedId.getForsendelse().getDokumenter()
-                .stream()
-                .map(p -> getAttachment(p, privateKey))
-                .collect(Collectors.toList());
+        List<Attachment> attachments = Lists.newArrayList();
+        if (soapAttachments.hasNext()) {
+            org.springframework.ws.mime.Attachment attachment = soapAttachments.next();
+            byte[] encrypted = IOUtils.toByteArray(attachment.getInputStream());
+            byte[] decrypted = cmsUtil.decryptCMS(encrypted, privateKey);
+            Dokument dokument = forsendelseMedId.getForsendelse().getDokumenter().get(0);
+            attachments.add(new Attachment(decrypted)
+                .setMimeType(dokument.getMimetype())
+                .setFileName(dokument.getFilnavn()));
+        }
+
+        return new Message()
+            .setServiceIdentifier(ServiceIdentifier.DPF)
+            .setAttachments(attachments);
     }
 
-    @SneakyThrows
-    private Attachment getAttachment(Dokument dokument, PrivateKey privateKey) {
-        byte[] encrypted = IOUtils.toByteArray(dokument.getData().getInputStream());
-        byte[] decrypted = cmsUtil.decryptCMS(encrypted, privateKey);
-        return new Attachment(decrypted)
-                .setMimeType(dokument.getMimetype())
-                .setFileName(dokument.getFilnavn());
-    }
 }

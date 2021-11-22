@@ -159,8 +159,7 @@ Feature: Sending a Next Move DPF message
     Then an upload to Fiks is initiated with:
     """
     <?xml version="1.0" encoding="UTF-8"?>
-    <ns2:sendForsendelseMedId xmlns:ns2="http://www.ks.no/svarut/servicesV9"
-                              xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+    <sendForsendelseMedId xmlns="http://www.ks.no/svarut/servicesV9">
         <forsendelse>
             <avgivendeSystem></avgivendeSystem>
             <dokumenter>
@@ -187,7 +186,7 @@ Feature: Sending a Next Move DPF message
             </metadataFraAvleverendeSystem>
             <mottaker>
                 <digitalAdresse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                xsi:type="ns2:organisasjonDigitalAdresse">
+                                xsi:type="organisasjonDigitalAdresse">
                     <orgnr>910075924</orgnr>
                 </digitalAdresse>
                 <postAdresse>
@@ -207,7 +206,7 @@ Feature: Sending a Next Move DPF message
             <svarPaForsendelseLink>false</svarPaForsendelseLink>
             <svarSendesTil>
                 <digitalAdresse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                                xsi:type="ns2:organisasjonDigitalAdresse">
+                                xsi:type="organisasjonDigitalAdresse">
                     <orgnr>910077473</orgnr>
                 </digitalAdresse>
                 <postAdresse>
@@ -220,7 +219,7 @@ Feature: Sending a Next Move DPF message
             <tittel>Nye lysrør</tittel>
         </forsendelse>
         <forsendelsesid>abc8849c-e281-4809-8555-7cd54952b946</forsendelsesid>
-    </ns2:sendForsendelseMedId>
+    </sendForsendelseMedId>
     """
     And the content of the file named "test.txt" is:
     """

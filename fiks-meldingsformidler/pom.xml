@@ -104,31 +104,6 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
-        <!--    <dependency>-->
-        <!--      <groupId>org.hibernate</groupId>-->
-        <!--      <artifactId>hibernate-validator</artifactId>-->
-        <!--    </dependency>-->
-        <!--    <dependency>-->
-        <!--      <groupId>cglib</groupId>-->
-        <!--      <artifactId>cglib</artifactId>-->
-        <!--      <version>3.2.4</version>-->
-        <!--      <scope>test</scope>-->
-        <!--    </dependency>-->
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ws.commons.axiom</groupId>
-            <artifactId>axiom-impl</artifactId>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>stax2-api</artifactId>
-                    <groupId>org.codehaus.woodstox</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <build>
