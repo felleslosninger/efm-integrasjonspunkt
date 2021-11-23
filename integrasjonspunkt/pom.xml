@@ -468,10 +468,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
         </dependency>
-        <!-- spring-boot-starter-aop gives transitive dependency to logback-classic which includes SLF4J bindings.
-        If it weren't we would need to import logback-classic here. -->
-
-        <!-- end logging/monitoring -->
 
         <!-- Spring Boot Devtools causes class loader problems with Metro generated SOAP clients. -->
 <!--        <dependency>-->
@@ -693,6 +689,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.kirviq</groupId>
             <artifactId>dumbster</artifactId>
         </dependency>
@@ -701,20 +701,13 @@
             <artifactId>spring-cloud-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jvnet.staxex</groupId>
-            <artifactId>stax-ex</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>javax.jms-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
+            <version>42.2.6</version>
         </dependency>
         <dependency>
             <groupId>net.javacrumbs.json-unit</groupId>

@@ -1,20 +1,26 @@
-                                     1ttttti        1ttttt;             .1tttttt.    ittttti
-                                    1ttttttti      1ttttttt;          .1tttttttt.   ittttttti
-                                    1ttttttti     ittttttttt,        1tttttttttt.  :ttttttttt:
-                                    1ttttttti     ;ttttttttt.       1ttttttttttt.  ,ttttttttt,
-                                    1ttttttti      :ttttttt.       ,tttttttt1       ,ttttttt,
-                                    1ttttttti         .,.          ;ttttttt1           .,.
-                         :1fL1 it1;.1ttttttti      .........    ...;ttttttt1....    .........
-                     .1LLLLLLLL; 1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
-                   .fLLLLLLLLLL1 1tttttttttti      1ttttttt;    1ttttttttttttttt.   ittttttti
-                  :LLLLLLLLLLi ;tttttttttttti      1ttttttt;    ;ii1ttttttt1iiii.   ittttttti
-                 :LLLLLLLLt,     ,1ttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 fLLLLLLL,         :tttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                ,LLLLLLL;           ittttttti      1ttttttt;       ;ttttttt1        ittttttti
-                ,LLLLLLL;           ittttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 fLLLLLLL,         :tttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                 :LLLLLLLLf,     :tttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                  :LLLLLLLLLL: itttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                    tLLLLLL1 1tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                      1LLLLt ;tttttttttttttti      1ttttttt;       ;ttttttt1        ittttttti
-                         :1fLi it1:.;1111111i      11111111;       ;1111111i        i1111111i
+
+
+                                                             dddddddd
+DDDDDDDDDDDDD          iiii                                  d::::::d  iiii
+D::::::::::::DDD      i::::i                                 d::::::d i::::i
+D:::::::::::::::DD     iiii                                  d::::::d  iiii
+DDD:::::DDDDD:::::D                                          d:::::d
+  D:::::D    D:::::D iiiiiii    ggggggggg   ggggg    ddddddddd:::::d iiiiiiirrrrr   rrrrrrrrr
+  D:::::D     D:::::Di:::::i   g:::::::::ggg::::g  dd::::::::::::::d i:::::ir::::rrr:::::::::r
+  D:::::D     D:::::D i::::i  g:::::::::::::::::g d::::::::::::::::d  i::::ir:::::::::::::::::r
+  D:::::D     D:::::D i::::i g::::::ggggg::::::ggd:::::::ddddd:::::d  i::::irr::::::rrrrr::::::r
+  D:::::D     D:::::D i::::i g:::::g     g:::::g d::::::d    d:::::d  i::::i r:::::r     r:::::r
+  D:::::D     D:::::D i::::i g:::::g     g:::::g d:::::d     d:::::d  i::::i r:::::r     rrrrrrr
+  D:::::D     D:::::D i::::i g:::::g     g:::::g d:::::d     d:::::d  i::::i r:::::r
+  D:::::D    D:::::D  i::::i g::::::g    g:::::g d:::::d     d:::::d  i::::i r:::::r
+DDD:::::DDDDD:::::D  i::::::ig:::::::ggggg:::::g d::::::ddddd::::::ddi::::::ir:::::r
+D:::::::::::::::DD   i::::::i g::::::::::::::::g  d:::::::::::::::::di::::::ir:::::r
+D::::::::::::DDD     i::::::i  gg::::::::::::::g   d:::::::::ddd::::di::::::ir:::::r
+DDDDDDDDDDDDD        iiiiiiii    gggggggg::::::g    ddddddddd   dddddiiiiiiiirrrrrrr
+                                         g:::::g
+                             gggggg      g:::::g
+                             g:::::gg   gg:::::g
+                              g::::::ggg:::::::g
+                               gg:::::::::::::g
+                                 ggg::::::ggg
+                                    gggggg

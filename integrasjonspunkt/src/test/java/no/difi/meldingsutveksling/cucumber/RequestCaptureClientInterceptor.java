@@ -28,6 +28,7 @@ public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter {
     private final Holder<List<String>> webServicePayloadHolder;
     private final Holder<Message> messageSentHolder;
     private final DigipostAttachmentParser digipostAttachmentParser;
+    private final SvarUtDataParser svarUtDataParser;
 
     @Override
     @SneakyThrows({TransformerException.class, IOException.class})
@@ -50,9 +51,13 @@ public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter {
 
     private void handleSaajSoapMessage(String payload, SaajSoapMessage soapMessage) throws IOException {
         if (soapMessage.getAttachments().hasNext()) {
-            InputStream encryptedAsic = soapMessage.getAttachments().next().getInputStream();
-            Message message = digipostAttachmentParser.parse(payload, encryptedAsic);
-            messageSentHolder.set(message);
+            if (payload.contains("sendForsendelseMedId")) {
+                messageSentHolder.set(svarUtDataParser.parse(payload, soapMessage.getAttachments()));
+            } else {
+                InputStream encryptedAsic = soapMessage.getAttachments().next().getInputStream();
+                Message message = digipostAttachmentParser.parse(payload, encryptedAsic);
+                messageSentHolder.set(message);
+            }
         }
     }
 }

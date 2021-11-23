@@ -14,13 +14,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
-import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.addressing.client.ActionCallback;
 import org.springframework.ws.soap.addressing.version.Addressing10;
-import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
+import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
      * Creates client to use Altinn Correspondence Agency
      */
     public CorrespondenceAgencyClient(CorrespondenceAgencyConfiguration config) {
-        super(getFactory());
         this.endpointUrl = config.getEndpointUrl();
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         String contextPath = "no.altinn.services.serviceengine.correspondence._2009._10";
@@ -54,16 +54,17 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
         template.setMarshaller(marshaller);
         template.setUnmarshaller(marshaller);
         template.setMessageSender(createMessageSender());
+        template.setMessageFactory(getFactory());
     }
 
     protected Map<String, Object> getMarshallerProperties() {
         return Collections.emptyMap();
     }
 
-    private static AxiomSoapMessageFactory getFactory() {
-        AxiomSoapMessageFactory newSoapMessageFactory = new AxiomSoapMessageFactory();
-        newSoapMessageFactory.setSoapVersion(SoapVersion.SOAP_12);
-        return newSoapMessageFactory;
+    @SneakyThrows
+    private static SaajSoapMessageFactory getFactory() {
+        MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
+        return new SaajSoapMessageFactory(messageFactory);
     }
 
     private List<ClientInterceptor> getInterceptors(CorrespondenceAgencyConfiguration config) {
