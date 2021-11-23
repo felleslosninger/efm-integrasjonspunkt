@@ -42,31 +42,32 @@ public class NextMoveMessageOutController {
     private final NextMoveMessageService messageService;
 
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public StandardBusinessDocument createAndSendMessage(
-            @RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
-            MultipartRequest multipartRequest) {
+    public StandardBusinessDocument createAndSendMessage(@RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
+                                                         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent,
+                                                         MultipartRequest multipartRequest) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
+        MDC.put(HttpHeaders.USER_AGENT, userAgent);
         List<MultipartFile> files = multipartRequest.getMultiFileMap().values().stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
         // Check for max size
         files.stream()
-                .filter(p -> p.getSize() > MAX_SIZE)
-                .findAny()
-                .ifPresent(p -> {
-                    throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
-                });
+            .filter(p -> p.getSize() > MAX_SIZE)
+            .findAny()
+            .ifPresent(p -> {
+                throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
+            });
         // Check for duplicate filenames
         List<String> filenames = files.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
+            .map(MultipartFile::getOriginalFilename)
+            .collect(Collectors.toList());
         filenames.stream()
-                .filter(f -> Collections.frequency(filenames, f) > 1)
-                .reduce((a, b) -> a + ", " + b)
-                .ifPresent(d -> {
-                    throw new DuplicateFilenameException(d);
-                });
+            .filter(f -> Collections.frequency(filenames, f) > 1)
+            .reduce((a, b) -> a + ", " + b)
+            .ifPresent(d -> {
+                throw new DuplicateFilenameException(d);
+            });
 
         NextMoveOutMessage message = messageService.createMessage(sbd, files);
         messageService.sendMessage(message.getId());
@@ -75,19 +76,20 @@ public class NextMoveMessageOutController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(noRollbackFor = TimeToLiveException.class)
-    public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd) {
+    public StandardBusinessDocument createMessage(@Valid @RequestBody StandardBusinessDocument sbd,
+                                                  @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
+        MDC.put(HttpHeaders.USER_AGENT, userAgent);
         NextMoveOutMessage message = messageService.createMessage(sbd);
         return message.getSbd();
     }
 
     @GetMapping
     @Transactional
-    public Page<StandardBusinessDocument> getMessages(
-            @QuerydslPredicate(root = NextMoveOutMessage.class) Predicate predicate,
-            @PageableDefault Pageable pageable) {
+    public Page<StandardBusinessDocument> getMessages(@QuerydslPredicate(root = NextMoveOutMessage.class) Predicate predicate,
+                                                      @PageableDefault Pageable pageable) {
         return messageService.findMessages(predicate, pageable)
-                .map(NextMoveOutMessage::getSbd);
+            .map(NextMoveOutMessage::getSbd);
     }
 
     @GetMapping("/{messageId}")
@@ -106,12 +108,11 @@ public class NextMoveMessageOutController {
 
     @PutMapping(value = "/{messageId}")
     @Transactional
-    public void uploadFile(
-            @PathVariable("messageId") String messageId,
-            @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
-            @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
-            @RequestParam(value = "title", required = false) String title,
-            HttpServletRequest request) {
+    public void uploadFile(@PathVariable("messageId") String messageId,
+                           @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
+                           @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
+                           @RequestParam(value = "title", required = false) String title,
+                           HttpServletRequest request) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.addFile(message, new NextMoveUploadedFile(contentType, contentDisposition, title, request));
