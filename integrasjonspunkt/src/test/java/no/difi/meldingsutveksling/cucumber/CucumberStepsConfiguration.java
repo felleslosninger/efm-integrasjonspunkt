@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
@@ -46,11 +47,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
-import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
 import javax.xml.bind.Marshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
 import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
@@ -183,15 +185,17 @@ public class CucumberStepsConfiguration {
             };
         }
 
+        @SneakyThrows
         @Bean
         @Primary
-        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
+        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
             SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
             client.setDefaultUri("http://localhost:8080");
             client.setMarshaller(marshaller);
             client.setUnmarshaller(marshaller);
 
-            client.setMessageFactory(svarUtMessageFactory);
+            MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
+            client.setMessageFactory(new SaajSoapMessageFactory(messageFactory));
             client.setMessageSender(svarUtMessageSender);
 
             final ClientInterceptor[] interceptors = new ClientInterceptor[2];

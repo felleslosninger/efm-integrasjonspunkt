@@ -4,8 +4,6 @@ import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtRequest;
 import org.hamcrest.MatcherAssert;
 import org.xmlunit.matchers.CompareMatcher;
 
@@ -15,8 +13,6 @@ import java.util.List;
 public class SvarUtSteps {
 
     private final Holder<List<String>> webServicePayloadHolder;
-    private final XMLMarshaller xmlMarshaller;
-    private final SvarUtDataParser svarUtDataParser;
     private final Holder<Message> messageSentHolder;
 
     @After
@@ -30,10 +26,13 @@ public class SvarUtSteps {
         List<String> payloads = webServicePayloadHolder.get();
         String actualPayload = payloads.get(0);
 
-        MatcherAssert.assertThat(actualPayload.replaceAll("<data>[^<]*</data>", "<data><!--encrypted content--></data>"),
+        MatcherAssert.assertThat(hideData(actualPayload),
             CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
+    }
 
-        SendForsendelseMedId sendForsendelseMedId = xmlMarshaller.unmarshall(actualPayload, SendForsendelseMedId.class);
-        messageSentHolder.set(svarUtDataParser.parse(new SvarUtRequest(null, sendForsendelseMedId)));
+    private String hideData(String s) {
+        return s.replaceAll("<data>.*</data>", "<data><!--encrypted content--></data>")
+            .replaceAll(":ns2|ns2:", "")
+            .replaceAll(":ns3|ns3:", "");
     }
 }
