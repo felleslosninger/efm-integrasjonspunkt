@@ -6,9 +6,9 @@ import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -23,8 +23,8 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 
 @DataJpaTest
 @Transactional(propagation = NOT_SUPPORTED) // we're going to handle transactions manually
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = JacksonTestConfig.class)
+@ActiveProfiles("test")
+@Import({JacksonTestConfig.class})
 class NextMoveMessageInRepositoryTest {
 
     @Autowired
