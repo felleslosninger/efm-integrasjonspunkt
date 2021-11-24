@@ -166,9 +166,14 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         private URL endpointUrl;
+        @NotNull
+        private String sensitiveServiceCode;
         private boolean notifyEmail;
         private boolean notifySms;
+        @NotNull
         private String notificationText;
+        @NotNull
+        private String sensitiveNotificationText;
         private boolean allowForwarding;
         private boolean enableDueDate;
         private Long daysToReply;
