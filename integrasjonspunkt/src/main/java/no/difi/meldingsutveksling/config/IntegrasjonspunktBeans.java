@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -82,7 +83,7 @@ public class IntegrasjonspunktBeans {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
         if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-            props.getOrg().getKeystore().getLockProvider()) {
+                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
             return new CmsUtil(null);
         }
         return new CmsUtil();
@@ -116,16 +117,6 @@ public class IntegrasjonspunktBeans {
     @Bean
     public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
         return new ForsendelseHandlerFactory(properties.getDpi());
-    }
-
-    @Bean
-    public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
-                                                           SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
-                                                           ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                           DpiReceiptMapper dpiReceiptMapper,
-                                                           ClientInterceptor metricsEndpointInterceptor) {
-        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
-            forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor);
     }
 
     @Bean
