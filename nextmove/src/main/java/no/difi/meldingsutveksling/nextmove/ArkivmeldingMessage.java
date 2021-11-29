@@ -13,4 +13,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
 public class ArkivmeldingMessage extends BusinessMessage<ArkivmeldingMessage> {
+    private DpvSettings dpv;
 }

@@ -38,7 +38,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Clock;
-import java.util.Optional;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
@@ -59,9 +58,9 @@ public class IntegrasjonspunktBeans {
     @Bean
     public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
         return LookupClientBuilder.forTest()
-                .locator(new StaticLocator(properties.getElma().getUrl()))
-                .certificateValidator(EmptyCertificateValidator.INSTANCE)
-                .build();
+            .locator(new StaticLocator(properties.getElma().getUrl()))
+            .certificateValidator(EmptyCertificateValidator.INSTANCE)
+            .build();
     }
 
     @Bean
@@ -83,7 +82,7 @@ public class IntegrasjonspunktBeans {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
         if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-                props.getOrg().getKeystore().getLockProvider()) {
+            props.getOrg().getKeystore().getLockProvider()) {
             return new CmsUtil(null);
         }
         return new CmsUtil();
@@ -102,16 +101,31 @@ public class IntegrasjonspunktBeans {
     @Bean
     public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
         return new CorrespondenceAgencyConfiguration()
-                .setPassword(properties.getDpv().getPassword())
-                .setSystemUserCode(properties.getDpv().getUsername())
-                .setNotifyEmail(properties.getDpv().isNotifyEmail())
-                .setNotifySms(properties.getDpv().isNotifySms())
-                .setNotificationText(Optional.ofNullable(properties.getDpv())
-                        .map(IntegrasjonspunktProperties.PostVirksomheter::getNotificationText)
-                        .orElse(null))
-                .setNextmoveFiledir(properties.getNextmove().getFiledir())
-                .setAllowForwarding(properties.getDpv().isAllowForwarding())
-                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+            .setPassword(properties.getDpv().getPassword())
+            .setSystemUserCode(properties.getDpv().getUsername())
+            .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
+            .setNotifyEmail(properties.getDpv().isNotifyEmail())
+            .setNotifySms(properties.getDpv().isNotifySms())
+            .setNotificationText(properties.getDpv().getNotificationText())
+            .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
+            .setNextmoveFiledir(properties.getNextmove().getFiledir())
+            .setAllowForwarding(properties.getDpv().isAllowForwarding())
+            .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
+    }
+
+    @Bean
+    public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
+        return new ForsendelseHandlerFactory(properties.getDpi());
+    }
+
+    @Bean
+    public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
+                                                           SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
+                                                           ForsendelseHandlerFactory forsendelseHandlerFactory,
+                                                           DpiReceiptMapper dpiReceiptMapper,
+                                                           ClientInterceptor metricsEndpointInterceptor) {
+        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
+            forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor);
     }
 
     @Bean
