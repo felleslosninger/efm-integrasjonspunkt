@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class SBDUtil {
 
@@ -106,6 +107,9 @@ public class SBDUtil {
     }
 
     public static String getMessageId(StandardBusinessDocument sbd) {
+        if (sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier() == null) {
+            sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().setInstanceIdentifier(UUID.randomUUID().toString());
+        }
         return StandardBusinessDocumentUtils.getMessageId(sbd)
                 .orElseThrow(() -> new NextMoveRuntimeException("Couldn't retrieve messageId from SBD"));
     }
