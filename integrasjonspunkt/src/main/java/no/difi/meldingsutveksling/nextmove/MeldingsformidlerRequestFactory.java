@@ -142,7 +142,10 @@ public class MeldingsformidlerRequestFactory {
 
     private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file, Reject reject, DpiDigitalMessage digital) {
         String metadataFilename = digital.getMetadataFiler().get(file.getFilename());
-        BusinessMessageFile messageFile = file.getMessage().getFiles()
+        if (nextMoveMessage.getFiles() == null) {
+            return null;
+        }
+        BusinessMessageFile messageFile = nextMoveMessage.getFiles()
                 .stream()
                 .filter(p -> p.getFilename().equals(metadataFilename))
                 .findFirst()
