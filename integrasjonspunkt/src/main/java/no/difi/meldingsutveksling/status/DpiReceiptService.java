@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -32,13 +33,16 @@ public class DpiReceiptService {
     @Transactional
     public void handleReceipt(ExternalReceipt externalReceipt) {
         final String conversationId = externalReceipt.getConversationId();
-        Conversation conversation = conversationService.findConversation(conversationId, ConversationDirection.OUTGOING)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown conversationID = %s", conversationId)));
+        Optional<Conversation> conversation = conversationService.findConversation(conversationId, ConversationDirection.OUTGOING);
 
-        conversationService.registerStatus(conversation, externalReceipt.toMessageStatus());
+        if (conversation.isPresent()) {
+            conversationService.registerStatus(conversation.get(), externalReceipt.toMessageStatus());
 
-        log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
-        externalReceipt.confirmReceipt();
-        log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
+            log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
+            externalReceipt.confirmReceipt();
+            log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
+        } else {
+            log.warn("Unknown conversationID = {}", conversationId);
+        }
     }
 }
