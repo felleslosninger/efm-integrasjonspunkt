@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;

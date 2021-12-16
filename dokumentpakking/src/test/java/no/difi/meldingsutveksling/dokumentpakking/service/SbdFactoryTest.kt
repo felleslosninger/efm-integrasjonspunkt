@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
+import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

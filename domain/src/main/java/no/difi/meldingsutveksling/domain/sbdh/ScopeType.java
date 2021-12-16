@@ -4,9 +4,10 @@ public enum ScopeType {
     JOURNALPOST_ID("JournalpostId"),
     CONVERSATION_ID("ConversationId"),
     SENDER_REF("SenderRef"),
-    RECEIVER_REF("ReceiverRef");
+    RECEIVER_REF("ReceiverRef"),
+    MESSAGE_CHANNEL("MessageChannel");
 
-    private String fullname;
+    private final String fullname;
 
     ScopeType(String fullname) {
         this.fullname = fullname;

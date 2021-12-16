@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.service;
+package no.difi.meldingsutveksling.sbd;
 
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @UtilityClass
 public class ScopeFactory {
@@ -23,6 +24,13 @@ public class ScopeFactory {
         return new Scope()
                 .setType(scopeType.toString())
                 .setInstanceIdentifier(identifier);
+    }
+
+    public static Scope fromIdentifier(ScopeType scopeType, String identifier) {
+        return new Scope()
+            .setType(scopeType.toString())
+            .setInstanceIdentifier(UUID.randomUUID().toString())
+            .setIdentifier(identifier);
     }
 
 }

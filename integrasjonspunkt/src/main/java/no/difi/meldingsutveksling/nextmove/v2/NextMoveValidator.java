@@ -10,7 +10,10 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -32,10 +35,12 @@ import java.io.InputStream;
 import java.security.cert.CertificateExpiredException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.MessageType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
@@ -56,6 +61,7 @@ public class NextMoveValidator {
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
+    private final IntegrasjonspunktProperties props;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
 
     void validate(StandardBusinessDocument sbd) {
@@ -89,6 +95,13 @@ public class NextMoveValidator {
 
         if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
+        }
+
+        if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
+            Optional<Scope> mc = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+            if (mc.isPresent() && !mc.get().getIdentifier().equals(props.getDpo().getMessageChannel())) {
+                throw new MessageChannelInvalidException(props.getDpo().getMessageChannel(), mc.get().getIdentifier());
+            }
         }
 
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);

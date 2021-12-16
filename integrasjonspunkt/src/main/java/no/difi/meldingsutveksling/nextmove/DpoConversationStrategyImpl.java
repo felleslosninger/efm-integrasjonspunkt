@@ -6,8 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnTransport;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
+import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -15,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -28,11 +35,15 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     private final AltinnTransport transport;
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
+    private final SBDUtil sbdUtil;
+    private final MessageChannelRepository messageChannelRepository;
 
     @Override
     @Transactional
     @Timed
-    public void send(NextMoveOutMessage message) {
+    public void send(@NotNull NextMoveOutMessage message) {
+        ifReceipt(message, mc -> message.getSbd().getScopes().add(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
+
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());
             return;
@@ -55,6 +66,14 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
+        ifReceipt(message, mc -> messageChannelRepository.deleteByMessageId(mc.getMessageId()));
+    }
+
+    private void ifReceipt(NextMoveOutMessage message, Consumer<MessageChannelEntry> consumer) {
+        if (sbdUtil.isReceipt(message.getSbd()) && message.getSbd().getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
+            ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) message.getSbd().getBusinessMessage();
+            messageChannelRepository.findByMessageId(receipt.getRelatedToMessageId()).ifPresent(consumer);
+        }
     }
 
 }

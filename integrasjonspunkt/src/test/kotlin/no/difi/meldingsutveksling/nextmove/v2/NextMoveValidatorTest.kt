@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.Scope
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
@@ -58,6 +59,9 @@ class NextMoveValidatorTest {
     lateinit var nextMoveFileSizeValidator: NextMoveFileSizeValidator
 
     @MockK
+    lateinit var props: IntegrasjonspunktProperties
+
+    @MockK
     lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
     private lateinit var nextMoveValidator: NextMoveValidator
@@ -84,6 +88,7 @@ class NextMoveValidatorTest {
             conversationService,
             arkivmeldingUtil,
             nextMoveFileSizeValidator,
+            props,
             certValidator
         )
 

@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.noarkexchange.LocalNorarkExistsCondition;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
