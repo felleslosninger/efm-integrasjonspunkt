@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -53,6 +55,7 @@ class SbdFactoryTest {
         every { receiverIdentifier } returns receiverOrgnr
         every { conversationId } returns convId
         every { messageId } returns msgId
+        every { findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.empty()
     }
 
     @BeforeEach

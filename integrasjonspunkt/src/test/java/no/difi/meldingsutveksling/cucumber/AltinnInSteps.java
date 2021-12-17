@@ -122,6 +122,7 @@ public class AltinnInSteps {
         BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
         BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
         file.setFileReference("testMessage");
+        file.setSendersReference(new ObjectFactory().createBrokerServiceAvailableFileSendersReference(UUID.randomUUID().toString()));
         file.setReceiptID(1);
         filesBasic.getBrokerServiceAvailableFile().add(file);
 
