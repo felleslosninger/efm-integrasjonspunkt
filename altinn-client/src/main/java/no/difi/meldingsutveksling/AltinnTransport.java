@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.Optional;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Transport implementation for Altinn message service.
@@ -23,6 +26,7 @@ public class AltinnTransport {
     private final UUIDGenerator uuidGenerator;
     private final AltinnWsClient client;
     private final SBDUtil sbdUtil;
+    private final IntegrasjonspunktProperties props;
 
     /**
      * @param sbd An SBD with a payload consisting of an CMS encrypted ASIC package
@@ -43,7 +47,10 @@ public class AltinnTransport {
 
     private String getSendersReference(StandardBusinessDocument sbd) {
         Optional<Scope> mcScope = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
-        if (mcScope.isPresent() && (sbdUtil.isStatus(sbd) || sbdUtil.isReceipt(sbd))) {
+        if (mcScope.isPresent() &&
+            (sbdUtil.isStatus(sbd) || sbdUtil.isReceipt(sbd)) &&
+            (isNullOrEmpty(props.getDpo().getMessageChannel()) ||
+                !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
             return mcScope.get().getIdentifier();
         }
         return uuidGenerator.generate();
