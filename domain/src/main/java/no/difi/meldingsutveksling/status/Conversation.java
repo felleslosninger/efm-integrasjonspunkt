@@ -55,6 +55,7 @@ public class Conversation extends AbstractEntity<Long> {
     private String receiver;
     private String receiverIdentifier;
     private String processIdentifier;
+    private String documentIdentifier;
     private String messageReference;
     private String messageTitle;
     private String serviceCode;
@@ -82,6 +83,7 @@ public class Conversation extends AbstractEntity<Long> {
                          Organisasjonsnummer sender,
                          Organisasjonsnummer receiver,
                          String processIdentifier,
+                         String documentIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier,
@@ -96,6 +98,7 @@ public class Conversation extends AbstractEntity<Long> {
         this.receiver = receiver.asIso6523();
         this.receiverIdentifier = receiver.getOrgNummer();
         this.processIdentifier = processIdentifier;
+        this.documentIdentifier = documentIdentifier;
         this.direction = direction;
         this.messageTitle = messageTitle;
         this.messageStatuses = new HashSet<>();
@@ -115,7 +118,7 @@ public class Conversation extends AbstractEntity<Long> {
 
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
-                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(),
+                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(), msg.getDocumentIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }

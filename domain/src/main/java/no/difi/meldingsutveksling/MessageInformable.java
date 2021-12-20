@@ -17,6 +17,8 @@ public interface MessageInformable {
 
     String getProcessIdentifier();
 
+    String getDocumentIdentifier();
+
     ConversationDirection getDirection();
 
     ServiceIdentifier getServiceIdentifier();
