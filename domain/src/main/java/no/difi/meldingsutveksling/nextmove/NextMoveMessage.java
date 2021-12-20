@@ -83,6 +83,11 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @Override
+    public String getDocumentIdentifier() {
+        return getSbd().getDocumentType();
+    }
+
+    @Override
     public OffsetDateTime getExpiry() {
         return getSbd().getExpectedResponseDateTime().orElse(null);
     }
