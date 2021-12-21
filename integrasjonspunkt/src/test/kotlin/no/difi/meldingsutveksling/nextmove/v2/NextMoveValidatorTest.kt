@@ -66,13 +66,12 @@ class NextMoveValidatorTest {
 
     private lateinit var nextMoveValidator: NextMoveValidator
 
-    val messageId = "123"
-    val message = mockk<NextMoveOutMessage>()
-    val sbd = mockk<StandardBusinessDocument>()
-    val serviceRecord = mockk<ServiceRecord>()
-    val businessMessage = ArkivmeldingMessage()
+    private val messageId = "123"
+    private val message = mockk<NextMoveOutMessage>()
+    private val sbd = mockk<StandardBusinessDocument>()
+    private val serviceRecord = mockk<ServiceRecord>()
+    private val businessMessage = ArkivmeldingMessage()
         .setHoveddokument("foo.txt")
-    val print = true
 
     @BeforeEach
     fun before() {
@@ -174,7 +173,6 @@ class NextMoveValidatorTest {
         nextMoveValidator.validate(sbd)
     }
 
-
     @Test
     fun `dpo message does not require title`() {
         val filename = "bar.txt"
@@ -190,5 +188,14 @@ class NextMoveValidatorTest {
         every { message.isPrimaryDocument(filename) } returns false
         val file = BasicNextMoveFile.of("", "bar.txt", "text", "foo".toByteArray())
         assertThrows(MissingFileTitleException::class.java) { nextMoveValidator.validateFile(message, file) }
+    }
+
+    @Test
+    fun `non-matching channel should throw exception`() {
+        every { props.dpo.messageChannel } returns "foo-42"
+        every { sbd.findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.of(mockk {
+            every { identifier } returns "foo-43"
+        })
+        assertThrows(MessageChannelInvalidException::class.java) { nextMoveValidator.validate(sbd) }
     }
 }

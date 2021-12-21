@@ -1,20 +1,36 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Clock;
+import java.util.Optional;
 
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(SpringExtension.class)
 public class NextMoveOutMessageFactoryTest {
 
     @MockBean
@@ -38,6 +54,43 @@ public class NextMoveOutMessageFactoryTest {
         when(srPostAddress.getName()).thenReturn("Foo");
         when(srPostAddress.getPostalCode()).thenReturn("0468");
         when(srPostAddress.getPostalArea()).thenReturn("Oslo");
+    }
+
+    @Test
+    public void testMessageChannelDefaultNoScope() {
+        ServiceRecord sr = mock(ServiceRecord.class);
+        StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
+        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
+        when(serviceRecordProvider.getServiceRecord(eq(sbd))).thenReturn(sr);
+
+        AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
+        String messageChannel = "foo-42";
+        dpo.setMessageChannel(messageChannel);
+        when(props.getDpo()).thenReturn(dpo);
+
+        NextMoveOutMessage msg = factory.getNextMoveOutMessage(sbd);
+        Optional<Scope> scope = msg.getSbd().findScope(ScopeType.MESSAGE_CHANNEL);
+        assertTrue(scope.isPresent());
+        assertEquals(messageChannel, scope.get().getIdentifier());
+    }
+
+    @Test
+    public void testMessageChannelDefaultScopeExistsEmptyIdentifier() {
+        ServiceRecord sr = mock(ServiceRecord.class);
+        StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
+        sbd.getScopes().add(new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
+        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
+        when(serviceRecordProvider.getServiceRecord(eq(sbd))).thenReturn(sr);
+
+        AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
+        String messageChannel = "foo-42";
+        dpo.setMessageChannel(messageChannel);
+        when(props.getDpo()).thenReturn(dpo);
+
+        NextMoveOutMessage msg = factory.getNextMoveOutMessage(sbd);
+        Optional<Scope> scope = msg.getSbd().findScope(ScopeType.MESSAGE_CHANNEL);
+        assertTrue(scope.isPresent());
+        assertEquals(messageChannel, scope.get().getIdentifier());
     }
 
     @Test
