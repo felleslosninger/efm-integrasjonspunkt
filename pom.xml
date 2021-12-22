@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>2.6.2</version>
         <relativePath/>
     </parent>
 
@@ -64,7 +64,7 @@
     </repositories>
 
     <properties>
-        <spring.cloud.version>2020.0.4</spring.cloud.version>
+        <spring.cloud.version>2021.0.0</spring.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.io.version>2.7</commons.io.version>
         <commons.compress.version>1.21</commons.compress.version>
@@ -75,7 +75,7 @@
         <junit.platform.version>1.8.1</junit.platform.version>
         <cucumber.version>7.0.0</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
-        <move-common.version>1.5.0</move-common.version>
+        <efm-common.version>1.6.0</efm-common.version>
         <lombok.version>1.18.16</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
@@ -223,22 +223,22 @@
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>audit</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>cloud</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>webservice-tools</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>security</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.commons</groupId>
