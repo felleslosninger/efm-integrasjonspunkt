@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
+import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.json.JsonDpiReceiptMapper;
 import no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient;
@@ -24,6 +25,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.time.Clock;
+import java.util.Arrays;
 
 @Configuration
 @ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
@@ -80,16 +82,21 @@ public class DpiConfig {
         return new MeldingsformidlerRequestFactory(properties, clock, optionalCryptoMessagePersister, mpcIdHolder);
     }
 
-    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
     public static class XmlSoap {
 
         @Bean
-        public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
-                                                               SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
-                                                               ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                               DpiReceiptMapper dpiReceiptMapper,
-                                                               ClientInterceptor metricsEndpointInterceptor,
-                                                               MetadataDocumentConverter metadataDocumentConverter) {
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
+        public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
+            return xmlSoapMeldingsformidlerClient;
+        }
+
+        @Bean
+        public MeldingsformidlerClient xmlSoapMeldingsformidlerClient(IntegrasjonspunktProperties properties,
+                                                                      SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
+                                                                      ForsendelseHandlerFactory forsendelseHandlerFactory,
+                                                                      DpiReceiptMapper dpiReceiptMapper,
+                                                                      ClientInterceptor metricsEndpointInterceptor,
+                                                                      MetadataDocumentConverter metadataDocumentConverter) {
             return new XmlSoapMeldingsformidlerClient(properties, sikkerDigitalPostKlientFactory,
                     forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor, metadataDocumentConverter);
         }
@@ -115,15 +122,23 @@ public class DpiConfig {
         }
     }
 
-    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json", matchIfMissing = true)
     @Import(DpiClientConfig.class)
     public static class Json {
 
         @Bean
-        public MeldingsformidlerClient meldingsformidlerClient(DpiClient dpiClient,
-                                                               ShipmentFactory shipmentFactory,
-                                                               JsonDpiReceiptMapper dpiReceiptMapper,
-                                                               MessageStatusMapper messageStatusMapper) {
+        public MeldingsformidlerClient meldingsformidlerClient(
+                MeldingsformidlerClient jsonMeldingsformidlerClient,
+                MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
+            return new DeletgatingMeldingsformidlerClient(Arrays.asList(
+                    jsonMeldingsformidlerClient, xmlSoapMeldingsformidlerClient));
+        }
+
+        @Bean
+        public MeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
+                                                                   ShipmentFactory shipmentFactory,
+                                                                   JsonDpiReceiptMapper dpiReceiptMapper,
+                                                                   MessageStatusMapper messageStatusMapper) {
             return new JsonMeldingsformidlerClient(dpiClient, shipmentFactory, dpiReceiptMapper, messageStatusMapper);
         }
 

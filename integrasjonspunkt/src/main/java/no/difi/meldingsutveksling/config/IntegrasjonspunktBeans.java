@@ -5,7 +5,6 @@ import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.xmlsoap.ForsendelseHandlerFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -59,9 +58,9 @@ public class IntegrasjonspunktBeans {
     @Bean
     public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
         return LookupClientBuilder.forTest()
-            .locator(new StaticLocator(properties.getElma().getUrl()))
-            .certificateValidator(EmptyCertificateValidator.INSTANCE)
-            .build();
+                .locator(new StaticLocator(properties.getElma().getUrl()))
+                .certificateValidator(EmptyCertificateValidator.INSTANCE)
+                .build();
     }
 
     @Bean
@@ -102,21 +101,16 @@ public class IntegrasjonspunktBeans {
     @Bean
     public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
         return new CorrespondenceAgencyConfiguration()
-            .setPassword(properties.getDpv().getPassword())
-            .setSystemUserCode(properties.getDpv().getUsername())
-            .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
-            .setNotifyEmail(properties.getDpv().isNotifyEmail())
-            .setNotifySms(properties.getDpv().isNotifySms())
-            .setNotificationText(properties.getDpv().getNotificationText())
-            .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
-            .setNextmoveFiledir(properties.getNextmove().getFiledir())
-            .setAllowForwarding(properties.getDpv().isAllowForwarding())
-            .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
-    public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
-        return new ForsendelseHandlerFactory(properties.getDpi());
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(properties.getDpv().getNotificationText())
+                .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setAllowForwarding(properties.getDpv().isAllowForwarding())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 
     @Bean

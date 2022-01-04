@@ -61,9 +61,11 @@ public class DefaultConversationService implements ConversationService {
         serviceIdentifiers.add(DPV);
         serviceIdentifiers.add(DPF);
 
-        Optional.ofNullable(meldingsformidlerClientObjectProvider.getIfAvailable())
-                .filter(MeldingsformidlerClient::skalPolleMeldingStatus)
-                .ifPresent(p -> serviceIdentifiers.add(DPI));
+
+        if (meldingsformidlerClientObjectProvider.stream()
+                .anyMatch(MeldingsformidlerClient::skalPolleMeldingStatus)) {
+            serviceIdentifiers.add(DPI);
+        }
 
         return Collections.unmodifiableSet(serviceIdentifiers);
     }
