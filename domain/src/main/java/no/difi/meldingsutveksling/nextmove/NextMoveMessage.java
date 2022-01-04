@@ -87,7 +87,7 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
 
     @Override
     public String getDocumentIdentifier() {
-        return getSbd().getDocumentType();
+        return SBDUtil.getDocumentType(getSbd());
     }
 
     @Override

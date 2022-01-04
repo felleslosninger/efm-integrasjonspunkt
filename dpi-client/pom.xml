@@ -49,10 +49,6 @@
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-        </dependency>
-        <dependency>
             <groupId>net.jimblackler</groupId>
             <artifactId>jsonschemafriend</artifactId>
         </dependency>

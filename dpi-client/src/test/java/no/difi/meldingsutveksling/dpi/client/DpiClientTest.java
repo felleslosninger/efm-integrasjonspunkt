@@ -34,11 +34,10 @@ import org.mockserver.model.MediaType;
 import org.mockserver.model.RequestDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
@@ -68,9 +67,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-@ContextConfiguration(
-        initializers = ConfigFileApplicationContextInitializer.class,
-        classes = {DpiClientTestConfig.class, DpiClientConfig.class})
+@SpringBootTest(classes = {DpiClientTestConfig.class, DpiClientConfig.class})
 @ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {

@@ -253,17 +253,17 @@
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>domain</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>validation</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>io</artifactId>
-                <version>${move-common.version}</version>
+                <version>${efm-common.version}</version>
             </dependency>
 
             <dependency>

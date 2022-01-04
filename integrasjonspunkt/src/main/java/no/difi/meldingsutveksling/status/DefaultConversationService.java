@@ -210,7 +210,7 @@ public class DefaultConversationService implements ConversationService {
 
             @Override
             public String getDocumentIdentifier() {
-                return sbd.getDocumentType();
+                return SBDUtil.getDocumentType(sbd);
             }
 
             @Override
