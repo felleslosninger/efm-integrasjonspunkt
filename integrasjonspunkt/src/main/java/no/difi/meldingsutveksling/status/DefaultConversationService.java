@@ -209,6 +209,11 @@ public class DefaultConversationService implements ConversationService {
             }
 
             @Override
+            public String getDocumentIdentifier() {
+                return sbd.getDocumentType();
+            }
+
+            @Override
             public ConversationDirection getDirection() {
                 return conversationDirection;
             }

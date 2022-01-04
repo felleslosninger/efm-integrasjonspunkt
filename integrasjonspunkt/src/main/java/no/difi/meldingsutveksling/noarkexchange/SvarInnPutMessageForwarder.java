@@ -94,6 +94,11 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
+            public String getDocumentIdentifier() {
+                return properties.getArkivmelding().getDefaultDocumentType();
+            }
+
+            @Override
             public ConversationDirection getDirection() {
                 return ConversationDirection.INCOMING;
             }

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +76,8 @@ public class ServiceRegistryClient {
             return client.getResource("virksert/{identifier}", Collections.singletonMap("identifier", identifier));
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);
+                String errorDescription = JsonPath.read(e.getResponseBodyAsString(), "$.error_description");
+                throw new ServiceRegistryLookupException(errorDescription);
             }
             throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier, e);
         } catch (BadJWSException e) {
