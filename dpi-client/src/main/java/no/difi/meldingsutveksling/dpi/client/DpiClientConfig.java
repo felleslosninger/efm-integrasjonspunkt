@@ -37,7 +37,6 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.TcpClient;
 
 import java.net.URI;
 import java.nio.file.FileSystems;
@@ -95,13 +94,12 @@ public class DpiClientConfig {
                         .baseUrl(properties.getUri())
                         .filter(logRequest())
                         .filter(logResponse())
-                        .clientConnector(new ReactorClientHttpConnector(HttpClient.from(TcpClient
-                                .create()
+                        .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getTimeout().getConnect())
                                 .doOnConnected(connection -> {
                                     connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout().getRead(), TimeUnit.MILLISECONDS));
                                     connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
-                                }))))
+                                })))
                         .build(),
                 dpiClientErrorHandler,
                 createMaskinportenToken,
@@ -266,44 +264,10 @@ public class DpiClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "commons-asic", matchIfMissing = true)
     public CreateAsiceImpl createAsiceImpl(
             CreateManifest createManifest,
             SignatureHelper signatureHelper) {
         return new CreateAsiceImpl(createManifest, signatureHelper);
-    }
-
-    @Configuration
-    @ConditionalOnProperty(prefix = "dpi.client", value = "asice.type", havingValue = "sikker-digital-post-klient")
-    public static class OldStyleAsiceConfiguration {
-
-        @Bean
-        public CreateOldStyleAsice createOldStyleAsice(
-                CreateManifest createManifest,
-                CreateSignature createSignature,
-                CreateZip createZip) {
-            return new CreateOldStyleAsice(createManifest, createSignature, createZip);
-        }
-
-        @Bean
-        public CreateSignature createSignature(DomUtils domUtils, CreateXAdESArtifacts createXAdESArtifacts, KeyPair keyPair) {
-            return new CreateSignature(domUtils, createXAdESArtifacts, keyPair);
-        }
-
-        @Bean
-        public CreateZip createZip() {
-            return new CreateZip();
-        }
-
-        @Bean
-        public DomUtils domUtils() {
-            return new DomUtils();
-        }
-
-        @Bean
-        public CreateXAdESArtifacts createXAdESArtifacts(Clock clock) {
-            return new CreateXAdESArtifacts(clock);
-        }
     }
 
     @Bean
