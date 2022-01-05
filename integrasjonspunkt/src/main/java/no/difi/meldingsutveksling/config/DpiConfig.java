@@ -16,8 +16,11 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.status.*;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
@@ -82,6 +85,16 @@ public class DpiConfig {
         return new MeldingsformidlerRequestFactory(properties, clock, optionalCryptoMessagePersister, mpcIdHolder);
     }
 
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap", matchIfMissing = true)
+    public MeldingsformidlerClient meldingsformidlerClient(
+            MeldingsformidlerClient jsonMeldingsformidlerClient,
+            MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
+        return new DeletgatingMeldingsformidlerClient(Arrays.asList(
+                jsonMeldingsformidlerClient, xmlSoapMeldingsformidlerClient));
+    }
+
+    @Conditional(XmlSoapCondition.class)
     public static class XmlSoap {
 
         @Bean
@@ -122,16 +135,14 @@ public class DpiConfig {
         }
     }
 
-    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json", matchIfMissing = true)
+    @Conditional(JsonCondition.class)
     @Import(DpiClientConfig.class)
     public static class Json {
 
         @Bean
-        public MeldingsformidlerClient meldingsformidlerClient(
-                MeldingsformidlerClient jsonMeldingsformidlerClient,
-                MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
-            return new DeletgatingMeldingsformidlerClient(Arrays.asList(
-                    jsonMeldingsformidlerClient, xmlSoapMeldingsformidlerClient));
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+        public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient jsonMeldingsformidlerClient) {
+            return jsonMeldingsformidlerClient;
         }
 
         @Bean
@@ -156,5 +167,31 @@ public class DpiConfig {
         public JsonDpiReceiptMapper jsonDpiReceiptMapper(MessageStatusMapper messageStatusMapper) {
             return new JsonDpiReceiptMapper(messageStatusMapper);
         }
+    }
+
+    static class XmlSoapCondition extends AnyNestedCondition {
+
+        XmlSoapCondition() {
+            super(ConfigurationPhase.PARSE_CONFIGURATION);
+        }
+
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
+        static class XmlSoap { }
+
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
+        static class JsonPlusXmlSoap{ }
+    }
+
+    static class JsonCondition extends AnyNestedCondition {
+
+        JsonCondition() {
+            super(ConfigurationPhase.PARSE_CONFIGURATION);
+        }
+
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+        static class Json { }
+
+        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
+        static class JsonPlusXmlSoap{ }
     }
 }
