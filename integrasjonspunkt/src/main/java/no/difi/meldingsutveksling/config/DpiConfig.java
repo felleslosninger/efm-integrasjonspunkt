@@ -4,6 +4,8 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.dpi.client.DpiClient;
+import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
 import no.difi.meldingsutveksling.dpi.json.JsonDpiReceiptMapper;
 import no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.json.MessageStatusMapper;
@@ -14,10 +16,7 @@ import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.status.*;
-import no.difi.meldingsutveksling.dpi.client.DpiClient;
-import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -88,8 +87,8 @@ public class DpiConfig {
     @Bean
     @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap", matchIfMissing = true)
     public MeldingsformidlerClient meldingsformidlerClient(
-            MeldingsformidlerClient jsonMeldingsformidlerClient,
-            MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
+            JsonMeldingsformidlerClient jsonMeldingsformidlerClient,
+            XmlSoapMeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
         return new DeletgatingMeldingsformidlerClient(Arrays.asList(
                 jsonMeldingsformidlerClient, xmlSoapMeldingsformidlerClient));
     }
@@ -104,12 +103,12 @@ public class DpiConfig {
         }
 
         @Bean
-        public MeldingsformidlerClient xmlSoapMeldingsformidlerClient(IntegrasjonspunktProperties properties,
-                                                                      SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
-                                                                      ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                                      DpiReceiptMapper dpiReceiptMapper,
-                                                                      ClientInterceptor metricsEndpointInterceptor,
-                                                                      MetadataDocumentConverter metadataDocumentConverter) {
+        public XmlSoapMeldingsformidlerClient xmlSoapMeldingsformidlerClient(IntegrasjonspunktProperties properties,
+                                                                             SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
+                                                                             ForsendelseHandlerFactory forsendelseHandlerFactory,
+                                                                             DpiReceiptMapper dpiReceiptMapper,
+                                                                             ClientInterceptor metricsEndpointInterceptor,
+                                                                             MetadataDocumentConverter metadataDocumentConverter) {
             return new XmlSoapMeldingsformidlerClient(properties, sikkerDigitalPostKlientFactory,
                     forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor, metadataDocumentConverter);
         }
@@ -146,10 +145,10 @@ public class DpiConfig {
         }
 
         @Bean
-        public MeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
-                                                                   ShipmentFactory shipmentFactory,
-                                                                   JsonDpiReceiptMapper dpiReceiptMapper,
-                                                                   MessageStatusMapper messageStatusMapper) {
+        public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
+                                                                       ShipmentFactory shipmentFactory,
+                                                                       JsonDpiReceiptMapper dpiReceiptMapper,
+                                                                       MessageStatusMapper messageStatusMapper) {
             return new JsonMeldingsformidlerClient(dpiClient, shipmentFactory, dpiReceiptMapper, messageStatusMapper);
         }
 
@@ -175,11 +174,15 @@ public class DpiConfig {
             super(ConfigurationPhase.PARSE_CONFIGURATION);
         }
 
+        @SuppressWarnings("unused")
         @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
-        static class XmlSoap { }
+        static class XmlSoap {
+        }
 
+        @SuppressWarnings("unused")
         @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
-        static class JsonPlusXmlSoap{ }
+        static class JsonPlusXmlSoap {
+        }
     }
 
     static class JsonCondition extends AnyNestedCondition {
@@ -188,10 +191,14 @@ public class DpiConfig {
             super(ConfigurationPhase.PARSE_CONFIGURATION);
         }
 
+        @SuppressWarnings("unused")
         @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
-        static class Json { }
+        static class Json {
+        }
 
+        @SuppressWarnings("unused")
         @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
-        static class JsonPlusXmlSoap{ }
+        static class JsonPlusXmlSoap {
+        }
     }
 }
