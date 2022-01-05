@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @UtilityClass
-class StandardBusinessDocumentTestData {
+public class StandardBusinessDocumentTestData {
 
     @Data
     static class MessageData {
@@ -25,7 +25,7 @@ class StandardBusinessDocumentTestData {
         private String type;
     }
 
-    static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
+    public static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
             .setType("arkivmelding")
@@ -137,6 +137,10 @@ class StandardBusinessDocumentTestData {
     static final StandardBusinessDocument PUBLISERING_SBD = getResponseSbd(PUBLISERING_MESSAGE_DATA);
     static final NextMoveOutMessage PUBLISERING_MESSAGE = NextMoveOutMessage.of(PUBLISERING_SBD, ServiceIdentifier.DPE);
     static final NextMoveInMessage PUBLISERING_MESSAGE_RESPONSE = NextMoveInMessage.of(getResponseSbd(PUBLISERING_MESSAGE_DATA), ServiceIdentifier.DPE);
+
+    public static StandardBusinessDocument createSbd(MessageData messageData) {
+        return getResponseSbd(messageData);
+    }
 
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();

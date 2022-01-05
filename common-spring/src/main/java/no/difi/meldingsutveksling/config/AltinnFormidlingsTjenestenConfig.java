@@ -5,6 +5,7 @@ import lombok.ToString;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 @Data
 @ToString(exclude = "password")
@@ -27,5 +28,7 @@ public class AltinnFormidlingsTjenestenConfig {
     private Integer requestTimeout;
     @NotNull
     private DataSize uploadSizeLimit;
+    @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
+    private String messageChannel;
 
 }

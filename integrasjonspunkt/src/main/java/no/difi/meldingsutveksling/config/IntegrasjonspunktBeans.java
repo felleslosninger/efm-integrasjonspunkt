@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsClientFactory;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -54,8 +53,13 @@ public class IntegrasjonspunktBeans {
     public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
                                             AltinnWsConfigurationFactory altinnWsConfigurationFactory,
                                             Plumber plumber,
-                                            PromiseMaker promiseMaker) {
-        return new AltinnWsClientFactory(applicationContextHolder, altinnWsConfigurationFactory, plumber, promiseMaker).getAltinnWsClient();
+                                            PromiseMaker promiseMaker,
+                                            IntegrasjonspunktProperties properties) {
+        return new AltinnWsClient(altinnWsConfigurationFactory.create(),
+            applicationContextHolder.getApplicationContext(),
+            plumber,
+            promiseMaker,
+            properties);
     }
 
     @Bean

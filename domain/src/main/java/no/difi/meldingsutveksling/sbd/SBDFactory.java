@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.service;
+package no.difi.meldingsutveksling.sbd;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
@@ -19,7 +19,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
+import static no.difi.meldingsutveksling.sbd.ScopeFactory.fromConversationId;
 
 @Component
 @RequiredArgsConstructor
@@ -86,15 +86,16 @@ public class SBDFactory {
         }
 
         StatusMessage statusMessage = new StatusMessage(status);
-        return createNextMoveSBD(sbd.getReceiver(),
+        StandardBusinessDocument statusSbd = createNextMoveSBD(sbd.getReceiver(),
             sbd.getSender(),
             sbd.getConversationId(),
             sbd.getMessageId(),
             process,
             props.getNextmove().getStatusDocumentType(),
             statusMessage);
+        sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent(statusSbd.getScopes()::add);
+        return statusSbd;
     }
-
 
     private Receiver createReceiver(Organisasjonsnummer orgNummer) {
         Receiver sender = new Receiver();

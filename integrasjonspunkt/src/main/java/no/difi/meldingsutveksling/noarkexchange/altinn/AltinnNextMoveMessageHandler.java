@@ -8,7 +8,10 @@ import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
+import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -39,6 +42,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final MessagePersister messagePersister;
     private final SBDUtil sbdUtil;
     private final TimeToLiveHelper timeToLiveHelper;
+    private final MessageChannelRepository messageChannelRepository;
 
     @Override
     public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
@@ -55,7 +59,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 return;
             }
             if (altinnPackage.getAsicInputStream() != null) {
-                try (InputStream asicStream = altinnPackage.getAsicInputStream()){
+                try (InputStream asicStream = altinnPackage.getAsicInputStream()) {
                     messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
@@ -64,6 +68,8 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 }
             }
 
+            sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent(s ->
+                messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), s.getIdentifier())));
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(sbd.getDocumentId(), ReceiptStatus.INNKOMMENDE_MOTTATT);

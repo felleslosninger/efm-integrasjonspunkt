@@ -10,6 +10,7 @@ import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,6 +27,7 @@ import java.util.Set;
  */
 @Data
 @ConfigurationProperties(prefix = "difi.move")
+@Validated
 public class IntegrasjonspunktProperties {
 
     @Valid
@@ -38,6 +40,7 @@ public class IntegrasjonspunktProperties {
     private String serviceregistryEndpoint;
 
     @Valid
+    @NestedConfigurationProperty
     private AltinnFormidlingsTjenestenConfig dpo;
 
     @Valid
@@ -83,6 +86,7 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private DeadLock deadlock;
+
 
     @Data
     public static class Vault {
