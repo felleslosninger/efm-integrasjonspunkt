@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import io.cucumber.java.Before;
 import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -31,6 +32,7 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,6 +64,7 @@ import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(classes = {
@@ -83,6 +86,7 @@ public class CucumberStepsConfiguration {
     @Profile("cucumber")
     @RequiredArgsConstructor
     @SpyBean(WebhookPusher.class)
+    @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
 
         @Primary
@@ -132,14 +136,6 @@ public class CucumberStepsConfiguration {
             marshaller.setMarshallerProperties(marshallerProperties);
 
             return klient;
-        }
-
-        @Bean
-        @Primary
-        public IntegrasjonspunktProperties properties(IntegrasjonspunktProperties properties) {
-            IntegrasjonspunktProperties spy = spy(properties);
-            given(spy.getNoarkSystem()).willReturn(spy(properties.getNoarkSystem()));
-            return spy;
         }
 
         @Bean
@@ -253,6 +249,8 @@ public class CucumberStepsConfiguration {
         }
     }
 
+    @Autowired private IntegrasjonspunktProperties integrasjonspunktProperties;
+
     @TempDir
     File temporaryFolder;
 
@@ -266,5 +264,10 @@ public class CucumberStepsConfiguration {
     @MockBean public AltinnConnectionCheck altinnConnectionCheck;
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockBean public FiksIOKlient fiksIOKlient;
+
+    @Before
+    public void before() {
+        willReturn(spy(integrasjonspunktProperties.getNoarkSystem())).given(integrasjonspunktProperties).getNoarkSystem();
+    }
 
 }
