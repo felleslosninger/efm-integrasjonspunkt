@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
@@ -19,6 +18,11 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Optional;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 
 @Component
 @RequiredArgsConstructor
@@ -86,7 +90,17 @@ public class NextMoveOutMessageFactory {
             }
         }
 
-        if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPI) {
+        if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
+            Optional<Scope> mcScope = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+            if (!mcScope.isPresent()) {
+                sbd.getScopes().add(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
+            }
+            if (mcScope.isPresent() && isNullOrEmpty(mcScope.get().getIdentifier())) {
+                mcScope.get().setIdentifier(properties.getDpo().getMessageChannel());
+            }
+        }
+
+        if (serviceRecord.getServiceIdentifier() == DPI) {
             setDpiDefaults(sbd, serviceRecord);
         }
     }
@@ -124,7 +138,7 @@ public class NextMoveOutMessageFactory {
         if (!StringUtils.hasText(receiver.getNavn())) {
             receiver.setNavn(srPostAddress.getName());
         }
-        if (Strings.isNullOrEmpty(receiver.getAdresselinje1())) {
+        if (isNullOrEmpty(receiver.getAdresselinje1())) {
             String[] addressLines = srPostAddress.getStreet().split(";");
             for (int i = 0; i < Math.min(addressLines.length, 4); i++) {
                 try {

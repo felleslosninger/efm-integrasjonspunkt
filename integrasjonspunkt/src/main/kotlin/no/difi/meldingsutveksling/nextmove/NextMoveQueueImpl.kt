@@ -8,7 +8,10 @@ import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.dpo.MessageChannelEntry
+import no.difi.meldingsutveksling.dpo.MessageChannelRepository
 import no.difi.meldingsutveksling.logging.Audit
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
@@ -26,7 +29,8 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
                              private val sbdService: SBDService,
                              private val messagePersister: MessagePersister,
                              private val timeToLiveHelper: TimeToLiveHelper,
-                             private val statusSender: ResponseStatusSender) : NextMoveQueue {
+                             private val statusSender: ResponseStatusSender,
+                             private val messageChannelRepository: MessageChannelRepository) : NextMoveQueue {
 
     val log = logger()
 
@@ -58,10 +62,18 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
             messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
         }
 
-        conversationService.registerConversation(sbd, serviceIdentifier, ConversationDirection.INCOMING, ReceiptStatus.INNKOMMENDE_MOTTATT)
+        sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent {
+            messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
+        }
+        conversationService.registerConversation(sbd,
+                                                 serviceIdentifier,
+                                                 ConversationDirection.INCOMING,
+                                                 ReceiptStatus.INNKOMMENDE_MOTTATT)
         statusSender.queue(message.sbd, serviceIdentifier, ReceiptStatus.MOTTATT)
 
-        Audit.info("Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue", markerFrom(message))
+        Audit.info("Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue",
+                   markerFrom(message)
+        )
     }
 
 }

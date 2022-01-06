@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dokumentpakking.service;
+package no.difi.meldingsutveksling.sbd;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
@@ -19,7 +19,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory.fromConversationId;
+import static no.difi.meldingsutveksling.sbd.ScopeFactory.fromConversationId;
 
 @Component
 @RequiredArgsConstructor
@@ -75,7 +75,7 @@ public class SBDFactory {
 
     public StandardBusinessDocument createStatusFrom(StandardBusinessDocument sbd,
                                                      ReceiptStatus status) {
-        return createNextMoveSBD(
+        StandardBusinessDocument statusSbd = createNextMoveSBD(
                 SBDUtil.getReceiver(sbd),
                 SBDUtil.getSender(sbd),
                 SBDUtil.getConversationId(sbd),
@@ -83,6 +83,9 @@ public class SBDFactory {
                 createProcess(sbd),
                 props.getNextmove().getStatusDocumentType(),
                 new StatusMessage(status));
+
+        sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent(statusSbd.getScopes()::add);
+        return statusSbd;
     }
 
     private String createProcess(StandardBusinessDocument sbd) {

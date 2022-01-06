@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.exceptions.MaxFileSizeExceededException
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,7 +20,7 @@ class NextMoveFileSizeValidatorTest {
     @MockK
     lateinit var props: IntegrasjonspunktProperties
 
-    lateinit var validator: NextMoveFileSizeValidator
+    private lateinit var validator: NextMoveFileSizeValidator
     private val msg = mockk<NextMoveOutMessage>()
     private val req = mockk<HttpServletRequest>()
     val file = NextMoveUploadedFile("text/html", "attachment; filename=\"test.txt\"", "title", req)

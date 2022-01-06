@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.DpfioPolling
 import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory
+import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.util.logger
