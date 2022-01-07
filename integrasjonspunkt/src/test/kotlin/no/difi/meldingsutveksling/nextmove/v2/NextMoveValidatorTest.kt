@@ -9,17 +9,19 @@ import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
-import no.difi.meldingsutveksling.domain.sbdh.*
+import no.difi.meldingsutveksling.domain.sbdh.SBDService
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.ObjectProvider
 import java.util.*
@@ -47,9 +49,6 @@ class NextMoveValidatorTest {
 
     @MockK
     lateinit var sbdService: SBDService
-
-    @MockK
-    lateinit var sbdUtil: SBDUtil
 
     @MockK
     lateinit var conversationService: ConversationService
@@ -122,8 +121,6 @@ class NextMoveValidatorTest {
         every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.ARKIVMELDING)
         every { SBDUtil.getDocumentType(sbd) } returns "standard::arkivmelding"
         every { SBDUtil.getProcess(sbd) } returns "arkivmelding:administrasjon"
-//        every { sbd.optionalConversationId } returns Optional.of(UUID.randomUUID().toString())
-//        every { sbd.findScope(ScopeType.SENDER_REF) } returns Optional.empty()
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
@@ -206,7 +203,7 @@ class NextMoveValidatorTest {
     @Test
     fun `non-matching channel should throw exception`() {
         every { props.dpo.messageChannel } returns "foo-42"
-        every { sbd.findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.of(mockk {
+        every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.of(mockk {
             every { identifier } returns "foo-43"
         })
         assertThrows(MessageChannelInvalidException::class.java) { nextMoveValidator.validate(sbd) }

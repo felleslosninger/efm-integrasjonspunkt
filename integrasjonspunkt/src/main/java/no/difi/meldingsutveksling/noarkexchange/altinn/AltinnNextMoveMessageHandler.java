@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
@@ -69,8 +68,8 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 }
             }
 
-            sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent(s ->
-                messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), s.getIdentifier())));
+            SBDUtil.getOptionalMessageChannel(sbd).ifPresent(s ->
+                    messageChannelRepository.save(new MessageChannelEntry(messageId, s.getIdentifier())));
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_MOTTATT);

@@ -11,12 +11,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.SBDService;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
+import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -71,12 +66,12 @@ public class NextMoveValidator {
 
         StandardBusinessDocumentUtils.getMessageId(sbd).ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
-                            .map(p -> {
+                            .ifPresent(p -> {
                                 throw new MessageAlreadyExistsException(messageId);
                             });
                     if (!SBDUtil.isStatus(sbd)) {
                         conversationService.findConversation(messageId)
-                                .map(c -> {
+                                .ifPresent(c -> {
                                     throw new MessageAlreadyExistsException(messageId);
                                 });
                     }
@@ -101,7 +96,7 @@ public class NextMoveValidator {
         }
 
         if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
-            Optional<Scope> mc = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+            Optional<Scope> mc = SBDUtil.getOptionalMessageChannel(sbd);
             if (mc.isPresent() && !mc.get().getIdentifier().equals(props.getDpo().getMessageChannel())) {
                 throw new MessageChannelInvalidException(props.getDpo().getMessageChannel(), mc.get().getIdentifier());
             }
@@ -221,18 +216,12 @@ public class NextMoveValidator {
             throw new MissingFileTitleException(DPV.toString());
         }
 
-        if (message.getServiceIdentifier() == DPI && !StringUtils.hasText(file.getName())) {
-            if (!message.isPrimaryDocument(file.getOriginalFilename())) {
-                if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-                    DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
-                    if (!bmsg.getMetadataFiler().containsValue(file.getOriginalFilename())) {
-                        throw new MissingFileTitleException(DPI.toString());
-                    }
-                } else {
-                    throw new MissingFileTitleException(DPI.toString());
-                }
-            }
+        if (message.getServiceIdentifier() == DPI
+                && !StringUtils.hasText(file.getName())
+                && !message.isPrimaryDocument(file.getOriginalFilename())) {
+            message.getBusinessMessage(DpiDigitalMessage.class)
+                    .filter(p -> p.getMetadataFiler().containsValue(file.getOriginalFilename()))
+                    .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
         }
-
     }
 }

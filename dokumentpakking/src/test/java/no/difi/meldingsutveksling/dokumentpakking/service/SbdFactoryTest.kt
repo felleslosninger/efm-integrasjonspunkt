@@ -30,7 +30,6 @@ class SbdFactoryTest {
 
     @MockK
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
-
     @MockK
     lateinit var props: IntegrasjonspunktProperties
 
@@ -47,13 +46,6 @@ class SbdFactoryTest {
     private val msgId = "4653f436-8921-4224-b824-068f2cc6232f"
 
     val sbd: StandardBusinessDocument = mockk {
-        every { receiver } returns Organisasjonsnummer.from(receiverOrgnr)
-        every { sender } returns Organisasjonsnummer.from(senderOrgnr)
-        every { senderIdentifier } returns senderOrgnr
-        every { receiverIdentifier } returns receiverOrgnr
-        every { conversationId } returns convId
-        every { messageId } returns msgId
-        every { findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.empty()
     }
 
     @BeforeEach
@@ -78,7 +70,8 @@ class SbdFactoryTest {
         every { SBDUtil.getSenderIdentifier(sbd) } returns senderOrgnr
         every { SBDUtil.getReceiverIdentifier(sbd) } returns receiverOrgnr
         every { SBDUtil.getConversationId(sbd) } returns convId
-        every {  SBDUtil.getMessageId(sbd) } returns msgId
+        every { SBDUtil.getMessageId(sbd) } returns msgId
+        every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()
     }
 
     @AfterEach
@@ -107,6 +100,8 @@ class SbdFactoryTest {
     fun `test status creation from einnsyn message`() {
         every { SBDUtil.isArkivmelding(sbd) } returns false
         every { SBDUtil.isEinnsyn(sbd) } returns true
+        every { StandardBusinessDocumentUtils.getScope(sbd, ScopeType.MESSAGE_CHANNEL) } returns Optional.empty()
+//        every { StandardBusinessDocumentUtils.addScope(same(sbd), any())} returns sbd
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
         assertEquals(einnsynResponseProcess, SBDUtil.getProcess(statusSbd))

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +24,6 @@ public class AltinnTransport {
 
     private final UUIDGenerator uuidGenerator;
     private final AltinnWsClient client;
-    private final SBDUtil sbdUtil;
     private final IntegrasjonspunktProperties props;
 
     /**
@@ -46,11 +44,11 @@ public class AltinnTransport {
     }
 
     private String getSendersReference(StandardBusinessDocument sbd) {
-        Optional<Scope> mcScope = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+        Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
         if (mcScope.isPresent() &&
-            (sbdUtil.isStatus(sbd) || sbdUtil.isReceipt(sbd)) &&
-            (isNullOrEmpty(props.getDpo().getMessageChannel()) ||
-                !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
+                (SBDUtil.isStatus(sbd) || SBDUtil.isReceipt(sbd)) &&
+                (isNullOrEmpty(props.getDpo().getMessageChannel()) ||
+                        !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
             return mcScope.get().getIdentifier();
         }
         return uuidGenerator.generate();

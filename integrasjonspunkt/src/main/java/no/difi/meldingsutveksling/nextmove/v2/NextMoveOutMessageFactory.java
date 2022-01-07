@@ -5,11 +5,11 @@ import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.stereotype.Component;
@@ -91,9 +91,9 @@ public class NextMoveOutMessageFactory {
         }
 
         if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
-            Optional<Scope> mcScope = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+            Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
             if (!mcScope.isPresent()) {
-                sbd.getScopes().add(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
+                StandardBusinessDocumentUtils.addScope(sbd, ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
             }
             if (mcScope.isPresent() && isNullOrEmpty(mcScope.get().getIdentifier())) {
                 mcScope.get().setIdentifier(properties.getDpo().getMessageChannel());

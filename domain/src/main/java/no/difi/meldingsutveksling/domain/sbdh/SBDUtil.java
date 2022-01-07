@@ -84,6 +84,10 @@ public class SBDUtil {
                 .map(Scope::getInstanceIdentifier);
     }
 
+    public static Optional<Scope> getOptionalMessageChannel(StandardBusinessDocument sbd) {
+        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.MESSAGE_CHANNEL);
+    }
+
     public static String getProcess(StandardBusinessDocument sbd) {
         return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
                 .flatMap(p -> Optional.of(p.getIdentifier()))

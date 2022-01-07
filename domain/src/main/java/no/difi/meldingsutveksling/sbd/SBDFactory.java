@@ -84,7 +84,10 @@ public class SBDFactory {
                 props.getNextmove().getStatusDocumentType(),
                 new StatusMessage(status));
 
-        sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent(statusSbd.getScopes()::add);
+        SBDUtil.getOptionalMessageChannel(sbd)
+                .ifPresent(messageChannel ->
+                        StandardBusinessDocumentUtils.addScope(statusSbd, messageChannel)
+                );
         return statusSbd;
     }
 

@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository
@@ -62,8 +61,8 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
             messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
         }
 
-        sbd.findScope(ScopeType.MESSAGE_CHANNEL).ifPresent {
-            messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
+        SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
+            messageChannelRepository.save(MessageChannelEntry(SBDUtil.getMessageId(sbd), it.identifier))
         }
         conversationService.registerConversation(sbd,
                                                  serviceIdentifier,
