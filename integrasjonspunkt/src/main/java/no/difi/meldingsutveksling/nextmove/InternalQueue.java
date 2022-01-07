@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.pipes.PromiseRuntimeException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,11 @@ import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom
 @Slf4j
 public class InternalQueue {
 
-    private static final String NOARK = "noark";
-    private static final String NEXTMOVE = "nextmove";
-    private static final String DLQ = "ActiveMQ.DLQ";
+
+    @Value("${difi.move.queue.nextmove-name}")
+    private String nextmoveQueue;
+    @Value("${difi.move.queue.noark-name}")
+    private String noarkQueue;
 
     private final JmsTemplate jmsTemplate;
     private final NextMoveSender nextMoveSender;
@@ -58,7 +61,7 @@ public class InternalQueue {
         this.deadLetterQueueHandler = deadLetterQueueHandler;
     }
 
-    @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory")
+    @JmsListener(destination = "${difi.move.queue.nextmove-name}", containerFactory = "myJmsContainerFactory")
     public void nextMoveListener(byte[] message, Session session) {
         NextMoveOutMessage nextMoveMessage;
         try {
@@ -81,7 +84,7 @@ public class InternalQueue {
         }
     }
 
-    @JmsListener(destination = NOARK, containerFactory = "myJmsContainerFactory")
+    @JmsListener(destination = "${difi.move.queue.noark-name}", containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
@@ -99,7 +102,7 @@ public class InternalQueue {
      * @param message the message
      * @param session {@link Session}
      */
-    @JmsListener(destination = DLQ)
+    @JmsListener(destination = "${difi.move.queue.dlq-name}")
     public void dlqListener(byte[] message, Session session) {
         deadLetterQueueHandler.handleDlqMessage(message);
     }
@@ -107,7 +110,7 @@ public class InternalQueue {
     public void enqueueNextMove(NextMoveOutMessage msg) {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             objectMapper.writeValue(bos, msg);
-            jmsTemplate.convertAndSend(NEXTMOVE, bos.toByteArray());
+            jmsTemplate.convertAndSend(nextmoveQueue, bos.toByteArray());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getMessageId()), e);
         }
@@ -119,6 +122,6 @@ public class InternalQueue {
      * @param sbd the sbd as received by IntegrasjonspunktReceiveImpl from an external source
      */
     public void enqueueNoark(StandardBusinessDocument sbd) {
-        jmsTemplate.convertAndSend(NOARK, documentConverter.marshallToBytes(sbd));
+        jmsTemplate.convertAndSend(noarkQueue, documentConverter.marshallToBytes(sbd));
     }
 }

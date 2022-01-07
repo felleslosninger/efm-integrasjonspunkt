@@ -135,6 +135,12 @@ public class IntegrasjonspunktProperties {
         private Integer maximumRetryHours;
         @NotNull
         private Integer concurrency;
+        @NotNull
+        private String nextmoveName;
+        @NotNull
+        private String noarkName;
+        @NotNull
+        private String dlqName;
     }
 
     public FeatureToggle getFeature() {
