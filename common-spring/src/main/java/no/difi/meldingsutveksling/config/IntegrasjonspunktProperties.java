@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -34,6 +35,7 @@ public class IntegrasjonspunktProperties {
     private Organization org;
 
     @Valid
+    @LoggedProperty
     private FeatureToggle feature;
 
     @NotNull(message = "Service registry must be configured")
@@ -70,6 +72,7 @@ public class IntegrasjonspunktProperties {
     private Mail mail;
 
     @Valid
+    @LoggedProperty
     private NextMove nextmove;
 
     @Valid
@@ -246,6 +249,8 @@ public class IntegrasjonspunktProperties {
         private Set<ServiceIdentifier> statusServices;
         @NotNull
         private String statusDocumentType;
+        @NotNull
+        private Boolean useDbPersistence;
     }
 
     @Data
@@ -291,6 +296,7 @@ public class IntegrasjonspunktProperties {
         /**
          * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
          */
+        @LoggedProperty
         private String type;
 
     }
