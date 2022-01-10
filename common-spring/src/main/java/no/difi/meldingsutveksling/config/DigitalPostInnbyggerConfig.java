@@ -7,6 +7,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.config.dpi.dpi.PrintSettings;
+import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import no.difi.sdp.client2.domain.Prioritet;
 import org.springframework.util.unit.DataSize;
@@ -30,6 +31,7 @@ public class DigitalPostInnbyggerConfig {
      * This is to avoid reading receipts from other applications that use the same service
      */
     @NotNull
+    @LoggedProperty
     private String mpcId;
 
     /**
