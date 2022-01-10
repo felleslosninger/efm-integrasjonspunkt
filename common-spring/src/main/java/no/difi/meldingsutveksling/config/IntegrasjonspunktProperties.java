@@ -50,6 +50,9 @@ public class IntegrasjonspunktProperties {
     private Arkivmelding arkivmelding;
 
     @Valid
+    private Avtalt avtalt;
+
+    @Valid
     private Einnsyn einnsyn;
 
     @Valid
@@ -109,6 +112,13 @@ public class IntegrasjonspunktProperties {
         private String receiptDocumentType;
 
     }
+
+    @Data
+    public static class Avtalt {
+        @NotNull
+        private String receiptProcess;
+    }
+
     @Data
     public static class Einnsyn {
         @NotNull
@@ -122,6 +132,7 @@ public class IntegrasjonspunktProperties {
         private String receiptProcess;
 
     }
+
     @Data
     public static class Ntp {
         @NotNull
