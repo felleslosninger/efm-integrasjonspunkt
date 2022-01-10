@@ -81,6 +81,8 @@ public class SBDFactory {
             process = props.getArkivmelding().getReceiptProcess();
         } else if (sbdUtil.isEinnsyn(sbd)) {
             process = props.getEinnsyn().getReceiptProcess();
+        } else if (sbdUtil.isAvtalt(sbd)) {
+            process = props.getAvtalt().getReceiptProcess();
         } else {
             return null;
         }
