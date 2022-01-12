@@ -129,7 +129,7 @@ public class StandardBusinessDocumentHeader {
     }
 
     @JsonIgnore
-    Optional<Sender> getFirstSender() {
+    public Optional<Sender> getFirstSender() {
         if (sender == null) {
             return Optional.empty();
         }
@@ -137,7 +137,7 @@ public class StandardBusinessDocumentHeader {
     }
 
     @JsonIgnore
-    Optional<Receiver> getFirstReceiver() {
+    public Optional<Receiver> getFirstReceiver() {
         if (receiver == null) {
             return Optional.empty();
         }

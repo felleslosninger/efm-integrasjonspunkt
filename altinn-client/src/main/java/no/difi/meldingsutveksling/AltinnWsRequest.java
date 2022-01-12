@@ -25,7 +25,7 @@ public class AltinnWsRequest implements UploadRequest {
 
     @Override
     public String getSender() {
-        return sbd.getSenderIdentifier();
+        return sbd.getSenderOrgnr();
     }
 
     @Override

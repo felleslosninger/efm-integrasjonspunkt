@@ -6,6 +6,7 @@ import org.springframework.util.unit.DataSize;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.util.Set;
 
 @Data
 @ToString(exclude = "password")
@@ -30,5 +31,6 @@ public class AltinnFormidlingsTjenestenConfig {
     private DataSize uploadSizeLimit;
     @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
     private String messageChannel;
+    private Set<String> reportees;
 
 }
