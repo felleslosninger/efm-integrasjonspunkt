@@ -100,6 +100,10 @@ public class SBDFactory {
             return props.getEinnsyn().getReceiptProcess();
         }
 
+        if (SBDUtil.isAvtalt(sbd)) {
+            return props.getAvtalt().getReceiptProcess();
+        }
+
         return null;
     }
 

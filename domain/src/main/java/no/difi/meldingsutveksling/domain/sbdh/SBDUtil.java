@@ -158,6 +158,10 @@ public class SBDUtil {
         return (isType(sbd, MessageType.ARKIVMELDING)) || (isType(sbd, MessageType.ARKIVMELDING_KVITTERING));
     }
 
+    public static boolean isAvtalt(StandardBusinessDocument sbd) {
+        return (isType(sbd, MessageType.AVTALT));
+    }
+
     public static boolean isEinnsyn(StandardBusinessDocument sbd) {
         return isType(sbd, MessageType.INNSYNSKRAV) || isType(sbd, MessageType.PUBLISERING) || isType(sbd, MessageType.EINNSYN_KVITTERING);
     }
