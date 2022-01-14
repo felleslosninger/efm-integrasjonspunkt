@@ -22,6 +22,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
@@ -115,9 +116,10 @@ public class FiksMapper {
     }
 
     private String getForsendelseType(NextMoveOutMessage message) {
-        return getDpfSettings(message).isPresent()
-                ? getDpfSettings(message).get().getForsendelseType()
-                : null;
+        return getDpfSettings(message)
+                .map(DpfSettings::getForsendelseType)
+                .filter(StringUtils::hasText)
+                .orElse(null);
     }
 
     private Optional<DpfSettings> getDpfSettings(NextMoveOutMessage message) {
