@@ -5,6 +5,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.InputStreamDataSource;
+import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
@@ -13,18 +14,15 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.ks.svarut.*;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
@@ -101,6 +99,7 @@ public class FiksMapper {
 
         return Forsendelse.builder()
                 .withEksternref(message.getMessageId())
+                .withForsendelseType(getForsendelseType(message))
                 .withKunDigitalLevering(false)
                 .withSvarPaForsendelse(receiverRef.orElse(null))
                 .withTittel(journalpost.getOffentligTittel())
@@ -114,6 +113,21 @@ public class FiksMapper {
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
                 .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
                 .build();
+    }
+
+    private String getForsendelseType(NextMoveOutMessage message) {
+        return getDpfSettings(message)
+                .map(DpfSettings::getForsendelseType)
+                .filter(StringUtils::hasText)
+                .orElse(null);
+    }
+
+    private Optional<DpfSettings> getDpfSettings(NextMoveOutMessage message) {
+        if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            ArkivmeldingMessage arkivmeldingMessage = (ArkivmeldingMessage) message.getBusinessMessage();
+            return Optional.ofNullable(arkivmeldingMessage.getDpf());
+        }
+        return Optional.empty();
     }
 
     private Printkonfigurasjon getPrintkonfigurasjon() {
@@ -194,7 +208,7 @@ public class FiksMapper {
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {
         PipedInputStream encrypted = plumber.pipe("encrypt attachment for FIKS forsendelse",
-                inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert), reject)
+                        inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert), reject)
                 .outlet();
 
         return new DataHandler(InputStreamDataSource.of(encrypted));
