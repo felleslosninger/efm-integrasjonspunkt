@@ -268,6 +268,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.santuario</groupId>
+                <artifactId>xmlsec</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.jvnet.jax-ws-commons.spring</groupId>
                 <artifactId>jaxws-spring</artifactId>
                 <version>1.9</version>
