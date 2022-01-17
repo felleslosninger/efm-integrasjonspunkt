@@ -149,12 +149,12 @@ public class DpiClientConfig {
     public CreateMaskinportenToken createMaskinportenTokenImpl() {
         return new CreateMaskinportenTokenImpl(
                 jwtTokenClient(),
-                new CreateOidcClientId(properties.getOidc().getSend().getClientIdPrefix()));
+                new GetConsumerOrg());
     }
 
     private JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-                properties.getOidc().getReceive().getClientId(),
+                properties.getOidc().getClientId(),
                 properties.getOidc().getUrl().toString(),
                 properties.getOidc().getAudience(),
                 properties.getOidc().getScopes(),

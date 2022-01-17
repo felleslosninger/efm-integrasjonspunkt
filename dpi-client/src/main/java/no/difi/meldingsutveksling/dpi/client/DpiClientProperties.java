@@ -62,22 +62,11 @@ public class DpiClientProperties {
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
         private Mock mock;
-        private Send send;
-        private Receive receive;
+        private String clientId;
 
         @Data
         public static class Mock {
             private String token;
-        }
-
-        @Data
-        public static class Send {
-            private String clientIdPrefix;
-        }
-
-        @Data
-        public static class Receive {
-            private String clientId;
         }
     }
 

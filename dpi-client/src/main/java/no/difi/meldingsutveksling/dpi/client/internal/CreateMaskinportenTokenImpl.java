@@ -1,16 +1,16 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenInput;
-import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;
 import org.springframework.cache.annotation.Cacheable;
 
 @RequiredArgsConstructor
 public class CreateMaskinportenTokenImpl implements CreateMaskinportenToken {
 
     private final JwtTokenClient jwtTokenClient;
-    private final CreateOidcClientId createOidcClientId;
+    private final GetConsumerOrg getConsumerOrg;
 
     @Override
     @Cacheable("dpiClient.getMaskinportenToken")
@@ -22,7 +22,7 @@ public class CreateMaskinportenTokenImpl implements CreateMaskinportenToken {
     @Cacheable("dpiClient.getMaskinportenToken")
     public String createMaskinportenTokenForSending(Avsender avsender) {
         return jwtTokenClient.fetchToken(new JwtTokenInput()
-                .setClientId(createOidcClientId.createOidcClientId(avsender))
+                .setConsumerOrg(getConsumerOrg.getConsumerOrg(avsender))
         ).getAccessToken();
     }
 }
