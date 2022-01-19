@@ -37,12 +37,12 @@ public class DpiReceiptService {
 
         if (conversation.isPresent()) {
             conversationService.registerStatus(conversation.get(), externalReceipt.toMessageStatus());
-
             log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
-            externalReceipt.confirmReceipt();
-            log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
         } else {
             log.warn("Unknown conversationID = {}", conversationId);
         }
+
+        externalReceipt.confirmReceipt();
+        log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
     }
 }
