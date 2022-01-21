@@ -7,6 +7,7 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 
 @Component
@@ -34,6 +34,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     private final IntegrasjonspunktProperties props;
     private final PromiseMaker promiseMaker;
     private final BestEduAppReceiptService bestEduAppReceiptService;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Override
     @Transactional
@@ -43,7 +44,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
         promiseMaker.promise(reject -> {
             InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message, reject);
 
-            Object response = withLogstashMarker(markerFrom(message))
+            Object response = withLogstashMarker(nextMoveMessageMarkers.markerFrom(message))
                     .execute(() -> client.sendCorrespondence(correspondence));
 
             if (response == null) {
@@ -64,7 +65,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             try {
                 bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);
             } catch (Exception e) {
-                log.error(markerFrom(message), "Error sending AppReceipt for DPV message", e);
+                log.error(nextMoveMessageMarkers.markerFrom(message), "Error sending AppReceipt for DPV message", e);
             }
         }
     }

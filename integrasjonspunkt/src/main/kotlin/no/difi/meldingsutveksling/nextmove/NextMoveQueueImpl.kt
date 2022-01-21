@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository
 import no.difi.meldingsutveksling.logging.Audit
-import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.util.logger
@@ -29,7 +29,9 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
                              private val messagePersister: MessagePersister,
                              private val timeToLiveHelper: TimeToLiveHelper,
                              private val statusSender: ResponseStatusSender,
-                             private val messageChannelRepository: MessageChannelRepository) : NextMoveQueue {
+                             private val messageChannelRepository: MessageChannelRepository,
+                             private val nextMoveInMessageFactory: NextMoveInMessageFactory,
+                             private val nextMoveMessageMarkers: NextMoveMessageMarkers) : NextMoveQueue {
 
     val log = logger()
 
@@ -58,7 +60,7 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
         asicStream?.use { messagePersister.writeStream(messageId, NextMoveConsts.ASIC_FILE, it, -1L) }
 
         val message = messageRepo.findByMessageId(messageId).orElseGet {
-            messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
+            messageRepo.save(nextMoveInMessageFactory.of(sbd, serviceIdentifier))
         }
 
         SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
@@ -71,7 +73,7 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
         statusSender.queue(message.sbd, serviceIdentifier, ReceiptStatus.MOTTATT)
 
         Audit.info("Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue",
-                   markerFrom(message)
+                   nextMoveMessageMarkers.markerFrom(message)
         )
     }
 

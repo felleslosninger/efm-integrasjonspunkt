@@ -5,22 +5,22 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.KvitteringStatusMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Service
 @Slf4j
@@ -33,6 +33,8 @@ public class BestEduAppReceiptService {
     private final NoarkClient noarkClient;
     private final UUIDGenerator uuidGenerator;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
+    private final SBDService sbdService;
 
     public BestEduAppReceiptService(
             IntegrasjonspunktProperties properties,
@@ -41,7 +43,7 @@ public class BestEduAppReceiptService {
             PutMessageRequestFactory putMessageRequestFactory,
             @Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
             UUIDGenerator uuidGenerator,
-            ConversationIdEntityRepo conversationIdEntityRepo) {
+            ConversationIdEntityRepo conversationIdEntityRepo, NextMoveMessageMarkers nextMoveMessageMarkers, SBDService sbdService) {
         this.properties = properties;
         this.createSBD = createSBD;
         this.nextMoveMessageService = nextMoveMessageService;
@@ -49,6 +51,8 @@ public class BestEduAppReceiptService {
         this.noarkClient = localNoark.getIfAvailable();
         this.uuidGenerator = uuidGenerator;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
+        this.nextMoveMessageMarkers = nextMoveMessageMarkers;
+        this.sbdService = sbdService;
     }
 
     public void sendBestEduErrorAppReceipt(NextMoveOutMessage message, String errorText) {
@@ -58,13 +62,13 @@ public class BestEduAppReceiptService {
     }
 
     public void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
-        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", SBDUtil.getReceiverIdentifier(sbd));
+        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", sbdService.getReceiverIdentifier(sbd));
         ArkivmeldingKvitteringMessage kvittering = new ArkivmeldingKvitteringMessage()
                 .setReceiptType("ERROR")
                 .addMessage(new KvitteringStatusMessage("Unknown", errorText));
 
-        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(SBDUtil.getReceiverIdentifier(sbd)),
-                Organisasjonsnummer.from(SBDUtil.getSenderIdentifier(sbd)),
+        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(sbdService.getReceiverIdentifier(sbd)),
+                Organisasjonsnummer.from(sbdService.getSenderIdentifier(sbd)),
                 SBDUtil.getConversationId(sbd),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
@@ -95,7 +99,7 @@ public class BestEduAppReceiptService {
         try {
             noarkClient.sendEduMelding(putMessage);
         } catch (Exception e) {
-            log.error(markerFrom(message), "Error sending AppReceipt to localNoark", e);
+            log.error(nextMoveMessageMarkers.markerFrom(message), "Error sending AppReceipt to localNoark", e);
         }
     }
 }

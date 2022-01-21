@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.bestedu;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.AddressType;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class PutMessageRequestFactory {
 
     private final ServiceRegistryLookup srLookup;
+    private final SBDService sbdService;
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
         return create(sbd, payload, SBDUtil.getConversationId(sbd));
@@ -25,22 +27,22 @@ public class PutMessageRequestFactory {
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getReceiverIdentifier(sbd));
-        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getSenderIdentifier(sbd));
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbdService.getReceiverIdentifier(sbd));
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbdService.getSenderIdentifier(sbd));
         return create(conversationId,
-                Sender.of(SBDUtil.getSenderIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(SBDUtil.getReceiverIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(sbdService.getSenderIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbdService.getReceiverIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
     public PutMessageRequestType createAndSwitchSenderReceiver(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getReceiverIdentifier(sbd));
-        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getSenderIdentifier(sbd));
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbdService.getReceiverIdentifier(sbd));
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbdService.getSenderIdentifier(sbd));
         return create(conversationId,
-                Sender.of(SBDUtil.getReceiverIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(SBDUtil.getSenderIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(sbdService.getReceiverIdentifier(sbd), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbdService.getSenderIdentifier(sbd), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 

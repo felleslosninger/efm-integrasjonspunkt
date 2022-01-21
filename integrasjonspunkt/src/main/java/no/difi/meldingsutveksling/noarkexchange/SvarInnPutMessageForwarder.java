@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnFieldValidator;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnPutMessageBuilder;
@@ -79,13 +78,13 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             }
 
             @Override
-            public Organisasjonsnummer getSender() {
-                return Organisasjonsnummer.from(putMessage.getEnvelope().getSender().getOrgnr());
+            public String getSender() {
+                return putMessage.getEnvelope().getSender().getOrgnr();
             }
 
             @Override
-            public Organisasjonsnummer getReceiver() {
-                return Organisasjonsnummer.from(putMessage.getEnvelope().getReceiver().getOrgnr());
+            public String getReceiver() {
+                return putMessage.getEnvelope().getReceiver().getOrgnr();
             }
 
             @Override
@@ -117,7 +116,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
         String missingFields = getMissingFields(forsendelse, putMessage, builder.getDokumentTypeList());
         if (!missingFields.isEmpty()) {
-            handleError(putMessage, forsendelse.getId(), "Validation failed - missing fields: "+missingFields);
+            handleError(putMessage, forsendelse.getId(), "Validation failed - missing fields: " + missingFields);
             return;
         }
 
@@ -133,7 +132,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
             svarInnService.confirmMessage(forsendelse.getId());
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            handleError(putMessage, forsendelse.getId(), "Archive system responded with error: "+response.getResult().getMessage().get(0).getText());
+            handleError(putMessage, forsendelse.getId(), "Archive system responded with error: " + response.getResult().getMessage().get(0).getText());
         }
     }
 

@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
 
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
-
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
@@ -37,6 +36,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
     private final MessageChannelRepository messageChannelRepository;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Override
     @Transactional
@@ -59,13 +59,14 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
                 }
             }).await();
         } catch (Exception e) {
-            Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);
+            Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()),
+                    nextMoveMessageMarkers.markerFrom(message), e);
             throw e;
         }
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
-                message.getMessageId(), message.getServiceIdentifier()),
-                markerFrom(message));
+                        message.getMessageId(), message.getServiceIdentifier()),
+                nextMoveMessageMarkers.markerFrom(message));
         ifReceipt(message, mc -> messageChannelRepository.deleteByMessageId(mc.getMessageId()));
     }
 

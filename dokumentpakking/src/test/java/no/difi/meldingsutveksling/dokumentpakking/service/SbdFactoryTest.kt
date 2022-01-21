@@ -7,10 +7,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils
+import no.difi.meldingsutveksling.domain.sbdh.*
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
@@ -32,6 +29,8 @@ class SbdFactoryTest {
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
     @MockK
     lateinit var props: IntegrasjonspunktProperties
+    @MockK
+    lateinit var sbdService: SBDService
 
     val clock: Clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DateTimeUtil.DEFAULT_ZONE_ID)
     private lateinit var sbdFactory: SBDFactory
@@ -51,7 +50,7 @@ class SbdFactoryTest {
     @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        sbdFactory = SBDFactory(serviceRegistryLookup, clock, props)
+        sbdFactory = SBDFactory(serviceRegistryLookup, clock, props, sbdService)
 
         every { props.arkivmelding } returns mockk {
             every { receiptProcess } returns arkivmeldingResponseProcess
@@ -65,10 +64,10 @@ class SbdFactoryTest {
         }
 
         mockkStatic(SBDUtil::class)
-        every { SBDUtil.getReceiver(sbd) } returns Organisasjonsnummer.from(receiverOrgnr)
-        every { SBDUtil.getSender(sbd) } returns Organisasjonsnummer.from(senderOrgnr)
-        every { SBDUtil.getSenderIdentifier(sbd) } returns senderOrgnr
-        every { SBDUtil.getReceiverIdentifier(sbd) } returns receiverOrgnr
+        every { sbdService.getReceiver(sbd) } returns Organisasjonsnummer.from(receiverOrgnr)
+        every { sbdService.getSender(sbd) } returns Organisasjonsnummer.from(senderOrgnr)
+        every { sbdService.getSenderIdentifier(sbd) } returns senderOrgnr
+        every { sbdService.getReceiverIdentifier(sbd) } returns receiverOrgnr
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns msgId
         every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()

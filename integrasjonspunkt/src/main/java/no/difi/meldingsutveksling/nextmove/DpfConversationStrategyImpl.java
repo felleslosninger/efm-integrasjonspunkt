@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.api.DpfConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,7 +15,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -26,6 +26,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
     private final SvarUtService svarUtService;
     private final IntegrasjonspunktProperties props;
     private final BestEduAppReceiptService bestEduAppReceiptService;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Override
     @Timed
@@ -33,8 +34,8 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
         svarUtService.send(message);
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",
-                message.getMessageId(), message.getServiceIdentifier()),
-                markerFrom(message));
+                        message.getMessageId(), message.getServiceIdentifier()),
+                nextMoveMessageMarkers.markerFrom(message));
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
             bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);

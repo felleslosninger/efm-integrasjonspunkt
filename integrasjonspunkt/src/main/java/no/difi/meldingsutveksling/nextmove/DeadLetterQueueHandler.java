@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 @Component
 public class DeadLetterQueueHandler {
@@ -34,6 +34,8 @@ public class DeadLetterQueueHandler {
     private final DocumentConverter documentConverter;
     private final BestEduAppReceiptService bestEduAppReceiptService;
     private final NextMoveMessageService messageService;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
+    private final MessageMarkerFactory messageMarkerFactory;
 
     public DeadLetterQueueHandler(
             IntegrasjonspunktProperties properties,
@@ -43,7 +45,8 @@ public class DeadLetterQueueHandler {
             @Qualifier("localNoark") ObjectProvider<NoarkClient> noarkClient,
             DocumentConverter documentConverter,
             BestEduAppReceiptService bestEduAppReceiptService,
-            @Lazy NextMoveMessageService messageService) {
+            @Lazy NextMoveMessageService messageService,
+            NextMoveMessageMarkers nextMoveMessageMarkers, MessageMarkerFactory messageMarkerFactory) {
         this.properties = properties;
         this.conversationService = conversationService;
         this.objectMapper = objectMapper;
@@ -52,6 +55,8 @@ public class DeadLetterQueueHandler {
         this.documentConverter = documentConverter;
         this.bestEduAppReceiptService = bestEduAppReceiptService;
         this.messageService = messageService;
+        this.nextMoveMessageMarkers = nextMoveMessageMarkers;
+        this.messageMarkerFactory = messageMarkerFactory;
     }
 
     void handleNextMoveMessage(NextMoveOutMessage message, String errorMsg) {
@@ -75,7 +80,7 @@ public class DeadLetterQueueHandler {
             errorMsg = String.format("Request to receiver '%s' failed delivery over %s - Moved to DLQ",
                     nextMoveMessage.getReceiverIdentifier(), nextMoveMessage.getServiceIdentifier());
             messageId = nextMoveMessage.getMessageId();
-            Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
+            Audit.error(errorMsg, nextMoveMessageMarkers.markerFrom(nextMoveMessage));
             if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && noarkClient != null) {
                 bestEduAppReceiptService.sendBestEduErrorAppReceipt(nextMoveMessage, errorMsg);
             }
@@ -88,7 +93,7 @@ public class DeadLetterQueueHandler {
         try {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
-            Audit.error(errorMsg, markerFrom(sbd));
+            Audit.error(errorMsg, messageMarkerFactory.markerFrom(sbd));
             messageId = SBDUtil.getMessageId(sbd);
             bestEduAppReceiptService.sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {

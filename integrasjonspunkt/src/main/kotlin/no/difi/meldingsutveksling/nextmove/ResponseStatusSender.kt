@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveOutMessageFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.context.annotation.Lazy
@@ -24,7 +25,12 @@ class ResponseStatusSender(
 
     fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         if (si in props.nextmove.statusServices) {
-            CoroutineScope(Dispatchers.IO).launch(CoroutineExceptionHandler { _, t -> log.error("Error sending status message", t) }) {
+            CoroutineScope(Dispatchers.IO).launch(CoroutineExceptionHandler { _, t ->
+                log.error(
+                    "Error sending status message",
+                    t
+                )
+            }) {
                 proxy.queue(sbd, si, status)
             }
         }
@@ -35,13 +41,14 @@ class ResponseStatusSender(
 @Component
 open class ResponseStatusSenderProxy(
     @Lazy val internalQueue: InternalQueue,
-    private val sbdFactory: SBDFactory
+    private val sbdFactory: SBDFactory,
+    private val nextMoveOutMessageFactory: NextMoveOutMessageFactory
 ) {
 
     @Retryable(maxAttempts = 10, backoff = Backoff(delay = 5000, multiplier = 2.0, maxDelay = 1000 * 60 * 10L))
     open fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         sbdFactory.createStatusFrom(sbd, status)
-            ?.let { NextMoveOutMessage.of(it, si) }
+            ?.let { nextMoveOutMessageFactory.of(it, si) }
             ?.let(internalQueue::enqueueNextMove)
     }
 }

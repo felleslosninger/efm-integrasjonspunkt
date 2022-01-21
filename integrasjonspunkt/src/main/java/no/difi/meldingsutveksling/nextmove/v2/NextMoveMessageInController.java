@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @RestController
 @Validated
@@ -38,6 +38,7 @@ public class NextMoveMessageInController {
     private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final NextMoveMessageInService messageService;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @GetMapping
     @Transactional
@@ -52,7 +53,8 @@ public class NextMoveMessageInController {
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
-        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
+        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()),
+                nextMoveMessageMarkers.markerFrom(message));
         return message.getSbd();
     }
 

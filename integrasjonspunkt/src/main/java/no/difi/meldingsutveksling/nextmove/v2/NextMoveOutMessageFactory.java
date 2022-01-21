@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -32,6 +34,20 @@ public class NextMoveOutMessageFactory {
     private final ServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final SBDService sbdService;
+
+    public NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+        NextMoveOutMessage message = new NextMoveOutMessage(
+                SBDUtil.getConversationId(sbd),
+                SBDUtil.getMessageId(sbd),
+                SBDUtil.getProcess(sbd),
+                sbdService.getReceiverIdentifier(sbd),
+                sbdService.getSenderIdentifier(sbd),
+                serviceIdentifier,
+                sbd);
+        message.setFiles(new HashSet<>());
+        return message;
+    }
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
@@ -42,8 +58,8 @@ public class NextMoveOutMessageFactory {
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiverIdentifier(sbd),
-                SBDUtil.getSenderIdentifier(sbd),
+                sbdService.getReceiverIdentifier(sbd),
+                sbdService.getSenderIdentifier(sbd),
                 serviceRecord.getServiceIdentifier(),
                 sbd);
     }
@@ -54,7 +70,7 @@ public class NextMoveOutMessageFactory {
                 .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
-        if (SBDUtil.getSenderIdentifier(sbd) == null) {
+        if (sbdService.getSenderIdentifier(sbd) == null) {
             Organisasjonsnummer org = Organisasjonsnummer.from(properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
                     new Partner()

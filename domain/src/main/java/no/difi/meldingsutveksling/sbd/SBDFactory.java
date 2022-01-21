@@ -30,6 +30,7 @@ public class SBDFactory {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final Clock clock;
     private final IntegrasjonspunktProperties props;
+    private final SBDService sbdService;
 
     public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
                                                       Organisasjonsnummer mottaker,
@@ -76,8 +77,8 @@ public class SBDFactory {
     public StandardBusinessDocument createStatusFrom(StandardBusinessDocument sbd,
                                                      ReceiptStatus status) {
         StandardBusinessDocument statusSbd = createNextMoveSBD(
-                SBDUtil.getReceiver(sbd),
-                SBDUtil.getSender(sbd),
+                sbdService.getReceiver(sbd),
+                sbdService.getSender(sbd),
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 createProcess(sbd),

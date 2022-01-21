@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.nextmove.BusinessMessage
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 import no.difi.meldingsutveksling.pipes.PromiseMaker
@@ -79,11 +79,20 @@ internal class FiksIoServiceTest {
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns messageId
         every { SBDUtil.getProcess(sbd) } returns protocol
-        every { SBDUtil.getReceiverIdentifier(sbd) } returns orgnr
-        every { SBDUtil.getSenderIdentifier(sbd) } returns orgnr
+//        every { SBDUtil.getReceiverIdentifier(sbd) } returns orgnr
+//        every { SBDUtil.getSenderIdentifier(sbd) } returns orgnr
         every { SBDUtil.getDocumentType(sbd) } returns protocol
 
-        val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
+        val msg = NextMoveOutMessage(
+            convId,
+            messageId,
+            protocol,
+            orgnr,
+            orgnr,
+            ServiceIdentifier.DPFIO,
+            sbd
+        )
+        msg.setFiles(HashSet());
 
         val payload = StringPayload("foo", "foo.txt")
         val sentMsg = mockkClass(SendtMelding::class)

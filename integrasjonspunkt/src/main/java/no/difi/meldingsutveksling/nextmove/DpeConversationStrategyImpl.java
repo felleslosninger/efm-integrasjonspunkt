@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpeConversationStrategy;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.servicebus.NextMoveServiceBus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 public class DpeConversationStrategyImpl implements DpeConversationStrategy {
 
     private final NextMoveServiceBus serviceBus;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Override
     @Transactional
@@ -30,7 +31,7 @@ public class DpeConversationStrategyImpl implements DpeConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         serviceBus.putMessage(message);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
-                message.getMessageId(), message.getServiceIdentifier()),
-                markerFrom(message));
+                        message.getMessageId(), message.getServiceIdentifier()),
+                nextMoveMessageMarkers.markerFrom(message));
     }
 }

@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -17,14 +18,13 @@ import org.springframework.stereotype.Component;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class Adresseregister {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
@@ -34,10 +34,12 @@ public class Adresseregister {
                             .build(),
                     SBDUtil.getDocumentType(message.getSbd())));
         } catch (ServiceRegistryLookupException e) {
-            log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
+            log.error(nextMoveMessageMarkers.markerFrom(message),
+                    "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));
         } catch (CertificateException e) {
-            log.error(markerFrom(message), "Could not fetch certificate for receiver {}", message.getReceiverIdentifier());
+            log.error(nextMoveMessageMarkers.markerFrom(message),
+                    "Could not fetch certificate for receiver {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch certificate for identifier %s", message.getReceiverIdentifier()));
         }
     }

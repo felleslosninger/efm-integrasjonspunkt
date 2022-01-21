@@ -1,23 +1,27 @@
 package no.difi.meldingsutveksling.logging;
 
 import com.google.common.base.Strings;
+import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.move.common.IdentifierHasher;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class NextMoveMessageMarkers {
 
-    private NextMoveMessageMarkers() {
-    }
+    private final SBDService sbdService;
 
-    public static LogstashMarker markerFrom(NextMoveMessage message) {
+    public LogstashMarker markerFrom(NextMoveMessage message) {
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(message.getConversationId());
         final LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(message.getMessageId());
-        final LogstashMarker senderMarker = senderMarker(SBDUtil.getSender(message.getSbd()).asIso6523());
+        final LogstashMarker senderMarker = senderMarker(sbdService.getSender(message.getSbd()).asIso6523());
         final LogstashMarker senderIdentifierMarker = MarkerFactory.senderMarker(message.getSenderIdentifier());
-        final LogstashMarker receiverMarker = receiverMarker(SBDUtil.getReceiver(message.getSbd()).asIso6523());
+        final LogstashMarker receiverMarker = receiverMarker(sbdService.getReceiver(message.getSbd()).asIso6523());
         final LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(message.getReceiverIdentifier());
         final LogstashMarker messagetypeIdMarker = MarkerFactory.messageTypeMarker(message.getServiceIdentifier().toString());
         final LogstashMarker processMarker = processMarker(SBDUtil.getProcess(message.getSbd()));

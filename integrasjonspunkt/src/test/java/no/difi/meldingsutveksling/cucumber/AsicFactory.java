@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateAsice;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveOutMessageFactory;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -16,6 +16,7 @@ import java.io.PipedOutputStream;
 public class AsicFactory {
 
     private final KeystoreHelper keystoreHelper;
+    private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
 
     void createAsic(Message message, PipedOutputStream inlet) {
         try {
@@ -23,7 +24,7 @@ public class AsicFactory {
                     .createAsiceStreamed(message.getFirstAttachment(), message.getAttachments().stream(),
                             inlet,
                             keystoreHelper.getSignatureHelper(),
-                            NextMoveOutMessage.of(message.getSbd(), message.getServiceIdentifier()));
+                            nextMoveOutMessageFactory.of(message.getSbd(), message.getServiceIdentifier()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

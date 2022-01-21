@@ -45,13 +45,14 @@ class CorrespondenceAgencyMessageFactoryTest {
     ServiceRegistryLookup serviceRegistryLookup;
     @Mock
     OptionalCryptoMessagePersister cryptoMessagePersister;
+    @Mock
+    SBDService sbdService;
     @Spy
     Clock clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DateTimeUtil.DEFAULT_ZONE_ID);
     @Spy
     ReporteeFactory reporteeFactory = new ReporteeFactory();
     @Spy
     ArkivmeldingUtil arkivmeldingUtil = new ArkivmeldingUtil();
-
     @InjectMocks
     CorrespondenceAgencyMessageFactory messageFactory;
 

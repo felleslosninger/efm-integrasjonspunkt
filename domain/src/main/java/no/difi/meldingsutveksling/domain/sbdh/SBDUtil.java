@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
 import java.util.Optional;
@@ -16,57 +15,32 @@ public class SBDUtil {
         // UtilityClass
     }
 
-    public static Organisasjonsnummer getSender(StandardBusinessDocument sbd) {
+    public static String getSender(StandardBusinessDocument sbd) {
         return getOptionalSender(sbd)
                 .orElse(null);
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalSender(StandardBusinessDocument sbd) {
+    public static Optional<String> getOptionalSender(StandardBusinessDocument sbd) {
         return StandardBusinessDocumentUtils.getFirstSender(sbd)
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
+                .flatMap(p -> Optional.ofNullable(p.getValue()));
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
+    public static Optional<String> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
         return sbdh.getFirstSender()
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
+                .flatMap(p -> Optional.ofNullable(p.getValue()));
     }
 
-    public static String getSenderIdentifier(StandardBusinessDocument sbd) {
-        return getOptionalSender(sbd)
-                .map(Organisasjonsnummer::getOrgNummer)
-                .orElse(null);
-    }
-
-    public static Organisasjonsnummer getReceiver(StandardBusinessDocument sbd) {
+    public static String getReceiver(StandardBusinessDocument sbd) {
         return getOptionalReceiver(sbd)
                 .orElse(null);
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalReceiver(StandardBusinessDocument sbd) {
+    public static Optional<String> getOptionalReceiver(StandardBusinessDocument sbd) {
         return StandardBusinessDocumentUtils.getFirstReceiver(sbd)
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
-    }
-
-    public static String getReceiverIdentifier(StandardBusinessDocument sbd) {
-        return getOptionalReceiver(sbd)
-                .map(Organisasjonsnummer::getOrgNummer)
-                .orElse(null);
-    }
-
-    public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocument sbd) {
-        return getOptionalSender(sbd)
-                .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
-    }
-
-    public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocumentHeader sbdh) {
-        return getOptionalSender(sbdh)
-                .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
+                .flatMap(p -> Optional.ofNullable(p.getValue()));
     }
 
     public static String getDocumentType(StandardBusinessDocument sbd) {
@@ -175,8 +149,8 @@ public class SBDUtil {
     public static MessageInfo getMessageInfo(StandardBusinessDocument sbd) {
         return new MessageInfo(
                 getMessageType(sbd).getType(),
-                getReceiverIdentifier(sbd),
-                getSenderIdentifier(sbd),
+                getReceiver(sbd),
+                getSender(sbd),
                 getJournalPostId(sbd),
                 getConversationId(sbd),
                 getMessageId(sbd));

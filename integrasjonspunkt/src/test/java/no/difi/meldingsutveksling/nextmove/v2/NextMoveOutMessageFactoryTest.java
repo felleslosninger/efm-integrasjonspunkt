@@ -38,6 +38,8 @@ class NextMoveOutMessageFactoryTest {
     private UUIDGenerator uuidGenerator;
     @MockBean
     private Clock clock;
+    @MockBean
+    private SBDService sbdService;
 
     private NextMoveOutMessageFactory factory;
 
@@ -45,7 +47,7 @@ class NextMoveOutMessageFactoryTest {
 
     @BeforeEach
     public void setup() {
-        factory = new NextMoveOutMessageFactory(props, serviceRecordProvider, uuidGenerator, clock);
+        factory = new NextMoveOutMessageFactory(props, serviceRecordProvider, uuidGenerator, clock, sbdService);
 
         srPostAddress = Mockito.mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         when(srPostAddress.getName()).thenReturn("Foo");
@@ -57,6 +59,8 @@ class NextMoveOutMessageFactoryTest {
     void testMessageChannelDefaultNoScope() {
         ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
+        when(sbdService.getSenderIdentifier(sbd)).thenReturn(StandardBusinessDocumentTestData.SENDER_IDENTIFIER);
+        when(sbdService.getReceiverIdentifier(sbd)).thenReturn(StandardBusinessDocumentTestData.RECEIVER_IDENTIFIER);
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(serviceRecordProvider.getServiceRecord(sbd)).thenReturn(sr);
 
@@ -75,6 +79,8 @@ class NextMoveOutMessageFactoryTest {
     void testMessageChannelDefaultScopeExistsEmptyIdentifier() {
         ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
+        when(sbdService.getSenderIdentifier(sbd)).thenReturn(StandardBusinessDocumentTestData.SENDER_IDENTIFIER);
+        when(sbdService.getReceiverIdentifier(sbd)).thenReturn(StandardBusinessDocumentTestData.RECEIVER_IDENTIFIER);
         StandardBusinessDocumentUtils.addScope(sbd, new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(serviceRecordProvider.getServiceRecord(sbd)).thenReturn(sr);

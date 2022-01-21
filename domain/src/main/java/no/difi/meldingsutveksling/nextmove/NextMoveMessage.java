@@ -96,12 +96,12 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @Override
-    public Organisasjonsnummer getSender() {
+    public String getSender() {
         return SBDUtil.getSender(getSbd());
     }
 
     @Override
-    public Organisasjonsnummer getReceiver() {
+    public String getReceiver() {
         return SBDUtil.getReceiver(getSbd());
     }
 

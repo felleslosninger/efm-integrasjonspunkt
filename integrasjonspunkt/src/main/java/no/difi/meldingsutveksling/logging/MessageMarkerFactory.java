@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.logging;
 
+import lombok.RequiredArgsConstructor;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.FileReference;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
+import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.documentTypeMarker;
@@ -19,13 +22,14 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.processM
  * <p/>
  * log.error(markerFrom(message), "putting message");
  */
+@Component
+@RequiredArgsConstructor
 public class MessageMarkerFactory {
 
     private static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
     private static final String PAYLOAD_SIZE = "payload-size";
 
-    private MessageMarkerFactory() {
-    }
+    private final SBDService sbdService;
 
     /**
      * Marker used to log payload size of the message.
@@ -44,15 +48,15 @@ public class MessageMarkerFactory {
      * @param sbd StandardBusinessDocument
      * @return LogstashMarker
      */
-    public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
+    public LogstashMarker markerFrom(StandardBusinessDocument sbd) {
         LogstashMarker conversationIdMarker = conversationIdMarker(SBDUtil.getConversationId(sbd));
         LogstashMarker messageIdMarker = messageIdMarker(SBDUtil.getMessageId(sbd));
         LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(SBDUtil.getMessageType(sbd).getType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(SBDUtil.getJournalPostId(sbd));
-        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(SBDUtil.getSender(sbd).asIso6523());
-        LogstashMarker senderIdentifierMarker = senderMarker(SBDUtil.getSenderIdentifier(sbd));
-        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(SBDUtil.getReceiver(sbd).asIso6523());
-        LogstashMarker receiverIdentifierMarker = receiverMarker(SBDUtil.getReceiverIdentifier(sbd));
+        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(sbdService.getSender(sbd).asIso6523());
+        LogstashMarker senderIdentifierMarker = senderMarker(sbdService.getSenderIdentifier(sbd));
+        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(sbdService.getReceiver(sbd).asIso6523());
+        LogstashMarker receiverIdentifierMarker = receiverMarker(sbdService.getReceiverIdentifier(sbd));
         LogstashMarker documentTypeMarker = documentTypeMarker(SBDUtil.getDocumentType(sbd));
         LogstashMarker processMarker = processMarker(SBDUtil.getProcess(sbd));
         return conversationIdMarker.and(messageTypeMarker)

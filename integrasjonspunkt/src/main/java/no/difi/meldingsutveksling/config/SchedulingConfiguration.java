@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.api.DpePolling;
 import no.difi.meldingsutveksling.api.DpfPolling;
 import no.difi.meldingsutveksling.api.DpoPolling;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
+import no.difi.meldingsutveksling.nextmove.MessagePollingScheduler;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessageUnlocker;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.nextmove.MessagePollingScheduler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +32,8 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
     private final TaskScheduler taskScheduler;
 
     @Bean
-    public NextMoveInMessageUnlocker nextMoveInMessageUnlocker(NextMoveMessageInRepository repo, Clock clock) {
-        return new NextMoveInMessageUnlocker(repo, clock);
+    public NextMoveInMessageUnlocker nextMoveInMessageUnlocker(NextMoveMessageInRepository repo, Clock clock, NextMoveMessageMarkers nextMoveMessageMarkers) {
+        return new NextMoveInMessageUnlocker(repo, clock, nextMoveMessageMarkers);
     }
 
     @Bean

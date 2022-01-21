@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
@@ -32,7 +33,6 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
 @Component
@@ -45,6 +45,7 @@ public class NextMoveMessageInService {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
     private final Clock clock;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
@@ -78,15 +79,16 @@ public class NextMoveMessageInService {
         try {
             FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE, throwable ->
                     Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
-                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
+                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), nextMoveMessageMarkers.markerFrom(message), throwable)
             );
-            Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()), markerFrom(message));
+            Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()),
+                    nextMoveMessageMarkers.markerFrom(message));
             return new InputStreamResource(getInputStream(fileEntry, messageId));
 
         } catch (PersistenceException e) {
             String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
-            Audit.error(errorMsg, markerFrom(message), e);
+            Audit.error(errorMsg, nextMoveMessageMarkers.markerFrom(message), e);
             messageRepo.delete(message);
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
             // throw checked AsicPersistanceException so that deletion transaction is not rolled back
@@ -124,7 +126,7 @@ public class NextMoveMessageInService {
         messageRepo.delete(message);
         conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_LEVERT);
         Audit.info(format("Message [id=%s, serviceIdentifier=%s] deleted from queue", messageId, message.getServiceIdentifier()),
-                markerFrom(message));
+                nextMoveMessageMarkers.markerFrom(message));
 
         responseStatusSender.queue(message.getSbd(), message.getServiceIdentifier(), ReceiptStatus.LEVERT);
 

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -24,6 +24,7 @@ public class ServiceBusMessageParser {
     private final AsicParser asicParser;
     private final CmsUtil cmsUtil;
     private final CucumberKeyStore cucumberKeyStore;
+    private final SBDService sbdService;
 
     @SneakyThrows
     public Message parse(byte[] in) {
@@ -33,7 +34,7 @@ public class ServiceBusMessageParser {
                 .setSbd(serviceBusPayload.getSbd());
 
         if (serviceBusPayload.getAsic() != null) {
-            String receiverOrgNumber = SBDUtil.getReceiverIdentifier(serviceBusPayload.getSbd());
+            String receiverOrgNumber = sbdService.getReceiverIdentifier(serviceBusPayload.getSbd());
             PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
             byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());

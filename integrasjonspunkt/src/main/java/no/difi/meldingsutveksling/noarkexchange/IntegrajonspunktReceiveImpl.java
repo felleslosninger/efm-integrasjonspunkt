@@ -9,20 +9,22 @@ import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.sbdh.SBDService;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveOutMessageFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -40,7 +42,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 import static no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarkers.markerFrom;
 
 /**
@@ -66,6 +67,8 @@ public class IntegrajonspunktReceiveImpl {
     private final InternalQueue internalQueue;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
     private final MeldingFactory meldingFactory;
+    private final MessageMarkerFactory messageMarkerFactory;
+    private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        KeystoreHelper keystoreHelper,
@@ -77,7 +80,7 @@ public class IntegrajonspunktReceiveImpl {
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
                                        ConversationIdEntityRepo conversationIdEntityRepo,
-                                       MeldingFactory meldingFactory) throws JAXBException {
+                                       MeldingFactory meldingFactory, MessageMarkerFactory messageMarkerFactory, NextMoveOutMessageFactory nextMoveOutMessageFactory) throws JAXBException {
         this.localNoark = localNoark.getIfAvailable();
         this.keystoreHelper = keystoreHelper;
         this.conversationService = conversationService;
@@ -89,6 +92,8 @@ public class IntegrajonspunktReceiveImpl {
         this.internalQueue = internalQueue;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
         this.meldingFactory = meldingFactory;
+        this.messageMarkerFactory = messageMarkerFactory;
+        this.nextMoveOutMessageFactory = nextMoveOutMessageFactory;
 
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
     }
@@ -100,7 +105,7 @@ public class IntegrajonspunktReceiveImpl {
             try {
                 messagePersister.delete(messageId);
             } catch (IOException e) {
-                log.error(markerFrom(sbd), "Could not delete files for expired message {}", messageId, e);
+                log.error(messageMarkerFactory.markerFrom(sbd), "Could not delete files for expired message {}", messageId, e);
             }
             return;
         }
@@ -140,7 +145,8 @@ public class IntegrajonspunktReceiveImpl {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
         String messageId = SBDUtil.getMessageId(sbd);
         if (response == null || response.getResult() == null) {
-            Audit.info(String.format("Empty response from archive for message [id=%s]", messageId), markerFrom(sbd));
+            Audit.info(String.format("Empty response from archive for message [id=%s]", messageId),
+                    messageMarkerFactory.markerFrom(sbd));
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
@@ -171,7 +177,7 @@ public class IntegrajonspunktReceiveImpl {
     private void sendLevertStatus(StandardBusinessDocument sbd) {
         StandardBusinessDocument statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT);
         if (statusSbd != null) {
-            NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPO);
+            NextMoveOutMessage msg = nextMoveOutMessageFactory.of(statusSbd, DPO);
             internalQueue.enqueueNextMove(msg);
         }
     }

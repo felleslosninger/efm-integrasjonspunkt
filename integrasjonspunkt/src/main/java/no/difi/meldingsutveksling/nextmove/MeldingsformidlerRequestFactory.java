@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
@@ -33,6 +33,7 @@ public class MeldingsformidlerRequestFactory {
     private final Clock clock;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MpcIdHolder mpcIdHolder;
+    private final SBDService sbdService;
 
     public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
@@ -40,7 +41,7 @@ public class MeldingsformidlerRequestFactory {
                 .attachments(getAttachments(nextMoveMessage, reject))
                 .mottakerPid(nextMoveMessage.getReceiverIdentifier())
                 .senderOrgnumber(nextMoveMessage.getSenderIdentifier())
-                .onBehalfOfOrgnumber(SBDUtil.getOnBehalfOfOrgNr(nextMoveMessage.getSbd()).orElse(null))
+                .onBehalfOfOrgnumber(sbdService.getOnBehalfOfOrgNr(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())

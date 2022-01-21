@@ -11,13 +11,12 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
     private final PromiseMaker promiseMaker;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Override
     @Timed
@@ -48,7 +48,8 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                 try {
                     meldingsformidlerClient.sendMelding(request);
                 } catch (MeldingsformidlerException e) {
-                    Audit.error("Failed to send message to DPI", markerFrom(message), e);
+                    Audit.error("Failed to send message to DPI",
+                            nextMoveMessageMarkers.markerFrom(message), e);
                     reject.reject(e);
                 }
 

@@ -18,6 +18,7 @@ package no.difi.meldingsutveksling.domain;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -46,10 +47,14 @@ public class Organisasjonsnummer {
     }
 
     public Optional<String> getPaaVegneAvOrgnr() {
-        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
+        if (hasOnBehalfOf()) {
             return Optional.of(paaVegneAvOrgnr);
         }
         return Optional.empty();
+    }
+
+    public boolean hasOnBehalfOf() {
+        return StringUtils.hasLength(paaVegneAvOrgnr);
     }
 
     public String getOrgNummer() {

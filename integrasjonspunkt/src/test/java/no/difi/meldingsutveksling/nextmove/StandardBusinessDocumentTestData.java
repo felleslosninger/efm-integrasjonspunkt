@@ -16,11 +16,14 @@ public class StandardBusinessDocumentTestData {
     static class MessageData {
         private final String messageId = UUID.randomUUID().toString();
         private final String conversationId = UUID.randomUUID().toString();
-        private BusinessMessage businessMessage;
+        private BusinessMessage<?> businessMessage;
         private String process;
         private String standard;
         private String type;
     }
+
+    public static final String RECEIVER_IDENTIFIER = "910075918";
+    public static final String SENDER_IDENTIFIER = "910077473";
 
     public static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
@@ -31,7 +34,14 @@ public class StandardBusinessDocumentTestData {
 
     static final StandardBusinessDocument ARKIVMELDING_INPUT = getInputSbd(ARKIVMELDING_MESSAGE_DATA);
     static final StandardBusinessDocument ARKIVMELDING_SBD = getResponseSbd(ARKIVMELDING_MESSAGE_DATA);
-    static final NextMoveOutMessage ARKIVMELDING_MESSAGE = NextMoveOutMessage.of(ARKIVMELDING_SBD, ServiceIdentifier.DPO);
+    static final NextMoveOutMessage ARKIVMELDING_MESSAGE = new NextMoveOutMessage(
+            ARKIVMELDING_MESSAGE_DATA.getConversationId(),
+            ARKIVMELDING_MESSAGE_DATA.getMessageId(),
+            ARKIVMELDING_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPO,
+            ARKIVMELDING_SBD);
 
     private static final MessageData DPI_DIGITAL_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
@@ -49,12 +59,18 @@ public class StandardBusinessDocumentTestData {
                             .setEpostTekst("Many a book is like a key to unknown chambers within the castle of one’s own self.")
                             .setSmsTekst("A book must be the axe for the frozen sea within us.")
                     )
-
             );
 
     static final StandardBusinessDocument DPI_DIGITAL_INPUT = getInputSbd(DPI_DIGITAL_MESSAGE_DATA);
     static final StandardBusinessDocument DPI_DIGITAL_SBD = getResponseSbd(DPI_DIGITAL_MESSAGE_DATA);
-    static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = NextMoveOutMessage.of(DPI_DIGITAL_SBD, ServiceIdentifier.DPI);
+    static final NextMoveOutMessage DPI_DIGITAL_MESSAGE = new NextMoveOutMessage(
+            DPI_DIGITAL_MESSAGE_DATA.getConversationId(),
+            DPI_DIGITAL_MESSAGE_DATA.getMessageId(),
+            DPI_DIGITAL_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPI,
+            DPI_DIGITAL_SBD);
 
     private static final MessageData DIGITAL_DPV_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
@@ -68,7 +84,14 @@ public class StandardBusinessDocumentTestData {
 
     static final StandardBusinessDocument DIGITAL_DPV_INPUT = getInputSbd(DIGITAL_DPV_MESSAGE_DATA);
     static final StandardBusinessDocument DIGITAL_DPV_SBD = getResponseSbd(DIGITAL_DPV_MESSAGE_DATA);
-    static final NextMoveOutMessage DIGITAL_DPV_MESSAGE = NextMoveOutMessage.of(DIGITAL_DPV_SBD, ServiceIdentifier.DPV);
+    static final NextMoveOutMessage DIGITAL_DPV_MESSAGE = new NextMoveOutMessage(
+            DIGITAL_DPV_MESSAGE_DATA.getConversationId(),
+            DIGITAL_DPV_MESSAGE_DATA.getMessageId(),
+            DIGITAL_DPV_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPV,
+            DIGITAL_DPV_SBD);
 
     private static final MessageData DPI_PRINT_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:digitalpost:vedtak:ver1.0")
@@ -107,7 +130,14 @@ public class StandardBusinessDocumentTestData {
 
     static final StandardBusinessDocument DPI_PRINT_INPUT = getInputSbd(DPI_PRINT_MESSAGE_DATA);
     static final StandardBusinessDocument DPI_PRINT_SBD = getResponseSbd(DPI_PRINT_MESSAGE_DATA);
-    static final NextMoveOutMessage DPI_PRINT_MESSAGE = NextMoveOutMessage.of(DPI_PRINT_SBD, ServiceIdentifier.DPI);
+    static final NextMoveOutMessage DPI_PRINT_MESSAGE = new NextMoveOutMessage(
+            DPI_PRINT_MESSAGE_DATA.getConversationId(),
+            DPI_PRINT_MESSAGE_DATA.getMessageId(),
+            DPI_PRINT_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPI,
+            DPI_PRINT_SBD);
 
     private static final MessageData INNSYNSKRAV_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:einnsyn:innsynskrav:ver1.0")
@@ -120,7 +150,14 @@ public class StandardBusinessDocumentTestData {
 
     static final StandardBusinessDocument INNSYNSKRAV_INPUT = getInputSbd(INNSYNSKRAV_MESSAGE_DATA);
     static final StandardBusinessDocument INNSYNSKRAV_SBD = getResponseSbd(INNSYNSKRAV_MESSAGE_DATA);
-    static final NextMoveOutMessage INNSYNSKRAV_MESSAGE = NextMoveOutMessage.of(INNSYNSKRAV_SBD, ServiceIdentifier.DPE);
+    static final NextMoveOutMessage INNSYNSKRAV_MESSAGE = new NextMoveOutMessage(
+            INNSYNSKRAV_MESSAGE_DATA.getConversationId(),
+            INNSYNSKRAV_MESSAGE_DATA.getMessageId(),
+            INNSYNSKRAV_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPE,
+            INNSYNSKRAV_SBD);
 
     private static final MessageData PUBLISERING_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:einnsyn:journalpost:ver1.0")
@@ -132,8 +169,23 @@ public class StandardBusinessDocumentTestData {
 
     static final StandardBusinessDocument PUBLISERING_INPUT = getInputSbd(PUBLISERING_MESSAGE_DATA);
     static final StandardBusinessDocument PUBLISERING_SBD = getResponseSbd(PUBLISERING_MESSAGE_DATA);
-    static final NextMoveOutMessage PUBLISERING_MESSAGE = NextMoveOutMessage.of(PUBLISERING_SBD, ServiceIdentifier.DPE);
-    static final NextMoveInMessage PUBLISERING_MESSAGE_RESPONSE = NextMoveInMessage.of(getResponseSbd(PUBLISERING_MESSAGE_DATA), ServiceIdentifier.DPE);
+    static final NextMoveOutMessage PUBLISERING_MESSAGE = new NextMoveOutMessage(
+            PUBLISERING_MESSAGE_DATA.getConversationId(),
+            PUBLISERING_MESSAGE_DATA.getMessageId(),
+            PUBLISERING_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPE,
+            PUBLISERING_SBD);
+
+    static final NextMoveInMessage PUBLISERING_MESSAGE_RESPONSE = new NextMoveInMessage(
+            PUBLISERING_MESSAGE_DATA.getConversationId(),
+            PUBLISERING_MESSAGE_DATA.getMessageId(),
+            PUBLISERING_MESSAGE_DATA.getProcess(),
+            RECEIVER_IDENTIFIER,
+            SENDER_IDENTIFIER,
+            ServiceIdentifier.DPE,
+            getResponseSbd(PUBLISERING_MESSAGE_DATA));
 
     public static StandardBusinessDocument createSbd(MessageData messageData) {
         return getResponseSbd(messageData);

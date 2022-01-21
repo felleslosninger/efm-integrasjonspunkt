@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import javax.persistence.DiscriminatorValue;
@@ -32,17 +31,6 @@ public class NextMoveInMessage extends NextMoveMessage {
                              ServiceIdentifier serviceIdentifier,
                              StandardBusinessDocument sbd) {
         super(conversationId, messageId, processIdentifier, receiverIdentifier, senderIdentifier, serviceIdentifier, sbd);
-    }
-
-    public static NextMoveInMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        return new NextMoveInMessage(
-                SBDUtil.getConversationId(sbd),
-                SBDUtil.getMessageId(sbd),
-                SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiverIdentifier(sbd),
-                SBDUtil.getSenderIdentifier(sbd),
-                serviceIdentifier,
-                sbd);
     }
 
     @Override

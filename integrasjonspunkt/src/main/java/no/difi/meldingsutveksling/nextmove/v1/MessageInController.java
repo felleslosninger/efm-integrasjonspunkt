@@ -8,20 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
-import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
+import no.difi.meldingsutveksling.nextmove.v2.*;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.core.io.InputStreamResource;
@@ -33,13 +30,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.PersistenceException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @RestController
 @RequestMapping("/in/messages")
@@ -52,14 +47,14 @@ public class MessageInController {
     private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final NextMoveMessageInRepository inRepo;
-    private final Clock clock;
-    private final IntegrasjonspunktProperties props;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ConversationService conversationService;
     private final InternalQueue internalQueue;
     private final SBDFactory sbdFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final NextMoveMessageInService messageService;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
+    private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
 
     @GetMapping("/peek")
     public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
@@ -69,7 +64,8 @@ public class MessageInController {
         NextMoveInMessage message = messageService.peek(query)
                 .orElseThrow(NoContentException::new);
 
-        log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
+        log.info(nextMoveMessageMarkers.markerFrom(message),
+                "Conversation with id={} locked", message.getMessageId());
 
         Map<String, String> customProperties = Maps.newHashMap();
         String si = null;
@@ -142,7 +138,7 @@ public class MessageInController {
             if (message.getServiceIdentifier() == DPE) {
                 StandardBusinessDocument statusSbd = sbdFactory.createStatusFrom(message.getSbd(), ReceiptStatus.LEVERT);
                 if (statusSbd != null) {
-                    NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
+                    NextMoveOutMessage msg = nextMoveOutMessageFactory.of(statusSbd, DPE);
                     internalQueue.enqueueNextMove(msg);
                 }
             }
@@ -156,7 +152,8 @@ public class MessageInController {
                     .body(isr);
         } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
-                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
+                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()),
+                    nextMoveMessageMarkers.markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
     }

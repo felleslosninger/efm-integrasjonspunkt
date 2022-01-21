@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
@@ -11,6 +12,7 @@ import no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.json.MessageStatusMapper;
 import no.difi.meldingsutveksling.dpi.json.ShipmentFactory;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
@@ -58,10 +60,16 @@ public class DpiConfig {
             MeldingsformidlerRequestFactory meldingsformidlerRequestFactory,
             MeldingsformidlerClient meldingsformidlerClient,
             ConversationService conversationService,
-            PromiseMaker promiseMaker
-
+            PromiseMaker promiseMaker,
+            NextMoveMessageMarkers nextMoveMessageMarkers
     ) {
-        return new DpiConversationStrategyImpl(sr, meldingsformidlerRequestFactory, meldingsformidlerClient, conversationService, promiseMaker);
+        return new DpiConversationStrategyImpl(
+                sr,
+                meldingsformidlerRequestFactory,
+                meldingsformidlerClient,
+                conversationService,
+                promiseMaker,
+                nextMoveMessageMarkers);
     }
 
     @Bean
@@ -79,9 +87,10 @@ public class DpiConfig {
             IntegrasjonspunktProperties properties,
             Clock clock,
             OptionalCryptoMessagePersister optionalCryptoMessagePersister,
-            MpcIdHolder mpcIdHolder
+            MpcIdHolder mpcIdHolder,
+            SBDService sbdService
     ) {
-        return new MeldingsformidlerRequestFactory(properties, clock, optionalCryptoMessagePersister, mpcIdHolder);
+        return new MeldingsformidlerRequestFactory(properties, clock, optionalCryptoMessagePersister, mpcIdHolder, sbdService);
     }
 
     @Bean

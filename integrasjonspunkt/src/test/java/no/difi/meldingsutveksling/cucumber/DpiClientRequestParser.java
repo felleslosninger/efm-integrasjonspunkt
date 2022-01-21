@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
@@ -40,6 +40,7 @@ public class DpiClientRequestParser {
     private final CucumberKeyStore cucumberKeyStore;
     private final UnpackJWT unpackJWT;
     private final UnpackStandardBusinessDocument unpackStandardBusinessDocument;
+    private final SBDService sbdService;
 
     @SneakyThrows
     Message parse(LoggedRequest loggedRequest) {
@@ -48,7 +49,7 @@ public class DpiClientRequestParser {
 
         StandardBusinessDocument sbd = getStandardBusinessDocument(fileItems);
 
-        String receiverOrgNumber = SBDUtil.getReceiverIdentifier(sbd);
+        String receiverOrgNumber = sbdService.getReceiverIdentifier(sbd);
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
 
         List<Attachment> attachments = getAttachments(fileItems, privateKey);

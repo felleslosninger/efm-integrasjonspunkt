@@ -6,14 +6,13 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.v2.BusinessMessageFileRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
 @Slf4j
@@ -27,6 +26,7 @@ public class NextMoveSender {
     private final SBDService sbdService;
     private final TimeToLiveHelper timeToLiveHelper;
     private final MessagePersister messagePersister;
+    private final NextMoveMessageMarkers nextMoveMessageMarkers;
 
     public void send(NextMoveOutMessage msg) throws NextMoveException {
         if (sbdService.isExpired(msg.getSbd())) {
@@ -41,7 +41,7 @@ public class NextMoveSender {
                     .orElseThrow(() -> {
                         String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
                                 msg.getServiceIdentifier());
-                        log.error(markerFrom(msg), errorStr);
+                        log.error(nextMoveMessageMarkers.markerFrom(msg), errorStr);
                         return new NextMoveRuntimeException(errorStr);
                     }).send(msg);
 

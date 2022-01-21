@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
@@ -51,6 +50,7 @@ public class DefaultConversationService implements ConversationService {
     private final IpMailSender ipMailSender;
     private final Clock clock;
     private final StatusQueue statusQueue;
+    private final ConversationFactory conversationFactory;
     private final ObjectProvider<MeldingsformidlerClient> meldingsformidlerClientObjectProvider;
     @Getter(lazy = true) private final Set<ServiceIdentifier> pollables = createrPollables();
 
@@ -196,12 +196,12 @@ public class DefaultConversationService implements ConversationService {
             }
 
             @Override
-            public Organisasjonsnummer getSender() {
+            public String getSender() {
                 return SBDUtil.getSender(sbd);
             }
 
             @Override
-            public Organisasjonsnummer getReceiver() {
+            public String getReceiver() {
                 return SBDUtil.getReceiver(sbd);
             }
 
@@ -239,7 +239,7 @@ public class DefaultConversationService implements ConversationService {
 
     Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
-        Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
+        Conversation c = conversationFactory.of(message, OffsetDateTime.now(clock), ms);
         repo.save(c);
         webhookPublisher.publish(c, ms);
         statusQueue.enqueueStatus(ms, c);

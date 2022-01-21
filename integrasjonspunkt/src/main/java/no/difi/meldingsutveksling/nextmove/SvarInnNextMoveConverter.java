@@ -14,8 +14,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
-import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.StreamedFile;
@@ -27,6 +25,9 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveOutMessageFactory;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,7 @@ public class SvarInnNextMoveConverter {
     private final IntegrasjonspunktProperties properties;
     private final KeystoreHelper keystoreHelper;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
 
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
@@ -74,7 +76,7 @@ public class SvarInnNextMoveConverter {
 
         InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
                 attachments,
-                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                nextMoveOutMessageFactory.of(sbd, ServiceIdentifier.DPF),
                 keystoreHelper.getX509Certificate(),
                 reject -> {
                     throw new NextMoveRuntimeException("Failed to create ASiC", reject);

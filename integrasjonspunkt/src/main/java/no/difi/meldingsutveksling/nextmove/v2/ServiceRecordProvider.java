@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final SBDService sbdService;
 
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
         return sbd.getBusinessMessage(BusinessMessage.class)
@@ -26,7 +28,7 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(SBDUtil.getReceiverIdentifier(sbd))
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbdService.getReceiverIdentifier(sbd))
                     .process(SBDUtil.getProcess(sbd));
 
             SBDUtil.getOptionalConversationId(sbd).ifPresent(parameterBuilder::conversationId);

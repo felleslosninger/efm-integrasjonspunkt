@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
@@ -31,9 +30,9 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @Slf4j
 @Table(name = "conversation",
         indexes = {
-            @Index(columnList = "conversation_id"),
-            @Index(columnList = "message_id")
-})
+                @Index(columnList = "conversation_id"),
+                @Index(columnList = "message_id")
+        })
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
 public class Conversation extends AbstractEntity<Long> {
@@ -77,18 +76,19 @@ public class Conversation extends AbstractEntity<Long> {
     public Conversation() {
     }
 
-    private Conversation(String conversationId,
-                         String messageId,
-                         String messageReference,
-                         Organisasjonsnummer sender,
-                         Organisasjonsnummer receiver,
-                         String processIdentifier,
-                         String documentIdentifier,
-                         ConversationDirection direction,
-                         String messageTitle,
-                         ServiceIdentifier serviceIdentifier,
-                         OffsetDateTime expiry,
-                         OffsetDateTime lastUpdate
+    Conversation(String conversationId,
+                 String messageId,
+                 String messageReference,
+                 Organisasjonsnummer sender,
+                 Organisasjonsnummer receiver,
+                 String processIdentifier,
+                 String documentIdentifier,
+                 ConversationDirection direction,
+                 String messageTitle,
+                 ServiceIdentifier serviceIdentifier,
+                 OffsetDateTime expiry,
+                 OffsetDateTime lastUpdate,
+                 MessageStatus... statuses
     ) {
         this.conversationId = conversationId;
         this.messageId = messageId;
@@ -105,22 +105,12 @@ public class Conversation extends AbstractEntity<Long> {
         this.serviceIdentifier = serviceIdentifier;
         this.expiry = expiry;
         this.lastUpdate = lastUpdate;
-    }
 
-    private Conversation addMessageStatuses(MessageStatus... statuses) {
         if (statuses != null) {
             for (MessageStatus status : statuses) {
                 addMessageStatus(status);
             }
         }
-        return this;
-    }
-
-    public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
-        return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
-                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(), msg.getDocumentIdentifier(),
-                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
-                .addMessageStatuses(statuses);
     }
 
     Conversation addMessageStatus(MessageStatus status) {

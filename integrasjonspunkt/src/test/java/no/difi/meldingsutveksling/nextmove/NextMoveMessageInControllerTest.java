@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.config.SecurityConfiguration;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
@@ -74,6 +75,7 @@ class NextMoveMessageInControllerTest {
 
     @MockBean private NextMoveMessageInService messageService;
     @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
+    @MockBean private NextMoveMessageMarkers nextMoveMessageMarkers;
 
     @Mock private IntegrasjonspunktProperties.Organization organization;
 

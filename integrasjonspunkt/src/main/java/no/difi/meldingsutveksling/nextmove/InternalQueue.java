@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.logging.MessageMarkerFactory;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.meldingsutveksling.pipes.PromiseRuntimeException;
 import org.slf4j.MDC;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Component;
 import javax.jms.Session;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 /**
  * The idea behind this queue is to avoid loosing messages before they are saved in Noark System.
@@ -44,19 +43,21 @@ public class InternalQueue {
     private final IntegrajonspunktReceiveImpl integrajonspunktReceive;
     private final DocumentConverter documentConverter;
     private final DeadLetterQueueHandler deadLetterQueueHandler;
+    private final MessageMarkerFactory messageMarkerFactory;
 
     public InternalQueue(JmsTemplate jmsTemplate,
                          NextMoveSender nextMoveSender,
                          ObjectMapper objectMapper,
                          ObjectProvider<IntegrajonspunktReceiveImpl> integrajonspunktReceive,
                          DocumentConverter documentConverter,
-                         DeadLetterQueueHandler deadLetterQueueHandler) {
+                         DeadLetterQueueHandler deadLetterQueueHandler, MessageMarkerFactory messageMarkerFactory) {
         this.jmsTemplate = jmsTemplate;
         this.nextMoveSender = nextMoveSender;
         this.objectMapper = objectMapper;
         this.integrajonspunktReceive = integrajonspunktReceive.getIfAvailable();
         this.documentConverter = documentConverter;
         this.deadLetterQueueHandler = deadLetterQueueHandler;
+        this.messageMarkerFactory = messageMarkerFactory;
     }
 
     @JmsListener(destination = NEXTMOVE, containerFactory = "myJmsContainerFactory")
@@ -89,7 +90,8 @@ public class InternalQueue {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
-            Audit.warn("Failed delivering message to archive.. queue will retry", markerFrom(sbd), e);
+            Audit.warn("Failed delivering message to archive.. queue will retry",
+                    messageMarkerFactory.markerFrom(sbd), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
     }
