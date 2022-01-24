@@ -5,7 +5,8 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.MatcherAssert;
-import org.xmlunit.matchers.CompareMatcher;
+import org.hamcrest.Matchers;
+import org.xmlunit.builder.DiffBuilder;
 
 import java.util.List;
 
@@ -24,15 +25,20 @@ public class SvarUtSteps {
     @SneakyThrows
     public void anUploadToFiksInitiatedWith(String expectedPayload) {
         List<String> payloads = webServicePayloadHolder.get();
-        String actualPayload = payloads.get(0);
 
-        MatcherAssert.assertThat(hideData(actualPayload),
-            CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
+        MatcherAssert.assertThat(
+                payloads.stream()
+                        .map(this::hideData)
+                        .anyMatch(p -> !DiffBuilder.compare(p)
+                                .withTest(expectedPayload).ignoreWhitespace()
+                                .build()
+                                .hasDifferences()),
+                Matchers.is(true));
     }
 
     private String hideData(String s) {
         return s.replaceAll("<data>.*</data>", "<data><!--encrypted content--></data>")
-            .replaceAll(":ns2|ns2:", "")
-            .replaceAll(":ns3|ns3:", "");
+                .replaceAll(":ns2|ns2:", "")
+                .replaceAll(":ns3|ns3:", "");
     }
 }
