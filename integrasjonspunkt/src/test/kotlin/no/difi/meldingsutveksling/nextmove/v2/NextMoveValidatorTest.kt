@@ -9,16 +9,15 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
-import no.difi.meldingsutveksling.domain.sbdh.Scope
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService
 import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,6 +63,9 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
+    @MockK
+    lateinit var svarUtService: SvarUtService
+
     private lateinit var nextMoveValidator: NextMoveValidator
 
     private val messageId = "123"
@@ -71,30 +73,31 @@ class NextMoveValidatorTest {
     private val sbd = mockk<StandardBusinessDocument>()
     private val serviceRecord = mockk<ServiceRecord>()
     private val businessMessage = ArkivmeldingMessage()
-        .setHoveddokument("foo.txt")
+            .setHoveddokument("foo.txt")
 
     @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
         nextMoveValidator = NextMoveValidator(
-            serviceRecordProvider,
-            nextMoveMessageOutRepository,
-            conversationStrategyFactory,
-            asserter,
-            optionalCryptoMessagePersister,
-            timeToLiveHelper,
-            sbdUtil,
-            conversationService,
-            arkivmeldingUtil,
-            nextMoveFileSizeValidator,
-            props,
-            certValidator
+                serviceRecordProvider,
+                nextMoveMessageOutRepository,
+                conversationStrategyFactory,
+                asserter,
+                optionalCryptoMessagePersister,
+                timeToLiveHelper,
+                sbdUtil,
+                conversationService,
+                arkivmeldingUtil,
+                nextMoveFileSizeValidator,
+                props,
+                certValidator,
+                svarUtService
         )
 
 
         val bmf = BusinessMessageFile()
-            .setFilename("foo.txt")
-            .setPrimaryDocument(true)
+                .setFilename("foo.txt")
+                .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
         every { certValidator.ifAvailable(any()) } just Runs

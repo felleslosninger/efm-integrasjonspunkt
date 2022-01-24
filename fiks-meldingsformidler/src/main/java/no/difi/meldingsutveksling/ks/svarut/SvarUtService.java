@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -68,8 +69,8 @@ public class SvarUtService {
         return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
-    public void retreiveForsendelseTyper() {
-        client.retreiveForsendelseTyper(getFiksUtUrl());
+    public List<String> retreiveForsendelseTyper() {
+        return client.retreiveForsendelseTyper(getFiksUtUrl());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {
