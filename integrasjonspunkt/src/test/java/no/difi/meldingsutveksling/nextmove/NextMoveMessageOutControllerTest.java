@@ -9,12 +9,15 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
+import no.difi.meldingsutveksling.nextmove.v2.OnBehalfOfNormalizer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -73,6 +76,7 @@ class NextMoveMessageOutControllerTest {
 
     @MockBean private NextMoveMessageService messageService;
     @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
+    @MockBean private OnBehalfOfNormalizer onBehalfOfNormalizer;
 
     @Mock private NextMoveOutMessage messageMock;
     @Mock private IntegrasjonspunktProperties.Organization organization;
@@ -85,8 +89,15 @@ class NextMoveMessageOutControllerTest {
         given(integrasjonspunktProperties.getOrg()).willReturn(organization);
     }
 
+    @AfterEach
+    public void after() {
+        Mockito.verifyNoMoreInteractions(messageService, integrasjonspunktProperties, onBehalfOfNormalizer);
+        Mockito.validateMockitoUsage();
+    }
+
     @Test
     void multipart() throws Exception {
+        given(messageMock.getId()).willReturn(34L);
         given(messageService.createMessage(any(StandardBusinessDocument.class), anyList())).willReturn(messageMock);
         given(messageMock.getSbd()).willReturn(ARKIVMELDING_MESSAGE.getSbd());
 
@@ -119,7 +130,10 @@ class NextMoveMessageOutControllerTest {
                         )
                 );
 
+        verify(onBehalfOfNormalizer).normalize(any());
         verify(messageService).createMessage(any(StandardBusinessDocument.class), anyList());
+        verify(messageService).sendMessage(34L);
+        verify(integrasjonspunktProperties).getOrg();
     }
 
     @Test
@@ -152,6 +166,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test
@@ -184,6 +199,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test
@@ -216,6 +232,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test
@@ -248,6 +265,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test
@@ -280,6 +298,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test
@@ -312,6 +331,7 @@ class NextMoveMessageOutControllerTest {
                 );
 
         verify(messageService).createMessage(any(StandardBusinessDocument.class));
+        verify(onBehalfOfNormalizer).normalize(any());
     }
 
     @Test

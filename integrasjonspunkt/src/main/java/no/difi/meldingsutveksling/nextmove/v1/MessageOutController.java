@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
@@ -12,6 +11,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -67,11 +67,10 @@ public class MessageOutController {
 
     @PostMapping("/{conversationId}")
     public ResponseEntity send(@PathVariable("conversationId") String conversationId,
-            MultipartRequest request) {
+                               MultipartRequest request) {
         NextMoveOutMessage outMessage = messageService.getMessage(conversationId);
         request.getFileMap().values().forEach(f -> messageService.addFile(outMessage, f));
         messageService.sendMessage(outMessage);
         return ResponseEntity.ok().build();
     }
-
 }
