@@ -46,10 +46,14 @@ public class Organisasjonsnummer {
     }
 
     public Optional<String> getPaaVegneAvOrgnr() {
-        if (!isNullOrEmpty(paaVegneAvOrgnr)) {
+        if (hasPaaVegneAvOrgnr()) {
             return Optional.of(paaVegneAvOrgnr);
         }
         return Optional.empty();
+    }
+
+    public boolean hasPaaVegneAvOrgnr() {
+        return !isNullOrEmpty(paaVegneAvOrgnr);
     }
 
     public String getOrgNummer() {
