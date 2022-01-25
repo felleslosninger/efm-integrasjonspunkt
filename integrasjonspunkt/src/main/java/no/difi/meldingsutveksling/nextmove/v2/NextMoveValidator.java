@@ -126,7 +126,7 @@ public class NextMoveValidator {
             if (!isNullOrEmpty(forsendelseType)) {
                 List<String> validTypes = svarUtService.retreiveForsendelseTyper();
                 if (!validTypes.contains(forsendelseType)) {
-                    throw new ForsendelseTypeNotFoundException(forsendelseType, validTypes);
+                    throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
                 }
             }
         }
