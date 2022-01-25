@@ -26,7 +26,7 @@ Feature: Sending a Next Move DPF message
     </ser:sendForsendelseMedIdResponse>
     """
 
-  Scenario: As a user I want to send a DPF message
+  Scenario: As a user I want to send a DPF message with valid forsendelsetype
     Given I POST the following message:
     """
     {
