@@ -169,6 +169,11 @@ Feature: Sending a Next Move DPF message
     Then an upload to Fiks is initiated with:
     """
     <?xml version="1.0" encoding="UTF-8"?>
+    <retreiveForsendelseTyper xmlns="http://www.ks.no/svarut/servicesV9"/>
+    """
+    Then an upload to Fiks is initiated with:
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
     <sendForsendelseMedId xmlns="http://www.ks.no/svarut/servicesV9">
         <forsendelse>
             <avgivendeSystem></avgivendeSystem>
