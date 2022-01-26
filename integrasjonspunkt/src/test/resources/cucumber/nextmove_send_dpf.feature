@@ -11,7 +11,14 @@ Feature: Sending a Next Move DPF message
     And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
-    And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
+    And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" with element "retreiveForsendelseTyper" will respond with the following payload:
+    """
+    <ser:retreiveForsendelseTyperResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">
+       <!--Optional:-->
+       <return>forsendelsetype-1</return>
+    </ser:retreiveForsendelseTyperResponse>
+    """
+    And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" with element "sendForsendelseMedId" will respond with the following payload:
     """
     <ser:sendForsendelseMedIdResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">
        <!--Optional:-->
@@ -19,7 +26,7 @@ Feature: Sending a Next Move DPF message
     </ser:sendForsendelseMedIdResponse>
     """
 
-  Scenario: As a user I want to send a DPF message
+  Scenario: As a user I want to send a DPF message with valid forsendelsetype
     Given I POST the following message:
     """
     {
@@ -159,6 +166,11 @@ Feature: Sending a Next Move DPF message
     Testing 1 2 3
     """
     And I send the message
+    Then an upload to Fiks is initiated with:
+    """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <retreiveForsendelseTyper xmlns="http://www.ks.no/svarut/servicesV9"/>
+    """
     Then an upload to Fiks is initiated with:
     """
     <?xml version="1.0" encoding="UTF-8"?>
