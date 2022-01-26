@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class OnBehalfOfNormalizerTest {
@@ -31,7 +31,7 @@ class OnBehalfOfNormalizerTest {
             "0192:910075918:111111111, 0192:910075918:111111111"
     })
     void normalize(String before, String after) {
-        given(properties.getOrg()).willReturn(
+        lenient().when(properties.getOrg()).thenReturn(
                 new IntegrasjonspunktProperties.Organization()
                         .setNumber("910075918")
         );
