@@ -65,6 +65,9 @@ Feature: Sending a Next Move DPF message
         },
         "arkivmelding": {
           "sikkerhetsnivaa": 3,
+          "dpf": {
+              "forsendelseType": "forsendelsetype-1"
+              },
           "hoveddokument": "arkivmelding.xml"
         }
     }
@@ -170,6 +173,7 @@ Feature: Sending a Next Move DPF message
                 <skalSigneres>false</skalSigneres>
             </dokumenter>
             <eksternref>abc8849c-e281-4809-8555-7cd54952b946</eksternref>
+            <forsendelseType>forsendelsetype-1</forsendelseType>
             <krevNiva4Innlogging>false</krevNiva4Innlogging>
             <kryptert>true</kryptert>
             <kunDigitalLevering>false</kunDigitalLevering>

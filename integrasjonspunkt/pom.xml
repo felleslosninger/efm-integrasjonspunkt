@@ -675,6 +675,10 @@
             <artifactId>jaxb-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.kirviq</groupId>
             <artifactId>dumbster</artifactId>
         </dependency>

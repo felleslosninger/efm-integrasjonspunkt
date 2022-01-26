@@ -14,4 +14,5 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
 public class ArkivmeldingMessage extends BusinessMessage<ArkivmeldingMessage> {
     private DpvSettings dpv;
+    private DpfSettings dpf;
 }
