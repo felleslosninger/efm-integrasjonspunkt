@@ -61,6 +61,9 @@ public class NextMoveMessageInController {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         try {
             InputStreamResource asic = messageService.popMessage(messageId);
+            if (asic == null) {
+                return ResponseEntity.noContent().build();
+            }
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)

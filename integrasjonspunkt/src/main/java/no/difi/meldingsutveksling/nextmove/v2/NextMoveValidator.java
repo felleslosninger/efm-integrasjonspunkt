@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
@@ -63,6 +64,7 @@ public class NextMoveValidator {
     private final NextMoveFileSizeValidator fileSizeValidator;
     private final IntegrasjonspunktProperties props;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
+    private final SvarUtService svarUtService;
 
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
@@ -104,11 +106,30 @@ public class NextMoveValidator {
             }
         }
 
+        validateDpfForsendelseType(sbd, serviceRecord);
+
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
                 {
                         group
                 } : new Class<?>[0]);
+    }
+
+    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+        if (serviceRecord.getServiceIdentifier() == DPF && sbd.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            ArkivmeldingMessage message = (ArkivmeldingMessage) sbd.getBusinessMessage();
+            DpfSettings dpfSettings = message.getDpf();
+            if (dpfSettings == null) {
+                return;
+            }
+            String forsendelseType = dpfSettings.getForsendelseType();
+            if (!isNullOrEmpty(forsendelseType)) {
+                List<String> validTypes = svarUtService.retreiveForsendelseTyper();
+                if (!validTypes.contains(forsendelseType)) {
+                    throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+                }
+            }
+        }
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)

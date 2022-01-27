@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
@@ -44,6 +45,7 @@ public class NextMoveMessageInService {
     private final NextMoveMessageInRepository messageRepo;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
+    private final SBDUtil sbdUtil;
     private final Clock clock;
 
     @Transactional
@@ -73,6 +75,10 @@ public class NextMoveMessageInService {
 
         if (message.getLockTimeout() == null) {
             throw new MessageNotLockedException(messageId);
+        }
+
+        if (sbdUtil.isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+            return null;
         }
 
         try {
