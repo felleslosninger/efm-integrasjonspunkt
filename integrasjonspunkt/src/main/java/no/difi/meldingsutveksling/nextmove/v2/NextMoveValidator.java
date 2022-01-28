@@ -64,7 +64,7 @@ public class NextMoveValidator {
     private final NextMoveFileSizeValidator fileSizeValidator;
     private final IntegrasjonspunktProperties props;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
-    private final SvarUtService svarUtService;
+    private final ObjectProvider<SvarUtService> svarUtService;
 
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
@@ -116,6 +116,9 @@ public class NextMoveValidator {
     }
 
     private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+        if (svarUtService.getIfAvailable() == null) {
+            return;
+        }
         if (serviceRecord.getServiceIdentifier() == DPF && sbd.getBusinessMessage() instanceof ArkivmeldingMessage) {
             ArkivmeldingMessage message = (ArkivmeldingMessage) sbd.getBusinessMessage();
             DpfSettings dpfSettings = message.getDpf();
@@ -124,7 +127,7 @@ public class NextMoveValidator {
             }
             String forsendelseType = dpfSettings.getForsendelseType();
             if (!isNullOrEmpty(forsendelseType)) {
-                List<String> validTypes = svarUtService.retreiveForsendelseTyper();
+                List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
                 if (!validTypes.contains(forsendelseType)) {
                     throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
                 }
