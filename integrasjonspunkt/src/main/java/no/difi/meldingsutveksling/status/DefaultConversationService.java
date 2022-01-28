@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
@@ -196,12 +196,12 @@ public class DefaultConversationService implements ConversationService {
             }
 
             @Override
-            public Organisasjonsnummer getSender() {
+            public PartnerIdentifier getSender() {
                 return SBDUtil.getSender(sbd);
             }
 
             @Override
-            public Organisasjonsnummer getReceiver() {
+            public PartnerIdentifier getReceiver() {
                 return SBDUtil.getReceiver(sbd);
             }
 

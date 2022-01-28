@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import org.springframework.context.annotation.Profile;
@@ -33,8 +34,8 @@ public class ServiceBusMessageParser {
                 .setSbd(serviceBusPayload.getSbd());
 
         if (serviceBusPayload.getAsic() != null) {
-            String receiverOrgNumber = SBDUtil.getReceiverIdentifier(serviceBusPayload.getSbd());
-            PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
+            PartnerIdentifier receiver = SBDUtil.getReceiver(serviceBusPayload.getSbd());
+            PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
 
             byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
             byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);

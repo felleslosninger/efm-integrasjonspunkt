@@ -11,8 +11,9 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -79,8 +80,9 @@ public class NextMoveAdapter {
         AppReceiptType appReceiptType = BestEduConverter.payloadAsAppReceipt(message.getPayload());
         ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), message.getConversationId(), Sets.newHashSet());
         appReceiptType.getMessage().forEach(sm -> receipt.getMessages().add(new KvitteringStatusMessage(sm.getCode(), sm.getText())));
-        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
-                Organisasjonsnummer.from(message.getReceiverPartyNumber()),
+        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
+                Iso6523.of(ICD.NO_ORG, message.getSenderPartynumber()),
+                Iso6523.of(ICD.NO_ORG, message.getReceiverPartyNumber()),
                 message.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
@@ -113,8 +115,9 @@ public class NextMoveAdapter {
         } else {
             process = properties.getArkivmelding().getDefaultProcess();
         }
-        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
-                Organisasjonsnummer.from(message.getReceiverPartyNumber()),
+        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
+                Iso6523.of(ICD.NO_ORG, message.getSenderPartynumber()),
+                Iso6523.of(ICD.NO_ORG, message.getReceiverPartyNumber()),
                 conversationId,
                 conversationId,
                 process,

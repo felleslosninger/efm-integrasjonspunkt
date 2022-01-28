@@ -20,8 +20,10 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                Optional.ofNullable(request.getOnBehalfOfOrgnumber())
-                        .orElse(request.getSenderOrgnumber()));
+                Optional.ofNullable(request.getOnBehalfOf())
+                        .orElse(request.getSender())
+                        .getOrganizationIdentifier()
+        );
         Avsender.Builder avsenderBuilder = Avsender.builder(aktoerOrganisasjonsnummer.forfremTilAvsender());
         Optional.ofNullable(request.getAvsenderIdentifikator()).ifPresent(avsenderBuilder::avsenderIdentifikator);
         Optional.ofNullable(request.getFakturaReferanse()).ifPresent(avsenderBuilder::fakturaReferanse);
@@ -41,7 +43,9 @@ public class PrintForsendelseHandler extends ForsendelseBuilderHandler {
         }
 
         KonvoluttAdresse kon = konvoluttAdresseHandler.handle(request.getPostAddress());
-        TekniskMottaker utskriftsleverandoer = new TekniskMottaker(Organisasjonsnummer.of(request.getOrgnrPostkasse()), Sertifikat.fraByteArray(request.getCertificate()));
+        TekniskMottaker utskriftsleverandoer = new TekniskMottaker(
+                Organisasjonsnummer.of(request.getPostkasseProvider().getOrganizationIdentifier()),
+                Sertifikat.fraByteArray(request.getCertificate()));
 
         FysiskPost fysiskPost = FysiskPost.builder()
                 .adresse(kon)

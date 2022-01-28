@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.BusinessMessage
@@ -58,13 +59,13 @@ internal class FiksIoServiceTest {
 
     @Test
     fun `send message ok`() {
-        val orgnr = "910076787"
+        val iso6523 = Iso6523.parse("0192:910076787")
         val kontoId = "d49177d3-ec0c-40ee-ace9-0f2781a05f45"
         val messageId = "0e238873-63ba-4993-84e1-73b91eb2061d"
         val convId = "c9f37b22-cf8a-44de-b854-050f6a9acc7a"
         val protocol = "digdir.einnsyn.v1"
 
-        val sr = ServiceRecord(ServiceIdentifier.DPFIO, orgnr, "pem123", kontoId)
+        val sr = ServiceRecord(ServiceIdentifier.DPFIO, iso6523.organizationIdentifier, "pem123", kontoId)
         sr.process = protocol
         sr.documentTypes = listOf(protocol)
         every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns sr
@@ -79,8 +80,8 @@ internal class FiksIoServiceTest {
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns messageId
         every { SBDUtil.getProcess(sbd) } returns protocol
-        every { SBDUtil.getReceiverIdentifier(sbd) } returns orgnr
-        every { SBDUtil.getSenderIdentifier(sbd) } returns orgnr
+        every { SBDUtil.getReceiver(sbd) } returns iso6523
+        every { SBDUtil.getSender(sbd) } returns iso6523
         every { SBDUtil.getDocumentType(sbd) } returns protocol
 
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)

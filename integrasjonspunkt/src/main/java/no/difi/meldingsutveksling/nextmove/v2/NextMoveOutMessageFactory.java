@@ -5,7 +5,8 @@ import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -42,8 +43,8 @@ public class NextMoveOutMessageFactory {
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiverIdentifier(sbd),
-                SBDUtil.getSenderIdentifier(sbd),
+                SBDUtil.getReceiver(sbd).getPrimaryIdentifier(),
+                SBDUtil.getSender(sbd).getPrimaryIdentifier(),
                 serviceRecord.getServiceIdentifier(),
                 sbd);
     }
@@ -54,13 +55,13 @@ public class NextMoveOutMessageFactory {
                 .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
-        if (SBDUtil.getSenderIdentifier(sbd) == null) {
-            Organisasjonsnummer org = Organisasjonsnummer.from(properties.getOrg().getNumber());
+        if (SBDUtil.getSender(sbd) == null) {
+            Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
                     new Partner()
                             .setIdentifier(new PartnerIdentification()
-                                    .setValue(org.asIso6523())
-                                    .setAuthority(org.authority()))
+                                    .setValue(org.getIdentifier())
+                                    .setAuthority(org.getAuthority()))
             );
         }
 

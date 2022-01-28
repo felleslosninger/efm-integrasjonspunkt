@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.annotation.Profile;
@@ -32,8 +33,8 @@ public class AltinnZipContentParser {
     Message parse(ZipContent zipContent) {
         StandardBusinessDocument sbd = getSbd(zipContent);
 
-        String receiverOrgNumber = SBDUtil.getReceiverIdentifier(sbd);
-        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
+        PartnerIdentifier receiver = SBDUtil.getReceiver(sbd);
+        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getPrimaryIdentifier());
 
         Message message = new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPO)

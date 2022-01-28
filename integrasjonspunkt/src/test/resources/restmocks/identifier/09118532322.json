@@ -11,7 +11,7 @@
     {
       "organisationNumber": "09118532322",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICujCCAaKgAwIBAgIEXIe4JzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTg3NDY0MjkxMCAXDTE5MDMxMjEzNDYxNVoYDzIxMTkwMzEyMTM0\nNjE1WjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTg3NDY0MjkxMIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz3fGUUZG9mQmiaXrY5j6EKofssPirvbkyqUD\n893jG2DGybjooSlsIub+NMJx3Dl+5jC9YIB6/BXglfReOg0LvvcoMR7Dr6rOCcKO\nWGMFhaCqlemEJ+HVCj6aOQ87lu+Zbb6hXTxkC1tTLd9x85hPXOH5x53MVzysj43e\nW+CG9VGXcwQBxksuyP+NRI8hEbwlCPcNjNg6u8X2akhKM4JyeaIpGdXNG2EmA0bd\nIaej6oAtZJ79x+3eR3MJR9TB5mauDZng9k5SxC9PxEENzhDaar8aXQrEFCFsRKEI\nnanOOvfihVoFeTxbsca6OeeSBaMNC11egRr+Ks1LsRCs+GF7AwIDAQABMA0GCSqG\nSIb3DQEBCwUAA4IBAQC9dlBI0kOkEQe6FCebfen38ns+kyqVk2I+xJ0MFxyJTd93\nF03BKv3y7WaYkYMBQBa2gyMqRCrH9q1ZNjKX4kjI/g0Hd7Kvqaup44kOaWrnA3pJ\n+5/OvGEdWdhrrKUrXhO7L7lbgu5jvX7emEpn1E8V+8WMDMHg1JMNNflJ0ZXgOU3e\n1tXkzuCBQWguDwdkoX923lUdGeD6h7SnTKzEvoXx2zHDQ0qUTl9W43vmCoxmmmhE\nzsJMnNUh8hK6NolPu7ZLPvkOEr+oLRKfDK6UR2pqVRJpvfCK9r+fDBTh1gmK144I\n6GRg5gVjSwEquF9GzTZ1PW8HNaxLsgA0EuVWZXfh\n-----END CERTIFICATE-----\n",
-      "orgnrPostkasse": "9908:987464291",
+      "orgnrPostkasse": "987464291",
       "postkasseAdresse": "dummy",
       "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
       "documentTypes": [
@@ -27,7 +27,7 @@
     {
       "organisationNumber": "09118532322",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICvjCCAaagAwIBAgIEXKRPEjANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDDBVU\nZXN0IERJRkkgMDkxMTg1MzIzMjIwIBcNMTkwNDAzMDYxMzM4WhgPMjExOTA0MDMw\nNjEzMzhaMCAxHjAcBgNVBAMMFVRlc3QgRElGSSAwOTExODUzMjMyMjCCASIwDQYJ\nKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKx7F22UlcIUNuEF8Vxn2SPTgMvEfUnJ\nWZY1RGr2dOmCTG0hg/a8eSBRrirGXIONULhRowv/bnUWaxUyHmxvvDLgiSnvbAZo\nNok3lBZIo8uPR3rmSzl0Z/6Xe1IhBCrCawpA6O0ohe2dACyoGinfFmAa2Bp4GlJk\niU+8wQlZJ5TsvVGqMIPz2iWWy9myQddYWpDdso1kitANmM3cr+ExES9NPJ2Pg1ol\nVA8gBZL/yVQ8fnq+lWl9xdhC03CJ7HLiWamd46n16fIqTq25icu8EpxG7VGL9A7N\noXhLgkV+oXHxaZ+5CNJAlbNu1xzPHlKRWQ0CkTD1/RcIxPH6E5xdgR8CAwEAATAN\nBgkqhkiG9w0BAQsFAAOCAQEASN0GL4i8X4LDIBa2gbg34ZPWnrVhc4410a1KYODP\nDgKJ4yhaRs/4p4h3kVZdqKQc9B7TkkYJhC0af98wNKRoy2hN9ziFnnsb3Rb+7uvD\nPtXZ+l+YTctMgtSDKzunTpaqxOGMD3dgo/xWrseH0XEGZPm3skH39bhtVps3Ulf0\n1Nh6qRrpacy77RHJSTT8dhfm+bsAVRRVbbZnYmfrzMwCwsiu2he5bpwoMYsZpf/k\ngIADbmEmhUlxWsuHEmGxtJeVuZxi1Boy6GZiYg+WSeWuJE49lJYX5Z2tBKvIMoQ0\nVKObepywsh1F7HBL7N+0frE6/7ZYRAC1WNHbrJJ4fOEdIA==\n-----END CERTIFICATE-----\n",
-      "orgnrPostkasse": "9908:987464291",
+      "orgnrPostkasse": "987464291",
       "postkasseAdresse": "dummy",
       "process": "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
       "documentTypes": [

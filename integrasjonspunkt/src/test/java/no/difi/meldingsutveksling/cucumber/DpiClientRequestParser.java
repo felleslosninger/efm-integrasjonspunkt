@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
@@ -48,14 +49,13 @@ public class DpiClientRequestParser {
 
         StandardBusinessDocument sbd = getStandardBusinessDocument(fileItems);
 
-        String receiverOrgNumber = SBDUtil.getReceiverIdentifier(sbd);
-        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
+        PartnerIdentifier receiver = SBDUtil.getReceiver(sbd);
+        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
 
         List<Attachment> attachments = getAttachments(fileItems, privateKey);
 
-        sbd.getBusinessMessage(DokumentpakkefingeravtrykkHolder.class).ifPresent(p -> {
-            p.getDokumentpakkefingeravtrykk().setDigestValue("dummy");
-        });
+        sbd.getBusinessMessage(DokumentpakkefingeravtrykkHolder.class)
+                .ifPresent(p -> p.getDokumentpakkefingeravtrykk().setDigestValue("dummy"));
 
         return new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPI)

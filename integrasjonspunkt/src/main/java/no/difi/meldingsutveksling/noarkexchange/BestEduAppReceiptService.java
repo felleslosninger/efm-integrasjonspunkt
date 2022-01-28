@@ -5,7 +5,6 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
@@ -58,13 +57,14 @@ public class BestEduAppReceiptService {
     }
 
     public void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
-        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", SBDUtil.getReceiverIdentifier(sbd));
+        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", SBDUtil.getReceiver(sbd));
         ArkivmeldingKvitteringMessage kvittering = new ArkivmeldingKvitteringMessage()
                 .setReceiptType("ERROR")
                 .addMessage(new KvitteringStatusMessage("Unknown", errorText));
 
-        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(SBDUtil.getReceiverIdentifier(sbd)),
-                Organisasjonsnummer.from(SBDUtil.getSenderIdentifier(sbd)),
+        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(
+                SBDUtil.getReceiver(sbd),
+                SBDUtil.getSender(sbd),
                 SBDUtil.getConversationId(sbd),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),

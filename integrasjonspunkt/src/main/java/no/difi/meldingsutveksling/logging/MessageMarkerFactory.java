@@ -49,10 +49,10 @@ public class MessageMarkerFactory {
         LogstashMarker messageIdMarker = messageIdMarker(SBDUtil.getMessageId(sbd));
         LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(SBDUtil.getMessageType(sbd).getType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(SBDUtil.getJournalPostId(sbd));
-        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(SBDUtil.getSender(sbd).asIso6523());
-        LogstashMarker senderIdentifierMarker = senderMarker(SBDUtil.getSenderIdentifier(sbd));
-        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(SBDUtil.getReceiver(sbd).asIso6523());
-        LogstashMarker receiverIdentifierMarker = receiverMarker(SBDUtil.getReceiverIdentifier(sbd));
+        LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(SBDUtil.getSender(sbd).getIdentifier());
+        LogstashMarker senderIdentifierMarker = senderMarker(SBDUtil.getSender(sbd).getPrimaryIdentifier());
+        LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(SBDUtil.getReceiver(sbd).getIdentifier());
+        LogstashMarker receiverIdentifierMarker = receiverMarker(SBDUtil.getReceiver(sbd).getPrimaryIdentifier());
         LogstashMarker documentTypeMarker = documentTypeMarker(SBDUtil.getDocumentType(sbd));
         LogstashMarker processMarker = processMarker(SBDUtil.getProcess(sbd));
         return conversationIdMarker.and(messageTypeMarker)

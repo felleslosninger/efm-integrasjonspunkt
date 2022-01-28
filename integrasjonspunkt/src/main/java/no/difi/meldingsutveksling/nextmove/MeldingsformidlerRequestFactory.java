@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.Document;
@@ -38,16 +41,16 @@ public class MeldingsformidlerRequestFactory {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
                 .document(getMainDocument(nextMoveMessage, reject))
                 .attachments(getAttachments(nextMoveMessage, reject))
-                .mottakerPid(nextMoveMessage.getReceiverIdentifier())
-                .senderOrgnumber(nextMoveMessage.getSenderIdentifier())
-                .onBehalfOfOrgnumber(SBDUtil.getOnBehalfOfOrgNr(nextMoveMessage.getSbd()).orElse(null))
+                .mottakerPid(nextMoveMessage.getReceiver().cast(PersonIdentifier.class))
+                .sender(nextMoveMessage.getSender().cast(Iso6523.class))
+                .onBehalfOf(SBDUtil.getOnBehalfOf(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())
                 .expectedResponseDateTime(StandardBusinessDocumentUtils.getExpectedResponseDateTime(nextMoveMessage.getSbd()).orElse(null))
                 .postkasseAdresse(serviceRecord.getPostkasseAdresse())
                 .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
-                .orgnrPostkasse(serviceRecord.getOrgnrPostkasse())
+                .postkasseProvider(Iso6523.of(ICD.NO_ORG, serviceRecord.getOrgnrPostkasse()))
                 .emailAddress(serviceRecord.getEpostAdresse())
                 .mobileNumber(getMobilnummer(serviceRecord))
                 .notifiable(serviceRecord.isKanVarsles())

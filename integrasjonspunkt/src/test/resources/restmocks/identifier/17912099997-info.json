@@ -1,6 +1,6 @@
 {
   "infoRecord": {
-    "identifier": "09118532323",
+    "identifier": "17912099997",
     "organizationName": "Dpi Mottaker 1",
     "postadresse": null,
     "entityType": {
@@ -9,7 +9,7 @@
   },
   "serviceRecords": [
     {
-      "organisationNumber": "09118532323",
+      "organisationNumber": "17912099997",
       "pemCertificate": "",
       "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
       "documentTypes": [

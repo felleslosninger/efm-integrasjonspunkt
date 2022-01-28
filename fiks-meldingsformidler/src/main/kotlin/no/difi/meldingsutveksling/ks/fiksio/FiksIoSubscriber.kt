@@ -5,8 +5,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.DpfioPolling
 import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.ICD
+import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.sbd.SBDFactory
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
@@ -36,8 +37,8 @@ class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
     private fun handleMessage(mottattMelding: MottattMelding, svarSender: SvarSender) {
         log.debug("FiksIO: Received message with fiksId=${mottattMelding.meldingId} protocol=${mottattMelding.meldingType}")
         val sbd = sbdFactory.createNextMoveSBD(
-            Organisasjonsnummer.from(props.fiks.io.senderOrgnr),
-            Organisasjonsnummer.from(props.org.number),
+            Iso6523.of(ICD.NO_ORG, props.fiks.io.senderOrgnr),
+            Iso6523.of(ICD.NO_ORG, props.org.number),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingType,

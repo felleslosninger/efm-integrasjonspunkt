@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -31,8 +31,8 @@ public class SBDFactory {
     private final Clock clock;
     private final IntegrasjonspunktProperties props;
 
-    public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
-                                                      Organisasjonsnummer mottaker,
+    public StandardBusinessDocument createNextMoveSBD(PartnerIdentifier avsender,
+                                                      PartnerIdentifier mottaker,
                                                       String conversationId,
                                                       String messageId,
                                                       String process,
@@ -41,21 +41,21 @@ public class SBDFactory {
         Optional<MessageType> type = MessageType.valueOfDocumentType(documentType);
         if (!type.isPresent()) {
             try {
-                ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrgNummer())
+                ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrganizationIdentifier())
                         .process(process).conversationId(conversationId).build(), documentType);
                 if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPFIO) {
                     type = Optional.of(MessageType.FIKSIO);
                 }
             } catch (ServiceRegistryLookupException e) {
-                throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker.getOrgNummer()), e);
+                throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker), e);
             }
         }
         MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: " + documentType));
         return createNextMoveSBD(avsender, mottaker, conversationId, messageId, process, documentType, messageType, any);
     }
 
-    public StandardBusinessDocument createNextMoveSBD(Organisasjonsnummer avsender,
-                                                      Organisasjonsnummer mottaker,
+    public StandardBusinessDocument createNextMoveSBD(PartnerIdentifier avsender,
+                                                      PartnerIdentifier mottaker,
                                                       String conversationId,
                                                       String messageId,
                                                       String process,
@@ -107,16 +107,16 @@ public class SBDFactory {
         return null;
     }
 
-    private Partner createPartner(Organisasjonsnummer orgNummer) {
+    private Partner createPartner(PartnerIdentifier partnerIdentifier) {
         Partner sender = new Partner();
-        fillPartner(sender, orgNummer);
+        fillPartner(sender, partnerIdentifier);
         return sender;
     }
 
-    private void fillPartner(Partner partner, Organisasjonsnummer orgNummer) {
+    private void fillPartner(Partner partner, PartnerIdentifier partnerIdentifier) {
         partner.setIdentifier(new PartnerIdentification()
-                .setValue(orgNummer.asIso6523())
-                .setAuthority(orgNummer.authority()));
+                .setValue(partnerIdentifier.getIdentifier())
+                .setAuthority(partnerIdentifier.getAuthority()));
     }
 
     private DocumentIdentification createDocumentIdentification(String documentType,

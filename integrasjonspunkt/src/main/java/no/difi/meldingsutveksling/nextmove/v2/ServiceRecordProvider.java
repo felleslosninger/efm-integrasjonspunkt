@@ -26,7 +26,7 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(SBDUtil.getReceiverIdentifier(sbd))
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(SBDUtil.getReceiver(sbd).getPrimaryIdentifier())
                     .process(SBDUtil.getProcess(sbd));
 
             SBDUtil.getOptionalConversationId(sbd).ifPresent(parameterBuilder::conversationId);

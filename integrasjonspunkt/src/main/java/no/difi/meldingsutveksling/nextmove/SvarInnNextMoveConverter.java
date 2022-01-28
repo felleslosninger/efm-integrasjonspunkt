@@ -14,10 +14,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
-import no.difi.meldingsutveksling.sbd.ScopeFactory;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
@@ -27,6 +26,8 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +54,8 @@ public class SvarInnNextMoveConverter {
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
-                Organisasjonsnummer.from(forsendelse.getSvarSendesTil().getOrgnr()),
-                Organisasjonsnummer.from(forsendelse.getMottaker().getOrgnr()),
+                Iso6523.of(ICD.NO_ORG, forsendelse.getSvarSendesTil().getOrgnr()),
+                Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
                 forsendelse.getId(),
                 forsendelse.getId(),
                 properties.getFiks().getInn().getProcess(),

@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -332,7 +333,9 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
-        String orgnr = SBDUtil.getOnBehalfOfOrgNr(msg.getSbd()).orElse(properties.getOrg().getNumber());
+        String orgnr = SBDUtil.getOnBehalfOf(msg.getSbd())
+                .map(Iso6523::getOrganizationIdentifier)
+                .orElse(properties.getOrg().getNumber());
         return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();
     }
 
