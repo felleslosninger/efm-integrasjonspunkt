@@ -66,6 +66,9 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var svarUtService: SvarUtService
 
+    @MockK
+    lateinit var svarUtServiceProvider: ObjectProvider<SvarUtService>
+
     private lateinit var nextMoveValidator: NextMoveValidator
 
     private val messageId = "123"
@@ -91,7 +94,7 @@ class NextMoveValidatorTest {
                 nextMoveFileSizeValidator,
                 props,
                 certValidator,
-                svarUtService
+                svarUtServiceProvider
         )
 
 
@@ -101,6 +104,8 @@ class NextMoveValidatorTest {
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
         every { certValidator.ifAvailable(any()) } just Runs
+        every { svarUtServiceProvider.getIfAvailable() } returns svarUtService
+        every { svarUtServiceProvider.getObject() } returns svarUtService
         every { message.businessMessage } returns businessMessage
         every { sbd.optionalMessageId } returns Optional.of(messageId)
         every { message.messageId } returns messageId
