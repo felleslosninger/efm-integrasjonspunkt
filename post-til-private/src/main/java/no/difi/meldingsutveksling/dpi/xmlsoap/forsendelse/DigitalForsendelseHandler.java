@@ -26,15 +26,17 @@ public class DigitalForsendelseHandler extends ForsendelseBuilderHandler {
     @Override
     public Forsendelse.Builder handle(MeldingsformidlerRequest request, Dokumentpakke dokumentpakke) {
         Mottaker mottaker = Mottaker.builder(
-                request.getMottakerPid(),
+                request.getMottakerPid().getIdentifier(),
                 request.getPostkasseAdresse(),
                 Sertifikat.fraByteArray(request.getCertificate()),
-                Organisasjonsnummer.of(request.getOrgnrPostkasse())
+                Organisasjonsnummer.of(request.getPostkasseProvider().getOrganizationIdentifier())
         ).build();
 
         final AktoerOrganisasjonsnummer aktoerOrganisasjonsnummer = AktoerOrganisasjonsnummer.of(
-                Optional.ofNullable(request.getOnBehalfOfOrgnumber())
-                        .orElse(request.getSenderOrgnumber()));
+                Optional.ofNullable(request.getOnBehalfOf())
+                        .orElse(request.getSender())
+                        .getOrganizationIdentifier()
+        );
         DigitalPost.Builder digitalPost = DigitalPost.builder(mottaker, request.getSubject())
                 .virkningsdato(java.util.Date.from(request.getVirkningsdato().toInstant()))
                 .aapningskvittering(request.isAapningskvittering())

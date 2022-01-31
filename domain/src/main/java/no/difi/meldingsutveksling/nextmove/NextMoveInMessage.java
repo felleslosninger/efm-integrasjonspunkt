@@ -39,8 +39,8 @@ public class NextMoveInMessage extends NextMoveMessage {
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiverIdentifier(sbd),
-                SBDUtil.getSenderIdentifier(sbd),
+                SBDUtil.getReceiver(sbd).getPrimaryIdentifier(),
+                SBDUtil.getSender(sbd).getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
     }

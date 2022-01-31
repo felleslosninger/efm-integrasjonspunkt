@@ -19,8 +19,8 @@ public class ShipmentFactory {
 
     public Shipment getShipment(DpiTestInput input) {
         return new Shipment()
-                .setSenderOrganizationIdentifier(input.getSenderOrganizationIdentifier())
-                .setReceiverOrganizationIdentifier(input.getReceiverOrganizationIdentifier())
+                .setSender(input.getSender())
+                .setReceiver(input.getReceiver())
                 .setMessageId(input.getMessageId())
                 .setConversationId(input.getConversationId())
                 .setExpectedResponseDateTime(input.getExpectedResponseDateTime())

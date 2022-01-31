@@ -5,8 +5,8 @@ import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.DateTimeUtil
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
@@ -16,8 +16,8 @@ import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Clock
@@ -30,6 +30,7 @@ class SbdFactoryTest {
 
     @MockK
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
+
     @MockK
     lateinit var props: IntegrasjonspunktProperties
 
@@ -40,8 +41,8 @@ class SbdFactoryTest {
     private val arkivmeldingResponseProcess = "urn:no:difi:profile:arkivmelding:response:ver1.0"
     private val einnsynResponseProcess = "urn:no:difi:profile:einnsyn:response:ver1.0"
     private val statusDocType = "urn:no:difi:eformidling:xsd::status"
-    private val senderOrgnr = "910076787"
-    private val receiverOrgnr = "991825827"
+    private val sender = Iso6523.parse("0192:910076787")
+    private val receiver = Iso6523.parse("0192:991825827")
     private val convId = "e3016cb7-39de-4166-a935-3a574cd2a2db"
     private val msgId = "4653f436-8921-4224-b824-068f2cc6232f"
 
@@ -65,10 +66,8 @@ class SbdFactoryTest {
         }
 
         mockkStatic(SBDUtil::class)
-        every { SBDUtil.getReceiver(sbd) } returns Organisasjonsnummer.from(receiverOrgnr)
-        every { SBDUtil.getSender(sbd) } returns Organisasjonsnummer.from(senderOrgnr)
-        every { SBDUtil.getSenderIdentifier(sbd) } returns senderOrgnr
-        every { SBDUtil.getReceiverIdentifier(sbd) } returns receiverOrgnr
+        every { SBDUtil.getReceiver(sbd) } returns receiver
+        every { SBDUtil.getSender(sbd) } returns sender
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns msgId
         every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()
@@ -85,11 +84,13 @@ class SbdFactoryTest {
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
 
-        assertEquals(StandardBusinessDocumentUtils.getFirstReceiver(statusSbd).get().identifier.value,
-            "0192:$senderOrgnr"
+        assertEquals(
+            StandardBusinessDocumentUtils.getFirstReceiver(statusSbd).get().identifier.value,
+            sender.identifier
         )
-        assertEquals(StandardBusinessDocumentUtils.getFirstSender(statusSbd).get().identifier.value,
-            "0192:$receiverOrgnr"
+        assertEquals(
+            StandardBusinessDocumentUtils.getFirstSender(statusSbd).get().identifier.value,
+            receiver.identifier
         )
         assertEquals(arkivmeldingResponseProcess, SBDUtil.getProcess(statusSbd))
         assertTrue(statusSbd.any is StatusMessage)
@@ -116,8 +117,8 @@ class SbdFactoryTest {
 
         Assertions.assertThrows(MeldingsUtvekslingRuntimeException::class.java) {
             sbdFactory.createNextMoveSBD(
-                Organisasjonsnummer.from(senderOrgnr),
-                Organisasjonsnummer.from(receiverOrgnr),
+                sender,
+                receiver,
                 convId, msgId,
                 arkivmeldingProcess,
                 "foo::bar",
@@ -134,8 +135,8 @@ class SbdFactoryTest {
         }
 
         sbdFactory.createNextMoveSBD(
-            Organisasjonsnummer.from(senderOrgnr),
-            Organisasjonsnummer.from(receiverOrgnr),
+            sender,
+            receiver,
             convId, msgId,
             arkivmeldingProcess,
             "foo::bar",

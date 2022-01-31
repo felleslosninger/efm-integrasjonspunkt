@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.Data;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 import org.springframework.core.io.Resource;
 
@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 public class DpiTestInput {
 
-    private PartnerIdentification senderOrganizationIdentifier;
-    private PartnerIdentification receiverOrganizationIdentifier;
+    private Iso6523 sender;
+    private Iso6523 receiver;
     private String messageId;
     private String conversationId;
     private OffsetDateTime expectedResponseDateTime;

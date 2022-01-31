@@ -68,7 +68,9 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
     }
 
     private SikkerDigitalPostKlient getSikkerDigitalPostKlient(MeldingsformidlerRequest request) {
-        return sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(request.getSenderOrgnumber()), metricsEndpointInterceptor);
+        return sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(
+                AktoerOrganisasjonsnummer.of(request.getSender().getOrganizationIdentifier()),
+                metricsEndpointInterceptor);
     }
 
     private ForsendelseBuilderHandler getForsendelseBuilderHandler(MeldingsformidlerRequest request) {

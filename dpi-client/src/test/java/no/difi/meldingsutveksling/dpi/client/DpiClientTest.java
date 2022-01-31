@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.Payload;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -202,12 +204,8 @@ class DpiClientTest {
 
     private DpiTestInput createDpiTestInput(BusinessMessage businessMessage) {
         return new DpiTestInput()
-                .setSenderOrganizationIdentifier(new PartnerIdentification()
-                        .setAuthority(Authority.ISO6523_ACTORID_UPIS)
-                        .setValue("0192:987654321"))
-                .setReceiverOrganizationIdentifier(new PartnerIdentification()
-                        .setAuthority(Authority.ISO6523_ACTORID_UPIS)
-                        .setValue("0192:123456789"))
+                .setSender(Iso6523.parse("0192:987654321"))
+                .setReceiver(Iso6523.parse("0192:123456789"))
                 .setMessageId("ff88849c-e281-4809-8555-7cd54952b916")
                 .setConversationId("37efbd4c-413d-4e2c-bbc5-257ef4a65a45")
                 .setExpectedResponseDateTime(OffsetDateTime.parse("2021-04-21T15:29:58.753+02:00"))

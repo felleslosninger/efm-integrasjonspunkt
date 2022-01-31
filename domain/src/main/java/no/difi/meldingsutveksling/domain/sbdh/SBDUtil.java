@@ -2,9 +2,10 @@ package no.difi.meldingsutveksling.domain.sbdh;
 
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
 import java.util.Optional;
@@ -16,57 +17,49 @@ public class SBDUtil {
         // UtilityClass
     }
 
-    public static Organisasjonsnummer getSender(StandardBusinessDocument sbd) {
+    public static PartnerIdentifier getSender(StandardBusinessDocument sbd) {
         return getOptionalSender(sbd)
                 .orElse(null);
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalSender(StandardBusinessDocument sbd) {
+    public static Optional<PartnerIdentifier> getOptionalSender(StandardBusinessDocument sbd) {
         return StandardBusinessDocumentUtils.getFirstSender(sbd)
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
                 .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
+                .map(PartnerIdentifier::parse);
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
+    public static Optional<PartnerIdentifier> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
         return sbdh.getFirstSender()
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
                 .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
+                .map(PartnerIdentifier::parse);
     }
 
-    public static String getSenderIdentifier(StandardBusinessDocument sbd) {
-        return getOptionalSender(sbd)
-                .map(Organisasjonsnummer::getOrgNummer)
-                .orElse(null);
-    }
-
-    public static Organisasjonsnummer getReceiver(StandardBusinessDocument sbd) {
+    public static PartnerIdentifier getReceiver(StandardBusinessDocument sbd) {
         return getOptionalReceiver(sbd)
                 .orElse(null);
     }
 
-    public static Optional<Organisasjonsnummer> getOptionalReceiver(StandardBusinessDocument sbd) {
+    public static Optional<PartnerIdentifier> getOptionalReceiver(StandardBusinessDocument sbd) {
         return StandardBusinessDocumentUtils.getFirstReceiver(sbd)
                 .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
                 .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(Organisasjonsnummer::parse);
+                .map(PartnerIdentifier::parse);
     }
 
-    public static String getReceiverIdentifier(StandardBusinessDocument sbd) {
-        return getOptionalReceiver(sbd)
-                .map(Organisasjonsnummer::getOrgNummer)
-                .orElse(null);
-    }
-
-    public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocument sbd) {
+    public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocument sbd) {
         return getOptionalSender(sbd)
-                .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
+                .flatMap(p -> p.as(Iso6523.class)
+                        .filter(Iso6523::hasOrganizationPartIdentifier)
+                        .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier())));
     }
 
-    public static Optional<String> getOnBehalfOfOrgNr(StandardBusinessDocumentHeader sbdh) {
+    public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocumentHeader sbdh) {
         return getOptionalSender(sbdh)
-                .flatMap(Organisasjonsnummer::getPaaVegneAvOrgnr);
+                .flatMap(p -> p.as(Iso6523.class)
+                        .filter(Iso6523::hasOrganizationPartIdentifier)
+                        .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier())));
     }
 
     public static String getDocumentType(StandardBusinessDocument sbd) {
@@ -175,8 +168,8 @@ public class SBDUtil {
     public static MessageInfo getMessageInfo(StandardBusinessDocument sbd) {
         return new MessageInfo(
                 getMessageType(sbd).getType(),
-                getReceiverIdentifier(sbd),
-                getSenderIdentifier(sbd),
+                getReceiver(sbd),
+                getSender(sbd),
                 getJournalPostId(sbd),
                 getConversationId(sbd),
                 getMessageId(sbd));

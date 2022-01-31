@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.dpi.json;
 
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
@@ -26,8 +25,8 @@ public class ShipmentFactory {
 
     public Shipment getShipment(MeldingsformidlerRequest request) {
         return new Shipment()
-                .setSenderOrganizationIdentifier(getPartnerIdentification(request.getSenderOrgnumber()))
-                .setReceiverOrganizationIdentifier(getPartnerIdentification(request.getOrgnrPostkasse()))
+                .setSender(request.getSender())
+                .setReceiver(request.getPostkasseProvider())
                 .setMessageId(request.getMessageId())
                 .setConversationId(request.getConversationId())
                 .setChannel(request.getMpcId())
@@ -36,13 +35,6 @@ public class ShipmentFactory {
                 .setParcel(getParcel(request))
                 .setReceiverBusinessCertificate(BusinessCertificate.of(request.getCertificate()))
                 .setLanguage(request.getLanguage());
-    }
-
-    private PartnerIdentification getPartnerIdentification(String orgnumber) {
-        Organisasjonsnummer organisasjonsnummer = Organisasjonsnummer.parse(orgnumber);
-        return new PartnerIdentification()
-                .setAuthority(organisasjonsnummer.authority())
-                .setValue(organisasjonsnummer.asIso6523());
     }
 
     private Parcel getParcel(MeldingsformidlerRequest request) {
@@ -211,10 +203,7 @@ public class ShipmentFactory {
     }
 
     private Identifikator getVirksomhetsindikator(MeldingsformidlerRequest request) {
-        Organisasjonsnummer orgnr = Organisasjonsnummer.from(
-                Optional.ofNullable(request.getOnBehalfOfOrgnumber()).orElseGet(request::getSenderOrgnumber)
-        );
-        return new Identifikator(orgnr.authority(), orgnr.asIso6523());
+        Iso6523 iso6523 = Optional.ofNullable(request.getOnBehalfOf()).orElseGet(request::getSender);
+        return new Identifikator(iso6523.getAuthority(), iso6523.getIdentifier());
     }
-
 }

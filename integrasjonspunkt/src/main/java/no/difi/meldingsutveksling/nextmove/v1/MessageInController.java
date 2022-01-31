@@ -9,7 +9,6 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
@@ -22,6 +21,7 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.core.io.InputStreamResource;
@@ -88,8 +88,8 @@ public class MessageInController {
         Map<Integer, String> fileRefs = Maps.newHashMap();
         fileRefs.put(0, ASIC_FILE);
 
-        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSenderIdentifier());
-        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiverIdentifier());
+        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSender().getPrimaryIdentifier());
+        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiver().getPrimaryIdentifier());
 
         NextMoveV1Message peekMessage = new NextMoveV1Message()
                 .setConversationId(message.getMessageId())

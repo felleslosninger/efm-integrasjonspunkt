@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.dpi;
 
 import lombok.Builder;
 import lombok.Value;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
@@ -16,10 +18,10 @@ public class MeldingsformidlerRequest {
 
     Document document;
     List<Document> attachments;
-    String mottakerPid;
+    PersonIdentifier mottakerPid;
     String subject;
-    String senderOrgnumber;
-    String onBehalfOfOrgnumber;
+    Iso6523 sender;
+    Iso6523 onBehalfOf;
     String avsenderIdentifikator;
     String fakturaReferanse;
     String messageId;
@@ -40,7 +42,7 @@ public class MeldingsformidlerRequest {
     /**
      * @return the organization number of the postkasse provider as defined in KRR
      */
-    String orgnrPostkasse;
+    Iso6523 postkasseProvider;
 
     /**
      * Needed if email notification is enabled

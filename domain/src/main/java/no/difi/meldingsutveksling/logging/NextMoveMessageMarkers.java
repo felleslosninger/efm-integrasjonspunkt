@@ -15,9 +15,9 @@ public class NextMoveMessageMarkers {
     public static LogstashMarker markerFrom(NextMoveMessage message) {
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(message.getConversationId());
         final LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(message.getMessageId());
-        final LogstashMarker senderMarker = senderMarker(SBDUtil.getSender(message.getSbd()).asIso6523());
+        final LogstashMarker senderMarker = senderMarker(SBDUtil.getSender(message.getSbd()).getIdentifier());
         final LogstashMarker senderIdentifierMarker = MarkerFactory.senderMarker(message.getSenderIdentifier());
-        final LogstashMarker receiverMarker = receiverMarker(SBDUtil.getReceiver(message.getSbd()).asIso6523());
+        final LogstashMarker receiverMarker = receiverMarker(SBDUtil.getReceiver(message.getSbd()).getIdentifier());
         final LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(message.getReceiverIdentifier());
         final LogstashMarker messagetypeIdMarker = MarkerFactory.messageTypeMarker(message.getServiceIdentifier().toString());
         final LogstashMarker processMarker = processMarker(SBDUtil.getProcess(message.getSbd()));
