@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MaskinportentokenHolder;
@@ -26,7 +25,7 @@ public class StandBusinessDocumentJsonFinalizer {
                 .ifPresent(message -> message.setMaskinportentoken(maskinportenToken));
 
         Map<String, Object> json = dpiMapper.convertToJsonObject(standardBusinessDocument);
-        jsonDigitalPostSchemaValidator.validate(json, StandardBusinessDocumentUtils.getType(standardBusinessDocument).orElse(null));
+        jsonDigitalPostSchemaValidator.validate(json, standardBusinessDocument.getType().orElse(null));
         return json;
     }
 }

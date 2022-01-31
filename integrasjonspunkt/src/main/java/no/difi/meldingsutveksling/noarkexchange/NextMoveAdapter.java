@@ -17,7 +17,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.KvitteringStatusMessage;
@@ -130,13 +129,13 @@ public class NextMoveAdapter {
         String senderRef = message.getRequest().getEnvelope().getSender().getRef();
 
         if (!Strings.isNullOrEmpty(senderRef)) {
-            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.SENDER_REF, senderRef));
+            sbd.addScope(ScopeFactory.fromRef(ScopeType.SENDER_REF, senderRef));
         }
 
         String receiverRef = message.getRequest().getEnvelope().getReceiver().getRef();
 
         if (!Strings.isNullOrEmpty(receiverRef)) {
-            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, receiverRef));
+            sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, receiverRef));
         }
 
         return nextMoveMessageService.createMessage(sbd, getFiles(message));

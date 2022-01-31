@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +14,7 @@ public class OnBehalfOfNormalizer {
     private final IntegrasjonspunktProperties properties;
 
     public void normalize(StandardBusinessDocument sbd) {
-        PartnerIdentifier sender = SBDUtil.getSender(sbd);
+        PartnerIdentifier sender = sbd.getSenderIdentifier();
 
         if (sender == null) {
             return;
@@ -31,14 +29,7 @@ public class OnBehalfOfNormalizer {
                 return;
             }
 
-            StandardBusinessDocumentUtils.getFirstSenderIdentifier(sbd)
-                    .ifPresent(p -> {
-                        Iso6523 onBehalfOf = Iso6523.parse(p.getValue());
-                        Iso6523 combined = onBehalfOf.withOrganizationPartIdentifier(onBehalfOf.getOrganizationIdentifier())
-                                .withOrganizationIdentifier(properties.getOrg().getNumber());
-                        p.setValue(combined.toString());
-                    });
-
+            sbd.setSenderIdentifier(Iso6523.of(iso6523.getIcd(), properties.getOrg().getNumber(), iso6523.getOrganizationIdentifier()));
         });
     }
 }

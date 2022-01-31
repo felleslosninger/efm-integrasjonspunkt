@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.dpi.MetadataDocument;
@@ -47,7 +46,7 @@ public class MeldingsformidlerRequestFactory {
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())
-                .expectedResponseDateTime(StandardBusinessDocumentUtils.getExpectedResponseDateTime(nextMoveMessage.getSbd()).orElse(null))
+                .expectedResponseDateTime(nextMoveMessage.getSbd().getExpectedResponseDateTime().orElse(null))
                 .postkasseAdresse(serviceRecord.getPostkasseAdresse())
                 .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
                 .postkasseProvider(Iso6523.of(ICD.NO_ORG, serviceRecord.getOrgnrPostkasse()))

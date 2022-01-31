@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
@@ -49,7 +48,7 @@ public class DpiClientRequestParser {
 
         StandardBusinessDocument sbd = getStandardBusinessDocument(fileItems);
 
-        PartnerIdentifier receiver = SBDUtil.getReceiver(sbd);
+        PartnerIdentifier receiver = sbd.getReceiverIdentifier();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
 
         List<Attachment> attachments = getAttachments(fileItems, privateKey);

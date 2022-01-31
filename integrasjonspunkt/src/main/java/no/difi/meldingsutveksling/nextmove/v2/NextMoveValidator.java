@@ -11,7 +11,10 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -64,7 +67,7 @@ public class NextMoveValidator {
     void validate(StandardBusinessDocument sbd) {
         validateCertificate();
 
-        StandardBusinessDocumentUtils.getMessageId(sbd).ifPresent(messageId -> {
+        sbd.getMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
                             .ifPresent(p -> {
                                 throw new MessageAlreadyExistsException(messageId);
@@ -87,7 +90,7 @@ public class NextMoveValidator {
 
         MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
                 .filter(p -> p.getApi() == ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(StandardBusinessDocumentUtils.getType(sbd).orElse("null")));
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType().orElse("null")));
 
         String documentType = SBDUtil.getDocumentType(sbd);
 
@@ -118,7 +121,7 @@ public class NextMoveValidator {
             throw new MissingFileException();
         }
 
-        StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd).ifPresent(expectedResponseDateTime -> {
+        sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
             if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
                 throw new TimeToLiveException(expectedResponseDateTime);

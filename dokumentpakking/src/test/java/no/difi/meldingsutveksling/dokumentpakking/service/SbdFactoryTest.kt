@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
 import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
@@ -66,8 +65,8 @@ class SbdFactoryTest {
         }
 
         mockkStatic(SBDUtil::class)
-        every { SBDUtil.getReceiver(sbd) } returns receiver
-        every { SBDUtil.getSender(sbd) } returns sender
+        every { sbd.receiverIdentifier } returns receiver
+        every { sbd.senderIdentifier } returns sender
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns msgId
         every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()
@@ -85,11 +84,11 @@ class SbdFactoryTest {
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
 
         assertEquals(
-            StandardBusinessDocumentUtils.getFirstReceiver(statusSbd).get().identifier.value,
+            statusSbd.receiverIdentifier.identifier,
             sender.identifier
         )
         assertEquals(
-            StandardBusinessDocumentUtils.getFirstSender(statusSbd).get().identifier.value,
+            statusSbd.senderIdentifier.identifier,
             receiver.identifier
         )
         assertEquals(arkivmeldingResponseProcess, SBDUtil.getProcess(statusSbd))
@@ -101,8 +100,7 @@ class SbdFactoryTest {
     fun `test status creation from einnsyn message`() {
         every { SBDUtil.isArkivmelding(sbd) } returns false
         every { SBDUtil.isEinnsyn(sbd) } returns true
-        every { StandardBusinessDocumentUtils.getScope(sbd, ScopeType.MESSAGE_CHANNEL) } returns Optional.empty()
-//        every { StandardBusinessDocumentUtils.addScope(same(sbd), any())} returns sbd
+        every { sbd.getScope(ScopeType.MESSAGE_CHANNEL) } returns Optional.empty()
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
         assertEquals(einnsynResponseProcess, SBDUtil.getProcess(statusSbd))

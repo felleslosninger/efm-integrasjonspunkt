@@ -26,10 +26,10 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(SBDUtil.getReceiver(sbd).getPrimaryIdentifier())
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier().getPrimaryIdentifier())
                     .process(SBDUtil.getProcess(sbd));
 
-            SBDUtil.getOptionalConversationId(sbd).ifPresent(parameterBuilder::conversationId);
+            sbd.getConversationId().ifPresent(parameterBuilder::conversationId);
 
             if (businessMessage.getSikkerhetsnivaa() != null) {
                 parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());

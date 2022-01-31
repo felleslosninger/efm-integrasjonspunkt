@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.AvsenderHolder;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
@@ -29,8 +30,11 @@ public class CreateReceiptJWT {
     private StandardBusinessDocument createReceiptStandardBusinessDocument(StandardBusinessDocument sbd, ReceiptFactory receiptFactory) {
         MessageType receiptType = receiptFactory.getMessageType();
 
-        PartnerIdentification receiver = StandardBusinessDocumentUtils.getFirstReceiverIdentifier(sbd)
+        PartnerIdentifier receiver = Optional.ofNullable(sbd.getReceiverIdentifier())
                 .orElseThrow(() -> new IllegalArgumentException("Missing receiver!"));
+
+        PartnerIdentifier sender = Optional.ofNullable(sbd.getSenderIdentifier())
+                .orElseThrow(() -> new IllegalArgumentException("Missing sender!"));
 
         return new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
@@ -42,12 +46,10 @@ public class CreateReceiptJWT {
                                 .setType(receiptType.getType())
                                 .setTypeVersion("1.0")
                                 .setCreationDateAndTime(OffsetDateTime.now(clock)))
-                        .addSender(sbd.getStandardBusinessDocumentHeader().getFirstReceiver()
-                                .orElseThrow(() -> new IllegalArgumentException("Missing receiver")))
-                        .addReceiver(sbd.getStandardBusinessDocumentHeader().getFirstSender()
-                                .orElseThrow(() -> new IllegalArgumentException("Missing sender")))
+                        .setSenderIdentifier(receiver)
+                        .setReceiverIdentifier(sender)
                         .setBusinessScope(new BusinessScope()
-                                .addScope(StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
+                                .addScope(sbd.getScope(ScopeType.CONVERSATION_ID)
                                         .orElseThrow(() -> new IllegalArgumentException("Missing conversationId")))))
                 .setAny(receiptFactory.getReceipt(new ReceiptInput()
                         .setMottaker(new Virksomhetmottaker()
@@ -55,7 +57,7 @@ public class CreateReceiptJWT {
                         .setAvsender(new Avsender()
                                 .setVirksomhetsidentifikator(new Identifikator()
                                         .setAuthority(receiver.getAuthority())
-                                        .setValue(receiver.getValue())
+                                        .setValue(receiver.getIdentifier())
                                 )
                         )));
     }

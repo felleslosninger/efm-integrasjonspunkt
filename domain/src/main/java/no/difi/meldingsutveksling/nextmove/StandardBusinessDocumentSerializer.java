@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 
 import java.io.IOException;
 
@@ -19,7 +18,7 @@ public class StandardBusinessDocumentSerializer extends JsonSerializer<StandardB
     public void serialize(StandardBusinessDocument value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         gen.writeObjectField("standardBusinessDocumentHeader", value.getStandardBusinessDocumentHeader());
-        gen.writeObjectField(StandardBusinessDocumentUtils.getType(value).orElse("any"), value.getAny());
+        gen.writeObjectField(value.getType().orElse("any"), value.getAny());
         gen.writeEndObject();
     }
 }

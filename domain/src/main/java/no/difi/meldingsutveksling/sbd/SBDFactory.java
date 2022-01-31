@@ -76,18 +76,15 @@ public class SBDFactory {
     public StandardBusinessDocument createStatusFrom(StandardBusinessDocument sbd,
                                                      ReceiptStatus status) {
         StandardBusinessDocument statusSbd = createNextMoveSBD(
-                SBDUtil.getReceiver(sbd),
-                SBDUtil.getSender(sbd),
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 createProcess(sbd),
                 props.getNextmove().getStatusDocumentType(),
                 new StatusMessage(status));
 
-        SBDUtil.getOptionalMessageChannel(sbd)
-                .ifPresent(messageChannel ->
-                        StandardBusinessDocumentUtils.addScope(statusSbd, messageChannel)
-                );
+        SBDUtil.getOptionalMessageChannel(sbd).ifPresent(statusSbd::addScope);
         return statusSbd;
     }
 

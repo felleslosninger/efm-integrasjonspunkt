@@ -43,19 +43,19 @@ public class NextMoveOutMessageFactory {
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiver(sbd).getPrimaryIdentifier(),
-                SBDUtil.getSender(sbd).getPrimaryIdentifier(),
+                sbd.getReceiverIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceRecord.getServiceIdentifier(),
                 sbd);
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        StandardBusinessDocumentUtils.getScopes(sbd)
+        sbd.getScopes()
                 .stream()
                 .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
-        if (SBDUtil.getSender(sbd) == null) {
+        if (sbd.getSenderIdentifier() == null) {
             Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
                     new Partner()
@@ -75,10 +75,10 @@ public class NextMoveOutMessageFactory {
             documentIdentification.setCreationDateAndTime(OffsetDateTime.now(clock));
         }
 
-        if (!StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd).isPresent()) {
+        if (!sbd.getExpectedResponseDateTime().isPresent()) {
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
 
-            Scope scope = StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
+            Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)
                     .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
 
             if (scope.getScopeInformation().isEmpty()) {
@@ -94,7 +94,7 @@ public class NextMoveOutMessageFactory {
         if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
             if (!mcScope.isPresent()) {
-                StandardBusinessDocumentUtils.addScope(sbd, ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
+                sbd.addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
             }
             if (mcScope.isPresent() && isNullOrEmpty(mcScope.get().getIdentifier())) {
                 mcScope.get().setIdentifier(properties.getDpo().getMessageChannel());
@@ -109,7 +109,7 @@ public class NextMoveOutMessageFactory {
     private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
         MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
                 .filter(p -> p.getApi() == ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(StandardBusinessDocumentUtils.getType(sbd).orElse("null")));
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType().orElse("null")));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();

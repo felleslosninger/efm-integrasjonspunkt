@@ -4,7 +4,10 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData;
@@ -75,7 +78,7 @@ class NextMoveOutMessageFactoryTest {
     void testMessageChannelDefaultScopeExistsEmptyIdentifier() {
         ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
-        StandardBusinessDocumentUtils.addScope(sbd, new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
+        sbd.addScope(new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
         when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
         when(serviceRecordProvider.getServiceRecord(sbd)).thenReturn(sr);
 

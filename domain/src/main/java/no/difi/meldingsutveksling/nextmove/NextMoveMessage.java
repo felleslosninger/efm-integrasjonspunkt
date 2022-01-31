@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -92,17 +91,17 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
 
     @Override
     public OffsetDateTime getExpiry() {
-        return StandardBusinessDocumentUtils.getExpectedResponseDateTime(getSbd()).orElse(null);
+        return getSbd().getExpectedResponseDateTime().orElse(null);
     }
 
     @Override
     public PartnerIdentifier getSender() {
-        return SBDUtil.getSender(getSbd());
+        return getSbd().getSenderIdentifier();
     }
 
     @Override
     public PartnerIdentifier getReceiver() {
-        return SBDUtil.getReceiver(getSbd());
+        return getSbd().getReceiverIdentifier();
     }
 
 }

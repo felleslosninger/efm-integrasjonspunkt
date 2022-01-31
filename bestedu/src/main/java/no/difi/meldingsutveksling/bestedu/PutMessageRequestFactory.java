@@ -25,22 +25,22 @@ public class PutMessageRequestFactory {
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getReceiver(sbd).getPrimaryIdentifier());
-        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getSender(sbd).getPrimaryIdentifier());
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier().getPrimaryIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier().getPrimaryIdentifier());
         return create(conversationId,
-                Sender.of(SBDUtil.getSender(sbd).getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(SBDUtil.getReceiver(sbd).getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(sbd.getSenderIdentifier().getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbd.getReceiverIdentifier().getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
     public PutMessageRequestType createAndSwitchSenderReceiver(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord senderInfo = srLookup.getInfoRecord(SBDUtil.getReceiver(sbd).getPrimaryIdentifier());
-        InfoRecord receiverInfo = srLookup.getInfoRecord(SBDUtil.getSender(sbd).getPrimaryIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier().getPrimaryIdentifier());
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier().getPrimaryIdentifier());
         return create(conversationId,
-                Sender.of(SBDUtil.getReceiver(sbd).getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
-                Receiver.of(SBDUtil.getSender(sbd).getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
+                Sender.of(sbd.getReceiverIdentifier().getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
+                Receiver.of(sbd.getSenderIdentifier().getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }
 
