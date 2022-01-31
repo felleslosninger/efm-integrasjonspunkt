@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -42,7 +41,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     @Transactional
     @Timed
     public void send(@NotNull NextMoveOutMessage message) {
-        ifReceipt(message, mc -> StandardBusinessDocumentUtils.addScope(message.getSbd(), ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
+        ifReceipt(message, mc -> message.getSbd().addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
 
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());
@@ -64,7 +63,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
         }
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
-                message.getMessageId(), message.getServiceIdentifier()),
+                        message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
         ifReceipt(message, mc -> messageChannelRepository.deleteByMessageId(mc.getMessageId()));
     }

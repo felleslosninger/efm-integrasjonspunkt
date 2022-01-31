@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeaderUtils;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
 import org.springframework.util.Assert;
 
@@ -22,7 +21,7 @@ public class StandardBusinessDocumentDeserializer extends JsonDeserializer<Stand
     @Override
     public StandardBusinessDocument deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         StandardBusinessDocumentHeader header = readObject(p, "standardBusinessDocumentHeader", StandardBusinessDocumentHeader.class);
-        MessageType type = MessageType.fromType(StandardBusinessDocumentHeaderUtils.getType(header)
+        MessageType type = MessageType.fromType(header.getType()
                 .orElseThrow(() -> new IOException("Missing type!")));
         StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(header)

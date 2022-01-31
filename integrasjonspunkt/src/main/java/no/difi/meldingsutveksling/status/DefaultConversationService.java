@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
@@ -181,7 +180,7 @@ public class DefaultConversationService implements ConversationService {
                                              @NotNull ServiceIdentifier si,
                                              @NotNull ConversationDirection conversationDirection,
                                              @NotNull ReceiptStatus... statuses) {
-        OffsetDateTime ttl = StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd)
+        OffsetDateTime ttl = sbd.getExpectedResponseDateTime()
                 .orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
 
         return registerConversation(new MessageInformable() {
@@ -197,12 +196,12 @@ public class DefaultConversationService implements ConversationService {
 
             @Override
             public PartnerIdentifier getSender() {
-                return SBDUtil.getSender(sbd);
+                return sbd.getSenderIdentifier();
             }
 
             @Override
             public PartnerIdentifier getReceiver() {
-                return SBDUtil.getReceiver(sbd);
+                return sbd.getReceiverIdentifier();
             }
 
             @Override

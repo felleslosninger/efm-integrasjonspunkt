@@ -115,8 +115,8 @@ class CorrespondenceAgencyMessageFactoryTest {
         serviceRecordService.setServiceCode(serviceCode);
         serviceRecordService.setIdentifier(ServiceIdentifier.DPV);
         when(serviceRecord.getService()).thenReturn(serviceRecordService);
-        StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
-                        .ifPresent(scope -> scope.setIdentifier(process));
+        sbd.getScope(ScopeType.CONVERSATION_ID)
+                .ifPresent(scope -> scope.setIdentifier(process));
         when(serviceRegistryLookup.getServiceRecord(any(), any())).thenReturn(serviceRecord);
     }
 

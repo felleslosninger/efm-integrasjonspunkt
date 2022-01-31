@@ -6,11 +6,8 @@ import com.nimbusds.jose.Payload;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.dpi.client.domain.*;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
@@ -369,7 +366,7 @@ class DpiClientTest {
         Payload payload = unpackJWT.getPayload(jwt);
         StandardBusinessDocument standardBusinessDocument = unpackStandardBusinessDocument.unpackStandardBusinessDocument(payload);
 
-        String type = StandardBusinessDocumentUtils.getType(standardBusinessDocument).orElse(null);
+        String type = standardBusinessDocument.getType().orElse(null);
 
         String expected = IOUtils.toString(expectedSBD.getInputStream(), StandardCharsets.UTF_8);
 

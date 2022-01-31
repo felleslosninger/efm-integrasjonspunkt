@@ -5,7 +5,6 @@ import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
-import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
 import java.util.Optional;
@@ -17,88 +16,54 @@ public class SBDUtil {
         // UtilityClass
     }
 
-    public static PartnerIdentifier getSender(StandardBusinessDocument sbd) {
-        return getOptionalSender(sbd)
-                .orElse(null);
-    }
-
-    public static Optional<PartnerIdentifier> getOptionalSender(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getFirstSender(sbd)
-                .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(PartnerIdentifier::parse);
-    }
-
-    public static Optional<PartnerIdentifier> getOptionalSender(StandardBusinessDocumentHeader sbdh) {
-        return sbdh.getFirstSender()
-                .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(PartnerIdentifier::parse);
-    }
-
-    public static PartnerIdentifier getReceiver(StandardBusinessDocument sbd) {
-        return getOptionalReceiver(sbd)
-                .orElse(null);
-    }
-
-    public static Optional<PartnerIdentifier> getOptionalReceiver(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getFirstReceiver(sbd)
-                .flatMap(p -> Optional.ofNullable(p.getIdentifier()))
-                .flatMap(p -> Optional.ofNullable(p.getValue()))
-                .map(PartnerIdentifier::parse);
-    }
-
     public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocument sbd) {
-        return getOptionalSender(sbd)
-                .flatMap(p -> p.as(Iso6523.class)
-                        .filter(Iso6523::hasOrganizationPartIdentifier)
-                        .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier())));
+        return Optional.ofNullable(sbd)
+                .map(StandardBusinessDocument::getSenderIdentifier)
+                .flatMap(p -> p.as(Iso6523.class))
+                .filter(Iso6523::hasOrganizationPartIdentifier)
+                .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier()));
     }
 
     public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocumentHeader sbdh) {
-        return getOptionalSender(sbdh)
-                .flatMap(p -> p.as(Iso6523.class)
-                        .filter(Iso6523::hasOrganizationPartIdentifier)
-                        .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier())));
+        return Optional.ofNullable(sbdh)
+                .map(StandardBusinessDocumentHeader::getSenderIdentifier)
+                .flatMap(p -> p.as(Iso6523.class))
+                .filter(Iso6523::hasOrganizationPartIdentifier)
+                .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier()));
     }
 
     public static String getDocumentType(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getDocumentType(sbd)
+        return sbd.getDocumentType()
                 .orElseThrow(MeldingsUtvekslingRuntimeException::new);
     }
 
     public static String getConversationId(StandardBusinessDocument sbd) {
-        return getOptionalConversationId(sbd)
+        return sbd.getConversationId()
                 .orElseThrow(MeldingsUtvekslingRuntimeException::new);
     }
 
-    public static Optional<String> getOptionalConversationId(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
-                .map(Scope::getInstanceIdentifier);
-    }
-
     public static Optional<Scope> getOptionalMessageChannel(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.MESSAGE_CHANNEL);
+        return sbd.getScope(ScopeType.MESSAGE_CHANNEL);
     }
 
     public static String getProcess(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.CONVERSATION_ID)
+        return sbd.getScope(ScopeType.CONVERSATION_ID)
                 .flatMap(p -> Optional.of(p.getIdentifier()))
                 .orElseThrow(() -> new NextMoveRuntimeException("Couldn't retrieve process from SBD"));
     }
 
     public static Optional<String> getOptionalReceiverRef(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.RECEIVER_REF)
+        return sbd.getScope(ScopeType.RECEIVER_REF)
                 .flatMap(p -> Optional.of(p.getInstanceIdentifier()));
     }
 
     public static Optional<String> getOptionalSenderRef(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.SENDER_REF)
+        return sbd.getScope(ScopeType.SENDER_REF)
                 .flatMap(p -> Optional.of(p.getInstanceIdentifier()));
     }
 
     public static String getJournalPostId(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getScope(sbd, ScopeType.JOURNALPOST_ID)
+        return sbd.getScope(ScopeType.JOURNALPOST_ID)
                 .map(Scope::getInstanceIdentifier)
                 .orElse("");
     }
@@ -107,7 +72,7 @@ public class SBDUtil {
         if (sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier() == null) {
             sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().setInstanceIdentifier(UUID.randomUUID().toString());
         }
-        return StandardBusinessDocumentUtils.getMessageId(sbd)
+        return sbd.getMessageId()
                 .orElseThrow(() -> new NextMoveRuntimeException("Couldn't retrieve messageId from SBD"));
     }
 
@@ -131,12 +96,12 @@ public class SBDUtil {
     }
 
     public static Optional<MessageType> getOptionalMessageType(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getType(sbd)
+        return sbd.getType()
                 .flatMap(MessageType::valueOfType);
     }
 
     public static MessageType getMessageType(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getType(sbd)
+        return sbd.getType()
                 .flatMap(MessageType::valueOfType)
                 .orElseThrow(() -> new NextMoveRuntimeException("Couldn't retrieve messageType from SBD"));
     }
@@ -168,8 +133,8 @@ public class SBDUtil {
     public static MessageInfo getMessageInfo(StandardBusinessDocument sbd) {
         return new MessageInfo(
                 getMessageType(sbd).getType(),
-                getReceiver(sbd),
-                getSender(sbd),
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 getJournalPostId(sbd),
                 getConversationId(sbd),
                 getMessageId(sbd));

@@ -22,7 +22,6 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
@@ -62,7 +61,7 @@ public class SvarInnNextMoveConverter {
                 properties.getFiks().getInn().getDocumentType(),
                 new ArkivmeldingMessage());
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
-            StandardBusinessDocumentUtils.getScopes(sbd).add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
+            sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
         NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 

@@ -41,8 +41,8 @@ public class NextMoveOutMessage extends NextMoveMessage {
                 SBDUtil.getConversationId(sbd),
                 SBDUtil.getMessageId(sbd),
                 SBDUtil.getProcess(sbd),
-                SBDUtil.getReceiver(sbd).getPrimaryIdentifier(),
-                SBDUtil.getSender(sbd).getPrimaryIdentifier(),
+                sbd.getReceiverIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
         message.setFiles(new HashSet<>());

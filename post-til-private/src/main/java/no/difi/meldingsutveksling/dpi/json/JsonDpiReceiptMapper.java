@@ -2,10 +2,9 @@ package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils;
-import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.status.MessageStatus;
 
 @RequiredArgsConstructor
 public class JsonDpiReceiptMapper {
@@ -13,7 +12,7 @@ public class JsonDpiReceiptMapper {
     private final MessageStatusMapper messageStatusMapper;
 
     public MessageStatus from(StandardBusinessDocument standardBusinessDocument) {
-        MessageStatus ms = StandardBusinessDocumentUtils.getType(standardBusinessDocument)
+        MessageStatus ms = standardBusinessDocument.getType()
                 .map(MessageType::fromType)
                 .map(messageStatusMapper::getMessageStatus)
                 .orElseGet(messageStatusMapper::getDefaultMessageStatus);

@@ -13,7 +13,7 @@ public class SBDService {
     private final Clock clock;
 
     public boolean isExpired(StandardBusinessDocument sbd) {
-        return StandardBusinessDocumentUtils.getExpectedResponseDateTime(sbd)
+        return sbd.getExpectedResponseDateTime()
                 .map(this::isExpired)
                 .orElse(false);
     }

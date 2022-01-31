@@ -26,12 +26,12 @@ public class AltinnWsRequest implements UploadRequest {
 
     @Override
     public String getSender() {
-        return SBDUtil.getSender(sbd).getPrimaryIdentifier();
+        return sbd.getSenderIdentifier().getPrimaryIdentifier();
     }
 
     @Override
     public String getReceiver() {
-        return SBDUtil.getReceiver(sbd).getPrimaryIdentifier();
+        return sbd.getReceiverIdentifier().getPrimaryIdentifier();
     }
 
     @Override

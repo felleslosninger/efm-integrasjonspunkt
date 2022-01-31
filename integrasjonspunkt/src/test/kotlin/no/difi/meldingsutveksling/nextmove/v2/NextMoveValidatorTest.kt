@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentUtils
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
@@ -101,8 +100,7 @@ class NextMoveValidatorTest {
         every { certValidator.ifAvailable(any()) } just Runs
         every { message.businessMessage } returns businessMessage
 
-        mockkStatic(StandardBusinessDocumentUtils::class)
-        every { StandardBusinessDocumentUtils.getMessageId(sbd) } returns Optional.of(messageId)
+        every { sbd.messageId } returns Optional.of(messageId)
 
         every { message.messageId } returns messageId
         every { message.sbd } returns sbd
@@ -126,7 +124,7 @@ class NextMoveValidatorTest {
 
     @AfterEach
     fun after() {
-        clearStaticMockk(StandardBusinessDocumentUtils::class, SBDUtil::class)
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test
@@ -138,7 +136,7 @@ class NextMoveValidatorTest {
     @Test
     fun `document type must be valid`() {
         every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.BESTEDU_MELDING)
-        every { StandardBusinessDocumentUtils.getType(sbd) } returns Optional.of("melding")
+        every { sbd.type } returns Optional.of("melding")
         assertThrows(UnknownMessageTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 

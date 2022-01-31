@@ -57,14 +57,14 @@ public class BestEduAppReceiptService {
     }
 
     public void sendBestEduErrorAppReceipt(StandardBusinessDocument sbd) {
-        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", SBDUtil.getReceiver(sbd));
+        String errorText = String.format("Feilet under mottak hos %s - ble ikke avlevert sakarkivsystem", sbd.getReceiverIdentifier());
         ArkivmeldingKvitteringMessage kvittering = new ArkivmeldingKvitteringMessage()
                 .setReceiptType("ERROR")
                 .addMessage(new KvitteringStatusMessage("Unknown", errorText));
 
         StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(
-                SBDUtil.getReceiver(sbd),
-                SBDUtil.getSender(sbd),
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 SBDUtil.getConversationId(sbd),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),

@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.nextmove.BusinessMessage
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
 import no.difi.meldingsutveksling.pipes.PromiseMaker
@@ -72,16 +71,18 @@ internal class FiksIoServiceTest {
 
         every { conversationService.registerStatus(any(), ofType(ReceiptStatus::class)) } returns Optional.empty()
 
-        val sbd = StandardBusinessDocument()
-            .setAny(FiksIoMessage()
-                .setSikkerhetsnivaa(3))
+        val sbd = spyk(StandardBusinessDocument()
+            .setAny(
+                FiksIoMessage()
+                    .setSikkerhetsnivaa(3)
+            ))
 
         mockkStatic(SBDUtil::class)
         every { SBDUtil.getConversationId(sbd) } returns convId
         every { SBDUtil.getMessageId(sbd) } returns messageId
         every { SBDUtil.getProcess(sbd) } returns protocol
-        every { SBDUtil.getReceiver(sbd) } returns iso6523
-        every { SBDUtil.getSender(sbd) } returns iso6523
+        every { sbd.receiverIdentifier } returns iso6523
+        every { sbd.senderIdentifier } returns iso6523
         every { SBDUtil.getDocumentType(sbd) } returns protocol
 
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)

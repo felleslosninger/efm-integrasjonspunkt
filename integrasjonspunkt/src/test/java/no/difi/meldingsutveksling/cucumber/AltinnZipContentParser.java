@@ -6,7 +6,6 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -16,8 +15,8 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 import java.util.List;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
 @Component
 @Profile("cucumber")
@@ -33,7 +32,7 @@ public class AltinnZipContentParser {
     Message parse(ZipContent zipContent) {
         StandardBusinessDocument sbd = getSbd(zipContent);
 
-        PartnerIdentifier receiver = SBDUtil.getReceiver(sbd);
+        PartnerIdentifier receiver = sbd.getReceiverIdentifier();
         PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getPrimaryIdentifier());
 
         Message message = new Message()
