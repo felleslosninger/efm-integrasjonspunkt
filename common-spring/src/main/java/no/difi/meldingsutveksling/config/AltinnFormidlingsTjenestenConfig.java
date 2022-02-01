@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.util.unit.DataSize;
@@ -31,6 +32,6 @@ public class AltinnFormidlingsTjenestenConfig {
     private DataSize uploadSizeLimit;
     @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
     private String messageChannel;
-    private Set<String> reportees;
+    private Set<String> reportees = Sets.newHashSet();
 
 }
