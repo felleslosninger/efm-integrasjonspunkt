@@ -89,7 +89,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         when(infoRecord.getOrganizationName()).thenReturn(SENDER_ORGNAME);
         when(serviceRegistryLookup.getInfoRecord(SENDER_ORGNR)).thenReturn(infoRecord);
 
-        when(sbd.getOnBehalfOfOrgNr()).thenReturn(Optional.empty());
+        when(sbd.getPartIdentifier()).thenReturn(Optional.empty());
         when(msg.getSbd()).thenReturn(sbd);
 
         when(msg.getReceiverIdentifier()).thenReturn(RECEIVER_ORGNR);

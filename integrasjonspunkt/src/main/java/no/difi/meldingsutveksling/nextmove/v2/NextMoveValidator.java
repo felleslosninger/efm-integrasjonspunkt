@@ -67,24 +67,24 @@ public class NextMoveValidator {
     private final ObjectProvider<SvarUtService> svarUtService;
 
     void validate(StandardBusinessDocument sbd) {
-        validateCertificate();
 
         sbd.getOptionalMessageId().ifPresent(messageId -> {
-                    messageRepo.findByMessageId(messageId)
-                            .map(p -> {
-                                throw new MessageAlreadyExistsException(messageId);
-                            });
-                    if (!sbdUtil.isStatus(sbd)) {
-                        conversationService.findConversation(messageId)
-                                .map(c -> {
-                                    throw new MessageAlreadyExistsException(messageId);
-                                });
-                    }
-                }
-        );
+            messageRepo.findByMessageId(messageId)
+                .map(p -> {
+                    throw new MessageAlreadyExistsException(messageId);
+                });
+            if (!sbdUtil.isStatus(sbd)) {
+                conversationService.findConversation(messageId)
+                    .map(c -> {
+                        throw new MessageAlreadyExistsException(messageId);
+                    });
+            }
+        });
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
+
+        validateCertificate(serviceIdentifier);
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
@@ -137,7 +137,7 @@ public class NextMoveValidator {
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
-        validateCertificate();
+        validateCertificate(message.getServiceIdentifier());
 
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
@@ -191,10 +191,10 @@ public class NextMoveValidator {
         }
     }
 
-    private void validateCertificate() {
+    private void validateCertificate(ServiceIdentifier si) {
         certificateValidator.ifAvailable(v -> {
             try {
-                v.validateCertificate();
+                v.validateCertificate(si);
             } catch (CertificateExpiredException | VirksertCertificateException e) {
                 log.error("Certificate validation failed", e);
                 throw new InvalidCertificateException(e.getMessage());

@@ -27,9 +27,9 @@ public class PutMessageRequestFactory {
         String receiverRef = sbd.findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier).orElse(null);
         String senderRef = sbd.findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier).orElse(null);
         InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
-        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderOrgnr());
         return create(conversationId,
-                Sender.of(sbd.getSenderIdentifier(), senderInfo.getOrganizationName(), senderRef),
+                Sender.of(sbd.getSenderOrgnr(), senderInfo.getOrganizationName(), senderRef),
                 Receiver.of(sbd.getReceiverIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
                 payload);
     }

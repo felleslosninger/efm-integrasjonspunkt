@@ -43,16 +43,16 @@ class SbdFactoryTest {
     private val arkivmeldingResponseProcess = "urn:no:difi:profile:arkivmelding:response:ver1.0"
     private val einnsynResponseProcess = "urn:no:difi:profile:einnsyn:response:ver1.0"
     private val statusDocType = "urn:no:difi:eformidling:xsd::status"
-    private val senderOrgnr = "910076787"
-    private val receiverOrgnr = "991825827"
+    private val orgnrSender = "910076787"
+    private val orgnrReceiver = "991825827"
     private val convId = "e3016cb7-39de-4166-a935-3a574cd2a2db"
     private val msgId = "4653f436-8921-4224-b824-068f2cc6232f"
 
     val sbd: StandardBusinessDocument = mockk {
-        every { receiver } returns Organisasjonsnummer.from(receiverOrgnr)
-        every { sender } returns Organisasjonsnummer.from(senderOrgnr)
-        every { senderIdentifier } returns senderOrgnr
-        every { receiverIdentifier } returns receiverOrgnr
+        every { receiver } returns Organisasjonsnummer.from(orgnrReceiver)
+        every { sender } returns Organisasjonsnummer.from(orgnrSender)
+        every { senderIdentifier } returns orgnrSender
+        every { receiverIdentifier } returns orgnrReceiver
         every { conversationId } returns convId
         every { messageId } returns msgId
         every { findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.empty()
@@ -81,8 +81,8 @@ class SbdFactoryTest {
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
 
-        assertEquals(statusSbd.receiverIdentifier, senderOrgnr)
-        assertEquals(statusSbd.senderIdentifier, receiverOrgnr)
+        assertEquals(statusSbd.receiverIdentifier, orgnrSender)
+        assertEquals(statusSbd.senderIdentifier, orgnrReceiver)
         assertEquals(arkivmeldingResponseProcess, statusSbd.process)
         assertTrue(statusSbd.any is StatusMessage)
         assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessage).status)
@@ -105,8 +105,8 @@ class SbdFactoryTest {
         }
 
         Assertions.assertThrows(MeldingsUtvekslingRuntimeException::class.java) {
-            sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(senderOrgnr),
-                Organisasjonsnummer.from(receiverOrgnr),
+            sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(orgnrSender),
+                Organisasjonsnummer.from(orgnrReceiver),
                 convId, msgId,
                 arkivmeldingProcess,
                 "foo::bar",
@@ -121,8 +121,8 @@ class SbdFactoryTest {
             every { documentTypes } returns listOf("foo::bar")
         }
 
-        sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(senderOrgnr),
-            Organisasjonsnummer.from(receiverOrgnr),
+        sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(orgnrSender),
+            Organisasjonsnummer.from(orgnrReceiver),
             convId, msgId,
             arkivmeldingProcess,
             "foo::bar",

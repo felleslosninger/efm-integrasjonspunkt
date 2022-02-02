@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.validation
 
 import no.difi.meldingsutveksling.CertificateParser
 import no.difi.meldingsutveksling.CertificateParserException
+import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.ServiceIdentifier.DPE
+import no.difi.meldingsutveksling.ServiceIdentifier.DPO
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
@@ -19,13 +22,25 @@ class IntegrasjonspunktCertificateValidator(
     private val srClient: ServiceRegistryClient
 ) {
 
+    private val virksertSupportedServiceIdentifiers = setOf(DPO, DPE)
+
     @PostConstruct
     @Throws(VirksertCertificateException::class, CertificateExpiredException::class)
-    fun validateCertificate() {
+    fun validateAll() {
+        if (props.feature.isEnableDPO) validateCertificate(DPO)
+        if (props.feature.isEnableDPE) validateCertificate(DPE)
+    }
+
+    @Throws(VirksertCertificateException::class, CertificateExpiredException::class)
+    fun validateCertificate(si: ServiceIdentifier) {
         keystoreHelper.x509Certificate.checkValidity()
 
+        if (!virksertSupportedServiceIdentifiers.contains(si)) {
+            return
+        }
+
         val pem = try {
-            srClient.getCertificate(props.org.number)
+            srClient.getCertificate(props.org.number, si)
         } catch (e: ServiceRegistryLookupException) {
             throw VirksertCertificateException(e)
         }

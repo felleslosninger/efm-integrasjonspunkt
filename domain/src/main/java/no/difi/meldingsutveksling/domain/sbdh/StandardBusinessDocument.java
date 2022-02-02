@@ -109,10 +109,15 @@ public class StandardBusinessDocument {
     }
 
     @JsonIgnore
-    public Optional<String> getOnBehalfOfOrgNr() {
+    public Optional<String> getPartIdentifier() {
         return getStandardBusinessDocumentHeader().getFirstSender()
                 .map(Partner::getIdentifier)
                 .map(PartnerIdentification::getPaaVegneAvValue);
+    }
+
+    @JsonIgnore
+    public String getSenderOrgnr() {
+        return getPartIdentifier().orElse(getSenderIdentifier());
     }
 
     @JsonIgnore

@@ -87,7 +87,7 @@ class NextMoveDpiRequest(private val props: IntegrasjonspunktProperties,
     }
 
     override fun getOnBehalfOfOrgnr(): Optional<String> {
-        return message.sbd.onBehalfOfOrgNr
+        return message.sbd.partIdentifier
     }
 
     override fun getAvsenderIdentifikator(): Optional<String> {
