@@ -9,7 +9,6 @@
 
     <artifactId>altinn-client</artifactId>
 
-
 <dependencies>
 
     <dependency>

@@ -135,8 +135,8 @@ public class AltinnWsClient {
         return idMarker.and(statusCodeMarker).and(textMarker);
     }
 
-    public List<FileReference> availableFiles() {
-        Stream<BrokerServiceAvailableFile> fileStream = getBrokerServiceAvailableFileList()
+    public List<FileReference> availableFiles(String orgnr) {
+        Stream<BrokerServiceAvailableFile> fileStream = getBrokerServiceAvailableFileList(orgnr)
             .map(BrokerServiceAvailableFileList::getBrokerServiceAvailableFile)
             .orElse(Collections.emptyList())
             .stream();
@@ -155,10 +155,10 @@ public class AltinnWsClient {
             .collect(Collectors.toList());
     }
 
-    public boolean checkIfAvailableFiles() throws IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage {
+    public boolean checkIfAvailableFiles(String orgnr) throws IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage {
         BrokerServicePoll params = new BrokerServicePoll();
         ArrayOfstring recipients = new ArrayOfstring();
-        recipients.getString().add(configuration.getOrgnr());
+        recipients.getString().add(orgnr);
         params.setRecipients(recipients);
 
         ObjectFactory of = new ObjectFactory();
@@ -169,19 +169,19 @@ public class AltinnWsClient {
         return getIBrokerServiceExternalBasic().checkIfAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), params);
     }
 
-    private Optional<BrokerServiceAvailableFileList> getBrokerServiceAvailableFileList() {
+    private Optional<BrokerServiceAvailableFileList> getBrokerServiceAvailableFileList(String orgnr) {
         try {
-            return Optional.of(getIBrokerServiceExternalBasic().getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch()));
+            return Optional.of(getIBrokerServiceExternalBasic().getAvailableFilesBasic(configuration.getUsername(), configuration.getPassword(), getBrokerServiceSearch(orgnr)));
         } catch (IBrokerServiceExternalBasicGetAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             log.error(AVAILABLE_FILES_ERROR_MESSAGE, AltinnReasonFactory.from(e));
             return Optional.empty();
         }
     }
 
-    private BrokerServiceSearch getBrokerServiceSearch() {
+    private BrokerServiceSearch getBrokerServiceSearch(String orgnr) {
         BrokerServiceSearch searchParameters = new BrokerServiceSearch();
         searchParameters.setFileStatus(BrokerServiceAvailableFileStatus.UPLOADED);
-        searchParameters.setReportee(configuration.getOrgnr());
+        searchParameters.setReportee(orgnr);
         ObjectFactory of = new ObjectFactory();
         JAXBElement<String> serviceCode = of.createBrokerServiceAvailableFileExternalServiceCode(configuration.getExternalServiceCode());
         searchParameters.setExternalServiceCode(serviceCode);

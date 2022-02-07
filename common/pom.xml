@@ -10,7 +10,6 @@
     <artifactId>common</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>no.difi.commons</groupId>
             <artifactId>commons-asic</artifactId>

@@ -16,6 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
@@ -63,9 +64,9 @@ public class NextMoveValidator {
     private final NextMoveFileSizeValidator fileSizeValidator;
     private final IntegrasjonspunktProperties props;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
+    private final ObjectProvider<SvarUtService> svarUtService;
 
     void validate(StandardBusinessDocument sbd) {
-        validateCertificate();
 
         sbd.getMessageId().ifPresent(messageId -> {
                     messageRepo.findByMessageId(messageId)
@@ -83,6 +84,8 @@ public class NextMoveValidator {
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
+
+        validateCertificate(serviceIdentifier);
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
@@ -105,6 +108,8 @@ public class NextMoveValidator {
             }
         }
 
+        validateDpfForsendelseType(sbd, serviceRecord);
+
         Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
         asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
                 {
@@ -112,9 +117,29 @@ public class NextMoveValidator {
                 } : new Class<?>[0]);
     }
 
+    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+        if (svarUtService.getIfAvailable() == null) {
+            return;
+        }
+        if (serviceRecord.getServiceIdentifier() == DPF && sbd.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            ArkivmeldingMessage message = (ArkivmeldingMessage) sbd.getBusinessMessage();
+            DpfSettings dpfSettings = message.getDpf();
+            if (dpfSettings == null) {
+                return;
+            }
+            String forsendelseType = dpfSettings.getForsendelseType();
+            if (!isNullOrEmpty(forsendelseType)) {
+                List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                if (!validTypes.contains(forsendelseType)) {
+                    throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+                }
+            }
+        }
+    }
+
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
-        validateCertificate();
+        validateCertificate(message.getServiceIdentifier());
 
         StandardBusinessDocument sbd = message.getSbd();
         if (SBDUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
@@ -168,10 +193,10 @@ public class NextMoveValidator {
         }
     }
 
-    private void validateCertificate() {
+    private void validateCertificate(ServiceIdentifier si) {
         certificateValidator.ifAvailable(v -> {
             try {
-                v.validateCertificate();
+                v.validateCertificate(si);
             } catch (CertificateExpiredException | VirksertCertificateException e) {
                 log.error("Certificate validation failed", e);
                 throw new InvalidCertificateException(e.getMessage());

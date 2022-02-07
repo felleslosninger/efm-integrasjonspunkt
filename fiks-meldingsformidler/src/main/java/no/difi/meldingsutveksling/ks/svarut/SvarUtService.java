@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
+import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
@@ -17,10 +18,12 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -69,8 +72,9 @@ public class SvarUtService {
         return fiksMapper.mapFrom(message, x509Certificate, reject);
     }
 
-    public void retreiveForsendelseTyper() {
-        client.retreiveForsendelseTyper(getFiksUtUrl());
+    @Cacheable(CacheConfig.SVARUT_FORSENDELSETYPER)
+    public List<String> retreiveForsendelseTyper() {
+        return client.retreiveForsendelseTyper(getFiksUtUrl());
     }
 
     private X509Certificate toX509Certificate(String pemCertificate) {

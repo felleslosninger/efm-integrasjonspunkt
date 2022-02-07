@@ -11,8 +11,10 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService
 import no.difi.meldingsutveksling.nextmove.*
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
@@ -64,6 +66,12 @@ class NextMoveValidatorTest {
     @MockK
     lateinit var certValidator: ObjectProvider<IntegrasjonspunktCertificateValidator>
 
+    @MockK
+    lateinit var svarUtService: SvarUtService
+
+    @MockK
+    lateinit var svarUtServiceProvider: ObjectProvider<SvarUtService>
+
     private lateinit var nextMoveValidator: NextMoveValidator
 
     private val messageId = "123"
@@ -71,7 +79,7 @@ class NextMoveValidatorTest {
     private val sbd = mockk<StandardBusinessDocument>()
     private val serviceRecord = mockk<ServiceRecord>()
     private val businessMessage = ArkivmeldingMessage()
-        .setHoveddokument("foo.txt")
+            .setHoveddokument("foo.txt")
 
     @BeforeEach
     fun before() {
@@ -88,16 +96,19 @@ class NextMoveValidatorTest {
             arkivmeldingUtil,
             nextMoveFileSizeValidator,
             props,
-            certValidator
+            certValidator,
+            svarUtServiceProvider
         )
 
 
         val bmf = BusinessMessageFile()
-            .setFilename("foo.txt")
-            .setPrimaryDocument(true)
+                .setFilename("foo.txt")
+                .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
         every { certValidator.ifAvailable(any()) } just Runs
+        every { svarUtServiceProvider.getIfAvailable() } returns svarUtService
+        every { svarUtServiceProvider.getObject() } returns svarUtService
         every { message.businessMessage } returns businessMessage
 
         every { sbd.messageId } returns Optional.of(messageId)

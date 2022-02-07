@@ -1,10 +1,12 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -17,8 +19,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -71,9 +73,12 @@ public class ServiceRegistryClient {
     }
 
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
-    public String getCertificate(String identifier) throws ServiceRegistryLookupException {
+    public String getCertificate(String identifier, ServiceIdentifier si) throws ServiceRegistryLookupException {
         try {
-            return client.getResource("virksert/{identifier}", Collections.singletonMap("identifier", identifier));
+            Map<String, String> params = Maps.newHashMap();
+            params.put("identifier", identifier);
+            params.put("serviceIdentifier", si.name());
+            return client.getResource("virksert/{identifier}/service/{serviceIdentifier}", params);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 String errorDescription = JsonPath.read(e.getResponseBodyAsString(), "$.error_description");
