@@ -121,19 +121,20 @@ public class NextMoveValidator {
         if (svarUtService.getIfAvailable() == null) {
             return;
         }
-        if (serviceRecord.getServiceIdentifier() == DPF && sbd.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            ArkivmeldingMessage message = (ArkivmeldingMessage) sbd.getBusinessMessage();
-            DpfSettings dpfSettings = message.getDpf();
-            if (dpfSettings == null) {
-                return;
-            }
-            String forsendelseType = dpfSettings.getForsendelseType();
-            if (!isNullOrEmpty(forsendelseType)) {
-                List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
-                if (!validTypes.contains(forsendelseType)) {
-                    throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+        if (serviceRecord.getServiceIdentifier() == DPF) {
+            sbd.getBusinessMessage(ArkivmeldingMessage.class).ifPresent(message -> {
+                DpfSettings dpfSettings = message.getDpf();
+                if (dpfSettings == null) {
+                    return;
                 }
-            }
+                String forsendelseType = dpfSettings.getForsendelseType();
+                if (!isNullOrEmpty(forsendelseType)) {
+                    List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                    if (!validTypes.contains(forsendelseType)) {
+                        throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+                    }
+                }
+            });
         }
     }
 

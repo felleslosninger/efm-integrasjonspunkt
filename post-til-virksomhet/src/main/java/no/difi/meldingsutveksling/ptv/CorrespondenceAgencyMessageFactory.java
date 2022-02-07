@@ -333,7 +333,7 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
-        String orgnr = SBDUtil.getOnBehalfOf(msg.getSbd())
+        String orgnr = SBDUtil.getPartIdentifier(msg.getSbd())
                 .map(Iso6523::getOrganizationIdentifier)
                 .orElse(properties.getOrg().getNumber());
         return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();

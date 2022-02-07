@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnTransport;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
@@ -45,14 +43,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) {
         ifReceipt(message, mc -> message.getSbd().addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
         // Strip main identifier if part identifier exists
-        message.getSbd().getPartIdentifier().ifPresent(o -> {
-            Organisasjonsnummer org = Organisasjonsnummer.from(o);
-            message.getSbd().getStandardBusinessDocumentHeader().getFirstSender().ifPresent(s -> {
-                s.setIdentifier(new PartnerIdentification()
-                    .setValue(org.asIso6523())
-                    .setAuthority(org.authority()));
-            });
-        });
+        SBDUtil.getPartIdentifier(message.getSbd()).ifPresent(o -> message.getSbd().setSenderIdentifier(o));
 
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());

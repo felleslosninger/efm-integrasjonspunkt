@@ -16,7 +16,7 @@ public class SBDUtil {
         // UtilityClass
     }
 
-    public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocument sbd) {
+    public static Optional<Iso6523> getPartIdentifier(StandardBusinessDocument sbd) {
         return Optional.ofNullable(sbd)
                 .map(StandardBusinessDocument::getSenderIdentifier)
                 .flatMap(p -> p.as(Iso6523.class))
@@ -24,7 +24,7 @@ public class SBDUtil {
                 .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier()));
     }
 
-    public static Optional<Iso6523> getOnBehalfOf(StandardBusinessDocumentHeader sbdh) {
+    public static Optional<Iso6523> getPartIdentifier(StandardBusinessDocumentHeader sbdh) {
         return Optional.ofNullable(sbdh)
                 .map(StandardBusinessDocumentHeader::getSenderIdentifier)
                 .flatMap(p -> p.as(Iso6523.class))

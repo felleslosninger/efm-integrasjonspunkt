@@ -42,7 +42,7 @@ public class MeldingsformidlerRequestFactory {
                 .attachments(getAttachments(nextMoveMessage, reject))
                 .mottakerPid(nextMoveMessage.getReceiver().cast(PersonIdentifier.class))
                 .sender(nextMoveMessage.getSender().cast(Iso6523.class))
-                .onBehalfOf(SBDUtil.getOnBehalfOf(nextMoveMessage.getSbd()).orElse(null))
+                .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())
