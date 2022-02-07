@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
+import no.difi.meldingsutveksling.nextmove.PartnerIdentifierDeserializer;
+import no.difi.meldingsutveksling.nextmove.PartnerIdentifierSerializer;
 import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentDeserializer;
 import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentSerializer;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -33,8 +35,8 @@ public class JacksonConfig {
                 builder.modulesToInstall(new JavaTimeModule())
                         .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
                         .serializationInclusion(JsonInclude.Include.NON_NULL)
-                        .serializers(new StandardBusinessDocumentSerializer())
-                        .deserializers(new StandardBusinessDocumentDeserializer())
+                        .serializers(new StandardBusinessDocumentSerializer(), new PartnerIdentifierSerializer())
+                        .deserializers(new StandardBusinessDocumentDeserializer(), new PartnerIdentifierDeserializer())
                         .featuresToEnable(
                                 SerializationFeature.INDENT_OUTPUT,
                                 JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,

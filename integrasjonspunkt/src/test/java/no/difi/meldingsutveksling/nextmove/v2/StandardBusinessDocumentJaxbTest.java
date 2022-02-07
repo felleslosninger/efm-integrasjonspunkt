@@ -19,7 +19,7 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
 
-public class StandardBusinessDocumentJaxbTest {
+class StandardBusinessDocumentJaxbTest {
 
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
@@ -37,16 +37,16 @@ public class StandardBusinessDocumentJaxbTest {
 
     @Test
     @SneakyThrows
-    public void testMarshall() {
+    void testMarshall() {
         StringResult result = new StringResult();
         marshaller.marshal(objectFactory.createStandardBusinessDocument(getDocument()), result);
         MatcherAssert.assertThat(result.toString(),
-            CompareMatcher.isIdenticalTo(contentOf(Objects.requireNonNull(getClass().getResource("/sbd/StandardBusinessDocument.xml")))).ignoreWhitespace());
+                CompareMatcher.isIdenticalTo(contentOf(Objects.requireNonNull(getClass().getResource("/sbd/StandardBusinessDocument.xml")))).ignoreWhitespace());
     }
 
     @Test
     @SneakyThrows
-    public void testUnmarshall() {
+    void testUnmarshall() {
         StandardBusinessDocument document = unmarshaller.unmarshal(new StreamSource(
                         getClass().getResourceAsStream("/sbd/StandardBusinessDocument.xml")),
                 StandardBusinessDocument.class).getValue();
