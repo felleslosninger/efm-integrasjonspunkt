@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.Partner;
-import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,16 +34,9 @@ class OnBehalfOfNormalizerTest {
                         .setNumber("910075918")
         );
 
-        PartnerIdentification partnerIdentification = new PartnerIdentification()
-                .setValue("910075918");
         StandardBusinessDocument sbd = new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                        .addSender(new Partner()
-                                .setIdentifier(partnerIdentification)
-                        )
-                );
-        partnerIdentification.setValue(before);
+                .setSenderIdentifier(PartnerIdentifier.parse(before));
         target.normalize(sbd);
-        assertThat(partnerIdentification.getValue()).isEqualTo(after);
+        assertThat(sbd.getSenderIdentifier()).isEqualTo(PartnerIdentifier.parse(after));
     }
 }
