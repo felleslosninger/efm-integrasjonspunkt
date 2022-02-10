@@ -1,29 +1,22 @@
 package no.difi.meldingsutveksling.validation;
 
-import no.difi.meldingsutveksling.status.AvsenderindikatorHolder;
+import no.difi.meldingsutveksling.status.AvsenderidentifikatorHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Set;
 
 public class AvsenderidentifikatorValidator implements ConstraintValidator<Avsenderidentifikator, String> {
 
     @Autowired
-    private AvsenderindikatorHolder avsenderindikatorHolder;
+    private AvsenderidentifikatorHolder avsenderidentifikatorHolder;
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        Set<String> avsenderindikatorListe = avsenderindikatorHolder.getAvsenderindikatorListe();
-
-        if (avsenderindikatorListe.isEmpty()) {
-            return true;
-        }
-
         if (s == null) {
-            return false;
+            return avsenderidentifikatorHolder.pollWithoutAvsenderidentifikator();
         }
 
-        return avsenderindikatorListe.contains(s);
+        return avsenderidentifikatorHolder.getAvsenderidentifikatorListe().contains(s);
     }
 }

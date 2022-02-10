@@ -47,8 +47,8 @@ public class DpiConfig {
     @Bean
     public DpiReceiptService dpiReceiptService(MeldingsformidlerClient meldingsformidlerClient,
                                                ConversationService conversationService,
-                                               AvsenderindikatorHolder avsenderindikatorHolder) {
-        return new DpiReceiptService(meldingsformidlerClient, conversationService, avsenderindikatorHolder);
+                                               AvsenderidentifikatorHolder avsenderidentifikatorHolder) {
+        return new DpiReceiptService(meldingsformidlerClient, conversationService, avsenderidentifikatorHolder);
     }
 
     @Order
@@ -65,8 +65,8 @@ public class DpiConfig {
     }
 
     @Bean
-    public AvsenderindikatorHolder avsenderindikatorHolder(IntegrasjonspunktProperties properties) {
-        return new AvsenderindikatorHolder(properties);
+    public AvsenderidentifikatorHolder avsenderindikatorHolder(IntegrasjonspunktProperties properties) {
+        return new AvsenderidentifikatorHolder(properties);
     }
 
     @Bean

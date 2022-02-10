@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,18 +15,15 @@ public class DpiReceiptService {
 
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
-    private final AvsenderindikatorHolder avsenderindikatorHolder;
+    private final AvsenderidentifikatorHolder avsenderidentifikatorHolder;
 
     public void handleReceipts(String mpcId) {
-        Set<String> avsenderindikatorListe = avsenderindikatorHolder.getAvsenderindikatorListe();
-
-        if (avsenderindikatorListe.isEmpty()) {
+        if (avsenderidentifikatorHolder.pollWithoutAvsenderidentifikator()) {
             meldingsformidlerClient.sjekkEtterKvitteringer(null, mpcId, this::handleReceipt);
-
-        } else {
-            avsenderindikatorListe.forEach(avsenderindikator ->
-                    meldingsformidlerClient.sjekkEtterKvitteringer(avsenderindikator, mpcId, this::handleReceipt));
         }
+
+        avsenderidentifikatorHolder.getAvsenderidentifikatorListe().forEach(avsenderidentifikator ->
+                meldingsformidlerClient.sjekkEtterKvitteringer(avsenderidentifikator, mpcId, this::handleReceipt));
     }
 
     @Transactional

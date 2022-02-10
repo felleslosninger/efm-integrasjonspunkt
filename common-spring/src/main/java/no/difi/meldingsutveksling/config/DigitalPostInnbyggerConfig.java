@@ -55,9 +55,10 @@ public class DigitalPostInnbyggerConfig {
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service
      */
-    private List<String> avsenderindikatorListe;
+    private List<String> avsenderidentifikatorListe;
 
-
+    @NotNull
+    private Boolean pollWithoutAvsenderidentifikator;
 
     @NotNull
     private String language;

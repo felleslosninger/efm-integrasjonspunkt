@@ -10,16 +10,20 @@ import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
-public class AvsenderindikatorHolder {
+public class AvsenderidentifikatorHolder {
 
     private final IntegrasjonspunktProperties properties;
-    @Getter(lazy = true) private final Set<String> avsenderindikatorListe = fetchAvsenderindikatorListe();
+    @Getter(lazy = true) private final Set<String> avsenderidentifikatorListe = fetchAvsenderidentifikatorListe();
 
-    private Set<String> fetchAvsenderindikatorListe() {
+    private Set<String> fetchAvsenderidentifikatorListe() {
         return Optional.ofNullable(properties)
                 .flatMap(p -> Optional.ofNullable(p.getDpi()))
-                .flatMap(p -> Optional.ofNullable(p.getAvsenderindikatorListe()))
+                .flatMap(p -> Optional.ofNullable(p.getAvsenderidentifikatorListe()))
                 .map(p -> Collections.unmodifiableSet(new HashSet<>(p)))
                 .orElseGet(Collections::emptySet);
+    }
+
+    public boolean pollWithoutAvsenderidentifikator() {
+        return true;
     }
 }
