@@ -27,16 +27,16 @@ public class DefaultDpePolling implements DpePolling {
     @Override
     @Timed
     public void poll() {
-        if (properties.getNextmove().getServiceBus().isBatchRead()) {
-            if (this.batchRead == null || this.batchRead.isDone()) {
-                log.debug("Checking for new DPE messages (batch)..");
-                this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
-            } else {
-                log.debug("DPE batch still processing..");
-            }
-        } else {
-            log.debug("Checking for new DPE messages..");
-            nextMoveServiceBus.getAllMessagesRest();
-        }
+//        if (properties.getNextmove().getServiceBus().isBatchRead()) {
+//            if (this.batchRead == null || this.batchRead.isDone()) {
+//                log.debug("Checking for new DPE messages (batch)..");
+//                this.batchRead = nextMoveServiceBus.getAllMessagesBatch();
+//            } else {
+//                log.debug("DPE batch still processing..");
+//            }
+//        } else {
+//            log.debug("Checking for new DPE messages..");
+//            nextMoveServiceBus.getAllMessagesRest();
+//        }
     }
 }

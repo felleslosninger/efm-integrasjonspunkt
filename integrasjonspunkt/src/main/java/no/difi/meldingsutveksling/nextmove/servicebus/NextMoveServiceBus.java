@@ -1,10 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.servicebus;
 
+import com.azure.messaging.servicebus.*;
+import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.microsoft.azure.servicebus.*;
-import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -25,12 +23,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
@@ -51,7 +47,8 @@ public class NextMoveServiceBus {
     private final TaskExecutor taskExecutor;
     private final NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory;
 
-    private IMessageReceiver messageReceiver;
+//    private IMessageReceiver messageReceiver;
+    private ServiceBusProcessorClient serviceBusProcessorClient;
 
     public NextMoveServiceBus(IntegrasjonspunktProperties props,
                               NextMoveQueue nextMoveQueue,
@@ -80,16 +77,29 @@ public class NextMoveServiceBus {
                 props.getNextmove().getServiceBus().getBaseUrl(),
                 props.getNextmove().getServiceBus().getSasKeyName(),
                 serviceBusClient.getSasKey());
-            ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
-            try {
-                this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
-            } catch (InterruptedException e) {
-                log.error("Error while constructing message receiver. Thread was interrupted", e);
-                // Restore interrupted state..
-                Thread.currentThread().interrupt();
-            } catch (ServiceBusException e) {
-                throw new NextMoveException(e);
-            }
+
+            serviceBusProcessorClient = new ServiceBusClientBuilder()
+                .connectionString(connectionString)
+                .processor()
+                .queueName(serviceBusClient.getLocalQueuePath())
+                .maxConcurrentCalls(50)
+                .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
+                .disableAutoComplete()
+                .processMessage(this::processMessage)
+                .processError(this::processError)
+                .buildProcessorClient();
+            serviceBusProcessorClient.start();
+
+//            ConnectionStringBuilder connectionStringBuilder = new ConnectionStringBuilder(connectionString, serviceBusClient.getLocalQueuePath());
+//            try {
+//                this.messageReceiver = ClientFactory.createMessageReceiverFromConnectionStringBuilder(connectionStringBuilder, ReceiveMode.PEEKLOCK);
+//            } catch (InterruptedException e) {
+//                log.error("Error while constructing message receiver. Thread was interrupted", e);
+//                // Restore interrupted state..
+//                Thread.currentThread().interrupt();
+//            } catch (ServiceBusException e) {
+//                throw new NextMoveException(e);
+//            }
         }
 
     }
@@ -125,53 +135,102 @@ public class NextMoveServiceBus {
             }
         }
     }
+//
+//    public CompletableFuture getAllMessagesBatch() {
+//        return CompletableFuture.runAsync(() -> {
+//            boolean hasQueuedMessages = true;
+//            while (hasQueuedMessages) {
+//                try {
+//                    log.trace("Calling receiveBatch..");
+//                    Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(10));
+//                    if (messages != null && !messages.isEmpty()) {
+//                        log.debug("Processing {} messages..", messages.size());
+//                        messages.forEach(this::handleMessage);
+//                        log.debug("Done processing {} messages", messages.size());
+//                    } else {
+//                        log.trace("No messages in queue, cancelling batch");
+//                        hasQueuedMessages = false;
+//                    }
+//                } catch (InterruptedException e) {
+//                    if (!Strings.isNullOrEmpty(e.getMessage())) {
+//                        log.error("Error while processing messages from service bus. Thread was interrupted", e);
+//                    } else {
+//                        log.trace("Error while processing messages from service bus. Thread was interrupted", e);
+//                    }
+//                    // Restore interrupted state..
+//                    Thread.currentThread().interrupt();
+//                } catch (ServiceBusException e) {
+//                    log.error("Error while processing messages from service bus", e);
+//                }
+//            }
+//        }, taskExecutor);
+//    }
 
-    public CompletableFuture getAllMessagesBatch() {
-        return CompletableFuture.runAsync(() -> {
-            boolean hasQueuedMessages = true;
-            while (hasQueuedMessages) {
-                try {
-                    log.trace("Calling receiveBatch..");
-                    Collection<IMessage> messages = messageReceiver.receiveBatch(100, Duration.ofSeconds(10));
-                    if (messages != null && !messages.isEmpty()) {
-                        log.debug("Processing {} messages..", messages.size());
-                        messages.forEach(this::handleMessage);
-                        log.debug("Done processing {} messages", messages.size());
-                    } else {
-                        log.trace("No messages in queue, cancelling batch");
-                        hasQueuedMessages = false;
-                    }
-                } catch (InterruptedException e) {
-                    if (!Strings.isNullOrEmpty(e.getMessage())) {
-                        log.error("Error while processing messages from service bus. Thread was interrupted", e);
-                    } else {
-                        log.trace("Error while processing messages from service bus. Thread was interrupted", e);
-                    }
-                    // Restore interrupted state..
-                    Thread.currentThread().interrupt();
-                } catch (ServiceBusException e) {
-                    log.error("Error while processing messages from service bus", e);
-                }
-            }
-        }, taskExecutor);
+    private void processMessage(ServiceBusReceivedMessageContext context) {
+        ServiceBusReceivedMessage m = context.getMessage();
+        log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
+        ServiceBusPayload payload = null;
+        try {
+            payload = payloadConverter.convert(m.getBody().toBytes());
+        } catch (IOException e) {
+            log.error(String.format("Failed to convert servicebus message with id = %s, abandoning", m.getMessageId()), e);
+            context.deadLetter();
+            return;
+        }
+        InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
+        nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
+        context.complete();
     }
 
-    private void handleMessage(IMessage m) {
-        try {
-            log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
-            ServiceBusPayload payload = payloadConverter.convert(getBody(m));
-            InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
-            nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
-            messageReceiver.completeAsync(m.getLockToken());
-        } catch (IOException e) {
-            log.error("Failed to put message on local queue", e);
+    private void processError(ServiceBusErrorContext context) {
+        System.out.printf("Error when receiving messages from namespace: '%s'. Entity: '%s'%n",
+            context.getFullyQualifiedNamespace(), context.getEntityPath());
+
+        if (!(context.getException() instanceof ServiceBusException)) {
+            System.out.printf("Non-ServiceBusException occurred: %s%n", context.getException());
+            return;
+        }
+
+        ServiceBusException exception = (ServiceBusException) context.getException();
+        ServiceBusFailureReason reason = exception.getReason();
+
+        if (reason == ServiceBusFailureReason.MESSAGING_ENTITY_DISABLED
+            || reason == ServiceBusFailureReason.MESSAGING_ENTITY_NOT_FOUND
+            || reason == ServiceBusFailureReason.UNAUTHORIZED) {
+            System.out.printf("An unrecoverable error occurred. Stopping processing with reason %s: %s%n",
+                reason, exception.getMessage());
+
+        } else if (reason == ServiceBusFailureReason.MESSAGE_LOCK_LOST) {
+            System.out.printf("Message lock lost for message: %s%n", context.getException());
+        } else if (reason == ServiceBusFailureReason.SERVICE_BUSY) {
+            try {
+                // Choosing an arbitrary amount of time to wait until trying again.
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                System.err.println("Unable to sleep for period of time");
+            }
+        } else {
+            System.out.printf("Error source %s, reason %s, message: %s%n", context.getErrorSource(),
+                reason, context.getException());
         }
     }
 
-    private byte[] getBody(IMessage message) {
-        MessageBody messageBody = message.getMessageBody();
-        return messageBody.getBinaryData().get(0);
-    }
+//    private void handleMessage(IMessage m) {
+//        try {
+//            log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
+//            ServiceBusPayload payload = payloadConverter.convert(getBody(m));
+//            InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
+//            nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
+//            messageReceiver.completeAsync(m.getLockToken());
+//        } catch (IOException e) {
+//            log.error("Failed to put message on local queue", e);
+//        }
+//    }
+//
+//    private byte[] getBody(IMessage message) {
+//        MessageBody messageBody = message.getMessageBody();
+//        return messageBody.getBinaryData().get(0);
+//    }
 
     private String getReceiverQueue(NextMoveOutMessage message) {
         String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
