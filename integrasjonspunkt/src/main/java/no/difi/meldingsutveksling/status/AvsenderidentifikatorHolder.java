@@ -24,6 +24,6 @@ public class AvsenderidentifikatorHolder {
     }
 
     public boolean pollWithoutAvsenderidentifikator() {
-        return true;
+        return properties.getDpi().getPollWithoutAvsenderidentifikator();
     }
 }
