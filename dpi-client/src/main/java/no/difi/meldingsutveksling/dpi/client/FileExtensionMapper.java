@@ -15,7 +15,7 @@ public class FileExtensionMapper {
 
     public FileExtensionMapper() {
         mimeTypeMap.put("pdf", "application/pdf");
-        mimeTypeMap.put("hrml", "text/html");
+        mimeTypeMap.put("html", "text/html");
         mimeTypeMap.put("txt", "text/plain");
         mimeTypeMap.put("xml", "text/xml");
         mimeTypeMap.put("doc", "application/msword");

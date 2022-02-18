@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dpi.json;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
@@ -21,7 +22,10 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class ShipmentFactory {
+
+    private final ChannelNormalizer channelNormalizer;
 
     public Shipment getShipment(MeldingsformidlerRequest request) {
         return new Shipment()
@@ -29,7 +33,7 @@ public class ShipmentFactory {
                 .setReceiver(request.getPostkasseProvider())
                 .setMessageId(request.getMessageId())
                 .setConversationId(request.getConversationId())
-                .setChannel(request.getMpcId())
+                .setChannel(channelNormalizer.normaiize(request.getMpcId()))
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(getParcel(request))

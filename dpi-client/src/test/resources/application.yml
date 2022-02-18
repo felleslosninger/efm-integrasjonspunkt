@@ -18,10 +18,7 @@ dpi:
         oidc:
             enable: true
             audience: http://localhost:8900/
-            send:
-                clientIdPrefix: MOVE_IP_
-            receive:
-                clientId: MOVE_IP_987654321
+            clientId: MOVE_IP_987654321
             keystore:
                 alias: ${dpi.client.keystore.alias}
                 lockProvider: ${dpi.client.keystore.lockProvider}

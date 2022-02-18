@@ -30,6 +30,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     private final ShipmentFactory shipmentFactory;
     private final JsonDpiReceiptMapper dpiReceiptMapper;
     private final MessageStatusMapper messageStatusMapper;
+    private final ChannelNormalizer channelNormalizer;
 
     @Override
     public boolean skalPolleMeldingStatus() {
@@ -52,7 +53,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     public void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback) {
         dpiClient.getMessages(new GetMessagesInput()
                         .setSenderId(avsenderidentifikator)
-                        .setChannel(mpcId)
+                        .setChannel(channelNormalizer.normaiize(mpcId))
                 )
                 .map(JsonExternalReceipt::new)
                 .toStream()

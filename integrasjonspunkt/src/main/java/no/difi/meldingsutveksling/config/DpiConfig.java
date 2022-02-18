@@ -6,10 +6,7 @@ import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
-import no.difi.meldingsutveksling.dpi.json.JsonDpiReceiptMapper;
-import no.difi.meldingsutveksling.dpi.json.JsonMeldingsformidlerClient;
-import no.difi.meldingsutveksling.dpi.json.MessageStatusMapper;
-import no.difi.meldingsutveksling.dpi.json.ShipmentFactory;
+import no.difi.meldingsutveksling.dpi.json.*;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
@@ -148,13 +145,20 @@ public class DpiConfig {
         public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
                                                                        ShipmentFactory shipmentFactory,
                                                                        JsonDpiReceiptMapper dpiReceiptMapper,
-                                                                       MessageStatusMapper messageStatusMapper) {
-            return new JsonMeldingsformidlerClient(dpiClient, shipmentFactory, dpiReceiptMapper, messageStatusMapper);
+                                                                       MessageStatusMapper messageStatusMapper,
+                                                                       ChannelNormalizer channelNormalizer) {
+            return new JsonMeldingsformidlerClient(dpiClient,
+                    shipmentFactory, dpiReceiptMapper, messageStatusMapper, channelNormalizer);
         }
 
         @Bean
-        public ShipmentFactory shipmentFactory() {
-            return new ShipmentFactory();
+        public ShipmentFactory shipmentFactory(ChannelNormalizer channelNormalizer) {
+            return new ShipmentFactory(channelNormalizer);
+        }
+
+        @Bean
+        public ChannelNormalizer channelNormalizer() {
+            return new ChannelNormalizer();
         }
 
         @Bean
