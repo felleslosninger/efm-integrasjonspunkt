@@ -84,7 +84,7 @@ public class NextMoveValidator {
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
 
-        validateCertificate(serviceIdentifier);
+        validateCertificate();
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
@@ -137,7 +137,7 @@ public class NextMoveValidator {
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
-        validateCertificate(message.getServiceIdentifier());
+        validateCertificate();
 
         StandardBusinessDocument sbd = message.getSbd();
         if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
@@ -191,10 +191,10 @@ public class NextMoveValidator {
         }
     }
 
-    private void validateCertificate(ServiceIdentifier si) {
+    private void validateCertificate() {
         certificateValidator.ifAvailable(v -> {
             try {
-                v.validateCertificate(si);
+                v.validateCertificate();
             } catch (CertificateExpiredException | VirksertCertificateException e) {
                 log.error("Certificate validation failed", e);
                 throw new InvalidCertificateException(e.getMessage());
