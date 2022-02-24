@@ -26,6 +26,7 @@ public class CacheConfig extends CachingConfigurerSupport {
     public static final String CACHE_LOAD_IDENTIFIER_RESOURCE = "loadIdentifierResource";
     public static final String CACHE_SR_VIRKSERT = "srVirksert";
     public static final String CACHE_FORSENDELSEID = "forsendelseIdCache";
+    public static final String CACHE_KRR_PRINT = "krrPrintCache";
     public static final String SVARUT_FORSENDELSETYPER = "svarutForsendelseTyperCache";
 
     @Override
@@ -34,26 +35,30 @@ public class CacheConfig extends CachingConfigurerSupport {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                new CaffeineCache(CACHE_GET_SAS_KEY,
-                        Caffeine.newBuilder()
-                                .expireAfterWrite(1, TimeUnit.DAYS)
-                                .build()),
-                new CaffeineCache(CACHE_FORSENDELSEID,
-                        Caffeine.newBuilder()
-                                .expireAfterWrite(1, TimeUnit.DAYS)
-                                .build()),
-                new CaffeineCache(CACHE_LOAD_IDENTIFIER_RESOURCE,
-                        Caffeine.newBuilder()
-                                .expireAfterWrite(5, TimeUnit.MINUTES)
-                                .build()),
-                new CaffeineCache(CACHE_SR_VIRKSERT,
-                        Caffeine.newBuilder()
-                                .expireAfterWrite(5, TimeUnit.MINUTES)
-                                .build()),
-                new CaffeineCache(SVARUT_FORSENDELSETYPER,
-                        Caffeine.newBuilder()
-                                .expireAfterWrite(1, TimeUnit.HOURS)
-                                .build())
+            new CaffeineCache(CACHE_GET_SAS_KEY,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(1, TimeUnit.DAYS)
+                    .build()),
+            new CaffeineCache(CACHE_FORSENDELSEID,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(1, TimeUnit.DAYS)
+                    .build()),
+            new CaffeineCache(CACHE_LOAD_IDENTIFIER_RESOURCE,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(5, TimeUnit.MINUTES)
+                    .build()),
+            new CaffeineCache(CACHE_SR_VIRKSERT,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(5, TimeUnit.MINUTES)
+                    .build()),
+            new CaffeineCache(CACHE_KRR_PRINT,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(5, TimeUnit.MINUTES)
+                    .build()),
+            new CaffeineCache(SVARUT_FORSENDELSETYPER,
+                Caffeine.newBuilder()
+                    .expireAfterWrite(1, TimeUnit.HOURS)
+                    .build())
         ));
         return cacheManager;
     }

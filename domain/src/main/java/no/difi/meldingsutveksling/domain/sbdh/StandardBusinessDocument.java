@@ -80,6 +80,7 @@ public class StandardBusinessDocument {
     @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.MessageType.Print.class)
     @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.MessageType.Innsynskrav.class)
     @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.MessageType.Publisering.class)
+    @Valid
     private Object any;
 
     @JsonIgnore

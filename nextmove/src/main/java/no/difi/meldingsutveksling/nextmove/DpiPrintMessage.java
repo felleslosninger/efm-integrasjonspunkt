@@ -6,6 +6,7 @@ import no.difi.sdp.client2.domain.fysisk_post.Posttype;
 import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Map;
 
@@ -20,10 +21,12 @@ public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> {
     private String avsenderId;
     private String fakturaReferanse;
     @Valid
+    @NotNull
     private PostAddress mottaker;
     private Utskriftsfarge utskriftsfarge;
     private Posttype posttype;
     @Valid
+    @NotNull
     private MailReturn retur;
 
     private Map<String, String> printinstruksjoner = Maps.newHashMap();

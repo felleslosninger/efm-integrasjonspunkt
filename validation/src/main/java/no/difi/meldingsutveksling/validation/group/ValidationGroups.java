@@ -56,6 +56,9 @@ public interface ValidationGroups {
 
         interface DPFIO extends ServiceIdentifier {
         }
+
+        interface UNKNOWN extends ServiceIdentifier {
+        }
     }
 
     interface Partner extends Default {

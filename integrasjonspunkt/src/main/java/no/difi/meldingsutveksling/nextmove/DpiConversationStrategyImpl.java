@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
@@ -34,19 +35,28 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
+    private final PrintService printService;
 
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
-        try {
-            serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .conversationId(message.getConversationId())
-                            .process(message.getProcessIdentifier())
-                            .build(),
+        if (message.getReceiver() == null) {
+            // Null receiver only allowed for print receiver
+            KrrPrintResponse printDetails = printService.getPrintDetails();
+            serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
+                printDetails.getX509Sertifikat(), null);
+            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+        } else {
+            try {
+                serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                        .conversationId(message.getConversationId())
+                        .process(message.getProcessIdentifier())
+                        .build(),
                     message.getSbd().getDocumentType());
-        } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
+            } catch (ServiceRegistryLookupException e) {
+                throw new MeldingsUtvekslingRuntimeException(e);
+            }
         }
 
         if (message.getSbd().getBusinessMessage() instanceof DpiDigitalMessage) {

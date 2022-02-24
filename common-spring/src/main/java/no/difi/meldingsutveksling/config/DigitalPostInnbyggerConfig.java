@@ -61,4 +61,6 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private int clientMaxConnectionPoolSize;
 
+    @NotNull
+    private String krrPrintUrl;
 }

@@ -80,7 +80,14 @@ public class StandardBusinessDocumentHeader {
     private Set<@Valid Sender> sender;
 
     @XmlElement(name = "Receiver", required = true)
-    @NotEmpty
+    @NotEmpty(groups = {
+        ValidationGroups.ServiceIdentifier.DPO.class,
+        ValidationGroups.ServiceIdentifier.DPE.class,
+        ValidationGroups.ServiceIdentifier.DPV.class,
+        ValidationGroups.ServiceIdentifier.DPF.class,
+        ValidationGroups.ServiceIdentifier.DPFIO.class,
+        ValidationGroups.ServiceIdentifier.UNKNOWN.class
+    })
     @Size(min = 1, max = 1)
     @Valid
     @ConvertGroup(to = ValidationGroups.Partner.Receiver.class)

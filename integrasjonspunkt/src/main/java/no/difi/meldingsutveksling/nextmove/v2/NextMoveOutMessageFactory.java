@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
@@ -37,9 +38,9 @@ public class NextMoveOutMessageFactory {
     private final Clock clock;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+        ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
 
-        setDefaults(sbd, serviceRecord);
+        setDefaults(sbd, serviceIdentifier);
 
         return new NextMoveOutMessage(
                 sbd.getConversationId(),
@@ -47,11 +48,11 @@ public class NextMoveOutMessageFactory {
                 sbd.getProcess(),
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
-                serviceRecord.getServiceIdentifier(),
+                serviceIdentifier,
                 sbd);
     }
 
-    private void setDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+    private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         sbd.getScopes()
                 .stream()
                 .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
@@ -89,7 +90,7 @@ public class NextMoveOutMessageFactory {
             }
         }
 
-        if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
+        if (serviceIdentifier == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             Optional<Scope> mcScope = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
             if (!mcScope.isPresent()) {
                 sbd.getScopes().add(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
@@ -99,28 +100,17 @@ public class NextMoveOutMessageFactory {
             }
         }
 
-        if (serviceRecord.getServiceIdentifier() == DPI) {
-            setDpiDefaults(sbd, serviceRecord);
+        if (serviceIdentifier == DPI) {
+            setDpiDefaults(sbd);
         }
     }
 
-    private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+    private void setDpiDefaults(StandardBusinessDocument sbd) {
         MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
-            if (dpiMessage.getMottaker() == null) {
-                dpiMessage.setMottaker(new PostAddress());
-            }
-            setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
-            if (dpiMessage.getRetur() == null) {
-                dpiMessage.setRetur(new MailReturn()
-                    .setMottaker(new PostAddress())
-                    .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
-            }
-            setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
-
             if (dpiMessage.getUtskriftsfarge() == null) {
                 dpiMessage.setUtskriftsfarge(Utskriftsfarge.SORT_HVIT);
             }
@@ -129,6 +119,19 @@ public class NextMoveOutMessageFactory {
                 dpiMessage.setPosttype(Posttype.B_OEKONOMI);
             }
 
+            if (sbd.getReceiverIdentifier() != null) {
+                if (dpiMessage.getMottaker() == null) {
+                    dpiMessage.setMottaker(new PostAddress());
+                }
+                if (dpiMessage.getRetur() == null) {
+                    dpiMessage.setRetur(new MailReturn()
+                        .setMottaker(new PostAddress())
+                        .setReturhaandtering(Returhaandtering.DIREKTE_RETUR));
+                }
+                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+                setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
+                setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
+            }
         }
     }
 

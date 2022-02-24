@@ -39,6 +39,10 @@ public class NextMoveMessageMarkers {
         return Markers.append("receiver", Strings.isNullOrEmpty(receiver) ? receiver : IdentifierHasher.hashIfPersonnr(receiver));
     }
 
+    public static LogstashMarker receiverOrgnrMarker(String receiverOrgnr) {
+        return Markers.append("receiver_org_number", Strings.isNullOrEmpty(receiverOrgnr) ? receiverOrgnr : IdentifierHasher.hashIfPersonnr(receiverOrgnr));
+    }
+
     public static LogstashMarker processMarker(String processIdentifier) {
         return Markers.append("process_identifier", processIdentifier);
     }

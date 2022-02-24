@@ -95,8 +95,10 @@ public class Conversation extends AbstractEntity<Long> {
         this.messageReference = messageReference;
         this.sender = sender.asIso6523();
         this.senderIdentifier = sender.getOrgNummer();
-        this.receiver = receiver.asIso6523();
-        this.receiverIdentifier = receiver.getOrgNummer();
+        if (receiver != null) {
+            this.receiver = receiver.asIso6523();
+            this.receiverIdentifier = receiver.getOrgNummer();
+        }
         this.processIdentifier = processIdentifier;
         this.documentIdentifier = documentIdentifier;
         this.direction = direction;

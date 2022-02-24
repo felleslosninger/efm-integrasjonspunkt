@@ -22,25 +22,31 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@RequiredArgsConstructor
 @NoArgsConstructor
 public abstract class NextMoveMessage extends AbstractEntity<Long> implements MessageInformable {
 
+    public NextMoveMessage(String conversationId, String messageId, String processIdentifier, String receiverIdentifier, String senderIdentifier, ServiceIdentifier serviceIdentifier, StandardBusinessDocument sbd) {
+        this.conversationId = conversationId;
+        this.messageId = messageId;
+        this.processIdentifier = processIdentifier;
+        this.receiverIdentifier = receiverIdentifier;
+        this.senderIdentifier = senderIdentifier;
+        this.serviceIdentifier = serviceIdentifier;
+        this.sbd = sbd;
+    }
+
     @Column(length = 36)
-    @NonNull
     private String conversationId;
 
-    @NonNull
     @Column(length = 36, unique = true)
     private String messageId;
 
-    @NonNull
     private String processIdentifier;
-    @NonNull
+
     private String receiverIdentifier;
-    @NonNull
+
     private String senderIdentifier;
-    @NonNull
+
     private ServiceIdentifier serviceIdentifier;
 
     @UpdateTimestamp
@@ -50,7 +56,6 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "message")
     private Set<BusinessMessageFile> files;
 
-    @NonNull
     @Convert(converter = StandardBusinessDocumentConverter.class)
     @Lob
     private StandardBusinessDocument sbd;
