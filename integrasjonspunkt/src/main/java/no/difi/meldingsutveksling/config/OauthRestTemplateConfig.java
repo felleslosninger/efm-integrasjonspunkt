@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -51,8 +50,7 @@ public class OauthRestTemplateConfig {
     @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
-                !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
-                        props.getOidc().getClientId() : props.getOidc().getClientIdPrefix() + props.getOrg().getNumber(),
+                props.getOidc().getClientId(),
                 props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 getCurrentScopes(),
