@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Direction;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -21,7 +21,7 @@ public class CreateStandardBusinessDocument {
     }
 
     private StandardBusinessDocumentHeader getStandardBusinessDocumentHeader(Shipment shipment) {
-        MessageType outgoingMessageType = MessageType.fromClass(shipment.getBusinessMessage(), Direction.OUTGOING);
+        DpiMessageType outgoingDpiMessageType = DpiMessageType.fromClass(shipment.getBusinessMessage(), Direction.OUTGOING);
 
         return new StandardBusinessDocumentHeader()
                 .setHeaderVersion("1.0")
@@ -39,8 +39,8 @@ public class CreateStandardBusinessDocument {
                 )
                 .setDocumentIdentification(new DocumentIdentification()
                         .setInstanceIdentifier(shipment.getMessageId())
-                        .setStandard(outgoingMessageType.getStandard())
-                        .setType(outgoingMessageType.getType())
+                        .setStandard(outgoingDpiMessageType.getStandard())
+                        .setType(outgoingDpiMessageType.getType())
                         .setTypeVersion("1.0")
                         .setCreationDateAndTime(OffsetDateTime.now(clock))
                 )
@@ -48,7 +48,7 @@ public class CreateStandardBusinessDocument {
                         .addScope(new Scope()
                                 .setType(ScopeType.CONVERSATION_ID.getFullname())
                                 .setInstanceIdentifier(shipment.getConversationId())
-                                .setIdentifier(outgoingMessageType.getProcess())
+                                .setIdentifier(outgoingDpiMessageType.getProcess())
                                 .addScopeInformation(new CorrelationInformation()
                                         .setExpectedResponseDateTime(shipment.getExpectedResponseDateTime())
                                 )

@@ -12,7 +12,7 @@ import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
@@ -215,8 +215,8 @@ public class DpiClientConfig {
     private Map<String, Schema> getSchemaMap(UrlRewriter urlRewriter) {
         SchemaStore schemaStore = new SchemaStore(urlRewriter);
         return Collections.unmodifiableMap(
-                Arrays.stream(MessageType.values())
-                        .collect(Collectors.toMap(MessageType::getType, p -> loadSchema(schemaStore, p.getSchemaUri()))));
+                Arrays.stream(DpiMessageType.values())
+                        .collect(Collectors.toMap(DpiMessageType::getType, p -> loadSchema(schemaStore, p.getSchemaUri()))));
     }
 
     @Bean
