@@ -8,6 +8,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
@@ -79,7 +80,7 @@ public class NextMoveMessageInSteps {
                 "/api/messages/in/pop/{messageId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
-                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
+                Collections.singletonMap("messageId", SBDUtil.getMessageId(messageReceivedHolder.get().getSbd()))
         );
     }
 
@@ -90,7 +91,7 @@ public class NextMoveMessageInSteps {
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 StandardBusinessDocument.class,
-                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
+                Collections.singletonMap("messageId", SBDUtil.getMessageId(messageReceivedHolder.get().getSbd()))
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

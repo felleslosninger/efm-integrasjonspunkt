@@ -45,7 +45,6 @@ public class NextMoveMessageInService {
     private final NextMoveMessageInRepository messageRepo;
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ResponseStatusSender responseStatusSender;
-    private final SBDUtil sbdUtil;
     private final Clock clock;
 
     @Transactional
@@ -77,7 +76,7 @@ public class NextMoveMessageInService {
             throw new MessageNotLockedException(messageId);
         }
 
-        if (sbdUtil.isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (SBDUtil.isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             return null;
         }
 

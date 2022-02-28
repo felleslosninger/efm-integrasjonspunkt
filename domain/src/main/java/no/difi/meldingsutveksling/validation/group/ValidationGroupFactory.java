@@ -9,25 +9,25 @@ public class ValidationGroupFactory {
     public static Class<?> toDocumentType(no.difi.meldingsutveksling.MessageType in) {
         switch (in) {
             case FIKSIO:
-                return ValidationGroups.MessageType.FiksIo.class;
+                return NextMoveValidationGroups.MessageType.FiksIo.class;
             case ARKIVMELDING:
-                return ValidationGroups.MessageType.Arkivmelding.class;
+                return NextMoveValidationGroups.MessageType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
-                return ValidationGroups.MessageType.ArkivmeldingKvittering.class;
+                return NextMoveValidationGroups.MessageType.ArkivmeldingKvittering.class;
             case AVTALT:
-                return ValidationGroups.MessageType.Avtalt.class;
+                return NextMoveValidationGroups.MessageType.Avtalt.class;
             case PRINT:
-                return ValidationGroups.MessageType.Print.class;
+                return NextMoveValidationGroups.MessageType.Print.class;
             case DIGITAL:
-                return ValidationGroups.MessageType.Digital.class;
+                return NextMoveValidationGroups.MessageType.Digital.class;
             case DIGITAL_DPV:
-                return ValidationGroups.MessageType.DigitalDpv.class;
+                return NextMoveValidationGroups.MessageType.DigitalDpv.class;
             case INNSYNSKRAV:
-                return ValidationGroups.MessageType.Innsynskrav.class;
+                return NextMoveValidationGroups.MessageType.Innsynskrav.class;
             case PUBLISERING:
-                return ValidationGroups.MessageType.Publisering.class;
+                return NextMoveValidationGroups.MessageType.Publisering.class;
             case EINNSYN_KVITTERING:
-                return ValidationGroups.MessageType.EInnsynKvittering.class;
+                return NextMoveValidationGroups.MessageType.EInnsynKvittering.class;
             default:
                 return null;
         }
@@ -36,17 +36,17 @@ public class ValidationGroupFactory {
     public static Class<?> toServiceIdentifier(ServiceIdentifier serviceIdentifier) {
         switch (serviceIdentifier) {
             case DPE:
-                return ValidationGroups.ServiceIdentifier.DPE.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPE.class;
             case DPF:
-                return ValidationGroups.ServiceIdentifier.DPF.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPF.class;
             case DPI:
-                return ValidationGroups.ServiceIdentifier.DPI.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPI.class;
             case DPO:
-                return ValidationGroups.ServiceIdentifier.DPO.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPO.class;
             case DPV:
-                return ValidationGroups.ServiceIdentifier.DPV.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPV.class;
             case DPFIO:
-                return ValidationGroups.ServiceIdentifier.DPFIO.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPFIO.class;
             default:
                 return null;
         }

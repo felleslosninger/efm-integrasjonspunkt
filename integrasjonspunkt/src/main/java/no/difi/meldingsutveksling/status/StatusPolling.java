@@ -12,11 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
@@ -34,7 +30,6 @@ public class StatusPolling {
     private final IntegrasjonspunktProperties props;
     private final ConversationRepository conversationRepository;
     private final StatusStrategyFactory statusStrategyFactory;
-    private final DpiReceiptService dpiReceiptService;
     private final ConversationStrategyFactory conversationStrategyFactory;
 
     @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
@@ -64,7 +59,7 @@ public class StatusPolling {
     }
 
     private void checkReceiptForType(ServiceIdentifier si, Set<Conversation> conversations) {
-        if (conversations.size() == 0) {
+        if (conversations.isEmpty()) {
             return;
         }
         try {
@@ -74,28 +69,4 @@ public class StatusPolling {
             log.error(format("Exception during receipt polling for %s", si), e);
         }
     }
-
-    @Scheduled(fixedRate = 10000)
-    public void dpiReceiptsScheduledTask() throws InterruptedException, ExecutionException {
-        if (props.getFeature().isEnableReceipts() && props.getFeature().isEnableDPI()) {
-            int mpcConcurrency = props.getDpi().getMpcConcurrency();
-            List<Future<Void>> futures = new ArrayList<>();
-            if (mpcConcurrency > 1) {
-                for (int i = 0; i < mpcConcurrency; i++) {
-                    String mpcId = props.getDpi().getMpcId() + "-" + i;
-                    futures.add(dpiReceiptService.handleReceipts(mpcId));
-                }
-
-            } else {
-                String mpcId = props.getDpi().getMpcId();
-                futures.add(dpiReceiptService.handleReceipts(mpcId));
-            }
-            for (Future<Void> future : futures) {
-                // Waits for the async handleReceipts to complete in order to avoid the schedule to fire again and cause
-                // concurrent consumption of the MPC(s).
-                future.get();
-            }
-        }
-    }
-
 }

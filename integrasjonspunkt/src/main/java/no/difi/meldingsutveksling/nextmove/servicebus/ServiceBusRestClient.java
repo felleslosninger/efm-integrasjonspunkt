@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.BrokerProperties;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -76,7 +77,7 @@ public class ServiceBusRestClient {
 
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("{} got response {}, error sending message to service bus", resourceUri, response.getStatusCode().toString());
+            log.error("{} got response {}, error sending message to service bus", resourceUri, response.getStatusCode());
         }
     }
 
@@ -95,7 +96,7 @@ public class ServiceBusRestClient {
         try {
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
             if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
-                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode());
                 return Optional.empty();
             }
 
@@ -110,7 +111,7 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(response.getBody());
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getDocumentId()));
+                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, SBDUtil.getMessageId(payload.getSbd())));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
                 log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
@@ -143,8 +144,8 @@ public class ServiceBusRestClient {
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.DELETE, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, message [messageId={}] was not deleted",
-                    resourceUri, response.getStatusCode().toString(),
-                    message.getPayload().getSbd().getDocumentId());
+                    resourceUri, response.getStatusCode(),
+                    message.getMessageId());
         }
     }
 

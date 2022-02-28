@@ -217,6 +217,7 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private String audience;
         private String clientId;
+        private String clientIdPrefix;
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
     }

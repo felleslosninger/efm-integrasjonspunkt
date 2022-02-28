@@ -11,9 +11,9 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
@@ -58,7 +58,7 @@ public class NextMoveValidator {
     private final Asserter asserter;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
@@ -68,18 +68,19 @@ public class NextMoveValidator {
 
     void validate(StandardBusinessDocument sbd) {
 
-        sbd.getOptionalMessageId().ifPresent(messageId -> {
-            messageRepo.findByMessageId(messageId)
-                .map(p -> {
-                    throw new MessageAlreadyExistsException(messageId);
-                });
-            if (!sbdUtil.isStatus(sbd)) {
-                conversationService.findConversation(messageId)
-                    .map(c -> {
-                        throw new MessageAlreadyExistsException(messageId);
-                    });
-            }
-        });
+        sbd.getMessageId().ifPresent(messageId -> {
+                    messageRepo.findByMessageId(messageId)
+                            .ifPresent(p -> {
+                                throw new MessageAlreadyExistsException(messageId);
+                            });
+                    if (!SBDUtil.isStatus(sbd)) {
+                        conversationService.findConversation(messageId)
+                                .ifPresent(c -> {
+                                    throw new MessageAlreadyExistsException(messageId);
+                                });
+                    }
+                }
+        );
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
@@ -90,17 +91,18 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        MessageType messageType = MessageType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getMessageType()));
+        MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
+                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType().orElse("null")));
 
-        String documentType = sbd.getDocumentType();
+        String documentType = SBDUtil.getDocumentType(sbd);
 
         if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
         }
 
         if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
-            Optional<Scope> mc = sbd.findScope(ScopeType.MESSAGE_CHANNEL);
+            Optional<Scope> mc = SBDUtil.getOptionalMessageChannel(sbd);
             if (mc.isPresent() && !mc.get().getIdentifier().equals(props.getDpo().getMessageChannel())) {
                 throw new MessageChannelInvalidException(props.getDpo().getMessageChannel(), mc.get().getIdentifier());
             }
@@ -119,19 +121,20 @@ public class NextMoveValidator {
         if (svarUtService.getIfAvailable() == null) {
             return;
         }
-        if (serviceRecord.getServiceIdentifier() == DPF && sbd.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            ArkivmeldingMessage message = (ArkivmeldingMessage) sbd.getBusinessMessage();
-            DpfSettings dpfSettings = message.getDpf();
-            if (dpfSettings == null) {
-                return;
-            }
-            String forsendelseType = dpfSettings.getForsendelseType();
-            if (!isNullOrEmpty(forsendelseType)) {
-                List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
-                if (!validTypes.contains(forsendelseType)) {
-                    throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+        if (serviceRecord.getServiceIdentifier() == DPF) {
+            sbd.getBusinessMessage(ArkivmeldingMessage.class).ifPresent(message -> {
+                DpfSettings dpfSettings = message.getDpf();
+                if (dpfSettings == null) {
+                    return;
                 }
-            }
+                String forsendelseType = dpfSettings.getForsendelseType();
+                if (!isNullOrEmpty(forsendelseType)) {
+                    List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                    if (!validTypes.contains(forsendelseType)) {
+                        throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+                    }
+                }
+            });
         }
     }
 
@@ -140,18 +143,18 @@ public class NextMoveValidator {
         validateCertificate();
 
         StandardBusinessDocument sbd = message.getSbd();
-        if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (SBDUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
         sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
-            if (sbdUtil.isExpired(sbd)) {
+            if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
                 throw new TimeToLiveException(expectedResponseDateTime);
             }
         });
 
-        if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
+        if (SBDUtil.isType(message.getSbd(), ARKIVMELDING)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -168,7 +171,7 @@ public class NextMoveValidator {
         }
 
         // Validate that files given in metadata mapping exist
-        if (sbdUtil.isType(message.getSbd(), DIGITAL)) {
+        if (SBDUtil.isType(message.getSbd(), DIGITAL)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -242,18 +245,12 @@ public class NextMoveValidator {
             throw new MissingFileTitleException(DPV.toString());
         }
 
-        if (message.getServiceIdentifier() == DPI && !StringUtils.hasText(file.getName())) {
-            if (!message.isPrimaryDocument(file.getOriginalFilename())) {
-                if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-                    DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
-                    if (!bmsg.getMetadataFiler().containsValue(file.getOriginalFilename())) {
-                        throw new MissingFileTitleException(DPI.toString());
-                    }
-                } else {
-                    throw new MissingFileTitleException(DPI.toString());
-                }
-            }
+        if (message.getServiceIdentifier() == DPI
+                && !StringUtils.hasText(file.getName())
+                && !message.isPrimaryDocument(file.getOriginalFilename())) {
+            message.getBusinessMessage(DpiDigitalMessage.class)
+                    .filter(p -> p.getMetadataFiler().containsValue(file.getOriginalFilename()))
+                    .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
         }
-
     }
 }

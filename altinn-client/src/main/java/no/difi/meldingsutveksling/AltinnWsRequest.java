@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
@@ -25,12 +26,12 @@ public class AltinnWsRequest implements UploadRequest {
 
     @Override
     public String getSender() {
-        return sbd.getSenderOrgnr();
+        return sbd.getSenderIdentifier().getPrimaryIdentifier();
     }
 
     @Override
     public String getReceiver() {
-        return sbd.getReceiverIdentifier();
+        return sbd.getReceiverIdentifier().getPrimaryIdentifier();
     }
 
     @Override
@@ -55,6 +56,6 @@ public class AltinnWsRequest implements UploadRequest {
      */
     @Override
     public Marker getMarkers() {
-        return sbd.createLogstashMarkers();
+        return SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
     }
 }

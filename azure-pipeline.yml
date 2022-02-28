@@ -1,6 +1,6 @@
 pool:
   vmImage: 'ubuntu-latest'
-  
+
 resources:
   repositories:
     - repository: efm-eproc-pipeline

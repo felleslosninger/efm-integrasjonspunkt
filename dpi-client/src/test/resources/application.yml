@@ -1,0 +1,46 @@
+difi:
+    move:
+        feature:
+            enableDPI: true
+dpi:
+    client:
+        asice:
+            type: commons-asic
+        initialBufferSize: 100000
+        certificate:
+            mode: SELF_SIGNED
+        keystore:
+            alias: c1
+            lockProvider: false
+            password: test
+            path: classpath:/c1.jks
+            type: jks
+        oidc:
+            enable: true
+            audience: http://localhost:8900/
+            clientId: MOVE_IP_987654321
+            keystore:
+                alias: ${dpi.client.keystore.alias}
+                lockProvider: ${dpi.client.keystore.lockProvider}
+                password: ${dpi.client.keystore.password}
+                path: ${dpi.client.keystore.path}
+                type: ${dpi.client.keystore.type}
+            scopes:
+                - 'dummy'
+            url: 'http://localhost:8900/token'
+        temporary-file-threshold: 10000000
+        timeout:
+            connect: 5000
+            read: 60000
+            write: 60000
+        uri: http://localhost:8900/dpi
+    server:
+        keystore:
+            alias: c2
+            lockProvider: false
+            password: test
+            path: classpath:/c2.jks
+            type: jks
+spring:
+    main:
+        web-application-type: NONE

@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -57,7 +57,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
     @Mock
     NextMoveOutMessage msg;
-    @Mock
+
     StandardBusinessDocument sbd;
 
     private static final String SENDER_ORGNR = "123456789";
@@ -89,10 +89,23 @@ class CorrespondenceAgencyMessageFactoryTest {
         when(infoRecord.getOrganizationName()).thenReturn(SENDER_ORGNAME);
         when(serviceRegistryLookup.getInfoRecord(SENDER_ORGNR)).thenReturn(infoRecord);
 
-        when(sbd.getPartIdentifier()).thenReturn(Optional.empty());
-        when(msg.getSbd()).thenReturn(sbd);
-
         when(msg.getReceiverIdentifier()).thenReturn(RECEIVER_ORGNR);
+
+        this.sbd = spy(new StandardBusinessDocument()
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                        .addSender(new Partner())
+                        .addReceiver(new Partner())
+                        .setDocumentIdentification(new DocumentIdentification()
+                                .setStandard("standard")
+                        )
+                        .setBusinessScope(new BusinessScope()
+                                .addScope(new Scope()
+                                        .setType(ScopeType.CONVERSATION_ID.getFullname())
+                                )
+                        )
+                ));
+
+        when(msg.getSbd()).thenReturn(sbd);
     }
 
     @SneakyThrows
@@ -102,8 +115,8 @@ class CorrespondenceAgencyMessageFactoryTest {
         serviceRecordService.setServiceCode(serviceCode);
         serviceRecordService.setIdentifier(ServiceIdentifier.DPV);
         when(serviceRecord.getService()).thenReturn(serviceRecordService);
-
-        when(sbd.getProcess()).thenReturn(PROCESS);
+        sbd.getScope(ScopeType.CONVERSATION_ID)
+                .ifPresent(scope -> scope.setIdentifier(process));
         when(serviceRegistryLookup.getServiceRecord(any(), any())).thenReturn(serviceRecord);
     }
 
@@ -128,12 +141,12 @@ class CorrespondenceAgencyMessageFactoryTest {
         String varselTekstOverride = "foo $reporterName$ bar $reporteeName$";
         dpv.setVarselTekst(varselTekstOverride);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn(amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
 
         setupForProcessAndServiceCode(PROCESS, SERVICE_CODE);
         List<Notification2009> notifications = ReflectionTestUtils.invokeMethod(messageFactory, "createNotifications", msg);
         assertNotNull(notifications);
-        assertEquals(notifications.size(), 1);
+        assertEquals(1, notifications.size());
         Notification2009 notification = notifications.get(0);
         assertEquals(DpvVarselType.VARSEL_DPV_UTEN_REVARSEL.getFullname(), notification.getNotificationType().getValue());
         assertEquals(TransportType.EMAIL, notification.getReceiverEndPoints().getValue().getReceiverEndPoint().get(0).getTransportType().getValue());
@@ -146,7 +159,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
         List<Notification2009> notifications = ReflectionTestUtils.invokeMethod(messageFactory, "createNotifications", msg);
         assertNotNull(notifications);
-        assertEquals(notifications.size(), 1);
+        assertEquals(1, notifications.size());
         Notification2009 notification = notifications.get(0);
         assertEquals(NOTIFICATION_TEXT_SENSITIVE.replace("$reporterName$", SENDER_ORGNAME), notification.getTextTokens().getValue().getTextToken().get(0).getTokenValue().getValue());
     }
@@ -158,13 +171,13 @@ class CorrespondenceAgencyMessageFactoryTest {
         String varselTekst = "taus foo $reporterName$ bar $reporteeName$";
         dpv.setTaushetsbelagtVarselTekst(varselTekst);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn(amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
 
         setupForProcessAndServiceCode(PROCESS_SENSITIVE, SERVICE_CODE_SENSITIVE);
 
         List<Notification2009> notifications = ReflectionTestUtils.invokeMethod(messageFactory, "createNotifications", msg);
         assertNotNull(notifications);
-        assertEquals(notifications.size(), 1);
+        assertEquals(1, notifications.size());
         Notification2009 notification = notifications.get(0);
         assertEquals(varselTekst.replace("$reporterName$", SENDER_ORGNAME), notification.getTextTokens().getValue().getTextToken().get(0).getTokenValue().getValue());
     }
@@ -175,7 +188,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         DpvSettings dpv = new DpvSettings();
         dpv.setDagerTilSvarfrist(3);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn(amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
 
         setupForProcessAndServiceCode(PROCESS, SERVICE_CODE);
         MyInsertCorrespondenceV2 correspondence = ReflectionTestUtils.invokeMethod(messageFactory, "getMyInsertCorrespondenceV2", msg, "title", "summary", "body", null);

@@ -4,10 +4,12 @@ import com.google.common.collect.Sets;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
@@ -68,21 +70,25 @@ public class DefaultDpoPolling implements DpoPolling {
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
             AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
-            MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
-            Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
+            String messageId = SBDUtil.getMessageId(sbd);
+            MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
+            LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
+            Audit.info(format("Downloaded message with id=%s", messageId), logstashMarkers);
+
+            String conversationId = SBDUtil.getConversationId(sbd);
 
             try {
-                UUID.fromString(sbd.getMessageId());
-                UUID.fromString(sbd.getConversationId());
+                UUID.fromString(messageId);
+                UUID.fromString(conversationId);
             } catch (IllegalArgumentException e) {
-                log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
+                log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", messageId, conversationId);
                 client.confirmDownload(request);
                 return;
             }
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
             client.confirmDownload(request);
-            log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
+            log.debug(markerFrom(reference).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
             log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
         }

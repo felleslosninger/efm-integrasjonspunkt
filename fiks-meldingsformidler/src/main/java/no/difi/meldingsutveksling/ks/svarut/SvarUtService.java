@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -43,9 +44,9 @@ public class SvarUtService {
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                             .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
-                            .process(message.getSbd().getProcess())
+                            .process(SBDUtil.getProcess(message.getSbd()))
                             .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getDocumentType());
+                    SBDUtil.getDocumentType(message.getSbd()));
         } catch (ServiceRegistryLookupException e) {
             throw new SvarUtServiceException(String.format("DPF service record not found for identifier=%s", message.getReceiverIdentifier()), e);
         }

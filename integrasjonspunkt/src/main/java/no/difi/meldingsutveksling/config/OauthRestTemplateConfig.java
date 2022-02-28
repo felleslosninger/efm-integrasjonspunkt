@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.config;
 
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
 import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -29,8 +29,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OauthRestTemplateConfig {
 
-    private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
-
     private static final String SCOPE_DPO = "move/dpo.read";
     private static final String SCOPE_DPE = "move/dpe.read";
     private static final String SCOPE_DPV = "move/dpv.read";
@@ -49,10 +47,10 @@ public class OauthRestTemplateConfig {
 
     @SneakyThrows
     @Bean
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
-                !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
-                        props.getOidc().getClientId() : CLIENT_ID_PREFIX+props.getOrg().getNumber(),
+                props.getOidc().getClientId(),
                 props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 getCurrentScopes(),
@@ -63,25 +61,32 @@ public class OauthRestTemplateConfig {
     }
 
     @Bean
-    public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "false")
+    public RestOperations restTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
+        RestTemplate rt = new RestTemplate(requestFactory);
+        metricsRestTemplateCustomizer.customize(rt);
+        return rt;
+    }
+
+    @Bean(name = "restTemplate")
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
+    public RestOperations oauthRestTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
 
-        if (props.getOidc().isEnable()) {
-            BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
-            resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
-            resource.setScope(getCurrentScopes());
-            resource.setClientId(props.getOidc().getClientId());
+        BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+        resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
+        resource.setScope(getCurrentScopes());
+        resource.setClientId(props.getOidc().getClientId());
 
-            OAuth2RestTemplate rt = new SyncedOauth2RestTemplate(resource);
-            rt.setRequestFactory(requestFactory);
-            rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
-            rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
-            metricsRestTemplateCustomizer.customize(rt);
-            return rt;
-        }
-        RestTemplate rt = new RestTemplate(requestFactory);
+        OAuth2RestTemplate rt = new SyncedOauth2RestTemplate(resource);
+        rt.setRequestFactory(requestFactory);
+        rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
+        rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
         metricsRestTemplateCustomizer.customize(rt);
         return rt;
     }

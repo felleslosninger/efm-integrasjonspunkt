@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
@@ -30,6 +30,7 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,12 @@ public class CucumberStepsConfiguration {
     @SpyBean(WebhookPusher.class)
     @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public CreateInstanceIdentifier createInstanceIdentifier() {
+            return () -> "ff88849c-e281-4809-8555-7cd54952b921";
+        }
 
         @Primary
         @Bean

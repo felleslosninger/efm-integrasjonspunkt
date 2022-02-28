@@ -4,9 +4,6 @@ import lombok.Data;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -90,8 +87,8 @@ public class StandardBusinessDocumentTestData {
                             .land("Norway")
                             .build()
                     )
-                    .setUtskriftsfarge(Utskriftsfarge.FARGE)
-                    .setPosttype(Posttype.A_PRIORITERT)
+                    .setUtskriftsfarge(PrintColor.FARGE)
+                    .setPosttype(PostalCategory.A_PRIORITERT)
                     .setRetur(new MailReturn()
                             .setMottaker(PostAddress.builder()
                                     .navn("Fjellheimen kommune")
@@ -104,7 +101,7 @@ public class StandardBusinessDocumentTestData {
                                     .land("Norway")
                                     .build()
                             )
-                            .setReturhaandtering(Returhaandtering.DIREKTE_RETUR)
+                            .setReturhaandtering(ReturnHandling.DIREKTE_RETUR)
                     )
             );
 
@@ -159,36 +156,36 @@ public class StandardBusinessDocumentTestData {
 
     private static void fill(StandardBusinessDocument sbd, MessageData message) {
         sbd.setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                .setBusinessScope(new BusinessScope()
-                        .addScope(new Scope()
-                                .addScopeInformation(new CorrelationInformation()
-                                        .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
+                        .setBusinessScope(new BusinessScope()
+                                .addScope(new Scope()
+                                        .addScopeInformation(new CorrelationInformation()
+                                                .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
+                                        )
+                                        .setIdentifier(message.process)
+                                        .setInstanceIdentifier(message.conversationId)
+                                        .setType("ConversationId")
                                 )
-                                .setIdentifier(message.process)
-                                .setInstanceIdentifier(message.conversationId)
-                                .setType("ConversationId")
+                        )
+                        .setDocumentIdentification(new DocumentIdentification()
+                                .setInstanceIdentifier(message.messageId)
+                                .setStandard(message.getStandard())
+                                .setType(message.getType())
+                                .setTypeVersion("1.0")
+                        )
+                        .setHeaderVersion("1.0")
+                        .addReceiver(new Partner()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("0192:910075918")
+                                )
+                        )
+                        .addSender(new Partner()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("0192:910077473")
+                                )
                         )
                 )
-                .setDocumentIdentification(new DocumentIdentification()
-                        .setInstanceIdentifier(message.messageId)
-                        .setStandard(message.getStandard())
-                        .setType(message.getType())
-                        .setTypeVersion("1.0")
-                )
-                .setHeaderVersion("1.0")
-                .addReceiver(new Receiver()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910075918")
-                        )
-                )
-                .addSender(new Sender()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910077473")
-                        )
-                )
-        )
                 .setAny(message.businessMessage);
     }
 }

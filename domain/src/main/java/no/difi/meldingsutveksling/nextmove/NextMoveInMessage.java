@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import javax.persistence.DiscriminatorValue;
@@ -35,11 +36,11 @@ public class NextMoveInMessage extends NextMoveMessage {
 
     public static NextMoveInMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         return new NextMoveInMessage(
-                sbd.getConversationId(),
-                sbd.getDocumentId(),
-                sbd.getProcess(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
+                SBDUtil.getConversationId(sbd),
+                SBDUtil.getMessageId(sbd),
+                SBDUtil.getProcess(sbd),
+                sbd.getReceiverIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
     }

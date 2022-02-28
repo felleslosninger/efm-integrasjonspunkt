@@ -1,15 +1,12 @@
 package no.difi.meldingsutveksling.dokumentpakking.service
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
-import io.mockk.mockkClass
 import no.difi.meldingsutveksling.DateTimeUtil
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
@@ -18,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,8 +29,7 @@ class SbdFactoryTest {
 
     @MockK
     lateinit var serviceRegistryLookup: ServiceRegistryLookup
-    @MockK
-    lateinit var sbdUtil: SBDUtil
+
     @MockK
     lateinit var props: IntegrasjonspunktProperties
 
@@ -43,25 +40,18 @@ class SbdFactoryTest {
     private val arkivmeldingResponseProcess = "urn:no:difi:profile:arkivmelding:response:ver1.0"
     private val einnsynResponseProcess = "urn:no:difi:profile:einnsyn:response:ver1.0"
     private val statusDocType = "urn:no:difi:eformidling:xsd::status"
-    private val orgnrSender = "910076787"
-    private val orgnrReceiver = "991825827"
+    private val sender = Iso6523.parse("0192:910076787")
+    private val receiver = Iso6523.parse("0192:991825827")
     private val convId = "e3016cb7-39de-4166-a935-3a574cd2a2db"
     private val msgId = "4653f436-8921-4224-b824-068f2cc6232f"
 
     val sbd: StandardBusinessDocument = mockk {
-        every { receiver } returns Organisasjonsnummer.from(orgnrReceiver)
-        every { sender } returns Organisasjonsnummer.from(orgnrSender)
-        every { senderIdentifier } returns orgnrSender
-        every { receiverIdentifier } returns orgnrReceiver
-        every { conversationId } returns convId
-        every { messageId } returns msgId
-        every { findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.empty()
     }
 
     @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        sbdFactory = SBDFactory(serviceRegistryLookup, sbdUtil, clock, props)
+        sbdFactory = SBDFactory(serviceRegistryLookup, clock, props)
 
         every { props.arkivmelding } returns mockk {
             every { receiptProcess } returns arkivmeldingResponseProcess
@@ -73,28 +63,47 @@ class SbdFactoryTest {
             every { statusDocumentType } returns statusDocType
             every { defaultTtlHours } returns 24
         }
+
+        mockkStatic(SBDUtil::class)
+        every { sbd.receiverIdentifier } returns receiver
+        every { sbd.senderIdentifier } returns sender
+        every { SBDUtil.getConversationId(sbd) } returns convId
+        every { SBDUtil.getMessageId(sbd) } returns msgId
+        every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()
+    }
+
+    @AfterEach
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test
     fun `test status creation from arkivmelding message`() {
-        every { sbdUtil.isArkivmelding(sbd) } returns true
+        every { SBDUtil.isArkivmelding(sbd) } returns true
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
 
-        assertEquals(statusSbd.receiverIdentifier, orgnrSender)
-        assertEquals(statusSbd.senderIdentifier, orgnrReceiver)
-        assertEquals(arkivmeldingResponseProcess, statusSbd.process)
+        assertEquals(
+            statusSbd.receiverIdentifier.identifier,
+            sender.identifier
+        )
+        assertEquals(
+            statusSbd.senderIdentifier.identifier,
+            receiver.identifier
+        )
+        assertEquals(arkivmeldingResponseProcess, SBDUtil.getProcess(statusSbd))
         assertTrue(statusSbd.any is StatusMessage)
         assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessage).status)
     }
 
     @Test
     fun `test status creation from einnsyn message`() {
-        every { sbdUtil.isArkivmelding(sbd) } returns false
-        every { sbdUtil.isEinnsyn(sbd) } returns true
+        every { SBDUtil.isArkivmelding(sbd) } returns false
+        every { SBDUtil.isEinnsyn(sbd) } returns true
+        every { sbd.getScope(ScopeType.MESSAGE_CHANNEL) } returns Optional.empty()
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
-        assertEquals(einnsynResponseProcess, statusSbd.process)
+        assertEquals(einnsynResponseProcess, SBDUtil.getProcess(statusSbd))
     }
 
     @Test
@@ -105,12 +114,14 @@ class SbdFactoryTest {
         }
 
         Assertions.assertThrows(MeldingsUtvekslingRuntimeException::class.java) {
-            sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(orgnrSender),
-                Organisasjonsnummer.from(orgnrReceiver),
+            sbdFactory.createNextMoveSBD(
+                sender,
+                receiver,
                 convId, msgId,
                 arkivmeldingProcess,
                 "foo::bar",
-                mockkClass(ArkivmeldingMessage::class))
+                mockkClass(ArkivmeldingMessage::class)
+            )
         }
     }
 
@@ -121,11 +132,13 @@ class SbdFactoryTest {
             every { documentTypes } returns listOf("foo::bar")
         }
 
-        sbdFactory.createNextMoveSBD(Organisasjonsnummer.from(orgnrSender),
-            Organisasjonsnummer.from(orgnrReceiver),
+        sbdFactory.createNextMoveSBD(
+            sender,
+            receiver,
             convId, msgId,
             arkivmeldingProcess,
             "foo::bar",
-            mockkClass(ArkivmeldingMessage::class))
+            mockkClass(ArkivmeldingMessage::class)
+        )
     }
 }

@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.BestEduConverter;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -59,7 +60,7 @@ public class IntegrajonspunktReceiveImpl {
     private final ConversationService conversationService;
     private final MessagePersister messagePersister;
     private final SBDFactory sbdFactory;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final PutMessageRequestFactory putMessageRequestFactory;
     private final NextMoveAdapter nextMoveAdapter;
     private final InternalQueue internalQueue;
@@ -71,7 +72,7 @@ public class IntegrajonspunktReceiveImpl {
                                        ConversationService conversationService,
                                        ObjectProvider<MessagePersister> messagePersister,
                                        SBDFactory sbdFactory,
-                                       SBDUtil sbdUtil,
+                                       SBDService sbdService,
                                        PutMessageRequestFactory putMessageRequestFactory,
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
@@ -82,7 +83,7 @@ public class IntegrajonspunktReceiveImpl {
         this.conversationService = conversationService;
         this.messagePersister = messagePersister.getIfUnique();
         this.sbdFactory = sbdFactory;
-        this.sbdUtil = sbdUtil;
+        this.sbdService = sbdService;
         this.putMessageRequestFactory = putMessageRequestFactory;
         this.nextMoveAdapter = nextMoveAdapter;
         this.internalQueue = internalQueue;
@@ -93,12 +94,13 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     public void forwardToNoarkSystem(StandardBusinessDocument sbd) {
-        if (sbdUtil.isExpired(sbd)) {
-            conversationService.registerStatus(sbd.getMessageId(), ReceiptStatus.LEVETID_UTLOPT);
+        if (sbdService.isExpired(sbd)) {
+            String messageId = SBDUtil.getMessageId(sbd);
+            conversationService.registerStatus(messageId, ReceiptStatus.LEVETID_UTLOPT);
             try {
-                messagePersister.delete(sbd.getMessageId());
+                messagePersister.delete(messageId);
             } catch (IOException e) {
-                log.error(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
+                log.error(markerFrom(sbd), "Could not delete files for expired message {}", messageId, e);
             }
             return;
         }
@@ -107,13 +109,14 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private PutMessageRequestType convertSbdToPutMessageRequest(StandardBusinessDocument sbd) {
-        if (sbdUtil.isReceipt(sbd)) {
+        if (SBDUtil.isReceipt(sbd)) {
             ArkivmeldingKvitteringMessage message = (ArkivmeldingKvitteringMessage) sbd.getAny();
             AppReceiptType appReceiptType = AppReceiptFactory.from(message);
             // ConversationId may be be overriden due to invalid UUID in corresponding outgoing message
-            ConversationIdEntity convId = conversationIdEntityRepo.findByNewConversationId(sbd.getConversationId());
+            String conversationId = SBDUtil.getConversationId(sbd);
+            ConversationIdEntity convId = conversationIdEntityRepo.findByNewConversationId(conversationId);
             if (convId != null) {
-                log.warn("Found {} which maps to conversation {} with invalid UUID - overriding in AppReceipt.", sbd.getConversationId(), convId.getOldConversationId());
+                log.warn("Found {} which maps to conversation {} with invalid UUID - overriding in AppReceipt.", conversationId, convId.getOldConversationId());
                 PutMessageRequestType putMessage = putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType), convId.getOldConversationId());
                 conversationIdEntityRepo.delete(convId);
                 return putMessage;
@@ -122,7 +125,7 @@ public class IntegrajonspunktReceiveImpl {
         } else {
             byte[] asicBytes;
             try {
-                asicBytes = messagePersister.read(sbd.getDocumentId(), NextMoveConsts.ASIC_FILE);
+                asicBytes = messagePersister.read(SBDUtil.getMessageId(sbd), NextMoveConsts.ASIC_FILE);
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
             }
@@ -135,15 +138,16 @@ public class IntegrajonspunktReceiveImpl {
 
     private void forwardToNoarkSystemAndSendReceipts(StandardBusinessDocument sbd, PutMessageRequestType putMessage) {
         PutMessageResponseType response = localNoark.sendEduMelding(putMessage);
+        String messageId = SBDUtil.getMessageId(sbd);
         if (response == null || response.getResult() == null) {
-            Audit.info(String.format("Empty response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(sbd));
+            Audit.info(String.format("Empty response from archive for message [id=%s]", messageId), markerFrom(sbd));
         } else {
             AppReceiptType result = response.getResult();
             if (result.getType().equals(OK_TYPE)) {
-                Audit.info(String.format("Message [id=%s] delivered archive", sbd.getMessageId()), markerFrom(response));
-                conversationService.registerStatus(sbd.getDocumentId(), ReceiptStatus.INNKOMMENDE_LEVERT);
+                Audit.info(String.format("Message [id=%s] delivered archive", messageId), markerFrom(response));
+                conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_LEVERT);
                 sendLevertStatus(sbd);
-                if (localNoark instanceof MailClient && !sbdUtil.isReceipt(sbd)) {
+                if (localNoark instanceof MailClient && !SBDUtil.isReceipt(sbd)) {
                     // Need to send AppReceipt manually in case receiver is mail
                     putMessage.setPayload(BestEduConverter.appReceiptAsString(result));
                     PutMessageRequestWrapper putMessageWrapper = new PutMessageRequestWrapper(putMessage);
@@ -151,12 +155,12 @@ public class IntegrajonspunktReceiveImpl {
                     nextMoveAdapter.convertAndSend(putMessageWrapper);
                 }
                 try {
-                    messagePersister.delete(sbd.getDocumentId());
+                    messagePersister.delete(messageId);
                 } catch (IOException e) {
-                    log.error(String.format("Unable to delete files for message with id=%s", sbd.getMessageId()), e);
+                    log.error(String.format("Unable to delete files for message with id=%s", messageId), e);
                 }
             } else {
-                Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
+                Audit.error(String.format("Unexpected response from archive for message [id=%s]", messageId), markerFrom(response));
                 if (!response.getResult().getMessage().isEmpty()) {
                     log.error(">>> archivesystem: " + response.getResult().getMessage().get(0).getText());
                 }

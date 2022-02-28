@@ -4,7 +4,7 @@ import io.cucumber.java.Before;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveSender;

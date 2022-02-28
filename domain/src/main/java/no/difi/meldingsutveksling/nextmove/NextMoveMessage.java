@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @DiscriminatorColumn(name = "direction", discriminatorType = DiscriminatorType.STRING)
@@ -72,19 +74,19 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @JsonIgnore
-    public BusinessMessage getBusinessMessage() {
-        if (getSbd().getAny() == null) {
-            throw new NextMoveRuntimeException("SBD missing BusinessMessage");
-        }
-        if (!(getSbd().getAny() instanceof BusinessMessage)) {
-            throw new NextMoveRuntimeException("SBD.any not instance of BusinessMessage");
-        }
-        return (BusinessMessage) getSbd().getAny();
+    public BusinessMessage<?> getBusinessMessage() {
+        return getSbd().getBusinessMessage(BusinessMessage.class)
+                .orElseThrow(() -> new NextMoveRuntimeException("SBD.any not instance of BusinessMessage"));
+    }
+
+    @JsonIgnore
+    public <T> Optional<T> getBusinessMessage(Class<T> clazz) {
+        return getSbd().getBusinessMessage(clazz);
     }
 
     @Override
     public String getDocumentIdentifier() {
-        return getSbd().getDocumentType();
+        return SBDUtil.getDocumentType(getSbd());
     }
 
     @Override
@@ -93,13 +95,13 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @Override
-    public Organisasjonsnummer getSender() {
-        return getSbd().getSender();
+    public PartnerIdentifier getSender() {
+        return getSbd().getSenderIdentifier();
     }
 
     @Override
-    public Organisasjonsnummer getReceiver() {
-        return getSbd().getReceiver();
+    public PartnerIdentifier getReceiver() {
+        return getSbd().getReceiverIdentifier();
     }
 
 }

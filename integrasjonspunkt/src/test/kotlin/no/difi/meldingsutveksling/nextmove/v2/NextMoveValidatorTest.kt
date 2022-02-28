@@ -3,11 +3,13 @@ package no.difi.meldingsutveksling.nextmove.v2
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import lombok.extern.slf4j.Slf4j
+import no.difi.meldingsutveksling.MessageType
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
@@ -18,6 +20,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.validation.Asserter
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,7 +49,7 @@ class NextMoveValidatorTest {
     lateinit var timeToLiveHelper: TimeToLiveHelper
 
     @MockK
-    lateinit var sbdUtil: SBDUtil
+    lateinit var sbdService: SBDService
 
     @MockK
     lateinit var conversationService: ConversationService
@@ -82,19 +85,19 @@ class NextMoveValidatorTest {
     fun before() {
         MockKAnnotations.init(this)
         nextMoveValidator = NextMoveValidator(
-                serviceRecordProvider,
-                nextMoveMessageOutRepository,
-                conversationStrategyFactory,
-                asserter,
-                optionalCryptoMessagePersister,
-                timeToLiveHelper,
-                sbdUtil,
-                conversationService,
-                arkivmeldingUtil,
-                nextMoveFileSizeValidator,
-                props,
-                certValidator,
-                svarUtServiceProvider
+            serviceRecordProvider,
+            nextMoveMessageOutRepository,
+            conversationStrategyFactory,
+            asserter,
+            optionalCryptoMessagePersister,
+            timeToLiveHelper,
+            sbdService,
+            conversationService,
+            arkivmeldingUtil,
+            nextMoveFileSizeValidator,
+            props,
+            certValidator,
+            svarUtServiceProvider
         )
 
 
@@ -107,36 +110,44 @@ class NextMoveValidatorTest {
         every { svarUtServiceProvider.getIfAvailable() } returns svarUtService
         every { svarUtServiceProvider.getObject() } returns svarUtService
         every { message.businessMessage } returns businessMessage
-        every { sbd.optionalMessageId } returns Optional.of(messageId)
+
+        every { sbd.messageId } returns Optional.of(messageId)
+
         every { message.messageId } returns messageId
         every { message.sbd } returns sbd
         every { message.serviceIdentifier } returns ServiceIdentifier.DPO
         every { message.files } returns emptySet()
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.empty()
-        every { sbdUtil.isStatus(sbd) } returns false
-        every { sbdUtil.isReceipt(sbd) } returns false
-        every { sbdUtil.isFileRequired(sbd) } returns true
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
         every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
-        every { sbd.messageType } returns "arkivmelding"
-        every { sbd.documentType } returns "standard::arkivmelding"
-        every { sbd.process } returns "arkivmelding:administrasjon"
-        every { sbd.optionalConversationId } returns Optional.of(UUID.randomUUID().toString())
-        every { sbd.findScope(ScopeType.SENDER_REF) } returns Optional.empty()
+
+        mockkStatic(SBDUtil::class)
+        every { SBDUtil.isStatus(sbd) } returns false
+        every { SBDUtil.isReceipt(sbd) } returns false
+        every { SBDUtil.isFileRequired(sbd) } returns true
+        every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.ARKIVMELDING)
+        every { SBDUtil.getDocumentType(sbd) } returns "standard::arkivmelding"
+        every { SBDUtil.getProcess(sbd) } returns "arkivmelding:administrasjon"
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
+    }
+
+    @AfterEach
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test
     fun `message type must fit document type`() {
-        every { sbd.documentType } returns "foo::bar"
+        every { SBDUtil.getDocumentType(sbd) } returns "foo::bar"
         assertThrows(MessageTypeDoesNotFitDocumentTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
     @Test
     fun `document type must be valid`() {
-        every { sbd.messageType } returns "foo"
+        every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.BESTEDU_MELDING)
+        every { sbd.type } returns Optional.of("melding")
         assertThrows(UnknownMessageTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
@@ -172,7 +183,7 @@ class NextMoveValidatorTest {
 
     @Test
     fun `unknown document type allowed for fiksio message`() {
-        every { sbd.documentType } returns "foo::bar"
+        every { SBDUtil.getDocumentType(sbd) } returns "foo::bar"
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
         every { sbd.any } returns mockkClass(FiksIoMessage::class)
@@ -201,7 +212,7 @@ class NextMoveValidatorTest {
     @Test
     fun `non-matching channel should throw exception`() {
         every { props.dpo.messageChannel } returns "foo-42"
-        every { sbd.findScope(eq(ScopeType.MESSAGE_CHANNEL)) } returns Optional.of(mockk {
+        every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.of(mockk {
             every { identifier } returns "foo-43"
         })
         assertThrows(MessageChannelInvalidException::class.java) { nextMoveValidator.validate(sbd) }
