@@ -7,11 +7,10 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
+import no.difi.meldingsutveksling.jackson.PartnerIdentifierModule;
+import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentModule;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.PartnerIdentifierDeserializer;
-import no.difi.meldingsutveksling.nextmove.PartnerIdentifierSerializer;
-import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentDeserializer;
-import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentSerializer;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageType;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +31,9 @@ public class JacksonConfig {
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer(Clock clock) {
 
         return builder ->
-                builder.modulesToInstall(new JavaTimeModule())
-                        .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
+                builder.modulesToInstall(new JavaTimeModule(), new StandardBusinessDocumentModule(BusinessMessageType::fromType), new PartnerIdentifierModule())
                         .serializationInclusion(JsonInclude.Include.NON_NULL)
-                        .serializers(new StandardBusinessDocumentSerializer(), new PartnerIdentifierSerializer())
-                        .deserializers(new StandardBusinessDocumentDeserializer(), new PartnerIdentifierDeserializer())
+                        .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
                         .featuresToEnable(
                                 SerializationFeature.INDENT_OUTPUT,
                                 JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,

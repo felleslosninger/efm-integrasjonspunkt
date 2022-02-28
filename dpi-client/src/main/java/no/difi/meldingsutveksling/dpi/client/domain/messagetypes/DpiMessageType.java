@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.dpi.client.domain.messagetypes;
 
 import lombok.Getter;
+import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Getter
-public enum DpiMessageType {
+public enum DpiMessageType implements StandardBusinessDocumentType {
 
     DIGITAL("digital", Digital.class, Direction.OUTGOING),
     UTSKRIFT("utskrift", Utskrift.class, Direction.OUTGOING),
@@ -53,5 +54,15 @@ public enum DpiMessageType {
                         Arrays.stream(values())
                                 .filter(p -> p.getDirection() == direction)
                                 .map(DpiMessageType::getClazz).map(Class::getSimpleName).collect(Collectors.joining(",")))));
+    }
+
+    @Override
+    public String getFieldName() {
+        return type;
+    }
+
+    @Override
+    public Class<?> getValueType() {
+        return clazz;
     }
 }

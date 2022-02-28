@@ -94,6 +94,10 @@
 
         <dependency>
             <groupId>no.difi.move-common</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>
             <exclusions>
                 <exclusion>
