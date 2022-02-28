@@ -39,7 +39,7 @@ public class CreateAsiceImpl implements CreateAsice {
         try {
             asicWriter.sign(signatureHelper);
         } catch (IOException e) {
-            throw new RuntimeException("Could not sign ASiC-E!", e);
+            throw new IllegalStateException("Could not sign ASiC-E!", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class CreateAsiceImpl implements CreateAsice {
         try (InputStream inputStream = new BufferedInputStream(attachable.getResource().getInputStream())) {
             asicWriter.add(inputStream, attachable.getFilename(), MimeType.forString(attachable.getMimeType()));
         } catch (IOException e) {
-            throw new RuntimeException("Could not add manifest to ASiC-E!", e);
+            throw new IllegalStateException("Could not add manifest to ASiC-E!", e);
         }
     }
 
