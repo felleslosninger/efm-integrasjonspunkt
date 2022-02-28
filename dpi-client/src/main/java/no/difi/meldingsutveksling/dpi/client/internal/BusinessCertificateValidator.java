@@ -26,7 +26,7 @@ public class BusinessCertificateValidator {
      *
      * @param mode One of the modes part of this package.
      * @return Validator for validation of business certificates.
-     * @throws IOException or
+     * @throws IOException               or
      * @throws ValidatorParsingException when loading of validator is unsuccessful.
      */
     @SneakyThrows({IOException.class, ValidatorParsingException.class})
@@ -42,7 +42,7 @@ public class BusinessCertificateValidator {
      *
      * @param mode Some enum annotated with {@link RecipePath}
      * @return Validator for validation of business certificates.
-     * @throws IOException or
+     * @throws IOException               or
      * @throws ValidatorParsingException when loading of validator is unsuccessful.
      */
     @SneakyThrows({IOException.class, ValidatorParsingException.class})
@@ -56,8 +56,8 @@ public class BusinessCertificateValidator {
      *
      * @param modeString Mode as string.
      * @return Validator for validation of business certificates.
-     * @throws IOException or
-     * @throws ValidatorParsingException or
+     * @throws IOException                    or
+     * @throws ValidatorParsingException      or
      * @throws CertificateValidationException when loading of validator is unsuccessful.
      */
     @SneakyThrows({IOException.class, ValidatorParsingException.class, CertificateValidationException.class})
