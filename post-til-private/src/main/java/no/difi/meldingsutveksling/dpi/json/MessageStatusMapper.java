@@ -4,15 +4,15 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 
 @RequiredArgsConstructor
 public class MessageStatusMapper {
 
     private final MessageStatusFactory messageStatusFactory;
 
-    public MessageStatus getMessageStatus(MessageType messageType) {
-        switch (messageType) {
+    public MessageStatus getMessageStatus(DpiMessageType dpiMessageType) {
+        switch (dpiMessageType) {
             case LEVERINGSKVITTERING:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt");
             case AAPNINGSKVITTERING:

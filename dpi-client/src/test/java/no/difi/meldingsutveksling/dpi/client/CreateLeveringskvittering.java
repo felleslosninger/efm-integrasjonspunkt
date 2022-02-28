@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Leveringskvittering;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -14,8 +14,8 @@ public class CreateLeveringskvittering implements ReceiptFactory {
     private final Clock clock;
 
     @Override
-    public MessageType getMessageType() {
-        return MessageType.LEVERINGSKVITTERING;
+    public DpiMessageType getMessageType() {
+        return DpiMessageType.LEVERINGSKVITTERING;
     }
 
     @Override

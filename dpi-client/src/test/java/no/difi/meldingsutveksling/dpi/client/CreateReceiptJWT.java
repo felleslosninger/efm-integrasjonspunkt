@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.AvsenderHolder;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Identifikator;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Virksomhetmottaker;
@@ -28,7 +28,7 @@ public class CreateReceiptJWT {
     }
 
     private StandardBusinessDocument createReceiptStandardBusinessDocument(StandardBusinessDocument sbd, ReceiptFactory receiptFactory) {
-        MessageType receiptType = receiptFactory.getMessageType();
+        DpiMessageType receiptType = receiptFactory.getMessageType();
 
         PartnerIdentifier receiver = Optional.ofNullable(sbd.getReceiverIdentifier())
                 .orElseThrow(() -> new IllegalArgumentException("Missing receiver!"));
