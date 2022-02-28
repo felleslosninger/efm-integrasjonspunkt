@@ -31,13 +31,8 @@ public class ManifestParser {
         try (InputStream inputStream = resource.getInputStream()) {
             return (SDPManifest) marshaller.unmarshal(new StreamSource(inputStream));
         } catch (IOException e) {
-            throw new Exception("Failed to parse SDPManifest!", e);
+            throw new IllegalStateException("Failed to parse SDPManifest!", e);
         }
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

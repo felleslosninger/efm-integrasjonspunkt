@@ -37,7 +37,7 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
         try {
             Files.write(getPath(base, "jwt"), jwt.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new Exception("Couldn't save file!", e);
+            throw new IllegalStateException("Couldn't save file!", e);
         }
     }
 
@@ -45,7 +45,7 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
         try (InputStream is = cmsEncryptedAsice.getResource().getInputStream()) {
             Files.copy(is, getPath(base, "asic.cms"), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new Exception("Couldn't save file!", e);
+            throw new IllegalStateException("Couldn't save file!", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
                     String.format("%s-%s.%s", base, properties.getAsice().getType(), postfix));
             return targetFile.toPath();
         } catch (MalformedURLException e) {
-            throw new Exception("Malformed URL", e);
+            throw new IllegalStateException("Malformed URL", e);
         }
     }
 
@@ -79,9 +79,4 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
         throw new UnsupportedOperationException();
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

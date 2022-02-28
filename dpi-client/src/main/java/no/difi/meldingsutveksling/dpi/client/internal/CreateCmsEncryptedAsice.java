@@ -6,10 +6,12 @@ import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
+import org.bouncycastle.cms.CMSException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.cert.CertificateEncodingException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class CreateCmsEncryptedAsice {
         try (InputStream inputStream = asic.getInputStream(); OutputStream outputStream = cms.getOutputStream()) {
             createCMS.createCMS(inputStream, outputStream, shipment.getReceiverBusinessCertificate());
         } catch (IOException e) {
-            throw new Exception("CMS encryption failed!", e);
+            throw new IllegalStateException("CMS encryption failed!", e);
         }
         return cms;
     }
@@ -40,14 +42,8 @@ public class CreateCmsEncryptedAsice {
         try (OutputStream outputStream = asic.getOutputStream()) {
             createASiCE.createAsice(shipment, outputStream);
         } catch (IOException e) {
-            throw new Exception("Creating ASiC-E failed!", e);
+            throw new IllegalArgumentException("Creating ASiC-E failed!", e);
         }
         return asic;
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }
