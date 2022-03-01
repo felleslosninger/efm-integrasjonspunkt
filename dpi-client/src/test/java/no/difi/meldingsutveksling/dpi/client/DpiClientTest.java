@@ -37,6 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
@@ -67,6 +68,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest(classes = {DpiClientTestConfig.class, DpiClientConfig.class})
+@ActiveProfiles("test")
 @ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
