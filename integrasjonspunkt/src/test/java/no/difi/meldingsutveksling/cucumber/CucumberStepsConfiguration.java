@@ -30,7 +30,6 @@ import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
-import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +65,7 @@ import java.util.Map;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
@@ -92,8 +91,10 @@ public class CucumberStepsConfiguration {
 
         @Primary
         @Bean
-        public CreateInstanceIdentifier createInstanceIdentifier() {
-            return () -> "ff88849c-e281-4809-8555-7cd54952b921";
+        public UUIDGenerator uuidGenerator() {
+            UUIDGenerator uuidGenerator = mock(UUIDGenerator.class);
+            when(uuidGenerator.generate()).thenReturn("ff88849c-e281-4809-8555-7cd54952b921");
+            return uuidGenerator;
         }
 
         @Primary

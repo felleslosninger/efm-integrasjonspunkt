@@ -18,13 +18,7 @@ public class CreateParcelFingerprint {
                     .setDigestMethod("http://www.w3.org/2001/04/xmlenc#sha256")
                     .setDigestValue(Base64.getEncoder().encodeToString(DigestUtils.sha256(inputStream)));
         } catch (IOException e) {
-            throw new Exception("Failed to create parcel fingerprint", e);
-        }
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
+            throw new IllegalStateException("Failed to create parcel fingerprint", e);
         }
     }
 }

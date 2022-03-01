@@ -313,11 +313,6 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public CreateUUIDInstanceIdentifier createUUIDInstanceIdentifier() {
-        return new CreateUUIDInstanceIdentifier();
-    }
-
-    @Bean
     public DpiMapper dpiMapper() {
         return new DpiMapper();
     }

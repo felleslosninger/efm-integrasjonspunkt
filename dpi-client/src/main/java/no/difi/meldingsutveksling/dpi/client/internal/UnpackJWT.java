@@ -29,7 +29,7 @@ public class UnpackJWT {
         try {
             Assert.state(jwsObject.verify(getVerifier(jwsObject)), "Verifying JWT failed!");
         } catch (IllegalStateException | JOSEException e) {
-            throw new Exception("Verifying JWT failed!", e);
+            throw new IllegalStateException("Verifying JWT failed!", e);
         }
     }
 
@@ -41,7 +41,7 @@ public class UnpackJWT {
         try {
             return JWSObject.parse(jwt);
         } catch (ParseException e) {
-            throw new Exception("Parsing JWT failed!", e);
+            throw new IllegalStateException("Parsing JWT failed!", e);
         }
     }
 
@@ -58,14 +58,8 @@ public class UnpackJWT {
                     .findFirst()
                     .orElseThrow(() -> new DpiException("Can not find signing certificate!", Blame.SERVER));
         } catch (ParseException e) {
-            throw new Exception("Can parse signing certificate!", e);
+            throw new IllegalStateException("Can parse signing certificate!", e);
         }
     }
 
-    private static class Exception extends RuntimeException {
-
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

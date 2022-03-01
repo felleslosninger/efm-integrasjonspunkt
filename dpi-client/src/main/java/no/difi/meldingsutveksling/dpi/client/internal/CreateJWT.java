@@ -39,18 +39,12 @@ public class CreateJWT {
         try {
             jwsObject.sign(jwsSigner);
         } catch (JOSEException e) {
-            throw new Exception("Signing failed!", e);
+            throw new IllegalStateException("Signing failed!", e);
         }
     }
 
     private JWSObject getJwsObject(Map<String, Object> sbd) {
         Payload payload = new Payload(new JSONObject(sbd));
         return new JWSObject(jwsHeader, payload);
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

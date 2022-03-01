@@ -34,7 +34,7 @@ public class ShipmentFactory {
         try (InputStream inputStream = input.getReceiverCertificate().getInputStream()) {
             return X509CertificateHelper.createX509Certificate(inputStream);
         } catch (IOException e) {
-            throw new Exception("Couldn't get receiver certificate!", e);
+            throw new IllegalStateException("Couldn't get receiver certificate!", e);
         }
     }
 
@@ -55,9 +55,4 @@ public class ShipmentFactory {
                 .setMimeType(fileExtensionMapper.getMimetype(resource));
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

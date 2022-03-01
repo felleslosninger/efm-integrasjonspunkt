@@ -28,7 +28,7 @@ public class CreateManifest {
         try {
             m.afterPropertiesSet();
         } catch (java.lang.Exception e) {
-            throw new CreateManifest.Exception("createJaxb2Marshaller failed!", e);
+            throw new IllegalStateException("createJaxb2Marshaller failed!", e);
         }
         return m;
     }
@@ -41,17 +41,11 @@ public class CreateManifest {
             return new Manifest(new ByteArrayResource(manifestStream.toByteArray()));
         } catch (MarshallingFailureException e) {
             if (e.getMostSpecificCause() instanceof SAXParseException) {
-                throw new Exception("Kunne ikke validere generert Manifest XML. Sjekk at alle påkrevde input er satt og ikke er null",
+                throw new IllegalArgumentException("Kunne ikke validere generert Manifest XML. Sjekk at alle påkrevde input er satt og ikke er null",
                         e.getMostSpecificCause());
             }
 
             throw e;
-        }
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 }

@@ -20,7 +20,7 @@ public class AsicParser {
             }
 
         } catch (IOException e) {
-            throw new Exception("Couldn't parse ASICe", e);
+            throw new IllegalStateException("Couldn't parse ASICe", e);
         }
     }
 
@@ -29,10 +29,4 @@ public class AsicParser {
         void onFile(String filename, InputStream inputStream);
     }
 
-    private static class Exception extends RuntimeException {
-
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

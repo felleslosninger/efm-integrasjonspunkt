@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
+import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
@@ -71,9 +74,9 @@ public class DpiClientTestConfig {
     @Bean
     public CreateReceiptJWT createReceiptJWT(StandBusinessDocumentJsonFinalizer standBusinessDocumentJsonFinalizer,
                                              CreateJWT createJWTServer,
-                                             CreateInstanceIdentifier createInstanceIdentifier,
+                                             UUIDGenerator uuidGenerator,
                                              Clock clock) {
-        return new CreateReceiptJWT(new CreateStandardBusinessDocumentJWT(standBusinessDocumentJsonFinalizer, createJWTServer), createInstanceIdentifier, clock);
+        return new CreateReceiptJWT(new CreateStandardBusinessDocumentJWT(standBusinessDocumentJsonFinalizer, createJWTServer), uuidGenerator, clock);
     }
 
     @Bean

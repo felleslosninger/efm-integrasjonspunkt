@@ -50,7 +50,7 @@ public class ParcelParser {
 
     private Document getDocument(Map<String, Document> documents, String filename) {
         return Optional.ofNullable(documents.get(filename))
-                .orElseThrow(() -> new Exception(String.format("No file named '%s' in ASICe!", filename)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No file named '%s' in ASICe!", filename)));
     }
 
     private Document getDocument(Map<String, Document> documents, SDPDokument sdpDokument) {
@@ -75,9 +75,4 @@ public class ParcelParser {
                 .setResource(resource);
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message) {
-            super(message);
-        }
-    }
 }

@@ -18,7 +18,7 @@ public class DecryptCMSDocument {
         try {
             return getRecipientInformation(encrypted).getContentStream(recipient).getContentStream();
         } catch (CMSException | IOException e) {
-            throw new Exception("Couldn't decrypt CMS", e);
+            throw new IllegalStateException("Couldn't decrypt CMS", e);
         }
     }
 
@@ -26,24 +26,15 @@ public class DecryptCMSDocument {
         return getParser(encrypted).getRecipientInfos().getRecipients()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new Exception("No recipients in CMS document."));
+                .orElseThrow(() -> new IllegalArgumentException("No recipients in CMS document."));
     }
 
     private CMSEnvelopedDataParser getParser(InputStream encrypted) {
         try {
             return new CMSEnvelopedDataParser(encrypted);
         } catch (CMSException | IOException e) {
-            throw new Exception("Couldn't create CMS parser", e);
+            throw new IllegalStateException("Couldn't create CMS parser", e);
         }
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message) {
-            super(message);
-        }
-
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

@@ -31,7 +31,7 @@ public class InMemoryDocumentStorage implements DocumentStorage {
         try {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
-            throw new Exception("Couldn't read all bytes", e);
+            throw new IllegalStateException("Couldn't read all bytes", e);
         }
     }
 
@@ -39,10 +39,4 @@ public class InMemoryDocumentStorage implements DocumentStorage {
         return data.getOrDefault(messageId, new HashMap<>());
     }
 
-    private static class Exception extends RuntimeException {
-
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }
