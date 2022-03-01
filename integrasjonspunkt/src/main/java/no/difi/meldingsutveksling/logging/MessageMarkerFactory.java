@@ -45,16 +45,16 @@ public class MessageMarkerFactory {
      * @return LogstashMarker
      */
     public static LogstashMarker markerFrom(StandardBusinessDocument sbd) {
-        LogstashMarker conversationIdMarker = conversationIdMarker(SBDUtil.getConversationId(sbd));
-        LogstashMarker messageIdMarker = messageIdMarker(SBDUtil.getMessageId(sbd));
-        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(SBDUtil.getMessageType(sbd).getType());
+        LogstashMarker conversationIdMarker = conversationIdMarker(sbd.getConversationId());
+        LogstashMarker messageIdMarker = messageIdMarker(sbd.getMessageId());
+        LogstashMarker messageTypeMarker = MarkerFactory.messageTypeMarker(sbd.getType());
         LogstashMarker journalPostIdMarker = journalPostIdMarker(SBDUtil.getJournalPostId(sbd));
         LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(sbd.getSenderIdentifier().getIdentifier());
         LogstashMarker senderIdentifierMarker = senderMarker(sbd.getSenderIdentifier().getPrimaryIdentifier());
         LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(sbd.getReceiverIdentifier().getIdentifier());
         LogstashMarker receiverIdentifierMarker = receiverMarker(sbd.getReceiverIdentifier().getPrimaryIdentifier());
-        LogstashMarker documentTypeMarker = documentTypeMarker(SBDUtil.getDocumentType(sbd));
-        LogstashMarker processMarker = processMarker(SBDUtil.getProcess(sbd));
+        LogstashMarker documentTypeMarker = documentTypeMarker(sbd.getDocumentType());
+        LogstashMarker processMarker = processMarker(sbd.getProcess());
         return conversationIdMarker.and(messageTypeMarker)
                 .and(messageIdMarker)
                 .and(journalPostIdMarker)

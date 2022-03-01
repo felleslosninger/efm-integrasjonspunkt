@@ -5,7 +5,6 @@ import lombok.*;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.jpa.StandardBusinessDocumentConverter;
 import org.hibernate.annotations.DiscriminatorOptions;
@@ -86,7 +85,7 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
 
     @Override
     public String getDocumentIdentifier() {
-        return SBDUtil.getDocumentType(getSbd());
+        return getSbd().getDocumentType();
     }
 
     @Override

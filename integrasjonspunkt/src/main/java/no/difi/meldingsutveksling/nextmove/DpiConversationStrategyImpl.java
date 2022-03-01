@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpiConversationStrategy;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
@@ -65,7 +64,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                             .conversationId(message.getConversationId())
                             .process(message.getProcessIdentifier())
                             .build(),
-                    SBDUtil.getDocumentType(message.getSbd()));
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(e);
         }

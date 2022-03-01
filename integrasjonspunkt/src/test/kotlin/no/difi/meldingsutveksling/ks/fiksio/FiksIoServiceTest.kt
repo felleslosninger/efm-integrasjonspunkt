@@ -78,12 +78,12 @@ internal class FiksIoServiceTest {
             ))
 
         mockkStatic(SBDUtil::class)
-        every { SBDUtil.getConversationId(sbd) } returns convId
-        every { SBDUtil.getMessageId(sbd) } returns messageId
-        every { SBDUtil.getProcess(sbd) } returns protocol
+        every { sbd.conversationId } returns convId
+        every { sbd.messageId } returns messageId
+        every { sbd.process } returns protocol
         every { sbd.receiverIdentifier } returns iso6523
         every { sbd.senderIdentifier } returns iso6523
-        every { SBDUtil.getDocumentType(sbd) } returns protocol
+        every { sbd.documentType } returns protocol
 
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
 

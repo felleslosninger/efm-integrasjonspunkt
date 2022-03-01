@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
 import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -29,10 +28,10 @@ public class Adresseregister {
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
             return getCertificate(serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .process(SBDUtil.getProcess(message.getSbd()))
+                            .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
-                    SBDUtil.getDocumentType(message.getSbd())));
+                    message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));

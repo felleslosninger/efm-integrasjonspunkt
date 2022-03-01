@@ -65,7 +65,7 @@ public class BestEduAppReceiptService {
         StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
-                SBDUtil.getConversationId(sbd),
+                sbd.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
                 properties.getArkivmelding().getReceiptDocumentType(),

@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers;
@@ -89,7 +88,7 @@ public class DeadLetterQueueHandler {
             StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
             errorMsg = "Failed to forward message to noark system. Moved to DLQ.";
             Audit.error(errorMsg, markerFrom(sbd));
-            messageId = SBDUtil.getMessageId(sbd);
+            messageId = sbd.getMessageId();
             bestEduAppReceiptService.sendBestEduErrorAppReceipt(sbd);
         } catch (Exception e) {
             // NOOP

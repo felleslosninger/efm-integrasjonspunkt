@@ -46,8 +46,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     @Override
     public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
         StandardBusinessDocument sbd = altinnPackage.getSbd();
-        String messageId = SBDUtil.getMessageId(sbd);
-        log.debug(String.format("NextMove message id=%s", messageId));
+        log.debug(String.format("NextMove message id=%s", sbd.getMessageId()));
 
         if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && SBDUtil.isArkivmelding(sbd) && !SBDUtil.isStatus(sbd)) {
             if (sbdService.isExpired(sbd)) {
@@ -60,7 +59,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             }
             if (altinnPackage.getAsicInputStream() != null) {
                 try (InputStream asicStream = altinnPackage.getAsicInputStream()) {
-                    messagePersister.writeStream(messageId, ASIC_FILE, asicStream, -1L);
+                    messagePersister.writeStream(sbd.getMessageId(), ASIC_FILE, asicStream, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
                 } finally {
@@ -69,10 +68,10 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             }
 
             SBDUtil.getOptionalMessageChannel(sbd).ifPresent(s ->
-                    messageChannelRepository.save(new MessageChannelEntry(messageId, s.getIdentifier())));
+                    messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), s.getIdentifier())));
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
-            conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_MOTTATT);
+            conversationService.registerStatus(sbd.getMessageId(), ReceiptStatus.INNKOMMENDE_MOTTATT);
         } else {
             nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
             if (altinnPackage.getTmpFile() != null) {
