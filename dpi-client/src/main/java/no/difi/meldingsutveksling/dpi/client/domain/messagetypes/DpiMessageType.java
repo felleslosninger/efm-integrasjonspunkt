@@ -1,13 +1,14 @@
 package no.difi.meldingsutveksling.dpi.client.domain.messagetypes;
 
 import lombok.Getter;
+import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Getter
-public enum MessageType {
+public enum DpiMessageType implements StandardBusinessDocumentType {
 
     DIGITAL("digital", Digital.class, Direction.OUTGOING),
     UTSKRIFT("utskrift", Utskrift.class, Direction.OUTGOING),
@@ -26,7 +27,7 @@ public enum MessageType {
     private final String standard;
     private final String process;
 
-    MessageType(String type, Class<? extends BusinessMessage> clazz, Direction direction) {
+    DpiMessageType(String type, Class<? extends BusinessMessage> clazz, Direction direction) {
         this.type = type;
         this.clazz = clazz;
         this.direction = direction;
@@ -35,16 +36,16 @@ public enum MessageType {
         this.process = direction == Direction.OUTGOING ? String.format("urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:%s:ver1.0", type) : null;
     }
 
-    public static MessageType fromType(String type) {
-        return Arrays.stream(MessageType.values()).filter(p -> p.getType().equalsIgnoreCase(type))
+    public static DpiMessageType fromType(String type) {
+        return Arrays.stream(DpiMessageType.values()).filter(p -> p.getType().equalsIgnoreCase(type))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown MessageType = %s. Expecting one of %s",
                         type,
-                        Arrays.stream(values()).map(MessageType::getType).collect(Collectors.joining(",")))));
+                        Arrays.stream(values()).map(DpiMessageType::getType).collect(Collectors.joining(",")))));
     }
 
-    public static MessageType fromClass(BusinessMessage businessMessage, Direction direction) {
-        return Arrays.stream(MessageType.values())
+    public static DpiMessageType fromClass(BusinessMessage businessMessage, Direction direction) {
+        return Arrays.stream(DpiMessageType.values())
                 .filter(p -> p.getClazz().isInstance(businessMessage))
                 .filter(p -> p.getDirection() == direction)
                 .findAny()
@@ -52,6 +53,16 @@ public enum MessageType {
                         businessMessage.getClass().getSimpleName(),
                         Arrays.stream(values())
                                 .filter(p -> p.getDirection() == direction)
-                                .map(MessageType::getClazz).map(Class::getSimpleName).collect(Collectors.joining(",")))));
+                                .map(DpiMessageType::getClazz).map(Class::getSimpleName).collect(Collectors.joining(",")))));
+    }
+
+    @Override
+    public String getFieldName() {
+        return type;
+    }
+
+    @Override
+    public Class<?> getValueType() {
+        return clazz;
     }
 }
