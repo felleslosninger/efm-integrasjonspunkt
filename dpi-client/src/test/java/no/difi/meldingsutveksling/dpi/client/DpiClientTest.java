@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.Payload;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -13,7 +14,6 @@ import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Utskrift;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.*;
-import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
@@ -99,7 +99,7 @@ class DpiClientTest {
     private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
     @MockBean
-    private CreateInstanceIdentifier createInstanceIdentifier;
+    private UUIDGenerator uuidGenerator;
 
     @Value("classpath:/digital_ready_for_send-sbd.json")
     private Resource digitalReadyForSendSbd;
@@ -262,7 +262,7 @@ class DpiClientTest {
     @Test
     @SneakyThrows
     void testGetMessages(MockServerClient client) {
-        given(createInstanceIdentifier.createInstanceIdentifier())
+        given(uuidGenerator.generate())
                 .willReturn("ff88849c-e281-4809-8555-7cd54952b916");
 
         String avsenderidentifikator = "123";
