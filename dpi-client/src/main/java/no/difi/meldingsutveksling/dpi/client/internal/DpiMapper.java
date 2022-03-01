@@ -3,13 +3,14 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.dpi.client.domain.sbd.StandardBusinessDocumentDeserializer;
-import no.difi.meldingsutveksling.dpi.client.domain.sbd.StandardBusinessDocumentSerializer;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
+import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentModule;
 import org.springframework.core.io.Resource;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -24,8 +25,7 @@ public class DpiMapper {
     public DpiMapper() {
         this.objectMapper = Jackson2ObjectMapperBuilder.json()
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
-                .serializers(new StandardBusinessDocumentSerializer())
-                .deserializers(new StandardBusinessDocumentDeserializer())
+                .modulesToInstall(new JavaTimeModule(), new StandardBusinessDocumentModule(DpiMessageType::fromType))
                 .build();
     }
 

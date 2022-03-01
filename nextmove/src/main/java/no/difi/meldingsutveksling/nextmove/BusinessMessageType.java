@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Getter;
+import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Getter
-public enum BusinessMessageType {
+public enum BusinessMessageType implements StandardBusinessDocumentType {
 
     STATUS("status", StatusMessage.class),
 
@@ -38,5 +39,15 @@ public enum BusinessMessageType {
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown BusinessMessageType = %s. Expecting one of %s",
                         type,
                         Arrays.stream(values()).map(BusinessMessageType::getType).collect(Collectors.joining(",")))));
+    }
+
+    @Override
+    public String getFieldName() {
+        return type;
+    }
+
+    @Override
+    public Class<?> getValueType() {
+        return clazz;
     }
 }
