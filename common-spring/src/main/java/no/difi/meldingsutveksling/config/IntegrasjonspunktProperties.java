@@ -64,6 +64,7 @@ public class IntegrasjonspunktProperties {
     private NorskArkivstandardSystem noarkSystem = new NorskArkivstandardSystem();
 
     @Valid
+    @NestedConfigurationProperty
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid

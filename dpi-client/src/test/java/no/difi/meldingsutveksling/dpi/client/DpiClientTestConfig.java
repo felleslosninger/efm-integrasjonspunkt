@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -19,10 +20,10 @@ import java.time.ZoneId;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(DpiServerProperties.class)
+@EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 public class DpiClientTestConfig {
 
-    private final DpiServerProperties properties;
+    private final IntegrasjonspunktProperties properties;
 
     @Bean
     @Primary
@@ -32,7 +33,7 @@ public class DpiClientTestConfig {
 
     @Bean
     public KeystoreHelper serverKeystoreHelper() {
-        return new KeystoreHelper(properties.getKeystore());
+        return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
     }
 
     @Bean
@@ -58,13 +59,18 @@ public class DpiClientTestConfig {
 
     @Bean
     public KeyPair keyPairServer(BusinessCertificateValidator businessCertificateValidator) {
-        return new KeyPairProvider(businessCertificateValidator, properties.getKeystore()).getKeyPair();
+        return new KeyPairProvider(businessCertificateValidator, properties.getDpi().getServer().getKeystore()).getKeyPair();
     }
 
     @Bean
     @SneakyThrows
     public CreateJWT createJWTServer(KeyPair keyPairServer) {
         return new CreateJWT(keyPairServer);
+    }
+
+    @Bean
+    public UUIDGenerator uuidGenerator() {
+        return new UUIDGenerator();
     }
 
     @Bean
