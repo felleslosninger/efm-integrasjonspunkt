@@ -5,6 +5,7 @@ import lombok.Data;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 
+import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class Shipment {
     private OffsetDateTime expectedResponseDateTime;
     private BusinessMessage businessMessage;
     private Parcel parcel;
-    private BusinessCertificate receiverBusinessCertificate;
+    private X509Certificate receiverBusinessCertificate;
     private String language = "NO";
 
     @JsonIgnore
