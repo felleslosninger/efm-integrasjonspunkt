@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.BrokerProperties;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,6 +24,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -109,9 +109,9 @@ public class ServiceBusRestClient {
                     .sequenceNumber(brokerProperties.getSequenceNumber());
 
             try {
-                ServiceBusPayload payload = payloadConverter.convert(response.getBody());
+                ServiceBusPayload payload = payloadConverter.convert(Objects.requireNonNull(response.getBody()));
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, SBDUtil.getMessageId(payload.getSbd())));
+                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getMessageId()));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
                 log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);

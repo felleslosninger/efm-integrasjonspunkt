@@ -12,10 +12,8 @@ public class JsonDpiReceiptMapper {
     private final MessageStatusMapper messageStatusMapper;
 
     public MessageStatus from(StandardBusinessDocument standardBusinessDocument) {
-        MessageStatus ms = standardBusinessDocument.getType()
-                .map(MessageType::fromType)
-                .map(messageStatusMapper::getMessageStatus)
-                .orElseGet(messageStatusMapper::getDefaultMessageStatus);
+        MessageStatus ms = messageStatusMapper.getMessageStatus(
+                MessageType.fromType(standardBusinessDocument.getType()));
 
         standardBusinessDocument.getBusinessMessage(Kvittering.class)
                 .filter(kvittering -> kvittering.getTidspunkt() != null)

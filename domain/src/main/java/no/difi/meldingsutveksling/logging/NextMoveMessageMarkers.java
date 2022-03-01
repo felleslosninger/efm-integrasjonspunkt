@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.logging;
 import com.google.common.base.Strings;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.move.common.IdentifierHasher;
 
@@ -20,8 +19,8 @@ public class NextMoveMessageMarkers {
         final LogstashMarker receiverMarker = receiverMarker(message.getReceiver().getIdentifier());
         final LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(message.getReceiverIdentifier());
         final LogstashMarker messagetypeIdMarker = MarkerFactory.messageTypeMarker(message.getServiceIdentifier().toString());
-        final LogstashMarker processMarker = processMarker(SBDUtil.getProcess(message.getSbd()));
-        final LogstashMarker documentTypeMarker = documentTypeMarker(SBDUtil.getDocumentType(message.getSbd()));
+        final LogstashMarker processMarker = processMarker(message.getSbd().getProcess());
+        final LogstashMarker documentTypeMarker = documentTypeMarker(message.getSbd().getDocumentType());
         return conversationIdMarker.and(messageIdMarker)
                 .and(senderMarker)
                 .and(senderIdentifierMarker)

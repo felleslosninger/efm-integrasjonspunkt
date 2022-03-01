@@ -8,7 +8,6 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
 import org.springframework.boot.test.json.JsonContentAssert;
@@ -126,7 +125,7 @@ public class NextMoveMessageOutSteps {
         );
 
         Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("messageId", SBDUtil.getMessageId(messageOutHolder.get().getSbd()));
+        uriVariables.put("messageId", messageOutHolder.get().getSbd().getMessageId());
         uriVariables.put("title", title);
 
         this.response = testRestTemplate.exchange(
@@ -147,7 +146,7 @@ public class NextMoveMessageOutSteps {
                 "/api/messages/out/{messageId}",
                 HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
-                SBDUtil.getMessageId(messageOutHolder.get().getSbd()));
+                messageOutHolder.get().getSbd().getMessageId());
         assertThat(response.getStatusCode())
                 .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
@@ -159,7 +158,7 @@ public class NextMoveMessageOutSteps {
                 "/api/messages/out/{messageId}",
                 HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
-                SBDUtil.getMessageId(messageOutHolder.get().getSbd()));
+                messageOutHolder.get().getSbd().getMessageId());
 
         try {
             new JsonContentAssert(String.class, response.getBody())

@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.exceptions.*
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService
@@ -111,7 +110,9 @@ class NextMoveValidatorTest {
         every { svarUtServiceProvider.getObject() } returns svarUtService
         every { message.businessMessage } returns businessMessage
 
-        every { sbd.messageId } returns Optional.of(messageId)
+        every { sbd.messageId } returns messageId
+        every { sbd.documentType } returns "standard::arkivmelding"
+        every { sbd.process } returns "arkivmelding:administrasjon"
 
         every { message.messageId } returns messageId
         every { message.sbd } returns sbd
@@ -127,9 +128,6 @@ class NextMoveValidatorTest {
         every { SBDUtil.isStatus(sbd) } returns false
         every { SBDUtil.isReceipt(sbd) } returns false
         every { SBDUtil.isFileRequired(sbd) } returns true
-        every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.ARKIVMELDING)
-        every { SBDUtil.getDocumentType(sbd) } returns "standard::arkivmelding"
-        every { SBDUtil.getProcess(sbd) } returns "arkivmelding:administrasjon"
         every { nextMoveFileSizeValidator.validate(any(), any()) } just Runs
     }
 
@@ -140,14 +138,14 @@ class NextMoveValidatorTest {
 
     @Test
     fun `message type must fit document type`() {
-        every { SBDUtil.getDocumentType(sbd) } returns "foo::bar"
+        every { sbd.documentType } returns "foo::bar"
+        every { sbd.type } returns "arkivmelding"
         assertThrows(MessageTypeDoesNotFitDocumentTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
     @Test
     fun `document type must be valid`() {
-        every { SBDUtil.getOptionalMessageType(sbd) } returns Optional.of(MessageType.BESTEDU_MELDING)
-        every { sbd.type } returns Optional.of("melding")
+        every { sbd.type } returns "melding"
         assertThrows(UnknownMessageTypeException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
@@ -183,7 +181,8 @@ class NextMoveValidatorTest {
 
     @Test
     fun `unknown document type allowed for fiksio message`() {
-        every { SBDUtil.getDocumentType(sbd) } returns "foo::bar"
+        every { sbd.documentType } returns "foo::bar"
+        every { sbd.type } returns "fiksio"
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
         every { sbd.any } returns mockkClass(FiksIoMessage::class)
@@ -212,6 +211,7 @@ class NextMoveValidatorTest {
     @Test
     fun `non-matching channel should throw exception`() {
         every { props.dpo.messageChannel } returns "foo-42"
+        every { sbd.type } returns "arkivmelding"
         every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.of(mockk {
             every { identifier } returns "foo-43"
         })

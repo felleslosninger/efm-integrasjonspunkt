@@ -39,8 +39,7 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
 
     @Transactional
     override fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asicStream: InputStream?) {
-        val messageId = SBDUtil.getMessageId(sbd)
-        MDC.put(NextMoveConsts.CORRELATION_ID, messageId)
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.messageId)
         when {
             sbd.any !is BusinessMessage<*> -> throw MeldingsUtvekslingRuntimeException("SBD payload not of a known type")
             sbdService.isExpired(sbd) -> {
@@ -49,20 +48,20 @@ open class NextMoveQueueImpl(private val messageRepo: NextMoveMessageInRepositor
                 return
             }
             SBDUtil.isStatus(sbd) -> {
-                log.debug("Message with id=${messageId} is a receipt")
-                conversationService.registerStatus(messageId, (sbd.any as StatusMessage).status)
+                log.debug("Message with id=${sbd.messageId} is a receipt")
+                conversationService.registerStatus(sbd.messageId, (sbd.any as StatusMessage).status)
                 return
             }
         }
 
-        asicStream?.use { messagePersister.writeStream(messageId, NextMoveConsts.ASIC_FILE, it, -1L) }
+        asicStream?.use { messagePersister.writeStream(sbd.messageId, NextMoveConsts.ASIC_FILE, it, -1L) }
 
-        val message = messageRepo.findByMessageId(messageId).orElseGet {
+        val message = messageRepo.findByMessageId(sbd.messageId).orElseGet {
             messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
         }
 
         SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
-            messageChannelRepository.save(MessageChannelEntry(SBDUtil.getMessageId(sbd), it.identifier))
+            messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
         }
         conversationService.registerConversation(sbd,
                                                  serviceIdentifier,

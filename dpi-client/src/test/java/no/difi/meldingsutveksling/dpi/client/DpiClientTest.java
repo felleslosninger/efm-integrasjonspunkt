@@ -366,12 +366,10 @@ class DpiClientTest {
         Payload payload = unpackJWT.getPayload(jwt);
         StandardBusinessDocument standardBusinessDocument = unpackStandardBusinessDocument.unpackStandardBusinessDocument(payload);
 
-        String type = standardBusinessDocument.getType().orElse(null);
-
         String expected = IOUtils.toString(expectedSBD.getInputStream(), StandardCharsets.UTF_8);
 
         assertThatJson(payload.toString())
-                .when(paths(String.format("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue", type)), then(Option.IGNORING_VALUES))
+                .when(paths(String.format("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue", standardBusinessDocument.getType())), then(Option.IGNORING_VALUES))
                 .isEqualTo(expected);
 
         return standardBusinessDocument;

@@ -25,7 +25,7 @@ public class StandBusinessDocumentJsonFinalizer {
                 .ifPresent(message -> message.setMaskinportentoken(maskinportenToken));
 
         Map<String, Object> json = dpiMapper.convertToJsonObject(standardBusinessDocument);
-        jsonDigitalPostSchemaValidator.validate(json, standardBusinessDocument.getType().orElse(null));
+        jsonDigitalPostSchemaValidator.validate(json, standardBusinessDocument.getType());
         return json;
     }
 }

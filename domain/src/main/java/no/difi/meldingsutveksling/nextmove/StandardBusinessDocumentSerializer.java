@@ -18,7 +18,7 @@ public class StandardBusinessDocumentSerializer extends JsonSerializer<StandardB
     public void serialize(StandardBusinessDocument value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         gen.writeObjectField("standardBusinessDocumentHeader", value.getStandardBusinessDocumentHeader());
-        gen.writeObjectField(value.getType().orElse("any"), value.getAny());
+        gen.writeObjectField(value.getType(), value.getAny());
         gen.writeEndObject();
     }
 }

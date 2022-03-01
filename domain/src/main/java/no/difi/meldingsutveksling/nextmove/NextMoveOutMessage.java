@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLockType;
@@ -38,9 +37,9 @@ public class NextMoveOutMessage extends NextMoveMessage {
 
     public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         NextMoveOutMessage message = new NextMoveOutMessage(
-                SBDUtil.getConversationId(sbd),
-                SBDUtil.getMessageId(sbd),
-                SBDUtil.getProcess(sbd),
+                sbd.getConversationId(),
+                sbd.getMessageId(),
+                sbd.getProcess(),
                 sbd.getReceiverIdentifier().getPrimaryIdentifier(),
                 sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,

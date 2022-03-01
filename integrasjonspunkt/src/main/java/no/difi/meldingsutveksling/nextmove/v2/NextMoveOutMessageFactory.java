@@ -40,9 +40,9 @@ public class NextMoveOutMessageFactory {
         setDefaults(sbd, serviceRecord);
 
         return new NextMoveOutMessage(
-                SBDUtil.getConversationId(sbd),
-                SBDUtil.getMessageId(sbd),
-                SBDUtil.getProcess(sbd),
+                sbd.getConversationId(),
+                sbd.getMessageId(),
+                sbd.getProcess(),
                 sbd.getReceiverIdentifier().getPrimaryIdentifier(),
                 sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceRecord.getServiceIdentifier(),
@@ -107,9 +107,9 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
-        MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
+        MessageType messageType = MessageType.valueOfType(sbd.getType())
                 .filter(p -> p.getApi() == ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType().orElse("null")));
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();

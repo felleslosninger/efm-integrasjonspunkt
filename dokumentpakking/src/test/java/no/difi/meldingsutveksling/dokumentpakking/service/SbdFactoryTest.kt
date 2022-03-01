@@ -67,8 +67,8 @@ class SbdFactoryTest {
         mockkStatic(SBDUtil::class)
         every { sbd.receiverIdentifier } returns receiver
         every { sbd.senderIdentifier } returns sender
-        every { SBDUtil.getConversationId(sbd) } returns convId
-        every { SBDUtil.getMessageId(sbd) } returns msgId
+        every { sbd.conversationId } returns convId
+        every { sbd.messageId } returns msgId
         every { SBDUtil.getOptionalMessageChannel(sbd) } returns Optional.empty()
     }
 
@@ -91,7 +91,7 @@ class SbdFactoryTest {
             statusSbd.senderIdentifier.identifier,
             receiver.identifier
         )
-        assertEquals(arkivmeldingResponseProcess, SBDUtil.getProcess(statusSbd))
+        assertEquals(arkivmeldingResponseProcess, statusSbd.process)
         assertTrue(statusSbd.any is StatusMessage)
         assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessage).status)
     }
@@ -103,7 +103,7 @@ class SbdFactoryTest {
         every { sbd.getScope(ScopeType.MESSAGE_CHANNEL) } returns Optional.empty()
 
         val statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT)
-        assertEquals(einnsynResponseProcess, SBDUtil.getProcess(statusSbd))
+        assertEquals(einnsynResponseProcess, statusSbd.process)
     }
 
     @Test

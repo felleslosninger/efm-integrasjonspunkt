@@ -68,19 +68,16 @@ public class NextMoveValidator {
 
     void validate(StandardBusinessDocument sbd) {
 
-        sbd.getMessageId().ifPresent(messageId -> {
-                    messageRepo.findByMessageId(messageId)
-                            .ifPresent(p -> {
-                                throw new MessageAlreadyExistsException(messageId);
-                            });
-                    if (!SBDUtil.isStatus(sbd)) {
-                        conversationService.findConversation(messageId)
-                                .ifPresent(c -> {
-                                    throw new MessageAlreadyExistsException(messageId);
-                                });
-                    }
-                }
-        );
+        messageRepo.findByMessageId(sbd.getMessageId())
+                .ifPresent(p -> {
+                    throw new MessageAlreadyExistsException(sbd.getMessageId());
+                });
+        if (!SBDUtil.isStatus(sbd)) {
+            conversationService.findConversation(sbd.getMessageId())
+                    .ifPresent(c -> {
+                        throw new MessageAlreadyExistsException(sbd.getMessageId());
+                    });
+        }
 
         ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
         ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
@@ -91,12 +88,11 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        MessageType messageType = SBDUtil.getOptionalMessageType(sbd)
+        MessageType messageType = MessageType.valueOfType(sbd.getType())
                 .filter(p -> p.getApi() == ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType().orElse("null")));
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
-        String documentType = SBDUtil.getDocumentType(sbd);
-
+        String documentType = sbd.getDocumentType();
         if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
         }
