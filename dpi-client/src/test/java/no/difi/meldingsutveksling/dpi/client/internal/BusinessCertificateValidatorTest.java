@@ -30,6 +30,6 @@ class BusinessCertificateValidatorTest {
 
     @Test()
     void receiptNotFound() {
-        Assertions.assertThrows(IOException.class, () -> BusinessCertificateValidator.of("/invalid-path.xml"));
+        Assertions.assertThrows(IllegalStateException.class, () -> BusinessCertificateValidator.of("/invalid-path.xml"));
     }
 }
