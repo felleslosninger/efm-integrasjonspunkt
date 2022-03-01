@@ -15,7 +15,6 @@ import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
-import no.difi.meldingsutveksling.dpi.client.internal.domain.Mode;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -35,7 +34,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
