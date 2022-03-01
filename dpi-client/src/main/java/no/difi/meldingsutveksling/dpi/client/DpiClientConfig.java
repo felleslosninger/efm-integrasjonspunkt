@@ -12,7 +12,6 @@ import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.asic.SignatureHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -165,8 +164,8 @@ public class DpiClientConfig {
 
     @Bean
     @SneakyThrows
-    public CreateJWT createJWT(KeyPair keyPair) {
-        return new CreateJWT(keyPair);
+    public CreateJWT createJWT(KeystoreHelper dpiKeystoreHelper) {
+        return new CreateJWT(dpiKeystoreHelper);
     }
 
     @Bean
@@ -250,13 +249,13 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public KeyPair keyPair(BusinessCertificateValidator businessCertificateValidator) {
-        return new KeyPairProvider(businessCertificateValidator, properties.getDpi().getKeystore()).getKeyPair();
+    public KeystoreHelper dpiKeystoreHelper() {
+        return new KeystoreHelper(properties.getDpi().getKeystore());
     }
 
     @Bean
-    public SignatureHelper signatureHelper() {
-        return new KeystoreHelper(properties.getDpi().getKeystore()).getSignatureHelper();
+    public SignatureHelper dpiSignatureHelper(KeystoreHelper dpiKeystoreHelper) {
+        return dpiKeystoreHelper.getSignatureHelper();
     }
 
     @Bean
@@ -267,8 +266,8 @@ public class DpiClientConfig {
     @Bean
     public CreateAsiceImpl createAsiceImpl(
             CreateManifest createManifest,
-            SignatureHelper signatureHelper) {
-        return new CreateAsiceImpl(createManifest, signatureHelper);
+            SignatureHelper dpiSignatureHelper) {
+        return new CreateAsiceImpl(createManifest, dpiSignatureHelper);
     }
 
     @Bean

@@ -4,14 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
-import no.difi.meldingsutveksling.dpi.client.internal.*;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import java.time.Clock;
@@ -21,6 +23,7 @@ import java.time.ZoneId;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
+@Import(UUIDGenerator.class)
 public class DpiClientTestConfig {
 
     private final IntegrasjonspunktProperties properties;
@@ -58,19 +61,14 @@ public class DpiClientTestConfig {
     }
 
     @Bean
-    public KeyPair keyPairServer(BusinessCertificateValidator businessCertificateValidator) {
-        return new KeyPairProvider(businessCertificateValidator, properties.getDpi().getServer().getKeystore()).getKeyPair();
+    public KeystoreHelper corner2keystoreHelper() {
+        return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
     }
 
     @Bean
     @SneakyThrows
-    public CreateJWT createJWTServer(KeyPair keyPairServer) {
-        return new CreateJWT(keyPairServer);
-    }
-
-    @Bean
-    public UUIDGenerator uuidGenerator() {
-        return new UUIDGenerator();
+    public CreateJWT createJWTServer(KeystoreHelper corner2keystoreHelper) {
+        return new CreateJWT(corner2keystoreHelper);
     }
 
     @Bean
