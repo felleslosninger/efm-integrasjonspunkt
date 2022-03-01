@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
 import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
@@ -53,7 +54,7 @@ public class DigitalPostInnbyggerConfig {
     private Integer mpcConcurrency;
 
     /**
-     *  This list overrides the mpcId + mpcConcurrency
+     * This list overrides the mpcId + mpcConcurrency
      */
     @LoggedProperty
     private List<String> mpcIdListe;
@@ -152,7 +153,7 @@ public class DigitalPostInnbyggerConfig {
     public static class Certificate {
 
         @NotNull
-        private String mode;
+        private Resource recipe;
     }
 
     @Data

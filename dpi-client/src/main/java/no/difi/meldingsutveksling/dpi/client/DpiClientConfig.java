@@ -34,12 +34,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -178,7 +182,12 @@ public class DpiClientConfig {
 
     @Bean
     public BusinessCertificateValidator businessCertificateValidator() {
-        return BusinessCertificateValidator.of(Mode.valueOf(properties.getDpi().getCertificate().getMode()));
+        Resource resource = properties.getDpi().getCertificate().getRecipe();
+        try(InputStream inputStream = resource.getInputStream()) {
+            return BusinessCertificateValidator.of(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't load recipe!", e);
+        }
     }
 
     @Bean
