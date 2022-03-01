@@ -11,6 +11,7 @@ import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.asic.SignatureHelper;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
@@ -53,7 +54,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(DpiClientProperties.class)
+@EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 @ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
 public class DpiClientConfig {
 
@@ -63,7 +64,7 @@ public class DpiClientConfig {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private final DpiClientProperties properties;
+    private final IntegrasjonspunktProperties properties;
 
     @Bean
     public DpiClient dpiClient(CreateCmsEncryptedAsice createCmsEncryptedAsice,
@@ -78,13 +79,13 @@ public class DpiClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "dpi.client", value = "type", havingValue = "file")
+    @ConditionalOnProperty(prefix = "difi.move.dpi", value = "c2-type", havingValue = "file")
     public Corner2Client localDirectoryCorner2Client() {
         return new LocalDirectoryCorner2Client(properties);
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "dpi.client", value = "type", havingValue = "web", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "difi.move.dpi", value = "c2-type", havingValue = "web", matchIfMissing = true)
     public Corner2Client corner2ClientImpl(
             DpiClientErrorHandler dpiClientErrorHandler,
             CreateMaskinportenToken createMaskinportenToken,
@@ -92,14 +93,14 @@ public class DpiClientConfig {
             InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
         return new Corner2ClientImpl(
                 WebClient.builder()
-                        .baseUrl(properties.getUri())
+                        .baseUrl(properties.getDpi().getUri())
                         .filter(logRequest())
                         .filter(logResponse())
                         .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getTimeout().getConnect())
+                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getDpi().getTimeout().getConnect())
                                 .doOnConnected(connection -> {
-                                    connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout().getRead(), TimeUnit.MILLISECONDS));
-                                    connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
+                                    connection.addHandlerLast(new ReadTimeoutHandler(properties.getDpi().getTimeout().getRead(), TimeUnit.MILLISECONDS));
+                                    connection.addHandlerLast(new WriteTimeoutHandler(properties.getDpi().getTimeout().getWrite(), TimeUnit.MILLISECONDS));
                                 })))
                         .build(),
                 dpiClientErrorHandler,
@@ -140,13 +141,13 @@ public class DpiClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "oidc.enable", prefix = "dpi.client", havingValue = "false")
+    @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dpi", havingValue = "false")
     public CreateMaskinportenToken createMaskinportenTokenMock() {
-        return new CreateMaskinportenTokenMock(properties.getOidc().getMock().getToken());
+        return new CreateMaskinportenTokenMock(properties.getDpi().getOidc().getMock().getToken());
     }
 
     @Bean
-    @ConditionalOnProperty(name = "oidc.enable", prefix = "dpi.client", havingValue = "true")
+    @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dpi", havingValue = "true")
     public CreateMaskinportenToken createMaskinportenTokenImpl() {
         return new CreateMaskinportenTokenImpl(
                 jwtTokenClient(),
@@ -155,11 +156,11 @@ public class DpiClientConfig {
 
     private JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-                properties.getOidc().getClientId(),
-                properties.getOidc().getUrl().toString(),
-                properties.getOidc().getAudience(),
-                properties.getOidc().getScopes(),
-                properties.getOidc().getKeystore()
+                properties.getDpi().getOidc().getClientId(),
+                properties.getDpi().getOidc().getUrl().toString(),
+                properties.getDpi().getOidc().getAudience(),
+                properties.getDpi().getOidc().getScopes(),
+                properties.getDpi().getOidc().getKeystore()
         ));
     }
 
@@ -177,7 +178,7 @@ public class DpiClientConfig {
 
     @Bean
     public BusinessCertificateValidator businessCertificateValidator() {
-        return BusinessCertificateValidator.of(Mode.valueOf(properties.getCertificate().getMode()));
+        return BusinessCertificateValidator.of(Mode.valueOf(properties.getDpi().getCertificate().getMode()));
     }
 
     @Bean
@@ -197,9 +198,9 @@ public class DpiClientConfig {
     @Bean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
-                .threshold(properties.getTemporaryFileThreshold())
-                .directory(properties.getTemporaryFileDirectory())
-                .initialBufferSize(properties.getInitialBufferSize())
+                .threshold(properties.getDpi().getTemporaryFileThreshold())
+                .directory(properties.getDpi().getTemporaryFileDirectory())
+                .initialBufferSize(properties.getDpi().getInitialBufferSize())
                 .build();
     }
 
@@ -221,14 +222,14 @@ public class DpiClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "schema", prefix = "dpi.client", havingValue = "online")
+    @ConditionalOnProperty(name = "schema", prefix = "difi.move.dpi", havingValue = "online")
     public UrlRewriter onlineUrlRewriter() {
         return uri -> uri;
     }
 
     @Bean
     @SneakyThrows
-    @ConditionalOnProperty(name = "schema", prefix = "dpi.client", havingValue = "offline", matchIfMissing = true)
+    @ConditionalOnProperty(name = "schema", prefix = "difi.move.dpi", havingValue = "offline", matchIfMissing = true)
     public UrlRewriter offlineUrlRewriter() {
         String path = getClass().getProtectionDomain()
                 .getCodeSource()
@@ -251,7 +252,7 @@ public class DpiClientConfig {
 
     @Bean
     public KeystoreHelper dpiKeystoreHelper() {
-        return new KeystoreHelper(properties.getKeystore());
+        return new KeystoreHelper(properties.getDpi().getKeystore());
     }
 
     @Bean

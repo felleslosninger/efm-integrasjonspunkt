@@ -82,7 +82,7 @@ public class DpiConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap", matchIfMissing = true)
+    @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json+xmlsoap", matchIfMissing = true)
     public MeldingsformidlerClient meldingsformidlerClient(
             JsonMeldingsformidlerClient jsonMeldingsformidlerClient,
             XmlSoapMeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
@@ -94,7 +94,7 @@ public class DpiConfig {
     public static class XmlSoap {
 
         @Bean
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "xmlsoap")
         public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient xmlSoapMeldingsformidlerClient) {
             return xmlSoapMeldingsformidlerClient;
         }
@@ -136,7 +136,7 @@ public class DpiConfig {
     public static class Json {
 
         @Bean
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json")
         public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient jsonMeldingsformidlerClient) {
             return jsonMeldingsformidlerClient;
         }
@@ -179,12 +179,12 @@ public class DpiConfig {
         }
 
         @SuppressWarnings("unused")
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "xmlsoap")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "xmlsoap")
         static class XmlSoap {
         }
 
         @SuppressWarnings("unused")
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json+xmlsoap")
         static class JsonPlusXmlSoap {
         }
     }
@@ -196,12 +196,12 @@ public class DpiConfig {
         }
 
         @SuppressWarnings("unused")
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json")
         static class Json {
         }
 
         @SuppressWarnings("unused")
-        @ConditionalOnProperty(name = "difi.move.dpi.client.type", havingValue = "json+xmlsoap")
+        @ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json+xmlsoap")
         static class JsonPlusXmlSoap {
         }
     }

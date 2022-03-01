@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
@@ -21,11 +22,11 @@ import java.time.ZoneId;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(DpiServerProperties.class)
+@EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 @Import(UUIDGenerator.class)
 public class DpiClientTestConfig {
 
-    private final DpiServerProperties properties;
+    private final IntegrasjonspunktProperties properties;
 
     @Bean
     @Primary
@@ -35,7 +36,7 @@ public class DpiClientTestConfig {
 
     @Bean
     public KeystoreHelper serverKeystoreHelper() {
-        return new KeystoreHelper(properties.getKeystore());
+        return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
     }
 
     @Bean
@@ -61,7 +62,7 @@ public class DpiClientTestConfig {
 
     @Bean
     public KeystoreHelper corner2keystoreHelper() {
-        return new KeystoreHelper(properties.getKeystore());
+        return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
     }
 
     @Bean
