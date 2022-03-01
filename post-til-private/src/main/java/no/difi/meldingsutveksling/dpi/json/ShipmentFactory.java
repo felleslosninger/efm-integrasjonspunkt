@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
 import no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
@@ -16,6 +15,7 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
+import no.difi.move.common.cert.X509CertificateHelper;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class ShipmentFactory {
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(getParcel(request))
-                .setReceiverBusinessCertificate(BusinessCertificate.of(request.getCertificate()))
+                .setReceiverBusinessCertificate(X509CertificateHelper.createX509Certificate(request.getCertificate()))
                 .setLanguage(request.getLanguage());
     }
 

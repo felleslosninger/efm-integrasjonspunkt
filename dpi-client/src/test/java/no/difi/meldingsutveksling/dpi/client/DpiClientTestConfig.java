@@ -2,8 +2,10 @@ package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
-import no.difi.meldingsutveksling.dpi.client.internal.*;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
@@ -56,14 +58,14 @@ public class DpiClientTestConfig {
     }
 
     @Bean
-    public KeyPair keyPairServer(BusinessCertificateValidator businessCertificateValidator) {
-        return new KeyPairProvider(businessCertificateValidator, properties.getKeystore()).getKeyPair();
+    public KeystoreHelper corner2keystoreHelper() {
+        return new KeystoreHelper(properties.getKeystore());
     }
 
     @Bean
     @SneakyThrows
-    public CreateJWT createJWTServer(KeyPair keyPairServer) {
-        return new CreateJWT(keyPairServer);
+    public CreateJWT createJWTServer(KeystoreHelper corner2keystoreHelper) {
+        return new CreateJWT(corner2keystoreHelper);
     }
 
     @Bean

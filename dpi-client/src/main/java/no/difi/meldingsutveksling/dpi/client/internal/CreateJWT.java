@@ -5,10 +5,11 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
+import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.cert.X509CertificateHelper;
 
-import java.security.cert.CertificateEncodingException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -17,19 +18,15 @@ public class CreateJWT {
     private final JWSHeader jwsHeader;
     private final JWSSigner jwsSigner;
 
-    public CreateJWT(KeyPair keyPair) {
+    public CreateJWT(KeystoreHelper keystoreHelper) {
         this.jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .x509CertChain(Collections.singletonList(Base64.encode(getEncodedCertificate(keyPair))))
+                .x509CertChain(getX509CertChain(keystoreHelper))
                 .build();
-        this.jwsSigner = new RSASSASigner(keyPair.getBusinessCertificatePrivateKey());
+        this.jwsSigner = new RSASSASigner(keystoreHelper.loadPrivateKey());
     }
 
-    private byte[] getEncodedCertificate(KeyPair keyPair) {
-        try {
-            return keyPair.getBusinessCertificate().getX509Certificate().getEncoded();
-        } catch (CertificateEncodingException e) {
-            throw new Exception("Couldn't get encoded certificate!", e);
-        }
+    private List<Base64> getX509CertChain(KeystoreHelper keystoreHelper) {
+        return Collections.singletonList(Base64.encode(X509CertificateHelper.getEncoded(keystoreHelper.getX509Certificate())));
     }
 
     public String createJWT(Map<String, Object> sbd) {

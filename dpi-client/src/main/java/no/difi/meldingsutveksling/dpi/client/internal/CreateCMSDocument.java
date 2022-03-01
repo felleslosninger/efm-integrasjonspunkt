@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 @RequiredArgsConstructor
 public class CreateCMSDocument {
@@ -24,9 +24,9 @@ public class CreateCMSDocument {
     private final ASN1ObjectIdentifier cmsEncryptionAlgorithm;
     private final AlgorithmIdentifier keyEncryptionScheme;
 
-    public void createCMS(InputStream inputStream, OutputStream outputStream, BusinessCertificate businessCertificate) {
+    public void createCMS(InputStream inputStream, OutputStream outputStream, X509Certificate businessCertificate) {
         try {
-            JceKeyTransRecipientInfoGenerator recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(businessCertificate.getX509Certificate(), keyEncryptionScheme)
+            JceKeyTransRecipientInfoGenerator recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(businessCertificate, keyEncryptionScheme)
                     .setProvider(BouncyCastleProvider.PROVIDER_NAME);
 
             CMSEnvelopedDataGenerator envelopedDataGenerator = new CMSEnvelopedDataGenerator();

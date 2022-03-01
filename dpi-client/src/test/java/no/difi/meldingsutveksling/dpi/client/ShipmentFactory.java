@@ -1,15 +1,15 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.dpi.client.domain.BusinessCertificate;
 import no.difi.meldingsutveksling.dpi.client.domain.Document;
 import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.cert.X509CertificateHelper;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -30,9 +30,9 @@ public class ShipmentFactory {
                 .setLanguage("NO");
     }
 
-    private BusinessCertificate getReceiverCertificate(DpiTestInput input) {
+    private X509Certificate getReceiverCertificate(DpiTestInput input) {
         try (InputStream inputStream = input.getReceiverCertificate().getInputStream()) {
-            return BusinessCertificate.of(IOUtils.toByteArray(inputStream));
+            return X509CertificateHelper.createX509Certificate(inputStream);
         } catch (IOException e) {
             throw new Exception("Couldn't get receiver certificate!", e);
         }
