@@ -3,9 +3,6 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.dpi.client.domain.KeyPair;
-import no.difi.meldingsutveksling.dpi.client.internal.*;
-import no.difi.meldingsutveksling.dpi.client.internal.CreateInstanceIdentifier;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
@@ -15,6 +12,7 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import java.time.Clock;
@@ -24,6 +22,7 @@ import java.time.ZoneId;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(DpiServerProperties.class)
+@Import(UUIDGenerator.class)
 public class DpiClientTestConfig {
 
     private final DpiServerProperties properties;
