@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.*;
 import no.difi.meldingsutveksling.dpi.client.domain.AsicEAttachable;
@@ -38,7 +39,7 @@ public class CreateAsiceImpl implements CreateAsice {
         try {
             asicWriter.sign(signatureHelper);
         } catch (IOException e) {
-            throw new Exception("Could not sign ASiC-E!", e);
+            throw new IllegalStateException("Could not sign ASiC-E!", e);
         }
     }
 
@@ -47,22 +48,13 @@ public class CreateAsiceImpl implements CreateAsice {
         try (InputStream inputStream = new BufferedInputStream(attachable.getResource().getInputStream())) {
             asicWriter.add(inputStream, attachable.getFilename(), MimeType.forString(attachable.getMimeType()));
         } catch (IOException e) {
-            throw new Exception("Could not add manifest to ASiC-E!", e);
+            throw new IllegalStateException("Could not add manifest to ASiC-E!", e);
         }
     }
 
+    @SneakyThrows({IOException.class})
     private AsicWriter getAsicWriter(OutputStream outputStream) {
-        try {
             return AsicWriterFactory.newFactory(SignatureMethod.XAdES)
                     .newContainer(outputStream);
-        } catch (IOException e) {
-            throw new Exception("Could not create ASiC-E writer!", e);
-        }
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

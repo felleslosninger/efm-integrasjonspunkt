@@ -14,13 +14,8 @@ public class ResourceUtils {
         try (InputStream inputStream = resource.getInputStream()) {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
-            throw new ResourceUtils.Exception("Couldn't create byte[] out of resource!", e);
+            throw new IllegalStateException("Couldn't create byte[] out of resource!", e);
         }
     }
 
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

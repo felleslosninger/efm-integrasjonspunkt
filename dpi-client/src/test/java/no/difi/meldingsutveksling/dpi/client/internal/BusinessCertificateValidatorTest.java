@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 class BusinessCertificateValidatorTest {
@@ -29,6 +30,6 @@ class BusinessCertificateValidatorTest {
 
     @Test()
     void receiptNotFound() {
-        Assertions.assertThrows(BusinessCertificateValidator.LoadingException.class, () -> BusinessCertificateValidator.of("/invalid-path.xml"));
+        Assertions.assertThrows(IllegalStateException.class, () -> BusinessCertificateValidator.of("/invalid-path.xml"));
     }
 }

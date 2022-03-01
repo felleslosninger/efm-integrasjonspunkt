@@ -10,6 +10,7 @@ import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OutputEncryptor;
 
@@ -40,15 +41,9 @@ public class CreateCMSDocument {
             IOUtils.copyLarge(inputStream, open);
             open.close();
         } catch (CertificateEncodingException e) {
-            throw new Exception("Something is wrong with the business certificate", e);
+            throw new IllegalArgumentException("Something is wrong with the business certificate", e);
         } catch (CMSException | IOException e) {
-            throw new Exception("Couldn't create Cryptographic Message Syntax for document package!", e);
-        }
-    }
-
-    private static class Exception extends RuntimeException {
-        public Exception(String message, Throwable cause) {
-            super(message, cause);
+            throw new IllegalStateException("Couldn't create Cryptographic Message Syntax for document package!", e);
         }
     }
 }
