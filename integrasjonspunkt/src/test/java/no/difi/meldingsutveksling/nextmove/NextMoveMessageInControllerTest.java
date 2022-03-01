@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.SecurityConfiguration;
 import no.difi.meldingsutveksling.config.ValidationConfig;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
@@ -314,7 +313,7 @@ class NextMoveMessageInControllerTest {
         );
 
         mvc.perform(
-                        get("/api/messages/in/pop/{messageId}", SBDUtil.getMessageId(ARKIVMELDING_SBD))
+                        get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
                                 .accept(AsicUtils.MIMETYPE_ASICE)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -331,7 +330,7 @@ class NextMoveMessageInControllerTest {
                         )
                 );
 
-        verify(messageService).popMessage(SBDUtil.getMessageId(ARKIVMELDING_SBD));
+        verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
     }
 
     @Test
@@ -339,7 +338,7 @@ class NextMoveMessageInControllerTest {
         given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
 
         mvc.perform(
-                        delete("/api/messages/in/{messageId}", SBDUtil.getMessageId(ARKIVMELDING_SBD))
+                        delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -360,6 +359,6 @@ class NextMoveMessageInControllerTest {
                         )
                 );
 
-        verify(messageService).deleteMessage(SBDUtil.getMessageId(ARKIVMELDING_SBD));
+        verify(messageService).deleteMessage(ARKIVMELDING_SBD.getMessageId());
     }
 }

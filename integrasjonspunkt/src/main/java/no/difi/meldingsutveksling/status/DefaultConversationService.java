@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.mail.IpMailSender;
@@ -186,12 +185,12 @@ public class DefaultConversationService implements ConversationService {
         return registerConversation(new MessageInformable() {
             @Override
             public String getConversationId() {
-                return SBDUtil.getConversationId(sbd);
+                return sbd.getConversationId();
             }
 
             @Override
             public String getMessageId() {
-                return SBDUtil.getMessageId(sbd);
+                return sbd.getMessageId();
             }
 
             @Override
@@ -206,12 +205,12 @@ public class DefaultConversationService implements ConversationService {
 
             @Override
             public String getProcessIdentifier() {
-                return SBDUtil.getProcess(sbd);
+                return sbd.getProcess();
             }
 
             @Override
             public String getDocumentIdentifier() {
-                return SBDUtil.getDocumentType(sbd);
+                return sbd.getDocumentType();
             }
 
             @Override

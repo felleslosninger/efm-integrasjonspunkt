@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
@@ -88,7 +87,7 @@ public class InternalQueue {
     @JmsListener(destination = "${difi.move.queue.noark-name}", containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
-        MDC.put(NextMoveConsts.CORRELATION_ID, SBDUtil.getMessageId(sbd));
+        MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         try {
             integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {

@@ -12,7 +12,7 @@ public class UnpackStandardBusinessDocument {
 
     public StandardBusinessDocument unpackStandardBusinessDocument(Payload payload) {
         StandardBusinessDocument standardBusinessDocument = dpiMapper.readStandardBusinessDocument(payload.toString());
-        String type = standardBusinessDocument.getType().orElse(null);
+        String type = standardBusinessDocument.getType();
         jsonDigitalPostSchemaValidator.validate(payload.toJSONObject(), type);
         return standardBusinessDocument;
     }

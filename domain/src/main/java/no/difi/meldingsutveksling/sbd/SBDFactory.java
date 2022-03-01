@@ -78,8 +78,8 @@ public class SBDFactory {
         StandardBusinessDocument statusSbd = createNextMoveSBD(
                 sbd.getReceiverIdentifier(),
                 sbd.getSenderIdentifier(),
-                SBDUtil.getConversationId(sbd),
-                SBDUtil.getMessageId(sbd),
+                sbd.getConversationId(),
+                sbd.getMessageId(),
                 createProcess(sbd),
                 props.getNextmove().getStatusDocumentType(),
                 new StatusMessage(status));

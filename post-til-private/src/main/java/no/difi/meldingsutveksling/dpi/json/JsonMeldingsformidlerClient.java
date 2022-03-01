@@ -4,17 +4,16 @@ import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.status.ExternalReceipt;
-import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
 import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
 import no.difi.meldingsutveksling.dpi.client.domain.ReceivedMessage;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
+import no.difi.meldingsutveksling.status.ExternalReceipt;
+import no.difi.meldingsutveksling.status.MessageStatus;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -75,12 +74,12 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
 
         @Override
         public void confirmReceipt() {
-            dpiClient.markAsRead(UUID.fromString(SBDUtil.getMessageId(receivedMessage.getStandardBusinessDocument())));
+            dpiClient.markAsRead(UUID.fromString(receivedMessage.getStandardBusinessDocument().getMessageId()));
         }
 
         @Override
         public String getConversationId() {
-            return SBDUtil.getConversationId(receivedMessage.getStandardBusinessDocument());
+            return receivedMessage.getStandardBusinessDocument().getConversationId();
         }
 
         @Override

@@ -19,7 +19,7 @@ public class PutMessageRequestFactory {
     private final ServiceRegistryLookup srLookup;
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload) {
-        return create(sbd, payload, SBDUtil.getConversationId(sbd));
+        return create(sbd, payload, sbd.getConversationId());
     }
 
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {

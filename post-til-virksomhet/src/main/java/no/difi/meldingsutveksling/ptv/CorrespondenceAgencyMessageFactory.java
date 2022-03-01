@@ -234,9 +234,9 @@ public class CorrespondenceAgencyMessageFactory {
             serviceRecord = serviceRegistryLookup.getServiceRecord(
                 SRParameter.builder(message.getReceiverIdentifier())
                     .conversationId(message.getConversationId())
-                    .process(SBDUtil.getProcess(message.getSbd()))
+                    .process(message.getSbd().getProcess())
                     .build(),
-                    SBDUtil.getDocumentType(message.getSbd()));
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }

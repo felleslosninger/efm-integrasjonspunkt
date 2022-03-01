@@ -70,18 +70,15 @@ public class DefaultDpoPolling implements DpoPolling {
             log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
             AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
-            String messageId = SBDUtil.getMessageId(sbd);
-            MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
+            MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
-            Audit.info(format("Downloaded message with id=%s", messageId), logstashMarkers);
-
-            String conversationId = SBDUtil.getConversationId(sbd);
+            Audit.info(format("Downloaded message with id=%s", sbd.getMessageId()), logstashMarkers);
 
             try {
-                UUID.fromString(messageId);
-                UUID.fromString(conversationId);
+                UUID.fromString(sbd.getMessageId());
+                UUID.fromString(sbd.getConversationId());
             } catch (IllegalArgumentException e) {
-                log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", messageId, conversationId);
+                log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
                 client.confirmDownload(request);
                 return;
             }
