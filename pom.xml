@@ -262,6 +262,11 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
+                <artifactId>certvalidator</artifactId>
+                <version>${efm-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.move-common</groupId>
                 <artifactId>io</artifactId>
                 <version>${efm-common.version}</version>
             </dependency>

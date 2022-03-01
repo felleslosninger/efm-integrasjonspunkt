@@ -11,8 +11,10 @@ import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.asic.SignatureHelper;
+import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
+import no.difi.meldingsutveksling.dpi.client.internal.domain.Mode;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -175,7 +177,7 @@ public class DpiClientConfig {
 
     @Bean
     public BusinessCertificateValidator businessCertificateValidator() {
-        return BusinessCertificateValidator.of(properties.getCertificate().getMode());
+        return BusinessCertificateValidator.of(Mode.valueOf(properties.getCertificate().getMode()));
     }
 
     @Bean

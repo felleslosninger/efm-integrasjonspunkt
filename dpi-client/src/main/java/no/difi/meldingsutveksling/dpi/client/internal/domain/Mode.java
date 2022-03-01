@@ -23,8 +23,7 @@
 package no.difi.meldingsutveksling.dpi.client.internal.domain;
 
 
-import java.util.Arrays;
-import java.util.Optional;
+import no.difi.certvalidator.RecipePath;
 
 /**
  * Defines validation modes available as part of this package.
@@ -43,17 +42,5 @@ public enum Mode {
     TEST,
 
     @RecipePath("/pki/recipe-dpi-norway-production.xml")
-    PRODUCTION;
-
-    /**
-     * Fetches {@link Mode} by comparing name using String#equalsIgnoreCase.
-     *
-     * @param value Some string.
-     * @return Mode if found.
-     */
-    public static Optional<Mode> of(String value) {
-        return Arrays.stream(values())
-                .filter(mode -> mode.name().equalsIgnoreCase(value))
-                .findAny();
-    }
+    PRODUCTION
 }
