@@ -22,7 +22,7 @@ difi:
                 type: commons-asic
             initialBufferSize: 100000
             certificate:
-                mode: SELF_SIGNED
+                recipe: "classpath:/pki/recipe-dpi-self-signed.xml"
             keystore:
                 alias: c1
                 lockProvider: false
