@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -162,7 +163,7 @@ public class IpMailSender {
     }
 
     private long getMessageSize(MimeMessage m) {
-        try (CountingOutputStream out = new CountingOutputStream(NullOutputStream.NULL_OUTPUT_STREAM)) {
+        try (CountingOutputStream out = new CountingOutputStream(NULL_OUTPUT_STREAM)) {
             m.writeTo(out);
             return out.getByteCount() + 100L;
         } catch (IOException | MessagingException e) {

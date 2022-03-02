@@ -22,7 +22,6 @@ public class DigipostOutSteps {
     public void after() {
     }
 
-
     @Then("^an upload to Digipost is initiated with:$")
     public void anUploadToDigipostIsInitiatedWith(String expectedPayload) {
         List<String> payloads = webServicePayloadHolder.get();

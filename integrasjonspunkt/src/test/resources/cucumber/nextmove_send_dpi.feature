@@ -1,4 +1,5 @@
-Feature: Sending a Next Move DPI message
+@Ignore
+Feature: Sending a Next Move DPI message (XML SOAP)
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/09118532322?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"

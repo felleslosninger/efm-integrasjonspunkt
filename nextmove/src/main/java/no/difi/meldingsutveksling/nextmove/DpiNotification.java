@@ -7,6 +7,6 @@ import java.io.Serializable;
 @Data
 public class DpiNotification implements Serializable {
 
-    String epostTekst;
-    String smsTekst;
+    private String epostTekst;
+    private String smsTekst;
 }

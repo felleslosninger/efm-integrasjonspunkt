@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
 import com.google.common.collect.Sets;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
@@ -8,8 +9,9 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -17,18 +19,20 @@ import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.webhooks.WebhookPublisher;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
@@ -45,9 +49,24 @@ public class DefaultConversationService implements ConversationService {
     private final IpMailSender ipMailSender;
     private final Clock clock;
     private final StatusQueue statusQueue;
+    private final ObjectProvider<MeldingsformidlerClient> meldingsformidlerClientObjectProvider;
+    @Getter(lazy = true) private final Set<ServiceIdentifier> pollables = createrPollables();
 
-    private static final Set<ServiceIdentifier> POLLABLES = Sets.newHashSet(DPV, DPF);
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
+
+    private Set<ServiceIdentifier> createrPollables() {
+        Set<ServiceIdentifier> serviceIdentifiers = new HashSet<>();
+        serviceIdentifiers.add(DPV);
+        serviceIdentifiers.add(DPF);
+
+
+        if (meldingsformidlerClientObjectProvider.stream()
+                .anyMatch(MeldingsformidlerClient::skalPolleMeldingStatus)) {
+            serviceIdentifiers.add(DPI);
+        }
+
+        return Collections.unmodifiableSet(serviceIdentifiers);
+    }
 
     @NotNull
     @Transactional
@@ -70,6 +89,7 @@ public class DefaultConversationService implements ConversationService {
 
     @NotNull
     @Override
+    @Transactional
     public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status, @NotNull String description) {
         return registerStatus(messageId, messageStatusFactory.getMessageStatus(status, description));
     }
@@ -103,7 +123,7 @@ public class DefaultConversationService implements ConversationService {
         }
 
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
-                conversation.getMessageId()),
+                        conversation.getMessageId()),
                 MessageStatusMarker.from(status));
         repo.save(conversation);
         webhookPublisher.publish(conversation, status);
@@ -130,7 +150,7 @@ public class DefaultConversationService implements ConversationService {
         Conversation conversation = status.getConversation();
         return conversation.getDirection() == ConversationDirection.OUTGOING &&
                 ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                POLLABLES.contains(conversation.getServiceIdentifier());
+                getPollables().contains(conversation.getServiceIdentifier());
     }
 
     @NotNull
@@ -159,7 +179,9 @@ public class DefaultConversationService implements ConversationService {
                                              @NotNull ServiceIdentifier si,
                                              @NotNull ConversationDirection conversationDirection,
                                              @NotNull ReceiptStatus... statuses) {
-        OffsetDateTime ttl = sbd.getExpectedResponseDateTime().orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+        OffsetDateTime ttl = sbd.getExpectedResponseDateTime()
+                .orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+
         return registerConversation(new MessageInformable() {
             @Override
             public String getConversationId() {
@@ -168,17 +190,17 @@ public class DefaultConversationService implements ConversationService {
 
             @Override
             public String getMessageId() {
-                return sbd.getDocumentId();
+                return sbd.getMessageId();
             }
 
             @Override
-            public Organisasjonsnummer getSender() {
-                return sbd.getSender();
+            public PartnerIdentifier getSender() {
+                return sbd.getSenderIdentifier();
             }
 
             @Override
-            public Organisasjonsnummer getReceiver() {
-                return sbd.getReceiver();
+            public PartnerIdentifier getReceiver() {
+                return sbd.getReceiverIdentifier();
             }
 
             @Override
@@ -213,7 +235,6 @@ public class DefaultConversationService implements ConversationService {
         return repo.findByMessageId(messageId).stream().findFirst();
     }
 
-    @Transactional
     Conversation createConversation(MessageInformable message) {
         MessageStatus ms = messageStatusFactory.getMessageStatus(ReceiptStatus.OPPRETTET);
         Conversation c = Conversation.of(message, OffsetDateTime.now(clock), ms);
@@ -221,5 +242,11 @@ public class DefaultConversationService implements ConversationService {
         webhookPublisher.publish(c, ms);
         statusQueue.enqueueStatus(ms, c);
         return c;
+    }
+
+    @NotNull
+    @Override
+    public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection direction) {
+        return repo.findByConversationIdAndDirection(conversationId, direction);
     }
 }

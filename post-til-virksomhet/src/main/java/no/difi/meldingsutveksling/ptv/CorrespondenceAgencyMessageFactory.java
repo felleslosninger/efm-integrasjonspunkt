@@ -21,7 +21,9 @@ import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.pipes.Reject;
@@ -234,7 +236,7 @@ public class CorrespondenceAgencyMessageFactory {
                     .conversationId(message.getConversationId())
                     .process(message.getSbd().getProcess())
                     .build(),
-                message.getSbd().getDocumentType());
+                    message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
         }
@@ -331,7 +333,9 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
-        String orgnr = msg.getSbd().getPartIdentifier().orElse(properties.getOrg().getNumber());
+        String orgnr = SBDUtil.getPartIdentifier(msg.getSbd())
+                .map(Iso6523::getOrganizationIdentifier)
+                .orElse(properties.getOrg().getNumber());
         return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();
     }
 

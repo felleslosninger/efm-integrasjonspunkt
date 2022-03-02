@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
 import no.difi.meldingsutveksling.dokumentpakking.xml.*;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import org.springframework.util.StringUtils;
 
@@ -12,8 +12,8 @@ class ManifestFactory {
 
     no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, String fileName, String mimeType) {
 
-        Avsender avsender = new Avsender(new Organisasjon(Organisasjonsnummer.from(message.getSenderIdentifier())));
-        Mottaker mottaker = new Mottaker(new Organisasjon(Organisasjonsnummer.from(message.getReceiverIdentifier())));
+        Avsender avsender = new Avsender(new Organisasjon(message.getSender().cast(Iso6523.class)));
+        Mottaker mottaker = new Mottaker(new Organisasjon(message.getReceiver().cast(Iso6523.class)));
         Manifest xmlManifest;
         if (StringUtils.hasText(fileName) && StringUtils.hasText(mimeType)) {
             HovedDokument hoveddokumentXml = new HovedDokument(fileName, mimeType, "Hoveddokument", "no");

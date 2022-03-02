@@ -6,6 +6,8 @@ import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.domain.Iso6523
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
@@ -15,6 +17,7 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -48,32 +51,40 @@ internal class FiksIoServiceTest {
         fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService, promiseMaker)
     }
 
+    @AfterEach
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
+    }
+
     @Test
     fun `send message ok`() {
-        val orgnr = "910076787"
+        val iso6523 = Iso6523.parse("0192:910076787")
         val kontoId = "d49177d3-ec0c-40ee-ace9-0f2781a05f45"
         val messageId = "0e238873-63ba-4993-84e1-73b91eb2061d"
         val convId = "c9f37b22-cf8a-44de-b854-050f6a9acc7a"
         val protocol = "digdir.einnsyn.v1"
 
-        val sr = ServiceRecord(ServiceIdentifier.DPFIO, orgnr, "pem123", kontoId)
+        val sr = ServiceRecord(ServiceIdentifier.DPFIO, iso6523.organizationIdentifier, "pem123", kontoId)
         sr.process = protocol
         sr.documentTypes = listOf(protocol)
         every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns sr
 
         every { conversationService.registerStatus(any(), ofType(ReceiptStatus::class)) } returns Optional.empty()
 
-        val sbd = mockkClass(StandardBusinessDocument::class) {
-            every { conversationId } returns convId
-            every { documentId } returns messageId
-            every { process } returns protocol
-            every { receiverIdentifier } returns orgnr
-            every { senderIdentifier } returns orgnr
-            every { documentType } returns protocol
-            every { any } returns mockkClass(FiksIoMessage::class) {
-                every { sikkerhetsnivaa } returns 3
-            }
-        }
+        val sbd = spyk(StandardBusinessDocument()
+            .setAny(
+                FiksIoMessage()
+                    .setSikkerhetsnivaa(3)
+            ))
+
+        mockkStatic(SBDUtil::class)
+        every { sbd.conversationId } returns convId
+        every { sbd.messageId } returns messageId
+        every { sbd.process } returns protocol
+        every { sbd.receiverIdentifier } returns iso6523
+        every { sbd.senderIdentifier } returns iso6523
+        every { sbd.documentType } returns protocol
+
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
 
         val payload = StringPayload("foo", "foo.txt")

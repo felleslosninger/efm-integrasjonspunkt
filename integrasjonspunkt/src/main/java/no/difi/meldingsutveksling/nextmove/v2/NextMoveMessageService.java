@@ -74,8 +74,8 @@ public class NextMoveMessageService {
     }
 
     public NextMoveOutMessage createMessage(StandardBusinessDocument sbd) {
-        validator.validate(sbd);
         NextMoveOutMessage message = nextMoveOutMessageFactory.getNextMoveOutMessage(sbd);
+        validator.validate(sbd);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         messageRepo.save(message);
         conversationService.registerConversation(message);

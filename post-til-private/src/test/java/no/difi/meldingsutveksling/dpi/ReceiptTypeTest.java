@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dpi;
 
+import no.difi.meldingsutveksling.dpi.xmlsoap.DpiReceiptMapper;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;

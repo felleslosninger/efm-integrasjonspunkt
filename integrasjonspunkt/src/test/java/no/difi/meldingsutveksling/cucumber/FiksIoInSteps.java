@@ -52,24 +52,25 @@ public class FiksIoInSteps {
     @And("^FIKS IO prepares a message with messageId \"([^\"]+)\"$")
     public void prepareFiksIoMessage(String messageId) {
         // only needed for generating manifest through asicFactory
-        StandardBusinessDocumentHeader sbdh = new StandardBusinessDocumentHeader();
-        sbdh.addSender(new Sender().setIdentifier(new PartnerIdentification().setValue("0192:123123123")));
-        sbdh.addReceiver(new Receiver().setIdentifier(new PartnerIdentification().setValue("0192:321321321")));
-        StandardBusinessDocument sbd = new StandardBusinessDocument();
-        sbd.setStandardBusinessDocumentHeader(sbdh);
-
-        StandardBusinessDocument sbdMock = mock(StandardBusinessDocument.class);
-        when(sbdMock.getConversationId()).thenReturn(messageId);
-        when(sbdMock.getMessageId()).thenReturn(messageId);
-        when(sbdMock.getDocumentId()).thenReturn("foo");
-        when(sbdMock.getProcess()).thenReturn("bar");
-        when(sbdMock.getReceiverIdentifier()).thenReturn("123123123");
-        when(sbdMock.getSenderIdentifier()).thenReturn("3213213121");
-
         Message message = new Message()
-            .setServiceIdentifier(ServiceIdentifier.DPFIO)
-            .setMessageId(messageId)
-            .setSbd(sbdMock);
+                .setServiceIdentifier(ServiceIdentifier.DPFIO)
+                .setMessageId(messageId)
+                .setSbd(new StandardBusinessDocument()
+                        .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                                .addSender(new Partner().setIdentifier(new PartnerIdentification().setValue("0192:123123123")))
+                                .addReceiver(new Partner().setIdentifier(new PartnerIdentification().setValue("0192:321321321")))
+                                .setDocumentIdentification(new DocumentIdentification()
+                                        .setStandard("")
+                                        .setInstanceIdentifier(messageId)
+                                )
+                                .setBusinessScope(new BusinessScope()
+                                        .addScope(new Scope()
+                                                .setType(ScopeType.CONVERSATION_ID.getFullname())
+                                                .setIdentifier("bar")
+                                                .setInstanceIdentifier(messageId)
+                                        )
+                                )
+                        ));
         messageInHolder.set(message);
     }
 
@@ -80,26 +81,28 @@ public class FiksIoInSteps {
 
         byte[] asic = getAsic(message);
         MottattMelding mottattMelding = MottattMelding.builder()
-            .writeDekryptertZip(w -> {})
-            .writeKryptertZip(w -> {})
-            .getKryptertStream(() -> new ByteArrayInputStream(asic))
-            .getDekryptertZipStream(() -> null)
-            .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
-            .meldingType(protocol)
-            .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
-            .avsenderKontoId(new KontoId(UUID.randomUUID()))
-            .ttl(Duration.ofHours(1))
-            .harPayload(true)
-            .build();
+                .writeDekryptertZip(w -> {
+                })
+                .writeKryptertZip(w -> {
+                })
+                .getKryptertStream(() -> new ByteArrayInputStream(asic))
+                .getDekryptertZipStream(() -> null)
+                .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
+                .meldingType(protocol)
+                .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
+                .avsenderKontoId(new KontoId(UUID.randomUUID()))
+                .ttl(Duration.ofHours(1))
+                .harPayload(true)
+                .build();
 
         AmqpChannelFeedbackHandler amqpHandler = mock(AmqpChannelFeedbackHandler.class);
         when(amqpHandler.getHandleAck()).thenReturn(mock(Runnable.class));
         SvarSender svarSender = SvarSender.builder()
-            .meldingSomSkalKvitteres(mottattMelding)
-            .utsendingKlient(mock(FiksIOSender.class))
-            .encrypt(e -> null)
-            .amqpChannelFeedbackHandler(amqpHandler)
-            .build();
+                .meldingSomSkalKvitteres(mottattMelding)
+                .utsendingKlient(mock(FiksIOSender.class))
+                .encrypt(e -> null)
+                .amqpChannelFeedbackHandler(amqpHandler)
+                .build();
 
         doAnswer(ans -> {
             BiConsumer<MottattMelding, SvarSender> consumer = ans.getArgument(0);
@@ -119,7 +122,7 @@ public class FiksIoInSteps {
         }
         return promiseMaker.promise(reject -> {
             try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
-                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate())).outlet()) {
+                    .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate())).outlet()) {
                 return IOUtils.toByteArray(is);
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Couldn't get ASIC", e);

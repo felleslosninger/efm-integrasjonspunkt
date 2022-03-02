@@ -1,0 +1,78 @@
+{
+  "standardBusinessDocument": {
+    "standardBusinessDocumentHeader": {
+      "headerVersion": "1.0",
+      "sender": [
+        {
+          "identifier": {
+            "authority": "iso6523-actorid-upis",
+            "value": "0192:987654321"
+          }
+        }
+      ],
+      "receiver": [
+        {
+          "identifier": {
+            "authority": "iso6523-actorid-upis",
+            "value": "0192:123456789"
+          }
+        }
+      ],
+      "documentIdentification": {
+        "standard": "urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:utskrift::1.0",
+        "typeVersion": "1.0",
+        "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+        "type": "utskrift",
+        "creationDateAndTime": "2021-05-21T13:19:57.12+02:00"
+      },
+      "businessScope": {
+        "scope": [
+          {
+            "type": "ConversationId",
+            "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+            "identifier": "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:utskrift:ver1.0",
+            "scopeInformation": [
+              {
+                "expectedResponseDateTime": "2021-04-21T15:29:58.753+02:00"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "utskrift": {
+      "avsender": {
+        "virksomhetsidentifikator": {
+          "authority": "iso6523-actorid-upis",
+          "value": "0192:999888999"
+        }
+      },
+      "mottaker": {
+        "navn": "navn",
+        "adresselinje1": "adresselinje1",
+        "adresselinje2": "adresselinje2",
+        "adresselinje3": "adresselinje3",
+        "adresselinje4": "adresselinje4",
+        "land": "land"
+      },
+      "utskriftstype": "SORT_HVIT",
+      "posttype": "B",
+      "retur": {
+        "mottaker": {
+          "navn": "navn",
+          "adresselinje1": "adresselinje1",
+          "adresselinje2": "adresselinje2",
+          "adresselinje3": "adresselinje3",
+          "postnummer": "1234",
+          "poststed": "poststed"
+        },
+        "returposthaandtering": "DIREKTE_RETUR"
+      },
+      "dokumentpakkefingeravtrykk": {
+        "digestMethod": "http://www.w3.org/2001/04/xmlenc#sha256",
+        "digestValue": "pj76aCcivS3ql6zy0sJKHyd3xuEUhcHUxNKXkcSjtfA="
+      },
+      "maskinportentoken": "DummyMaskinportenToken"
+    }
+  }
+}

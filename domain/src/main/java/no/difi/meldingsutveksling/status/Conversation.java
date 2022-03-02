@@ -9,7 +9,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.hibernate.annotations.DynamicUpdate;
@@ -31,9 +31,9 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @Slf4j
 @Table(name = "conversation",
         indexes = {
-            @Index(columnList = "conversation_id"),
-            @Index(columnList = "message_id")
-})
+                @Index(columnList = "conversation_id"),
+                @Index(columnList = "message_id")
+        })
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
 public class Conversation extends AbstractEntity<Long> {
@@ -80,8 +80,8 @@ public class Conversation extends AbstractEntity<Long> {
     private Conversation(String conversationId,
                          String messageId,
                          String messageReference,
-                         Organisasjonsnummer sender,
-                         Organisasjonsnummer receiver,
+                         PartnerIdentifier sender,
+                         PartnerIdentifier receiver,
                          String processIdentifier,
                          String documentIdentifier,
                          ConversationDirection direction,
@@ -93,11 +93,11 @@ public class Conversation extends AbstractEntity<Long> {
         this.conversationId = conversationId;
         this.messageId = messageId;
         this.messageReference = messageReference;
-        this.sender = sender.asIso6523();
-        this.senderIdentifier = sender.getOrgNummer();
+        this.sender = sender.getIdentifier();
+        this.senderIdentifier = sender.getPrimaryIdentifier();
         if (receiver != null) {
-            this.receiver = receiver.asIso6523();
-            this.receiverIdentifier = receiver.getOrgNummer();
+            this.receiver = receiver.getIdentifier();
+            this.receiverIdentifier = receiver.getPrimaryIdentifier();
         }
         this.processIdentifier = processIdentifier;
         this.documentIdentifier = documentIdentifier;
