@@ -127,7 +127,7 @@ Feature: Receiving a Next Move DPF message
           "typeVersion" : "2.0",
           "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {
