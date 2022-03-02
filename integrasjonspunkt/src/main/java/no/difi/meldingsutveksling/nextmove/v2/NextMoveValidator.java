@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
@@ -79,45 +78,45 @@ public class NextMoveValidator {
                     });
         }
 
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
-        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
-
         validateCertificate();
-
-        if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
-            throw new ServiceNotEnabledException(serviceIdentifier);
-        }
 
         MessageType messageType = MessageType.valueOfType(sbd.getType())
                 .filter(p -> p.getApi() == ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
-        String documentType = sbd.getDocumentType();
-        if (!messageType.fitsDocumentIdentifier(documentType) && serviceRecord.getServiceIdentifier() != DPFIO) {
-            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, documentType);
+        ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
+
+        Class<?> serviceIdentifierGroup = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
+        asserter.isValid(sbd, serviceIdentifierGroup);
+        Class<?> documentTypeGroup = ValidationGroupFactory.toDocumentType(messageType);
+        if (documentTypeGroup != null) {
+            asserter.isValid(sbd, documentTypeGroup);
         }
 
-        if (serviceRecord.getServiceIdentifier() == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
+        if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
+            throw new ServiceNotEnabledException(serviceIdentifier);
+        }
+
+        if (!messageType.fitsDocumentIdentifier(sbd.getDocumentType()) && serviceIdentifier != DPFIO) {
+            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, sbd.getDocumentType());
+        }
+
+        if (serviceIdentifier == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
             Optional<Scope> mc = SBDUtil.getOptionalMessageChannel(sbd);
             if (mc.isPresent() && !mc.get().getIdentifier().equals(props.getDpo().getMessageChannel())) {
                 throw new MessageChannelInvalidException(props.getDpo().getMessageChannel(), mc.get().getIdentifier());
             }
         }
 
-        validateDpfForsendelseType(sbd, serviceRecord);
+        validateDpfForsendelseType(sbd, serviceIdentifier);
 
-        Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
-        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
-                {
-                        group
-                } : new Class<?>[0]);
     }
 
-    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceRecord serviceRecord) {
+    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (svarUtService.getIfAvailable() == null) {
             return;
         }
-        if (serviceRecord.getServiceIdentifier() == DPF) {
+        if (serviceIdentifier == DPF) {
             sbd.getBusinessMessage(ArkivmeldingMessage.class).ifPresent(message -> {
                 DpfSettings dpfSettings = message.getDpf();
                 if (dpfSettings == null) {

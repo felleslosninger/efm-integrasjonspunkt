@@ -113,6 +113,7 @@ class NextMoveValidatorTest {
         every { sbd.messageId } returns messageId
         every { sbd.documentType } returns "standard::arkivmelding"
         every { sbd.process } returns "arkivmelding:administrasjon"
+        every { sbd.type } returns "arkivmelding"
 
         every { message.messageId } returns messageId
         every { message.sbd } returns sbd
@@ -122,7 +123,9 @@ class NextMoveValidatorTest {
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
         every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRecordProvider.getServiceIdentifier(sbd) } returns ServiceIdentifier.DPO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
+        every { asserter.isValid(any<ArkivmeldingMessage>(), any()) } just Runs
 
         mockkStatic(SBDUtil::class)
         every { SBDUtil.isStatus(sbd) } returns false
@@ -184,6 +187,7 @@ class NextMoveValidatorTest {
         every { sbd.documentType } returns "foo::bar"
         every { sbd.type } returns "fiksio"
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
+        every { serviceRecordProvider.getServiceIdentifier(any()) } returns ServiceIdentifier.DPFIO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
         every { sbd.any } returns mockkClass(FiksIoMessage::class)
         every { asserter.isValid(any<FiksIoMessage>(), any()) } just Runs

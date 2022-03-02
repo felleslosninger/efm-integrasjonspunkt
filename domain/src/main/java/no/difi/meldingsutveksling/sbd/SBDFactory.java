@@ -120,7 +120,8 @@ public class SBDFactory {
                                                                 MessageType messageType,
                                                                 String messageId) {
         return new DocumentIdentification()
-                .setCreationDateAndTime(OffsetDateTime.now(clock))
+                // Need to subtract a couple of seconds due to SBD validation as @Past
+                .setCreationDateAndTime(OffsetDateTime.now(clock).minusSeconds(5))
                 .setStandard(documentType)
                 .setType(messageType.getType())
                 .setTypeVersion(TYPE_VERSION_2)

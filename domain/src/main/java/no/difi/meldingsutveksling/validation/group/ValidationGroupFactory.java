@@ -34,6 +34,7 @@ public class ValidationGroupFactory {
     }
 
     public static Class<?> toServiceIdentifier(ServiceIdentifier serviceIdentifier) {
+        if (serviceIdentifier == null) throw new IllegalArgumentException("ServiceIdentifier cannot be null");
         switch (serviceIdentifier) {
             case DPE:
                 return NextMoveValidationGroups.ServiceIdentifier.DPE.class;
@@ -47,8 +48,10 @@ public class ValidationGroupFactory {
                 return NextMoveValidationGroups.ServiceIdentifier.DPV.class;
             case DPFIO:
                 return NextMoveValidationGroups.ServiceIdentifier.DPFIO.class;
+            case UNKNOWN:
+                return NextMoveValidationGroups.ServiceIdentifier.UNKNOWN.class;
             default:
-                return null;
+                throw new IllegalArgumentException("Missing case for ServiceIdentifier: "+serviceIdentifier);
         }
     }
 

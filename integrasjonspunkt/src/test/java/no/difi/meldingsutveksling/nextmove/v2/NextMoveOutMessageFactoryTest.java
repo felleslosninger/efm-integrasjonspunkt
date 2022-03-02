@@ -58,10 +58,8 @@ class NextMoveOutMessageFactoryTest {
 
     @Test
     void testMessageChannelDefaultNoScope() {
-        ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
-        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        when(serviceRecordProvider.getServiceRecord(sbd)).thenReturn(sr);
+        when(serviceRecordProvider.getServiceIdentifier(sbd)).thenReturn(ServiceIdentifier.DPO);
 
         AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
         String messageChannel = "foo-42";
@@ -79,8 +77,7 @@ class NextMoveOutMessageFactoryTest {
         ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
         sbd.addScope(new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
-        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        when(serviceRecordProvider.getServiceRecord(sbd)).thenReturn(sr);
+        when(serviceRecordProvider.getServiceIdentifier(sbd)).thenReturn(ServiceIdentifier.DPO);
 
         AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
         String messageChannel = "foo-42";

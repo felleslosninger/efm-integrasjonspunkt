@@ -56,5 +56,8 @@ public interface NextMoveValidationGroups {
 
         interface DPFIO extends ServiceIdentifier {
         }
+
+        interface UNKNOWN extends ServiceIdentifier {
+        }
     }
 }

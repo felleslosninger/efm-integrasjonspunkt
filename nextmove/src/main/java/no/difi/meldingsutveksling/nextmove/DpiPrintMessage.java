@@ -5,6 +5,7 @@ import lombok.*;
 import no.difi.meldingsutveksling.validation.Avsenderidentifikator;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Map;
 
@@ -20,10 +21,12 @@ public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> implements
     private String avsenderId;
     private String fakturaReferanse;
     @Valid
+    @NotNull
     private PostAddress mottaker;
     private PrintColor utskriftsfarge;
     private PostalCategory posttype;
     @Valid
+    @NotNull
     private MailReturn retur;
 
     private Map<String, String> printinstruksjoner = Maps.newHashMap();

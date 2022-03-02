@@ -40,7 +40,6 @@ public class MeldingsformidlerRequestFactory {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
                 .document(getMainDocument(nextMoveMessage, reject))
                 .attachments(getAttachments(nextMoveMessage, reject))
-                .mottakerPid(nextMoveMessage.getReceiver().cast(PersonIdentifier.class))
                 .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
                 .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
@@ -58,6 +57,10 @@ public class MeldingsformidlerRequestFactory {
                 .printColor(PrintColor.SORT_HVIT)
                 .postalCategory(PostalCategory.B_OEKONOMI)
                 .returnHandling(ReturnHandling.DIREKTE_RETUR);
+
+        if (nextMoveMessage.getReceiver() != null) {
+            builder.mottakerPid(nextMoveMessage.getReceiver().cast(PersonIdentifier.class));
+        }
 
         nextMoveMessage.getBusinessMessage(DpiMessage.class).ifPresent(dpiMessage ->
                 builder.avsenderIdentifikator(dpiMessage.getAvsenderId())

@@ -28,7 +28,7 @@ public class ConversationMarker {
         LogstashMarker senderMarker = NextMoveMessageMarkers.senderMarker(conversation.getSender());
         LogstashMarker senderIdentifierMarker = MarkerFactory.senderMarker(conversation.getSenderIdentifier());
         LogstashMarker receiverMarker = NextMoveMessageMarkers.receiverMarker(conversation.getReceiver());
-        LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(conversation.getReceiverIdentifier());
+        LogstashMarker receiverIdentifierMarker = NextMoveMessageMarkers.receiverOrgnrMarker(conversation.getReceiverIdentifier());
         LogstashMarker processMarker = processIdentifierMarker(conversation.getProcessIdentifier());
         LogstashMarker serviceIdentifierMarker = serviceIdentifierMarker(conversation.getServiceIdentifier());
         LogstashMarker directionMarker = directionMarker(conversation.getDirection());

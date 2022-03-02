@@ -15,7 +15,9 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.jetbrains.annotations.NotNull;
 
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
@@ -26,11 +28,12 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
+    private final PrintService printService;
     private final PromiseMaker promiseMaker;
 
     @Override
     @Timed
-    public void send(NextMoveOutMessage message) throws NextMoveException {
+    public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord = getServiceRecord(message);
 
         message.getBusinessMessage(DpiDigitalMessage.class).ifPresent(bmsg ->
@@ -59,14 +62,23 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     }
 
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
-        try {
-            return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .conversationId(message.getConversationId())
-                            .process(message.getProcessIdentifier())
-                            .build(),
-                    message.getSbd().getDocumentType());
-        } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(e);
+        if (message.getReceiver() != null) {
+            try {
+                return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                                .conversationId(message.getConversationId())
+                                .process(message.getProcessIdentifier())
+                                .build(),
+                        message.getSbd().getDocumentType());
+            } catch (ServiceRegistryLookupException e) {
+                throw new MeldingsUtvekslingRuntimeException(e);
+            }
+        } else {
+            // Null receiver only allowed for print receiver
+            KrrPrintResponse printDetails = printService.getPrintDetails();
+            ServiceRecord serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
+                    printDetails.getX509Sertifikat(), null);
+            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+            return serviceRecord;
         }
     }
 }
