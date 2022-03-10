@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -24,13 +25,13 @@ import java.util.List;
 @Slf4j
 public class SvarInnClient {
 
-    @Getter
-    private final RestTemplate restTemplate;
+    private final Plumber plumber;
     @Getter
     private final String rootUri;
-    private final Plumber plumber;
+    @Getter
+    private final RestTemplate restTemplate;
 
-    public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder, Plumber plumber) {
+    public SvarInnClient(Plumber plumber, IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder) {
         this.plumber = plumber;
         this.rootUri = props.getFiks().getInn().getBaseUrl();
         this.restTemplate = restTemplateBuilder
@@ -46,15 +47,15 @@ public class SvarInnClient {
         return Arrays.asList(restTemplate.getForObject("/mottaker/hentNyeForsendelser", Forsendelse[].class));
     }
 
-    InputStream downloadZipFile(Forsendelse forsendelse, Reject reject) {
-        return plumber.pipe("downloading zip file", inlet ->
+    InputStreamResource downloadZipFile(Forsendelse forsendelse, Reject reject) {
+        return new InputStreamResource(plumber.pipe("downloading zip file", inlet ->
                 restTemplate.execute(forsendelse.getDownloadUrl(), HttpMethod.GET, null, response -> {
                     InputStream body = new AutoCloseInputStream(response.getBody());
                     int bytes = IOUtils.copy(body, inlet);
                     log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
                     return null;
                 }), reject
-        ).outlet();
+        ).outlet());
     }
 
     void confirmMessage(String forsendelseId) {

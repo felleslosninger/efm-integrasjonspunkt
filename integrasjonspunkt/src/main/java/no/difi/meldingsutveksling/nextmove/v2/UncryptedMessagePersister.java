@@ -2,11 +2,11 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.nextmove.message.*;
-import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.message.BugFix610;
+import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class UncryptedMessagePersister implements OptionalCryptoMessagePersister
         return delegate.read(messageId, filename);
     }
 
-    public FileEntryStream readStream(String messageId, String filename, Reject reject) {
+    public FileEntryStream readStream(String messageId, String filename) throws IOException {
         InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
         return FileEntryStream.of(inputStream, -1);
     }

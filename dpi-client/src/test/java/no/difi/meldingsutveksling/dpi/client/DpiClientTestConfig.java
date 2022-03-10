@@ -8,8 +8,6 @@ import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
 import no.difi.move.common.cert.KeystoreHelper;
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,17 +35,6 @@ public class DpiClientTestConfig {
     @Bean
     public KeystoreHelper serverKeystoreHelper() {
         return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
-    }
-
-    @Bean
-    public DecryptCMSDocument decryptCMSDocument(JceKeyTransRecipient jceKeyTransRecipient) {
-        return new DecryptCMSDocument(jceKeyTransRecipient);
-    }
-
-    @Bean
-    public JceKeyTransRecipient jceKeyTransRecipient(KeystoreHelper serverKeystoreHelper) {
-        JceKeyTransRecipient recipient = new JceKeyTransEnvelopedRecipient(serverKeystoreHelper.loadPrivateKey());
-        return serverKeystoreHelper.shouldLockProvider() ? recipient.setProvider(serverKeystoreHelper.getKeyStore().getProvider()) : recipient;
     }
 
     @Bean

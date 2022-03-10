@@ -26,6 +26,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
+import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -222,8 +223,13 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public CucumberKeyStore cucumberKeyStore(IntegrasjonspunktProperties properties) {
-            return new CucumberKeyStore(properties.getOrg().getKeystore());
+        public KeystoreHelper cucumberKeystoreHelper(IntegrasjonspunktProperties properties) {
+            return new KeystoreHelper(properties.getOrg().getKeystore());
+        }
+
+        @Bean
+        public KeystoreHelper fiksKeystoreHelper(IntegrasjonspunktProperties properties) {
+            return new KeystoreHelper(properties.getFiks().getKeystore());
         }
 
         @Bean

@@ -5,9 +5,10 @@ import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +30,9 @@ public class NextMoveServiceBusPayloadFactory {
         if (message.getFiles() == null || message.getFiles().isEmpty()) return null;
 
         return promiseMaker.promise(reject -> {
-            try (InputStream encryptedAsic = asicHandler.createEncryptedAsic(message, reject)) {
-                return Base64.getEncoder().encode(IOUtils.toByteArray(encryptedAsic));
+            InputStreamResource encryptedAsic1 = asicHandler.createEncryptedAsic(message, reject);
+            try (InputStream inputStream = encryptedAsic1.getInputStream()) {
+                return Base64.getEncoder().encode(StreamUtils.copyToByteArray(inputStream));
             } catch (IOException e) {
                 throw new NextMoveRuntimeException("Unable to read encrypted asic", e);
             }

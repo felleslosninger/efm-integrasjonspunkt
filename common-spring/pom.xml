@@ -14,6 +14,10 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>pipes</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

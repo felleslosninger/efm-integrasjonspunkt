@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -23,13 +22,11 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
 
 import java.net.MalformedURLException;
@@ -53,10 +50,10 @@ public class IntegrasjonspunktBeans {
                                             PromiseMaker promiseMaker,
                                             IntegrasjonspunktProperties properties) {
         return new AltinnWsClient(altinnWsConfigurationFactory.create(),
-            applicationContextHolder.getApplicationContext(),
-            plumber,
-            promiseMaker,
-            properties);
+                applicationContextHolder.getApplicationContext(),
+                plumber,
+                promiseMaker,
+                properties);
     }
 
     @Bean
@@ -80,16 +77,6 @@ public class IntegrasjonspunktBeans {
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
         return new JWTDecoder();
-    }
-
-    @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
-        if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
-            return new CmsUtil(null);
-        }
-        return new CmsUtil();
     }
 
     @Bean

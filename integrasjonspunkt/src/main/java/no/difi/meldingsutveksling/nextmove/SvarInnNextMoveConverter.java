@@ -14,10 +14,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
-import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
@@ -25,17 +24,17 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.move.common.cert.KeystoreHelper;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -51,7 +50,7 @@ public class SvarInnNextMoveConverter {
     private final ArkivmeldingUtil arkivmeldingUtil;
 
     @Transactional
-    public SvarInnPackage convert(Forsendelse forsendelse) {
+    public SvarInnPackage convert(Forsendelse forsendelse, Reject reject) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 Iso6523.of(ICD.NO_ORG, forsendelse.getSvarSendesTil().getOrgnr()),
                 Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
@@ -63,32 +62,26 @@ public class SvarInnNextMoveConverter {
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
-        NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
-        Stream<StreamedFile> attachments = Stream.concat(
-                Stream.of(arkivmeldingFile),
-                svarInnService.getAttachments(forsendelse,
-                        reject -> {
-                            throw new NextMoveRuntimeException("Failed to get attachments from SvarInn", reject);
-                        }));
-
-        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
-                attachments,
+        InputStreamResource asic = asicHandler.createEncryptedAsic(
                 NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+                getArkivmeldingFile(forsendelse),
+                svarInnService.getAttachments(forsendelse, reject),
                 keystoreHelper.getX509Certificate(),
-                reject -> {
-                    throw new NextMoveRuntimeException("Failed to create ASiC", reject);
-                });
+                reject);
 
-        return new SvarInnPackage(sbd, asicStream);
+        return new SvarInnPackage(sbd, asic);
     }
 
-    private NextMoveStreamedFile getArkivmeldingFile(Forsendelse forsendelse) {
-        ByteArrayInputStream arkivmeldingStream = getArkivmeldingStream(forsendelse);
-        return new NextMoveStreamedFile(NextMoveConsts.ARKIVMELDING_FILE, arkivmeldingStream, MediaType.APPLICATION_XML_VALUE);
+    private Document getArkivmeldingFile(Forsendelse forsendelse) {
+        return Document.builder()
+                .filename(NextMoveConsts.ARKIVMELDING_FILE)
+                .mimeType(MediaType.APPLICATION_XML_VALUE)
+                .resource(getArkivmelding(forsendelse))
+                .build();
     }
 
-    private ByteArrayInputStream getArkivmeldingStream(Forsendelse forsendelse) {
+    private ByteArrayResource getArkivmelding(Forsendelse forsendelse) {
         Arkivmelding arkivmelding = toArkivmelding(forsendelse);
         byte[] arkivmeldingBytes;
         try {
@@ -98,7 +91,7 @@ public class SvarInnNextMoveConverter {
             throw new NextMoveRuntimeException("Error marshalling arkivmelding");
         }
 
-        return new ByteArrayInputStream(arkivmeldingBytes);
+        return new ByteArrayResource(arkivmeldingBytes);
     }
 
     private Arkivmelding toArkivmelding(Forsendelse forsendelse) {

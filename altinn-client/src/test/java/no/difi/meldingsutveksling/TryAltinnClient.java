@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import org.slf4j.Marker;
-
-import java.io.InputStream;
 
 public class TryAltinnClient {
 
@@ -31,7 +31,7 @@ public class TryAltinnClient {
         }
 
         @Override
-        public InputStream getAsicInputStream() {
+        public InMemoryWithTempFileFallbackResource getAsic() {
             return null;
         }
 
@@ -43,7 +43,9 @@ public class TryAltinnClient {
     }
 
     public static void main(String[] args) {
-        AltinnClient altinnClient = new AltinnClient();
+        CreateAltinnPackage createAltinnPackage = new CreateAltinnPackage(InMemoryWithTempFileFallbackResourceFactory.builder()
+                .build());
+        AltinnClient altinnClient = new AltinnClient(createAltinnPackage);
 
         System.out.println(".... Uploading test.zip");
         altinnClient.send(new TryAltinnClient.MockRequest());

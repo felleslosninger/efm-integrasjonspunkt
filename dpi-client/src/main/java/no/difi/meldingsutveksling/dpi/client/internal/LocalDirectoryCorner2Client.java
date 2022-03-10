@@ -3,11 +3,12 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
-import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
 import no.difi.meldingsutveksling.dpi.client.domain.Message;
 import no.difi.meldingsutveksling.dpi.client.domain.MessageStatus;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import org.springframework.core.io.Resource;
 import reactor.core.publisher.Flux;
 
 import java.io.File;
@@ -41,8 +42,8 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
         }
     }
 
-    private void writeCmsEncryptedAsice(String base, CmsEncryptedAsice cmsEncryptedAsice) {
-        try (InputStream is = cmsEncryptedAsice.getResource().getInputStream()) {
+    private void writeCmsEncryptedAsice(String base, Resource cmsEncryptedAsice) {
+        try (InputStream is = cmsEncryptedAsice.getInputStream()) {
             Files.copy(is, getPath(base, "asic.cms"), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't save file!", e);
@@ -70,7 +71,7 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
     }
 
     @Override
-    public CmsEncryptedAsice getCmsEncryptedAsice(URI downloadurl) throws DpiException {
+    public InMemoryWithTempFileFallbackResource getCmsEncryptedAsice(URI downloadurl) throws DpiException {
         throw new UnsupportedOperationException();
     }
 

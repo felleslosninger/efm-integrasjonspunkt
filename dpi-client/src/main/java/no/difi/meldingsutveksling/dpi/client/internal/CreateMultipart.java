@@ -17,7 +17,7 @@ public class CreateMultipart {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("forretningsmelding", input.getJwt(), APPLICATION_JWT)
                 .filename("sbd.jwt");
-        builder.part("dokumentpakke", input.getCmsEncryptedAsice().getResource(), APPLICATION_CMS)
+        builder.part("dokumentpakke", input.getCmsEncryptedAsice(), APPLICATION_CMS)
                 .filename("asic.cms");
         return builder.build();
     }

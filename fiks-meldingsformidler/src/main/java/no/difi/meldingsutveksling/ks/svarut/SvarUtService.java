@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -38,7 +37,7 @@ public class SvarUtService {
     private final ForsendelseIdService forsendelseIdService;
 
     @Transactional
-    public String send(NextMoveOutMessage message) throws NextMoveException {
+    public String send(NextMoveOutMessage message) {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
@@ -52,7 +51,7 @@ public class SvarUtService {
 
         return promiseMaker.promise(reject -> {
             try {
-                SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
+                SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord);
                 forsendelseIdService.newEntry(message.getMessageId(), forsendelse.getForsendelsesid());
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
                 return client.sendMessage(svarUtRequest);
@@ -66,9 +65,9 @@ public class SvarUtService {
         return props.getFiks().getUt().getEndpointUrl().toString();
     }
 
-    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord, Reject reject) throws NextMoveException {
+    private SendForsendelseMedId getForsendelse(NextMoveOutMessage message, ServiceRecord serviceRecord) throws NextMoveException {
         final X509Certificate x509Certificate = toX509Certificate(serviceRecord.getPemCertificate());
-        return fiksMapper.mapFrom(message, x509Certificate, reject);
+        return fiksMapper.mapFrom(message, x509Certificate);
     }
 
     @Cacheable(CacheConfig.SVARUT_FORSENDELSETYPER)

@@ -7,7 +7,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ResourceUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
-import no.difi.meldingsutveksling.dpi.Document;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
@@ -78,8 +78,9 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
     }
 
     private Dokumentpakke getDokumentpakke(MeldingsformidlerRequest request) {
-        return Dokumentpakke.builder(dokumentFromDocument(request.getDocument()))
-                .vedlegg(toVedlegg(request.getAttachments()))
+        Parcel parcel = request.getParcel();
+        return Dokumentpakke.builder(dokumentFromDocument(parcel.getMainDocument()))
+                .vedlegg(toVedlegg(parcel.getAttachments()))
                 .build();
     }
 
@@ -90,16 +91,16 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
         return Prioritet.NORMAL;
     }
 
-    private List<Dokument> toVedlegg(List<Document> attachements) {
+    private List<Dokument> toVedlegg(List<no.difi.meldingsutveksling.dokumentpakking.domain.Document> attachements) {
         return attachements.stream().map(this::dokumentFromDocument).collect(toList());
     }
 
-    private Dokument dokumentFromDocument(Document document) {
+    private Dokument dokumentFromDocument(no.difi.meldingsutveksling.dokumentpakking.domain.Document document) {
         Dokument.Builder builder = Dokument.builder(
                         document.getTitle(),
                         document.getFilename(),
                         ResourceUtils.toByteArray(document.getResource()))
-                .mimeType(document.getMimeType());
+                .mimeType(document.getMimeType().toString());
         if (document.getMetadataDocument() != null) {
             builder.metadataDocument(metadataDocumentConverter.toMetadataDokument(document.getMetadataDocument()));
         }

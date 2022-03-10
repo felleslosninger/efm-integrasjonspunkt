@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dpi.client.Blame;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
-import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
 import no.difi.meldingsutveksling.dpi.client.domain.Message;
 import no.difi.meldingsutveksling.dpi.client.domain.MessageStatus;
@@ -76,7 +75,7 @@ public class Corner2ClientImpl implements Corner2Client {
     }
 
     @Override
-    public CmsEncryptedAsice getCmsEncryptedAsice(URI downloadurl) throws DpiException {
+    public InMemoryWithTempFileFallbackResource getCmsEncryptedAsice(URI downloadurl) throws DpiException {
         InMemoryWithTempFileFallbackResource cms = resourceFactory.getResource("dpi-", ".asic.cms");
         Flux<DataBuffer> dataBuffer = webClient.get()
                 .uri(downloadurl)
@@ -95,7 +94,7 @@ public class Corner2ClientImpl implements Corner2Client {
                     Blame.CLIENT);
         }
 
-        return new CmsEncryptedAsice(cms);
+        return cms;
     }
 
     @Override

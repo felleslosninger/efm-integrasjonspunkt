@@ -1,32 +1,35 @@
 package no.difi.meldingsutveksling.dokumentpakking.domain;
 
-import no.difi.meldingsutveksling.domain.ByteArrayFile;
 
-import java.util.Arrays;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.util.MimeType;
 
-public class Manifest implements ByteArrayFile {
+@Value
+@Builder
+public class Manifest implements AsicEAttachable {
 
-	private byte[] manifestXml;
+    @NonNull Resource resource;
+    @NonNull MimeType mimeType;
 
-	
-	public Manifest(byte[] manifestXml) {
-		super();
-		this.manifestXml = Arrays.copyOf(manifestXml, manifestXml.length);
-	}
+    @Override
+    public String getFilename() {
+        return "manifest.xml";
+    }
 
-	@Override
-	public String getFileName() {
-		return "manifest.xml";
-	}
+    public static class ManifestBuilder {
+        private MimeType mimeType;
 
-	@Override
-	public byte[] getBytes() {
-		return Arrays.copyOf(manifestXml, manifestXml.length);
-	}
+        public Manifest.ManifestBuilder mimeType(MimeType mimeType) {
+            this.mimeType = mimeType;
+            return this;
+        }
 
-	@Override
-	public String getMimeType() {
-		return "text/xml";
-	}
-
+        public Manifest.ManifestBuilder mimeType(String mimeType) {
+            this.mimeType = mimeType != null ? MimeType.valueOf(mimeType) : null;
+            return this;
+        }
+    }
 }

@@ -3,12 +3,20 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.dpi.client.domain.*;
+import no.difi.asic.SignatureHelper;
+import no.difi.asic.SignatureMethod;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
+import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
+import no.difi.meldingsutveksling.dpi.client.domain.MessageStatus;
+import no.difi.meldingsutveksling.dpi.client.domain.ReceivedMessage;
+import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.internal.Corner2Client;
-import no.difi.meldingsutveksling.dpi.client.internal.CreateCmsEncryptedAsice;
+import no.difi.meldingsutveksling.dpi.client.internal.CreateManifest;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateSendMessageInput;
 import no.difi.meldingsutveksling.dpi.client.internal.MessageUnwrapper;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
@@ -18,15 +26,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DpiClientImpl implements DpiClient {
 
-    private final CreateCmsEncryptedAsice createCmsEncryptedAsice;
+    private final CreateCMSEncryptedAsice createCmsEncryptedAsice;
     private final CreateSendMessageInput createSendMessageInput;
     private final Corner2Client corner2Client;
     private final MessageUnwrapper messageUnwrapper;
+    private final SignatureHelper signatureHelper;
+    private final CreateManifest createManifest;
 
     @Override
     @SneakyThrows
     public void sendMessage(Shipment shipment) {
-        try (CmsEncryptedAsice cmsEncryptedAsice = createCmsEncryptedAsice.createCmsEncryptedAsice(shipment)) {
+        try (InMemoryWithTempFileFallbackResource cmsEncryptedAsice = createCmsEncryptedAsice(shipment)) {
             SendMessageInput input = createSendMessageInput.createSendMessageInput(shipment, cmsEncryptedAsice);
             corner2Client.sendMessage(input);
         } catch (DpiException e) {
@@ -34,6 +44,19 @@ public class DpiClientImpl implements DpiClient {
         } catch (Exception e) {
             throw new DpiException("Sending failed!", e, Blame.CLIENT);
         }
+    }
+
+    private InMemoryWithTempFileFallbackResource createCmsEncryptedAsice(Shipment shipment) {
+        return createCmsEncryptedAsice.createCmsEncryptedAsice(CreateCMSEncryptedAsice.Input.builder()
+                .documents(shipment.getParcel().getDocuments())
+                .manifest(createManifest.createManifest(shipment))
+                .certificate(shipment.getReceiverBusinessCertificate())
+                .signatureMethod(SignatureMethod.XAdES)
+                .signatureHelper(signatureHelper)
+                .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
+                .tempFilePrefix("dpi-")
+                .build()
+        );
     }
 
     @Override
@@ -48,7 +71,7 @@ public class DpiClientImpl implements DpiClient {
     }
 
     @Override
-    public CmsEncryptedAsice getCmsEncryptedAsice(URI downloadurl) throws DpiException {
+    public InMemoryWithTempFileFallbackResource getCmsEncryptedAsice(URI downloadurl) throws DpiException {
         return corner2Client.getCmsEncryptedAsice(downloadurl);
     }
 

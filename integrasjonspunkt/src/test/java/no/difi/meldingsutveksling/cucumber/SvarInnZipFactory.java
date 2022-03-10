@@ -1,47 +1,49 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
 import no.difi.move.common.cert.KeystoreHelper;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.io.ResourceUtils;
+import no.difi.move.common.io.WritableByteArrayResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Component
 @Profile("cucumber")
+@RequiredArgsConstructor
 public class SvarInnZipFactory {
 
-    private final CmsUtil cmsUtil;
-    private final KeystoreHelper keystoreHelper;
-
-    public SvarInnZipFactory(CmsUtil cmsUtil, IntegrasjonspunktProperties properties) {
-        this.cmsUtil = cmsUtil;
-        this.keystoreHelper = new KeystoreHelper(properties.getFiks().getKeystore());
-    }
+    private final CreateCMSDocument createCMSDocument;
+    private final KeystoreHelper fiksKeystoreHelper;
 
     @SneakyThrows
-    byte[] createSvarInnZip(Message message) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ZipOutputStream out = new ZipOutputStream(bos);
+    ByteArrayResource createSvarInnZip(Message message) {
+        WritableByteArrayResource resource = new WritableByteArrayResource();
 
-        for (Attachment file : message.getAttachments()) {
-            out.putNextEntry(new ZipEntry(file.getFileName()));
-            IOUtils.copy(file.getInputStream(), out);
-            out.closeEntry();
+        try (ZipOutputStream out = new ZipOutputStream(resource.getOutputStream())) {
+            for (Document file : message.getAttachments()) {
+                out.putNextEntry(new ZipEntry(file.getFilename()));
+                ResourceUtils.copy(file.getResource(), out);
+                out.closeEntry();
+            }
         }
 
-        out.close();
-
-        return encrypt(bos.toByteArray());
+        return new ByteArrayResource(encrypt(resource));
     }
 
-    private byte[] encrypt(byte[] in) {
-        return cmsUtil.createCMS(in, keystoreHelper.getX509Certificate());
+    private byte[] encrypt(Resource resource) {
+        return createCMSDocument.toByteArray(CreateCMSDocument.Input.builder()
+                .resource(resource)
+                .certificate(fiksKeystoreHelper.getX509Certificate())
+                .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
+                .build());
     }
-
 }

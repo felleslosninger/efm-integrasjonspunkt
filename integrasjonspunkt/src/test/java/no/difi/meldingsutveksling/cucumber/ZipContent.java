@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,26 +11,26 @@ import java.util.Optional;
 @Data
 class ZipContent {
 
-    private List<ZipFile> files = new ArrayList<>();
+    private List<Document> files = new ArrayList<>();
 
-    ZipContent files(ZipFile file) {
+    ZipContent files(Document file) {
         files.add(file);
         return this;
     }
 
-    ZipContent files(Collection<ZipFile> in) {
+    ZipContent files(Collection<Document> in) {
         files.addAll(in);
         return this;
     }
 
-    ZipFile getFile(String filename) {
+    Document getFile(String filename) {
         return getOptionalFile(filename)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("File not found for %s", filename)));
     }
 
-    Optional<ZipFile> getOptionalFile(String filename) {
+    Optional<Document> getOptionalFile(String filename) {
         return files.stream()
-                .filter(p -> p.getFileName().equals(filename))
+                .filter(p -> p.getFilename().equals(filename))
                 .findAny();
     }
 }

@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,10 @@ public class BugFix610 {
         log.debug("Unable to applying patch 610 to incomming message with messageId: {}. Message to short", messageId);
 
         return false;
+    }
+
+    public static Resource applyPatch(Resource input, String messageId) throws IOException {
+        return new InputStreamResource(applyPatch(input.getInputStream(), messageId));
     }
 
     public static InputStream applyPatch(InputStream inputStream, String messageId) throws IOException {

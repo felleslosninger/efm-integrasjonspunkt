@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.dpi.client.internal.domain;
 
 import lombok.Data;
-import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
+import org.springframework.core.io.Resource;
 
 @Data
 public class SendMessageInput {
 
     private String maskinportentoken;
     private String jwt;
-    private CmsEncryptedAsice cmsEncryptedAsice;
+    private Resource cmsEncryptedAsice;
     private String channel;
 }

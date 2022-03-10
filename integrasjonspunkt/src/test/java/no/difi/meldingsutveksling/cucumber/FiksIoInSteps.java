@@ -4,9 +4,13 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.ks.fiksio.FiksIoSubscriber;
+import no.difi.meldingsutveksling.nextmove.AsicHandlerImpl;
+import no.difi.meldingsutveksling.nextmove.ManifestFactory;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
@@ -36,10 +40,10 @@ public class FiksIoInSteps {
 
     private final Holder<Message> messageInHolder;
     private final FiksIOKlient fiksIOKlient;
-    private final AsicFactory asicFactory;
+    private final AsicHandler asicHandler;
+    private final CreateCMSEncryptedAsice createCMSEncryptedAsice;
     private final Plumber plumber;
     private final PromiseMaker promiseMaker;
-    private final ObjectProvider<CmsUtil> cmsUtilProvider;
     private final KeystoreHelper keystoreHelper;
     private final FiksIoSubscriber fiksIoSubscriber;
 
@@ -117,9 +121,11 @@ public class FiksIoInSteps {
     }
 
     private byte[] getAsic(Message message) {
-        if (cmsUtilProvider.getIfAvailable() == null) {
-            throw new NextMoveRuntimeException("CmsUtil unavailable");
-        }
+
+        return createCMSEncryptedAsice.toByteArray(CreateCMSEncryptedAsice.Input.builder()
+                        .
+                .build());
+
         return promiseMaker.promise(reject -> {
             try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
                     .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate())).outlet()) {
