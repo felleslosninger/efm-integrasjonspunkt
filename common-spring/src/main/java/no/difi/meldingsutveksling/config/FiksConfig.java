@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.move.common.config.KeystoreProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
@@ -16,6 +17,7 @@ public class FiksConfig {
 
     @Valid
     @NotNull(message = "Certificate properties for FIKS not set.")
+    @NestedConfigurationProperty
     private KeystoreProperties keystore;
 
     SvarUt ut = new SvarUt();
@@ -42,6 +44,7 @@ public class FiksConfig {
         private String konteringsKode;
         private String username;
         private String password;
+        private boolean kunDigitalLevering;
         private URL endpointUrl;
         private DataSize uploadSizeLimit;
     }

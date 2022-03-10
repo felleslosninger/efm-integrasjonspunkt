@@ -111,6 +111,7 @@ public class FiksMapper {
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
                 .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
+                .withKunDigitalLevering(properties.getFiks().getUt().isKunDigitalLevering())
                 .build();
     }
 
