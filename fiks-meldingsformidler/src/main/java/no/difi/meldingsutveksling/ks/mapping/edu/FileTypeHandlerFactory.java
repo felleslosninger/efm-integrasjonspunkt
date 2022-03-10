@@ -25,7 +25,7 @@ public class FileTypeHandlerFactory {
     }
 
     private byte[] encrypt(byte[] bytes) {
-        return createCMSDocument.createByteArray(CreateCMSDocument.Input.builder()
+        return createCMSDocument.toByteArray(CreateCMSDocument.Input.builder()
                 .resource(new ByteArrayResource(bytes))
                 .certificate(certificate)
                 .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)

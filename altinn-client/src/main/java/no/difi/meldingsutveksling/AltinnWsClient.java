@@ -20,8 +20,11 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
+import no.difi.move.common.io.OutputStreamResource;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.WritableResource;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
@@ -32,7 +35,6 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +75,8 @@ public class AltinnWsClient {
     private void upload(UploadRequest request, String senderReference) {
         try {
             promiseMaker.promise(reject -> {
-                try (InputStream inputStream = getInputStream(request, reject)) {
+                InputStreamResource altinnZip = getAltinnZip(request, reject);
+                try (InputStream inputStream = altinnZip.getInputStream()) {
                     StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
                     parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
                     uploadToAltinn(request, senderReference, parameters);
@@ -88,17 +91,17 @@ public class AltinnWsClient {
         }
     }
 
-    private InputStream getInputStream(UploadRequest request, Reject reject) {
-        return plumber.pipe("write Altinn zip",
+    private InputStreamResource getAltinnZip(UploadRequest request, Reject reject) {
+        return new InputStreamResource(plumber.pipe("write Altinn zip",
                 inlet -> {
                     AltinnPackage altinnPackage = AltinnPackage.from(request);
-                    writeAltinnZip(request, altinnPackage, inlet);
-                }, reject).outlet();
+                    writeAltinnZip(request, altinnPackage, new OutputStreamResource(inlet));
+                }, reject).outlet());
     }
 
-    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, PipedOutputStream pos) {
+    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, WritableResource writableResource) {
         try {
-            altinnPackage.write(pos, context);
+            altinnPackage.write(writableResource, context);
         } catch (IOException e) {
             auditError(request, e);
             throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
@@ -137,22 +140,22 @@ public class AltinnWsClient {
 
     public List<FileReference> availableFiles(String orgnr) {
         Stream<BrokerServiceAvailableFile> fileStream = getBrokerServiceAvailableFileList(orgnr)
-            .map(BrokerServiceAvailableFileList::getBrokerServiceAvailableFile)
-            .orElse(Collections.emptyList())
-            .stream();
+                .map(BrokerServiceAvailableFileList::getBrokerServiceAvailableFile)
+                .orElse(Collections.emptyList())
+                .stream();
         if (!isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             fileStream = fileStream.filter(f -> f.getSendersReference() != null &&
-                f.getSendersReference().getValue().equals(properties.getDpo().getMessageChannel()));
+                    f.getSendersReference().getValue().equals(properties.getDpo().getMessageChannel()));
         } else {
             // SendersReference is default set to random UUID.
             // Make sure not to consume messages with matching message channel pattern.
             Pattern p = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
             fileStream = fileStream.filter(f -> f.getSendersReference() == null ||
-                !p.matcher(f.getSendersReference().getValue()).matches());
+                    !p.matcher(f.getSendersReference().getValue()).matches());
         }
         return fileStream
-            .map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))
-            .collect(Collectors.toList());
+                .map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))
+                .collect(Collectors.toList());
     }
 
     public boolean checkIfAvailableFiles(String orgnr) throws IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage {

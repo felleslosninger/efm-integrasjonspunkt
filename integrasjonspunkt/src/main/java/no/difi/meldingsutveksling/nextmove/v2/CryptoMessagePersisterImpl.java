@@ -11,7 +11,9 @@ import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -34,18 +36,19 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     private final PromiseMaker promiseMaker;
 
     public void write(String messageId, String filename, Resource input) {
-        InputStreamResource encrypted = promiseMaker.promise(reject -> {
+        promiseMaker.promise(reject -> {
             try {
-                return createCMSDocument.createCMS(CreateCMSDocument.Input.builder()
+                InputStreamResource encrypted = createCMSDocument.createCMS(CreateCMSDocument.Input.builder()
                         .resource(possiblyApplyZipHeaderPatch(messageId, filename, input))
                         .certificate(keystoreHelper.getX509Certificate())
                         .keyEncryptionScheme(getKeyEncryptionScheme())
                         .build(), reject);
+                delegate.write(messageId, filename, encrypted);
+                return null;
             } catch (IOException e) {
                 throw new NextMoveRuntimeException(String.format("Writing of file %s failed for messageId: %s", filename, messageId));
             }
         }).await();
-        delegate.write(messageId, filename, encrypted);
     }
 
     private Resource possiblyApplyZipHeaderPatch(String messageId, String filename, Resource stream) throws IOException {
@@ -56,11 +59,19 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         return stream;
     }
 
-    public Resource read(String messageId, String filename) {
-        return promiseMaker.promise(reject -> decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+    public InMemoryWithTempFileFallbackResource read(String messageId, String filename) {
+        return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                 .keystoreHelper(keystoreHelper)
                 .resource(delegate.read(messageId, filename))
-                .build(), reject)).await();
+                .build());
+    }
+
+    @Override
+    public InputStreamResource read(String messageId, String filename, Reject reject) {
+        return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                .keystoreHelper(keystoreHelper)
+                .resource(delegate.read(messageId, filename))
+                .build(), reject);
     }
 
     public void delete(String messageId) throws IOException {

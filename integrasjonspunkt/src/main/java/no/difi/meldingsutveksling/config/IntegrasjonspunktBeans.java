@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -22,6 +23,7 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +36,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Clock;
+import java.util.function.Supplier;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
@@ -77,6 +80,15 @@ public class IntegrasjonspunktBeans {
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
         return new JWTDecoder();
+    }
+
+    @Bean
+    public Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier(IntegrasjonspunktProperties props) {
+        if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
+                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
+            return () -> null;
+        }
+        return () -> CmsAlgorithm.RSAES_OAEP;
     }
 
     @Bean

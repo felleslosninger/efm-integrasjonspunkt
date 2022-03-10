@@ -32,7 +32,7 @@ class FiksIoService(
     fun sendMessage(msg: NextMoveMessage) {
         promise.promise { reject ->
             val payloads = msg.files.map {
-                StreamPayload(persister.readStream(msg.messageId, it.identifier, reject).inputStream, it.filename)
+                StreamPayload(persister.read(msg.messageId, it.identifier, reject).inputStream, it.filename)
             }.toCollection(arrayListOf())
             createRequest(payloads = payloads, msg = msg)
         }.await()
