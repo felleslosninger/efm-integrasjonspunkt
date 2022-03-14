@@ -6,13 +6,16 @@ import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
+import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
@@ -26,20 +29,16 @@ public class UncryptedMessagePersister implements OptionalCryptoMessagePersister
     private final MessagePersister delegate;
     private final IntegrasjonspunktProperties props;
 
-    public void write(String messageId, String filename, byte[] message) throws IOException {
-        if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
-            BugFix610.applyPatch(message, messageId);
-        }
-        delegate.write(messageId, filename, message);
+    public void write(String messageId, String filename, Resource input) throws IOException {
+        delegate.write(messageId, filename, possiblyApplyZipHeaderPatch(messageId, filename, input));
     }
 
-    public void writeStream(String messageId, String filename, InputStream stream) throws IOException {
-        try (InputStream inputStream = possiblyApplyZipHeaderPatch(messageId, filename, stream)) {
-            delegate.writeStream(messageId, filename, inputStream, -1L);
-        }
+    @Override
+    public byte[] readBytes(String messageId, String filename) throws IOException {
+        return delegate.readBytes(messageId, filename);
     }
 
-    private InputStream possiblyApplyZipHeaderPatch(String messageId, String filename, InputStream stream) throws IOException {
+    private Resource possiblyApplyZipHeaderPatch(String messageId, String filename, Resource stream) throws IOException {
         if (props.getNextmove().getApplyZipHeaderPatch() && ASIC_FILE.equals(filename)) {
             return BugFix610.applyPatch(stream, messageId);
         }
@@ -47,13 +46,18 @@ public class UncryptedMessagePersister implements OptionalCryptoMessagePersister
         return stream;
     }
 
-    public byte[] read(String messageId, String filename) throws IOException {
+    public InMemoryWithTempFileFallbackResource read(String messageId, String filename) throws IOException {
         return delegate.read(messageId, filename);
     }
 
-    public FileEntryStream readStream(String messageId, String filename) throws IOException {
-        InputStream inputStream = delegate.readStream(messageId, filename).getInputStream();
-        return FileEntryStream.of(inputStream, -1);
+    @Override
+    public InputStreamResource stream(String messageId, String filename, Reject reject) throws IOException {
+        return delegate.stream(messageId, filename, reject);
+    }
+
+    @Override
+    public void read(String messageId, String filename, WritableResource writableResource) throws IOException {
+        delegate.read(messageId, filename, writableResource);
     }
 
     public void delete(String messageId) throws IOException {

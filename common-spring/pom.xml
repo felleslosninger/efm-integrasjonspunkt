@@ -16,11 +16,6 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>pipes</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>nextmove</artifactId>
         </dependency>
 

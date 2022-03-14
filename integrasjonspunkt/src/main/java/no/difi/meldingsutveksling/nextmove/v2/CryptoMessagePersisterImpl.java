@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -15,11 +14,13 @@ import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.*;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Supplier;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 
@@ -34,14 +35,15 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
     private final CreateCMSDocument createCMSDocument;
     private final DecryptCMSDocument decryptCMSDocument;
     private final PromiseMaker promiseMaker;
+    private final Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier;
 
-    public void write(String messageId, String filename, Resource input) {
+    public void write(String messageId, String filename, Resource input) throws IOException {
         promiseMaker.promise(reject -> {
             try {
                 InputStreamResource encrypted = createCMSDocument.createCMS(CreateCMSDocument.Input.builder()
                         .resource(possiblyApplyZipHeaderPatch(messageId, filename, input))
                         .certificate(keystoreHelper.getX509Certificate())
-                        .keyEncryptionScheme(getKeyEncryptionScheme())
+                        .keyEncryptionScheme(algorithmIdentifierSupplier.get())
                         .build(), reject);
                 delegate.write(messageId, filename, encrypted);
                 return null;
@@ -49,6 +51,12 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
                 throw new NextMoveRuntimeException(String.format("Writing of file %s failed for messageId: %s", filename, messageId));
             }
         }).await();
+    }
+
+    @Override
+    public byte[] readBytes(String messageId, String filename) throws IOException {
+        byte[] encrypted = delegate.readBytes(messageId, filename);
+        return decryptCMSDocument.toByteArray(getDecryptInput(new ByteArrayResource(encrypted)));
     }
 
     private Resource possiblyApplyZipHeaderPatch(String messageId, String filename, Resource stream) throws IOException {
@@ -59,30 +67,77 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         return stream;
     }
 
-    public InMemoryWithTempFileFallbackResource read(String messageId, String filename) {
-        return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
-                .keystoreHelper(keystoreHelper)
-                .resource(delegate.read(messageId, filename))
-                .build());
+    public InMemoryWithTempFileFallbackResource read(String messageId, String filename) throws IOException {
+        Resource encrypted = delegate.read(messageId, filename);
+        return decryptCMSDocument.decrypt(getDecryptInput(encrypted));
     }
 
     @Override
-    public InputStreamResource read(String messageId, String filename, Reject reject) {
-        return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+    public InputStreamResource stream(String messageId, String filename, Reject reject) throws IOException {
+        Resource encrypted = delegate.read(messageId, filename);
+        return decryptCMSDocument.decrypt(getDecryptInput(encrypted), reject);
+    }
+
+    @Override
+    public void read(String messageId, String filename, WritableResource writableResource) throws IOException {
+        promiseMaker.promise(reject -> {
+            try {
+                Resource encrypted = delegate.read(messageId, filename);
+                decryptCMSDocument.decrypt(getDecryptInput(encrypted), writableResource);
+            } catch (IOException e) {
+                reject.reject(e);
+            }
+            return null;
+        }).await();
+    }
+
+    private DecryptCMSDocument.Input getDecryptInput(Resource encrypted) {
+        return DecryptCMSDocument.Input.builder()
                 .keystoreHelper(keystoreHelper)
-                .resource(delegate.read(messageId, filename))
-                .build(), reject);
+                .resource(encrypted)
+                .build();
     }
 
     public void delete(String messageId) throws IOException {
         delegate.delete(messageId);
     }
 
-    private AlgorithmIdentifier getKeyEncryptionScheme() {
-        if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
+    public class EncryptedResource extends AbstractResource {
+
+        private final Resource encrypted;
+        private final String description;
+
+        public EncryptedResource(Resource encrypted, @Nullable String description) {
+            this.encrypted = encrypted;
+            this.description = (description != null ? description : "");
+        }
+
+        public String getDescription() {
+            return "Encrypted resource [" + this.description + "]";
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
             return null;
         }
-        return CmsAlgorithm.RSAES_OAEP;
+
+        @Override
+        public void read(String messageId, String filename, WritableResource writableResource) throws IOException {
+            promiseMaker.promise(reject -> {
+                try {
+                    decryptCMSDocument.decrypt(getDecryptInput(), writableResource);
+                } catch (IOException e) {
+                    reject.reject(e);
+                }
+                return null;
+            }).await();
+        }
+
+        private DecryptCMSDocument.Input getDecryptInput() {
+            return DecryptCMSDocument.Input.builder()
+                    .keystoreHelper(keystoreHelper)
+                    .resource(encrypted)
+                    .build();
+        }
     }
 }

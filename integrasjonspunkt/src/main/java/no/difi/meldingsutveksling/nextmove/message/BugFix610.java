@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove.message;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class BugFix610 {
         return false;
     }
 
-    public static Resource applyPatch(Resource input, String messageId) throws IOException {
+    public static Resource applyPatch(InputStreamSource input, String messageId) throws IOException {
         return new InputStreamResource(applyPatch(input.getInputStream(), messageId));
     }
 

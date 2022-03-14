@@ -23,15 +23,13 @@ import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidat
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.CertificateExpiredException;
 import java.util.Collection;
 import java.util.List;
@@ -207,10 +205,10 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-
-        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
-        } catch (JAXBException | IOException e) {
+        ByteArrayResource resource = new ByteArrayResource(optionalCryptoMessagePersister.readBytes(message.getMessageId(), arkivmeldingFile.getIdentifier()));
+        try {
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
+        } catch (JAXBException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
     }

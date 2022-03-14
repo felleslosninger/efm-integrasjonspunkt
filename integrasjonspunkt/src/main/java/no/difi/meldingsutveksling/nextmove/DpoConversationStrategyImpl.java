@@ -16,11 +16,10 @@ import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.function.Consumer;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -52,12 +51,9 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                try (InputStream is = asicHandler.createEncryptedAsic(message, reject)) {
-                    transport.send(message.getSbd(), is);
-                    return null;
-                } catch (IOException e) {
-                    throw new NextMoveRuntimeException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
-                }
+                InputStreamResource encryptedAsic = asicHandler.createEncryptedAsic(message, reject);
+                transport.send(message.getSbd(), encryptedAsic);
+                return null;
             }).await();
         } catch (Exception e) {
             Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);

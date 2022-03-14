@@ -102,7 +102,6 @@
         <module>noarkexchange-ephorte</module>
         <module>noarkexchange-websak</module>
         <module>altinnexchange</module>
-        <module>pipes</module>
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
         <module>validation</module>
@@ -144,11 +143,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>bestedu</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>pipes</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

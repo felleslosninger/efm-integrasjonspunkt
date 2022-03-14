@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import org.apache.commons.io.IOUtils;
 

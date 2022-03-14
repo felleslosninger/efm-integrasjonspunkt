@@ -15,16 +15,17 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -116,11 +117,16 @@ public class NextMoveServiceBus {
             }
 
             for (ServiceBusMessage msg : messages) {
-                InputStream asicStream = (msg.getPayload().getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(msg.getPayload().getAsic())) : null;
-                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asicStream);
+                Resource asic = getAsic(msg);
+                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asic);
                 serviceBusClient.deleteMessage(msg);
             }
         }
+    }
+
+    @Nullable
+    private Resource getAsic(ServiceBusMessage msg) {
+        return (msg.getPayload().getAsic() != null) ? new ByteArrayResource(Base64.getDecoder().decode(msg.getPayload().getAsic())) : null;
     }
 
     public CompletableFuture getAllMessagesBatch() {
@@ -157,12 +163,17 @@ public class NextMoveServiceBus {
         try {
             log.debug(format("Received message on queue=%s with id=%s", serviceBusClient.getLocalQueuePath(), m.getMessageId()));
             ServiceBusPayload payload = payloadConverter.convert(getBody(m));
-            InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
-            nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
+            Resource asic = getAsic(payload);
+            nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asic);
             messageReceiver.completeAsync(m.getLockToken());
         } catch (IOException e) {
             log.error("Failed to put message on local queue", e);
         }
+    }
+
+    @Nullable
+    private Resource getAsic(ServiceBusPayload payload) {
+        return (payload.getAsic() != null) ? new ByteArrayResource(Base64.getDecoder().decode(payload.getAsic())) : null;
     }
 
     private byte[] getBody(IMessage message) {

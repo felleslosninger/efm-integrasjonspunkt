@@ -17,11 +17,13 @@ import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.slf4j.MDC;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -31,7 +33,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -129,9 +130,10 @@ public class NextMoveMessageService {
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
-        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), identifier))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
-        } catch (JAXBException | IOException e) {
+        byte[] bytes = optionalCryptoMessagePersister.readBytes(message.getMessageId(), identifier);
+        try {
+            return arkivmeldingUtil.unmarshalArkivmelding(new ByteArrayResource(bytes));
+        } catch (JAXBException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
     }
@@ -143,8 +145,8 @@ public class NextMoveMessageService {
     private String persistFile(NextMoveOutMessage message, MultipartFile file) {
         String identifier = UUID.randomUUID().toString();
 
-        try {
-            optionalCryptoMessagePersister.writeStream(message.getMessageId(), identifier, file.getInputStream());
+        try (InputStream inputStream = file.getInputStream()) {
+            optionalCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream));
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }

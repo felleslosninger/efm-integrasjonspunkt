@@ -53,7 +53,7 @@ public class DecryptCMSDocument {
         }, reject).outlet());
     }
 
-    private void decrypt(Input input, WritableResource writableResource) {
+    public void decrypt(Input input, WritableResource writableResource) {
         try (OutputStream outputStream = writableResource.getOutputStream()) {
             StreamUtils.copy(getRecipientInformation(input.getResource()).getContentStream(getRecipient(input)).getContentStream(), outputStream);
         } catch (CMSException | IOException e) {

@@ -13,12 +13,12 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.move.common.io.ResourceDataSource;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
@@ -47,7 +46,6 @@ public class FiksMapper {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final CreateCMSDocument createCMSDocument;
     private final ArkivmeldingUtil arkivmeldingUtil;
-    private final PromiseMaker promiseMaker;
     private final Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
@@ -55,12 +53,11 @@ public class FiksMapper {
                       OptionalCryptoMessagePersister optionalCryptoMessagePersister,
                       CreateCMSDocument createCMSDocument,
                       ArkivmeldingUtil arkivmeldingUtil,
-                      PromiseMaker promiseMaker, Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier) {
+                      Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
         this.createCMSDocument = createCMSDocument;
-        this.promiseMaker = promiseMaker;
         this.algorithmIdentifierSupplier = algorithmIdentifierSupplier;
         this.arkivmeldingUtil = arkivmeldingUtil;
     }
@@ -165,14 +162,12 @@ public class FiksMapper {
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String identifier = getArkivmeldingIdentifier(message);
-        return promiseMaker.promise(reject -> {
-            InputStreamResource resource = optionalCryptoMessagePersister.read(message.getMessageId(), identifier, reject);
-            try (InputStream is = resource.getInputStream()) {
-                return arkivmeldingUtil.unmarshalArkivmelding(is);
-            } catch (JAXBException | IOException e) {
-                throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
-            }
-        }).await();
+        try {
+            byte[] bytes = optionalCryptoMessagePersister.readBytes(message.getMessageId(), identifier);
+            return arkivmeldingUtil.unmarshalArkivmelding(new ByteArrayResource(bytes));
+        } catch (JAXBException | IOException e) {
+            throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
+        }
     }
 
     private String getArkivmeldingIdentifier(NextMoveOutMessage message) throws NextMoveException {
@@ -200,7 +195,7 @@ public class FiksMapper {
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
-        InputStreamResource document = optionalCryptoMessagePersister.read(messageId, file.getIdentifier(), reject);
+        InputStreamResource document = readDocument(messageId, file, reject);
         InputStreamResource encryptedDocument = createCMSDocument.createCMS(CreateCMSDocument.Input.builder()
                 .resource(document)
                 .certificate(cert)
@@ -212,6 +207,14 @@ public class FiksMapper {
                 .withFilnavn(file.getFilename())
                 .withMimetype(file.getMimetype())
                 .build();
+    }
+
+    private InputStreamResource readDocument(String messageId, BusinessMessageFile file, Reject reject) {
+        try {
+            return optionalCryptoMessagePersister.stream(messageId, file.getIdentifier(), reject);
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for messageId='%s'", file.getIdentifier(), messageId), e);
+        }
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(Saksmappe sm, Journalpost jp) {

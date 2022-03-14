@@ -2,12 +2,14 @@ package no.difi.meldingsutveksling.arkivmelding;
 
 import lombok.SneakyThrows;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
@@ -39,8 +41,12 @@ public class ArkivmeldingUtil {
         return bos.toByteArray();
     }
 
-    public Arkivmelding unmarshalArkivmelding(InputStream inputStream) throws JAXBException {
-        return marshallerContext.createUnmarshaller().unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
+    public Arkivmelding unmarshalArkivmelding(Resource resource) throws JAXBException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            return marshallerContext.createUnmarshaller().unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
+        } catch (IOException e) {
+            throw new ArkivmeldingRuntimeException("Could not unmarshal Arkivmelding");
+        }
     }
 
     public Saksmappe getSaksmappe(Arkivmelding am) {

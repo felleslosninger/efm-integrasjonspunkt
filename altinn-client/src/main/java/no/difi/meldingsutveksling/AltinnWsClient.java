@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnWsException;
 import no.difi.meldingsutveksling.shipping.ws.ManifestBuilder;
 import no.difi.meldingsutveksling.shipping.ws.RecipientBuilder;
 import no.difi.move.common.io.OutputStreamResource;
+import no.difi.move.common.io.ResourceDataSource;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.InputStreamResource;
@@ -76,14 +77,10 @@ public class AltinnWsClient {
         try {
             promiseMaker.promise(reject -> {
                 InputStreamResource altinnZip = getAltinnZip(request, reject);
-                try (InputStream inputStream = altinnZip.getInputStream()) {
-                    StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
-                    parameters.setDataStream(new DataHandler(InputStreamDataSource.of(inputStream)));
-                    uploadToAltinn(request, senderReference, parameters);
-                    return null;
-                } catch (IOException e) {
-                    throw new AltinnWsException(FAILED_TO_UPLOAD_A_MESSAGE_TO_ALTINN_BROKER_SERVICE, e);
-                }
+                StreamedPayloadBasicBE parameters = new StreamedPayloadBasicBE();
+                parameters.setDataStream(new DataHandler(new ResourceDataSource(altinnZip)));
+                uploadToAltinn(request, senderReference, parameters);
+                return null;
             }).await();
         } catch (Exception e) {
             auditError(request, e);
@@ -196,13 +193,17 @@ public class AltinnWsClient {
         try {
             DataHandler dh = getIBrokerServiceExternalBasicStreamed().downloadFileStreamedBasic(configuration.getUsername(), configuration.getPassword(), request.getFileReference(), request.getReciever());
             // TODO: rewrite this when Altinn fixes zip
-            TmpFile tmpFile = TmpFile.create();
-            File file = tmpFile.getFile();
-            FileUtils.copyInputStreamToFile(dh.getInputStream(), file);
-            AltinnPackage altinnPackage = AltinnPackage.from(file, context);
-            tmpFile.delete();
 
-            return altinnPackage;
+            TmpFile tmpFile = TmpFile.create();
+            try {
+                File file = tmpFile.getFile();
+                try (InputStream inputStream = dh.getInputStream()) {
+                    FileUtils.copyInputStreamToFile(inputStream, file);
+                }
+                return AltinnPackage.from(file, context);
+            } finally {
+                tmpFile.delete();
+            }
         } catch (IBrokerServiceExternalBasicStreamedDownloadFileStreamedBasicAltinnFaultFaultFaultMessage e) {
             throw new AltinnWsException(CANNOT_DOWNLOAD_FILE, AltinnReasonFactory.from(e), e);
         } catch (IOException | JAXBException e) {

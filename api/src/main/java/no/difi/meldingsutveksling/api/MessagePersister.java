@@ -1,18 +1,19 @@
 package no.difi.meldingsutveksling.api;
 
-import no.difi.meldingsutveksling.pipes.Reject;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
 
 import java.io.IOException;
 
 public interface MessagePersister {
 
-    void write(String messageId, String filename, Resource resource);
+    void write(String messageId, String filename, Resource resource) throws IOException;
 
-    Resource read(String messageId, String filename);
+    byte[] readBytes(String messageId, String filename) throws IOException;
 
-    InputStreamResource read(String messageId, String filename, Reject reject);
+    Resource read(String messageId, String filename) throws IOException;
+
+    void read(String messageId, String filename, WritableResource writableResource) throws IOException;
 
     void delete(String messageId) throws IOException;
 }

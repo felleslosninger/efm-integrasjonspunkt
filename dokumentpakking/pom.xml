@@ -54,10 +54,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>pipes</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>security</artifactId>
         </dependency>
