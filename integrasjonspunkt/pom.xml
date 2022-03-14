@@ -263,16 +263,6 @@
             <groupId>no.difi.move-common</groupId>
             <artifactId>domain</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.difi.commons</groupId>
-            <artifactId>commons-certvalidator</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -608,6 +598,12 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>no.difi.commons</groupId>
+                    <artifactId>commons-certvalidator</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.move-common</groupId>
