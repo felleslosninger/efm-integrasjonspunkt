@@ -28,7 +28,6 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.jupiter.api.io.TempDir;
@@ -263,7 +262,6 @@ public class CucumberStepsConfiguration {
     File temporaryFolder;
 
     @MockBean public UUIDGenerator uuidGenerator;
-    @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;

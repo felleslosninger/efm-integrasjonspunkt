@@ -281,11 +281,6 @@
                 <artifactId>commons-asic</artifactId>
                 <version>0.10.0</version>
             </dependency>
-            <dependency>
-                <groupId>no.difi.vefa</groupId>
-                <artifactId>peppol-lookup</artifactId>
-                <version>0.9.9</version>
-            </dependency>
 
             <!-- DPI -->
             <dependency>

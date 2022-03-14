@@ -18,11 +18,6 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.oauth.JWTDecoder;
-import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
-import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.locator.StaticLocator;
-import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -53,18 +48,10 @@ public class IntegrasjonspunktBeans {
                                             PromiseMaker promiseMaker,
                                             IntegrasjonspunktProperties properties) {
         return new AltinnWsClient(altinnWsConfigurationFactory.create(),
-            applicationContextHolder.getApplicationContext(),
-            plumber,
-            promiseMaker,
-            properties);
-    }
-
-    @Bean
-    public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
-        return LookupClientBuilder.forTest()
-                .locator(new StaticLocator(properties.getElma().getUrl()))
-                .certificateValidator(EmptyCertificateValidator.INSTANCE)
-                .build();
+                applicationContextHolder.getApplicationContext(),
+                plumber,
+                promiseMaker,
+                properties);
     }
 
     @Bean
