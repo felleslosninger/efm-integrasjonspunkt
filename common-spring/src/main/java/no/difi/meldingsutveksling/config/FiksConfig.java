@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.move.common.config.KeystoreProperties;
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.net.URL;
+import java.util.Set;
 
 @Data
 public class FiksConfig {
@@ -47,6 +49,7 @@ public class FiksConfig {
         private boolean kunDigitalLevering;
         private URL endpointUrl;
         private DataSize uploadSizeLimit;
+        private Set<String> ekskluderesFraPrint = Sets.newHashSet();
     }
 
     @Data

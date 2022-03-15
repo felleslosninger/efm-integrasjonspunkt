@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -199,11 +200,17 @@ public class FiksMapper {
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
         FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier(), reject);
 
-        return Dokument.builder()
+        Dokument.Builder<Void> builder = Dokument.builder()
                 .withData(getDataHandler(cert, fileEntryStream.getInputStream(), reject))
                 .withFilnavn(file.getFilename())
-                .withMimetype(file.getMimetype())
-                .build();
+                .withMimetype(file.getMimetype());
+
+        String ext = Stream.of(file.getFilename().split("\\.")).reduce((a, b) -> b).orElse("pdf");
+        if (properties.getFiks().getUt().getEkskluderesFraPrint().contains(ext)) {
+            builder.withEkskluderesFraPrint(true);
+        }
+
+        return builder.build();
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {
