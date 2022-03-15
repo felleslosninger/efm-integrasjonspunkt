@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.Manifest;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
@@ -11,6 +12,7 @@ import org.xml.sax.SAXParseException;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 
+@Slf4j
 public class CreateManifest {
 
     private final Jaxb2Marshaller marshaller;
@@ -28,6 +30,7 @@ public class CreateManifest {
         try {
             m.afterPropertiesSet();
         } catch (java.lang.Exception e) {
+            log.error("Error creating Jaxb2Marshaller", e);
             throw new IllegalStateException("createJaxb2Marshaller failed!", e);
         }
         return m;
