@@ -7,7 +7,7 @@ difi:
             mpc-id: mpctest
             language: NO
             mpc-concurrency: 1
-            schema: online
+            schema: offline
             upload-size-limit: 150MB
             poll-without-avsenderidentifikator: true
             client-type: json

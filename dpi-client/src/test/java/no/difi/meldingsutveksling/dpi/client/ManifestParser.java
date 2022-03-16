@@ -22,7 +22,7 @@ public class ManifestParser {
     private Jaxb2Marshaller createJaxb2Marshaller() throws java.lang.Exception {
         Jaxb2Marshaller m = new Jaxb2Marshaller();
         m.setClassesToBeBound(SDPManifest.class);
-        m.setSchema(Schemas.SDP_MANIFEST_SCHEMA);
+        m.setSchemas(Schemas.SDP_MANIFEST_SCHEMA);
         m.afterPropertiesSet();
         return m;
     }
