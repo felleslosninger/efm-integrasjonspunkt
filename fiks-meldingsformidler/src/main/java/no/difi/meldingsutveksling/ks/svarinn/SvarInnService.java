@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.io.pipe.Reject;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
@@ -36,7 +36,7 @@ public class SvarInnService {
 
     public Stream<Document> getAttachments(Forsendelse forsendelse, Reject reject) {
         Resource encrypted = svarInnClient.downloadZipFile(forsendelse, reject);
-        Resource decrypted = decryptor.decrypt(encrypted, reject);
+        Resource decrypted = decryptor.decrypt(encrypted);
         return unzip(forsendelse, decrypted);
     }
 

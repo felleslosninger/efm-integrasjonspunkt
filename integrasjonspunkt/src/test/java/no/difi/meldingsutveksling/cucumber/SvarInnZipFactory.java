@@ -36,14 +36,16 @@ public class SvarInnZipFactory {
             }
         }
 
-        return new ByteArrayResource(encrypt(resource));
+        return encrypt(resource);
     }
 
-    private byte[] encrypt(Resource resource) {
-        return createCMSDocument.toByteArray(CreateCMSDocument.Input.builder()
+    private ByteArrayResource encrypt(Resource resource) {
+        WritableByteArrayResource writableByteArrayResource = new WritableByteArrayResource();
+        createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
                 .resource(resource)
                 .certificate(fiksKeystoreHelper.getX509Certificate())
                 .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
-                .build());
+                .build(), writableByteArrayResource);
+        return new ByteArrayResource(writableByteArrayResource.toByteArray());
     }
 }

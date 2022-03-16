@@ -8,12 +8,14 @@ import no.difi.commons.asic.jaxb.asic.AsicManifest;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.util.MimeType;
 import org.springframework.util.StreamUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AsicParser {
 
@@ -27,15 +29,20 @@ public class AsicParser {
                 String filename;
 
                 while ((filename = asicReader.getNextFile()) != null) {
-                    attachments.add(Document.builder()
-                            .resource(new ByteArrayResource(StreamUtils.copyToByteArray(asicReader.inputStream())))
-                            .filename(filename)
-                            .build()
-                    );
+                    try (InputStream attachmentStream = asicReader.inputStream()) {
+                        attachments.add(Document.builder()
+                                .resource(new ByteArrayResource(StreamUtils.copyToByteArray(attachmentStream)))
+                                .filename(filename)
+                                .mimeType(MediaType.APPLICATION_OCTET_STREAM)
+                                .build()
+                        );
+                    }
                 }
 
                 AsicManifest asicManifest = asicReader.getAsicManifest();
-                attachments.forEach(p -> p.withMimeType(getMimeType(asicManifest, p.getFilename())));
+                attachments = attachments.stream()
+                        .map(p -> p.withMimeType(getMimeType(asicManifest, p.getFilename())))
+                        .collect(Collectors.toList());
             }
 
             return attachments;

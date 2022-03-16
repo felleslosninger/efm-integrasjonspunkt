@@ -9,14 +9,9 @@ import no.difi.asic.SignatureHelper;
 import no.difi.asic.SignatureMethod;
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
-import no.difi.move.common.io.OutputStreamResource;
+import no.difi.move.common.io.pipe.PromiseMaker;
+import no.difi.move.common.io.pipe.Reject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
@@ -27,51 +22,28 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class CreateCMSEncryptedAsice {
 
-    private final Plumber plumber;
     private final PromiseMaker promiseMaker;
     private final CreateAsice createASiCE;
     private final CreateCMSDocument createCMS;
 
-    public byte[] toByteArray(Input input) {
-        byte[] asic = createASiCE.toByteArray(input.getCreateAsicInput());
-        return createCMS.toByteArray(input.getCreateCMSDocumentInput(new ByteArrayResource(asic)));
-    }
-
-    public InMemoryWithTempFileFallbackResource createCmsEncryptedAsice(Input input) {
-        try (InMemoryWithTempFileFallbackResource asic = createASiCE.createAsice(input.getCreateAsicInput())) {
-            return createCMS.createCMS(input.getCreateCMSDocumentInput(asic));
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not create CMS Encrypted Asice", e);
-        }
-    }
-
-    public InputStreamResource createCmsEncryptedAsice(Input input, Reject reject) {
-        return new InputStreamResource(plumber.pipe("Creating CMS encrypted Asice", inlet -> {
-            try {
-                createCmsEncryptedAsice(input, new OutputStreamResource(inlet));
-            } catch (Exception e) {
-                reject.reject(e);
-            }
-        }, reject).outlet());
+    public Resource createCmsEncryptedAsice(Input input, Reject reject) {
+        Resource asic = createASiCE.createAsice(input.getCreateAsicInput(), reject);
+        return createCMS.encrypt(input.getCreateCMSDocumentInput(asic), reject);
     }
 
     public void createCmsEncryptedAsice(Input input, WritableResource output) {
         promiseMaker.promise(reject -> {
-            InputStreamResource asic = createASiCE.createAsice(input.getCreateAsicInput(), reject);
-            try {
-                createCMS.createCMS(input.getCreateCMSDocumentInput(asic), output);
-            } catch (Exception e) {
-                reject.reject(e);
-            }
+            Resource asic = createASiCE.createAsice(input.getCreateAsicInput(), reject);
+            createCMS.encrypt(input.getCreateCMSDocumentInput(asic), output);
             return null;
-        });
+        }).await();
     }
 
     @Value
     @Builder
     public static class Input {
         @NonNull Manifest manifest;
-        @NonNull Stream<AsicEAttachable> documents;
+        @NonNull Stream<? extends AsicEAttachable> documents;
         @NonNull X509Certificate certificate;
         @NonNull SignatureMethod signatureMethod;
         @NonNull SignatureHelper signatureHelper;

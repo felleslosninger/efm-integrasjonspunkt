@@ -24,7 +24,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.move.common.cert.KeystoreHelper;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -125,18 +124,26 @@ public class IntegrajonspunktReceiveImpl {
             }
             return putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
         } else {
-            Resource encryptedAsic = messagePersister.read(sbd.getMessageId(), NextMoveConsts.ASIC_FILE);
-            try (InMemoryWithTempFileFallbackResource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+            Resource encryptedAsic = getEncryptedAsic(sbd);
+            Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                     .resource(encryptedAsic)
                     .keystoreHelper(keystoreHelper)
-                    .build())) {
-
+                    .build());
+            try {
                 Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
                 MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
                 return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
             } catch (Exception e) {
                 throw new NextMoveRuntimeException("Closing ASiC failed!", e);
             }
+        }
+    }
+
+    private Resource getEncryptedAsic(StandardBusinessDocument sbd) {
+        try {
+            return messagePersister.read(sbd.getMessageId(), NextMoveConsts.ASIC_FILE);
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException("Could not read ASiC!", e);
         }
     }
 

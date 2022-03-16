@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.slf4j.MDC;
 
 import java.util.function.Consumer;

@@ -1,13 +1,11 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import no.difi.meldingsutveksling.api.MessagePersister;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.io.ResourceUtils;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,30 +14,16 @@ public class InMemoryMessagePersister implements MessagePersister {
     private final Map<String, Map<String, byte[]>> data = new HashMap<>();
 
     @Override
-    public void write(String messageId, String filename, byte[] message) {
+    public void write(String messageId, String filename, Resource resource) throws IOException {
         Map<String, byte[]> files = getFiles(messageId);
-        files.put(filename, Arrays.copyOf(message, message.length));
+        files.put(filename, ResourceUtils.toByteArray(resource));
         data.put(messageId, files);
     }
 
     @Override
-    public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
+    public Resource read(String messageId, String filename) {
         Map<String, byte[]> files = getFiles(messageId);
-        files.put(filename, IOUtils.toByteArray(stream));
-        data.put(messageId, files);
-    }
-
-    @Override
-    public byte[] read(String messageId, String filename) {
-        Map<String, byte[]> files = getFiles(messageId);
-        return files.get(filename);
-    }
-
-    @Override
-    public FileEntryStream readStream(String messageId, String filename) {
-        Map<String, byte[]> files = getFiles(messageId);
-        byte[] bytes = files.get(filename);
-        return FileEntryStream.of(new BufferedInputStream(new ByteArrayInputStream(bytes)), bytes.length);
+        return new ByteArrayResource(files.get(filename));
     }
 
     @Override

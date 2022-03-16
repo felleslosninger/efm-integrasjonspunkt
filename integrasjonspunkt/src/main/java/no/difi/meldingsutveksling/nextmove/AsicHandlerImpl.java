@@ -12,15 +12,16 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.services.Adresseregister;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.Reject;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,22 +40,31 @@ public class AsicHandlerImpl implements AsicHandler {
     private final CreateCMSEncryptedAsice createCMSEncryptedAsice;
     private final ManifestFactory manifestFactory;
 
-    @NotNull
     @Override
-    public InputStreamResource createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull Reject reject) {
+    public void createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull WritableResource writableResource) {
         List<AsicEAttachable> documents = getDocuments(msg);
         AsicEAttachable mainDocument = documents.get(0);
-        return createEncryptedAsic(msg, manifestFactory.createManifest(msg, mainDocument), documents.stream(), getMottakerSertifikat(msg), reject);
+        CreateCMSEncryptedAsice.Input input = getInput(msg, manifestFactory.createManifest(msg, mainDocument), documents.stream(), getMottakerSertifikat(msg));
+        createCMSEncryptedAsice.createCmsEncryptedAsice(input, writableResource);
     }
 
     @NotNull
     @Override
-    public InputStreamResource createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull Document mainDocument, @NotNull Stream<Document> attachments, @NotNull X509Certificate certificate, @NotNull Reject reject) {
-        return createEncryptedAsic(msg, manifestFactory.createManifest(msg, mainDocument), Streams.concat(Stream.of(mainDocument), attachments), certificate, reject);
+    public Resource createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull Reject reject) {
+        List<AsicEAttachable> documents = getDocuments(msg);
+        AsicEAttachable mainDocument = documents.get(0);
+        CreateCMSEncryptedAsice.Input input = getInput(msg, manifestFactory.createManifest(msg, mainDocument), documents.stream(), getMottakerSertifikat(msg));
+        return createCMSEncryptedAsice.createCmsEncryptedAsice(input, reject);
     }
 
-    private InputStreamResource createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull Manifest manifest, @NotNull Stream<AsicEAttachable> documents, @NotNull X509Certificate certificate, @NotNull Reject reject) {
-        return createCMSEncryptedAsice.createCmsEncryptedAsice(CreateCMSEncryptedAsice.Input.builder()
+    @Override
+    public Resource createEncryptedAsic(@NotNull NextMoveMessage msg, @NotNull Document mainDocument, @NotNull Stream<Document> attachments, @NotNull X509Certificate certificate, @NotNull Reject reject) {
+        CreateCMSEncryptedAsice.Input input = getInput(msg, manifestFactory.createManifest(msg, mainDocument), Streams.concat(Stream.of(mainDocument), attachments), certificate);
+        return createCMSEncryptedAsice.createCmsEncryptedAsice(input, reject);
+    }
+
+    private CreateCMSEncryptedAsice.Input getInput(@NotNull NextMoveMessage msg, @NotNull Manifest manifest, @NotNull Stream<AsicEAttachable> documents, @NotNull X509Certificate certificate) {
+        return CreateCMSEncryptedAsice.Input.builder()
                 .manifest(manifest)
                 .documents(documents)
                 .certificate(certificate)
@@ -62,8 +72,7 @@ public class AsicHandlerImpl implements AsicHandler {
                 .signatureHelper(keystoreHelper.getSignatureHelper())
                 .keyEncryptionScheme(msg.getServiceIdentifier() == DPE ? null : CmsAlgorithm.RSAES_OAEP)
                 .tempFilePrefix(msg.getSenderIdentifier().toLowerCase() + "-")
-                .build(), reject
-        );
+                .build();
     }
 
     private List<AsicEAttachable> getDocuments(NextMoveMessage msg) {
@@ -72,15 +81,20 @@ public class AsicHandlerImpl implements AsicHandler {
                     if (Boolean.TRUE.equals(a.getPrimaryDocument())) return -1;
                     if (Boolean.TRUE.equals(b.getPrimaryDocument())) return 1;
                     return a.getDokumentnummer().compareTo(b.getDokumentnummer());
-                }).map(f -> {
-                    Resource fes = optionalCryptoMessagePersister.read(msg.getMessageId(), f.getIdentifier());
-                    return Document.builder()
-                            .filename(f.getFilename())
-                            .mimeType(getMimetype(f))
-                            .title(f.getTitle())
-                            .resource(fes)
-                            .build();
-                }).collect(Collectors.toList());
+                }).map(f -> Document.builder()
+                        .filename(f.getFilename())
+                        .mimeType(getMimetype(f))
+                        .title(f.getTitle())
+                        .resource(getResource(msg, f))
+                        .build()).collect(Collectors.toList());
+    }
+
+    private Resource getResource(NextMoveMessage msg, BusinessMessageFile f) {
+        try {
+            return optionalCryptoMessagePersister.read(msg.getMessageId(), f.getIdentifier());
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format("Could not read file messageId=%s, filename=%s", msg.getMessageId(), f.getIdentifier()), e);
+        }
     }
 
     private String getMimetype(BusinessMessageFile f) {
@@ -95,4 +109,6 @@ public class AsicHandlerImpl implements AsicHandler {
     private X509Certificate getMottakerSertifikat(NextMoveMessage message) {
         return (X509Certificate) adresseregister.getReceiverCertificate(message);
     }
+
+
 }

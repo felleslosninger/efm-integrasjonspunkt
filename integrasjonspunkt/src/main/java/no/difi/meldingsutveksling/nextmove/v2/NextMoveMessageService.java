@@ -22,8 +22,8 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.slf4j.MDC;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -130,10 +130,10 @@ public class NextMoveMessageService {
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, String identifier) {
-        byte[] bytes = optionalCryptoMessagePersister.readBytes(message.getMessageId(), identifier);
         try {
-            return arkivmeldingUtil.unmarshalArkivmelding(new ByteArrayResource(bytes));
-        } catch (JAXBException e) {
+            Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), identifier);
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
+        } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
     }

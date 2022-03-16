@@ -15,7 +15,7 @@ import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -64,7 +64,7 @@ public class NextMoveMessageInService {
     }
 
     @Transactional
-    public InputStreamResource popMessage(String messageId) throws AsicPersistenceException {
+    public Resource popMessage(String messageId) throws AsicPersistenceException {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
 
@@ -78,10 +78,7 @@ public class NextMoveMessageInService {
 
         try {
             Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()), markerFrom(message));
-            return cryptoMessagePersister.stream(messageId, ASIC_FILE, throwable ->
-                    Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
-                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
-            );
+            return cryptoMessagePersister.read(messageId, ASIC_FILE);
         } catch (PersistenceException | IOException e) {
             String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());

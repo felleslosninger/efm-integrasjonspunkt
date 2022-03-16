@@ -13,13 +13,12 @@ import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.move.common.io.ResourceDataSource;
+import no.difi.move.common.io.pipe.Reject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -163,8 +162,8 @@ public class FiksMapper {
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String identifier = getArkivmeldingIdentifier(message);
         try {
-            byte[] bytes = optionalCryptoMessagePersister.readBytes(message.getMessageId(), identifier);
-            return arkivmeldingUtil.unmarshalArkivmelding(new ByteArrayResource(bytes));
+            Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), identifier);
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
@@ -195,8 +194,8 @@ public class FiksMapper {
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
-        InputStreamResource document = readDocument(messageId, file, reject);
-        InputStreamResource encryptedDocument = createCMSDocument.createCMS(CreateCMSDocument.Input.builder()
+        Resource document = readDocument(messageId, file);
+        Resource encryptedDocument = createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
                 .resource(document)
                 .certificate(cert)
                 .keyEncryptionScheme(algorithmIdentifierSupplier.get())
@@ -209,9 +208,9 @@ public class FiksMapper {
                 .build();
     }
 
-    private InputStreamResource readDocument(String messageId, BusinessMessageFile file, Reject reject) {
+    private Resource readDocument(String messageId, BusinessMessageFile file) {
         try {
-            return optionalCryptoMessagePersister.stream(messageId, file.getIdentifier(), reject);
+            return optionalCryptoMessagePersister.read(messageId, file.getIdentifier());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for messageId='%s'", file.getIdentifier(), messageId), e);
         }

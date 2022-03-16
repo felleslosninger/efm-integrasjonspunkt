@@ -4,6 +4,11 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import no.difi.move.common.io.OutputStreamResource;
+import no.difi.move.common.io.pipe.Pipe;
+import no.difi.move.common.io.pipe.PipeResource;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.Reject;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
@@ -26,31 +31,16 @@ import java.security.cert.X509Certificate;
 @RequiredArgsConstructor
 public class CreateCMSDocument {
 
-    //    private final Plumber plumber;
-//    private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
+    private final Plumber plumber;
     private final ASN1ObjectIdentifier cmsEncryptionAlgorithm;
 
-//    public byte[] toByteArray(Input input) {
-//        WritableByteArrayResource output = new WritableByteArrayResource();
-//        createCMS(input, output);
-//        return output.toByteArray();
-//    }
-//
-//    public InMemoryWithTempFileFallbackResource createCMS(Input input) {
-//        InMemoryWithTempFileFallbackResource output = resourceFactory.getResource(input.getTempFilePrefix(), ".cms");
-//        createCMS(input, output);
-//        return output;
-//    }
-//
-//    public InputStreamResource createCMS(Input input, Reject reject) {
-//        return new InputStreamResource(plumber.pipe("Creating CMS document", inlet -> {
-//            try {
-//                createCMS(input, new OutputStreamResource(inlet));
-//            } catch (Exception e) {
-//                reject.reject(new IllegalStateException("Couldn't create CMS document", e));
-//            }
-//        }, reject).outlet());
-//    }
+    public Resource encrypt(Input input, Reject reject) {
+        Pipe pipe = plumber.pipe("Encrypting",
+                inlet -> encrypt(input, new OutputStreamResource(inlet)),
+                reject);
+
+        return new PipeResource(pipe, String.format("Encrypted %s", input.getResource().getDescription()));
+    }
 
     public void encrypt(Input input, WritableResource output) {
         try {

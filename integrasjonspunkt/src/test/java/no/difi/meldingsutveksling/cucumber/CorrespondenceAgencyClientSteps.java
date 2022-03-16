@@ -7,7 +7,9 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAttachmentV2;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import org.apache.commons.io.IOUtils;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.StreamUtils;
 import org.xmlunit.matchers.CompareMatcher;
 
 import java.util.List;
@@ -31,15 +33,17 @@ public class CorrespondenceAgencyClientSteps {
         assertThat(hideData(actualPayload), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
 
 
-        List<Attachment> attachments = in.getCorrespondence()
+        List<Document> attachments = in.getCorrespondence()
                 .getContent().getValue()
                 .getAttachments().getValue()
                 .getBinaryAttachments().getValue()
                 .getBinaryAttachmentV2()
                 .stream()
-                .map(p -> new Attachment(getInpuStream(p))
-                        .setFileName(p.getFileName().getValue())
-                        .setMimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFileName().getValue().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
+                .map(p -> Document.builder()
+                        .resource(getResource(p))
+                        .filename(p.getFileName().getValue())
+                        .mimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFileName().getValue().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
+                        .build()
                 ).collect(Collectors.toList());
         messageSentHolder.set(new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPV)
@@ -54,7 +58,7 @@ public class CorrespondenceAgencyClientSteps {
     }
 
     @SneakyThrows
-    private byte[] getInpuStream(BinaryAttachmentV2 p) {
-        return IOUtils.toByteArray(p.getData().getValue().getInputStream());
+    private ByteArrayResource getResource(BinaryAttachmentV2 p) {
+        return new ByteArrayResource(StreamUtils.copyToByteArray(p.getData().getValue().getInputStream()));
     }
 }

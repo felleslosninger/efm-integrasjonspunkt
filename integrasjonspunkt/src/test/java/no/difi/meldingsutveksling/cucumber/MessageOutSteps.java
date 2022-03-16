@@ -9,12 +9,11 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.io.ResourceUtils;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.xmlunit.matchers.CompareMatcher;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,7 +79,7 @@ public class MessageOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
-                .map(p -> Arrays.asList(p.getFileName(), p.getMimeType()))
+                .map(p -> Arrays.asList(p.getFilename(), p.getMimeType().toString()))
                 .collect(Collectors.toList())
         );
 
@@ -96,17 +95,17 @@ public class MessageOutSteps {
     }
 
     @Then("^the content of the file named \"([^\"]*)\" is:$")
-    public void theContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
+    public void theContentOfTheFileNamedIs(String filename, String expectedContent) {
         Message message = messageSentHolder.get();
 
-        String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
+        String actualContent = new String(ResourceUtils.toByteArray(message.getAttachment(filename).getResource()));
         assertThat(actualContent, equalToCompressingWhiteSpace(expectedContent));
     }
 
     @Then("^the XML content of the file named \"([^\"]*)\" is:$")
-    public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
+    public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) {
         Message message = messageSentHolder.get();
-        String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
+        String actualContent = new String(ResourceUtils.toByteArray(message.getAttachment(filename).getResource()));
         assertThat(actualContent, CompareMatcher.isIdenticalTo(expectedContent).ignoreWhitespace());
     }
 

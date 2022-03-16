@@ -23,12 +23,15 @@ import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocu
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.ResourceUtils;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
@@ -45,6 +48,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
@@ -69,15 +75,27 @@ import static net.javacrumbs.jsonunit.core.ConfigurationWhen.paths;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.then;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-@SpringBootTest(classes = {DpiClientTestConfig.class, DpiClientConfig.class, DokumentpakkingConfig.class})
+@SpringBootTest(classes = {
+        DpiClientTestConfig.class,
+        DpiClientConfig.class,
+        DokumentpakkingConfig.class,
+        TaskExecutorConfig.class,
+        PromiseMaker.class,
+        Plumber.class
+})
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
+
+    @MockBean private TransactionTemplate transactionTemplate;
+    @Mock private TransactionStatus transactionStatus;
 
     @Autowired
     private DpiClient dpiClient;
@@ -132,6 +150,9 @@ class DpiClientTest {
 
     @BeforeEach
     public void beforeEach(MockServerClient client) {
+        when(transactionTemplate.execute(any()))
+                .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
+
         client.when(request()
                         .withMethod("POST")
                         .withPath("/token"))
@@ -417,8 +438,7 @@ class DpiClientTest {
         Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                 .resource(new InputStreamResource(content))
                 .keystoreHelper(serverKeystoreHelper)
-                .build()
-        );
+                .build());
 
         Parcel parcel = getParcel(standardBusinessDocument, asic);
         assertThat(parcel.getMainDocument().getFilename()).isEqualTo("svada.pdf");

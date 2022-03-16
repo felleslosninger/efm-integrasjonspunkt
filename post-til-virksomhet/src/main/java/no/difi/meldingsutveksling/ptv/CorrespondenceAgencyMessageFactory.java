@@ -24,14 +24,12 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.move.common.io.ResourceDataSource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -66,24 +64,24 @@ public class CorrespondenceAgencyMessageFactory {
     private final no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationObjectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
 
     @SneakyThrows
-    public InsertCorrespondenceV2 create(NextMoveOutMessage message, Reject reject) {
+    public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
         if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            return handleArkivmeldingMessage(message, reject);
+            return handleArkivmeldingMessage(message);
         }
 
         if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
-            return handleDigitalDpvMessage(message, reject);
+            return handleDigitalDpvMessage(message);
         }
 
         throw new NextMoveRuntimeException(String.format("StandardBusinessDocument.any not instance of %s or %s, aborting",
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
-    private InsertCorrespondenceV2 handleDigitalDpvMessage(NextMoveOutMessage message, Reject reject) {
+    private InsertCorrespondenceV2 handleDigitalDpvMessage(NextMoveOutMessage message) {
         DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles(), reject));
+        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles()));
 
         return create(message,
                 msg.getTittel(),
@@ -92,7 +90,7 @@ public class CorrespondenceAgencyMessageFactory {
                 attachmentExternalBEV2List);
     }
 
-    private InsertCorrespondenceV2 handleArkivmeldingMessage(NextMoveOutMessage message, Reject reject) {
+    private InsertCorrespondenceV2 handleArkivmeldingMessage(NextMoveOutMessage message) {
         Map<String, BusinessMessageFile> fileMap = message.getFiles().stream()
                 .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
@@ -106,7 +104,7 @@ public class CorrespondenceAgencyMessageFactory {
                 .map(fileMap::get)
                 .filter(Objects::nonNull).collect(Collectors.toList());
 
-        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files, reject));
+        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files));
 
         return create(message,
                 jp.getOffentligTittel(),
@@ -127,16 +125,16 @@ public class CorrespondenceAgencyMessageFactory {
         }
     }
 
-    private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files, Reject reject) {
+    private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files) {
         return files
                 .stream()
                 .sorted(Comparator.comparing(BusinessMessageFile::getDokumentnummer))
-                .map(file -> getBinaryAttachmentV2(messageId, file, reject))
+                .map(file -> getBinaryAttachmentV2(messageId, file))
                 .collect(Collectors.toList());
     }
 
-    private BinaryAttachmentV2 getBinaryAttachmentV2(String messageId, BusinessMessageFile file, Reject reject) {
-        InputStreamResource resource = getResource(messageId, file, reject);
+    private BinaryAttachmentV2 getBinaryAttachmentV2(String messageId, BusinessMessageFile file) {
+        Resource resource = getResource(messageId, file);
         BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
         binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
         binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(file.getFilename()));
@@ -147,9 +145,9 @@ public class CorrespondenceAgencyMessageFactory {
         return binaryAttachmentV2;
     }
 
-    private InputStreamResource getResource(String messageId, BusinessMessageFile f, Reject reject) {
+    private Resource getResource(String messageId, BusinessMessageFile f) {
         try {
-            return optionalCryptoMessagePersister.stream(messageId, f.getIdentifier(), reject);
+            return optionalCryptoMessagePersister.read(messageId, f.getIdentifier());
         } catch (IOException e) {
             throw new NextMoveRuntimeException(String.format("Could read file named '%s' for messageId=%s",
                     f.getIdentifier(), f.getFilename()), e);

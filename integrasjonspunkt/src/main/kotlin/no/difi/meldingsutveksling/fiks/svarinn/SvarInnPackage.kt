@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.fiks.svarinn
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource
-import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.Resource
 
-data class SvarInnPackage(val sbd: StandardBusinessDocument, val asic: InputStreamResource)
+data class SvarInnPackage(val sbd: StandardBusinessDocument, val asic: Resource)

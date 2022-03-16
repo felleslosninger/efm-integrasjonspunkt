@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.*;
 import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.io.OutputStreamResource;
-import no.difi.move.common.io.WritableByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
+import no.difi.move.common.io.pipe.Pipe;
+import no.difi.move.common.io.pipe.PipeResource;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.Reject;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
 import java.io.BufferedInputStream;
@@ -25,28 +24,13 @@ import java.util.stream.Stream;
 public class CreateAsice {
 
     private final Plumber plumber;
-    private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
 
-    public byte[] toByteArray(Input input) {
-        WritableByteArrayResource output = new WritableByteArrayResource();
-        createAsice(input, output);
-        return output.toByteArray();
-    }
+    public Resource createAsice(Input input, Reject reject) {
+        Pipe pipe = plumber.pipe("Creating ASiC-E",
+                inlet -> createAsice(input, new OutputStreamResource(inlet)),
+                reject);
 
-    public InMemoryWithTempFileFallbackResource createAsice(Input input) {
-        InMemoryWithTempFileFallbackResource output = resourceFactory.getResource(input.getTempFilePrefix(), ".asic");
-        createAsice(input, output);
-        return output;
-    }
-
-    public InputStreamResource createAsice(Input input, Reject reject) {
-        return new InputStreamResource(plumber.pipe("Creating Asice", inlet -> {
-            try {
-                createAsice(input, new OutputStreamResource(inlet));
-            } catch (Exception e) {
-                reject.reject(new IllegalStateException("Couldn't create Asice!", e));
-            }
-        }, reject).outlet());
+        return new PipeResource(pipe, "Creating ASiC-E");
     }
 
     public void createAsice(Input input, WritableResource output) {
@@ -84,7 +68,7 @@ public class CreateAsice {
     @Builder
     public static class Input {
         @NonNull Manifest manifest;
-        @NonNull Stream<AsicEAttachable> documents;
+        @NonNull Stream<? extends AsicEAttachable> documents;
         @NonNull X509Certificate certificate;
         @NonNull SignatureMethod signatureMethod;
         @NonNull SignatureHelper signatureHelper;

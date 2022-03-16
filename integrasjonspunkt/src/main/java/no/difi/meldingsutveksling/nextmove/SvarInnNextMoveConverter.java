@@ -24,12 +24,12 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.fiks.svarinn.SvarInnPackage;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.Reject;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,12 +63,11 @@ public class SvarInnNextMoveConverter {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
 
-        InputStreamResource asic = asicHandler.createEncryptedAsic(
+        Resource asic = asicHandler.createEncryptedAsic(
                 NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
                 getArkivmeldingFile(forsendelse),
                 svarInnService.getAttachments(forsendelse, reject),
-                keystoreHelper.getX509Certificate(),
-                reject);
+                keystoreHelper.getX509Certificate(), reject);
 
         return new SvarInnPackage(sbd, asic);
     }

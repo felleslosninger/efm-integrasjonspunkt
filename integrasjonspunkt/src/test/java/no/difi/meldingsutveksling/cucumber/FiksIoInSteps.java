@@ -4,17 +4,9 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.api.AsicHandler;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.ks.fiksio.FiksIoSubscriber;
-import no.difi.meldingsutveksling.nextmove.AsicHandlerImpl;
-import no.difi.meldingsutveksling.nextmove.ManifestFactory;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import no.ks.fiks.io.client.FiksIOKlient;
 import no.ks.fiks.io.client.SvarSender;
 import no.ks.fiks.io.client.model.AmqpChannelFeedbackHandler;
@@ -22,12 +14,10 @@ import no.ks.fiks.io.client.model.KontoId;
 import no.ks.fiks.io.client.model.MeldingId;
 import no.ks.fiks.io.client.model.MottattMelding;
 import no.ks.fiks.io.client.send.FiksIOSender;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.io.Resource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -40,17 +30,13 @@ public class FiksIoInSteps {
 
     private final Holder<Message> messageInHolder;
     private final FiksIOKlient fiksIOKlient;
-    private final AsicHandler asicHandler;
-    private final CreateCMSEncryptedAsice createCMSEncryptedAsice;
-    private final Plumber plumber;
     private final PromiseMaker promiseMaker;
-    private final KeystoreHelper keystoreHelper;
     private final FiksIoSubscriber fiksIoSubscriber;
+    private final CreateAsic createAsic;
 
     @Before
     public void before() {
         messageInHolder.reset();
-
     }
 
     @And("^FIKS IO prepares a message with messageId \"([^\"]+)\"$")
@@ -83,57 +69,49 @@ public class FiksIoInSteps {
     public void fiksIoHasTheMessageAvailable(String mottakerKontoId, String protocol) {
         Message message = messageInHolder.get();
 
-        byte[] asic = getAsic(message);
-        MottattMelding mottattMelding = MottattMelding.builder()
-                .writeDekryptertZip(w -> {
-                })
-                .writeKryptertZip(w -> {
-                })
-                .getKryptertStream(() -> new ByteArrayInputStream(asic))
-                .getDekryptertZipStream(() -> null)
-                .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
-                .meldingType(protocol)
-                .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
-                .avsenderKontoId(new KontoId(UUID.randomUUID()))
-                .ttl(Duration.ofHours(1))
-                .harPayload(true)
-                .build();
+        promiseMaker.promise(reject -> {
+            Resource asic = createAsic.createAsic(message, reject);
 
-        AmqpChannelFeedbackHandler amqpHandler = mock(AmqpChannelFeedbackHandler.class);
-        when(amqpHandler.getHandleAck()).thenReturn(mock(Runnable.class));
-        SvarSender svarSender = SvarSender.builder()
-                .meldingSomSkalKvitteres(mottattMelding)
-                .utsendingKlient(mock(FiksIOSender.class))
-                .encrypt(e -> null)
-                .amqpChannelFeedbackHandler(amqpHandler)
-                .build();
+            try (InputStream inputStream = asic.getInputStream()) {
+                MottattMelding mottattMelding = MottattMelding.builder()
+                        .writeDekryptertZip(w -> {
+                        })
+                        .writeKryptertZip(w -> {
+                        })
+                        .getKryptertStream(() -> inputStream)
+                        .getDekryptertZipStream(() -> null)
+                        .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
+                        .meldingType(protocol)
+                        .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
+                        .avsenderKontoId(new KontoId(UUID.randomUUID()))
+                        .ttl(Duration.ofHours(1))
+                        .harPayload(true)
+                        .build();
 
-        doAnswer(ans -> {
-            BiConsumer<MottattMelding, SvarSender> consumer = ans.getArgument(0);
-            consumer.accept(mottattMelding, svarSender);
-            return null;
-        }).when(fiksIOKlient).newSubscription(any(BiConsumer.class));
+                AmqpChannelFeedbackHandler amqpHandler = mock(AmqpChannelFeedbackHandler.class);
+                when(amqpHandler.getHandleAck()).thenReturn(mock(Runnable.class));
+                SvarSender svarSender = SvarSender.builder()
+                        .meldingSomSkalKvitteres(mottattMelding)
+                        .utsendingKlient(mock(FiksIOSender.class))
+                        .encrypt(e -> null)
+                        .amqpChannelFeedbackHandler(amqpHandler)
+                        .build();
+
+                doAnswer(ans -> {
+                    BiConsumer<MottattMelding, SvarSender> consumer = ans.getArgument(0);
+                    consumer.accept(mottattMelding, svarSender);
+                    return null;
+                }).when(fiksIOKlient).newSubscription(any(BiConsumer.class));
+                return null;
+            } catch (IOException e) {
+                throw new IllegalStateException("Could not read ASIC!", e);
+            }
+        });
     }
 
     @And("^the FIKS IO subscriber is registered$")
     public void registerSubscriber() {
         fiksIoSubscriber.registerSubscriber();
-    }
-
-    private byte[] getAsic(Message message) {
-
-        return createCMSEncryptedAsice.toByteArray(CreateCMSEncryptedAsice.Input.builder()
-                        .
-                .build());
-
-        return promiseMaker.promise(reject -> {
-            try (PipedInputStream is = plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
-                    .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate())).outlet()) {
-                return IOUtils.toByteArray(is);
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Couldn't get ASIC", e);
-            }
-        }).await();
     }
 
 }

@@ -9,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.WritableResource;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedOutputStream;
@@ -43,22 +42,10 @@ public class FileMessagePersister implements MessagePersister {
     }
 
     @Override
-    public byte[] readBytes(String messageId, String filename) throws IOException {
-        String filedir = getMessageFiledirPath(messageId);
-        File file = new File(filedir + filename);
-        return FileUtils.readFileToByteArray(file);
-    }
-
-    @Override
     public Resource read(String messageId, String filename) throws IOException {
         String filedir = getMessageFiledirPath(messageId);
         File file = new File(filedir + filename);
         return new FileSystemResource(file);
-    }
-
-    @Override
-    public void read(String messageId, String filename, WritableResource writableResource) throws IOException {
-        ResourceUtils.copy(read(messageId, filename), writableResource);
     }
 
     @Override

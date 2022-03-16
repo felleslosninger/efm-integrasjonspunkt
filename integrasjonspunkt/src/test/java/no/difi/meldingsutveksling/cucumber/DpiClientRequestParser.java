@@ -6,21 +6,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
-import org.apache.commons.fileupload.FileItem;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
 
@@ -35,22 +35,19 @@ public class DpiClientRequestParser {
 
     private final MultipartParser multipartParser;
     private final AsicParser asicParser;
-    private final CmsUtil cmsUtil;
-    private final CucumberKeyStore cucumberKeyStore;
+    private final DecryptCMSDocument decryptCMSDocument;
+    private final KeystoreHelper cucumberKeystoreHelper;
     private final UnpackJWT unpackJWT;
     private final UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
     @SneakyThrows
     Message parse(LoggedRequest loggedRequest) {
         String contentType = loggedRequest.getHeader(HttpHeaders.CONTENT_TYPE);
-        Map<String, FileItem> fileItems = multipartParser.parse(contentType, loggedRequest.getBody());
+        Map<String, FileItemResource> fileItems = multipartParser.parse(contentType, loggedRequest.getBody());
 
         StandardBusinessDocument sbd = getStandardBusinessDocument(fileItems);
-
         PartnerIdentifier receiver = sbd.getReceiverIdentifier();
-        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
-
-        List<Attachment> attachments = getAttachments(fileItems, privateKey);
+        List<Document> attachments = getAttachments(fileItems, receiver);
 
         sbd.getBusinessMessage(DokumentpakkefingeravtrykkHolder.class)
                 .ifPresent(p -> p.getDokumentpakkefingeravtrykk().setDigestValue("dummy"));
@@ -61,23 +58,27 @@ public class DpiClientRequestParser {
                 .attachments(attachments);
     }
 
-    private List<Attachment> getAttachments(Map<String, FileItem> fileItems, PrivateKey privateKey) throws IOException {
-        FileItem cmsFileItem = fileItems.get("dokumentpakke");
+    private List<Document> getAttachments(Map<String, FileItemResource> fileItems, PartnerIdentifier receiver) {
+        FileItemResource cmsFileItem = fileItems.get("dokumentpakke");
         assertThat(cmsFileItem.getContentType()).isEqualTo("application/cms");
         assertThat(cmsFileItem.getName()).isEqualTo("asic.cms");
-        return getAttachments(cmsUtil.decryptCMSStreamed(cmsFileItem.getInputStream(), privateKey));
+        return getAttachments(decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                .resource(cmsFileItem)
+                .keystoreHelper(cucumberKeystoreHelper)
+                .alias(receiver.getOrganizationIdentifier())
+                .build()));
     }
 
-    private StandardBusinessDocument getStandardBusinessDocument(Map<String, FileItem> fileItems) {
-        FileItem jwtFileItem = fileItems.get("forretningsmelding");
+    private StandardBusinessDocument getStandardBusinessDocument(Map<String, FileItemResource> fileItems) {
+        FileItemResource jwtFileItem = fileItems.get("forretningsmelding");
         assertThat(jwtFileItem.getContentType()).isEqualTo("application/jwt");
         assertThat(jwtFileItem.getName()).isEqualTo("sbd.jwt");
-        String jwt = new String(jwtFileItem.get(), StandardCharsets.UTF_8);
+        String jwt = new String(jwtFileItem.getByteArray(), StandardCharsets.UTF_8);
         Payload payload = unpackJWT.getPayload(jwt);
         return unpackStandardBusinessDocument.unpackStandardBusinessDocument(payload);
     }
 
-    private List<Attachment> getAttachments(InputStream asic) {
+    private List<Document> getAttachments(Resource asic) {
         return asicParser.parse(asic);
     }
 }

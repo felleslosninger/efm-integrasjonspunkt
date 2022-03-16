@@ -62,13 +62,16 @@ public class DpiClientConfig {
     private final IntegrasjonspunktProperties properties;
 
     @Bean
-    public DpiClient dpiClient(CreateCMSEncryptedAsice createCmsEncryptedAsice,
-                               CreateSendMessageInput createSendMessageInput,
-                               Corner2Client corner2Client,
-                               MessageUnwrapper messageUnwrapper,
-                               SignatureHelper dpiSignatureHelper,
-                               CreateManifest createManifest) {
+    public DpiClient dpiClient(
+            InMemoryWithTempFileFallbackResourceFactory resourceFactory,
+            CreateCMSEncryptedAsice createCmsEncryptedAsice,
+            CreateSendMessageInput createSendMessageInput,
+            Corner2Client corner2Client,
+            MessageUnwrapper messageUnwrapper,
+            SignatureHelper dpiSignatureHelper,
+            CreateManifest createManifest) {
         return new DpiClientImpl(
+                resourceFactory,
                 createCmsEncryptedAsice,
                 createSendMessageInput,
                 corner2Client,

@@ -8,18 +8,21 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.io.ResourceUtils;
 import org.hamcrest.MatcherAssert;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -38,7 +41,6 @@ public class NextMoveMessageInSteps {
     private final Holder<Message> messageReceivedHolder;
 
     private JacksonTester<StandardBusinessDocument> json;
-
 
     @Before
     public void before() {
@@ -70,9 +72,11 @@ public class NextMoveMessageInSteps {
                 .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
 
         ResponseExtractor<Void> responseExtractor = response -> {
-            byte[] asic = IOUtils.toByteArray(response.getBody());
-            messageReceivedHolder.get().attachments(asicParser.parse(new ByteArrayInputStream(asic)));
-            return null;
+            try (InputStream inputStream = response.getBody()) {
+                ByteArrayResource asic = new ByteArrayResource(StreamUtils.copyToByteArray(inputStream));
+                messageReceivedHolder.get().attachments(asicParser.parse(asic));
+                return null;
+            }
         };
 
         testRestTemplate.execute(
@@ -112,11 +116,11 @@ public class NextMoveMessageInSteps {
     }
 
     @And("^I have an ASIC that contains a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
-    public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) throws Throwable {
-        Attachment attachement = messageReceivedHolder.get().getAttachment(filename);
-        assertThat(attachement.getMimeType()).isEqualTo(mimetype);
+    public void iHaveAnASICThatContainsAFileNamedWithMimetype(String filename, String mimetype, String body) {
+        Document attachment = messageReceivedHolder.get().getAttachment(filename);
+        assertThat(attachment.getMimeType()).hasToString(mimetype);
 
-        String actual = new String(IOUtils.toByteArray(attachement.getInputStream()));
+        String actual = new String(ResourceUtils.toByteArray(attachment.getResource()));
 
         if (MediaType.APPLICATION_XML_VALUE.equals(mimetype)) {
             MatcherAssert.assertThat(actual, isIdenticalTo(body).ignoreWhitespace());

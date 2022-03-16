@@ -5,12 +5,14 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.manifest.xml.*;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 
+@Component
 public class ManifestFactory {
 
-    no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, AsicEAttachable mainDocument) {
+    public no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, AsicEAttachable mainDocument) {
 
         Avsender avsender = new Avsender(new Organisasjon(message.getSender().cast(Iso6523.class)));
         Mottaker mottaker = new Mottaker(new Organisasjon(message.getReceiver().cast(Iso6523.class)));

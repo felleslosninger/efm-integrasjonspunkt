@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.ks.fiksio
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
-import no.difi.meldingsutveksling.pipes.PromiseMaker
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
@@ -25,17 +24,14 @@ class FiksIoService(
     private val serviceRegistryLookup: ServiceRegistryLookup,
     private val persister: OptionalCryptoMessagePersister,
     private val conversationService: ConversationService,
-    private val promise: PromiseMaker
 ) {
     val log = logger()
 
     fun sendMessage(msg: NextMoveMessage) {
-        promise.promise { reject ->
-            val payloads = msg.files.map {
-                StreamPayload(persister.stream(msg.messageId, it.identifier, reject).inputStream, it.filename)
-            }.toCollection(arrayListOf())
-            createRequest(payloads = payloads, msg = msg)
-        }.await()
+        val payloads = msg.files.map {
+            StreamPayload(persister.read(msg.messageId, it.identifier).inputStream, it.filename)
+        }.toCollection(arrayListOf())
+        createRequest(payloads = payloads, msg = msg)
     }
 
     fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {

@@ -10,8 +10,9 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.apache.commons.io.IOUtils;
+import no.difi.move.common.io.ResourceUtils;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
 
@@ -89,7 +90,7 @@ public class AltinnOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Collections.singletonList("filename"));
         actualList.addAll(zipContent.getFiles().stream()
-                .map(ZipFile::getFileName)
+                .map(Document::getFilename)
                 .map(Collections::singletonList)
                 .collect(Collectors.toList())
         );
@@ -102,7 +103,7 @@ public class AltinnOutSteps {
     @SneakyThrows
     public void theContentOfTheAltinnZipFileNamedIs(String filename, String expectedContent) {
         ZipContent zipContent = zipContentHolder.get();
-        assertThat(new String(IOUtils.toByteArray(zipContent.getFile(filename).getInputStream())))
+        assertThat(new String(ResourceUtils.toByteArray(zipContent.getFile(filename).getResource())))
                 .isEqualToIgnoringWhitespace(expectedContent);
     }
 
@@ -110,7 +111,7 @@ public class AltinnOutSteps {
     @SneakyThrows
     public void theJsonContentOfTheAltinnZipFileNamedIs(String filename, String expectedContent) {
         ZipContent zipContent = zipContentHolder.get();
-        String jsonString = new String(IOUtils.toByteArray(zipContent.getFile(filename).getInputStream()));
+        String jsonString = new String(ResourceUtils.toByteArray(zipContent.getFile(filename).getResource()));
         new JsonContentAssert(StandardBusinessDocument.class, jsonString)
                 .isStrictlyEqualToJson(expectedContent);
     }

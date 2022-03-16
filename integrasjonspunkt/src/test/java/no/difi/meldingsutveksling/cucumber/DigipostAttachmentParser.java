@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.cert.KeystoreHelper;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -23,12 +22,12 @@ public class DigipostAttachmentParser {
     private final XMLMarshaller xmlMarshaller;
     private final AsicParser asicParser;
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelpere;
+    private final KeystoreHelper cucumberKeystoreHelper;
 
     @SneakyThrows
     Message parse(String payload, Resource encryptedAsic) {
         String receiverOrgNumber = getReceiverOrgNumber(payload);
-        InMemoryWithTempFileFallbackResource asic = decrypt(encryptedAsic, receiverOrgNumber);
+        Resource asic = decrypt(encryptedAsic, receiverOrgNumber);
 
         return new Message()
                 .setBody(payload)
@@ -43,10 +42,10 @@ public class DigipostAttachmentParser {
         return personidentifikator.getTextContent();
     }
 
-    private InMemoryWithTempFileFallbackResource decrypt(Resource encryptedAsic, String receiverOrgNumber) {
+    private Resource decrypt(Resource encryptedAsic, String receiverOrgNumber) {
         return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                 .resource(encryptedAsic)
-                .keystoreHelper(cucumberKeystoreHelpere)
+                .keystoreHelper(cucumberKeystoreHelper)
                 .alias(receiverOrgNumber)
                 .build());
     }

@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.FiksConfig;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
+import no.difi.move.common.io.WritableByteArrayResource;
 import org.springframework.core.io.ByteArrayResource;
 
 import java.security.cert.X509Certificate;
@@ -25,10 +26,12 @@ public class FileTypeHandlerFactory {
     }
 
     private byte[] encrypt(byte[] bytes) {
-        return createCMSDocument.toByteArray(CreateCMSDocument.Input.builder()
+        WritableByteArrayResource encrypted = new WritableByteArrayResource();
+        createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
                 .resource(new ByteArrayResource(bytes))
                 .certificate(certificate)
                 .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
-                .build());
+                .build(), encrypted);
+        return encrypted.toByteArray();
     }
 }

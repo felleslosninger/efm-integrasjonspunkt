@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.dpi.client.internal.CreateSendMessageInput;
 import no.difi.meldingsutveksling.dpi.client.internal.MessageUnwrapper;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DpiClientImpl implements DpiClient {
 
+    private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
     private final CreateCMSEncryptedAsice createCmsEncryptedAsice;
     private final CreateSendMessageInput createSendMessageInput;
     private final Corner2Client corner2Client;
@@ -47,16 +49,21 @@ public class DpiClientImpl implements DpiClient {
     }
 
     private InMemoryWithTempFileFallbackResource createCmsEncryptedAsice(Shipment shipment) {
-        return createCmsEncryptedAsice.createCmsEncryptedAsice(CreateCMSEncryptedAsice.Input.builder()
-                .documents(shipment.getParcel().getDocuments())
-                .manifest(createManifest.createManifest(shipment))
-                .certificate(shipment.getReceiverBusinessCertificate())
-                .signatureMethod(SignatureMethod.XAdES)
-                .signatureHelper(signatureHelper)
-                .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
-                .tempFilePrefix("dpi-")
-                .build()
+        InMemoryWithTempFileFallbackResource resource = resourceFactory.getResource("dpi-", ".asic.cms");
+
+        createCmsEncryptedAsice.createCmsEncryptedAsice(CreateCMSEncryptedAsice.Input.builder()
+                        .documents(shipment.getParcel().getDocuments())
+                        .manifest(createManifest.createManifest(shipment))
+                        .certificate(shipment.getReceiverBusinessCertificate())
+                        .signatureMethod(SignatureMethod.XAdES)
+                        .signatureHelper(signatureHelper)
+                        .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
+                        .tempFilePrefix("dpi-")
+                        .build(),
+                resource
         );
+
+        return resource;
     }
 
     @Override

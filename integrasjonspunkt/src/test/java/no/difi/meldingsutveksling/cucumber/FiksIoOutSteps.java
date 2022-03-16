@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.ks.fiks.io.client.FiksIOKlient;
 import no.ks.fiks.io.client.model.*;
-import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.StreamUtils;
 
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +37,15 @@ public class FiksIoOutSteps {
         messageSentHolder.reset();
 
         SendtMelding sendtMelding = SendtMelding.builder()
-            .meldingId(new MeldingId(UUID.randomUUID()))
-            .avsenderKontoId(new KontoId(UUID.randomUUID()))
-            .mottakerKontoId(new KontoId(UUID.randomUUID()))
-            .meldingType("")
-            .ttl(Duration.ofHours(1))
-            .build();
+                .meldingId(new MeldingId(UUID.randomUUID()))
+                .avsenderKontoId(new KontoId(UUID.randomUUID()))
+                .mottakerKontoId(new KontoId(UUID.randomUUID()))
+                .meldingType("")
+                .ttl(Duration.ofHours(1))
+                .build();
         doReturn(sendtMelding)
-            .when(fiksIOKlient)
-            .send(any(), anyList());
+                .when(fiksIOKlient)
+                .send(any(), anyList());
 
     }
 
@@ -59,17 +62,20 @@ public class FiksIoOutSteps {
         assertEquals(protocol, request.getMeldingType());
 
         List<Payload> payloads = payloadCaptor.getValue();
-        List<Attachment> attachments = new ArrayList<>();
+        List<Document> attachments = new ArrayList<>();
         for (Payload p : payloads) {
-            Attachment attachment = new Attachment(IOUtils.toByteArray(p.getPayload()))
-                .setFileName(p.getFilnavn())
-                .setMimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFilnavn().split("\\.")).reduce((a, b) -> b).orElse("pdf")));
-            attachments.add(attachment);
+            try (InputStream inputStream = p.getPayload()) {
+                attachments.add(Document.builder()
+                        .resource(new ByteArrayResource(StreamUtils.copyToByteArray(inputStream)))
+                        .filename(p.getFilnavn())
+                        .mimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFilnavn().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
+                        .build());
+            }
         }
 
         Message message = new Message()
-            .setAttachments(attachments)
-            .setServiceIdentifier(ServiceIdentifier.DPFIO);
+                .setAttachments(attachments)
+                .setServiceIdentifier(ServiceIdentifier.DPFIO);
         messageSentHolder.set(message);
     }
 }

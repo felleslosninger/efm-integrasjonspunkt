@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.cert.KeystoreHelper;
-import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -42,13 +41,13 @@ public class AltinnZipContentParser {
                 .setSbd(sbd);
 
         zipContent.getOptionalFile(ASIC_FILE).ifPresent(asicFile -> {
-            try (InMemoryWithTempFileFallbackResource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+            Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                     .keystoreHelper(cucumberKeystoreHelper)
                     .resource(asicFile.getResource())
                     .alias(receiver.getPrimaryIdentifier())
-                    .build())) {
-                message.attachments(getAttachments(asic));
-            }
+                    .build());
+
+            message.attachments(getAttachments(asic));
         });
 
         return message;
@@ -60,9 +59,7 @@ public class AltinnZipContentParser {
         }
     }
 
-    private List<Document> getAttachments(Resource asic) throws IOException {
-        try (InputStream inputStream = asic.getInputStream()) {
-            return asicParser.parse(inputStream);
-        }
+    private List<Document> getAttachments(Resource asic) {
+        return asicParser.parse(asic);
     }
 }

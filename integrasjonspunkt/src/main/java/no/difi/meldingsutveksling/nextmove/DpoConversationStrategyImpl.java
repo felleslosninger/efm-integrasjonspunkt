@@ -11,12 +11,12 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +51,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                InputStreamResource encryptedAsic = asicHandler.createEncryptedAsic(message, reject);
+                Resource encryptedAsic = asicHandler.createEncryptedAsic(message, reject);
                 transport.send(message.getSbd(), encryptedAsic);
                 return null;
             }).await();

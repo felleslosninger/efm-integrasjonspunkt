@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
+import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.List;
 
@@ -21,8 +24,8 @@ public class ServiceBusMessageParser {
 
     private final ObjectMapper objectMapper;
     private final AsicParser asicParser;
-    private final CmsUtil cmsUtil;
-    private final CucumberKeyStore cucumberKeyStore;
+    private final DecryptCMSDocument decryptCMSDocument;
+    private final KeystoreHelper cucumberKeystoreHelper;
 
     @SneakyThrows
     public Message parse(byte[] in) {
@@ -33,12 +36,14 @@ public class ServiceBusMessageParser {
 
         if (serviceBusPayload.getAsic() != null) {
             PartnerIdentifier receiver = serviceBusPayload.getSbd().getReceiverIdentifier();
-            PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
+            Resource encryptedAsic = new ByteArrayResource(Base64.getDecoder().decode(serviceBusPayload.getAsic()));
+            Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                    .resource(encryptedAsic)
+                    .keystoreHelper(cucumberKeystoreHelper)
+                    .alias(receiver.getOrganizationIdentifier())
+                    .build());
 
-            byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
-            byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
-
-            List<Attachment> attachments = asicParser.parse(new ByteArrayInputStream(asic));
+            List<Document> attachments = asicParser.parse(asic);
             message.setAttachments(attachments);
         }
 
