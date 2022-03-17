@@ -1,3 +1,4 @@
+@new
 Feature: Sending a Next Move DPO message
 
   Background:

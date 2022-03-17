@@ -25,7 +25,7 @@ import java.util.List;
 public class SvarUtDataParser {
 
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelper;
+    private final KeystoreHelper keystoreHelper;
     private final XMLMarshaller xmlMarshaller;
 
     @SneakyThrows
@@ -39,7 +39,7 @@ public class SvarUtDataParser {
             Resource encrypted = new ByteArrayResource(IOUtils.toByteArray(attachment.getInputStream()));
             Resource decrypted = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                     .resource(encrypted)
-                    .keystoreHelper(cucumberKeystoreHelper)
+                    .keystoreHelper(keystoreHelper)
                     .alias(digitalAdresse.getOrgnr())
                     .build());
 

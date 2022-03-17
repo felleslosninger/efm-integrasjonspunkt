@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -220,11 +221,6 @@ public class CucumberStepsConfiguration {
         @Bean
         public AsicParser asicParser() {
             return new AsicParser();
-        }
-
-        @Bean
-        public KeystoreHelper cucumberKeystoreHelper(IntegrasjonspunktProperties properties) {
-            return new KeystoreHelper(properties.getOrg().getKeystore());
         }
 
         @Bean

@@ -12,14 +12,12 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
-import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
-import no.difi.meldingsutveksling.nextmove.InternalQueue;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
@@ -38,6 +36,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -154,15 +153,6 @@ public class NextMoveMessageService {
         return identifier;
     }
 
-    private String getMimeType(String contentType, String filename) {
-        if (MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(contentType)) {
-            String ext = Stream.of(filename.split("\\.")).reduce((a, b) -> b).orElse("pdf");
-            return MimeTypeExtensionMapper.getMimetype(ext);
-        }
-
-        return contentType;
-    }
-
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(NextMoveOutMessage message) {
         validator.validate(message);
@@ -172,5 +162,36 @@ public class NextMoveMessageService {
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void sendMessage(Long id) {
         messageRepo.findById(id).ifPresent(this::sendMessage);
+    }
+
+    public List<Document> getDocuments(NextMoveMessage msg) {
+        return msg.getFiles().stream()
+                .sorted((a, b) -> {
+                    if (Boolean.TRUE.equals(a.getPrimaryDocument())) return -1;
+                    if (Boolean.TRUE.equals(b.getPrimaryDocument())) return 1;
+                    return a.getDokumentnummer().compareTo(b.getDokumentnummer());
+                }).map(f -> Document.builder()
+                        .filename(f.getFilename())
+                        .mimeType(getMimeType(f.getMimetype(), f.getFilename()))
+                        .title(f.getTitle())
+                        .resource(getResource(msg, f))
+                        .build()).collect(Collectors.toList());
+    }
+
+    private Resource getResource(NextMoveMessage msg, BusinessMessageFile f) {
+        try {
+            return optionalCryptoMessagePersister.read(msg.getMessageId(), f.getIdentifier());
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format("Could not read file messageId=%s, filename=%s", msg.getMessageId(), f.getIdentifier()), e);
+        }
+    }
+
+    private String getMimeType(String contentType, String filename) {
+        if (!StringUtils.hasText(contentType) || MediaType.APPLICATION_OCTET_STREAM_VALUE.equals(contentType)) {
+            String ext = Stream.of(filename.split("\\.")).reduce((a, b) -> b).orElse("pdf");
+            return MimeTypeExtensionMapper.getMimetype(ext);
+        }
+
+        return contentType;
     }
 }

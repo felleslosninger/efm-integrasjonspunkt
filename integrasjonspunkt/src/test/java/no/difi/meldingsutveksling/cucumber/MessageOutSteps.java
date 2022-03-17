@@ -79,7 +79,7 @@ public class MessageOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
-                .map(p -> Arrays.asList(p.getFilename(), p.getMimeType().toString()))
+                .map(p -> Arrays.asList(p.getFilename(), p.getMimeType() != null ? p.getMimeType().toString() : null))
                 .collect(Collectors.toList())
         );
 

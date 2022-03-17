@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.util.MimeType;
 
 @Value
@@ -12,7 +13,8 @@ import org.springframework.util.MimeType;
 public class Manifest implements AsicEAttachable {
 
     @NonNull Resource resource;
-    @NonNull MimeType mimeType;
+    @Builder.Default
+    @NonNull MimeType mimeType = MediaType.APPLICATION_XML;
 
     @Override
     public String getFilename() {

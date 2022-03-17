@@ -32,8 +32,6 @@ public class DecryptCMSDocument {
         @NonNull Resource resource;
         @NonNull KeystoreHelper keystoreHelper;
         String alias;
-        @Builder.Default
-        String tempFilePrefix = "";
     }
 
     @RequiredArgsConstructor

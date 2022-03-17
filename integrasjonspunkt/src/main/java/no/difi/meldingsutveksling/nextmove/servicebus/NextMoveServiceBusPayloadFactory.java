@@ -23,7 +23,7 @@ public class NextMoveServiceBusPayloadFactory {
     private byte[] getAsicBytes(NextMoveOutMessage message) {
         if (message.getFiles() == null || message.getFiles().isEmpty()) return null;
         WritableByteArrayResource writableByteArrayResource = new WritableByteArrayResource();
-        asicHandler.createEncryptedAsic(message, writableByteArrayResource);
+        asicHandler.createCmsEncryptedAsice(message, writableByteArrayResource);
         return Base64.getEncoder().encode(writableByteArrayResource.toByteArray());
     }
 }

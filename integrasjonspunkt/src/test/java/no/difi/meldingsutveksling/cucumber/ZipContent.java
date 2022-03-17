@@ -13,7 +13,7 @@ class ZipContent {
 
     private List<Document> files = new ArrayList<>();
 
-    ZipContent files(Document file) {
+    ZipContent file(Document file) {
         files.add(file);
         return this;
     }

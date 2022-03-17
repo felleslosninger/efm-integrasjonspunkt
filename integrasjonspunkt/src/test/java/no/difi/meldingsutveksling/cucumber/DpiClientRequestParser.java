@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
@@ -36,7 +37,7 @@ public class DpiClientRequestParser {
     private final MultipartParser multipartParser;
     private final AsicParser asicParser;
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelper;
+    private final KeystoreHelper keystoreHelper;
     private final UnpackJWT unpackJWT;
     private final UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
@@ -64,7 +65,7 @@ public class DpiClientRequestParser {
         assertThat(cmsFileItem.getName()).isEqualTo("asic.cms");
         return getAttachments(decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                 .resource(cmsFileItem)
-                .keystoreHelper(cucumberKeystoreHelper)
+                .keystoreHelper(keystoreHelper)
                 .alias(receiver.getOrganizationIdentifier())
                 .build()));
     }

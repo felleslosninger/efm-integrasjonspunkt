@@ -5,12 +5,12 @@ import lombok.Value;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.domain.MetadataDocument;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokument;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokumentData;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.Resource;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,9 +23,9 @@ public class ParcelParser {
     private final ManifestParser manifestParser;
     private final DocumentStorage documentStorage;
 
-    public Parcel parse(String messageId, InputStream asicInputStream) {
+    public Parcel parse(String messageId, Resource asic) {
         Map<String, InternalDocument> documents = new HashMap<>();
-        asicParser.parse(asicInputStream,
+        asicParser.parse(asic,
                 ((filename, inputStream) -> {
                     documentStorage.write(messageId, filename, inputStream);
                     Resource resource = documentStorage.read(messageId, filename);

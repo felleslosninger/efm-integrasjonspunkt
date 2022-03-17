@@ -17,7 +17,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 import org.springframework.util.StreamUtils;
@@ -135,7 +135,7 @@ public class AltinnPackage {
                 }
             }
 
-            zipOutputStream.finish();
+            zipOutputStream.flush();
         }
     }
 
@@ -170,7 +170,7 @@ public class AltinnPackage {
                         break;
                     case ASIC_FILE:
                         tmpAsicFile = TmpFile.create(zipFile.getInputStream(zipEntry));
-                        asic = new InputStreamResource(tmpAsicFile.getInputStream());
+                        asic = new FileSystemResource(tmpAsicFile.getFile());
                         break;
                     default:
                         log.info("Skipping file: {}", zipEntry.getName());

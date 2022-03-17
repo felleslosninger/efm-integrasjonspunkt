@@ -44,9 +44,7 @@ public class CreateCMSDocument {
 
     public void encrypt(Input input, WritableResource output) {
         try {
-            JceKeyTransRecipientInfoGenerator recipientInfoGenerator = new JceKeyTransRecipientInfoGenerator(
-                    input.getCertificate(), input.getKeyEncryptionScheme())
-                    .setProvider(BouncyCastleProvider.PROVIDER_NAME);
+            JceKeyTransRecipientInfoGenerator recipientInfoGenerator = getRecipientInfoGenerator(input);
 
             CMSEnvelopedDataGenerator envelopedDataGenerator = new CMSEnvelopedDataGenerator();
             envelopedDataGenerator.addRecipientInfoGenerator(recipientInfoGenerator);
@@ -65,6 +63,15 @@ public class CreateCMSDocument {
         } catch (CMSException | IOException e) {
             throw new IllegalStateException("Couldn't create Cryptographic Message Syntax for document package!", e);
         }
+    }
+
+    private JceKeyTransRecipientInfoGenerator getRecipientInfoGenerator(Input input) throws CertificateEncodingException {
+        JceKeyTransRecipientInfoGenerator recipientInfoGenerator = input.getKeyEncryptionScheme() != null
+                ? new JceKeyTransRecipientInfoGenerator(input.getCertificate(), input.getKeyEncryptionScheme())
+                : new JceKeyTransRecipientInfoGenerator(input.getCertificate());
+
+        recipientInfoGenerator.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+        return recipientInfoGenerator;
     }
 
     @Value

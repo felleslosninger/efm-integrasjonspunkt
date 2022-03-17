@@ -10,11 +10,11 @@ import java.util.stream.Stream
 
 interface AsicHandler {
 
-    fun createEncryptedAsic(msg: NextMoveMessage, writableResource: WritableResource)
+    fun createCmsEncryptedAsice(msg: NextMoveMessage, writableResource: WritableResource)
 
-    fun createEncryptedAsic(msg: NextMoveMessage, reject: Reject): Resource
+    fun createCmsEncryptedAsice(msg: NextMoveMessage, reject: Reject): Resource
 
-    fun createEncryptedAsic(
+    fun createCmsEncryptedAsice(
         msg: NextMoveMessage,
         mainDocument: Document,
         attachments: Stream<Document>,

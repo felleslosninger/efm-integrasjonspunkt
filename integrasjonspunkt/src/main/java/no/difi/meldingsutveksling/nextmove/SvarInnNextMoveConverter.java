@@ -63,7 +63,7 @@ public class SvarInnNextMoveConverter {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
 
-        Resource asic = asicHandler.createEncryptedAsic(
+        Resource asic = asicHandler.createCmsEncryptedAsice(
                 NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
                 getArkivmeldingFile(forsendelse),
                 svarInnService.getAttachments(forsendelse, reject),

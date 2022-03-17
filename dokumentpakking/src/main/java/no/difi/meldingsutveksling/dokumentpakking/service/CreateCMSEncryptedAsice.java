@@ -45,28 +45,24 @@ public class CreateCMSEncryptedAsice {
         @NonNull Manifest manifest;
         @NonNull Stream<? extends AsicEAttachable> documents;
         @NonNull X509Certificate certificate;
+        AlgorithmIdentifier keyEncryptionScheme;
         @NonNull SignatureMethod signatureMethod;
         @NonNull SignatureHelper signatureHelper;
-        AlgorithmIdentifier keyEncryptionScheme;
-        @Builder.Default String tempFilePrefix = "";
 
         private CreateAsice.Input getCreateAsicInput() {
             return CreateAsice.Input.builder()
                     .documents(documents)
                     .manifest(manifest)
-                    .certificate(certificate)
                     .signatureMethod(signatureMethod)
                     .signatureHelper(signatureHelper)
-                    .tempFilePrefix(tempFilePrefix)
                     .build();
         }
 
-        public CreateCMSDocument.Input getCreateCMSDocumentInput(Resource resource) {
+        private CreateCMSDocument.Input getCreateCMSDocumentInput(Resource resource) {
             return CreateCMSDocument.Input.builder()
                     .resource(resource)
                     .certificate(certificate)
                     .keyEncryptionScheme(keyEncryptionScheme)
-                    .tempFilePrefix(tempFilePrefix)
                     .build();
         }
     }

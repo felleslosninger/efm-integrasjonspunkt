@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -22,7 +23,7 @@ public class DigipostAttachmentParser {
     private final XMLMarshaller xmlMarshaller;
     private final AsicParser asicParser;
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelper;
+    private final KeystoreHelper keystoreHelper;
 
     @SneakyThrows
     Message parse(String payload, Resource encryptedAsic) {
@@ -45,7 +46,7 @@ public class DigipostAttachmentParser {
     private Resource decrypt(Resource encryptedAsic, String receiverOrgNumber) {
         return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                 .resource(encryptedAsic)
-                .keystoreHelper(cucumberKeystoreHelper)
+                .keystoreHelper(keystoreHelper)
                 .alias(receiverOrgNumber)
                 .build());
     }

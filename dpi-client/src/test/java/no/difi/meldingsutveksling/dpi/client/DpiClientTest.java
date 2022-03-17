@@ -59,7 +59,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.mail.util.SharedByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -454,11 +453,9 @@ class DpiClientTest {
 
     @SneakyThrows
     private Parcel getParcel(StandardBusinessDocument standardBusinessDocument, Resource asic) {
-        try (InputStream asicInputStream = asic.getInputStream()) {
-            return parcelParser.parse(
-                    standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
-                    asicInputStream);
-        }
+        return parcelParser.parse(
+                standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
+                asic);
     }
 
     private MimeMultipart getMimeMultipart(HttpRequest httpRequest) throws MessagingException {

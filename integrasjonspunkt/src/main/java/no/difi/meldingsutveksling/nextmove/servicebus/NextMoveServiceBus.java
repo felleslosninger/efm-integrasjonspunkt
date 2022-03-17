@@ -89,7 +89,6 @@ public class NextMoveServiceBus {
                 throw new NextMoveException(e);
             }
         }
-
     }
 
     public void putMessage(NextMoveOutMessage message) throws NextMoveException {

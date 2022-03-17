@@ -29,7 +29,7 @@ public class ManifestFactory {
         MarshalManifest.marshal(xmlManifest, os);
         return no.difi.meldingsutveksling.dokumentpakking.domain.Manifest.builder()
                 .resource(new ByteArrayResource(os.toByteArray()))
-                .mimeType(MediaType.TEXT_XML)
+                .mimeType(MediaType.APPLICATION_XML)
                 .build();
     }
 

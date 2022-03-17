@@ -58,7 +58,6 @@ public class DpiClientImpl implements DpiClient {
                         .signatureMethod(SignatureMethod.XAdES)
                         .signatureHelper(signatureHelper)
                         .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
-                        .tempFilePrefix("dpi-")
                         .build(),
                 resource
         );

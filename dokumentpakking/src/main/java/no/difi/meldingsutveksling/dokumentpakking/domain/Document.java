@@ -14,7 +14,7 @@ public class Document implements AsicEAttachable {
     @NonNull String filename;
     @NonNull Resource resource;
     @With
-    @NonNull MimeType mimeType;
+    MimeType mimeType;
     String title;
     MetadataDocument metadataDocument;
 

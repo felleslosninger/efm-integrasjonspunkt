@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
@@ -28,7 +29,7 @@ public class AltinnZipContentParser {
     private final ObjectMapper objectMapper;
     private final AsicParser asicParser;
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelper;
+    private final KeystoreHelper keystoreHelper;
 
     @SneakyThrows
     Message parse(ZipContent zipContent) {
@@ -42,7 +43,7 @@ public class AltinnZipContentParser {
 
         zipContent.getOptionalFile(ASIC_FILE).ifPresent(asicFile -> {
             Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
-                    .keystoreHelper(cucumberKeystoreHelper)
+                    .keystoreHelper(keystoreHelper)
                     .resource(asicFile.getResource())
                     .alias(receiver.getPrimaryIdentifier())
                     .build());

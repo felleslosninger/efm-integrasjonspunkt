@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
@@ -25,7 +26,7 @@ public class ServiceBusMessageParser {
     private final ObjectMapper objectMapper;
     private final AsicParser asicParser;
     private final DecryptCMSDocument decryptCMSDocument;
-    private final KeystoreHelper cucumberKeystoreHelper;
+    private final KeystoreHelper keystoreHelper;
 
     @SneakyThrows
     public Message parse(byte[] in) {
@@ -39,7 +40,7 @@ public class ServiceBusMessageParser {
             Resource encryptedAsic = new ByteArrayResource(Base64.getDecoder().decode(serviceBusPayload.getAsic()));
             Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                     .resource(encryptedAsic)
-                    .keystoreHelper(cucumberKeystoreHelper)
+                    .keystoreHelper(keystoreHelper)
                     .alias(receiver.getOrganizationIdentifier())
                     .build());
 

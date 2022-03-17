@@ -16,7 +16,6 @@ import org.springframework.core.io.WritableResource;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.cert.X509Certificate;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -69,11 +68,8 @@ public class CreateAsice {
     public static class Input {
         @NonNull Manifest manifest;
         @NonNull Stream<? extends AsicEAttachable> documents;
-        @NonNull X509Certificate certificate;
         @NonNull SignatureMethod signatureMethod;
         @NonNull SignatureHelper signatureHelper;
-        @Builder.Default
-        String tempFilePrefix = "";
     }
 }
 

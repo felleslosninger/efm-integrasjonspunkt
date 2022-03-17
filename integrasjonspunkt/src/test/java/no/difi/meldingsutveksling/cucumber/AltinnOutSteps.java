@@ -15,12 +15,14 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.ResourceUtils;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
+import org.springframework.core.io.InputStreamResource;
 
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPMessage;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,9 +79,11 @@ public class AltinnOutSteps {
         message.saveChanges();
 
         AttachmentPart attachmentPart = (AttachmentPart) message.getAttachments().next();
-        ZipContent zipContent = zipParser.parse(attachmentPart.getDataHandler().getInputStream());
-        zipContentHolder.set(zipContent);
-        messageSentHolder.set(altinnZipContentParser.parse(zipContent));
+        try (InputStream inputStream = attachmentPart.getDataHandler().getInputStream()) {
+            ZipContent zipContent = zipParser.parse(new InputStreamResource(inputStream));
+            zipContentHolder.set(zipContent);
+            messageSentHolder.set(altinnZipContentParser.parse(zipContent));
+        }
     }
 
     @Then("^the sent Altinn ZIP contains the following files:$")

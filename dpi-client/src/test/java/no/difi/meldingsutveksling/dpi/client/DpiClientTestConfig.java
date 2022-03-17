@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.config.DokumentpakkingConfig;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
@@ -21,7 +23,7 @@ import java.time.ZoneId;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
-@Import(UUIDGenerator.class)
+@Import({UUIDGenerator.class, DokumentpakkingConfig.class})
 public class DpiClientTestConfig {
 
     private final IntegrasjonspunktProperties properties;
@@ -35,11 +37,6 @@ public class DpiClientTestConfig {
     @Bean
     public KeystoreHelper serverKeystoreHelper() {
         return new KeystoreHelper(properties.getDpi().getServer().getKeystore());
-    }
-
-    @Bean
-    public AsicParser asicParser() {
-        return new AsicParser();
     }
 
     @Bean

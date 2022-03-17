@@ -51,7 +51,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                Resource encryptedAsic = asicHandler.createEncryptedAsic(message, reject);
+                Resource encryptedAsic = asicHandler.createCmsEncryptedAsice(message, reject);
                 transport.send(message.getSbd(), encryptedAsic);
                 return null;
             }).await();
