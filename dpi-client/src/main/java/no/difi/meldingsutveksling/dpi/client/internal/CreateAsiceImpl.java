@@ -3,10 +3,14 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.asic.*;
+import no.difi.asic.AsicWriter;
+import no.difi.asic.AsicWriterFactory;
+import no.difi.asic.MimeType;
+import no.difi.asic.SignatureMethod;
 import no.difi.meldingsutveksling.dpi.client.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.Manifest;
+import no.difi.move.common.cert.KeystoreHelper;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -19,7 +23,7 @@ import java.util.Optional;
 public class CreateAsiceImpl implements CreateAsice {
 
     private final CreateManifest createManifest;
-    private final SignatureHelper signatureHelper;
+    private final KeystoreHelper dpiKeystoreHelper;
 
     public void createAsice(Shipment shipment, OutputStream outputStream) {
         log.info("Creating ASiC-E manifest");
@@ -37,7 +41,7 @@ public class CreateAsiceImpl implements CreateAsice {
 
     private void sign(AsicWriter asicWriter) {
         try {
-            asicWriter.sign(signatureHelper);
+            asicWriter.sign(dpiKeystoreHelper.getSignatureHelper());
         } catch (IOException e) {
             throw new IllegalStateException("Could not sign ASiC-E!", e);
         }
@@ -54,7 +58,7 @@ public class CreateAsiceImpl implements CreateAsice {
 
     @SneakyThrows({IOException.class})
     private AsicWriter getAsicWriter(OutputStream outputStream) {
-            return AsicWriterFactory.newFactory(SignatureMethod.XAdES)
-                    .newContainer(outputStream);
+        return AsicWriterFactory.newFactory(SignatureMethod.XAdES)
+                .newContainer(outputStream);
     }
 }
