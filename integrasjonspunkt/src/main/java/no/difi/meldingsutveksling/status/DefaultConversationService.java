@@ -83,8 +83,11 @@ public class DefaultConversationService implements ConversationService {
     @NotNull
     @Override
     @Transactional
-    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status) {
-        return registerStatus(messageId, messageStatusFactory.getMessageStatus(status));
+    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus... status) {
+        for (ReceiptStatus s : status) {
+            registerStatus(messageId, messageStatusFactory.getMessageStatus(s));
+        }
+        return repo.findByMessageId(messageId).stream().findFirst();
     }
 
     @NotNull
