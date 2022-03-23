@@ -212,6 +212,6 @@ public class AltinnInSteps {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         soapMessage.saveChanges();
         soapMessage.writeTo(out);
-        return new String(out.toByteArray());
+        return out.toString();
     }
 }

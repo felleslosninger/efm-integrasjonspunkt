@@ -79,10 +79,15 @@ public class AltinnOutSteps {
         message.saveChanges();
 
         AttachmentPart attachmentPart = (AttachmentPart) message.getAttachments().next();
+        ZipContent zipContent = getZipContent(attachmentPart);
+        zipContentHolder.set(zipContent);
+        messageSentHolder.set(altinnZipContentParser.parse(zipContent));
+    }
+
+    @SneakyThrows
+    private ZipContent getZipContent(AttachmentPart attachmentPart) {
         try (InputStream inputStream = attachmentPart.getDataHandler().getInputStream()) {
-            ZipContent zipContent = zipParser.parse(new InputStreamResource(inputStream));
-            zipContentHolder.set(zipContent);
-            messageSentHolder.set(altinnZipContentParser.parse(zipContent));
+            return zipParser.parse(new InputStreamResource(inputStream));
         }
     }
 
