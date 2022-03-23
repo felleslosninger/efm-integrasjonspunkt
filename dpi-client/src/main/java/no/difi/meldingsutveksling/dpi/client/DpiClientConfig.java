@@ -10,7 +10,6 @@ import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
-import no.difi.asic.SignatureHelper;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
@@ -181,7 +180,7 @@ public class DpiClientConfig {
     @Bean
     public BusinessCertificateValidator businessCertificateValidator() {
         Resource resource = properties.getDpi().getCertificate().getRecipe();
-        try(InputStream inputStream = resource.getInputStream()) {
+        try (InputStream inputStream = resource.getInputStream()) {
             return BusinessCertificateValidator.of(inputStream);
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't load recipe!", e);
@@ -263,11 +262,6 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public SignatureHelper dpiSignatureHelper(KeystoreHelper dpiKeystoreHelper) {
-        return dpiKeystoreHelper.getSignatureHelper();
-    }
-
-    @Bean
     public FileExtensionMapper fileExtensionMapper() {
         return new FileExtensionMapper();
     }
@@ -275,8 +269,8 @@ public class DpiClientConfig {
     @Bean
     public CreateAsiceImpl createAsiceImpl(
             CreateManifest createManifest,
-            SignatureHelper dpiSignatureHelper) {
-        return new CreateAsiceImpl(createManifest, dpiSignatureHelper);
+            KeystoreHelper dpiKeystoreHelper) {
+        return new CreateAsiceImpl(createManifest, dpiKeystoreHelper);
     }
 
     @Bean
