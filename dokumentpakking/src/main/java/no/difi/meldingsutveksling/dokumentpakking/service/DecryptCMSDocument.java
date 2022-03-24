@@ -14,6 +14,7 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -43,7 +44,7 @@ public class DecryptCMSDocument {
         public InputStream getInputStream() throws IOException {
             RecipientInformation recipientInformation = getRecipientInformation(input.getResource());
             CMSTypedStream contentStream = getCmsTypedStream(recipientInformation);
-            return contentStream.getContentStream();
+            return new BufferedInputStream(contentStream.getContentStream());
         }
 
         private CMSTypedStream getCmsTypedStream(RecipientInformation recipientInformation) throws IOException {
