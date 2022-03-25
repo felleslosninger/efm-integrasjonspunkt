@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class DefaultConversationService implements ConversationService {
 
     private Map<ServiceIdentifier, StatusStrategy> createStatusStrategyMap() {
         return statusStrategyProvider.stream().collect(
-                Collectors.toMap(StatusStrategy::getServiceIdentifier, Function.identity())
+                Collectors.toConcurrentMap(StatusStrategy::getServiceIdentifier, Function.identity())
         );
     }
 
