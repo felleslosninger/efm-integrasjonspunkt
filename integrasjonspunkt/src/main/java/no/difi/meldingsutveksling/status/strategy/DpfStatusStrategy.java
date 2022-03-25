@@ -9,7 +9,9 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
 import no.difi.meldingsutveksling.ks.svarut.ForsendelseIdService;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -69,4 +71,15 @@ public class DpfStatusStrategy implements StatusStrategy {
     public ServiceIdentifier getServiceIdentifier() {
         return ServiceIdentifier.DPF;
     }
+
+    @Override
+    public boolean isStartPolling(@NotNull MessageStatus status) {
+        return ReceiptStatus.SENDT.toString().equals(status.getStatus());
+    }
+
+    @Override
+    public boolean isStopPolling(@NotNull MessageStatus status) {
+        return false;
+    }
+
 }

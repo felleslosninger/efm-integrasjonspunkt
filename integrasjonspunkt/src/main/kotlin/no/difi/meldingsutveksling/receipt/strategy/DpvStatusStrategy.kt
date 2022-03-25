@@ -10,15 +10,18 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory
 import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
+import no.difi.meldingsutveksling.status.MessageStatus
 import no.difi.meldingsutveksling.status.MessageStatusFactory
 import no.difi.meldingsutveksling.util.logger
 import org.springframework.stereotype.Component
 
 @Component
-class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: CorrespondenceAgencyMessageFactory,
-                        private val correspondenceAgencyClient: CorrespondenceAgencyClient,
-                        private val conversationService: ConversationService,
-                        private val messageStatusFactory: MessageStatusFactory) : StatusStrategy {
+class DpvStatusStrategy(
+    private val correspondencyAgencyMessageFactory: CorrespondenceAgencyMessageFactory,
+    private val correspondenceAgencyClient: CorrespondenceAgencyClient,
+    private val conversationService: ConversationService,
+    private val messageStatusFactory: MessageStatusFactory
+) : StatusStrategy {
 
     val log = logger()
 
@@ -48,5 +51,14 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
     override fun getServiceIdentifier(): ServiceIdentifier {
         return ServiceIdentifier.DPV
     }
+
+    override fun isStartPolling(status: MessageStatus): Boolean {
+        return SENDT.toString() == status.status
+    }
+
+    override fun isStopPolling(status: MessageStatus): Boolean {
+        return false
+    }
+
 
 }
