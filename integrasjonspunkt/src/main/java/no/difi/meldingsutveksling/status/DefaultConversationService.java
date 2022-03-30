@@ -8,10 +8,10 @@ import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -25,14 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
@@ -49,23 +49,15 @@ public class DefaultConversationService implements ConversationService {
     private final IpMailSender ipMailSender;
     private final Clock clock;
     private final StatusQueue statusQueue;
-    private final ObjectProvider<MeldingsformidlerClient> meldingsformidlerClientObjectProvider;
-    @Getter(lazy = true) private final Set<ServiceIdentifier> pollables = createrPollables();
+    private final ObjectProvider<StatusStrategy> statusStrategyProvider;
+    @Getter(lazy = true) private final Map<ServiceIdentifier, StatusStrategy> statusStrategyMap = createStatusStrategyMap();
 
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
 
-    private Set<ServiceIdentifier> createrPollables() {
-        Set<ServiceIdentifier> serviceIdentifiers = new HashSet<>();
-        serviceIdentifiers.add(DPV);
-        serviceIdentifiers.add(DPF);
-
-
-        if (meldingsformidlerClientObjectProvider.stream()
-                .anyMatch(MeldingsformidlerClient::skalPolleMeldingStatus)) {
-            serviceIdentifiers.add(DPI);
-        }
-
-        return Collections.unmodifiableSet(serviceIdentifiers);
+    private Map<ServiceIdentifier, StatusStrategy> createStatusStrategyMap() {
+        return statusStrategyProvider.stream().collect(
+                Collectors.toConcurrentMap(StatusStrategy::getServiceIdentifier, Function.identity())
+        );
     }
 
     @NotNull
@@ -108,11 +100,15 @@ public class DefaultConversationService implements ConversationService {
 
         conversation.addMessageStatus(status);
 
-        if (isPollable(status)) {
-            // Note: isPollable can not be moved into setPollable, as this would interrupt polling
-            // for every other registered status than 'SENDT'
-            conversation.setPollable(true);
-        }
+        getStatusStrategy(status)
+                .ifPresent(statusStrategy -> {
+                    if (statusStrategy.isStartPolling(status)) {
+                        conversation.setPollable(true);
+                    } else if (statusStrategy.isStopPolling(status)) {
+                        conversation.setPollable(false);
+                    }
+                });
+
         if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT) {
             conversation.setFinished(true);
         }
@@ -149,11 +145,14 @@ public class DefaultConversationService implements ConversationService {
         }
     }
 
-    private boolean isPollable(MessageStatus status) {
+    private Optional<StatusStrategy> getStatusStrategy(MessageStatus status) {
         Conversation conversation = status.getConversation();
-        return conversation.getDirection() == ConversationDirection.OUTGOING &&
-                ReceiptStatus.SENDT.toString().equals(status.getStatus()) &&
-                getPollables().contains(conversation.getServiceIdentifier());
+
+        if (conversation.getDirection() != ConversationDirection.OUTGOING) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(getStatusStrategyMap().get(conversation.getServiceIdentifier()));
     }
 
     @NotNull
@@ -249,7 +248,8 @@ public class DefaultConversationService implements ConversationService {
 
     @NotNull
     @Override
-    public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection direction) {
+    public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection
+            direction) {
         return repo.findByConversationIdAndDirection(conversationId, direction);
     }
 }

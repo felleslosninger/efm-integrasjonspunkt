@@ -6,7 +6,9 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -38,5 +40,15 @@ public class DpiStatusStrategy implements StatusStrategy {
     @Override
     public ServiceIdentifier getServiceIdentifier() {
         return ServiceIdentifier.DPI;
+    }
+
+    @Override
+    public boolean isStartPolling(@NotNull MessageStatus status) {
+        return meldingsformidlerClient.skalPolleMeldingStatus() && ReceiptStatus.SENDT.toString().equals(status.getStatus());
+    }
+
+    @Override
+    public boolean isStopPolling(@NotNull MessageStatus status) {
+        return ReceiptStatus.MOTTATT.toString().equals(status.getStatus());
     }
 }
