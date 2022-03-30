@@ -89,4 +89,15 @@ public class DpfStatusStrategy implements StatusStrategy {
     public ServiceIdentifier getServiceIdentifier() {
         return DPF;
     }
+
+    @Override
+    public boolean isStartPolling(@NotNull MessageStatus status) {
+        return ReceiptStatus.SENDT.toString().equals(status.getStatus());
+    }
+
+    @Override
+    public boolean isStopPolling(@NotNull MessageStatus status) {
+        return false;
+    }
+
 }
