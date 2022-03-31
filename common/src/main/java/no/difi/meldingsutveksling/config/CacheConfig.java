@@ -26,6 +26,7 @@ public class CacheConfig extends CachingConfigurerSupport {
     public static final String CACHE_LOAD_IDENTIFIER_RESOURCE = "loadIdentifierResource";
     public static final String CACHE_SR_VIRKSERT = "srVirksert";
     public static final String CACHE_FORSENDELSEID = "forsendelseIdCache";
+    public static final String CACHE_KRR_PRINT = "krrPrintCache";
     public static final String SVARUT_FORSENDELSETYPER = "svarutForsendelseTyperCache";
 
     @Override
@@ -50,9 +51,17 @@ public class CacheConfig extends CachingConfigurerSupport {
                         Caffeine.newBuilder()
                                 .expireAfterWrite(5, TimeUnit.MINUTES)
                                 .build()),
+                new CaffeineCache(CACHE_KRR_PRINT,
+                        Caffeine.newBuilder()
+                                .expireAfterWrite(5, TimeUnit.MINUTES)
+                                .build()),
                 new CaffeineCache(SVARUT_FORSENDELSETYPER,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.HOURS)
+                                .build()),
+                new CaffeineCache("dpiClient.getMaskinportenToken",
+                        Caffeine.newBuilder()
+                                .expireAfterWrite(90, TimeUnit.SECONDS)
                                 .build())
         ));
         return cacheManager;

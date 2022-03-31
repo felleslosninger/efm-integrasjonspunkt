@@ -112,7 +112,7 @@ public class OidcTokenClientTest {
     public void testOathRestTemplate() throws URISyntaxException, MalformedURLException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
-        RestOperations ops = config.restTemplate(oidcTokenClient);
+        RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
         RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
         String response = restClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
         System.out.println(response);
@@ -123,7 +123,7 @@ public class OidcTokenClientTest {
     public void testSasTokenFetch() throws URISyntaxException, IOException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
-        RestOperations ops = config.restTemplate(oidcTokenClient);
+        RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
         RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
         String response = restClient.getResource("sastoken");
         System.out.println(response);

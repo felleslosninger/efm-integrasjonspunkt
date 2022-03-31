@@ -79,7 +79,7 @@ public class NextMoveMessageInSteps {
                 "/api/messages/in/pop/{messageId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
-                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
+                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getMessageId())
         );
     }
 
@@ -90,7 +90,7 @@ public class NextMoveMessageInSteps {
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 StandardBusinessDocument.class,
-                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getDocumentId())
+                Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getMessageId())
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

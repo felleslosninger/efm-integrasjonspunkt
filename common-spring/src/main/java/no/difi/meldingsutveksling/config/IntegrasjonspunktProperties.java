@@ -64,9 +64,11 @@ public class IntegrasjonspunktProperties {
     private NorskArkivstandardSystem noarkSystem = new NorskArkivstandardSystem();
 
     @Valid
+    @NestedConfigurationProperty
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
+    @NestedConfigurationProperty
     private FiksConfig fiks = new FiksConfig();
 
     @Valid
@@ -149,6 +151,12 @@ public class IntegrasjonspunktProperties {
         private Integer maximumRetryHours;
         @NotNull
         private Integer concurrency;
+        @NotNull
+        private String nextmoveName;
+        @NotNull
+        private String noarkName;
+        @NotNull
+        private String dlqName;
     }
 
     public FeatureToggle getFeature() {
@@ -211,6 +219,7 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private String audience;
         private String clientId;
+        private String clientIdPrefix;
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
     }

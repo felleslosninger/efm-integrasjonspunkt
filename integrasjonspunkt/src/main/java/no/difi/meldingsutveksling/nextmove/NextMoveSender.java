@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.v2.BusinessMessageFileRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
@@ -23,16 +24,16 @@ public class NextMoveSender {
     private final ConversationService conversationService;
     private final NextMoveMessageOutRepository messageRepo;
     private final BusinessMessageFileRepository businessMessageFileRepository;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final TimeToLiveHelper timeToLiveHelper;
     private final MessagePersister messagePersister;
 
     public void send(NextMoveOutMessage msg) throws NextMoveException {
-        if (sbdUtil.isExpired(msg.getSbd())) {
+        if (sbdService.isExpired(msg.getSbd())) {
             conversationService.findConversation(msg.getMessageId())
                     .ifPresent(timeToLiveHelper::registerErrorStatusAndMessage);
 
-            if (sbdUtil.isStatus(msg.getSbd())) {
+            if (SBDUtil.isStatus(msg.getSbd())) {
                 return;
             }
         } else {
@@ -44,7 +45,7 @@ public class NextMoveSender {
                         return new NextMoveRuntimeException(errorStr);
                     }).send(msg);
 
-            if (sbdUtil.isStatus(msg.getSbd())) {
+            if (SBDUtil.isStatus(msg.getSbd())) {
                 return;
             }
 

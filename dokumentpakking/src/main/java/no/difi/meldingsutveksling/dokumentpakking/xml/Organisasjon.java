@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dokumentpakking.xml;
 
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.Iso6523;
 
 import javax.xml.bind.annotation.*;
 
@@ -13,10 +13,10 @@ public class Organisasjon {
     @XmlValue
     private String orgNummer;
 
-    public Organisasjon(Organisasjonsnummer orgNummer) {
+    public Organisasjon(Iso6523 iso6523) {
         super();
-        this.authority = orgNummer.authority();
-        this.orgNummer = orgNummer.asIso6523();
+        this.authority = iso6523.getAuthority();
+        this.orgNummer = iso6523.getIdentifier();
     }
 
     public Organisasjon() {

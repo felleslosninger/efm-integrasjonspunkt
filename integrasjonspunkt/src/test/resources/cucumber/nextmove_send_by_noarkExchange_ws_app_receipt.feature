@@ -2,15 +2,16 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
 
   Background:
 
-    Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
-    Given a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    Given a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=19efbd4c-413d-4e2c-bbc5-257ef4a65b38" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-arkivmelding_response.json"
+    Given a "GET" request to "http://localhost:9099/virksert/910075918" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910075918"
 
   Scenario: As a user I want to send a BEST/EDU AppReceipt message
 
-    Given the sender is "910077473"
-    And the receiver is "910075918"
+    # Need to swap sender and receiver due to noarkSystem.type being p360
+    Given the sender is "910075918"
+    And the receiver is "910077473"
     And the conversationId is "19efbd4c-413d-4e2c-bbc5-257ef4a65b38"
     And the payload is:
     """
@@ -44,12 +45,12 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
                                 <FileName>sbd.zip</FileName>
                             </File>
                         </ArrayOfFile>
-                        <Reportee>910075918</Reportee>
+                        <Reportee>910077473</Reportee>
                         <SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</SendersReference>
                     </Manifest>
                     <RecipientList>
                         <Recipient>
-                            <PartyNumber>910077473</PartyNumber>
+                            <PartyNumber>910075918</PartyNumber>
                         </Recipient>
                     </RecipientList>
                 </ns2:brokerServiceInitiation>
@@ -69,7 +70,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
        <ExternalServiceCode>v3888</ExternalServiceCode>
        <ExternalServiceEditionCode>70515</ExternalServiceEditionCode>
        <SendersReference>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</SendersReference>
-       <Reportee>910075918</Reportee>
+       <Reportee>910077473</Reportee>
        <FileList>
           <File>
              <FileName>sbd.json</FileName>
@@ -82,7 +83,7 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
     <?xml version="1.0" encoding="UTF-8"?>
     <BrokerServiceRecipientList xmlns="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
        <Recipient>
-          <PartyNumber>910077473</PartyNumber>
+          <PartyNumber>910075918</PartyNumber>
        </Recipient>
     </BrokerServiceRecipientList>
     """
@@ -93,24 +94,22 @@ Feature: Sending a BEST/EDU AppReceipt message by the noarkExchange WebService
         "headerVersion" : "1.0",
         "sender" : [ {
           "identifier" : {
-            "value" : "0192:910075918",
+            "value" : "0192:910077473",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "receiver" : [ {
           "identifier" : {
-            "value" : "0192:910077473",
+            "value" : "0192:910075918",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
           "type" : "arkivmelding_kvittering",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {

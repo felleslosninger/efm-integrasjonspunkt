@@ -42,10 +42,11 @@ class FiksIoService(
         val params = SRParameter.builder(msg.receiverIdentifier)
             .process(msg.sbd.process)
             .conversationId(msg.conversationId)
-        if (msg.businessMessage.getSikkerhetsnivaa() != null) {
-            params.securityLevel(msg.businessMessage.getSikkerhetsnivaa())
+        if (msg.businessMessage.sikkerhetsnivaa != null) {
+            params.securityLevel(msg.businessMessage.sikkerhetsnivaa)
         }
-        val serviceRecord: ServiceRecord = serviceRegistryLookup.getServiceRecord(params.build(), msg.sbd.documentType)
+        val serviceRecord: ServiceRecord =
+            serviceRegistryLookup.getServiceRecord(params.build(), msg.sbd.documentType)
 
         val request = MeldingRequest.builder()
             .mottakerKontoId(KontoId(UUID.fromString(serviceRecord.service.endpointUrl)))

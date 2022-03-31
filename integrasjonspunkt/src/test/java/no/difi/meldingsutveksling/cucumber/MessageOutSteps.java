@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -7,7 +8,10 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
 import org.xmlunit.matchers.CompareMatcher;
 
 import java.io.IOException;
@@ -16,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,8 +30,17 @@ public class MessageOutSteps {
 
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
+    private final ObjectMapper objectMapper;
+
+    private JacksonTester<StandardBusinessDocument> json;
 
     @Before
+    public void before() {
+        JacksonTester.initFields(this, objectMapper);
+        messageOutHolder.reset();
+        messageSentHolder.reset();
+    }
+
     @After
     public void beforeAndAfter() {
         messageOutHolder.reset();
@@ -101,4 +115,12 @@ public class MessageOutSteps {
         Message message = messageSentHolder.get();
         assertThat(message.getBody(), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
     }
+
+    @SneakyThrows
+    @Then("^the sent message's SBD is:$")
+    public void theSentMessagesSbdIs(String expectedSBD) {
+        JsonContent<StandardBusinessDocument> actual = json.write(messageSentHolder.get().getSbd());
+        assertThat(actual.getJson(), jsonEquals(expectedSBD));
+    }
+
 }

@@ -6,7 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -73,14 +72,14 @@ public class ServiceRegistryClient {
     }
 
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
-    public String getCertificate(String identifier, ServiceIdentifier si) throws ServiceRegistryLookupException {
+    public String getCertificate(String identifier) throws ServiceRegistryLookupException {
         try {
             Map<String, String> params = Maps.newHashMap();
             params.put("identifier", identifier);
-            params.put("serviceIdentifier", si.name());
-            return client.getResource("virksert/{identifier}/service/{serviceIdentifier}", params);
+            return client.getResource("virksert/{identifier}", params);
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND ||
+                e.getStatusCode() == HttpStatus.BAD_REQUEST) {
                 String errorDescription = JsonPath.read(e.getResponseBodyAsString(), "$.error_description");
                 throw new ServiceRegistryLookupException(errorDescription);
             }

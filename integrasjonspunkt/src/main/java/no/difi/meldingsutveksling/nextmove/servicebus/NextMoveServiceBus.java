@@ -43,7 +43,6 @@ public class NextMoveServiceBus {
     private final ObjectMapper om;
     private final ServiceBusPayloadConverter payloadConverter;
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final SBDUtil sbdUtil;
     private final TaskExecutor taskExecutor;
     private final NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory;
 
@@ -56,7 +55,6 @@ public class NextMoveServiceBus {
                               ObjectMapper om,
                               ServiceBusPayloadConverter payloadConverter,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              SBDUtil sbdUtil,
                               TaskExecutor taskExecutor,
                               NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory) {
         this.props = props;
@@ -66,7 +64,6 @@ public class NextMoveServiceBus {
         this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
         this.payloadConverter = payloadConverter;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.sbdUtil = sbdUtil;
         this.taskExecutor = taskExecutor;
     }
 
@@ -235,7 +232,7 @@ public class NextMoveServiceBus {
     private String getReceiverQueue(NextMoveOutMessage message) {
         String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
 
-        if (sbdUtil.isStatus(message.getSbd())) {
+        if (SBDUtil.isStatus(message.getSbd())) {
             return prefix + statusSuffix();
         }
         if (message.getBusinessMessage() instanceof EinnsynKvitteringMessage) {
@@ -244,10 +241,10 @@ public class NextMoveServiceBus {
 
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
-                SRParameter.builder(message.getReceiverIdentifier())
-                    .process(message.getSbd().getProcess())
-                    .conversationId(message.getConversationId()).build(),
-                message.getSbd().getDocumentType());
+                    SRParameter.builder(message.getReceiverIdentifier())
+                            .process(message.getSbd().getProcess())
+                            .conversationId(message.getConversationId()).build(),
+                    message.getSbd().getDocumentType());
 
             if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
                 throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));

@@ -4,10 +4,6 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.dpi.DpiReceiptMapper;
-import no.difi.meldingsutveksling.dpi.ForsendelseHandlerFactory;
-import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -22,19 +18,14 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.oauth.JWTDecoder;
-import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
-import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.locator.StaticLocator;
-import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
-import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -46,6 +37,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
+@Import(DpiConfig.class)
 public class IntegrasjonspunktBeans {
 
     @Bean
@@ -56,18 +48,10 @@ public class IntegrasjonspunktBeans {
                                             PromiseMaker promiseMaker,
                                             IntegrasjonspunktProperties properties) {
         return new AltinnWsClient(altinnWsConfigurationFactory.create(),
-            applicationContextHolder.getApplicationContext(),
-            plumber,
-            promiseMaker,
-            properties);
-    }
-
-    @Bean
-    public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
-        return LookupClientBuilder.forTest()
-            .locator(new StaticLocator(properties.getElma().getUrl()))
-            .certificateValidator(EmptyCertificateValidator.INSTANCE)
-            .build();
+                applicationContextHolder.getApplicationContext(),
+                plumber,
+                promiseMaker,
+                properties);
     }
 
     @Bean
@@ -89,7 +73,7 @@ public class IntegrasjonspunktBeans {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
         if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-            props.getOrg().getKeystore().getLockProvider()) {
+                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
             return new CmsUtil(null);
         }
         return new CmsUtil();
@@ -108,31 +92,16 @@ public class IntegrasjonspunktBeans {
     @Bean
     public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
         return new CorrespondenceAgencyConfiguration()
-            .setPassword(properties.getDpv().getPassword())
-            .setSystemUserCode(properties.getDpv().getUsername())
-            .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
-            .setNotifyEmail(properties.getDpv().isNotifyEmail())
-            .setNotifySms(properties.getDpv().isNotifySms())
-            .setNotificationText(properties.getDpv().getNotificationText())
-            .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
-            .setNextmoveFiledir(properties.getNextmove().getFiledir())
-            .setAllowForwarding(properties.getDpv().isAllowForwarding())
-            .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
-    public ForsendelseHandlerFactory forsendelseHandlerFactory(IntegrasjonspunktProperties properties) {
-        return new ForsendelseHandlerFactory(properties.getDpi());
-    }
-
-    @Bean
-    public MeldingsformidlerClient meldingsformidlerClient(IntegrasjonspunktProperties properties,
-                                                           SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory,
-                                                           ForsendelseHandlerFactory forsendelseHandlerFactory,
-                                                           DpiReceiptMapper dpiReceiptMapper,
-                                                           ClientInterceptor metricsEndpointInterceptor) {
-        return new MeldingsformidlerClient(properties.getDpi(), sikkerDigitalPostKlientFactory,
-            forsendelseHandlerFactory, dpiReceiptMapper, metricsEndpointInterceptor);
+                .setPassword(properties.getDpv().getPassword())
+                .setSystemUserCode(properties.getDpv().getUsername())
+                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
+                .setNotifyEmail(properties.getDpv().isNotifyEmail())
+                .setNotifySms(properties.getDpv().isNotifySms())
+                .setNotificationText(properties.getDpv().getNotificationText())
+                .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
+                .setNextmoveFiledir(properties.getNextmove().getFiledir())
+                .setAllowForwarding(properties.getDpv().isAllowForwarding())
+                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
     }
 
     @Bean

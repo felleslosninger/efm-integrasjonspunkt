@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import sun.security.provider.X509Factory;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -58,6 +59,13 @@ public class ServiceRecord {
     @JsonIgnore
     public ServiceIdentifier getServiceIdentifier() {
         return getService().getIdentifier();
+    }
+
+    public String getPemCertificate() {
+        if (!pemCertificate.contains(X509Factory.BEGIN_CERT)) {
+            return String.format("%s\n%s\n%s\n", X509Factory.BEGIN_CERT, pemCertificate, X509Factory.END_CERT);
+        }
+        return pemCertificate;
     }
 
 }

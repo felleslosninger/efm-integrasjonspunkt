@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
@@ -28,7 +28,6 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.junit.jupiter.api.io.TempDir;
@@ -65,7 +64,7 @@ import java.util.Map;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
@@ -88,6 +87,14 @@ public class CucumberStepsConfiguration {
     @SpyBean(WebhookPusher.class)
     @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public UUIDGenerator uuidGenerator() {
+            UUIDGenerator uuidGenerator = mock(UUIDGenerator.class);
+            when(uuidGenerator.generate()).thenReturn("ff88849c-e281-4809-8555-7cd54952b921");
+            return uuidGenerator;
+        }
 
         @Primary
         @Bean
@@ -255,7 +262,6 @@ public class CucumberStepsConfiguration {
     File temporaryFolder;
 
     @MockBean public UUIDGenerator uuidGenerator;
-    @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;

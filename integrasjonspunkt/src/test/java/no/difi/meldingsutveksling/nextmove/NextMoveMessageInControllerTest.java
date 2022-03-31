@@ -1,11 +1,11 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.config.SecurityConfiguration;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
@@ -20,12 +20,12 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,15 +56,20 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@Import({FixedClockConfig.class, ValidationConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
+@ContextConfiguration(classes = {
+        SecurityConfiguration.class,
+        FixedClockConfig.class,
+        ValidationConfig.class,
+        JacksonConfig.class,
+        JacksonMockitoConfig.class,
+        NextMoveMessageInController.class})
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
 @TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
-public class NextMoveMessageInControllerTest {
+class NextMoveMessageInControllerTest {
 
     @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper objectMapper;
 
     @MockBean private NextMoveMessageInService messageService;
     @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
@@ -80,7 +85,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void find() throws Exception {
+    void find() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
                     List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
@@ -124,7 +129,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void findSearch() throws Exception {
+    void findSearch() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
                     List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
@@ -144,7 +149,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void findSorting() throws Exception {
+    void findSorting() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
                     List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
@@ -164,7 +169,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void findPaging() throws Exception {
+    void findPaging() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
                 .willAnswer(invocation -> {
                     List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
@@ -185,7 +190,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void peek() throws Exception {
+    void peek() throws Exception {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
@@ -221,7 +226,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void peekDPE() throws Exception {
+    void peekDPE() throws Exception {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
@@ -253,7 +258,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void peekMessageIdAndConversationId() throws Exception {
+    void peekMessageIdAndConversationId() throws Exception {
         NextMoveInMessage message = PUBLISERING_MESSAGE_RESPONSE;
 
         given(messageService.peek(any(NextMoveInMessageQueryInput.class)))
@@ -293,7 +298,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void pop() throws Exception {
+    void pop() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
         zipOutputStream.putNextEntry(new ZipEntry("test"));
@@ -329,7 +334,7 @@ public class NextMoveMessageInControllerTest {
     }
 
     @Test
-    public void deleteMessage() throws Exception {
+    void deleteMessage() throws Exception {
         given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
 
         mvc.perform(

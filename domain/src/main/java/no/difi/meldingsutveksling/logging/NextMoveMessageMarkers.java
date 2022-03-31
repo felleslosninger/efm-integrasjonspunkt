@@ -14,9 +14,9 @@ public class NextMoveMessageMarkers {
     public static LogstashMarker markerFrom(NextMoveMessage message) {
         final LogstashMarker conversationIdMarker = MarkerFactory.conversationIdMarker(message.getConversationId());
         final LogstashMarker messageIdMarker = MarkerFactory.messageIdMarker(message.getMessageId());
-        final LogstashMarker senderMarker = senderMarker(message.getSbd().getSender().asIso6523());
+        final LogstashMarker senderMarker = senderMarker(message.getSender().getIdentifier());
         final LogstashMarker senderIdentifierMarker = MarkerFactory.senderMarker(message.getSenderIdentifier());
-        final LogstashMarker receiverMarker = receiverMarker(message.getSbd().getReceiver().asIso6523());
+        final LogstashMarker receiverMarker = receiverMarker(message.getReceiver().getIdentifier());
         final LogstashMarker receiverIdentifierMarker = MarkerFactory.receiverMarker(message.getReceiverIdentifier());
         final LogstashMarker messagetypeIdMarker = MarkerFactory.messageTypeMarker(message.getServiceIdentifier().toString());
         final LogstashMarker processMarker = processMarker(message.getSbd().getProcess());
@@ -37,6 +37,10 @@ public class NextMoveMessageMarkers {
 
     public static LogstashMarker receiverMarker(String receiver) {
         return Markers.append("receiver", Strings.isNullOrEmpty(receiver) ? receiver : IdentifierHasher.hashIfPersonnr(receiver));
+    }
+
+    public static LogstashMarker receiverOrgnrMarker(String receiverOrgnr) {
+        return Markers.append("receiver_org_number", Strings.isNullOrEmpty(receiverOrgnr) ? receiverOrgnr : IdentifierHasher.hashIfPersonnr(receiverOrgnr));
     }
 
     public static LogstashMarker processMarker(String processIdentifier) {

@@ -1,0 +1,26 @@
+{
+  "infoRecord": {
+    "identifier": "17912099997",
+    "organizationName": "Dpi Mottaker 1",
+    "postadresse": null,
+    "entityType": {
+      "name": "ORGL"
+    }
+  },
+  "serviceRecords": [
+    {
+      "organisationNumber": "17912099997",
+      "pemCertificate": "",
+      "process": "urn:no:difi:profile:digitalpost:info:ver1.0",
+      "documentTypes": [
+        "urn:no:difi:digitalpost:xsd:digital::digital_dpv",
+        "urn:no:difi:digitalpost:xsd:fysisk::print"
+      ],
+      "service": {
+        "identifier": "DPV",
+        "serviceCode": "4255",
+        "serviceEditionCode": "10"
+      }
+    }
+  ]
+}

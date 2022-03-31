@@ -4,10 +4,12 @@ import com.google.common.collect.Sets;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
@@ -69,7 +71,8 @@ public class DefaultDpoPolling implements DpoPolling {
             AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
-            Audit.info(format("Downloaded message with id=%s", sbd.getDocumentId()), sbd.createLogstashMarkers());
+            LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
+            Audit.info(format("Downloaded message with id=%s", sbd.getMessageId()), logstashMarkers);
 
             try {
                 UUID.fromString(sbd.getMessageId());
@@ -82,7 +85,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
             client.confirmDownload(request);
-            log.debug(markerFrom(reference).and(sbd.createLogstashMarkers()), "Message confirmed downloaded");
+            log.debug(markerFrom(reference).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
             log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
         }

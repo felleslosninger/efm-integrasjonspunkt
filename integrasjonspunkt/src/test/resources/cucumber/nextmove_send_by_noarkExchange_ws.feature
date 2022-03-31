@@ -189,22 +189,20 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
           "identifier" : {
             "value" : "0192:910077473",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "receiver" : [ {
           "identifier" : {
             "value" : "0192:910075918",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {

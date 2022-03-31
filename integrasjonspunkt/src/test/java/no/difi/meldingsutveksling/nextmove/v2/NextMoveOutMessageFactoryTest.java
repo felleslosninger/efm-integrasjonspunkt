@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -26,12 +27,11 @@ import java.util.Optional;
 import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.ARKIVMELDING_MESSAGE_DATA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class NextMoveOutMessageFactoryTest {
+class NextMoveOutMessageFactoryTest {
 
     @MockBean
     private IntegrasjonspunktProperties props;
@@ -57,11 +57,9 @@ public class NextMoveOutMessageFactoryTest {
     }
 
     @Test
-    public void testMessageChannelDefaultNoScope() {
-        ServiceRecord sr = mock(ServiceRecord.class);
+    void testMessageChannelDefaultNoScope() {
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
-        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        when(serviceRecordProvider.getServiceRecord(eq(sbd))).thenReturn(sr);
+        when(serviceRecordProvider.getServiceIdentifier(sbd)).thenReturn(ServiceIdentifier.DPO);
 
         AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
         String messageChannel = "foo-42";
@@ -69,18 +67,17 @@ public class NextMoveOutMessageFactoryTest {
         when(props.getDpo()).thenReturn(dpo);
 
         NextMoveOutMessage msg = factory.getNextMoveOutMessage(sbd);
-        Optional<Scope> scope = msg.getSbd().findScope(ScopeType.MESSAGE_CHANNEL);
+        Optional<Scope> scope = SBDUtil.getOptionalMessageChannel(msg.getSbd());
         assertTrue(scope.isPresent());
         assertEquals(messageChannel, scope.get().getIdentifier());
     }
 
     @Test
-    public void testMessageChannelDefaultScopeExistsEmptyIdentifier() {
+    void testMessageChannelDefaultScopeExistsEmptyIdentifier() {
         ServiceRecord sr = mock(ServiceRecord.class);
         StandardBusinessDocument sbd = StandardBusinessDocumentTestData.createSbd(ARKIVMELDING_MESSAGE_DATA);
-        sbd.getScopes().add(new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
-        when(sr.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        when(serviceRecordProvider.getServiceRecord(eq(sbd))).thenReturn(sr);
+        sbd.addScope(new Scope().setType(ScopeType.MESSAGE_CHANNEL.toString()));
+        when(serviceRecordProvider.getServiceIdentifier(sbd)).thenReturn(ServiceIdentifier.DPO);
 
         AltinnFormidlingsTjenestenConfig dpo = new AltinnFormidlingsTjenestenConfig();
         String messageChannel = "foo-42";
@@ -88,18 +85,18 @@ public class NextMoveOutMessageFactoryTest {
         when(props.getDpo()).thenReturn(dpo);
 
         NextMoveOutMessage msg = factory.getNextMoveOutMessage(sbd);
-        Optional<Scope> scope = msg.getSbd().findScope(ScopeType.MESSAGE_CHANNEL);
+        Optional<Scope> scope = SBDUtil.getOptionalMessageChannel(msg.getSbd());
         assertTrue(scope.isPresent());
         assertEquals(messageChannel, scope.get().getIdentifier());
     }
 
     @Test
-    public void testReceiverDefaults() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    void testReceiverDefaults() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         when(srPostAddress.getStreet()).thenReturn("Bergensgata 42");
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 
@@ -110,12 +107,12 @@ public class NextMoveOutMessageFactoryTest {
     }
 
     @Test
-    public void testMultipleAddressLines() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testMultipleAddressLines() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         when(srPostAddress.getStreet()).thenReturn("C/O Bar;Bergensgata 42");
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 
@@ -124,12 +121,12 @@ public class NextMoveOutMessageFactoryTest {
     }
 
     @Test
-    public void testAddressLinesOverflow() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testAddressLinesOverflow() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         when(srPostAddress.getStreet()).thenReturn("a;b;c;d;e");
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 

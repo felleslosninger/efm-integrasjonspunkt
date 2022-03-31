@@ -11,8 +11,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
@@ -36,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -65,7 +65,7 @@ public class FiksMapper {
     }
 
     public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
-        Optional<String> senderRef = message.getSbd().findScope(ScopeType.SENDER_REF).map(Scope::getInstanceIdentifier);
+        Optional<String> senderRef = SBDUtil.getOptionalSenderRef(message.getSbd());
         // Confirm that SenderRef is a valid UUID, else use messageId
         if (senderRef.isPresent()) {
             try {
@@ -87,7 +87,7 @@ public class FiksMapper {
         Saksmappe saksmappe = arkivmeldingUtil.getSaksmappe(am);
         Journalpost journalpost = arkivmeldingUtil.getJournalpost(am);
 
-        Optional<String> receiverRef = message.getSbd().findScope(ScopeType.RECEIVER_REF).map(Scope::getInstanceIdentifier);
+        Optional<String> receiverRef = SBDUtil.getOptionalReceiverRef(message.getSbd());
         if (receiverRef.isPresent()) {
             try {
                 //noinspection ResultOfMethodCallIgnored
@@ -112,6 +112,7 @@ public class FiksMapper {
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
                 .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
+                .withKunDigitalLevering(properties.getFiks().getUt().isKunDigitalLevering())
                 .build();
     }
 
@@ -199,11 +200,17 @@ public class FiksMapper {
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
         FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier(), reject);
 
-        return Dokument.builder()
+        Dokument.Builder<Void> builder = Dokument.builder()
                 .withData(getDataHandler(cert, fileEntryStream.getInputStream(), reject))
                 .withFilnavn(file.getFilename())
-                .withMimetype(file.getMimetype())
-                .build();
+                .withMimetype(file.getMimetype());
+
+        String ext = Stream.of(file.getFilename().split("\\.")).reduce((a, b) -> b).orElse("pdf");
+        if (properties.getFiks().getUt().getEkskluderesFraPrint().contains(ext)) {
+            builder.withEkskluderesFraPrint(true);
+        }
+
+        return builder.build();
     }
 
     private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {

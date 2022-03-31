@@ -114,22 +114,20 @@ Feature: Receiving a Next Move DPF message
           "identifier" : {
             "value" : "0192:910229028",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "receiver" : [ {
           "identifier" : {
             "value" : "0192:910229028",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {
