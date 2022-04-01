@@ -1,0 +1,45 @@
+{
+  "arkivmelding": {
+    "sikkerhetsnivaa": 3
+  },
+  "standardBusinessDocumentHeader": {
+    "businessScope": {
+      "scope": [
+        {
+          "scopeInformation": [
+            {
+              "expectedResponseDateTime": "2003-05-10T00:31:52Z"
+            }
+          ],
+          "identifier": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+          "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+          "type": "ConversationId"
+        }
+      ]
+    },
+    "documentIdentification": {
+      "creationDateAndTime": "2016-04-11T15:29:58.753+02:00",
+      "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+      "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
+      "type": "arkivmelding",
+      "typeVersion": "2.0"
+    },
+    "headerVersion": "1.0",
+    "receiver": [
+      {
+        "identifier": {
+          "authority": "iso6523-actorid-upis",
+          "value": "9908:910075918"
+        }
+      }
+    ],
+    "sender": [
+      {
+        "identifier": {
+          "authority": "iso6523-actorid-upis",
+          "value": "9908:910077473"
+        }
+      }
+    ]
+  }
+}
