@@ -132,7 +132,7 @@ public class ArkivmeldingFactory {
         am.setSystem(properties.getNoarkSystem().getType());
         am.setMeldingId(putMessage.getConversationId());
         am.setTidspunkt(DateTimeUtil.toXMLGregorianCalendar(mt.getNoarksak().getSaDato()));
-        am.setAntallFiler(Integer.parseInt(mt.getJournpost().getJpAntved()));
+        am.setAntallFiler(mt.getJournpost().getDokument().size());
         return am;
     }
 
