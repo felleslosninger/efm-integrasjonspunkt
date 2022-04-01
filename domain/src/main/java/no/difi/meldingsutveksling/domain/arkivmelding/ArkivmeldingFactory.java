@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
@@ -14,11 +13,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.TimeZone;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
