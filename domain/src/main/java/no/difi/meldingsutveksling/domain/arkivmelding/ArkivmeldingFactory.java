@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.util.GregorianCalendar;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -128,9 +129,9 @@ public class ArkivmeldingFactory {
         am.getMappe().add(sm);
         am.setSystem(properties.getNoarkSystem().getType());
         am.setMeldingId(putMessage.getConversationId());
-        am.setTidspunkt(mt.getNoarksak().getSaDato().length() > 0
-                ? DateTimeUtil.toXMLGregorianCalendar(mt.getNoarksak().getSaDato())
-                : DateTimeUtil.toXMLGregorianCalendar(LocalDateTime.now().toString()));
+        ofNullable(mt.getNoarksak().getSaDato())
+                .map(DateTimeUtil::toXMLGregorianCalendar)
+                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault())));
         am.setAntallFiler(mt.getJournpost().getDokument().size());
         return am;
     }
