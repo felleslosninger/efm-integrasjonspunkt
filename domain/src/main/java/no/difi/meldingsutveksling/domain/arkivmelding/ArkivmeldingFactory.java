@@ -1,10 +1,12 @@
 package no.difi.meldingsutveksling.domain.arkivmelding;
 
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestWrapper;
@@ -12,8 +14,11 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -23,6 +28,7 @@ import static java.util.Optional.ofNullable;
 @Component
 @RequiredArgsConstructor
 public class ArkivmeldingFactory {
+    private final IntegrasjonspunktProperties properties;
 
     public Arkivmelding from(PutMessageRequestWrapper putMessage) {
         MeldingType mt = BestEduConverter.payloadAsMeldingType(putMessage.getPayload());
@@ -61,6 +67,7 @@ public class ArkivmeldingFactory {
         ofNullable(mt.getJournpost().getJpArkdel()).ifPresent(jp::setReferanseArkivdel);
         ofNullable(mt.getJournpost().getJpAntved()).filter(s -> !isNullOrEmpty(s)).map(BigInteger::new).ifPresent(jp::setAntallVedlegg);
         ofNullable(mt.getJournpost().getJpOffinnhold()).ifPresent(jp::setOffentligTittel);
+
 
         Skjerming skjerming = amOf.createSkjerming();
         ofNullable(mt.getJournpost().getJpUoff()).ifPresent(skjerming::setSkjermingshjemmel);
@@ -122,6 +129,10 @@ public class ArkivmeldingFactory {
 
         sm.getBasisregistrering().add(jp);
         am.getMappe().add(sm);
+        am.setSystem(properties.getNoarkSystem().getType());
+        am.setMeldingId(putMessage.getConversationId());
+        am.setTidspunkt(DateTimeUtil.toXMLGregorianCalendar(mt.getNoarksak().getSaDato()));
+        am.setAntallFiler(Integer.parseInt(mt.getJournpost().getJpAntved()));
         return am;
     }
 
