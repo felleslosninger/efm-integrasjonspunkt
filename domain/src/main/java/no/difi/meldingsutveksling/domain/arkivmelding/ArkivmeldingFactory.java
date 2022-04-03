@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
 import java.util.Optional;
@@ -129,9 +130,9 @@ public class ArkivmeldingFactory {
         am.getMappe().add(sm);
         am.setSystem(properties.getNoarkSystem().getType());
         am.setMeldingId(putMessage.getConversationId());
-        ofNullable(mt.getNoarksak().getSaDato())
+        am.setTidspunkt(ofNullable(mt.getNoarksak().getSaDato())
                 .map(DateTimeUtil::toXMLGregorianCalendar)
-                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault())));
+                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
         am.setAntallFiler(mt.getJournpost().getDokument().size());
         return am;
     }
