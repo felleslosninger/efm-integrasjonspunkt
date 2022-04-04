@@ -36,6 +36,11 @@ import java.util.Arrays;
 public class DpiConfig {
 
     @Bean
+    public DigitalPostInnbyggerConfig digitalPostInnbyggerConfig(IntegrasjonspunktProperties properties) {
+        return properties.getDpi();
+    }
+
+    @Bean
     public DpiStatusPolling dpiStatusPolling(IntegrasjonspunktProperties properties,
                                              SchedulingTaskExecutor dpiReceiptExecutor,
                                              DpiReceiptService dpiReceiptService) {
