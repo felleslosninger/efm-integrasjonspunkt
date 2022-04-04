@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
+import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class MockServerRestSteps {
 
     private final RestClient restClient;
+    private final ServiceBusRestTemplate serviceBusRestTemplate;
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
 
@@ -43,7 +45,7 @@ public class MockServerRestSteps {
         mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
         mockServerRestTemplateCustomizer.setDetectRootUri(false);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
-        mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
+        mockServerRestTemplateCustomizer.customize(serviceBusRestTemplate);
         mockServerRestTemplateCustomizer.customize(svarInnClient.getRestTemplate());
     }
 
@@ -61,7 +63,7 @@ public class MockServerRestSteps {
     @SuppressWarnings("squid:S1172")
     private RestTemplate getRestTemplate(String url) {
         if (url.startsWith(serviceBusRestClient.getBase())) {
-            return serviceBusRestClient.getRestTemplate();
+            return serviceBusRestTemplate;
         } else if (url.startsWith(svarInnClient.getRootUri())) {
             return svarInnClient.getRestTemplate();
         }

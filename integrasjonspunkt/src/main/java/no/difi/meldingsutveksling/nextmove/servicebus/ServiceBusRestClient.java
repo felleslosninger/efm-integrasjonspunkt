@@ -1,12 +1,12 @@
 package no.difi.meldingsutveksling.nextmove.servicebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.BrokerProperties;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,9 @@ import org.springframework.web.client.ResourceAccessException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,40 +25,29 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static no.difi.meldingsutveksling.NextMoveConsts.NEXTMOVE_QUEUE_PREFIX;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPE", havingValue = "true")
+@RequiredArgsConstructor
 public class ServiceBusRestClient {
 
     private static final String AUTH_HEADER = "Authorization";
 
-    private final ServiceRegistryLookup sr;
     private final IntegrasjonspunktProperties props;
     private final ObjectMapper objectMapper;
     private final ServiceBusPayloadConverter payloadConverter;
-    @Getter
+    private final NextMoveQueue nextMoveQueue;
+    private final ServiceBusUtil serviceBusUtil;
     private final ServiceBusRestTemplate restTemplate;
-    @Getter
-    private final String localQueuePath;
-
-    public ServiceBusRestClient(ServiceRegistryLookup sr, IntegrasjonspunktProperties props, ObjectMapper objectMapper, ServiceBusPayloadConverter payloadConverter, ServiceBusRestTemplate restTemplate) {
-        this.sr = sr;
-        this.props = props;
-        this.objectMapper = objectMapper;
-        this.payloadConverter = payloadConverter;
-        this.restTemplate = restTemplate;
-        this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
-                props.getOrg().getNumber() +
-                props.getNextmove().getServiceBus().getMode();
-    }
 
     public String getBase() {
         return format("%s://%s", props.getNextmove().getServiceBus().isUseHttps() ? "https" : "http",
@@ -82,9 +73,7 @@ public class ServiceBusRestClient {
     }
 
     public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("%s/%s/messages/head",
-                getBase(),
-                localQueuePath);
+        String resourceUri = format("%s/%s/messages/head", getBase(), serviceBusUtil.getLocalQueuePath());
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
@@ -111,7 +100,8 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(Objects.requireNonNull(response.getBody()));
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", localQueuePath, payload.getSbd().getMessageId()));
+                log.debug(format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
+                        payload.getSbd().getMessageId()));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
                 log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
@@ -123,6 +113,29 @@ public class ServiceBusRestClient {
         return Optional.empty();
     }
 
+    public void getAllMessagesRest() {
+        log.debug("Checking for new DPE messages with REST client..");
+
+        boolean messagesInQueue = true;
+        while (messagesInQueue) {
+            ArrayList<ServiceBusMessage> messages = new ArrayList<>();
+            for (int i = 0; i < props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
+                Optional<ServiceBusMessage> msg = receiveMessage();
+                if (!msg.isPresent()) {
+                    messagesInQueue = false;
+                    break;
+                }
+                messages.add(msg.get());
+            }
+
+            for (ServiceBusMessage msg : messages) {
+                InputStream asicStream = (msg.getPayload().getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(msg.getPayload().getAsic())) : null;
+                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asicStream);
+                deleteMessage(msg);
+            }
+        }
+    }
+
     private BrokerProperties getBrokerProperties(ResponseEntity<String> response) throws IOException {
         String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
         return objectMapper.readValue(brokerPropertiesJson, BrokerProperties.class);
@@ -131,7 +144,7 @@ public class ServiceBusRestClient {
     public void deleteMessage(ServiceBusMessage message) {
         String resourceUri = format("%s/%s/messages/%s/%s",
                 getBase(),
-                localQueuePath,
+                serviceBusUtil.getLocalQueuePath(),
                 message.getMessageId(),
                 message.getLockToken());
 
@@ -168,7 +181,7 @@ public class ServiceBusRestClient {
 
         int expiry = Math.round(Instant.now().plusSeconds(20).toEpochMilli() / 1000f);
         String hashInput = urlEncoded + "\n" + expiry;
-        byte[] bytes = hmacSha256(getSasKey(), hashInput);
+        byte[] bytes = hmacSha256(serviceBusUtil.getSasKey(), hashInput);
         byte[] signEncoded = Base64.getEncoder().encode(bytes);
         String signature;
         try {
@@ -195,11 +208,4 @@ public class ServiceBusRestClient {
         }
     }
 
-    public String getSasKey() {
-        if (props.getOidc().isEnable()) {
-            return sr.getSasKey();
-        } else {
-            return props.getNextmove().getServiceBus().getSasToken();
-        }
-    }
 }
