@@ -11,7 +11,7 @@ import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -29,7 +29,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(IntegrasjonspunktProperties.class)
 @ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
 public class DpiClientConfig {
 
@@ -65,7 +63,7 @@ public class DpiClientConfig {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private final IntegrasjonspunktProperties properties;
+    private final DigitalPostInnbyggerConfig properties;
 
     @Bean
     public DpiClient dpiClient(CreateCmsEncryptedAsice createCmsEncryptedAsice,
@@ -94,14 +92,14 @@ public class DpiClientConfig {
             InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
         return new Corner2ClientImpl(
                 WebClient.builder()
-                        .baseUrl(properties.getDpi().getUri())
+                        .baseUrl(properties.getUri())
                         .filter(logRequest())
                         .filter(logResponse())
                         .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getDpi().getTimeout().getConnect())
+                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getTimeout().getConnect())
                                 .doOnConnected(connection -> {
-                                    connection.addHandlerLast(new ReadTimeoutHandler(properties.getDpi().getTimeout().getRead(), TimeUnit.MILLISECONDS));
-                                    connection.addHandlerLast(new WriteTimeoutHandler(properties.getDpi().getTimeout().getWrite(), TimeUnit.MILLISECONDS));
+                                    connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout().getRead(), TimeUnit.MILLISECONDS));
+                                    connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
                                 })))
                         .build(),
                 dpiClientErrorHandler,
@@ -144,7 +142,7 @@ public class DpiClientConfig {
     @Bean
     @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dpi", havingValue = "false")
     public CreateMaskinportenToken createMaskinportenTokenMock() {
-        return new CreateMaskinportenTokenMock(properties.getDpi().getOidc().getMock().getToken());
+        return new CreateMaskinportenTokenMock(properties.getOidc().getMock().getToken());
     }
 
     @Bean
@@ -157,11 +155,11 @@ public class DpiClientConfig {
 
     private JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-                properties.getDpi().getOidc().getClientId(),
-                properties.getDpi().getOidc().getUrl().toString(),
-                properties.getDpi().getOidc().getAudience(),
-                properties.getDpi().getOidc().getScopes(),
-                properties.getDpi().getOidc().getKeystore()
+                properties.getOidc().getClientId(),
+                properties.getOidc().getUrl().toString(),
+                properties.getOidc().getAudience(),
+                properties.getOidc().getScopes(),
+                properties.getOidc().getKeystore()
         ));
     }
 
@@ -179,7 +177,7 @@ public class DpiClientConfig {
 
     @Bean
     public BusinessCertificateValidator businessCertificateValidator() {
-        Resource resource = properties.getDpi().getCertificate().getRecipe();
+        Resource resource = properties.getCertificate().getRecipe();
         try (InputStream inputStream = resource.getInputStream()) {
             return BusinessCertificateValidator.of(inputStream);
         } catch (IOException e) {
@@ -204,9 +202,9 @@ public class DpiClientConfig {
     @Bean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
-                .threshold(properties.getDpi().getTemporaryFileThreshold())
-                .directory(properties.getDpi().getTemporaryFileDirectory())
-                .initialBufferSize(properties.getDpi().getInitialBufferSize())
+                .threshold(properties.getTemporaryFileThreshold())
+                .directory(properties.getTemporaryFileDirectory())
+                .initialBufferSize(properties.getInitialBufferSize())
                 .build();
     }
 
@@ -258,7 +256,7 @@ public class DpiClientConfig {
 
     @Bean
     public KeystoreHelper dpiKeystoreHelper() {
-        return new KeystoreHelper(properties.getDpi().getKeystore());
+        return new KeystoreHelper(properties.getKeystore());
     }
 
     @Bean
