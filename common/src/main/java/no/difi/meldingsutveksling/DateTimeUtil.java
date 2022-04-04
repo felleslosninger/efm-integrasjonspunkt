@@ -59,7 +59,7 @@ public class DateTimeUtil {
         return in != null ? toXMLGregorianCalendar(GregorianCalendar.from(in)) : null;
     }
 
-    private static XMLGregorianCalendar toXMLGregorianCalendar(GregorianCalendar gcal) {
+    public static XMLGregorianCalendar toXMLGregorianCalendar(GregorianCalendar gcal) {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(gcal);
         } catch (DatatypeConfigurationException e) {
