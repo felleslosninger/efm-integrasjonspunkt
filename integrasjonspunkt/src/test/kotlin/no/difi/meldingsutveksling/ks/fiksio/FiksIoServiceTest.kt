@@ -69,7 +69,7 @@ internal class FiksIoServiceTest {
         sr.documentTypes = listOf(protocol)
         every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns sr
 
-        every { conversationService.registerStatus(any(), ofType(ReceiptStatus::class)) } returns Optional.empty()
+        every { conversationService.registerStatus(any(), *anyVararg()) } returns Optional.empty()
 
         val sbd = spyk(StandardBusinessDocument()
             .setAny(
