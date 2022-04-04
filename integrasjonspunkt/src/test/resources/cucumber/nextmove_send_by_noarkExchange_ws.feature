@@ -246,7 +246,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
         <system>p360</system>
         <meldingId>6e9cab22-a682-461c-bcd4-f201bfb3de8c</meldingId>
-        <tidspunkt/>
+        <tidspunkt>2016-01-25T00:00:00</tidspunkt>
         <antallFiler>1</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <systemID>6</systemID>

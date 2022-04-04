@@ -131,6 +131,7 @@ public class ArkivmeldingFactory {
         am.setMeldingId(putMessage.getConversationId());
         am.setTidspunkt(ofNullable(mt.getNoarksak().getSaDato())
                 .map(DateTimeUtil::toXMLGregorianCalendar)
+                .map(DateTimeUtil::atStartOfDay)
                 .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
         am.setAntallFiler(mt.getJournpost().getDokument().size());
         return am;
