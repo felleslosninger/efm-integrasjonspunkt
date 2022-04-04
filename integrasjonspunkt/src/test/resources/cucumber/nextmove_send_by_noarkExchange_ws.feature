@@ -244,7 +244,10 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
-        <antallFiler>0</antallFiler>
+        <system>p360</system>
+        <meldingId>6e9cab22-a682-461c-bcd4-f201bfb3de8c</meldingId>
+        <tidspunkt/>
+        <antallFiler>1</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <systemID>6</systemID>
             <tittel>Test18 - Difi</tittel>

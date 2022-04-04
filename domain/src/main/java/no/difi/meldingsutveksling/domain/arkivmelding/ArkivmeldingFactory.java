@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.MeldingType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
 import java.util.Optional;
