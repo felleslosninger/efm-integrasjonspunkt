@@ -1,18 +1,24 @@
 package no.difi.meldingsutveksling.sbd;
 
+import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringType;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -30,6 +36,7 @@ public class SBDFactory {
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final Clock clock;
     private final IntegrasjonspunktProperties props;
+    private final UUIDGenerator uuidGenerator;
 
     public StandardBusinessDocument createNextMoveSBD(PartnerIdentifier avsender,
                                                       PartnerIdentifier mottaker,
@@ -86,6 +93,28 @@ public class SBDFactory {
 
         SBDUtil.getOptionalMessageChannel(sbd).ifPresent(statusSbd::addScope);
         return statusSbd;
+    }
+
+    public StandardBusinessDocument createArkivmeldingReceiptFrom(NextMoveMessage message, ArkivmeldingKvitteringType type) {
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(type.name(), message.getMessageId(), Sets.newHashSet());
+        return createNextMoveSBD(message.getReceiver(),
+                message.getSender(),
+                message.getConversationId(),
+                uuidGenerator.generate(),
+                props.getArkivmelding().getReceiptProcess(),
+                props.getArkivmelding().getReceiptDocumentType(),
+                receipt);
+    }
+
+    public StandardBusinessDocument createArkivmeldingReceiptFrom(Conversation conversation, ArkivmeldingKvitteringType type) {
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(type.name(), conversation.getMessageId(), Sets.newHashSet());
+        return createNextMoveSBD(PartnerIdentifier.parse(conversation.getReceiver()),
+                PartnerIdentifier.parse(conversation.getSender()),
+                conversation.getConversationId(),
+                uuidGenerator.generate(),
+                props.getArkivmelding().getReceiptProcess(),
+                props.getArkivmelding().getReceiptDocumentType(),
+                receipt);
     }
 
     private String createProcess(StandardBusinessDocument sbd) {
