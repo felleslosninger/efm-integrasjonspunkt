@@ -68,6 +68,7 @@ public class IntegrasjonspunktProperties {
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
+    @NestedConfigurationProperty
     private FiksConfig fiks = new FiksConfig();
 
     @Valid
@@ -114,7 +115,7 @@ public class IntegrasjonspunktProperties {
         private String receiptProcess;
         @NotNull
         private String receiptDocumentType;
-
+        private boolean generateReceipts;
     }
 
     @Data

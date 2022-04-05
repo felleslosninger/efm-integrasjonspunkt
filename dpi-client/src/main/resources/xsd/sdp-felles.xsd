@@ -5,7 +5,7 @@
             targetNamespace="http://begrep.difi.no/sdp/schema_v10"
             elementFormDefault="qualified" version="1.0">
 
-	<xsd:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"/>
+	<xsd:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="w3/xmldsig-core-schema.xsd"/>
 
 	<xsd:complexType name="Melding" abstract="true">
 		<xsd:sequence>

@@ -3,14 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>integrasjonspunkt</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
 
     <name>Meldingsutveksling Integrasjonspunkt</name>
 
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>2.4.0-SNAPSHOT</version>
+        <version>2.6.0-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -262,26 +262,6 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.commons</groupId>
-            <artifactId>commons-certvalidator</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.vefa</groupId>
-            <artifactId>peppol-lookup</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -618,6 +598,12 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>no.difi.commons</groupId>
+                    <artifactId>commons-certvalidator</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.move-common</groupId>

@@ -4,6 +4,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.DateTimeUtil
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.UUIDGenerator
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
@@ -33,6 +34,9 @@ class SbdFactoryTest {
     @MockK
     lateinit var props: IntegrasjonspunktProperties
 
+    @MockK
+    lateinit var uuidGenerator: UUIDGenerator
+
     val clock: Clock = Clock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DateTimeUtil.DEFAULT_ZONE_ID)
     private lateinit var sbdFactory: SBDFactory
 
@@ -51,7 +55,7 @@ class SbdFactoryTest {
     @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        sbdFactory = SBDFactory(serviceRegistryLookup, clock, props)
+        sbdFactory = SBDFactory(serviceRegistryLookup, clock, props, uuidGenerator)
 
         every { props.arkivmelding } returns mockk {
             every { receiptProcess } returns arkivmeldingResponseProcess

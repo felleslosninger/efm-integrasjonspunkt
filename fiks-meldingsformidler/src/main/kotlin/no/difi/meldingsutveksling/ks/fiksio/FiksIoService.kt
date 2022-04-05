@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
+import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
@@ -50,9 +51,7 @@ class FiksIoService(
             .build()
         val sentMessage = fiksIoKlient.send(request, payloads)
         // No status API, so need to register all statuses at once
-        conversationService.registerStatus(msg.messageId, ReceiptStatus.SENDT)
-        conversationService.registerStatus(msg.messageId, ReceiptStatus.MOTTATT)
-        conversationService.registerStatus(msg.messageId, ReceiptStatus.LEVERT)
+        conversationService.registerStatus(msg.messageId, SENDT, MOTTATT, LEVERT)
         log.debug("FiksIO: Sent message with fiksId=${sentMessage.meldingId}")
     }
 

@@ -12,7 +12,7 @@ interface NextMoveQueue {
     fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asic: Resource?)
 
     /**
-     * Enqueue an incoming status message.
+     * Enqueue an incoming message.
      */
-    fun enqueueIncomingStatus(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier)
+    fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier)
 }

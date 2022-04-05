@@ -136,7 +136,7 @@ public class Conversation extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
-    boolean hasStatus(MessageStatus status) {
+    public boolean hasStatus(MessageStatus status) {
         return getMessageStatuses().stream()
                 .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }

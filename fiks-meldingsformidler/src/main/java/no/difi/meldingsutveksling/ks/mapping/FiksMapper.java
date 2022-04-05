@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -109,6 +110,7 @@ public class FiksMapper {
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))
                 .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
                 .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
+                .withKunDigitalLevering(properties.getFiks().getUt().isKunDigitalLevering())
                 .build();
     }
 
@@ -201,11 +203,17 @@ public class FiksMapper {
                 .keyEncryptionScheme(algorithmIdentifierSupplier.get())
                 .build(), reject);
 
-        return Dokument.builder()
+        Dokument.Builder<Void> builder = Dokument.builder()
                 .withData(new DataHandler(new ResourceDataSource(encryptedDocument)))
                 .withFilnavn(file.getFilename())
-                .withMimetype(file.getMimetype())
-                .build();
+                .withMimetype(file.getMimetype());
+
+        String ext = Stream.of(file.getFilename().split("\\.")).reduce((a, b) -> b).orElse("pdf");
+        if (properties.getFiks().getUt().getEkskluderesFraPrint().contains(ext)) {
+            builder.withEkskluderesFraPrint(true);
+        }
+
+        return builder.build();
     }
 
     private Resource readDocument(String messageId, BusinessMessageFile file) {

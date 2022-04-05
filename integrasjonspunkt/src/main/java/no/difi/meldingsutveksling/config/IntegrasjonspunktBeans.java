@@ -24,6 +24,7 @@ import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -57,14 +58,6 @@ public class IntegrasjonspunktBeans {
                 plumber,
                 promiseMaker,
                 properties);
-    }
-
-    @Bean
-    public LookupClient getElmaLookupClient(IntegrasjonspunktProperties properties) throws PeppolLoadingException {
-        return LookupClientBuilder.forTest()
-                .locator(new StaticLocator(properties.getElma().getUrl()))
-                .certificateValidator(EmptyCertificateValidator.INSTANCE)
-                .build();
     }
 
     @Bean

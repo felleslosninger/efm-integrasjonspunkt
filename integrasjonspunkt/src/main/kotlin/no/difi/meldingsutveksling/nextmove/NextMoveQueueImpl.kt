@@ -35,7 +35,7 @@ open class NextMoveQueueImpl(
 
     val log = logger()
 
-    override fun enqueueIncomingStatus(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier) {
+    override fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier) {
         enqueueIncomingMessage(sbd, serviceIdentifier, null)
     }
 

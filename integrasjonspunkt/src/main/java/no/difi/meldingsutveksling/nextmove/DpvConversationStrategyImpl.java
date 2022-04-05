@@ -7,6 +7,7 @@ import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespon
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @Component
 @Slf4j
@@ -37,6 +39,12 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     @Transactional
     @Timed
     public void send(@NotNull NextMoveOutMessage message) {
+
+        if (SBDUtil.isReceipt(message.getSbd())) {
+            log.info(String.format("Message [%s] is a receipt - not supported by DPV. Discarding message.", message.getMessageId()));
+            conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT, LEST);
+            return;
+        }
 
         InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 
