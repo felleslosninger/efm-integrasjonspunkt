@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 @Component
 @ConditionalOnExpression("${difi.move.feature.enableDPE} && ${difi.move.nextmove.serviceBus.batchRead}")
 @RequiredArgsConstructor
+@DependsOn("objectMapperHolder")
 public class ServiceBusAmqpClient {
 
     private final IntegrasjonspunktProperties properties;
