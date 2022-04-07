@@ -70,7 +70,7 @@ public class Conversation extends AbstractEntity<Long> {
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 
-    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "conversation", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<MessageStatus> messageStatuses;
 
