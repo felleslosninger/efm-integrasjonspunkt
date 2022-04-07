@@ -91,7 +91,6 @@ public class DefaultConversationService implements ConversationService {
 
     @NotNull
     @SuppressWarnings("squid:S2250")
-    @Transactional
     public Conversation registerStatus(Conversation conversation, @NotNull MessageStatus status) {
         MDC.put(NextMoveConsts.CORRELATION_ID, conversation.getMessageId());
         if (conversation.hasStatus(status)) {
@@ -124,9 +123,9 @@ public class DefaultConversationService implements ConversationService {
         log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
                         conversation.getMessageId()),
                 MessageStatusMarker.from(status));
-        repo.save(conversation);
-        webhookPublisher.publish(conversation, status);
-        statusQueue.enqueueStatus(status, conversation);
+        Conversation c = save(conversation);
+        webhookPublisher.publish(c, status);
+        statusQueue.enqueueStatus(status, c);
 
         return conversation;
     }
