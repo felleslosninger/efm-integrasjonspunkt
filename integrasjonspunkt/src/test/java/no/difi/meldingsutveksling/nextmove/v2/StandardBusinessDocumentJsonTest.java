@@ -38,6 +38,8 @@ public class StandardBusinessDocumentJsonTest {
     public void testDeserialize() throws Exception {
         assertThat(json.read("/sbd/StandardBusinessDocument.json").getObject())
                 .hasToString(getDocument().toString());
+        assertThat(json.read("/sbd/StandardBusinessDocument-unordered.json").getObject())
+                .hasToString(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {

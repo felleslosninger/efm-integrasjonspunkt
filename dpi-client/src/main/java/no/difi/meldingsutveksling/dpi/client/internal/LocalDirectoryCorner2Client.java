@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
 import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LocalDirectoryCorner2Client implements Corner2Client {
 
-    private final IntegrasjonspunktProperties properties;
+    private final DigitalPostInnbyggerConfig properties;
 
     @Override
     public void sendMessage(SendMessageInput input) {
@@ -51,8 +51,8 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
 
     private Path getPath(String base, String postfix) {
         try {
-            File targetFile = new File(new File(URI.create(properties.getDpi().getUri()).toURL().getFile()),
-                    String.format("%s-%s.%s", base, properties.getDpi().getAsice().getType(), postfix));
+            File targetFile = new File(new File(URI.create(properties.getUri()).toURL().getFile()),
+                    String.format("%s-%s.%s", base, properties.getAsice().getType(), postfix));
             return targetFile.toPath();
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Malformed URL", e);
