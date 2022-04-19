@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.ks.fiksio.FiksIoSubscriber;
-import no.difi.move.common.io.pipe.PromiseMaker;
+import no.difi.move.common.io.WritableByteArrayResource;
 import no.ks.fiks.io.client.FiksIOKlient;
 import no.ks.fiks.io.client.SvarSender;
 import no.ks.fiks.io.client.model.AmqpChannelFeedbackHandler;
@@ -14,7 +14,6 @@ import no.ks.fiks.io.client.model.KontoId;
 import no.ks.fiks.io.client.model.MeldingId;
 import no.ks.fiks.io.client.model.MottattMelding;
 import no.ks.fiks.io.client.send.FiksIOSender;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +29,6 @@ public class FiksIoInSteps {
 
     private final Holder<Message> messageInHolder;
     private final FiksIOKlient fiksIOKlient;
-    private final PromiseMaker promiseMaker;
     private final FiksIoSubscriber fiksIoSubscriber;
     private final CreateAsic createAsic;
 
@@ -69,49 +67,46 @@ public class FiksIoInSteps {
     public void fiksIoHasTheMessageAvailable(String mottakerKontoId, String protocol) {
         Message message = messageInHolder.get();
 
-        promiseMaker.promise(reject -> {
-            Resource asic = createAsic.createAsic(message, reject);
+        WritableByteArrayResource asic = new WritableByteArrayResource();
+        createAsic.createAsic(message, asic);
 
-            try (InputStream inputStream = asic.getInputStream()) {
-                MottattMelding mottattMelding = MottattMelding.builder()
-                        .writeDekryptertZip(w -> {
-                        })
-                        .writeKryptertZip(w -> {
-                        })
-                        .getKryptertStream(() -> inputStream)
-                        .getDekryptertZipStream(() -> null)
-                        .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
-                        .meldingType(protocol)
-                        .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
-                        .avsenderKontoId(new KontoId(UUID.randomUUID()))
-                        .ttl(Duration.ofHours(1))
-                        .harPayload(true)
-                        .build();
+        try (InputStream inputStream = asic.getInputStream()) {
+            MottattMelding mottattMelding = MottattMelding.builder()
+                    .writeDekryptertZip(w -> {
+                    })
+                    .writeKryptertZip(w -> {
+                    })
+                    .getKryptertStream(() -> inputStream)
+                    .getDekryptertZipStream(() -> null)
+                    .meldingId(new MeldingId(UUID.fromString(message.getMessageId())))
+                    .meldingType(protocol)
+                    .mottakerKontoId(new KontoId(UUID.fromString(mottakerKontoId)))
+                    .avsenderKontoId(new KontoId(UUID.randomUUID()))
+                    .ttl(Duration.ofHours(1))
+                    .harPayload(true)
+                    .build();
 
-                AmqpChannelFeedbackHandler amqpHandler = mock(AmqpChannelFeedbackHandler.class);
-                when(amqpHandler.getHandleAck()).thenReturn(mock(Runnable.class));
-                SvarSender svarSender = SvarSender.builder()
-                        .meldingSomSkalKvitteres(mottattMelding)
-                        .utsendingKlient(mock(FiksIOSender.class))
-                        .encrypt(e -> null)
-                        .amqpChannelFeedbackHandler(amqpHandler)
-                        .build();
+            AmqpChannelFeedbackHandler amqpHandler = mock(AmqpChannelFeedbackHandler.class);
+            when(amqpHandler.getHandleAck()).thenReturn(mock(Runnable.class));
+            SvarSender svarSender = SvarSender.builder()
+                    .meldingSomSkalKvitteres(mottattMelding)
+                    .utsendingKlient(mock(FiksIOSender.class))
+                    .encrypt(e -> null)
+                    .amqpChannelFeedbackHandler(amqpHandler)
+                    .build();
 
-                doAnswer(ans -> {
-                    BiConsumer<MottattMelding, SvarSender> consumer = ans.getArgument(0);
-                    consumer.accept(mottattMelding, svarSender);
-                    return null;
-                }).when(fiksIOKlient).newSubscription(any(BiConsumer.class));
+            doAnswer(ans -> {
+                BiConsumer<MottattMelding, SvarSender> consumer = ans.getArgument(0);
+                consumer.accept(mottattMelding, svarSender);
                 return null;
-            } catch (IOException e) {
-                throw new IllegalStateException("Could not read ASIC!", e);
-            }
-        });
+            }).when(fiksIOKlient).newSubscription(any(BiConsumer.class));
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read ASIC!", e);
+        }
     }
 
     @And("^the FIKS IO subscriber is registered$")
     public void registerSubscriber() {
         fiksIoSubscriber.registerSubscriber();
     }
-
 }

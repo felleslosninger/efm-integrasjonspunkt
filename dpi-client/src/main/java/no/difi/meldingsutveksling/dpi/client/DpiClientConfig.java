@@ -12,7 +12,6 @@ import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
@@ -66,7 +65,7 @@ public class DpiClientConfig {
             CreateSendMessageInput createSendMessageInput,
             Corner2Client corner2Client,
             MessageUnwrapper messageUnwrapper,
-            SignatureHelper dpiSignatureHelper,
+            KeystoreHelper dpiKeystoreHelper,
             CreateManifest createManifest) {
         return new DpiClientImpl(
                 resourceFactory,
@@ -74,7 +73,7 @@ public class DpiClientConfig {
                 createSendMessageInput,
                 corner2Client,
                 messageUnwrapper,
-                dpiSignatureHelper,
+                dpiKeystoreHelper,
                 createManifest);
     }
 

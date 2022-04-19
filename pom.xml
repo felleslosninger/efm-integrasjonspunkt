@@ -79,7 +79,7 @@
         <junit.platform.version>1.8.1</junit.platform.version>
         <cucumber.version>7.0.0</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
-        <efm-common.version>1.14.0-SNAPSHOT</efm-common.version>
+        <efm-common.version>1.15.0-SNAPSHOT</efm-common.version>
         <lombok.version>1.18.16</lombok.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>

@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.dpi.client;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.asic.SignatureHelper;
 import no.difi.asic.SignatureMethod;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
@@ -16,6 +15,7 @@ import no.difi.meldingsutveksling.dpi.client.internal.CreateManifest;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateSendMessageInput;
 import no.difi.meldingsutveksling.dpi.client.internal.MessageUnwrapper;
 import no.difi.meldingsutveksling.dpi.client.internal.domain.SendMessageInput;
+import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import reactor.core.publisher.Flux;
@@ -32,7 +32,7 @@ public class DpiClientImpl implements DpiClient {
     private final CreateSendMessageInput createSendMessageInput;
     private final Corner2Client corner2Client;
     private final MessageUnwrapper messageUnwrapper;
-    private final SignatureHelper signatureHelper;
+    private final KeystoreHelper keystoreHelper;
     private final CreateManifest createManifest;
 
     @Override
@@ -56,7 +56,7 @@ public class DpiClientImpl implements DpiClient {
                         .manifest(createManifest.createManifest(shipment))
                         .certificate(shipment.getReceiverBusinessCertificate())
                         .signatureMethod(SignatureMethod.XAdES)
-                        .signatureHelper(signatureHelper)
+                        .signatureHelper(keystoreHelper.getSignatureHelper())
                         .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
                         .build(),
                 resource
