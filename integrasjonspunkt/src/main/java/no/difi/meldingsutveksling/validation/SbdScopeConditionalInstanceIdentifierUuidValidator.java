@@ -13,8 +13,7 @@ public class SbdScopeConditionalInstanceIdentifierUuidValidator implements
 
     @Override
     public boolean isValid(Scope s, ConstraintValidatorContext constraintValidatorContext) {
-        if (ScopeType.CONVERSATION_ID.getFullname().equals(s.getType()) ||
-                ScopeType.SENDER_REF.getFullname().equals(s.getType())) {
+        if (ScopeType.CONVERSATION_ID.getFullname().equals(s.getType())) {
             return uuidValidator.isValid(s.getInstanceIdentifier(), constraintValidatorContext);
         }
         // No UUID validation for other scope types

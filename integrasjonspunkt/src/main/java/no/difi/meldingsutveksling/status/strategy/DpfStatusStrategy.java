@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
 import static no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringType.OK;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
@@ -71,6 +72,7 @@ public class DpfStatusStrategy implements StatusStrategy {
                 if (!c.hasStatus(status)) {
                     if (ReceiptStatus.valueOf(status.getStatus()) == LEST &&
                             c.getDocumentIdentifier().equals(props.getArkivmelding().getDefaultDocumentType()) &&
+                            isNullOrEmpty(props.getNoarkSystem().getType()) &&
                             props.getArkivmelding().isGenerateReceipts()) {
                         nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPF);
                     }
