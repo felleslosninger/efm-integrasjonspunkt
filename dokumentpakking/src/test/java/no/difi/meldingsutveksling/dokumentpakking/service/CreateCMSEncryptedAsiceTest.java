@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +45,12 @@ class CreateCMSEncryptedAsiceTest {
     @Configuration
     public static class Config {
 
+        @Value("classpath:/c1.jks")
+        private Resource c1;
+
+        @Value("classpath:/c2.jks")
+        private Resource c2;
+
         @Bean(destroyMethod = "shutdown")
         public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
             ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -57,7 +64,7 @@ class CreateCMSEncryptedAsiceTest {
         @Bean
         public KeystoreHelper senderKeystoreHelper() {
             return new KeystoreHelper(new KeystoreProperties()
-                    .setPath(new ClassPathResource("c1.jks"))
+                    .setPath(c1)
                     .setAlias("c1")
                     .setPassword("test")
             );
@@ -66,7 +73,7 @@ class CreateCMSEncryptedAsiceTest {
         @Bean
         public KeystoreHelper receiverKeystoreHelper() {
             return new KeystoreHelper(new KeystoreProperties()
-                    .setPath(new ClassPathResource("c2.jks"))
+                    .setPath(c2)
                     .setAlias("c2")
                     .setPassword("test")
             );
