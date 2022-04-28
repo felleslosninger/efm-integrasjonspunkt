@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,6 +20,7 @@ import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class SvarInnService {
 
     private final SvarInnClient svarInnClient;
     private final SvarInnFileDecryptor decryptor;
+    private final IntegrasjonspunktProperties properties;
 
     public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse, Reject reject) {
         InputStream encrypted = svarInnClient.downloadZipFile(forsendelse, reject);
@@ -74,7 +78,13 @@ public class SvarInnService {
     }
 
     public List<Forsendelse> getForsendelser() {
-        final List<Forsendelse> forsendelser = svarInnClient.checkForNewMessages();
+        final List<Forsendelse> forsendelser = Lists.newArrayList();
+        if (!isNullOrEmpty(properties.getFiks().getInn().getUsername())) {
+            forsendelser.addAll(svarInnClient.checkForNewMessages(properties.getFiks().getInn().getOrgnr()));
+        }
+        properties.getFiks().getInn().getPaaVegneAv().keySet().forEach(orgnr -> {
+            forsendelser.addAll(svarInnClient.checkForNewMessages(orgnr));
+        });
 
         if (!forsendelser.isEmpty()) {
             Audit.info(format("%d new messages in FIKS", forsendelser.size()));
@@ -82,11 +92,11 @@ public class SvarInnService {
         return forsendelser;
     }
 
-    public void confirmMessage(String forsendelsesId) {
-        svarInnClient.confirmMessage(forsendelsesId);
+    public void confirmMessage(Forsendelse forsendelse) {
+        svarInnClient.confirmMessage(forsendelse);
     }
 
-    public void setErrorStateForMessage(String forsendelseId, String errorMsg) {
-        svarInnClient.setErrorStateForMessage(forsendelseId, errorMsg);
+    public void setErrorStateForMessage(Forsendelse forsendelse, String errorMsg) {
+        svarInnClient.setErrorStateForMessage(forsendelse, errorMsg);
     }
 }

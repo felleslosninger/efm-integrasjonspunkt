@@ -25,6 +25,6 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
         MDC.put(NextMoveConsts.CORRELATION_ID, forsendelse.getId());
         SvarInnPackage svarInnPackage = svarInnNextMoveConverter.convert(forsendelse);
         nextMoveQueue.enqueueIncomingMessage(svarInnPackage.getSbd(), ServiceIdentifier.DPF, svarInnPackage.getAsicStream());
-        svarInnService.confirmMessage(forsendelse.getId());
+        svarInnService.confirmMessage(forsendelse);
     }
 }
