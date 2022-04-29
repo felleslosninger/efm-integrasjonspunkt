@@ -38,6 +38,7 @@ import java.math.BigInteger;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,7 +54,9 @@ public class SvarInnNextMoveConverter {
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
-                Iso6523.of(ICD.NO_ORG, forsendelse.getSvarSendesTil().getOrgnr()),
+                Iso6523.of(ICD.NO_ORG, hasText(forsendelse.getSvarSendesTil().getOrgnr()) ?
+                        forsendelse.getSvarSendesTil().getOrgnr() :
+                        properties.getFiks().getInn().getFallbackSenderOrgNr()),
                 Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
                 forsendelse.getId(),
                 forsendelse.getId(),
