@@ -150,6 +150,19 @@ Feature: Receiving a Next Move DPF message
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <basisregistrering xsi:type="journalpost">
+                <dokumentbeskrivelse>
+                  <tittel>primary.html</tittel>
+                  <dokumentobjekt>
+                    <referanseDokumentfil>primary.html</referanseDokumentfil>
+                  </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <dokumentbeskrivelse>
+                  <tittel>before_the_law.txt</tittel>
+                  <dokumentobjekt>
+                    <referanseDokumentfil>before_the_law.txt</referanseDokumentfil>
+                  </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Test4 - liten fil - 22.04.16</tittel>
                 <offentligTittel>Test4 - liten fil - 22.04.16</offentligTittel>
                 <journalaar>2016</journalaar>
                 <journalsekvensnummer>25</journalsekvensnummer>
