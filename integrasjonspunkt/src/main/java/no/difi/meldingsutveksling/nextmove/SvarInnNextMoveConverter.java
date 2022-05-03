@@ -3,10 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
-import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
-import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
+import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -137,13 +134,36 @@ public class SvarInnNextMoveConverter {
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
             journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getDokumentetsDato())));
         }
-        journalpost.setOffentligTittel(metadata.getTittel());
+
+        if (!isNullOrEmpty(sst.getFnr())) {
+            journalpost.setTittel(getTittel(forsendelse) + " (eDialog fra "+sst.getFnr()+")");
+        } else {
+            journalpost.setTittel(getTittel(forsendelse));
+        }
+
+        forsendelse.getFilmetadata().forEach(fmd -> {
+            Dokumentbeskrivelse db = of.createDokumentbeskrivelse();
+            db.setTittel(fmd.getFilnavn());
+
+            Dokumentobjekt dobj = of.createDokumentobjekt();
+            dobj.setReferanseDokumentfil(fmd.getFilnavn());
+            db.getDokumentobjekt().add(dobj);
+
+            journalpost.getDokumentbeskrivelseAndDokumentobjekt().add(db);
+        });
 
         saksmappe.getBasisregistrering().add(journalpost);
         Arkivmelding arkivmelding = of.createArkivmelding();
         arkivmelding.getMappe().add(saksmappe);
 
         return arkivmelding;
+    }
+
+    private String getTittel(Forsendelse forsendelse) {
+        if (!isNullOrEmpty(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
+            return forsendelse.getMetadataFraAvleverendeSystem().getTittel();
+        }
+        return forsendelse.getTittel();
     }
 
 }
