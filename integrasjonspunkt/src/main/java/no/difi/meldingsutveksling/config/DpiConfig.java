@@ -6,6 +6,8 @@ import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
+import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.json.*;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
@@ -24,6 +26,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
+import javax.xml.bind.JAXBException;
 import java.time.Clock;
 import java.util.Arrays;
 
@@ -153,9 +156,10 @@ public class DpiConfig {
                                                                        ShipmentFactory shipmentFactory,
                                                                        JsonDpiReceiptMapper dpiReceiptMapper,
                                                                        MessageStatusMapper messageStatusMapper,
-                                                                       ChannelNormalizer channelNormalizer) {
+                                                                       ChannelNormalizer channelNormalizer,
+                                                                       DpiReceiptConverter dpiReceiptConverter) {
             return new JsonMeldingsformidlerClient(dpiClient,
-                    shipmentFactory, dpiReceiptMapper, messageStatusMapper, channelNormalizer);
+                    shipmentFactory, dpiReceiptMapper, messageStatusMapper, channelNormalizer, dpiReceiptConverter);
         }
 
         @Bean
@@ -176,6 +180,19 @@ public class DpiConfig {
         @Bean
         public JsonDpiReceiptMapper jsonDpiReceiptMapper(MessageStatusMapper messageStatusMapper) {
             return new JsonDpiReceiptMapper(messageStatusMapper);
+        }
+
+        @Bean
+        @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "json", matchIfMissing = true)
+        public DpiReceiptConverter identityReceiptConverter() {
+            return p -> p;
+        }
+
+        @Bean
+        @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "xmlsoap")
+        public JWT2XmlSoapDpiReceiptConverter jwt2XmlSoapReceiptConverter(UnpackJWT unpackJWT,
+                                                                          UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
+            return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
         }
     }
 

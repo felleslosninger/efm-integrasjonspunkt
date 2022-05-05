@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.Virksomhetmottaker;
 import java.time.OffsetDateTime;
 
 @Data
-abstract class AbstractKvittering implements Kvittering {
+public abstract class AbstractKvittering implements Kvittering {
 
     private Avsender avsender;
     private Virksomhetmottaker mottaker;

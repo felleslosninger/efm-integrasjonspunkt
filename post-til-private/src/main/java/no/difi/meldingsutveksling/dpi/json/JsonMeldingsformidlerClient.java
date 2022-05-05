@@ -30,6 +30,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     private final JsonDpiReceiptMapper dpiReceiptMapper;
     private final MessageStatusMapper messageStatusMapper;
     private final ChannelNormalizer channelNormalizer;
+    private final DpiReceiptConverter dpiReceiptConverter;
 
     @Override
     public boolean skalPolleMeldingStatus() {
@@ -90,7 +91,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
         @Override
         public MessageStatus toMessageStatus() {
             MessageStatus ms = dpiReceiptMapper.from(receivedMessage.getStandardBusinessDocument());
-            ms.setRawReceipt(receivedMessage.getMessage().getForretningsmelding());
+            ms.setRawReceipt(dpiReceiptConverter.apply(receivedMessage.getMessage().getForretningsmelding()));
             return ms;
         }
     }
