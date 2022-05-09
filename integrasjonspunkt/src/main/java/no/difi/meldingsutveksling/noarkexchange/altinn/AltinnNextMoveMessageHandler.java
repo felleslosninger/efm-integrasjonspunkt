@@ -52,7 +52,6 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
                 if (asic != null) {
-                    asic.getInputStream().close();
                     altinnPackage.getTmpFile().delete();
                 }
                 return;

@@ -45,7 +45,7 @@ public class ArkivmeldingUtil {
         try (InputStream inputStream = resource.getInputStream()) {
             return marshallerContext.createUnmarshaller().unmarshal(new StreamSource(inputStream), Arkivmelding.class).getValue();
         } catch (IOException e) {
-            throw new ArkivmeldingRuntimeException("Could not unmarshal Arkivmelding");
+            throw new ArkivmeldingRuntimeException("Could not unmarshal Arkivmelding", e);
         }
     }
 

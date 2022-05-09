@@ -59,7 +59,9 @@ open class NextMoveQueueImpl(
             }
         }
 
-        messagePersister.write(sbd.messageId, NextMoveConsts.ASIC_FILE, asic)
+        if(asic != null) {
+            messagePersister.write(sbd.messageId, NextMoveConsts.ASIC_FILE, asic)
+        }
 
         val message = messageRepo.findByMessageId(sbd.messageId).orElseGet {
             messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
