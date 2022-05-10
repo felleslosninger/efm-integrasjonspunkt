@@ -30,6 +30,7 @@ public class ConversationController {
 
     @GetMapping
     @JsonView(Views.Conversation.class)
+    @Transactional
     public Page<Conversation> find(
             @Valid ConversationQueryInput input,
             @PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable
@@ -39,6 +40,7 @@ public class ConversationController {
 
     @GetMapping("{id}")
     @JsonView(Views.Conversation.class)
+    @Transactional
     public Conversation getById(
             @PathVariable("id") Long id) {
         return conversationRepository.findByIdAndDirection(id, OUTGOING)
@@ -53,6 +55,7 @@ public class ConversationController {
 
     @GetMapping("messageId/{messageId}")
     @JsonView(Views.Conversation.class)
+    @Transactional
     public Conversation getByMessageId(
             @PathVariable("messageId") String messageId) {
         return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
@@ -61,14 +64,15 @@ public class ConversationController {
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
-    @Transactional
     @DeleteMapping("messageId/{messageId}")
+    @Transactional
     public void deleteByMessageId(@PathVariable("messageId") String messageId) {
         conversationRepository.deleteByMessageId(messageId);
     }
 
     @GetMapping("queue")
     @JsonView(Views.Conversation.class)
+    @Transactional
     public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
         return conversationRepository.findByPollable(true, pageable);
     }
