@@ -15,7 +15,6 @@ import org.springframework.messaging.rsocket.RSocketStrategies
 import org.springframework.security.rsocket.metadata.BearerTokenAuthenticationEncoder
 import org.springframework.security.rsocket.metadata.BearerTokenMetadata
 import org.springframework.util.MimeTypeUtils
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import java.time.Duration
@@ -26,16 +25,15 @@ class LoggingProxyAppender : AppenderBase<ILoggingEvent>() {
 
     private val authMime = MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION.string)
 
-    var proxyHost: String = ""
-    var proxyRSocketPort: Int = 0
-    var orgnr: String = ""
-    var kspath: String = ""
-    lateinit var encoder: Encoder<ILoggingEvent>
-    lateinit var jwtTokenConfig: JwtTokenConfig
+    private var proxyHost: String = ""
+    private var proxyRSocketPort: Int = 0
+    private var orgnr: String = ""
+    private var kspath: String = ""
+    private lateinit var encoder: Encoder<ILoggingEvent>
+    private lateinit var jwtTokenConfig: JwtTokenConfig
 
-    private lateinit var wc: WebClient
     private lateinit var job: Job
-    private lateinit var rsreq: Mono<RSocketRequester>
+    private lateinit var rsreq: RSocketRequester
     private lateinit var queue: LinkedBlockingDeque<ILoggingEvent>
 
     override fun start() {
@@ -73,13 +71,12 @@ class LoggingProxyAppender : AppenderBase<ILoggingEvent>() {
             jwtTokenConfig.scopes = listOf("move/dpe.read")
 
             val jwtTokenClient = JwtTokenClient(jwtTokenConfig)
-            val token = jwtTokenClient.fetchTokenMono()
 
             job = CoroutineScope(Dispatchers.IO).launch {
                 while (this.isActive) {
                     queue.peek()?.let {
                         try {
-                            postEvent(it, token)
+                            postEvent(it, jwtTokenClient.fetchToken())
                         } catch (e: Exception) {
                             when (e) {
                                 is CancellationException -> throw e
@@ -109,23 +106,18 @@ class LoggingProxyAppender : AppenderBase<ILoggingEvent>() {
                 }
             )
         }
-        .connectTcp(proxyHost, proxyRSocketPort)
+        .tcp(proxyHost, proxyRSocketPort)
 
-    private suspend fun postEvent(le: ILoggingEvent, token: Mono<JwtTokenResponse>) {
+    private suspend fun postEvent(le: ILoggingEvent, token: JwtTokenResponse) {
         if (!encoder.isStarted) {
             encoder.start()
         }
 
-        rsreq.zipWith(token)
-            .flatMap {
-                it.t1.route("log-fire")
-                    .metadata(BearerTokenMetadata(it.t2.accessToken), authMime)
-                    .data(encoder.encode(le))
-                    .retrieveMono(Void::class.java)
-            }
-            .onErrorResume {
-                Mono.error(it.cause ?: it)
-            }
+        rsreq.route("log-fire")
+            .metadata(BearerTokenMetadata(token.accessToken), authMime)
+            .data(encoder.encode(le))
+            .retrieveMono(Void::class.java)
+            .onErrorResume { Mono.error(it.cause ?: it) }
             .awaitFirstOrNull()
     }
 
