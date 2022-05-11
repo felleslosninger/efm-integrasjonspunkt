@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3.xmldsig.*;
+import no.digipost.org.w3.xmldsig.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
