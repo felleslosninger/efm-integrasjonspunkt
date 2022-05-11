@@ -3,9 +3,10 @@ package no.difi.meldingsutveksling.noark;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +27,7 @@ public class NoarkClientFactoryTest {
     }
 
     @Test
-    public void config_specifies_p360_creates_p360_client() throws Exception {
+    public void config_specifies_p360_creates_p360_client() {
         IntegrasjonspunktProperties props = mock(IntegrasjonspunktProperties.class);
         IntegrasjonspunktProperties.NorskArkivstandardSystem noarkSystem = mock(IntegrasjonspunktProperties
                 .NorskArkivstandardSystem.class);
@@ -67,7 +68,7 @@ public class NoarkClientFactoryTest {
         assertEquals(WebsakClient.class, client.getClass());
     }
 
-    @Test(expected = UnknownArchiveSystemException.class)
+    @Test
     public void config_specifies_unknownarchive_throws_exception() {
         IntegrasjonspunktProperties props = mock(IntegrasjonspunktProperties.class);
         IntegrasjonspunktProperties.NorskArkivstandardSystem noarkSystem = mock(IntegrasjonspunktProperties
@@ -76,14 +77,14 @@ public class NoarkClientFactoryTest {
         when(props.getNoarkSystem()).thenReturn(noarkSystem);
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
-        new NoarkClientFactory(settings).from(props);
+        assertThrows(UnknownArchiveSystemException.class, () -> new NoarkClientFactory(settings).from(props));
     }
 
-    @Test(expected = MissingConfigurationException.class)
+    @Test
     public void config_missing_throws_exception() {
         IntegrasjonspunktProperties properties = mock(IntegrasjonspunktProperties.class);
         NoarkClientSettings settings = new NoarkClientSettings("http://localhost", "username", "password");
 
-        new NoarkClientFactory(settings).from(properties);
+        assertThrows(MissingConfigurationException.class, () -> new NoarkClientFactory(settings).from(properties));
     }
 }

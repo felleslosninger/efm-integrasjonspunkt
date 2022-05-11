@@ -38,10 +38,10 @@ public class NextMoveOutMessage extends NextMoveMessage {
     public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         NextMoveOutMessage message = new NextMoveOutMessage(
                 sbd.getConversationId(),
-                sbd.getDocumentId(),
+                sbd.getMessageId(),
                 sbd.getProcess(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
+                sbd.getReceiverIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
         message.setFiles(new HashSet<>());

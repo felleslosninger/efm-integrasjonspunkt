@@ -6,7 +6,6 @@ import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -15,13 +14,14 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
-import no.difi.meldingsutveksling.kvittering.SBDReceiptFactory;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import no.difi.meldingsutveksling.nextmove.v2.PageRequests;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.core.io.InputStreamResource;
@@ -35,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -58,19 +57,18 @@ public class MessageInController {
     private final CryptoMessagePersister cryptoMessagePersister;
     private final ConversationService conversationService;
     private final InternalQueue internalQueue;
-    private final SBDReceiptFactory receiptFactory;
+    private final SBDFactory sbdFactory;
     private final ServiceRegistryLookup serviceRegistryLookup;
+    private final NextMoveMessageInService messageService;
 
     @GetMapping("/peek")
-    @Transactional
     public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
 
         NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
-        NextMoveInMessage message = inRepo.peek(query)
+
+        NextMoveInMessage message = messageService.peek(query)
                 .orElseThrow(NoContentException::new);
 
-        inRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
         log.info(markerFrom(message), "Conversation with id={} locked", message.getMessageId());
 
         Map<String, String> customProperties = Maps.newHashMap();
@@ -90,8 +88,8 @@ public class MessageInController {
         Map<Integer, String> fileRefs = Maps.newHashMap();
         fileRefs.put(0, ASIC_FILE);
 
-        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSenderIdentifier());
-        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiverIdentifier());
+        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSender().getPrimaryIdentifier());
+        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiver().getPrimaryIdentifier());
 
         NextMoveV1Message peekMessage = new NextMoveV1Message()
                 .setConversationId(message.getMessageId())
@@ -142,7 +140,7 @@ public class MessageInController {
             conversationService.registerStatus(conversationId, ReceiptStatus.INNKOMMENDE_LEVERT);
 
             if (message.getServiceIdentifier() == DPE) {
-                StandardBusinessDocument statusSbd = receiptFactory.createStatusFrom(message.getSbd(), DocumentType.STATUS, ReceiptStatus.LEVERT);
+                StandardBusinessDocument statusSbd = sbdFactory.createStatusFrom(message.getSbd(), ReceiptStatus.LEVERT);
                 if (statusSbd != null) {
                     NextMoveOutMessage msg = NextMoveOutMessage.of(statusSbd, DPE);
                     internalQueue.enqueueNextMove(msg);

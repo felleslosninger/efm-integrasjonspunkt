@@ -7,7 +7,6 @@ import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceMan
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
@@ -33,12 +32,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
 /**
  * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
- * <p/>
  * Has factory methods of writing/reading from to zip files via input/output streams.
  */
 @Slf4j
@@ -57,7 +55,7 @@ public class AltinnPackage {
     static {
         try {
             ctx = JAXBContextFactory.createContext(new Class[]{BrokerServiceManifest.class,
-                    BrokerServiceRecipientList.class, StandardBusinessDocument.class, Kvittering.class}, new HashMap());
+                    BrokerServiceRecipientList.class, StandardBusinessDocument.class}, new HashMap());
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext", e);
         }
@@ -103,6 +101,9 @@ public class AltinnPackage {
      * Writes the Altinn package as a Zip file
      *
      * @param outputStream where the Zip file is written
+     * @param context {@link ApplicationContext}
+     *
+     * @throws IOException
      */
     public void write(OutputStream outputStream, ApplicationContext context) throws IOException {
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);

@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StandardBusinessDocumentConverterTest {
 

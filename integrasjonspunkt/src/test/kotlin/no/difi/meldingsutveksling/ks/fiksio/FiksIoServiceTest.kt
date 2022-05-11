@@ -4,17 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.domain.Iso6523
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
+import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import no.difi.meldingsutveksling.pipes.Plumber
 import no.difi.meldingsutveksling.pipes.PromiseMaker
+import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.*
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -33,38 +38,53 @@ internal class FiksIoServiceTest {
     lateinit var objectMapper: ObjectMapper
 
     @MockK
-    lateinit var plumber: Plumber
+    lateinit var promiseMaker: PromiseMaker
 
     @MockK
-    lateinit var promiseMaker: PromiseMaker
+    lateinit var conversationService: ConversationService
 
     private lateinit var fiksIoService: FiksIoService
 
-    @Before
+    @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, objectMapper, plumber, promiseMaker)
+        fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService, promiseMaker)
+    }
+
+    @AfterEach
+    fun after() {
+        clearStaticMockk(SBDUtil::class)
     }
 
     @Test
     fun `send message ok`() {
-        val orgnr = "910076787"
+        val iso6523 = Iso6523.parse("0192:910076787")
         val kontoId = "d49177d3-ec0c-40ee-ace9-0f2781a05f45"
-        val sr = ServiceRecord(ServiceIdentifier.DPFIO, orgnr, "pem123", kontoId)
-        sr.service.serviceCode = "no.digdir.einnsyn.v1"
-        every { serviceRegistryLookup.getServiceRecord(any(), any<String>()) } returns sr
-
         val messageId = "0e238873-63ba-4993-84e1-73b91eb2061d"
-        val conversationId = "c9f37b22-cf8a-44de-b854-050f6a9acc7a"
-        val process = "urn:no:difi:profile:einnsyn:innsynskrav:ver1.0"
-        val documenttype = "urn:no:difi:einnsyn:xsd::innsynskrav"
-        val sbd = mockkClass(StandardBusinessDocument::class)
-        every { sbd.conversationId } returns conversationId
-        every { sbd.documentId } returns messageId
-        every { sbd.process } returns process
-        every { sbd.receiverIdentifier } returns orgnr
-        every { sbd.senderIdentifier } returns orgnr
-        every { sbd.standard } returns documenttype
+        val convId = "c9f37b22-cf8a-44de-b854-050f6a9acc7a"
+        val protocol = "digdir.einnsyn.v1"
+
+        val sr = ServiceRecord(ServiceIdentifier.DPFIO, iso6523.organizationIdentifier, "pem123", kontoId)
+        sr.process = protocol
+        sr.documentTypes = listOf(protocol)
+        every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns sr
+
+        every { conversationService.registerStatus(any(), *anyVararg()) } returns Optional.empty()
+
+        val sbd = spyk(StandardBusinessDocument()
+            .setAny(
+                FiksIoMessage()
+                    .setSikkerhetsnivaa(3)
+            ))
+
+        mockkStatic(SBDUtil::class)
+        every { sbd.conversationId } returns convId
+        every { sbd.messageId } returns messageId
+        every { sbd.process } returns protocol
+        every { sbd.receiverIdentifier } returns iso6523
+        every { sbd.senderIdentifier } returns iso6523
+        every { sbd.documentType } returns protocol
+
         val msg = NextMoveOutMessage.of(sbd, ServiceIdentifier.DPFIO)
 
         val payload = StringPayload("foo", "foo.txt")
@@ -78,6 +98,6 @@ internal class FiksIoServiceTest {
 
         verify { fiksIOKlient.send(any(), any<List<Payload>>()) }
         assertEquals(kontoId, requestSlot.captured.mottakerKontoId.toString())
-        assertEquals(sr.service.serviceCode, requestSlot.captured.meldingType)
+        assertEquals(protocol, requestSlot.captured.meldingType)
     }
 }

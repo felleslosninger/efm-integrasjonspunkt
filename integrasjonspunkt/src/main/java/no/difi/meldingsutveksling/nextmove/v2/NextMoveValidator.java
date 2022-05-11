@@ -4,17 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.difi.meldingsutveksling.ApiType;
-import no.difi.meldingsutveksling.DocumentType;
+import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.*;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
@@ -32,14 +35,15 @@ import java.io.InputStream;
 import java.security.cert.CertificateExpiredException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.difi.meldingsutveksling.DocumentType.ARKIVMELDING;
-import static no.difi.meldingsutveksling.DocumentType.DIGITAL;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
+import static no.difi.meldingsutveksling.MessageType.DIGITAL;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 
 @Component
@@ -47,81 +51,105 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPV;
 @RequiredArgsConstructor
 public class NextMoveValidator {
 
-    private final NextMoveServiceRecordProvider serviceRecordProvider;
+    private final ServiceRecordProvider serviceRecordProvider;
     private final NextMoveMessageOutRepository messageRepo;
     private final ConversationStrategyFactory conversationStrategyFactory;
     private final Asserter asserter;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final TimeToLiveHelper timeToLiveHelper;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final ConversationService conversationService;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final NextMoveFileSizeValidator fileSizeValidator;
+    private final IntegrasjonspunktProperties props;
     private final ObjectProvider<IntegrasjonspunktCertificateValidator> certificateValidator;
+    private final ObjectProvider<SvarUtService> svarUtService;
 
     void validate(StandardBusinessDocument sbd) {
+
+        messageRepo.findByMessageId(sbd.getMessageId())
+                .ifPresent(p -> {
+                    throw new MessageAlreadyExistsException(sbd.getMessageId());
+                });
+        if (!SBDUtil.isStatus(sbd)) {
+            conversationService.findConversation(sbd.getMessageId())
+                    .ifPresent(c -> {
+                        throw new MessageAlreadyExistsException(sbd.getMessageId());
+                    });
+        }
+
         validateCertificate();
 
-        sbd.getOptionalMessageId().ifPresent(messageId -> {
-                    messageRepo.findByMessageId(messageId)
-                            .map(p -> {
-                                throw new MessageAlreadyExistsException(messageId);
-                            });
-                    if (!sbdUtil.isStatus(sbd)) {
-                        conversationService.findConversation(messageId)
-                                .map(c -> {
-                                    throw new MessageAlreadyExistsException(messageId);
-                                });
-                    }
-                }
-        );
+        MessageType messageType = MessageType.valueOfType(sbd.getType())
+                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
+                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
-        ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
-        ServiceIdentifier serviceIdentifier = serviceRecord.getServiceIdentifier();
+        ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
+
+        Class<?> serviceIdentifierGroup = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
+        asserter.isValid(sbd, serviceIdentifierGroup);
+        Class<?> documentTypeGroup = ValidationGroupFactory.toDocumentType(messageType);
+        if (documentTypeGroup != null) {
+            asserter.isValid(sbd, documentTypeGroup);
+        }
 
         if (!conversationStrategyFactory.isEnabled(serviceIdentifier)) {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
-        DocumentType documentType = DocumentType.valueOf(sbd.getMessageType(), ApiType.NEXTMOVE)
-                .orElseThrow(() -> new UnknownNextMoveDocumentTypeException(sbd.getMessageType()));
-
-        String standard = sbd.getStandard();
-
-        if (!documentType.fitsDocumentIdentifier(standard)) {
-            throw new DocumentTypeDoNotFitDocumentStandardException(documentType, standard);
+        if (!messageType.fitsDocumentIdentifier(sbd.getDocumentType()) && serviceIdentifier != DPFIO) {
+            throw new MessageTypeDoesNotFitDocumentTypeException(messageType, sbd.getDocumentType());
         }
 
-        if (!serviceRecord.hasStandard(standard)) {
-            throw new ReceiverDoNotAcceptDocumentStandard(standard, sbd.getProcess());
+        if (serviceIdentifier == DPO && !isNullOrEmpty(props.getDpo().getMessageChannel())) {
+            Optional<Scope> mc = SBDUtil.getOptionalMessageChannel(sbd);
+            if (mc.isPresent() && !mc.get().getIdentifier().equals(props.getDpo().getMessageChannel())) {
+                throw new MessageChannelInvalidException(props.getDpo().getMessageChannel(), mc.get().getIdentifier());
+            }
         }
 
-        Class<?> group = ValidationGroupFactory.toServiceIdentifier(serviceIdentifier);
-        asserter.isValid(sbd.getAny(), group != null ? new Class<?>[]
+        validateDpfForsendelseType(sbd, serviceIdentifier);
 
-                {
-                        group
-                } : new Class<?>[0]);
+    }
+
+    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+        if (svarUtService.getIfAvailable() == null) {
+            return;
+        }
+        if (serviceIdentifier == DPF) {
+            sbd.getBusinessMessage(ArkivmeldingMessage.class).ifPresent(message -> {
+                DpfSettings dpfSettings = message.getDpf();
+                if (dpfSettings == null) {
+                    return;
+                }
+                String forsendelseType = dpfSettings.getForsendelseType();
+                if (!isNullOrEmpty(forsendelseType)) {
+                    List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                    if (!validTypes.contains(forsendelseType)) {
+                        throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
+                    }
+                }
+            });
+        }
     }
 
     @Transactional(noRollbackFor = TimeToLiveException.class)
     public void validate(NextMoveOutMessage message) {
         validateCertificate();
 
-        // Must always be at least one attachment
         StandardBusinessDocument sbd = message.getSbd();
-        if (sbdUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (SBDUtil.isFileRequired(sbd) && (message.getFiles() == null || message.getFiles().isEmpty())) {
             throw new MissingFileException();
         }
 
         sbd.getExpectedResponseDateTime().ifPresent(expectedResponseDateTime -> {
-            if (sbdUtil.isExpired(sbd)) {
+            if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, message.getServiceIdentifier(), message.getDirection());
                 throw new TimeToLiveException(expectedResponseDateTime);
             }
         });
 
-        if (sbdUtil.isType(message.getSbd(), ARKIVMELDING)) {
+        if (SBDUtil.isType(message.getSbd(), ARKIVMELDING)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -138,7 +166,7 @@ public class NextMoveValidator {
         }
 
         // Validate that files given in metadata mapping exist
-        if (sbdUtil.isType(message.getSbd(), DIGITAL)) {
+        if (SBDUtil.isType(message.getSbd(), DIGITAL)) {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
@@ -212,18 +240,12 @@ public class NextMoveValidator {
             throw new MissingFileTitleException(DPV.toString());
         }
 
-        if (message.getServiceIdentifier() == DPI && !StringUtils.hasText(file.getName())) {
-            if (!message.isPrimaryDocument(file.getOriginalFilename())) {
-                if (message.getBusinessMessage() instanceof DpiDigitalMessage) {
-                    DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
-                    if (!bmsg.getMetadataFiler().containsValue(file.getOriginalFilename())) {
-                        throw new MissingFileTitleException(DPI.toString());
-                    }
-                } else {
-                    throw new MissingFileTitleException(DPI.toString());
-                }
-            }
+        if (message.getServiceIdentifier() == DPI
+                && !StringUtils.hasText(file.getName())
+                && !message.isPrimaryDocument(file.getOriginalFilename())) {
+            message.getBusinessMessage(DpiDigitalMessage.class)
+                    .filter(p -> p.getMetadataFiler().containsValue(file.getOriginalFilename()))
+                    .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
         }
-
     }
 }

@@ -14,5 +14,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class EinnsynKvitteringMessage extends BusinessMessage<EinnsynKvitteringMessage> {
 
     @NotNull
-    private String content;
+    private String dokumentId;
+    @NotNull
+    private String status;
+    @NotNull
+    private EinnsynType referanseType;
 }

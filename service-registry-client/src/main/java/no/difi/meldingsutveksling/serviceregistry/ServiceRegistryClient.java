@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -17,6 +19,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -26,6 +29,7 @@ public class ServiceRegistryClient {
     private final RestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
+    private final IntegrasjonspunktProperties props;
 
     @Cacheable(CacheConfig.CACHE_LOAD_IDENTIFIER_RESOURCE)
     public IdentifierResource loadIdentifierResource(SRParameter parameter) throws ServiceRegistryLookupException {
@@ -41,15 +45,12 @@ public class ServiceRegistryClient {
     }
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
+        if(!props.getFeature().isEnableDsfPrintLookup()) {
+            //Default value in SR is true. If you want to avoid DSF lookup set this property to false.
+            parameter.setPrint(props.getFeature().isEnableDsfPrintLookup());
+        }
         try {
-            if (parameter.getInfoOnly()) {
-                return client.getResource("info/" + parameter.getIdentifier());
-            }
-            if (!Strings.isNullOrEmpty(parameter.getProcess())) {
-                return client.getResource("identifier/" + parameter.getIdentifier() + "/process/" + parameter.getProcess(), parameter.getQuery());
-            } else {
-                return client.getResource("identifier/" + parameter.getIdentifier(), parameter.getQuery());
-            }
+            return client.getResource(parameter.getUrlTemplate(), parameter.getUrlVariables());
         } catch (HttpClientErrorException httpException) {
             if (httpException.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundInServiceRegistryException(parameter);
@@ -73,10 +74,14 @@ public class ServiceRegistryClient {
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
     public String getCertificate(String identifier) throws ServiceRegistryLookupException {
         try {
-            return client.getResource("virksert/" + identifier);
+            Map<String, String> params = Maps.newHashMap();
+            params.put("identifier", identifier);
+            return client.getResource("virksert/{identifier}", params);
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new ServiceRegistryLookupException("Certificate expired or not found for identifier "+identifier);
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND ||
+                e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                String errorDescription = JsonPath.read(e.getResponseBodyAsString(), "$.error_description");
+                throw new ServiceRegistryLookupException(errorDescription);
             }
             throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier, e);
         } catch (BadJWSException e) {
@@ -84,7 +89,7 @@ public class ServiceRegistryClient {
         }
     }
 
-    @Cacheable(CacheConfig.CACHE_GET_SAS_KEY)
+    @Cacheable(value = CacheConfig.CACHE_GET_SAS_KEY, sync = true)
     public String getSasKey() {
         try {
             String sasKey = client.getResource("sastoken");

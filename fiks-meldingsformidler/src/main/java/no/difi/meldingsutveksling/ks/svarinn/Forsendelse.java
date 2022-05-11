@@ -4,19 +4,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Forsendelse {
     private String id;
     private MetadataFraAvleverendeSystem metadataFraAvleverendeSystem;
     private MetadataForImport metadataForImport;
     private String downloadUrl;
-    private List<Map<String, String>> filmetadata;
+    private List<Filmetadata> filmetadata;
     private SvarSendesTil svarSendesTil;
     private String svarPaForsendelse;
     private Mottaker mottaker;
     private String tittel;
+
+    @Data
+    public static class Filmetadata {
+        private String filnavn;
+        private String mimetype;
+        private String sha256hash;
+        private String dokumentType;
+        private Long size;
+    }
 
     @Data
     public static class Mottaker {
@@ -58,5 +67,6 @@ public class Forsendelse {
         private String navn;
         private String land;
         private String orgnr;
+        private String fnr;
     }
 }

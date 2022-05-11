@@ -7,8 +7,11 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
+import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -21,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
@@ -37,16 +39,17 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final ConversationService conversationService;
     private final NextMoveQueue nextMoveQueue;
     private final MessagePersister messagePersister;
-    private final SBDUtil sbdUtil;
+    private final SBDService sbdService;
     private final TimeToLiveHelper timeToLiveHelper;
+    private final MessageChannelRepository messageChannelRepository;
 
     @Override
     public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
         StandardBusinessDocument sbd = altinnPackage.getSbd();
-        log.debug(format("NextMove message id=%s", sbd.getDocumentId()));
+        log.debug(String.format("NextMove message id=%s", sbd.getMessageId()));
 
-        if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && sbdUtil.isArkivmelding(sbd) && !sbdUtil.isStatus(sbd)) {
-            if (sbdUtil.isExpired(sbd)) {
+        if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && SBDUtil.isArkivmelding(sbd) && !SBDUtil.isStatus(sbd)) {
+            if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
                 if (altinnPackage.getAsicInputStream() != null) {
                     altinnPackage.getAsicInputStream().close();
@@ -55,8 +58,8 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 return;
             }
             if (altinnPackage.getAsicInputStream() != null) {
-                try (InputStream asicStream = altinnPackage.getAsicInputStream()){
-                    messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
+                try (InputStream asicStream = altinnPackage.getAsicInputStream()) {
+                    messagePersister.writeStream(sbd.getMessageId(), ASIC_FILE, asicStream, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
                 } finally {
@@ -64,9 +67,11 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 }
             }
 
+            SBDUtil.getOptionalMessageChannel(sbd).ifPresent(s ->
+                    messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), s.getIdentifier())));
             conversationService.registerConversation(sbd, DPO, INCOMING);
             internalQueue.enqueueNoark(sbd);
-            conversationService.registerStatus(sbd.getDocumentId(), ReceiptStatus.INNKOMMENDE_MOTTATT);
+            conversationService.registerStatus(sbd.getMessageId(), ReceiptStatus.INNKOMMENDE_MOTTATT);
         } else {
             nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
             if (altinnPackage.getTmpFile() != null) {
@@ -74,9 +79,10 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             }
         }
 
-        if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
-            ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
-            conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
+        if (SBDUtil.isReceipt(sbd)) {
+            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt ->
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST)
+            );
         }
     }
 

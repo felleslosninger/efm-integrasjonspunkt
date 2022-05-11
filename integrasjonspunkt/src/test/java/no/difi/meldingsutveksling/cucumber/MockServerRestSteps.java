@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
@@ -41,6 +41,7 @@ public class MockServerRestSteps {
     @SneakyThrows
     public void before() {
         mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
+        mockServerRestTemplateCustomizer.setDetectRootUri(false);
         mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
         mockServerRestTemplateCustomizer.customize(serviceBusRestClient.getRestTemplate());
         mockServerRestTemplateCustomizer.customize(svarInnClient.getRestTemplate());

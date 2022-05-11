@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import org.xmlunit.assertj.XmlAssert;
 
@@ -21,7 +21,6 @@ public class DigipostOutSteps {
     @After
     public void after() {
     }
-
 
     @Then("^an upload to Digipost is initiated with:$")
     public void anUploadToDigipostIsInitiatedWith(String expectedPayload) {

@@ -29,7 +29,8 @@
     <thead>
     <tr>
         <th>   </th>
-        <th>Id</th>
+        <th>MessageId</th>
+        <th>ConversationId</th>
         <th>Title</th>
         <th>Sender</th>
         <th>Receiver</th>
@@ -56,6 +57,7 @@
     <tr th:each="c : ${page.content}" >
         <td th:with="s=${statusMap.get(c.messageId)}" th:class="${s eq 'LEVERT' or s eq 'LEST' or s eq 'INNKOMMENDE_LEVERT'} ? 'table-success' : (${s eq 'FEIL' or s eq 'LEVETID_UTLOPT'} ? 'table-danger' : 'table-warning')">   </td>
         <td th:text="${c.messageId}">Id</td>
+        <td th:text="${c.conversationId}">Id</td>
         <td th:text="${c.messageTitle}">Title</td>
         <td th:text="${c.senderIdentifier}">Receiver</td>
         <td th:text="${c.receiverIdentifier}">Receiver</td>

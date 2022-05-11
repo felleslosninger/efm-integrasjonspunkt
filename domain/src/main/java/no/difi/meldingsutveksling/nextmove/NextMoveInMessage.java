@@ -36,10 +36,10 @@ public class NextMoveInMessage extends NextMoveMessage {
     public static NextMoveInMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         return new NextMoveInMessage(
                 sbd.getConversationId(),
-                sbd.getDocumentId(),
+                sbd.getMessageId(),
                 sbd.getProcess(),
-                sbd.getReceiverIdentifier(),
-                sbd.getSenderIdentifier(),
+                sbd.getReceiverIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
     }

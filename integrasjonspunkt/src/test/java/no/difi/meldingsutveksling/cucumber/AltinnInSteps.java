@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
@@ -122,6 +122,7 @@ public class AltinnInSteps {
         BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
         BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
         file.setFileReference("testMessage");
+        file.setSendersReference(new ObjectFactory().createBrokerServiceAvailableFileSendersReference(UUID.randomUUID().toString()));
         file.setReceiptID(1);
         filesBasic.getBrokerServiceAvailableFile().add(file);
 

@@ -14,9 +14,9 @@ import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
 import no.difi.meldingsutveksling.web.IntegrasjonspunktErrorController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -52,7 +52,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import({
         FixedClockConfig.class,
         JacksonConfig.class,
@@ -72,7 +72,7 @@ public class IntegrasjonspunktErrorControllerTest {
     @Autowired private Validator validator;
     @MockBean IntegrasjonspunktProperties properties;
 
-    @Before
+    @BeforeEach
     public void before() {
         given(properties.getOrg()).willReturn(
                 new IntegrasjonspunktProperties.Organization()
@@ -139,16 +139,16 @@ public class IntegrasjonspunktErrorControllerTest {
                         "  \"status\" : 400,\n" +
                         "  \"error\" : \"Bad Request\",\n" +
                         "  \"exception\" : \"javax.validation.ConstraintViolationException\",\n" +
-                        "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove document type\",\n" +
+                        "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type\",\n" +
                         "  \"path\" : \"/api/messages/out\",\n" +
                         "  \"errors\" : [ {\n" +
-                        "    \"codes\" : [ \"IsDocumentType\" ],\n" +
-                        "    \"defaultMessage\" : \"Must be a NextMove document type\",\n" +
+                        "    \"codes\" : [ \"MessageType\" ],\n" +
+                        "    \"defaultMessage\" : \"Must be a NextMove message type\",\n" +
                         "    \"objectName\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"field\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
                         "    \"rejectedValue\" : \"strange\",\n" +
                         "    \"bindingFailure\" : false,\n" +
-                        "    \"code\" : \"IsDocumentType\"\n" +
+                        "    \"code\" : \"MessageType\"\n" +
                         "  } ]\n" +
                         "}"))
                 .andDo(document("messages/out/create/constraint-violation",

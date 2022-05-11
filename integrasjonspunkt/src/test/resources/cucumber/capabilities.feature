@@ -92,7 +92,11 @@ Feature: Capabilities
           }, {
             "type" : "print",
             "standard" : "urn:no:difi:digitalpost:xsd:fysisk::print"
-          } ]
+          } ],
+          "digitalPostAddress": {
+                "supplier": "987464291",
+                "address": "dummy"
+          }
         }, {
           "process" : "urn:no:difi:profile:digitalpost:vedtak:ver1.0",
           "serviceIdentifier" : "DPI",
@@ -116,7 +120,11 @@ Feature: Capabilities
           }, {
             "type" : "print",
             "standard" : "urn:no:difi:digitalpost:xsd:fysisk::print"
-          } ]
+          } ],
+          "digitalPostAddress": {
+                "supplier": "987464291",
+                "address": "dummy"
+          }
         } ]
       }
       """

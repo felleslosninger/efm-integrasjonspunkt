@@ -1,15 +1,16 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /**
  * TOOD: Add test for payload of type ElementNSImpl and other variants
@@ -38,13 +39,13 @@ public class JournalPostIdTest {
 
     private JAXBContext jaxbContext;
 
-    @Before
+    @BeforeEach
     public void initializeJaxb() throws JAXBException {
         jaxbContext = JAXBContext.newInstance(PutMessageRequestType.class);
     }
 
     @Test
-    public void shouldExtractJpIdFromCdataTaggedXml() throws JAXBException, PayloadException {
+    public void shouldExtractJpIdFromCdataTaggedXml() throws JAXBException {
         PutMessageRequestType request = createPutMessageRequestWith(cdataTaggedXml);
         JournalpostId id = JournalpostId.fromPutMessage(new PutMessageRequestWrapper(request));
         assertEquals("219816", id.value());

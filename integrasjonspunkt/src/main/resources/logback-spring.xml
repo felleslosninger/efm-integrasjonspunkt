@@ -90,7 +90,6 @@
         </then>
     </if>
 
-
     <if condition='property("enableLoggingProxy").contains("true")'>
         <then>
             <appender name="loggingProxy" class="no.difi.meldingsutveksling.logging.LoggingProxyAppender">

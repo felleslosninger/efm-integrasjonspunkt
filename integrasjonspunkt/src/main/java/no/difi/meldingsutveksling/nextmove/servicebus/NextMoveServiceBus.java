@@ -10,9 +10,7 @@ import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.nextmove.NextMoveException;
-import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -49,7 +47,6 @@ public class NextMoveServiceBus {
     private final ObjectMapper om;
     private final ServiceBusPayloadConverter payloadConverter;
     private final ServiceRegistryLookup serviceRegistryLookup;
-    private final SBDUtil sbdUtil;
     private final TaskExecutor taskExecutor;
     private final NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory;
 
@@ -61,7 +58,6 @@ public class NextMoveServiceBus {
                               ObjectMapper om,
                               ServiceBusPayloadConverter payloadConverter,
                               ServiceRegistryLookup serviceRegistryLookup,
-                              SBDUtil sbdUtil,
                               TaskExecutor taskExecutor,
                               NextMoveServiceBusPayloadFactory nextMoveServiceBusPayloadFactory) {
         this.props = props;
@@ -71,7 +67,6 @@ public class NextMoveServiceBus {
         this.nextMoveServiceBusPayloadFactory = nextMoveServiceBusPayloadFactory;
         this.payloadConverter = payloadConverter;
         this.serviceRegistryLookup = serviceRegistryLookup;
-        this.sbdUtil = sbdUtil;
         this.taskExecutor = taskExecutor;
     }
 
@@ -178,8 +173,11 @@ public class NextMoveServiceBus {
     private String getReceiverQueue(NextMoveOutMessage message) {
         String prefix = NextMoveConsts.NEXTMOVE_QUEUE_PREFIX + message.getReceiverIdentifier();
 
-        if (sbdUtil.isStatus(message.getSbd())) {
-            return prefix + receiptTarget();
+        if (SBDUtil.isStatus(message.getSbd())) {
+            return prefix + statusSuffix();
+        }
+        if (message.getBusinessMessage() instanceof EinnsynKvitteringMessage) {
+            return prefix + receiptSuffix((EinnsynKvitteringMessage) message.getBusinessMessage());
         }
 
         try {
@@ -187,7 +185,7 @@ public class NextMoveServiceBus {
                     SRParameter.builder(message.getReceiverIdentifier())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
-                    message.getSbd().getStandard());
+                    message.getSbd().getDocumentType());
 
             if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
                 throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
@@ -198,7 +196,17 @@ public class NextMoveServiceBus {
         }
     }
 
-    private String receiptTarget() {
+    private String receiptSuffix(EinnsynKvitteringMessage k) {
+        if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
+            return props.getNextmove().getServiceBus().getReceiptQueue();
+        }
+        if (k.getReferanseType() == EinnsynType.INNSYNSKRAV) {
+            return DATA.fullname();
+        }
+        return INNSYN.fullname();
+    }
+
+    private String statusSuffix() {
         if (StringUtils.hasText(props.getNextmove().getServiceBus().getReceiptQueue())) {
             return props.getNextmove().getServiceBus().getReceiptQueue();
         }

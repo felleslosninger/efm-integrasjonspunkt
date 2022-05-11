@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.services;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.CertificateParser;
@@ -11,7 +12,6 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -31,7 +31,7 @@ public class Adresseregister {
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
-                    message.getSbd().getStandard()));
+                    message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));
@@ -44,7 +44,7 @@ public class Adresseregister {
     public Certificate getCertificate(ServiceRecord serviceRecord) throws CertificateException {
 
         String pemCertificate = serviceRecord.getPemCertificate();
-        if (StringUtils.isEmpty(pemCertificate)) {
+        if (Strings.isNullOrEmpty(pemCertificate)) {
             throw new CertificateException("ServiceRegistry does not have public certificate for " + serviceRecord.getOrganisationNumber());
         }
         try {

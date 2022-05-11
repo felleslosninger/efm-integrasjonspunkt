@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
@@ -8,12 +8,13 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import org.apache.commons.io.IOUtils;
+import org.xmlunit.matchers.CompareMatcher;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor
 public class CorrespondenceAgencyClientSteps {
@@ -27,7 +28,7 @@ public class CorrespondenceAgencyClientSteps {
         List<String> payloads = webServicePayloadHolder.get();
         String actualPayload = payloads.get(0);
         InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
-        assertThat(hideData(actualPayload)).isXmlEqualTo(expectedPayload);
+        assertThat(hideData(actualPayload), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
 
 
         List<Attachment> attachments = in.getCorrespondence()

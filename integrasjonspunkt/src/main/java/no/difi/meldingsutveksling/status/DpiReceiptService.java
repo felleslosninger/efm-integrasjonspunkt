@@ -3,32 +3,41 @@ package no.difi.meldingsutveksling.status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import org.springframework.stereotype.Component;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@Component
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class DpiReceiptService {
 
-    private final IntegrasjonspunktProperties properties;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
+    private final AvsenderidentifikatorHolder avsenderidentifikatorHolder;
 
-    Optional<ExternalReceipt> checkForReceipts() {
-        return meldingsformidlerClient.sjekkEtterKvittering(properties.getOrg().getNumber());
+    public void handleReceipts(String mpcId) {
+        if (avsenderidentifikatorHolder.pollWithoutAvsenderidentifikator()) {
+            meldingsformidlerClient.sjekkEtterKvitteringer(null, mpcId, this::handleReceipt);
+        }
+
+        avsenderidentifikatorHolder.getAvsenderidentifikatorListe().forEach(avsenderidentifikator ->
+                meldingsformidlerClient.sjekkEtterKvitteringer(avsenderidentifikator, mpcId, this::handleReceipt));
     }
 
+    @Transactional
     public void handleReceipt(ExternalReceipt externalReceipt) {
-        final String id = externalReceipt.getId();
-        MessageStatus status = externalReceipt.toMessageStatus();
+        final String conversationId = externalReceipt.getConversationId();
+        Optional<Conversation> conversation = conversationService.findConversation(conversationId, ConversationDirection.OUTGOING);
 
-        conversationService.registerStatus(id, status);
+        if (conversation.isPresent()) {
+            conversationService.registerStatus(conversation.get(), externalReceipt.toMessageStatus());
+            log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
+        } else {
+            log.warn("Unknown conversationID = {}", conversationId);
+        }
 
-        log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
         externalReceipt.confirmReceipt();
         log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
     }

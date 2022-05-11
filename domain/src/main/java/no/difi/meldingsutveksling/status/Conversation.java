@@ -9,7 +9,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import org.hibernate.annotations.DynamicUpdate;
@@ -31,9 +31,9 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @Slf4j
 @Table(name = "conversation",
         indexes = {
-            @Index(columnList = "conversation_id"),
-            @Index(columnList = "message_id")
-})
+                @Index(columnList = "conversation_id"),
+                @Index(columnList = "message_id")
+        })
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
 public class Conversation extends AbstractEntity<Long> {
@@ -55,6 +55,7 @@ public class Conversation extends AbstractEntity<Long> {
     private String receiver;
     private String receiverIdentifier;
     private String processIdentifier;
+    private String documentIdentifier;
     private String messageReference;
     private String messageTitle;
     private String serviceCode;
@@ -69,7 +70,7 @@ public class Conversation extends AbstractEntity<Long> {
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
 
-    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "conversation", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<MessageStatus> messageStatuses;
 
@@ -79,9 +80,10 @@ public class Conversation extends AbstractEntity<Long> {
     private Conversation(String conversationId,
                          String messageId,
                          String messageReference,
-                         Organisasjonsnummer sender,
-                         Organisasjonsnummer receiver,
+                         PartnerIdentifier sender,
+                         PartnerIdentifier receiver,
                          String processIdentifier,
+                         String documentIdentifier,
                          ConversationDirection direction,
                          String messageTitle,
                          ServiceIdentifier serviceIdentifier,
@@ -91,11 +93,14 @@ public class Conversation extends AbstractEntity<Long> {
         this.conversationId = conversationId;
         this.messageId = messageId;
         this.messageReference = messageReference;
-        this.sender = sender.asIso6523();
-        this.senderIdentifier = sender.getOrgNummer();
-        this.receiver = receiver.asIso6523();
-        this.receiverIdentifier = receiver.getOrgNummer();
+        this.sender = sender.getIdentifier();
+        this.senderIdentifier = sender.getPrimaryIdentifier();
+        if (receiver != null) {
+            this.receiver = receiver.getIdentifier();
+            this.receiverIdentifier = receiver.getPrimaryIdentifier();
+        }
         this.processIdentifier = processIdentifier;
+        this.documentIdentifier = documentIdentifier;
         this.direction = direction;
         this.messageTitle = messageTitle;
         this.messageStatuses = new HashSet<>();
@@ -115,7 +120,7 @@ public class Conversation extends AbstractEntity<Long> {
 
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
-                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(),
+                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(), msg.getDocumentIdentifier(),
                 msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
                 .addMessageStatuses(statuses);
     }
@@ -131,7 +136,7 @@ public class Conversation extends AbstractEntity<Long> {
     }
 
     @JsonIgnore
-    boolean hasStatus(MessageStatus status) {
+    public boolean hasStatus(MessageStatus status) {
         return getMessageStatuses().stream()
                 .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }

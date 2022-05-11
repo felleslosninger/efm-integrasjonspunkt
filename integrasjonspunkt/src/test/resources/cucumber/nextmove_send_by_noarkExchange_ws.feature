@@ -3,6 +3,7 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075918?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
+    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     Given a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
 
   Scenario: As a user I want to send a BEST/EDU message
@@ -188,22 +189,20 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
           "identifier" : {
             "value" : "0192:910077473",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "receiver" : [ {
           "identifier" : {
             "value" : "0192:910075918",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "6e9cab22-a682-461c-bcd4-f201bfb3de8c",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {
@@ -241,11 +240,14 @@ Feature: Sending a BEST/EDU message by the noarkExchange WebService
        </hoveddokument>
     </manifest>
     """
-    And the content of the file named "arkivmelding.xml" is:
+    And the XML content of the file named "arkivmelding.xml" is:
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
-        <antallFiler>0</antallFiler>
+        <system>p360</system>
+        <meldingId>6e9cab22-a682-461c-bcd4-f201bfb3de8c</meldingId>
+        <tidspunkt>2016-01-25T00:00:00</tidspunkt>
+        <antallFiler>1</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <systemID>6</systemID>
             <tittel>Test18 - Difi</tittel>

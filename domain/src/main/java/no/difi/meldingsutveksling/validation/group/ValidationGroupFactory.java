@@ -1,51 +1,57 @@
 package no.difi.meldingsutveksling.validation.group;
 
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 
 @UtilityClass
 public class ValidationGroupFactory {
 
-    public static Class<?> toDocumentType(DocumentType in) {
+    public static Class<?> toDocumentType(no.difi.meldingsutveksling.MessageType in) {
         switch (in) {
+            case FIKSIO:
+                return NextMoveValidationGroups.MessageType.FiksIo.class;
             case ARKIVMELDING:
-                return ValidationGroups.DocumentType.Arkivmelding.class;
+                return NextMoveValidationGroups.MessageType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
-                return ValidationGroups.DocumentType.ArkivmeldingKvittering.class;
+                return NextMoveValidationGroups.MessageType.ArkivmeldingKvittering.class;
             case AVTALT:
-                return ValidationGroups.DocumentType.Avtalt.class;
+                return NextMoveValidationGroups.MessageType.Avtalt.class;
             case PRINT:
-                return ValidationGroups.DocumentType.Print.class;
+                return NextMoveValidationGroups.MessageType.Print.class;
             case DIGITAL:
-                return ValidationGroups.DocumentType.Digital.class;
+                return NextMoveValidationGroups.MessageType.Digital.class;
             case DIGITAL_DPV:
-                return ValidationGroups.DocumentType.DigitalDpv.class;
+                return NextMoveValidationGroups.MessageType.DigitalDpv.class;
             case INNSYNSKRAV:
-                return ValidationGroups.DocumentType.Innsynskrav.class;
+                return NextMoveValidationGroups.MessageType.Innsynskrav.class;
             case PUBLISERING:
-                return ValidationGroups.DocumentType.Publisering.class;
+                return NextMoveValidationGroups.MessageType.Publisering.class;
             case EINNSYN_KVITTERING:
-                return ValidationGroups.DocumentType.EInnsynKvittering.class;
+                return NextMoveValidationGroups.MessageType.EInnsynKvittering.class;
             default:
                 return null;
         }
     }
 
     public static Class<?> toServiceIdentifier(ServiceIdentifier serviceIdentifier) {
+        if (serviceIdentifier == null) throw new IllegalArgumentException("ServiceIdentifier cannot be null");
         switch (serviceIdentifier) {
             case DPE:
-                return ValidationGroups.ServiceIdentifier.DPE.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPE.class;
             case DPF:
-                return ValidationGroups.ServiceIdentifier.DPF.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPF.class;
             case DPI:
-                return ValidationGroups.ServiceIdentifier.DPI.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPI.class;
             case DPO:
-                return ValidationGroups.ServiceIdentifier.DPO.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPO.class;
             case DPV:
-                return ValidationGroups.ServiceIdentifier.DPV.class;
+                return NextMoveValidationGroups.ServiceIdentifier.DPV.class;
+            case DPFIO:
+                return NextMoveValidationGroups.ServiceIdentifier.DPFIO.class;
+            case UNKNOWN:
+                return NextMoveValidationGroups.ServiceIdentifier.UNKNOWN.class;
             default:
-                return null;
+                throw new IllegalArgumentException("Missing case for ServiceIdentifier: "+serviceIdentifier);
         }
     }
 

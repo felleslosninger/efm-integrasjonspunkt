@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -125,7 +125,7 @@ public class NextMoveMessageOutSteps {
         );
 
         Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("messageId", messageOutHolder.get().getSbd().getDocumentId());
+        uriVariables.put("messageId", messageOutHolder.get().getSbd().getMessageId());
         uriVariables.put("title", title);
 
         this.response = testRestTemplate.exchange(
@@ -144,9 +144,9 @@ public class NextMoveMessageOutSteps {
     public void iSendTheMessage() {
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity(null),
+                HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
-                messageOutHolder.get().getSbd().getDocumentId());
+                messageOutHolder.get().getSbd().getMessageId());
         assertThat(response.getStatusCode())
                 .withFailMessage(response.toString())
                 .isEqualTo(HttpStatus.OK);
@@ -156,14 +156,14 @@ public class NextMoveMessageOutSteps {
     public void iSendTheMessageAndGetTheFollowingErrorResponse(String body) {
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity(null),
+                HttpMethod.POST, new HttpEntity<>(null),
                 String.class,
-                messageOutHolder.get().getSbd().getDocumentId());
+                messageOutHolder.get().getSbd().getMessageId());
 
         try {
             new JsonContentAssert(String.class, response.getBody())
                     .isStrictlyEqualToJson(body);
-        } catch(AssertionError e) {
+        } catch (AssertionError e) {
             log.info(response.getBody());
             throw e;
         }

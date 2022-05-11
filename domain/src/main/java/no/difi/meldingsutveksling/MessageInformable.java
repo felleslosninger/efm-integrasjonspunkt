@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling;
 
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 
 import java.time.OffsetDateTime;
@@ -11,11 +11,13 @@ public interface MessageInformable {
 
     String getMessageId();
 
-    Organisasjonsnummer getSender();
+    PartnerIdentifier getSender();
 
-    Organisasjonsnummer getReceiver();
+    PartnerIdentifier getReceiver();
 
     String getProcessIdentifier();
+
+    String getDocumentIdentifier();
 
     ConversationDirection getDirection();
 

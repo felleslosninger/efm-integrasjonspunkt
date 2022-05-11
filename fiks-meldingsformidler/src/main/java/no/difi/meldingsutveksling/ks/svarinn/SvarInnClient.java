@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
 @Slf4j
 public class SvarInnClient {
 

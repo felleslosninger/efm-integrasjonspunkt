@@ -38,7 +38,7 @@ import static org.xmlunit.diff.ComparisonType.*;
 
 public class SimilarToXmlPattern extends StringValuePattern {
 
-    private static List<ComparisonType> COUNTED_COMPARISONS = Collections.unmodifiableList(Arrays.asList(
+    private static final List<ComparisonType> COUNTED_COMPARISONS = Collections.unmodifiableList(Arrays.asList(
             ELEMENT_TAG_NAME,
             SCHEMA_LOCATION,
             NO_NAMESPACE_SCHEMA_LOCATION,
@@ -146,7 +146,7 @@ public class SimilarToXmlPattern extends StringValuePattern {
                             .ignoreWhitespace()
                             .ignoreComments()
                             .withDifferenceEvaluator(diffEvaluator)
-                            .withComparisonListeners((ComparisonListener) (comparison, outcome) -> {
+                            .withComparisonListeners((comparison, outcome) -> {
                                 if (COUNTED_COMPARISONS.contains(comparison.getType()) && comparison.getControlDetails().getValue() != null) {
                                     totalComparisons.incrementAndGet();
                                     if (outcome == ComparisonResult.DIFFERENT) {

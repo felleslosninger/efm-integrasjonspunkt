@@ -2,10 +2,10 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -53,17 +53,18 @@ public class NextMoveMessageInService {
         return messageRepo.find(input, pageable);
     }
 
-    @Transactional
-    public StandardBusinessDocument peek(NextMoveInMessageQueryInput input) {
-        NextMoveInMessage message = messageRepo.peek(input)
-                .orElseThrow(NoContentException::new);
-        MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
+    public Optional<NextMoveInMessage> peek(NextMoveInMessageQueryInput input) {
+        OffsetDateTime lockTimeout = OffsetDateTime.now(clock)
+                .plusMinutes(props.getNextmove().getLockTimeoutMinutes());
 
-        messageRepo.save(message.setLockTimeout(OffsetDateTime.now(clock)
-                .plusMinutes(props.getNextmove().getLockTimeoutMinutes())));
+        for (Long id : messageRepo.findIdsForUnlockedMessages(input, 20)) {
+            Optional<NextMoveInMessage> lockedMessage = messageRepo.lock(id, lockTimeout);
+            if (lockedMessage.isPresent()) {
+                return lockedMessage;
+            }
+        }
 
-        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
-        return message.getSbd();
+        throw new NoContentException();
     }
 
     @Transactional
@@ -73,6 +74,10 @@ public class NextMoveMessageInService {
 
         if (message.getLockTimeout() == null) {
             throw new MessageNotLockedException(messageId);
+        }
+
+        if (SBDUtil.isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+            return null;
         }
 
         try {

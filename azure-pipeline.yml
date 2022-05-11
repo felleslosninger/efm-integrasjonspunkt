@@ -1,3 +1,6 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
 resources:
   repositories:
     - repository: efm-eproc-pipeline
@@ -11,12 +14,18 @@ extends:
   parameters:
     environmentRepository: git://eformidling/eformidling
     jdkVersion: 1.8
-    buildDockerArtifact: false
+    coverageTool: none
+    buildDockerArtifact: true
+    dockerhubPush: true
+    dockerRegistryEndpoint: dockerhub-difi
+    deployOssrh: true
+    mavenGoals: deploy
+    jiraVersionPrefix: IP
 
 trigger:
   batch: true
   branches:
     include:
-      - development
-      - release-*
-      - master
+      - '*'
+
+pr: none

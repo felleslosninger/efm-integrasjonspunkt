@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.kvittering.xsd.Kvittering;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +31,7 @@ class DocumentConverter {
                     EinnsynKvitteringMessage.class,
                     InnsynskravMessage.class,
                     PubliseringMessage.class,
-                    StatusMessage.class,
-                    Kvittering.class}, null);
+                    StatusMessage.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + DocumentConverter.class, e);
         }

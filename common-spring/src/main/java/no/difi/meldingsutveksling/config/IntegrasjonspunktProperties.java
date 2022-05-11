@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,18 +28,21 @@ import java.util.Set;
  */
 @Data
 @ConfigurationProperties(prefix = "difi.move")
+@Validated
 public class IntegrasjonspunktProperties {
 
     @Valid
     private Organization org;
 
     @Valid
+    @LoggedProperty
     private FeatureToggle feature;
 
     @NotNull(message = "Service registry must be configured")
     private String serviceregistryEndpoint;
 
     @Valid
+    @NestedConfigurationProperty
     private AltinnFormidlingsTjenestenConfig dpo;
 
     @Valid
@@ -45,6 +50,9 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private Arkivmelding arkivmelding;
+
+    @Valid
+    private Avtalt avtalt;
 
     @Valid
     private Einnsyn einnsyn;
@@ -56,9 +64,11 @@ public class IntegrasjonspunktProperties {
     private NorskArkivstandardSystem noarkSystem = new NorskArkivstandardSystem();
 
     @Valid
+    @NestedConfigurationProperty
     private DigitalPostInnbyggerConfig dpi;
 
     @Valid
+    @NestedConfigurationProperty
     private FiksConfig fiks = new FiksConfig();
 
     @Valid
@@ -67,6 +77,7 @@ public class IntegrasjonspunktProperties {
     private Mail mail;
 
     @Valid
+    @LoggedProperty
     private NextMove nextmove;
 
     @Valid
@@ -84,6 +95,7 @@ public class IntegrasjonspunktProperties {
     @Valid
     private DeadLock deadlock;
 
+
     @Data
     public static class Vault {
         private String uri;
@@ -98,17 +110,34 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String dpvDefaultProcess;
         @NotNull
+        private String defaultDocumentType;
+        @NotNull
         private String receiptProcess;
-
+        @NotNull
+        private String receiptDocumentType;
+        private boolean generateReceipts;
     }
+
+    @Data
+    public static class Avtalt {
+        @NotNull
+        private String receiptProcess;
+    }
+
     @Data
     public static class Einnsyn {
         @NotNull
         private String defaultJournalProcess;
         @NotNull
+        private String defaultJournalDocumentType;
+        @NotNull
         private String defaultInnsynskravProcess;
+        @NotNull
+        private String defaultInnsynskravDocumentType;
+        private String receiptProcess;
 
     }
+
     @Data
     public static class Ntp {
         @NotNull
@@ -120,7 +149,14 @@ public class IntegrasjonspunktProperties {
     public static class Queue {
         @NotNull
         private Integer maximumRetryHours;
-
+        @NotNull
+        private Integer concurrency;
+        @NotNull
+        private String nextmoveName;
+        @NotNull
+        private String noarkName;
+        @NotNull
+        private String dlqName;
     }
 
     public FeatureToggle getFeature() {
@@ -156,10 +192,16 @@ public class IntegrasjonspunktProperties {
         private String username;
         private String password;
         private URL endpointUrl;
+        @NotNull
+        private String sensitiveServiceCode;
         private boolean notifyEmail;
         private boolean notifySms;
+        @NotNull
         private String notificationText;
+        @NotNull
+        private String sensitiveNotificationText;
         private boolean allowForwarding;
+        private boolean enableDueDate;
         private Long daysToReply;
         @NotNull
         private DataSize uploadSizeLimit;
@@ -177,6 +219,7 @@ public class IntegrasjonspunktProperties {
         private URL url;
         private String audience;
         private String clientId;
+        private String clientIdPrefix;
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
     }
@@ -222,7 +265,12 @@ public class IntegrasjonspunktProperties {
         private Boolean applyZipHeaderPatch = Boolean.FALSE;
         @Valid
         private ServiceBus serviceBus;
-
+        @NotNull
+        private Set<ServiceIdentifier> statusServices;
+        @NotNull
+        private String statusDocumentType;
+        @NotNull
+        private Boolean useDbPersistence;
     }
 
     @Data
@@ -268,12 +316,14 @@ public class IntegrasjonspunktProperties {
         /**
          * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
          */
+        @LoggedProperty
         private String type;
 
     }
 
     @Data
     public static class FeatureToggle {
+        private boolean enableDsfPrintLookup;
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
         private boolean returnOkOnEmptyPayload;

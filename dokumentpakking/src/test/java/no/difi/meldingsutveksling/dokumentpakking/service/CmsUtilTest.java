@@ -20,7 +20,7 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -35,10 +35,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.Executors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 
-//@Ignore("JCE support is missing on our build server")
 public class CmsUtilTest {
 
     private static final String FILENAME_CERT = "difi-cert.pem";
@@ -53,7 +52,7 @@ public class CmsUtilTest {
         byte[] plaintext = "Text to be encrypted".getBytes();
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, (X509Certificate) certificate);
         byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
-        assertThat(plaintextRecovered).isEqualTo(plaintext);
+        assertArrayEquals(plaintextRecovered, plaintext);
     }
 
     @Test
@@ -80,7 +79,7 @@ public class CmsUtilTest {
         byte[] ciphertext = (new CmsUtil()).createCMS(plaintext, cert);
         byte[] plaintextRecovered = util.decryptCMS(ciphertext, keyPair.getPrivate());
 
-        assertThat(plaintextRecovered).isEqualTo(plaintext);
+        assertArrayEquals(plaintextRecovered, plaintext);
     }
 
     @Test
@@ -118,7 +117,7 @@ public class CmsUtilTest {
             }
         }).await();
 
-        assertThat(actual).isEqualTo(plaintext);
+        assertArrayEquals(actual, plaintext);
     }
 
     private KeyPair generateKeyPair() throws NoSuchAlgorithmException {

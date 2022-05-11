@@ -16,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,7 +48,9 @@ public class IpMailSender {
         mailProps.put("mail.smtp.host", props.getMail().getSmtpHost());
         mailProps.put("mail.smtp.port", props.getMail().getSmtpPort());
         mailProps.put("mail.smtp.starttls.enable", "true");
-        mailProps.put("mail.smtp.auth", props.getMail().getEnableAuth());
+        if (!isNullOrEmpty(props.getMail().getEnableAuth())) {
+            mailProps.put("mail.smtp.auth", props.getMail().getEnableAuth());
+        }
 
         String trust = props.getMail().getTrust();
         if (!isNullOrEmpty(trust)) {
@@ -157,7 +163,7 @@ public class IpMailSender {
     }
 
     private long getMessageSize(MimeMessage m) {
-        try (CountingOutputStream out = new CountingOutputStream(new NullOutputStream())) {
+        try (CountingOutputStream out = new CountingOutputStream(NULL_OUTPUT_STREAM)) {
             m.writeTo(out);
             return out.getByteCount() + 100L;
         } catch (IOException | MessagingException e) {

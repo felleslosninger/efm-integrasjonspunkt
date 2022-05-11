@@ -3,14 +3,14 @@ package no.difi.meldingsutveksling.noarkexchange.receive;
 import no.difi.meldingsutveksling.noarkexchange.PutMessageRequestConverter;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PutMessageRequestConverterTest {
 
     private final PutMessageRequestType putMessageRequestType = new PutMessageRequestType();
 
-    @Before
+    @BeforeEach
     public void setup() {
         putMessageRequestType.setPayload(new AppReceiptType());
     }

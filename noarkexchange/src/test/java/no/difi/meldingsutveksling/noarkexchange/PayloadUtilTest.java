@@ -3,19 +3,20 @@ package no.difi.meldingsutveksling.noarkexchange;
 import net.logstash.logback.encoder.org.apache.commons.lang.StringEscapeUtils;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class PayloadUtilTest {
 
     private TestData<PutMessageRequestType> testData;
 
-    @Before
+    @BeforeEach
     public void setup() throws JAXBException {
         testData = new TestData<>(PutMessageRequestType.class);
     }
@@ -25,7 +26,7 @@ public class PayloadUtilTest {
         PutMessageRequestType value = testData.loadFromClasspath("p360/PutMessageAppReceiptFeilmelding.xml");
 
         final AppReceiptType appReceiptType = PayloadUtil.getAppReceiptType(value.getPayload());
-        assertFalse(appReceiptType.getType().equals("OK"));
+        assertNotEquals(appReceiptType.getType(), "OK");
     }
 
     @Test

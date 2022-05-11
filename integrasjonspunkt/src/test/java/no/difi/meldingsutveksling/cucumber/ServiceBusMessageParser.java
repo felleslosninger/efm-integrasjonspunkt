@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusPayload;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -27,18 +28,21 @@ public class ServiceBusMessageParser {
     @SneakyThrows
     public Message parse(byte[] in) {
         ServiceBusPayload serviceBusPayload = objectMapper.readValue(in, ServiceBusPayload.class);
-
-        String receiverOrgNumber = serviceBusPayload.getSbd().getReceiverIdentifier();
-        PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiverOrgNumber);
-
-        byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
-        byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
-
-        List<Attachment> attachments = asicParser.parse(new ByteArrayInputStream(asic));
-
-        return new Message()
+        Message message = new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPE)
-                .setSbd(serviceBusPayload.getSbd())
-                .attachments(attachments);
+                .setSbd(serviceBusPayload.getSbd());
+
+        if (serviceBusPayload.getAsic() != null) {
+            PartnerIdentifier receiver = serviceBusPayload.getSbd().getReceiverIdentifier();
+            PrivateKey privateKey = cucumberKeyStore.getPrivateKey(receiver.getOrganizationIdentifier());
+
+            byte[] encryptedAsic = Base64.getDecoder().decode(serviceBusPayload.getAsic());
+            byte[] asic = cmsUtil.decryptCMS(encryptedAsic, privateKey);
+
+            List<Attachment> attachments = asicParser.parse(new ByteArrayInputStream(asic));
+            message.setAttachments(attachments);
+        }
+
+        return message;
     }
 }

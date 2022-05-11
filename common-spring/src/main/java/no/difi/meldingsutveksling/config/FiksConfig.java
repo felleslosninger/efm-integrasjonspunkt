@@ -1,14 +1,17 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.move.common.config.KeystoreProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.net.URL;
+import java.util.Set;
 
 @Data
 public class FiksConfig {
@@ -16,6 +19,7 @@ public class FiksConfig {
 
     @Valid
     @NotNull(message = "Certificate properties for FIKS not set.")
+    @NestedConfigurationProperty
     private KeystoreProperties keystore;
 
     SvarUt ut = new SvarUt();
@@ -25,6 +29,7 @@ public class FiksConfig {
     @Data
     @ToString(exclude = "integrasjonsPassord")
     public static class FiksIO {
+        private String senderOrgnr;
         private String host;
         private String apiHost;
         private String kontoId;
@@ -41,13 +46,16 @@ public class FiksConfig {
         private String konteringsKode;
         private String username;
         private String password;
+        private boolean kunDigitalLevering;
         private URL endpointUrl;
         private DataSize uploadSizeLimit;
+        private Set<String> ekskluderesFraPrint = Sets.newHashSet();
     }
 
     @Data
     @ToString(exclude = "password")
     public static class SvarInn {
+        private boolean enable;
         @NotNull
         private String baseUrl;
         private String username;
@@ -57,6 +65,8 @@ public class FiksConfig {
         private String fallbackSenderOrgNr;
         @NotNull
         private String process;
+        @NotNull
+        private String documentType;
         @NotNull
         private Integer connectTimeout;
         @NotNull

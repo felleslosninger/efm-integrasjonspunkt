@@ -114,22 +114,20 @@ Feature: Receiving a Next Move DPF message
           "identifier" : {
             "value" : "0192:910229028",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "receiver" : [ {
           "identifier" : {
             "value" : "0192:910229028",
             "authority" : "iso6523-actorid-upis"
-          },
-          "contactInformation" : [ ]
+          }
         } ],
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
           "instanceIdentifier" : "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
           "type" : "arkivmelding",
-          "creationDateAndTime" : "2019-03-25T12:38:23+01:00"
+          "creationDateAndTime" : "2019-03-25T12:38:18+01:00"
         },
         "businessScope" : {
           "scope" : [ {
@@ -152,6 +150,19 @@ Feature: Receiving a Next Move DPF message
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <basisregistrering xsi:type="journalpost">
+                <dokumentbeskrivelse>
+                  <tittel>primary.html</tittel>
+                  <dokumentobjekt>
+                    <referanseDokumentfil>primary.html</referanseDokumentfil>
+                  </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <dokumentbeskrivelse>
+                  <tittel>before_the_law.txt</tittel>
+                  <dokumentobjekt>
+                    <referanseDokumentfil>before_the_law.txt</referanseDokumentfil>
+                  </dokumentobjekt>
+                </dokumentbeskrivelse>
+                <tittel>Test4 - liten fil - 22.04.16</tittel>
                 <offentligTittel>Test4 - liten fil - 22.04.16</offentligTittel>
                 <journalaar>2016</journalaar>
                 <journalsekvensnummer>25</journalsekvensnummer>

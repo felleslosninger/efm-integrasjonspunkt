@@ -24,21 +24,23 @@ class IntegrasjonspunktCertificateValidator(
     fun validateCertificate() {
         keystoreHelper.x509Certificate.checkValidity()
 
-        val pem = try {
-            srClient.getCertificate(props.org.number)
-        } catch (e: ServiceRegistryLookupException) {
-            throw VirksertCertificateException(e)
-        }
+        if (props.feature.isEnableDPO || props.feature.isEnableDPE) {
+            val pem = try {
+                srClient.getCertificate(props.org.number)
+            } catch (e: ServiceRegistryLookupException) {
+                throw VirksertCertificateException(e)
+            }
 
-        val cert = try {
-            CertificateParser.parse(pem)
-        } catch (e: CertificateParserException) {
-            throw VirksertCertificateException("Failed to parse certificate from Virksert", e)
-        }
-        cert.checkValidity()
+            val cert = try {
+                CertificateParser.parse(pem)
+            } catch (e: CertificateParserException) {
+                throw VirksertCertificateException("Failed to parse certificate from Virksert", e)
+            }
+            cert.checkValidity()
 
-        if (keystoreHelper.x509Certificate.serialNumber != cert.serialNumber) {
-            throw VirksertCertificateException("Keystore certificate serial number (${keystoreHelper.x509Certificate.serialNumber}) does not match certificate in Virksert (${cert.serialNumber})")
+            if (keystoreHelper.x509Certificate.serialNumber != cert.serialNumber) {
+                throw VirksertCertificateException("Keystore certificate serial number (${keystoreHelper.x509Certificate.serialNumber}) does not match certificate in Virksert (${cert.serialNumber})")
+            }
         }
     }
 

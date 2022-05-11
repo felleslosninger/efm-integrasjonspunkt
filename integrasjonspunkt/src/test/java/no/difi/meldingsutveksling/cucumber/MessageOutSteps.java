@@ -1,14 +1,18 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.DataTable;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.util.StringUtil;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
+import org.xmlunit.matchers.CompareMatcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,15 +20,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor
 public class MessageOutSteps {
 
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
+    private final ObjectMapper objectMapper;
+
+    private JacksonTester<StandardBusinessDocument> json;
 
     @Before
+    public void before() {
+        JacksonTester.initFields(this, objectMapper);
+        messageOutHolder.reset();
+        messageSentHolder.reset();
+    }
+
     @After
     public void beforeAndAfter() {
         messageOutHolder.reset();
@@ -64,7 +80,7 @@ public class MessageOutSteps {
         List<List<String>> actualList = new ArrayList<>();
         actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
-                .map(p -> Arrays.asList(p.getFileName(), StringUtil.nonNull(p.getMimeType())))
+                .map(p -> Arrays.asList(p.getFileName(), p.getMimeType()))
                 .collect(Collectors.toList())
         );
 
@@ -76,7 +92,7 @@ public class MessageOutSteps {
     @SneakyThrows
     public void theSentMessageContainsNoFiles() {
         Message message = messageSentHolder.get();
-        assertThat(message.getAttachments()).isEmpty();
+        assertTrue(message.getAttachments().isEmpty());
     }
 
     @Then("^the content of the file named \"([^\"]*)\" is:$")
@@ -84,19 +100,27 @@ public class MessageOutSteps {
         Message message = messageSentHolder.get();
 
         String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
-        assertThat(actualContent).isEqualToIgnoringWhitespace(expectedContent);
+        assertThat(actualContent, equalToCompressingWhiteSpace(expectedContent));
     }
 
     @Then("^the XML content of the file named \"([^\"]*)\" is:$")
     public void theXmlContentOfTheFileNamedIs(String filename, String expectedContent) throws IOException {
         Message message = messageSentHolder.get();
         String actualContent = new String(IOUtils.toByteArray(message.getAttachment(filename).getInputStream()));
-        assertThat(actualContent).isXmlEqualTo(expectedContent);
+        assertThat(actualContent, CompareMatcher.isIdenticalTo(expectedContent).ignoreWhitespace());
     }
 
     @Then("^the XML payload of the message is:$")
     public void theXmlPayloadOfTheMessageIs(String expectedPayload) {
         Message message = messageSentHolder.get();
-        assertThat(message.getBody()).isXmlEqualTo(expectedPayload);
+        assertThat(message.getBody(), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
     }
+
+    @SneakyThrows
+    @Then("^the sent message's SBD is:$")
+    public void theSentMessagesSbdIs(String expectedSBD) {
+        JsonContent<StandardBusinessDocument> actual = json.write(messageSentHolder.get().getSbd());
+        assertThat(actual.getJson(), jsonEquals(expectedSBD));
+    }
+
 }

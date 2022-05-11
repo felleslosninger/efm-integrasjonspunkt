@@ -15,7 +15,7 @@ public interface ExternalReceipt {
      * Gets the identificator of the receipt. This should correspond to the conversation id of the original message
      * @return identificator of the receipt/conversation id
      */
-    String getId();
+    String getConversationId();
 
     /**
      * Used with logging to identify the receipt

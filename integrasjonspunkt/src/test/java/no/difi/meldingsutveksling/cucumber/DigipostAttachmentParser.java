@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.unece.cefact.namespaces.standardbusinessdocumentheader.StandardBusinessDocument;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;

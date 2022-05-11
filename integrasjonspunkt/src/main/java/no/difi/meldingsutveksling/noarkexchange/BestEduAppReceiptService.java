@@ -1,24 +1,19 @@
 package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.KvitteringStatusMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
-import no.difi.meldingsutveksling.noarkexchange.AppReceiptFactory;
-import no.difi.meldingsutveksling.noarkexchange.ConversationIdEntity;
-import no.difi.meldingsutveksling.noarkexchange.ConversationIdEntityRepo;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -67,12 +62,13 @@ public class BestEduAppReceiptService {
                 .setReceiptType("ERROR")
                 .addMessage(new KvitteringStatusMessage("Unknown", errorText));
 
-        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(sbd.getReceiverIdentifier()),
-                Organisasjonsnummer.from(sbd.getSenderIdentifier()),
+        StandardBusinessDocument receiptSbd = createSBD.createNextMoveSBD(
+                sbd.getReceiverIdentifier(),
+                sbd.getSenderIdentifier(),
                 sbd.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
-                DocumentType.ARKIVMELDING_KVITTERING,
+                properties.getArkivmelding().getReceiptDocumentType(),
                 kvittering);
 
         NextMoveOutMessage message = nextMoveMessageService.createMessage(receiptSbd);

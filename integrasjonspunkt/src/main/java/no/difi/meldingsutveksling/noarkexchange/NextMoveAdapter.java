@@ -5,19 +5,16 @@ import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.core.BestEduConverter;
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
-import no.difi.meldingsutveksling.dokumentpakking.service.ScopeFactory;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
 import no.difi.meldingsutveksling.domain.arkivmelding.ArkivmeldingFactory;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
@@ -28,6 +25,8 @@ import no.difi.meldingsutveksling.nextmove.v2.BasicNextMoveFile;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.noarkexchange.schema.AppReceiptType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
+import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -80,13 +79,15 @@ public class NextMoveAdapter {
         AppReceiptType appReceiptType = BestEduConverter.payloadAsAppReceipt(message.getPayload());
         ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(appReceiptType.getType(), message.getConversationId(), Sets.newHashSet());
         appReceiptType.getMessage().forEach(sm -> receipt.getMessages().add(new KvitteringStatusMessage(sm.getCode(), sm.getText())));
-        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
-                Organisasjonsnummer.from(message.getReceiverPartyNumber()),
+        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
+                Iso6523.of(ICD.NO_ORG, message.getSenderPartynumber()),
+                Iso6523.of(ICD.NO_ORG, message.getReceiverPartyNumber()),
                 message.getConversationId(),
                 uuidGenerator.generate(),
                 properties.getArkivmelding().getReceiptProcess(),
-                DocumentType.ARKIVMELDING_KVITTERING,
+                properties.getArkivmelding().getReceiptDocumentType(),
                 receipt);
+
         return nextMoveMessageService.createMessage(sbd);
     }
 
@@ -103,7 +104,7 @@ public class NextMoveAdapter {
         try {
             receiverServiceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", message.getReceiverPartyNumber()), e);
         }
@@ -113,21 +114,28 @@ public class NextMoveAdapter {
         } else {
             process = properties.getArkivmelding().getDefaultProcess();
         }
-        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(Organisasjonsnummer.from(message.getSenderPartynumber()),
-                Organisasjonsnummer.from(message.getReceiverPartyNumber()),
+        StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
+                Iso6523.of(ICD.NO_ORG, message.getSenderPartynumber()),
+                Iso6523.of(ICD.NO_ORG, message.getReceiverPartyNumber()),
                 conversationId,
                 conversationId,
                 process,
-                DocumentType.ARKIVMELDING,
+                properties.getArkivmelding().getDefaultDocumentType(),
                 new ArkivmeldingMessage()
                         .setSikkerhetsnivaa(receiverServiceRecord.getService().getSecurityLevel())
                         .setHoveddokument(ARKIVMELDING_FILE)
         );
-        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getSender().getRef())) {
-            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.SENDER_REF, message.getRequest().getEnvelope().getSender().getRef()));
+
+        String senderRef = message.getRequest().getEnvelope().getSender().getRef();
+
+        if (!Strings.isNullOrEmpty(senderRef)) {
+            sbd.addScope(ScopeFactory.fromRef(ScopeType.SENDER_REF, senderRef));
         }
-        if (!Strings.isNullOrEmpty(message.getRequest().getEnvelope().getReceiver().getRef())) {
-            sbd.getScopes().add(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, message.getRequest().getEnvelope().getReceiver().getRef()));
+
+        String receiverRef = message.getRequest().getEnvelope().getReceiver().getRef();
+
+        if (!Strings.isNullOrEmpty(receiverRef)) {
+            sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, receiverRef));
         }
 
         return nextMoveMessageService.createMessage(sbd, getFiles(message));
@@ -152,7 +160,7 @@ public class NextMoveAdapter {
         try {
             serviceRecord = srLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
                             .process(properties.getArkivmelding().getDefaultProcess()).build(),
-                    DocumentType.ARKIVMELDING);
+                    properties.getArkivmelding().getDefaultDocumentType());
         } catch (ServiceRegistryLookupException e) {
             throw new MeldingsUtvekslingRuntimeException(String.format("Could not find service record for receiver %s", message.getReceiverPartyNumber()), e);
         }

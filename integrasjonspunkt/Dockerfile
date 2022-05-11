@@ -11,6 +11,7 @@ ENV APP_DIR=/opt/integrasjonspunkt \
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
     openssl  && \
     update-ca-certificates && \
     rm -rf /var/cache/apt/* && \
@@ -23,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR ${APP_DIR}
 
 # Add jar last, since this changes the most
-ADD /target/*.jar ${APP_DIR}/app.jar
+ADD /target/integrasjonspunkt.jar ${APP_DIR}/app.jar
 
 RUN chown -R java:java ${APP_DIR}
 RUN chmod +x ${APP_DIR}/*

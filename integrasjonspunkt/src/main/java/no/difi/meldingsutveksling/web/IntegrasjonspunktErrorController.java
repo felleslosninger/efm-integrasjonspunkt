@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.web;
 
-import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -23,19 +22,10 @@ import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.*
 public class IntegrasjonspunktErrorController implements ErrorController {
 
     private final ErrorAttributes errorAttributes;
-    private final ErrorProperties errorProperties;
 
     public IntegrasjonspunktErrorController(ErrorAttributes errorAttributes, ServerProperties serverProperties) {
         Assert.notNull(serverProperties, "ServerProperties must not be null");
-        Assert.notNull(errorAttributes, "ErrorAttributes must not be null");
-        this.errorProperties = serverProperties.getError();
         this.errorAttributes = errorAttributes;
-    }
-
-    @Deprecated
-    @Override
-    public String getErrorPath() {
-        return this.errorProperties.getPath();
     }
 
     @RequestMapping

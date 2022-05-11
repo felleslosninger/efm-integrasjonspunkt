@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SRParameterTest {
 
@@ -22,7 +22,8 @@ public class SRParameterTest {
                 .securityLevel(4)
                 .build();
         assertEquals(Integer.valueOf(4), parameter.getSecurityLevel());
-        assertEquals("securityLevel=4", parameter.getQuery());
+        assertTrue(parameter.getUrlTemplate().contains("securityLevel="));
+        assertEquals("4", parameter.getUrlVariables().get("securityLevel"));
     }
 
     @Test
@@ -30,7 +31,8 @@ public class SRParameterTest {
         SRParameter parameter = SRParameter.builder(IDENTIFIER)
                 .conversationId("foo123")
                 .build();
-        assertEquals("conversationId=foo123", parameter.getQuery());
+        assertTrue(parameter.getUrlTemplate().contains("conversationId="));
+        assertEquals("foo123", parameter.getUrlVariables().get("conversationId"));
     }
 
     @Test
@@ -39,6 +41,9 @@ public class SRParameterTest {
                 .conversationId("foo123")
                 .securityLevel(3)
                 .build();
-        assertEquals("securityLevel=3&conversationId=foo123", parameter.getQuery());
+        assertTrue(parameter.getUrlTemplate().contains("securityLevel="));
+        assertTrue(parameter.getUrlTemplate().contains("conversationId="));
+        assertEquals("3", parameter.getUrlVariables().get("securityLevel"));
+        assertEquals("foo123", parameter.getUrlVariables().get("conversationId"));
     }
 }

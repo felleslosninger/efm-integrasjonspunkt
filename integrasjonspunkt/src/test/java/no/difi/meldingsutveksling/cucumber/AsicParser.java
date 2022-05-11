@@ -35,8 +35,7 @@ public class AsicParser {
     }
 
     private String getMimeType(AsicManifest asicManifest, String filename) {
-        AsicFile file = getFile(asicManifest, filename);
-        return file.getMimetype();
+        return getFile(asicManifest, filename).getMimetype();
     }
 
     private AsicFile getFile(AsicManifest asicManifest, String filename) {

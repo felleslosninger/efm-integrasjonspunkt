@@ -62,11 +62,12 @@ public class JmsConfiguration {
     }
 
     @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory myJmsConnectionFactory) {
+    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory myJmsConnectionFactory, IntegrasjonspunktProperties props) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(myJmsConnectionFactory);
         factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(false));
+        factory.setConcurrency(String.valueOf(props.getQueue().getConcurrency()));
         return factory;
     }
 }

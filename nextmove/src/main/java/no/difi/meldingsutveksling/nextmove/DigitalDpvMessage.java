@@ -20,4 +20,5 @@ public class DigitalDpvMessage extends BusinessMessage<DigitalDpvMessage> {
     @NotNull
     private String innhold;
 
+    DpvSettings dpv;
 }

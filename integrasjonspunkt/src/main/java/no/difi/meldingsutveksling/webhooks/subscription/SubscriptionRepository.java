@@ -19,6 +19,8 @@ public interface SubscriptionRepository extends PagingAndSortingRepository<Subsc
 
     /**
      * Using this to avoid Exception if the entity is already deleted at the time of deletion
+     *
+     * @param id subscription id
      */
     @Modifying
     @Query("DELETE FROM Subscription where id = ?1")

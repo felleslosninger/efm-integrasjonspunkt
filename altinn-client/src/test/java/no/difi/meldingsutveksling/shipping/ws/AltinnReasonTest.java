@@ -1,14 +1,15 @@
 package no.difi.meldingsutveksling.shipping.ws;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class AltinnReasonTest {
     AltinnReason altinnReason;
 
-    @Before
+    @BeforeEach
     public void createAltinnReason() {
         int id = 1;
         String message = "Something went terribly wrong";
@@ -21,27 +22,27 @@ public class AltinnReasonTest {
     public void toStringShouldContainReasonId() {
         String actual = altinnReason.toString();
 
-        assertThat(actual.contains(Integer.toString(altinnReason.getId()))).isTrue();
+        assertThat(actual.contains(Integer.toString(altinnReason.getId())), is(true));
     }
 
     @Test
     public void toStringShouldContainMessage() {
         String actual = altinnReason.toString();
 
-        assertThat(actual.contains(altinnReason.getMessage())).isTrue();
+        assertThat(actual.contains(altinnReason.getMessage()), is(true));
     }
 
     @Test
     public void toStringShouldContainUserId() {
         String actual = altinnReason.toString();
 
-        assertThat(actual.contains(altinnReason.getUserId())).isTrue();
+        assertThat(actual.contains(altinnReason.getUserId()), is(true));
     }
 
     @Test
     public void toStringShouldContainLocalizedMessage() {
         String actual = altinnReason.toString();
 
-        assertThat(actual.contains(altinnReason.getLocalized())).isTrue();
+        assertThat(actual.contains(altinnReason.getLocalized()), is(true));
     }
 }

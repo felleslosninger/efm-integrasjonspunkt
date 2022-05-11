@@ -11,9 +11,6 @@ import java.io.PushbackInputStream;
 @UtilityClass
 public class BugFix610 {
 
-    /**
-     * Bug fix for #MOVE-610
-     */
     public static boolean applyPatch(byte[] message, String messageId) {
 
         if (message.length >= 16) {
@@ -27,9 +24,6 @@ public class BugFix610 {
         return false;
     }
 
-    /**
-     * Bug fix for #MOVE-610
-     */
     public static InputStream applyPatch(InputStream inputStream, String messageId) throws IOException {
         PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream, 16);
 

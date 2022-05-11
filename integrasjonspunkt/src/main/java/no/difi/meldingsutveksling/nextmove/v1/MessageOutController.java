@@ -3,16 +3,15 @@ package no.difi.meldingsutveksling.nextmove.v1;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.SBDFactory;
-import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
-import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutRepository;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +26,6 @@ import java.util.UUID;
 public class MessageOutController {
 
     private final NextMoveMessageService messageService;
-    private final NextMoveMessageOutRepository outRepo;
     private final SBDFactory sbdFactory;
     private final IntegrasjonspunktProperties properties;
 
@@ -41,24 +39,24 @@ public class MessageOutController {
         StandardBusinessDocument sbd;
         if ("DPE_INNSYN".equals(message.getServiceIdentifier())) {
             sbd = sbdFactory.createNextMoveSBD(
-                    Organisasjonsnummer.from(properties.getOrg().getNumber()),
-                    Organisasjonsnummer.from(message.getReceiverId()),
+                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber()),
+                    Iso6523.of(ICD.NO_ORG, message.getReceiverId()),
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultInnsynskravProcess(),
-                    DocumentType.INNSYNSKRAV,
+                    properties.getEinnsyn().getDefaultInnsynskravDocumentType(),
                     new InnsynskravMessage()
                             .setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
                             .setEpost(message.getCustomProperties().getOrDefault("epost", ""))
             );
         } else {
             sbd = sbdFactory.createNextMoveSBD(
-                    Organisasjonsnummer.from(properties.getOrg().getNumber()),
-                    Organisasjonsnummer.from(message.getReceiverId()),
+                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber()),
+                    Iso6523.of(ICD.NO_ORG, message.getReceiverId()),
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultJournalProcess(),
-                    DocumentType.PUBLISERING,
+                    properties.getEinnsyn().getDefaultJournalDocumentType(),
                     new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
             );
         }
@@ -68,11 +66,10 @@ public class MessageOutController {
 
     @PostMapping("/{conversationId}")
     public ResponseEntity send(@PathVariable("conversationId") String conversationId,
-            MultipartRequest request) {
+                               MultipartRequest request) {
         NextMoveOutMessage outMessage = messageService.getMessage(conversationId);
         request.getFileMap().values().forEach(f -> messageService.addFile(outMessage, f));
         messageService.sendMessage(outMessage);
         return ResponseEntity.ok().build();
     }
-
 }

@@ -1,25 +1,22 @@
 package no.difi.meldingsutveksling.config;
 
-import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
-import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -31,8 +28,6 @@ import java.util.List;
 @EnableOAuth2Client
 @RequiredArgsConstructor
 public class OauthRestTemplateConfig {
-
-    private static final String CLIENT_ID_PREFIX = "MOVE_IP_";
 
     private static final String SCOPE_DPO = "move/dpo.read";
     private static final String SCOPE_DPE = "move/dpe.read";
@@ -48,13 +43,14 @@ public class OauthRestTemplateConfig {
             "global/postadresse.read");
 
     private final IntegrasjonspunktProperties props;
+    private final MetricsRestTemplateCustomizer metricsRestTemplateCustomizer;
 
     @SneakyThrows
     @Bean
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
     public JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
-                !Strings.isNullOrEmpty(props.getOidc().getClientId()) ?
-                        props.getOidc().getClientId() : CLIENT_ID_PREFIX+props.getOrg().getNumber(),
+                props.getOidc().getClientId(),
                 props.getOidc().getUrl().toString(),
                 props.getOidc().getAudience(),
                 getCurrentScopes(),
@@ -65,31 +61,34 @@ public class OauthRestTemplateConfig {
     }
 
     @Bean
-    public RestOperations restTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .useSystemProperties()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(5000)
-                        .setConnectionRequestTimeout(5000)
-                        .setSocketTimeout(5000)
-                        .build())
-                .build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "false")
+    public RestOperations restTemplate() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
+        RestTemplate rt = new RestTemplate(requestFactory);
+        metricsRestTemplateCustomizer.customize(rt);
+        return rt;
+    }
 
-        if (props.getOidc().isEnable()) {
-            DefaultAccessTokenRequest atr = new DefaultAccessTokenRequest();
-            BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
-            resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
-            resource.setScope(getCurrentScopes());
-            resource.setClientId(props.getOidc().getClientId());
+    @Bean(name = "restTemplate")
+    @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
+    public RestOperations oauthRestTemplate(JwtTokenClient jwtTokenClient) throws URISyntaxException {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
 
-            OAuth2RestTemplate rt = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
-            rt.setRequestFactory(requestFactory);
-            rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
-            return rt;
-        }
+        BaseOAuth2ProtectedResourceDetails resource = new BaseOAuth2ProtectedResourceDetails();
+        resource.setAccessTokenUri(String.valueOf(props.getOidc().getUrl().toURI()));
+        resource.setScope(getCurrentScopes());
+        resource.setClientId(props.getOidc().getClientId());
 
-        return new RestTemplate(requestFactory);
+        OAuth2RestTemplate rt = new SyncedOauth2RestTemplate(resource);
+        rt.setRequestFactory(requestFactory);
+        rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
+        rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
+        metricsRestTemplateCustomizer.customize(rt);
+        return rt;
     }
 
     private ArrayList<String> getCurrentScopes() {

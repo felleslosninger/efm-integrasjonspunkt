@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
+import io.cucumber.java.Before;
+import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dpi.SikkerDigitalPostKlientFactory;
+import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
@@ -28,10 +28,10 @@ import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionChec
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.webservice.support.SoapFaultInterceptorLogger;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
+import no.ks.fiks.io.client.FiksIOKlient;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,11 +48,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
-import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
 import javax.xml.bind.Marshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
+import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,13 +63,15 @@ import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.spy;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,
         TestClockConfig.class,
         CucumberStepsConfiguration.SpringConfiguration.class,
 }, loader = SpringBootContextLoader.class)
+@CucumberContextConfiguration
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
@@ -81,7 +85,16 @@ public class CucumberStepsConfiguration {
     @Profile("cucumber")
     @RequiredArgsConstructor
     @SpyBean(WebhookPusher.class)
+    @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
+
+        @Primary
+        @Bean
+        public UUIDGenerator uuidGenerator() {
+            UUIDGenerator uuidGenerator = mock(UUIDGenerator.class);
+            when(uuidGenerator.generate()).thenReturn("ff88849c-e281-4809-8555-7cd54952b921");
+            return uuidGenerator;
+        }
 
         @Primary
         @Bean
@@ -133,14 +146,6 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        @Primary
-        public IntegrasjonspunktProperties properties(IntegrasjonspunktProperties properties) {
-            IntegrasjonspunktProperties spy = spy(properties);
-            given(spy.getNoarkSystem()).willReturn(spy(properties.getNoarkSystem()));
-            return spy;
-        }
-
-        @Bean
         public CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory(
                 RequestCaptureClientInterceptor requestCaptureClientInterceptor
         ) {
@@ -183,15 +188,17 @@ public class CucumberStepsConfiguration {
             };
         }
 
+        @SneakyThrows
         @Bean
         @Primary
-        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AxiomSoapMessageFactory svarUtMessageFactory, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
+        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
             SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
             client.setDefaultUri("http://localhost:8080");
             client.setMarshaller(marshaller);
             client.setUnmarshaller(marshaller);
 
-            client.setMessageFactory(svarUtMessageFactory);
+            MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
+            client.setMessageFactory(new SaajSoapMessageFactory(messageFactory));
             client.setMessageSender(svarUtMessageSender);
 
             final ClientInterceptor[] interceptors = new ClientInterceptor[2];
@@ -249,11 +256,12 @@ public class CucumberStepsConfiguration {
         }
     }
 
-    @Rule
-    private final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Autowired private IntegrasjonspunktProperties integrasjonspunktProperties;
+
+    @TempDir
+    File temporaryFolder;
 
     @MockBean public UUIDGenerator uuidGenerator;
-    @MockBean public LookupClient lookupClient;
     @MockBean public InternalQueue internalQueue;
     @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
@@ -261,15 +269,11 @@ public class CucumberStepsConfiguration {
     @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
     @MockBean public AltinnConnectionCheck altinnConnectionCheck;
     @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
+    @MockBean public FiksIOKlient fiksIOKlient;
 
     @Before
-    @SneakyThrows
     public void before() {
-        temporaryFolder.create();
+        willReturn(spy(integrasjonspunktProperties.getNoarkSystem())).given(integrasjonspunktProperties).getNoarkSystem();
     }
 
-    @After
-    public void after() {
-        temporaryFolder.delete();
-    }
 }

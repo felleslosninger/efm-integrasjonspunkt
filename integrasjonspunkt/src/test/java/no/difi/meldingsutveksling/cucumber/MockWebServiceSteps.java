@@ -1,15 +1,17 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.en.And;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
+import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.test.client.MockWebServiceServer;
+import org.springframework.ws.test.client.RequestMatchers;
 import org.springframework.xml.transform.StringSource;
 
 import java.util.List;
@@ -61,6 +63,13 @@ public class MockWebServiceSteps {
     @And("^a SOAP request to \"([^\"]*)\" will respond with the following payload:$")
     public void aSOAPRequestToWithActionWillRespondWith(String uri, String responsePayload) {
         getServer(uri).expect(connectionTo(uri))
+                .andRespond(withPayload(new StringSource(responsePayload)));
+    }
+
+    @And("^a SOAP request to \"([^\"]*)\" with element \"([^\"]*)\" will respond with the following payload:$")
+    public void aSOAPRequestToWithRootElementAndActionWillRespondWith(String uri, String root, String responsePayload) {
+        getServer(uri).expect(connectionTo(uri))
+                .andExpect(RequestMatchers.xpath("//*[local-name()='" + root + "']").exists())
                 .andRespond(withPayload(new StringSource(responsePayload)));
     }
 }

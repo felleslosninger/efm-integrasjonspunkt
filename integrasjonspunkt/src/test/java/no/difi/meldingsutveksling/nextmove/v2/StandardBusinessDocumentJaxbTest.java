@@ -3,26 +3,29 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringResult;
+import org.xmlunit.matchers.CompareMatcher;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
 
-public class StandardBusinessDocumentJaxbTest {
+class StandardBusinessDocumentJaxbTest {
 
     private Marshaller marshaller;
     private Unmarshaller unmarshaller;
     private ObjectFactory objectFactory;
 
-    @Before
+    @BeforeEach
     @SneakyThrows
     public void createMarshaller() {
         JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessage.class);
@@ -34,21 +37,20 @@ public class StandardBusinessDocumentJaxbTest {
 
     @Test
     @SneakyThrows
-    public void testMarshall() {
+    void testMarshall() {
         StringResult result = new StringResult();
         marshaller.marshal(objectFactory.createStandardBusinessDocument(getDocument()), result);
-        assertThat(result.toString()).isXmlEqualTo(
-                contentOf(getClass().getResource("/sbd/StandardBusinessDocument.xml"))
-        );
+        MatcherAssert.assertThat(result.toString(),
+                CompareMatcher.isIdenticalTo(contentOf(Objects.requireNonNull(getClass().getResource("/sbd/StandardBusinessDocument.xml")))).ignoreWhitespace());
     }
 
     @Test
     @SneakyThrows
-    public void testUnmarshall() {
+    void testUnmarshall() {
         StandardBusinessDocument document = unmarshaller.unmarshal(new StreamSource(
                         getClass().getResourceAsStream("/sbd/StandardBusinessDocument.xml")),
                 StandardBusinessDocument.class).getValue();
-        assertThat(document.toString()).isEqualTo(getDocument().toString());
+        assertThat(document).hasToString(getDocument().toString());
     }
 
     private StandardBusinessDocument getDocument() {
@@ -72,13 +74,13 @@ public class StandardBusinessDocumentJaxbTest {
                                 .setTypeVersion("2.0")
                         )
                         .setHeaderVersion("1.0")
-                        .addReceiver(new Receiver()
+                        .addReceiver(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910075918")
                                 )
                         )
-                        .addSender(new Sender()
+                        .addSender(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
                                         .setValue("9908:910077473")

@@ -17,9 +17,10 @@ public class CapabilitiesFactory {
     private final ServiceRegistryLookup sr;
     private final CapabilityFactory capabilityFactory;
 
-    public Capabilities getCapabilities(String receiverIdentifier, Integer securityLevel) {
+    public Capabilities getCapabilities(String receiverIdentifier, Integer securityLevel, String process) {
         List<ServiceRecord> serviceRecords = sr.getServiceRecords(SRParameter.builder(receiverIdentifier)
-                .securityLevel(securityLevel).build());
+                .securityLevel(securityLevel)
+                .process(process).build());
 
         return new Capabilities()
                 .setCapabilities(serviceRecords

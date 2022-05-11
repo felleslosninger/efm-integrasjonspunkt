@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class TmpFileTest {
 
@@ -23,7 +22,7 @@ public class TmpFileTest {
         InputStream is = tmpFile.getInputStream();
         byte[] inBytes = IOUtils.toByteArray(is);
         is.close();
-        assertThat(inBytes).isEqualTo(data);
+        Assertions.assertArrayEquals(inBytes, data);
         tmpFile.delete();
     }
 }

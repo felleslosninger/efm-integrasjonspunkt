@@ -1,8 +1,8 @@
 Feature: Sending a Next Move Digital DPV message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/09118532323?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532323.json"
-    And a "GET" request to "http://localhost:9099/identifier/09118532323/process/urn:no:difi:profile:digitalpost:info:ver1.0?conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532323-info.json"
+    Given a "GET" request to "http://localhost:9099/identifier/17912099997?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/17912099997.json"
+    And a "GET" request to "http://localhost:9099/identifier/17912099997/process/urn:no:difi:profile:digitalpost:info:ver1.0?conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/17912099997-info.json"
     And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
     And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
@@ -69,7 +69,7 @@ Feature: Sending a Next Move Digital DPV message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "09118532323"
+                        "value": "17912099997"
                     }
                 }
             ],
@@ -104,7 +104,7 @@ Feature: Sending a Next Move Digital DPV message
         <Correspondence>
             <ServiceCode>4255</ServiceCode>
             <ServiceEdition>10</ServiceEdition>
-            <Reportee>09118532323</Reportee>
+            <Reportee>17912099997</Reportee>
             <Content>
                 <LanguageCode>1044</LanguageCode>
                 <MessageTitle>foo</MessageTitle>

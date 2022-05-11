@@ -2,11 +2,10 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import no.difi.meldingsutveksling.DocumentType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import sun.security.provider.X509Factory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 @Data
@@ -57,24 +56,16 @@ public class ServiceRecord {
         return s -> s != null && s.getDocumentTypes().contains(documentType);
     }
 
-    public static Predicate<ServiceRecord> hasDocumentType(DocumentType documentType) {
-        return s -> s != null && s.getDocumentTypes().stream().anyMatch(documentType::fitsDocumentIdentifier);
-    }
-
     @JsonIgnore
     public ServiceIdentifier getServiceIdentifier() {
         return getService().getIdentifier();
     }
 
-    @JsonIgnore
-    public Optional<String> getStandard(DocumentType documentType) {
-        return documentTypes.stream()
-                .filter(documentType::fitsDocumentIdentifier)
-                .findAny();
+    public String getPemCertificate() {
+        if (!pemCertificate.contains(X509Factory.BEGIN_CERT)) {
+            return String.format("%s\n%s\n%s\n", X509Factory.BEGIN_CERT, pemCertificate, X509Factory.END_CERT);
+        }
+        return pemCertificate;
     }
 
-    @JsonIgnore
-    public boolean hasStandard(String standard) {
-        return documentTypes.contains(standard);
-    }
 }

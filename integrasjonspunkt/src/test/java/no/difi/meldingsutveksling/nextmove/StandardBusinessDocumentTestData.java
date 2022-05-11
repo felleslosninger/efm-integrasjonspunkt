@@ -4,16 +4,13 @@ import lombok.Data;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @UtilityClass
-class StandardBusinessDocumentTestData {
+public class StandardBusinessDocumentTestData {
 
     @Data
     static class MessageData {
@@ -25,7 +22,7 @@ class StandardBusinessDocumentTestData {
         private String type;
     }
 
-    static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
+    public static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
             .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
             .setType("arkivmelding")
@@ -79,30 +76,32 @@ class StandardBusinessDocumentTestData {
             .setType("print")
             .setBusinessMessage(new DpiPrintMessage()
                     .setHoveddokument("kafka_quotes.txt")
-                    .setMottaker(new PostAddress()
-                            .setNavn("Ola Nordmann")
-                            .setAdresselinje1("Langtoppilia 1")
-                            .setAdresselinje2("")
-                            .setAdresselinje3("")
-                            .setAdresselinje4("")
-                            .setPostnummer("9999")
-                            .setPoststed("FJELL")
-                            .setLand("Norway")
+                    .setMottaker(PostAddress.builder()
+                            .navn("Ola Nordmann")
+                            .adresselinje1("Langtoppilia 1")
+                            .adresselinje2("")
+                            .adresselinje3("")
+                            .adresselinje4("")
+                            .postnummer("9999")
+                            .poststed("FJELL")
+                            .land("Norway")
+                            .build()
                     )
-                    .setUtskriftsfarge(Utskriftsfarge.FARGE)
-                    .setPosttype(Posttype.A_PRIORITERT)
+                    .setUtskriftsfarge(PrintColor.FARGE)
+                    .setPosttype(PostalCategory.A_PRIORITERT)
                     .setRetur(new MailReturn()
-                            .setMottaker(new PostAddress()
-                                    .setNavn("Fjellheimen kommune")
-                                    .setAdresselinje1("Luftigveien 1")
-                                    .setAdresselinje2("")
-                                    .setAdresselinje3("")
-                                    .setAdresselinje4("")
-                                    .setPostnummer("9999")
-                                    .setPoststed("FJELL")
-                                    .setLand("Norway")
+                            .setMottaker(PostAddress.builder()
+                                    .navn("Fjellheimen kommune")
+                                    .adresselinje1("Luftigveien 1")
+                                    .adresselinje2("")
+                                    .adresselinje3("")
+                                    .adresselinje4("")
+                                    .postnummer("9999")
+                                    .poststed("FJELL")
+                                    .land("Norway")
+                                    .build()
                             )
-                            .setReturhaandtering(Returhaandtering.DIREKTE_RETUR)
+                            .setReturhaandtering(ReturnHandling.DIREKTE_RETUR)
                     )
             );
 
@@ -134,6 +133,11 @@ class StandardBusinessDocumentTestData {
     static final StandardBusinessDocument PUBLISERING_INPUT = getInputSbd(PUBLISERING_MESSAGE_DATA);
     static final StandardBusinessDocument PUBLISERING_SBD = getResponseSbd(PUBLISERING_MESSAGE_DATA);
     static final NextMoveOutMessage PUBLISERING_MESSAGE = NextMoveOutMessage.of(PUBLISERING_SBD, ServiceIdentifier.DPE);
+    static final NextMoveInMessage PUBLISERING_MESSAGE_RESPONSE = NextMoveInMessage.of(getResponseSbd(PUBLISERING_MESSAGE_DATA), ServiceIdentifier.DPE);
+
+    public static StandardBusinessDocument createSbd(MessageData messageData) {
+        return getResponseSbd(messageData);
+    }
 
     static StandardBusinessDocument getInputSbd(MessageData message) {
         StandardBusinessDocument sbd = new StandardBusinessDocument();
@@ -152,36 +156,36 @@ class StandardBusinessDocumentTestData {
 
     private static void fill(StandardBusinessDocument sbd, MessageData message) {
         sbd.setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                .setBusinessScope(new BusinessScope()
-                        .addScope(new Scope()
-                                .addScopeInformation(new CorrelationInformation()
-                                        .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
+                        .setBusinessScope(new BusinessScope()
+                                .addScope(new Scope()
+                                        .addScopeInformation(new CorrelationInformation()
+                                                .setExpectedResponseDateTime(OffsetDateTime.parse("2019-04-25T11:38:23+02:00"))
+                                        )
+                                        .setIdentifier(message.process)
+                                        .setInstanceIdentifier(message.conversationId)
+                                        .setType("ConversationId")
                                 )
-                                .setIdentifier(message.process)
-                                .setInstanceIdentifier(message.conversationId)
-                                .setType("ConversationId")
+                        )
+                        .setDocumentIdentification(new DocumentIdentification()
+                                .setInstanceIdentifier(message.messageId)
+                                .setStandard(message.getStandard())
+                                .setType(message.getType())
+                                .setTypeVersion("1.0")
+                        )
+                        .setHeaderVersion("1.0")
+                        .addReceiver(new Partner()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("0192:910075918")
+                                )
+                        )
+                        .addSender(new Partner()
+                                .setIdentifier(new PartnerIdentification()
+                                        .setAuthority("iso6523-actorid-upis")
+                                        .setValue("0192:910077473")
+                                )
                         )
                 )
-                .setDocumentIdentification(new DocumentIdentification()
-                        .setInstanceIdentifier(message.messageId)
-                        .setStandard(message.getStandard())
-                        .setType(message.getType())
-                        .setTypeVersion("1.0")
-                )
-                .setHeaderVersion("1.0")
-                .addReceiver(new Receiver()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910075918")
-                        )
-                )
-                .addSender(new Sender()
-                        .setIdentifier(new PartnerIdentification()
-                                .setAuthority("iso6523-actorid-upis")
-                                .setValue("0192:910077473")
-                        )
-                )
-        )
                 .setAny(message.businessMessage);
     }
 }

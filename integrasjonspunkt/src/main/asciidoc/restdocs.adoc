@@ -2,7 +2,6 @@
 :toc: left
 :toc-title: Table of Contents
 :toclevels: 3
-:toc-collapsable:
 :linkcss:
 :stylesdir: assets/css
 :stylesheet: asciidoctor.css
