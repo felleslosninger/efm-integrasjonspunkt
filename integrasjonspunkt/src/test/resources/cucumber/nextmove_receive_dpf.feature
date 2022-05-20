@@ -147,6 +147,9 @@ Feature: Receiving a Next Move DPF message
     """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
+        <system>Integrasjonspunkt</system>
+        <meldingId>81264cfa-1ba5-4fb5-a95d-48c824ed3bbb</meldingId>
+        <tidspunkt/>
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
             <basisregistrering xsi:type="journalpost">

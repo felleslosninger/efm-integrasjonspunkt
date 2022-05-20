@@ -32,6 +32,9 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.GregorianCalendar;
+import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -155,6 +158,13 @@ public class SvarInnNextMoveConverter {
         saksmappe.getBasisregistrering().add(journalpost);
         Arkivmelding arkivmelding = of.createArkivmelding();
         arkivmelding.getMappe().add(saksmappe);
+
+        arkivmelding.setSystem("Integrasjonspunkt");
+        arkivmelding.setMeldingId(forsendelse.getId());
+        arkivmelding.setTidspunkt(Optional.ofNullable(metadata.getDokumentetsDato())
+                .map(DateTimeUtil::toXMLGregorianCalendar)
+                .map(DateTimeUtil::atStartOfDay)
+                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
 
         return arkivmelding;
     }
