@@ -157,9 +157,11 @@ public class DpiConfig {
                                                                        JsonDpiReceiptMapper dpiReceiptMapper,
                                                                        MessageStatusMapper messageStatusMapper,
                                                                        ChannelNormalizer channelNormalizer,
-                                                                       DpiReceiptConverter dpiReceiptConverter) {
+                                                                       DpiReceiptConverter dpiReceiptConverter,
+                                                                       DpiMessageStatusFilter dpiMessageStatusFilter) {
             return new JsonMeldingsformidlerClient(dpiClient,
-                    shipmentFactory, dpiReceiptMapper, messageStatusMapper, channelNormalizer, dpiReceiptConverter);
+                    shipmentFactory, dpiReceiptMapper, messageStatusMapper,
+                    channelNormalizer, dpiReceiptConverter, dpiMessageStatusFilter);
         }
 
         @Bean
@@ -182,17 +184,35 @@ public class DpiConfig {
             return new JsonDpiReceiptMapper(messageStatusMapper);
         }
 
-        @Bean
+        @Configuration
         @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "json", matchIfMissing = true)
-        public DpiReceiptConverter identityReceiptConverter() {
-            return p -> p;
+        public static class ReceiptTypeJson {
+
+            @Bean
+            public DpiMessageStatusFilter passThroughDpiMessageStatusFilter() {
+                return p -> true;
+            }
+
+            @Bean
+            public DpiReceiptConverter identityDpiReceiptConverter() {
+                return p -> p;
+            }
         }
 
-        @Bean
+        @Configuration
         @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "xmlsoap")
-        public JWT2XmlSoapDpiReceiptConverter jwt2XmlSoapReceiptConverter(UnpackJWT unpackJWT,
-                                                                          UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
-            return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
+        public static class RecieptTypeXmlSoap {
+
+            @Bean
+            public XmlSoapDpiMessageStatusFilter xmlXmlSoapDpiMessageStatusFilter() {
+                return new XmlSoapDpiMessageStatusFilter();
+            }
+
+            @Bean
+            public JWT2XmlSoapDpiReceiptConverter jwt2XmlSoapDpiReceiptConverter(UnpackJWT unpackJWT,
+                                                                                 UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
+                return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
+            }
         }
     }
 

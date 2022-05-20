@@ -32,6 +32,8 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     private final ChannelNormalizer channelNormalizer;
     private final DpiReceiptConverter dpiReceiptConverter;
 
+    private final DpiMessageStatusFilter dpiMessageStatusFilter;
+
     @Override
     public boolean skalPolleMeldingStatus() {
         return true;
@@ -64,6 +66,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     public Stream<MessageStatus> hentMeldingStatusListe(String messageId) {
         return dpiClient.getMessageStatuses(UUID.fromString(messageId))
                 .map(messageStatusMapper::getMessageStatus)
+                .filter(dpiMessageStatusFilter)
                 .toStream();
     }
 
