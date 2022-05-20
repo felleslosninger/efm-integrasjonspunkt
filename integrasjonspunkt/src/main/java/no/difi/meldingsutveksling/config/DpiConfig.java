@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.DpiReceiptHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
@@ -48,10 +49,15 @@ public class DpiConfig {
     }
 
     @Bean
+    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService) {
+        return new DpiReceiptHandler(conversationService);
+    }
+
+    @Bean
     public DpiReceiptService dpiReceiptService(MeldingsformidlerClient meldingsformidlerClient,
-                                               ConversationService conversationService,
+                                               DpiReceiptHandler dpiReceiptHandler,
                                                AvsenderidentifikatorHolder avsenderidentifikatorHolder) {
-        return new DpiReceiptService(meldingsformidlerClient, conversationService, avsenderidentifikatorHolder);
+        return new DpiReceiptService(meldingsformidlerClient, dpiReceiptHandler, avsenderidentifikatorHolder);
     }
 
     @Order
