@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import no.digipost.api.representations.EbmsContext;
-import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo;
-import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.SignalMessage;
+import no.digipost.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo;
+import no.digipost.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.SignalMessage;
 import org.springframework.ws.client.WebServiceClientException;
 import org.springframework.ws.client.support.interceptor.ClientInterceptorAdapter;
 import org.springframework.ws.context.MessageContext;

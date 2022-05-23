@@ -75,7 +75,7 @@
         <apache.commons.version>10.0-b28</apache.commons.version>
         <logback.version>1.2.3</logback.version>
 
-        <sikker-digital-post-klient.version>5.10</sikker-digital-post-klient.version>
+        <sikker-digital-post-klient.version>6.3</sikker-digital-post-klient.version>
         <junit.platform.version>1.8.1</junit.platform.version>
         <cucumber.version>7.0.0</cucumber.version>
         <apache.wss4j.version>2.1.11</apache.wss4j.version>
