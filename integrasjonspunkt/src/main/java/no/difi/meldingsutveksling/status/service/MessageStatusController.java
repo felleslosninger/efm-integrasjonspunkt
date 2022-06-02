@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class MessageStatusController {
 
     @GetMapping
     @JsonView(Views.MessageStatus.class)
+    @Transactional(readOnly = true)
     public Page<MessageStatus> find(
             @Valid MessageStatusQueryInput input,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
@@ -42,6 +44,7 @@ public class MessageStatusController {
 
     @GetMapping("{messageId}")
     @JsonView(Views.MessageStatus.class)
+    @Transactional(readOnly = true)
     public Page<MessageStatus> findByMessageId(
             @PathVariable("messageId") String messageId,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -51,6 +54,7 @@ public class MessageStatusController {
 
     @GetMapping("peek")
     @JsonView(Views.MessageStatus.class)
+    @Transactional
     public MessageStatus peekLatest() {
         Optional<Long> statusId = statusQueue.receiveStatus();
         return statusId.map(s -> statusRepo.findById(s)
@@ -59,6 +63,7 @@ public class MessageStatusController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> removeStatus(@PathVariable Long id) {
         if (statusQueue.removeStatus(id)) {
             return ResponseEntity.ok().build();
