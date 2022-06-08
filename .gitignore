@@ -123,7 +123,8 @@ $RECYCLE.BIN/
 
 # IntelliJ
 out/
-
+.run/
+.java-version
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 
