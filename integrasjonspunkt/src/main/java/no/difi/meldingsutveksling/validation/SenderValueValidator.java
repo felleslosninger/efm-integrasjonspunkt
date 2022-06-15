@@ -15,7 +15,7 @@ public class SenderValueValidator implements ConstraintValidator<SenderValue, St
 
     @Override
     public void initialize(SenderValue constraintAnnotation) {
-        this.expectedValue = "0192:" + properties.getOrg().getNumber();
+        this.expectedValue = "0192:" + properties.getOrg().getIdentifier();
     }
 
     @Override

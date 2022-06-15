@@ -25,11 +25,11 @@ public class OnBehalfOfNormalizer {
                 return;
             }
 
-            if (iso6523.getOrganizationIdentifier().equals(properties.getOrg().getNumber())) {
+            if (iso6523.getOrganizationIdentifier().equals(properties.getOrg().getIdentifier())) {
                 return;
             }
 
-            sbd.setSenderIdentifier(Iso6523.of(iso6523.getIcd(), properties.getOrg().getNumber(), iso6523.getOrganizationIdentifier()));
+            sbd.setSenderIdentifier(Iso6523.of(iso6523.getIcd(), properties.getOrg().getIdentifier(), iso6523.getOrganizationIdentifier()));
         });
     }
 }

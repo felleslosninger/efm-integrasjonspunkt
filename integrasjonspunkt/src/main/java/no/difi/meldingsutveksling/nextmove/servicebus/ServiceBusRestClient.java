@@ -54,7 +54,7 @@ public class ServiceBusRestClient {
         this.payloadConverter = payloadConverter;
         this.restTemplate = restTemplate;
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
-                props.getOrg().getNumber() +
+                props.getOrg().getIdentifier() +
                 props.getNextmove().getServiceBus().getMode();
     }
 

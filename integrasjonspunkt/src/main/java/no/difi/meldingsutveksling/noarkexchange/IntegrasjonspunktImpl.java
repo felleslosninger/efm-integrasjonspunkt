@@ -136,7 +136,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(properties.getOrg().getNumber());
+            message.setSenderPartyNumber(properties.getOrg().getIdentifier());
         }
 
         Audit.info(String.format("Received EDU message [id=%s]", message.getConversationId()), markerFrom(message));

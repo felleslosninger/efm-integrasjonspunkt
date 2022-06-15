@@ -174,7 +174,7 @@ public class IntegrasjonspunktProperties {
          */
         @NotNull(message = "difi.move.org.number is not set. This property is required.")
         @Size(min = 9, max = 9, message = "difi.move.org.number must be exactly 9 digits")
-        private String number;
+        private String identifier;
 
         /**
          * Business certificate for this instance.

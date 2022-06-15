@@ -27,7 +27,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,7 +78,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         when(config.isNotifySms()).thenReturn(true);
 
         IntegrasjonspunktProperties.Organization org = mock(IntegrasjonspunktProperties.Organization.class);
-        when(org.getNumber()).thenReturn(SENDER_ORGNR);
+        when(org.getIdentifier()).thenReturn(SENDER_ORGNR);
         when(props.getOrg()).thenReturn(org);
         IntegrasjonspunktProperties.PostVirksomheter dpv = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         lenient().when(dpv.getDaysToReply()).thenReturn(7L);

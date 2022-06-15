@@ -26,7 +26,7 @@ class IntegrasjonspunktCertificateValidator(
 
         if (props.feature.isEnableDPO || props.feature.isEnableDPE) {
             val pem = try {
-                srClient.getCertificate(props.org.number)
+                srClient.getCertificate(props.org.identifier)
             } catch (e: ServiceRegistryLookupException) {
                 throw VirksertCertificateException(e)
             }

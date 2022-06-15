@@ -57,7 +57,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldNotFailWhenPartyAndOrganisationNumberIsMissing() {
-        when(organizationMock.getNumber()).thenReturn(null);
+        when(organizationMock.getIdentifier()).thenReturn(null);
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);
@@ -65,7 +65,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() {
-        when(organizationMock.getNumber()).thenReturn("1234");
+        when(organizationMock.getIdentifier()).thenReturn("1234");
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);

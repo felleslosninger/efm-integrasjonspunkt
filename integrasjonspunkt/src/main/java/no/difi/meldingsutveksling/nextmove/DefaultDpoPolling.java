@@ -42,7 +42,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
     @PostConstruct
     public void init() {
-        orgnrs = Sets.newHashSet(properties.getOrg().getNumber());
+        orgnrs = Sets.newHashSet(properties.getOrg().getIdentifier());
         orgnrs.addAll(properties.getDpo().getReportees());
     }
 

@@ -24,7 +24,7 @@ public class AltinnConnectionCheck {
     @PostConstruct
     public void checkTheConnection() {
         try {
-            altinnWsClient.checkIfAvailableFiles(props.getOrg().getNumber());
+            altinnWsClient.checkIfAvailableFiles(props.getOrg().getIdentifier());
             // TODO verify integrity of difi.move.dpo.reportees delegation
         } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             throw new MeldingsUtvekslingRuntimeException("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);

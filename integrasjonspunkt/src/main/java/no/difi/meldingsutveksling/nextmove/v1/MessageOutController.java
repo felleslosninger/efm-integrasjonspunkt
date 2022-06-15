@@ -39,25 +39,25 @@ public class MessageOutController {
         StandardBusinessDocument sbd;
         if ("DPE_INNSYN".equals(message.getServiceIdentifier())) {
             sbd = sbdFactory.createNextMoveSBD(
-                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber()),
+                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getIdentifier()),
                     Iso6523.of(ICD.NO_ORG, message.getReceiverId()),
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultInnsynskravProcess(),
                     properties.getEinnsyn().getDefaultInnsynskravDocumentType(),
                     new InnsynskravMessage()
-                            .setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
+                            .setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getIdentifier()))
                             .setEpost(message.getCustomProperties().getOrDefault("epost", ""))
             );
         } else {
             sbd = sbdFactory.createNextMoveSBD(
-                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber()),
+                    Iso6523.of(ICD.NO_ORG, properties.getOrg().getIdentifier()),
                     Iso6523.of(ICD.NO_ORG, message.getReceiverId()),
                     message.getConversationId(),
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultJournalProcess(),
                     properties.getEinnsyn().getDefaultJournalDocumentType(),
-                    new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
+                    new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getIdentifier()))
             );
         }
         messageService.createMessage(sbd);

@@ -109,7 +109,7 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
     @Timed
     @Override
     public void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback) {
-        sjekkEtterKvitteringer(properties.getOrg().getNumber(), mpcId)
+        sjekkEtterKvitteringer(properties.getOrg().getIdentifier(), mpcId)
                 .toStream()
                 .forEach(callback);
     }

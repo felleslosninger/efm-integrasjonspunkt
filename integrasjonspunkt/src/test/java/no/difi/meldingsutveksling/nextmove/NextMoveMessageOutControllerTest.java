@@ -85,7 +85,7 @@ class NextMoveMessageOutControllerTest {
 
     @BeforeEach
     public void before() {
-        given(organization.getNumber()).willReturn("910077473");
+        given(organization.getIdentifier()).willReturn("910077473");
         given(integrasjonspunktProperties.getOrg()).willReturn(organization);
     }
 

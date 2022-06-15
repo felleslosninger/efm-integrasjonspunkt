@@ -76,7 +76,7 @@ public class IntegrasjonspunktErrorControllerTest {
     public void before() {
         given(properties.getOrg()).willReturn(
                 new IntegrasjonspunktProperties.Organization()
-                        .setNumber("910077473")
+                        .setIdentifier("910077473")
         );
     }
 

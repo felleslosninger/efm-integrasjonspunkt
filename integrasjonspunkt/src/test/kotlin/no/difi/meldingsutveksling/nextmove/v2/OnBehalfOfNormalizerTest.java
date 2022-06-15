@@ -31,7 +31,7 @@ class OnBehalfOfNormalizerTest {
     void normalize(String before, String after) {
         lenient().when(properties.getOrg()).thenReturn(
                 new IntegrasjonspunktProperties.Organization()
-                        .setNumber("910075918")
+                        .setIdentifier("910075918")
         );
 
         StandardBusinessDocument sbd = new StandardBusinessDocument()

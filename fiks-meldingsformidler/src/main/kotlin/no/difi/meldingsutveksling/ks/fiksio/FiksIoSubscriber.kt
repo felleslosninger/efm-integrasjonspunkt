@@ -38,7 +38,7 @@ class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
         log.debug("FiksIO: Received message with fiksId=${mottattMelding.meldingId} protocol=${mottattMelding.meldingType}")
         val sbd = sbdFactory.createNextMoveSBD(
             Iso6523.of(ICD.NO_ORG, props.fiks.io.senderOrgnr),
-            Iso6523.of(ICD.NO_ORG, props.org.number),
+            Iso6523.of(ICD.NO_ORG, props.org.identifier),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingType,
