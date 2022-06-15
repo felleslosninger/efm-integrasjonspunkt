@@ -10,6 +10,6 @@ public class CmsEncryptedAsice implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        resource.deleteFileIfItExists();
+        resource.close();
     }
 }
