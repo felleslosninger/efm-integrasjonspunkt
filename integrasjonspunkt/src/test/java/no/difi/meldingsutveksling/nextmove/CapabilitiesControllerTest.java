@@ -2,6 +2,10 @@ package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
+import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesController;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesFactory;
 import org.junit.jupiter.api.Test;
@@ -48,7 +52,7 @@ public class CapabilitiesControllerTest {
 
     @Test
     public void getCapabilitiesDPI() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), isNull(), isNull())).willReturn(capabilitiesDPI());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), isNull())).willReturn(capabilitiesDPI());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
@@ -72,12 +76,12 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("01017012345"), isNull(), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), isNull(), isNull());
     }
 
     @Test
     public void getCapabilitiesDPIWithSecurityLevel() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), any(Integer.class), isNull())).willReturn(capabilitiesDPI());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), any(Integer.class), isNull())).willReturn(capabilitiesDPI());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
@@ -102,12 +106,12 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("01017012345"), eq(4), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), eq(4), isNull());
     }
 
     @Test
     public void getCapabilitiesDPIWithProcess() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), isNull(), anyString())).willReturn(capabilitiesDPI());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), anyString())).willReturn(capabilitiesDPI());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
@@ -132,12 +136,12 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("01017012345"), isNull(), eq("admin-process"));
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), isNull(), eq("admin-process"));
     }
 
     @Test
     public void getCapabilitiesDPO() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), isNull(), isNull())).willReturn(capabilitiesDPO());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), isNull())).willReturn(capabilitiesDPO());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
@@ -161,12 +165,12 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("987654321"), isNull(), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(Iso6523.of(ICD.NO_ORG,"987654321")), isNull(), isNull());
     }
 
     @Test
     public void getCapabilitiesDPOWithSecurityLevel() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), any(Integer.class), isNull())).willReturn(capabilitiesDPO());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), any(Integer.class), isNull())).willReturn(capabilitiesDPO());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
@@ -191,12 +195,12 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("987654321"), eq(4), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(Iso6523.of(ICD.NO_ORG,"987654321")), eq(4), isNull());
     }
 
     @Test
     public void getCapabilitiesDPOWithProcess() throws Exception {
-        given(capabilitiesFactory.getCapabilities(anyString(), isNull(), anyString())).willReturn(capabilitiesDPO());
+        given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), anyString())).willReturn(capabilitiesDPO());
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
@@ -221,6 +225,6 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq("987654321"), isNull(), eq("admin-process"));
+        verify(capabilitiesFactory).getCapabilities(eq(Iso6523.of(ICD.NO_ORG,"987654321")), isNull(), eq("admin-process"));
     }
 }

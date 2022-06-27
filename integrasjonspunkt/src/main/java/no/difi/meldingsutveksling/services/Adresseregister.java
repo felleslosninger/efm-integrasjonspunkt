@@ -27,17 +27,17 @@ public class Adresseregister {
 
     public Certificate getReceiverCertificate(NextMoveMessage message) {
         try {
-            return getCertificate(serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+            return getCertificate(serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId())
                             .build(),
                     message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
-            log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));
+            log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiver());
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiver()));
         } catch (CertificateException e) {
-            log.error(markerFrom(message), "Could not fetch certificate for receiver {}", message.getReceiverIdentifier());
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch certificate for identifier %s", message.getReceiverIdentifier()));
+            log.error(markerFrom(message), "Could not fetch certificate for receiver {}", message.getReceiver());
+            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch certificate for identifier %s", message.getReceiver()));
         }
     }
 

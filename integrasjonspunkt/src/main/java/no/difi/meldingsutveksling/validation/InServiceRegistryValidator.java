@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.validation;
 
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -26,7 +28,7 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
         }
 
         try {
-            return serviceRegistryLookup.isInServiceRegistry(getStrippedIdentifier(s));
+            return serviceRegistryLookup.isInServiceRegistry(Iso6523.of(ICD.NO_ORG, s));
         } catch (Exception e) {
             if (e.getCause() instanceof NotFoundInServiceRegistryException) {
                 log.debug("Service Registry lookup failed with: {}", e.getLocalizedMessage());
@@ -37,7 +39,5 @@ public class InServiceRegistryValidator implements ConstraintValidator<InService
         }
     }
 
-    private String getStrippedIdentifier(String s) {
-        return PartnerIdentifier.isValid(s) ? PartnerIdentifier.parse(s).getPrimaryIdentifier() : s;
-    }
+
 }

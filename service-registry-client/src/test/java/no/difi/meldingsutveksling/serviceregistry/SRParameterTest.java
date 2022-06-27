@@ -1,13 +1,15 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SRParameterTest {
 
-    private static final String IDENTIFIER = "123123123";
+    private static final Iso6523 IDENTIFIER = Iso6523.of(ICD.NO_ORG, "123123123");
 
     @Test
     public void queryWithNoParameters() {

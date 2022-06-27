@@ -5,6 +5,8 @@ import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.*;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
@@ -85,7 +87,7 @@ class NextMoveMessageOutControllerTest {
 
     @BeforeEach
     public void before() {
-        given(organization.getIdentifier()).willReturn("910077473");
+        given(organization.getIdentifier()).willReturn(Iso6523.of(ICD.NO_ORG,"910077473"));
         given(integrasjonspunktProperties.getOrg()).willReturn(organization);
     }
 

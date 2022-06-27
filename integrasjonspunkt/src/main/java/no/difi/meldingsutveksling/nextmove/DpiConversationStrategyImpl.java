@@ -64,7 +64,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
         if (message.getReceiver() != null) {
             try {
-                return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                return sr.getServiceRecord(SRParameter.builder(message.getReceiver())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),

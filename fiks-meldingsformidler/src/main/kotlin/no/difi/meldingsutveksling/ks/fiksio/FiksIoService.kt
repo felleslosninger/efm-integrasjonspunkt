@@ -40,7 +40,7 @@ class FiksIoService(
     }
 
     fun createRequest(msg: NextMoveMessage, payloads: List<Payload>) {
-        val params = SRParameter.builder(msg.receiverIdentifier)
+        val params = SRParameter.builder(msg.receiver)
             .process(msg.sbd.process)
             .conversationId(msg.conversationId)
         if (msg.businessMessage.sikkerhetsnivaa != null) {

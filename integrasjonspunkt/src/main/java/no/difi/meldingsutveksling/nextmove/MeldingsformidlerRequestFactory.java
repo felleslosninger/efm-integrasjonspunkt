@@ -41,7 +41,7 @@ public class MeldingsformidlerRequestFactory {
                 .document(getMainDocument(nextMoveMessage, reject))
                 .attachments(getAttachments(nextMoveMessage, reject))
                 .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
-                .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
+                .onBehalfOf(SBDUtil.getSenderPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
                 .messageId(nextMoveMessage.getMessageId())
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())

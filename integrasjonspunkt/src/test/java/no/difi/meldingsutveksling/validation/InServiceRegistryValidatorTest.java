@@ -3,6 +3,8 @@ package no.difi.meldingsutveksling.validation;
 import lombok.Value;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.Test;
@@ -54,7 +56,7 @@ public class InServiceRegistryValidatorTest {
                 .withFailMessage("Should accept identifiers in the Service Registry")
                 .isEmpty();
 
-        verify(serviceRegistryLookup).isInServiceRegistry("98765432");
+        verify(serviceRegistryLookup).isInServiceRegistry(Iso6523.of(ICD.NO_ORG, "98765432"));
     }
 
     @Test
@@ -65,7 +67,7 @@ public class InServiceRegistryValidatorTest {
                 .withFailMessage("Should only accept identifiers in the Service Registry")
                 .isNotEmpty();
 
-        verify(serviceRegistryLookup).isInServiceRegistry("98765432");
+        verify(serviceRegistryLookup).isInServiceRegistry(Iso6523.of(ICD.NO_ORG, "98765432"));
     }
 }
 

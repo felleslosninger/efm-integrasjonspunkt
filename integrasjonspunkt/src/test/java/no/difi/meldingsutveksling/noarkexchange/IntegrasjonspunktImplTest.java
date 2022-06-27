@@ -5,6 +5,8 @@ import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.nextmove.DpvConversationStrategyImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.GetCanReceiveMessageRequestType;
@@ -65,7 +67,7 @@ public class IntegrasjonspunktImplTest {
 
     @Test
     public void shouldPutMessageOnQueueWhenOrganisationNumberIsConfigured() {
-        when(organizationMock.getIdentifier()).thenReturn("1234");
+        when(organizationMock.getIdentifier()).thenReturn(Iso6523.of(ICD.NO_ORG,"123456789"));
         PutMessageRequestType request = PutMessageObjectMother.createMessageRequestType(null);
 
         integrasjonspunkt.putMessage(request);

@@ -7,6 +7,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.SecurityConfiguration;
 import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
@@ -80,7 +82,7 @@ class NextMoveMessageInControllerTest {
 
     @BeforeEach
     public void before() {
-        given(organization.getIdentifier()).willReturn("910077473");
+        given(organization.getIdentifier()).willReturn(Iso6523.of(ICD.NO_ORG,"910077473"));
         given(integrasjonspunktProperties.getOrg()).willReturn(organization);
     }
 

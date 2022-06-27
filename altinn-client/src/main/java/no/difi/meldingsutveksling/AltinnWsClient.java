@@ -143,12 +143,15 @@ public class AltinnWsClient {
         if (!isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             fileStream = fileStream.filter(f -> f.getSendersReference() != null &&
                 f.getSendersReference().getValue().equals(properties.getDpo().getMessageChannel()));
+        }else if(properties.getOrg().getIdentifier().hasOrganizationPartIdentifier()){
+            fileStream = fileStream.filter(f -> f.getSendersReference() != null &&
+                    f.getSendersReference().getValue().equals(properties.getOrg().getIdentifier().getIdentifier()));
         } else {
             // SendersReference is default set to random UUID.
             // Make sure not to consume messages with matching message channel pattern.
-            Pattern p = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
+            Pattern uuidRegexpPattern = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
             fileStream = fileStream.filter(f -> f.getSendersReference() == null ||
-                !p.matcher(f.getSendersReference().getValue()).matches());
+                !uuidRegexpPattern.matcher(f.getSendersReference().getValue()).matches());
         }
         return fileStream
             .map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))

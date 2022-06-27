@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -172,9 +173,8 @@ public class IntegrasjonspunktProperties {
         /**
          * Organization number to run as.
          */
-        @NotNull(message = "difi.move.org.number is not set. This property is required.")
-        @Size(min = 9, max = 9, message = "difi.move.org.number must be exactly 9 digits")
-        private String identifier;
+        @NotNull(message = "difi.move.org.identifier is not set. This property is required.")
+        private Iso6523 identifier;
 
         /**
          * Business certificate for this instance.

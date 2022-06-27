@@ -9,6 +9,8 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -59,9 +61,9 @@ class CorrespondenceAgencyMessageFactoryTest {
 
     StandardBusinessDocument sbd;
 
-    private static final String SENDER_ORGNR = "123456789";
+    private static final Iso6523 SENDER_IDENTIFIER = Iso6523.of(ICD.NO_ORG,"123456789");
     private static final String SENDER_ORGNAME = "ACME Corp.";
-    private static final String RECEIVER_ORGNR = "987654321";
+    private static final Iso6523 RECEIVER_IDENTIFIER = Iso6523.of(ICD.NO_ORG, "987654321");
     private static final String NOTIFICATION_TEXT = "Melding til $reporteeName$ fra $reporterName$";
     private static final String NOTIFICATION_TEXT_SENSITIVE = "Taushetsbelagt melding til $reporteeName$ fra $reporterName$";
     private static final String PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
@@ -78,7 +80,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         when(config.isNotifySms()).thenReturn(true);
 
         IntegrasjonspunktProperties.Organization org = mock(IntegrasjonspunktProperties.Organization.class);
-        when(org.getIdentifier()).thenReturn(SENDER_ORGNR);
+        when(org.getIdentifier()).thenReturn(SENDER_IDENTIFIER);
         when(props.getOrg()).thenReturn(org);
         IntegrasjonspunktProperties.PostVirksomheter dpv = mock(IntegrasjonspunktProperties.PostVirksomheter.class);
         lenient().when(dpv.getDaysToReply()).thenReturn(7L);
@@ -86,9 +88,9 @@ class CorrespondenceAgencyMessageFactoryTest {
 
         InfoRecord infoRecord = mock(InfoRecord.class);
         when(infoRecord.getOrganizationName()).thenReturn(SENDER_ORGNAME);
-        when(serviceRegistryLookup.getInfoRecord(SENDER_ORGNR)).thenReturn(infoRecord);
+        when(serviceRegistryLookup.getInfoRecord(SENDER_IDENTIFIER)).thenReturn(infoRecord);
 
-        when(msg.getReceiverIdentifier()).thenReturn(RECEIVER_ORGNR);
+        when(msg.getReceiver()).thenReturn(RECEIVER_IDENTIFIER);
 
         this.sbd = spy(new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()

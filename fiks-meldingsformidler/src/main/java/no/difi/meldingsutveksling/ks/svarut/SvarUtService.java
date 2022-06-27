@@ -41,7 +41,7 @@ public class SvarUtService {
     public String send(NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver())
                             .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),

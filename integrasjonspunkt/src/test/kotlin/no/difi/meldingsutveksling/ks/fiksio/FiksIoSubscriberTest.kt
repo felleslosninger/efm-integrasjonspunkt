@@ -5,6 +5,8 @@ import io.mockk.impl.annotations.MockK
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
+import no.difi.meldingsutveksling.domain.ICD
+import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.ks.fiks.io.client.FiksIOKlient
@@ -35,7 +37,7 @@ class FiksIoSubscriberTest {
         MockKAnnotations.init(this)
 
         every { fiksIOKlient.newSubscription(any()) } just Runs
-        every { props.org.identifier } returns "123123123"
+        every { props.org.identifier } returns Iso6523.of(ICD.NO_ORG,"123123123")
         every { props.fiks.io.senderOrgnr } returns "321321321"
         every { sbdFactory.createNextMoveSBD(any(), any(), any(), any(), any(),  any(), any(), any()) } returns mockkClass(StandardBusinessDocument::class)
         every { nextMoveQueue.enqueueIncomingMessage(any(), any(), any()) } just Runs

@@ -88,8 +88,8 @@ public class MessageInController {
         Map<Integer, String> fileRefs = Maps.newHashMap();
         fileRefs.put(0, ASIC_FILE);
 
-        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSender().getPrimaryIdentifier());
-        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiver().getPrimaryIdentifier());
+        InfoRecord senderInfoRecord = serviceRegistryLookup.getInfoRecord(message.getSender());
+        InfoRecord receiverInfoRecord = serviceRegistryLookup.getInfoRecord(message.getReceiver());
 
         NextMoveV1Message peekMessage = new NextMoveV1Message()
                 .setConversationId(message.getMessageId())

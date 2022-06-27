@@ -5,6 +5,8 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.logging.MarkerFactory;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
@@ -80,7 +82,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         final ServiceRecord serviceRecord;
         try {
-            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(orgnr).build());
+            serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(Iso6523.of(ICD.NO_ORG, orgnr)).build());
         } catch (Exception e) {
             log.warn("Exception during service registry lookup: {}", e.getLocalizedMessage());
             response.setResult(false);
@@ -120,7 +122,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
 
         ServiceRecord receiverRecord;
         try {
-            receiverRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverPartyNumber())
+            receiverRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(Iso6523.of(ICD.NO_ORG, message.getReceiverPartyNumber()))
                     .conversationId(message.getConversationId())
                     .build());
         } catch (ServiceRegistryLookupException e) {
@@ -136,7 +138,7 @@ public class IntegrasjonspunktImpl implements SOAPport {
         }
 
         if (!message.hasSenderPartyNumber()) {
-            message.setSenderPartyNumber(properties.getOrg().getIdentifier());
+            message.setSenderPartyNumber(properties.getOrg().getIdentifier().getPrimaryIdentifier());
         }
 
         Audit.info(String.format("Received EDU message [id=%s]", message.getConversationId()), markerFrom(message));

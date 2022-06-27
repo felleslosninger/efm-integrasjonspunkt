@@ -7,6 +7,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.ResourceUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
@@ -119,11 +120,12 @@ public class XmlSoapMeldingsformidlerClient implements MeldingsformidlerClient {
         return Stream.empty();
     }
 
-    private Flux<ExternalReceipt> sjekkEtterKvitteringer(String orgnr, String mpcId) {
+    private Flux<ExternalReceipt> sjekkEtterKvitteringer(Iso6523 identifier, String mpcId) {
 
         AtomicReference<String> rawReceipt = new AtomicReference<>();
         PayloadInterceptor payloadInterceptor = new PayloadInterceptor(rawReceipt::set);
-        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(orgnr), payloadInterceptor, metricsEndpointInterceptor);
+        SikkerDigitalPostKlient klient = sikkerDigitalPostKlientFactory.createSikkerDigitalPostKlient(AktoerOrganisasjonsnummer.of(identifier.getOrganizationIdentifier()),
+                payloadInterceptor, metricsEndpointInterceptor);
 
         return Flux.create(fluxSink -> {
             try {

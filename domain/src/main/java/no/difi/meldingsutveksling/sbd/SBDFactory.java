@@ -48,7 +48,7 @@ public class SBDFactory {
         Optional<MessageType> type = MessageType.valueOfDocumentType(documentType);
         if (!type.isPresent()) {
             try {
-                ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrganizationIdentifier())
+                ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker)
                         .process(process).conversationId(conversationId).build(), documentType);
                 if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPFIO) {
                     type = Optional.of(MessageType.FIKSIO);

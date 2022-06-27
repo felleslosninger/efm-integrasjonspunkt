@@ -9,7 +9,7 @@ import no.difi.move.common.IdentifierHasher;
 public class SRMarkers {
 
     public static LogstashMarker markerFrom(SRParameter srparam) {
-        return Markers.append("identifier", Strings.isNullOrEmpty(srparam.getIdentifier()) ? null : IdentifierHasher.hashIfPersonnr(srparam.getIdentifier()))
+        return Markers.append("identifier", Strings.isNullOrEmpty(srparam.getIdentifier().getIdentifier()) ? null : IdentifierHasher.hashIfPersonnr(srparam.getIdentifier().getIdentifier()))
                 .and(MarkerFactory.conversationIdMarker(srparam.getConversationId()))
                 .and(Markers.append("process_identifier", srparam.getProcess()));
     }

@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class ServiceRegistryLookup {
         }
     }
 
-    public boolean isInServiceRegistry(String identifier) {
+    public boolean isInServiceRegistry(Iso6523 identifier) {
         return !getServiceRecords(SRParameter.builder(identifier).build()).isEmpty();
     }
 
@@ -92,7 +94,7 @@ public class ServiceRegistryLookup {
      * @param identifier of the receiver
      * @return an {@link InfoRecord} for the respective identifier
      */
-    public InfoRecord getInfoRecord(String identifier) {
+    public InfoRecord getInfoRecord(PartnerIdentifier identifier) {
         try {
             return loadInfoRecord(SRParameter.builder(identifier).infoOnly(true).build());
         } catch (ServiceRegistryLookupException e) {

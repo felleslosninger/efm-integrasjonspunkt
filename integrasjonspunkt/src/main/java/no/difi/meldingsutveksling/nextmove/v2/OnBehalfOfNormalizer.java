@@ -29,7 +29,7 @@ public class OnBehalfOfNormalizer {
                 return;
             }
 
-            sbd.setSenderIdentifier(Iso6523.of(iso6523.getIcd(), properties.getOrg().getIdentifier(), iso6523.getOrganizationIdentifier()));
+            sbd.setSenderIdentifier(Iso6523.of(iso6523.getIcd(), properties.getOrg().getIdentifier().getPrimaryIdentifier(), iso6523.getOrganizationIdentifier()));
         });
     }
 }

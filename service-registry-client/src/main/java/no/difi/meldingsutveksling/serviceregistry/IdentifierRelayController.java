@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.serviceregistry;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.http.MediaType;
@@ -20,7 +22,7 @@ public class IdentifierRelayController {
     private final ServiceRegistryLookup serviceRegistryLookup;
 
     @GetMapping(value = "/servicerecord/{identifier}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
+    public ResponseEntity getServiceRecord(@PathVariable("identifier") PartnerIdentifier identifier) {
         ServiceRecord serviceRecord = null;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(identifier).build());

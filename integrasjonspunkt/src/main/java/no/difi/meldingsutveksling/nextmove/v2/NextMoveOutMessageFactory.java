@@ -57,7 +57,7 @@ public class NextMoveOutMessageFactory {
                 .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
         if (sbd.getSenderIdentifier() == null) {
-            Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getIdentifier());
+            Iso6523 org = properties.getOrg().getIdentifier();
             sbd.getStandardBusinessDocumentHeader().addSender(
                     new Partner()
                             .setIdentifier(new PartnerIdentification()

@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 
 import java.util.*;
 
@@ -14,7 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class SRParameter {
 
     @NonNull
-    private String identifier;
+    private PartnerIdentifier identifier;
     private String process;
     private Integer securityLevel;
     private Boolean print;
@@ -53,7 +55,7 @@ public class SRParameter {
 
     public Map<String, String> getUrlVariables() {
         Map<String, String> urlVariables = new HashMap<>();
-        urlVariables.put("identifier", identifier);
+        urlVariables.put("identifier", identifier.getIdentifier());
         if (infoOnly) {
             return urlVariables;
         }
@@ -73,7 +75,7 @@ public class SRParameter {
         return new SRParameterBuilder();
     }
 
-    public static SRParameterBuilder builder(String identifier) {
+    public static SRParameterBuilder builder(PartnerIdentifier identifier) {
         return builder().identifier(identifier);
     }
 

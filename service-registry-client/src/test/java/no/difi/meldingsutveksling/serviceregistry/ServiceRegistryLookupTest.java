@@ -6,6 +6,8 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -42,8 +44,8 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
-    private static final String ORGNR = "12345678";
-    private static final String ORGNR2 = "23456789";
+    private static final Iso6523 ORGNR = Iso6523.of(ICD.NO_ORG, "12345678");
+    private static final Iso6523 ORGNR2 = Iso6523.of(ICD.NO_ORG, "23456789");
     private static final String ORGNAME = "test";
     private static final String DEFAULT_PROCESS = "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0";
     private static final String DEFAULT_DOCTYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";

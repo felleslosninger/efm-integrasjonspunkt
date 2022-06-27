@@ -25,8 +25,8 @@ public class PutMessageRequestFactory {
     public PutMessageRequestType create(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier().getPrimaryIdentifier());
-        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier().getPrimaryIdentifier());
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
         return create(conversationId,
                 Sender.of(sbd.getSenderIdentifier().getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
                 Receiver.of(sbd.getReceiverIdentifier().getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),
@@ -36,8 +36,8 @@ public class PutMessageRequestFactory {
     public PutMessageRequestType createAndSwitchSenderReceiver(StandardBusinessDocument sbd, Object payload, String conversationId) {
         String senderRef = SBDUtil.getOptionalSenderRef(sbd).orElse(null);
         String receiverRef = SBDUtil.getOptionalReceiverRef(sbd).orElse(null);
-        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier().getPrimaryIdentifier());
-        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier().getPrimaryIdentifier());
+        InfoRecord senderInfo = srLookup.getInfoRecord(sbd.getReceiverIdentifier());
+        InfoRecord receiverInfo = srLookup.getInfoRecord(sbd.getSenderIdentifier());
         return create(conversationId,
                 Sender.of(sbd.getReceiverIdentifier().getPrimaryIdentifier(), senderInfo.getOrganizationName(), senderRef),
                 Receiver.of(sbd.getSenderIdentifier().getPrimaryIdentifier(), receiverInfo.getOrganizationName(), receiverRef),

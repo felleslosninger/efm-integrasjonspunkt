@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.capabilities.Capabilities;
 import no.difi.meldingsutveksling.exceptions.IdentifierNotFoundException;
 import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
@@ -23,7 +24,7 @@ public class CapabilitiesController {
     @Transactional
     @ResponseBody
     public Capabilities capabilities(
-            @PathVariable @NotNull String receiverIdentifier,
+            @PathVariable @NotNull PartnerIdentifier receiverIdentifier,
             @RequestParam(required = false) Integer securityLevel,
             @RequestParam(required = false) String process) throws NotFoundInServiceRegistryException {
         try {

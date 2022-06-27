@@ -6,6 +6,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktHandlerExceptionResolv
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
@@ -76,7 +78,7 @@ public class IntegrasjonspunktErrorControllerTest {
     public void before() {
         given(properties.getOrg()).willReturn(
                 new IntegrasjonspunktProperties.Organization()
-                        .setIdentifier("910077473")
+                        .setIdentifier(Iso6523.of(ICD.NO_ORG,"910077473"))
         );
     }
 

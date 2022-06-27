@@ -232,7 +232,7 @@ public class CorrespondenceAgencyMessageFactory {
         ServiceRecord serviceRecord;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(
-                SRParameter.builder(message.getReceiverIdentifier())
+                SRParameter.builder(message.getReceiver())
                     .conversationId(message.getConversationId())
                     .process(message.getSbd().getProcess())
                     .build(),
@@ -333,10 +333,11 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
-        String orgnr = SBDUtil.getPartIdentifier(msg.getSbd())
+//        TODO: Fiks meg!! På vegne av-scenarioet...
+        String sender = SBDUtil.getSenderPartIdentifier(msg.getSbd())
                 .map(Iso6523::getOrganizationIdentifier)
-                .orElse(properties.getOrg().getIdentifier());
-        return serviceRegistryLookup.getInfoRecord(orgnr).getOrganizationName();
+                .orElse(properties.getOrg().getIdentifier().getOrganizationIdentifier());
+        return serviceRegistryLookup.getInfoRecord(msg.getSbd().getSenderIdentifier()).getOrganizationName();
     }
 
     private OffsetDateTime getAllowSystemDeleteDateTime() {

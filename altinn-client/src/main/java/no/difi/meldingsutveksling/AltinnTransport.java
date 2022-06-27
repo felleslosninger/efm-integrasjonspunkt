@@ -44,12 +44,17 @@ public class AltinnTransport {
     }
 
     private String getSendersReference(StandardBusinessDocument sbd) {
+        //TODO: This must be changed if one shall use message channels and utvidet adresse, it is assumed this is not possible atm:
         Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
-        if (mcScope.isPresent() &&
-                (SBDUtil.isStatus(sbd) || SBDUtil.isReceipt(sbd)) &&
-                (isNullOrEmpty(props.getDpo().getMessageChannel()) ||
-                        !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
-            return mcScope.get().getIdentifier();
+        if ((SBDUtil.isStatus(sbd) || SBDUtil.isReceipt(sbd))) {
+            if (mcScope.isPresent() &&
+                    (isNullOrEmpty(props.getDpo().getMessageChannel()) ||
+                            !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
+                return mcScope.get().getIdentifier();
+            }
+            if (SBDUtil.getSenderPartIdentifier(sbd).isPresent()) {
+                return sbd.getSenderIdentifier().getIdentifier();
+            }
         }
         return uuidGenerator.generate();
     }

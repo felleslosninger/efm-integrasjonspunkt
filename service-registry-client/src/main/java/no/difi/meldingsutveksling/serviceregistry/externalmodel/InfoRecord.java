@@ -1,21 +1,22 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import lombok.Data;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 
 @Data
 public class InfoRecord {
-    private String identifier;
+    private PartnerIdentifier identifier;
     private String organizationName;
     private EntityType entityType;
     private BrregPostadresse postadresse;
 
-    public InfoRecord(String identifier, String organizationName, EntityType entityType) {
+    public InfoRecord(PartnerIdentifier identifier, String organizationName, EntityType entityType) {
         this.identifier = identifier;
         this.organizationName = organizationName;
         this.entityType = entityType;
     }
 
-    public InfoRecord(String identifier, String organizationName, EntityType entityType, BrregPostadresse postadresse) {
+    public InfoRecord(PartnerIdentifier identifier, String organizationName, EntityType entityType, BrregPostadresse postadresse) {
         this.identifier = identifier;
         this.organizationName = organizationName;
         this.entityType = entityType;

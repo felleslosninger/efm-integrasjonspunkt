@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -45,7 +47,7 @@ public class ServiceRegistryClient {
     }
 
     private String getIdentifierResourceString(SRParameter parameter) throws ServiceRegistryLookupException {
-        if(!props.getFeature().isEnableDsfPrintLookup()) {
+        if (!props.getFeature().isEnableDsfPrintLookup()) {
             //Default value in SR is true. If you want to avoid DSF lookup set this property to false.
             parameter.setPrint(props.getFeature().isEnableDsfPrintLookup());
         }
@@ -72,14 +74,12 @@ public class ServiceRegistryClient {
     }
 
     @Cacheable(CacheConfig.CACHE_SR_VIRKSERT)
-    public String getCertificate(String identifier) throws ServiceRegistryLookupException {
+    public String getCertificate(PartnerIdentifier identifier) throws ServiceRegistryLookupException {
         try {
-            Map<String, String> params = Maps.newHashMap();
-            params.put("identifier", identifier);
-            return client.getResource("virksert/{identifier}", params);
+            return client.getResource("virksert/" + identifier.getIdentifier());
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND ||
-                e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                    e.getStatusCode() == HttpStatus.BAD_REQUEST) {
                 String errorDescription = JsonPath.read(e.getResponseBodyAsString(), "$.error_description");
                 throw new ServiceRegistryLookupException(errorDescription);
             }

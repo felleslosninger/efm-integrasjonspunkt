@@ -182,7 +182,7 @@ public class NextMoveServiceBus {
 
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
-                    SRParameter.builder(message.getReceiverIdentifier())
+                    SRParameter.builder(message.getReceiver())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
                     message.getSbd().getDocumentType());

@@ -19,10 +19,12 @@ import javax.annotation.PostConstruct
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
-class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
-                       private val sbdFactory: SBDFactory,
-                       private val props: IntegrasjonspunktProperties,
-                       private val nextMoveQueue: NextMoveQueue): DpfioPolling {
+class FiksIoSubscriber(
+    private val fiksIOKlient: FiksIOKlient,
+    private val sbdFactory: SBDFactory,
+    private val props: IntegrasjonspunktProperties,
+    private val nextMoveQueue: NextMoveQueue
+) : DpfioPolling {
 
     val log = logger()
 
@@ -38,7 +40,7 @@ class FiksIoSubscriber(private val fiksIOKlient: FiksIOKlient,
         log.debug("FiksIO: Received message with fiksId=${mottattMelding.meldingId} protocol=${mottattMelding.meldingType}")
         val sbd = sbdFactory.createNextMoveSBD(
             Iso6523.of(ICD.NO_ORG, props.fiks.io.senderOrgnr),
-            Iso6523.of(ICD.NO_ORG, props.org.identifier),
+            props.org.identifier,
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingId.toString(),
             mottattMelding.meldingType,

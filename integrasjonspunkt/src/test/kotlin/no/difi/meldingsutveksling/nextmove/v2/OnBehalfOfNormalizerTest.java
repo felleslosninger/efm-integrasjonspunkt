@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +33,7 @@ class OnBehalfOfNormalizerTest {
     void normalize(String before, String after) {
         lenient().when(properties.getOrg()).thenReturn(
                 new IntegrasjonspunktProperties.Organization()
-                        .setIdentifier("910075918")
+                        .setIdentifier(Iso6523.of(ICD.NO_ORG,"910075918"))
         );
 
         StandardBusinessDocument sbd = new StandardBusinessDocument()

@@ -23,7 +23,7 @@ public class AltinnWsConfigurationFactory {
         return AltinnWsConfiguration.builder()
                 .username(config.getUsername())
                 .password(config.getPassword())
-                .orgnr(properties.getOrg().getIdentifier())
+                .orgnr(properties.getOrg().getIdentifier().getPrimaryIdentifier())
                 .streamingServiceUrl(streamingserviceUrl)
                 .brokerServiceUrl(brokerserviceUrl)
                 .externalServiceCode(config.getServiceCode())

@@ -33,7 +33,7 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier().getPrimaryIdentifier())
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
                     .process(sbd.getProcess());
 
             if (!Strings.isNullOrEmpty(sbd.getConversationId())) {

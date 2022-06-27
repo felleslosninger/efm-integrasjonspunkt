@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnTransport;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
@@ -36,14 +37,20 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
     private final MessageChannelRepository messageChannelRepository;
+    private final IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @Override
     @Transactional
     @Timed
     public void send(@NotNull NextMoveOutMessage message) {
         ifReceipt(message, mc -> message.getSbd().addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
-        // Strip main identifier if part identifier exists
-        SBDUtil.getPartIdentifier(message.getSbd()).ifPresent(o -> message.getSbd().setSenderIdentifier(o));
+        // If part identifier matches identifier set in IP-props, then it is utvidet adressering. If not, it is on-behalf-of.
+        SBDUtil.getSenderPartIdentifier(message.getSbd()).ifPresent(o -> {
+                    if (!o.equals(integrasjonspunktProperties.getOrg().getIdentifier().getOrganizationPartIdentifier())) {
+                        message.getSbd().setSenderIdentifier(o);
+                    }
+                }
+        );
 
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());

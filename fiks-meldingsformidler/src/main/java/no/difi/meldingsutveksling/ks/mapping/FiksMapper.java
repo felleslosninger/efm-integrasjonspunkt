@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.domain.PartnerUtil;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -141,9 +142,9 @@ public class FiksMapper {
     private Adresse getSvarSendesTil(NextMoveOutMessage message, Journalpost journalpost) {
         return journalpost.getKorrespondansepart().stream()
                 .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
-                .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
+                .map(a -> getAdresse(a, message.getSenderIdentifier()))
                 .findFirst()
-                .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
+                .orElseGet(() -> getAdresse(serviceRegistry.getInfoRecord(message.getSender())));
     }
 
     private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
@@ -159,8 +160,8 @@ public class FiksMapper {
     }
 
     private Adresse getMottaker(NextMoveOutMessage message) {
-        final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(message.getReceiverIdentifier());
-        return mottakerFrom(receiverInfo);
+        final InfoRecord receiverInfo = serviceRegistry.getInfoRecord(message.getReceiver());
+        return getAdresse(receiverInfo);
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
@@ -248,7 +249,7 @@ public class FiksMapper {
         return x == null ? 0 : x.intValueExact();
     }
 
-    private Adresse mottakerFrom(Korrespondansepart kp, String orgnr) {
+    private Adresse getAdresse(Korrespondansepart kp, String orgnr) {
         return Adresse.builder()
                 .withDigitalAdresse(OrganisasjonDigitalAdresse.builder().withOrgnr(orgnr).build())
                 .withPostAdresse(PostAdresse.builder()
@@ -261,10 +262,11 @@ public class FiksMapper {
                 .build();
     }
 
-    private Adresse mottakerFrom(InfoRecord infoRecord) {
+    private Adresse getAdresse(InfoRecord infoRecord) {
         return Adresse.builder()
                 .withDigitalAdresse(OrganisasjonDigitalAdresse.builder()
-                        .withOrgnr(infoRecord.getIdentifier())
+//                        TODO: Diskuter utvidet adressering med Steinar, pdd vil ikke utvidet adressering funke via FIKS
+                        .withOrgnr(infoRecord.getIdentifier().getPrimaryIdentifier())
                         .build())
                 .withPostAdresse(getPostAdresse(infoRecord))
                 .build();
