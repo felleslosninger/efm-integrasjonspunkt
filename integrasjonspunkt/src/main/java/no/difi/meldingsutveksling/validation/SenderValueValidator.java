@@ -15,7 +15,7 @@ public class SenderValueValidator implements ConstraintValidator<SenderValue, St
 
     @Override
     public void initialize(SenderValue constraintAnnotation) {
-        this.expectedValue = "0192:" + properties.getOrg().getIdentifier();
+        this.expectedValue = properties.getOrg().getIdentifier().getIdentifier();
     }
 
     @Override
@@ -23,9 +23,12 @@ public class SenderValueValidator implements ConstraintValidator<SenderValue, St
         if (value == null) {
             return true;
         }
-        String[] split = value.split(":");
-        if (split.length == 3) {
-            return (split[0]+":"+split[1]).equals(expectedValue);
+
+        String[] sbdhSenderComponents = value.split(":");
+        if (sbdhSenderComponents.length >= 3) {
+            String[] hostIdentifierComponents = expectedValue.split(":");
+            return (sbdhSenderComponents[0] + ":" + sbdhSenderComponents[1])
+                    .equals(hostIdentifierComponents[0] + ":" + hostIdentifierComponents[1]);
         }
 
         return Objects.equals(expectedValue, value);
