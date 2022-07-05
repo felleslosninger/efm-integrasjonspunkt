@@ -19,7 +19,10 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "message_status")
+@Table(name = "message_status",
+        indexes = {
+            @Index(columnList = "conv_id")
+        })
 @NamedEntityGraph(name = "MessageStatus.conversation", attributeNodes = @NamedAttributeNode("conversation"))
 public class MessageStatus extends AbstractEntity<Long> {
 

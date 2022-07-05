@@ -3,10 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
-import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
-import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
+import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -35,9 +32,13 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.GregorianCalendar;
+import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,7 +54,9 @@ public class SvarInnNextMoveConverter {
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
-                Iso6523.of(ICD.NO_ORG, forsendelse.getSvarSendesTil().getOrgnr()),
+                Iso6523.of(ICD.NO_ORG, hasText(forsendelse.getSvarSendesTil().getOrgnr()) ?
+                        forsendelse.getSvarSendesTil().getOrgnr() :
+                        properties.getFiks().getInn().getFallbackSenderOrgNr()),
                 Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
                 forsendelse.getId(),
                 forsendelse.getId(),
@@ -134,13 +137,43 @@ public class SvarInnNextMoveConverter {
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
             journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getDokumentetsDato())));
         }
-        journalpost.setOffentligTittel(metadata.getTittel());
+
+        if (!isNullOrEmpty(sst.getFnr())) {
+            journalpost.setTittel(getTittel(forsendelse) + " (eDialog fra "+sst.getFnr()+")");
+        } else {
+            journalpost.setTittel(getTittel(forsendelse));
+        }
+
+        forsendelse.getFilmetadata().forEach(fmd -> {
+            Dokumentbeskrivelse db = of.createDokumentbeskrivelse();
+            db.setTittel(fmd.getFilnavn());
+
+            Dokumentobjekt dobj = of.createDokumentobjekt();
+            dobj.setReferanseDokumentfil(fmd.getFilnavn());
+            db.getDokumentobjekt().add(dobj);
+
+            journalpost.getDokumentbeskrivelseAndDokumentobjekt().add(db);
+        });
 
         saksmappe.getBasisregistrering().add(journalpost);
         Arkivmelding arkivmelding = of.createArkivmelding();
         arkivmelding.getMappe().add(saksmappe);
 
+        arkivmelding.setSystem("Integrasjonspunkt");
+        arkivmelding.setMeldingId(forsendelse.getId());
+        arkivmelding.setTidspunkt(Optional.ofNullable(metadata.getDokumentetsDato())
+                .map(DateTimeUtil::toXMLGregorianCalendar)
+                .map(DateTimeUtil::atStartOfDay)
+                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
+
         return arkivmelding;
+    }
+
+    private String getTittel(Forsendelse forsendelse) {
+        if (!isNullOrEmpty(forsendelse.getMetadataFraAvleverendeSystem().getTittel())) {
+            return forsendelse.getMetadataFraAvleverendeSystem().getTittel();
+        }
+        return forsendelse.getTittel();
     }
 
 }
