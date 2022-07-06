@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.DpiReceiptHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.DeletgatingMeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
+import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
+import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.json.*;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
@@ -24,6 +27,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 
+import javax.xml.bind.JAXBException;
 import java.time.Clock;
 import java.util.Arrays;
 
@@ -48,10 +52,15 @@ public class DpiConfig {
     }
 
     @Bean
+    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService) {
+        return new DpiReceiptHandler(conversationService);
+    }
+
+    @Bean
     public DpiReceiptService dpiReceiptService(MeldingsformidlerClient meldingsformidlerClient,
-                                               ConversationService conversationService,
+                                               DpiReceiptHandler dpiReceiptHandler,
                                                AvsenderidentifikatorHolder avsenderidentifikatorHolder) {
-        return new DpiReceiptService(meldingsformidlerClient, conversationService, avsenderidentifikatorHolder);
+        return new DpiReceiptService(meldingsformidlerClient, dpiReceiptHandler, avsenderidentifikatorHolder);
     }
 
     @Order
@@ -153,9 +162,12 @@ public class DpiConfig {
                                                                        ShipmentFactory shipmentFactory,
                                                                        JsonDpiReceiptMapper dpiReceiptMapper,
                                                                        MessageStatusMapper messageStatusMapper,
-                                                                       ChannelNormalizer channelNormalizer) {
+                                                                       ChannelNormalizer channelNormalizer,
+                                                                       DpiReceiptConverter dpiReceiptConverter,
+                                                                       DpiMessageStatusFilter dpiMessageStatusFilter) {
             return new JsonMeldingsformidlerClient(dpiClient,
-                    shipmentFactory, dpiReceiptMapper, messageStatusMapper, channelNormalizer);
+                    shipmentFactory, dpiReceiptMapper, messageStatusMapper,
+                    channelNormalizer, dpiReceiptConverter, dpiMessageStatusFilter);
         }
 
         @Bean
@@ -176,6 +188,37 @@ public class DpiConfig {
         @Bean
         public JsonDpiReceiptMapper jsonDpiReceiptMapper(MessageStatusMapper messageStatusMapper) {
             return new JsonDpiReceiptMapper(messageStatusMapper);
+        }
+
+        @Configuration
+        @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "json", matchIfMissing = true)
+        public static class ReceiptTypeJson {
+
+            @Bean
+            public DpiMessageStatusFilter passThroughDpiMessageStatusFilter() {
+                return p -> true;
+            }
+
+            @Bean
+            public DpiReceiptConverter identityDpiReceiptConverter() {
+                return p -> p;
+            }
+        }
+
+        @Configuration
+        @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "xmlsoap")
+        public static class RecieptTypeXmlSoap {
+
+            @Bean
+            public XmlSoapDpiMessageStatusFilter xmlXmlSoapDpiMessageStatusFilter() {
+                return new XmlSoapDpiMessageStatusFilter();
+            }
+
+            @Bean
+            public JWT2XmlSoapDpiReceiptConverter jwt2XmlSoapDpiReceiptConverter(UnpackJWT unpackJWT,
+                                                                                 UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
+                return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
+            }
         }
     }
 

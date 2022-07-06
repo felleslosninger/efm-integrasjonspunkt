@@ -11,7 +11,6 @@ public class DpiClientErrorHandlerImpl implements DpiClientErrorHandler {
         return response.createException()
                 .flatMap(ex -> Mono.error(new DpiException(
                         String.format("%s:%n%s", ex.getMessage(), ex.getResponseBodyAsString()),
-                        ex,
                         getBlame(response))));
     }
 

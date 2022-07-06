@@ -118,7 +118,11 @@ public class SvarInnPutMessageBuilder {
         journpostType.setJpSeknr(metadata.getJournalsekvensnummer());
         journpostType.setJpJpostnr(metadata.getJournalpostnummer());
         journpostType.setJpOffinnhold(getForsendelseTittel());
-        journpostType.setJpInnhold(getForsendelseTittel());
+        if (!isNullOrEmpty(forsendelse.getSvarSendesTil().getFnr())) {
+            journpostType.setJpInnhold(getForsendelseTittel() + " (eDialog fra "+forsendelse.getSvarSendesTil().getFnr()+")");
+        } else {
+            journpostType.setJpInnhold(getForsendelseTittel());
+        }
         if (!isNullOrEmpty(metadata.getJournaldato())) {
             journpostType.setJpJdato(Instant.ofEpochMilli(Long.parseLong(metadata.getJournaldato())).atZone(clock.getZone()).toLocalDate().toString());
         }

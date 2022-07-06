@@ -63,9 +63,8 @@ open class NextMoveQueueImpl(
             messagePersister.write(sbd.messageId, NextMoveConsts.ASIC_FILE, asic)
         }
 
-        val message = messageRepo.findByMessageId(sbd.messageId).orElseGet {
-            messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
-        }
+        if (!messageRepo.findByMessageId(sbd.messageId).isPresent) {
+            val message = messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
 
         SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
             messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
@@ -77,11 +76,9 @@ open class NextMoveQueueImpl(
             ReceiptStatus.INNKOMMENDE_MOTTATT
         )
         statusSender.queue(message.sbd, serviceIdentifier, ReceiptStatus.MOTTATT)
-
-        Audit.info(
-            "Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue",
-            markerFrom(message)
-        )
+            log.info(markerFrom(message), "Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue",)
+        } else {
+            log.warn("Received duplicate message with id=${sbd.messageId}, message discarded.")
+        }
     }
-
 }

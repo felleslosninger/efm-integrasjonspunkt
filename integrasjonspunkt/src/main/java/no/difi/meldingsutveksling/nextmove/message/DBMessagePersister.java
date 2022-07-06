@@ -36,7 +36,7 @@ public class DBMessagePersister implements MessagePersister {
     @Override
     @Transactional(readOnly = true)
     public Resource read(String messageId, String filename) throws IOException {
-        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
+        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
                 .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));
         return new BlobResource(entry.getContent(), String.format("BLOB for messageId=%s, filename=%s", messageId, filename));
     }

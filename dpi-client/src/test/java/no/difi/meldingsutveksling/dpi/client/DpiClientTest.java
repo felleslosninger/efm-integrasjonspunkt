@@ -51,7 +51,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
 import javax.mail.BodyPart;
@@ -254,8 +253,7 @@ class DpiClientTest {
 
         assertThatThrownBy(() -> send(client, input, httpResponse))
                 .isInstanceOf(DpiException.class)
-                .hasMessage(String.format("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}"))
-                .hasCauseInstanceOf(WebClientResponseException.BadRequest.class);
+                .hasMessage(String.format("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}"));
     }
 
     @Test
