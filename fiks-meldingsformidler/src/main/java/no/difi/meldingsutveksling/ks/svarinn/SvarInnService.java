@@ -2,11 +2,17 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.io.pipe.Reject;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
@@ -28,20 +34,31 @@ public class SvarInnService {
     private final SvarInnClient svarInnClient;
     private final SvarInnFileDecryptor decryptor;
 
-    public Stream<SvarInnStreamedFile> getAttachments(Forsendelse forsendelse, Reject reject) {
-        InputStream encrypted = svarInnClient.downloadZipFile(forsendelse, reject);
-        InputStream decrypted = decryptor.decryptCMSStreamed(encrypted);
+    public Stream<Document> getAttachments(Forsendelse forsendelse, Reject reject) {
+        Resource encrypted = svarInnClient.downloadZipFile(forsendelse, reject);
+        Resource decrypted = decryptor.decrypt(encrypted);
         return unzip(forsendelse, decrypted);
     }
 
-    private Stream<SvarInnStreamedFile> unzip(Forsendelse forsendelse, InputStream decrypted) {
+    private Stream<Document> unzip(Forsendelse forsendelse, Resource decrypted) {
+        try {
+            Iterator<Document> sourceIterator = getDocumentIterator(forsendelse, decrypted.getInputStream());
+            Iterable<Document> iterable = () -> sourceIterator;
+            return StreamSupport.stream(iterable.spliterator(), false);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not unzip file!", e);
+        }
+    }
+
+    @NotNull
+    private Iterator<Document> getDocumentIterator(Forsendelse forsendelse, InputStream inputStream) {
         Map<String, String> mimeTypeMap = forsendelse.getFilmetadata()
                 .stream()
                 .collect(Collectors.toMap(Forsendelse.Filmetadata::getFilnavn, Forsendelse.Filmetadata::getMimetype));
 
-        Iterator<SvarInnStreamedFile> sourceIterator = new Iterator<SvarInnStreamedFile>() {
+        return new Iterator<Document>() {
 
-            private final ZipInputStream stream = new ZipInputStream(decrypted);
+            private final ZipInputStream stream = new ZipInputStream(inputStream);
             private ZipEntry entry;
 
             @Override
@@ -55,22 +72,24 @@ public class SvarInnService {
             }
 
             @Override
-            public SvarInnStreamedFile next() {
+            public Document next() {
                 if (hasNext()) {
-                    SvarInnStreamedFile file = SvarInnStreamedFile.of(
-                            entry.getName(),
-                            new NonClosableInputStream(stream),
-                            mimeTypeMap.get(entry.getName()));
+                    Document file = Document.builder()
+                            .filename(entry.getName())
+                            .mimeType(mimeTypeMap.get(entry.getName()))
+                            .resource(getResource(stream))
+                            .build();
                     entry = null;
                     return file;
                 }
 
                 throw new NoSuchElementException();
             }
-        };
 
-        Iterable<SvarInnStreamedFile> iterable = () -> sourceIterator;
-        return StreamSupport.stream(iterable.spliterator(), false);
+            private Resource getResource(ZipInputStream inputStream) {
+                return new InputStreamResource(StreamUtils.nonClosing(inputStream));
+            }
+        };
     }
 
     public List<Forsendelse> getForsendelser() {

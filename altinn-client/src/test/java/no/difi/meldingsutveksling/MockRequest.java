@@ -2,9 +2,8 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.slf4j.Marker;
-
-import java.io.InputStream;
 
 class MockRequest implements UploadRequest {
 
@@ -35,7 +34,7 @@ class MockRequest implements UploadRequest {
     }
 
     @Override
-    public InputStream getAsicInputStream() {
+    public InMemoryWithTempFileFallbackResource getAsic() {
         return null;
     }
 

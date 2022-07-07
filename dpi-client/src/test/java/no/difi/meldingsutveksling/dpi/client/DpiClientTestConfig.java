@@ -5,12 +5,12 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.config.DokumentpakkingConfig;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
 import no.difi.move.common.cert.KeystoreHelper;
-import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
-import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import java.time.ZoneId;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
-@Import(UUIDGenerator.class)
+@Import({UUIDGenerator.class, DokumentpakkingConfig.class})
 public class DpiClientTestConfig {
 
     @Bean
@@ -41,22 +41,6 @@ public class DpiClientTestConfig {
     @Bean
     public KeystoreHelper serverKeystoreHelper(DigitalPostInnbyggerConfig properties) {
         return new KeystoreHelper(properties.getServer().getKeystore());
-    }
-
-    @Bean
-    public DecryptCMSDocument decryptCMSDocument(JceKeyTransRecipient jceKeyTransRecipient) {
-        return new DecryptCMSDocument(jceKeyTransRecipient);
-    }
-
-    @Bean
-    public JceKeyTransRecipient jceKeyTransRecipient(KeystoreHelper serverKeystoreHelper) {
-        JceKeyTransRecipient recipient = new JceKeyTransEnvelopedRecipient(serverKeystoreHelper.loadPrivateKey());
-        return serverKeystoreHelper.shouldLockProvider() ? recipient.setProvider(serverKeystoreHelper.getKeyStore().getProvider()) : recipient;
-    }
-
-    @Bean
-    public AsicParser asicParser() {
-        return new AsicParser();
     }
 
     @Bean

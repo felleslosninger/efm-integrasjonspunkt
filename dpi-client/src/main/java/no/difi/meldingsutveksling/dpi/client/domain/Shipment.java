@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi.client.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 

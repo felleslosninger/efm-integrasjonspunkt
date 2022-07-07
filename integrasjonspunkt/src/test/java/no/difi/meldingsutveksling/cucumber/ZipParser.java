@@ -1,11 +1,14 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
-import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -14,14 +17,17 @@ import java.util.zip.ZipInputStream;
 class ZipParser {
 
     @SneakyThrows
-    ZipContent parse(InputStream is) {
+    ZipContent parse(Resource zip) {
         ZipContent zipContent = new ZipContent();
 
-        try (ZipInputStream stream = new ZipInputStream(is)) {
+        try (ZipInputStream stream = new ZipInputStream(zip.getInputStream())) {
             ZipEntry entry;
             while ((entry = stream.getNextEntry()) != null) {
-                ZipFile zipFile = new ZipFile(entry.getName(), IOUtils.toByteArray(stream));
-                zipContent.files(zipFile);
+                zipContent.file(Document.builder()
+                        .filename(entry.getName())
+                        .resource(new ByteArrayResource(StreamUtils.copyToByteArray(stream)))
+                        .mimeType(MediaType.APPLICATION_OCTET_STREAM)
+                        .build());
             }
         }
 

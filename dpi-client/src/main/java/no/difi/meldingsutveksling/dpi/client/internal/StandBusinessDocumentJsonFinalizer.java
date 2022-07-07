@@ -2,9 +2,10 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DokumentpakkefingeravtrykkHolder;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.MaskinportentokenHolder;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
+import org.springframework.core.io.Resource;
 
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class StandBusinessDocumentJsonFinalizer {
     private final JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator;
 
     public Map<String, Object> getFinalizedStandardBusinessDocumentAsJson(StandardBusinessDocument standardBusinessDocument,
-                                                                          CmsEncryptedAsice cmsEncryptedAsice,
+                                                                          Resource cmsEncryptedAsice,
                                                                           String maskinportenToken) {
         standardBusinessDocument.getBusinessMessage(DokumentpakkefingeravtrykkHolder.class)
                 .ifPresent(p -> p.setDokumentpakkefingeravtrykk(createParcelFingerprint.createParcelFingerprint(cmsEncryptedAsice)));

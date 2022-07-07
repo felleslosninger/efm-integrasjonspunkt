@@ -8,15 +8,14 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.nextmove.BrokerProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -129,8 +128,10 @@ public class ServiceBusRestClient {
             }
 
             for (ServiceBusMessage msg : messages) {
-                InputStream asicStream = (msg.getPayload().getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(msg.getPayload().getAsic())) : null;
-                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asicStream);
+                ByteArrayResource asicResource = (msg.getPayload().getAsic() != null)
+                        ? new ByteArrayResource(Base64.getDecoder().decode(msg.getPayload().getAsic()))
+                        : null;
+                nextMoveQueue.enqueueIncomingMessage(msg.getPayload().getSbd(), DPE, asicResource);
                 deleteMessage(msg);
             }
         }

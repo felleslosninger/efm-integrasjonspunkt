@@ -1,58 +1,75 @@
 package no.difi.meldingsutveksling.dokumentpakking.service;
 
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.asic.AsicWriter;
-import no.difi.asic.AsicWriterFactory;
-import no.difi.asic.MimeType;
-import no.difi.asic.SignatureHelper;
+import no.difi.asic.*;
+import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import no.difi.meldingsutveksling.domain.StreamedFile;
-import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.noarkexchange.StatusMessage;
+import no.difi.move.common.io.OutputStreamResource;
+import no.difi.move.common.io.pipe.Pipe;
+import no.difi.move.common.io.pipe.PipeResource;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.Reject;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.stream.Stream;
 
 @Slf4j
+@RequiredArgsConstructor
 public class CreateAsice {
 
-    private final ManifestFactory manifestFactory;
+    private final Plumber plumber;
 
-    public CreateAsice() {
-        manifestFactory = new ManifestFactory();
+    public Resource createAsice(Input input, Reject reject) {
+        Pipe pipe = plumber.pipe("Creating ASiC-E",
+                inlet -> createAsice(input, new OutputStreamResource(inlet)),
+                reject);
+
+        return new PipeResource(pipe, "Creating ASiC-E");
     }
 
-    public void createAsiceStreamed(StreamedFile mainAttachment,
-                                    Stream<? extends StreamedFile> files,
-                                    OutputStream archive,
-                                    SignatureHelper signatureHelper,
-                                    NextMoveMessage message) throws IOException {
-        Manifest manifest = manifestFactory.createManifest(message, mainAttachment.getFileName(), mainAttachment.getMimeType());
-        AsicWriter asicWriter = AsicWriterFactory.newFactory()
-                .newContainer(archive)
-                .add(new BufferedInputStream(new ByteArrayInputStream(manifest.getBytes())), "manifest.xml", MimeType.XML);
+    public void createAsice(Input input, WritableResource output) {
+        log.info("Creating ASiC-E manifest");
+        AsicWriter asicWriter = getAsicWriter(input, output);
+        addAsicFile(asicWriter, input.getManifest());
+        input.getDocuments().forEachOrdered(p -> addAsicFile(asicWriter, p));
+        sign(input, asicWriter);
+    }
 
-        List<InputStream> streamsToClose = new ArrayList<>();
-
+    private void sign(Input input, AsicWriter asicWriter) {
         try {
-            files.forEach(f -> {
-                try {
-                    log.debug("Adding file {} of type {}", f.getFileName(), f.getMimeType());
-                    InputStream inputStream = new BufferedInputStream(f.getInputStream());
-                    streamsToClose.add(inputStream);
-                    asicWriter.add(inputStream, f.getFileName(), MimeType.forString(f.getMimeType()));
-                } catch (IOException e) {
-                    throw new MeldingsUtvekslingRuntimeException(StatusMessage.UNABLE_TO_CREATE_STANDARD_BUSINESS_DOCUMENT.getTechnicalMessage(), e);
-                }
-            });
-            asicWriter.sign(signatureHelper);
-        } finally {
-            for (InputStream is : streamsToClose) {
-                is.close();
-            }
+            asicWriter.sign(input.getSignatureHelper());
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not sign ASiC-E!", e);
         }
     }
+
+    private void addAsicFile(AsicWriter asicWriter, AsicEAttachable attachable) {
+        log.debug("Adding file {} of type {}", attachable.getFilename(), attachable.getMimeType());
+        try (InputStream inputStream = new BufferedInputStream(attachable.getResource().getInputStream())) {
+            asicWriter.add(inputStream, attachable.getFilename(), MimeType.forString(attachable.getMimeType().toString()));
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not add manifest to ASiC-E!", e);
+        }
+    }
+
+    @SneakyThrows({IOException.class})
+    private AsicWriter getAsicWriter(Input input, WritableResource output) {
+        return AsicWriterFactory.newFactory(input.getSignatureMethod())
+                .newContainer(output.getOutputStream());
+    }
+
+    @Value
+    @Builder
+    public static class Input {
+        @NonNull Manifest manifest;
+        @NonNull Stream<? extends AsicEAttachable> documents;
+        @NonNull SignatureMethod signatureMethod;
+        @NonNull SignatureHelper signatureHelper;
+    }
 }
+

@@ -7,13 +7,13 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.noarkexchange.LocalNorarkExistsCondition;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.SvarInnPutMessageForwarder;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
+import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -45,8 +45,8 @@ public class DpfPollingConfig {
     }
 
     @Bean
-    public SvarInnNextMoveForwarder svarInnNextMoveForwarder(SvarInnNextMoveConverter svarInnNextMoveConverter, SvarInnService svarInnService, NextMoveQueue nextMoveQueue) {
-        return new SvarInnNextMoveForwarder(svarInnNextMoveConverter, svarInnService, nextMoveQueue);
+    public SvarInnNextMoveForwarder svarInnNextMoveForwarder(SvarInnNextMoveConverter svarInnNextMoveConverter, SvarInnService svarInnService, NextMoveQueue nextMoveQueue, PromiseMaker promiseMaker) {
+        return new SvarInnNextMoveForwarder(svarInnNextMoveConverter, svarInnService, nextMoveQueue, promiseMaker);
     }
 
     @Bean

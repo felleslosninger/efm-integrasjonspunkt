@@ -9,12 +9,11 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -68,8 +67,10 @@ public class ServiceBusAmqpClient {
             context.deadLetter();
             return;
         }
-        InputStream asicStream = (payload.getAsic() != null) ? new ByteArrayInputStream(Base64.getDecoder().decode(payload.getAsic())) : null;
-        nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicStream);
+        ByteArrayResource asicResource = (payload.getAsic() != null)
+                ? new ByteArrayResource(Base64.getDecoder().decode(payload.getAsic()))
+                : null;
+        nextMoveQueue.enqueueIncomingMessage(payload.getSbd(), DPE, asicResource);
         context.complete();
     }
 

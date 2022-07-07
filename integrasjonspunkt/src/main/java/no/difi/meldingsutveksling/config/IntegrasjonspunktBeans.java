@@ -3,28 +3,27 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.mail.MailClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import no.difi.move.common.oauth.JWTDecoder;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.client.RestOperations;
 
 import java.net.MalformedURLException;
@@ -32,12 +31,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Clock;
+import java.util.function.Supplier;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
-@Import(DpiConfig.class)
+@Import({DpiConfig.class, Plumber.class, PromiseMaker.class})
 public class IntegrasjonspunktBeans {
 
     @Bean
@@ -70,13 +70,12 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public CmsUtil cmsUtil(IntegrasjonspunktProperties props) {
+    public Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier(IntegrasjonspunktProperties props) {
         if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
                 Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
-            return new CmsUtil(null);
+            return () -> null;
         }
-        return new CmsUtil();
+        return () -> CmsAlgorithm.RSAES_OAEP;
     }
 
     @Bean
