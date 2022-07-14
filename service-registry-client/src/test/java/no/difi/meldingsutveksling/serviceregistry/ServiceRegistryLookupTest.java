@@ -82,7 +82,7 @@ public class ServiceRegistryLookupTest {
     @MockBean
     private RestClient client;
 
-    private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
+    private ServiceRecord dpo = new ServiceRecord(DPO, ORGNR, "certificate", "http://localhost:4567");
 
     @BeforeEach
     public void setup() {

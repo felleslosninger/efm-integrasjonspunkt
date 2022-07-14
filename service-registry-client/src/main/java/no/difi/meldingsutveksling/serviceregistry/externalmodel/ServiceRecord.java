@@ -3,6 +3,9 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import org.springframework.util.StringUtils;
 import sun.security.provider.X509Factory;
 
@@ -14,7 +17,7 @@ public class ServiceRecord {
 
     public static final ServiceRecord EMPTY = new ServiceRecord();
 
-    private String organisationNumber;
+    private PartnerIdentifier identifier;
     private String pemCertificate;
     private String orgnrPostkasse;
     private String postkasseAdresse;
@@ -28,14 +31,14 @@ public class ServiceRecord {
     private List<String> documentTypes;
     private Service service;
 
-    public ServiceRecord(ServiceIdentifier serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
-        this.organisationNumber = organisationNumber;
+    public ServiceRecord(ServiceIdentifier serviceIdentifier, PartnerIdentifier identifier, String pemCertificate, String endPointURL) {
+        this.identifier = identifier;
         this.pemCertificate = pemCertificate;
         this.service = new Service(serviceIdentifier, endPointURL);
     }
 
     public ServiceRecord() {
-        this.organisationNumber = "";
+        this.identifier = Iso6523.of(ICD.NO_ORG,"12345678");
         this.pemCertificate = "";
         this.epostAdresse = "";
         this.mobilnummer = "";
