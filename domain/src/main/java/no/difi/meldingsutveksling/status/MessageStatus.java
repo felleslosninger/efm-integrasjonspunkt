@@ -39,7 +39,7 @@ public class MessageStatus extends AbstractEntity<Long> {
         return conversation.getId();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "conv_id")
     @JsonIgnore
     private Conversation conversation;
