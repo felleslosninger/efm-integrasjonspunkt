@@ -34,9 +34,10 @@
         <th>Title</th>
         <th>Sender</th>
         <th>Receiver</th>
-        <th>Reference</th>
         <th>Date</th>
-        <th>Type</th>
+        <th>Process</th>
+        <th>Document type</th>
+        <th>Service</th>
         <th>Last status</th>
         <th></th>
     </tr>
@@ -61,8 +62,9 @@
         <td th:text="${c.messageTitle}">Title</td>
         <td th:text="${c.senderIdentifier}">Receiver</td>
         <td th:text="${c.receiverIdentifier}">Receiver</td>
-        <td th:text="${c.messageReference}">Title</td>
         <td th:text="${c.lastUpdate}">Date</td>
+        <td th:text="${c.processIdentifier}">Date</td>
+        <td th:text="${c.documentIdentifier}">Date</td>
         <td th:text="${c.serviceIdentifier}">Type</td>
         <td th:text="${statusMap.get(c.messageId)}">Last status</td>
         <td>
