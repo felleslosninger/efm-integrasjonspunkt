@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.noarkexchange;
 import no.difi.meldingsutveksling.GetCanReceiveObjectMother;
 import no.difi.meldingsutveksling.PutMessageObjectMother;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.ServiceRecordObjectMother;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
@@ -43,7 +42,7 @@ public class IntegrasjonspunktImplTest {
     @BeforeEach
     public void setUp() throws ServiceRegistryLookupException {
         openMocks(this);
-        ServiceRecord serviceRecord = ServiceRecordObjectMother.createDPVServiceRecord("1234");
+        ServiceRecord serviceRecord = new ServiceRecord(ServiceIdentifier.DPV, Iso6523.of(ICD.NO_ORG, "123456789"), "","http://localhost");
         lenient().when(serviceRegistryLookup.getServiceRecord(any(SRParameter.class))).thenReturn(serviceRecord);
         lenient().when(propertiesMock.getOrg()).thenReturn(organizationMock);
         lenient().when(strategyFactory.getStrategy(ServiceIdentifier.DPV)).thenReturn(Optional.of(mock(DpvConversationStrategyImpl.class)));

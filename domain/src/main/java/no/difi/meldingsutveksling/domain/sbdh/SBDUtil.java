@@ -21,6 +21,14 @@ public class SBDUtil {
                 .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier()));
     }
 
+    public static Optional<Iso6523> getReceiverPartIdentifier(StandardBusinessDocument sbd) {
+        return Optional.ofNullable(sbd)
+                .map(StandardBusinessDocument::getReceiverIdentifier)
+                .flatMap(p -> p.as(Iso6523.class))
+                .filter(Iso6523::hasOrganizationPartIdentifier)
+                .map(o -> Iso6523.of(o.getIcd(), o.getOrganizationPartIdentifier()));
+    }
+
     public static Optional<Iso6523> getSenderPartIdentifier(StandardBusinessDocumentHeader sbdh) {
         return Optional.ofNullable(sbdh)
                 .map(StandardBusinessDocumentHeader::getSenderIdentifier)

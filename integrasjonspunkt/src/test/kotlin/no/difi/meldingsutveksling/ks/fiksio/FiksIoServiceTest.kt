@@ -64,7 +64,7 @@ internal class FiksIoServiceTest {
         val convId = "c9f37b22-cf8a-44de-b854-050f6a9acc7a"
         val protocol = "digdir.einnsyn.v1"
 
-        val sr = ServiceRecord(ServiceIdentifier.DPFIO, iso6523.organizationIdentifier, "pem123", kontoId)
+        val sr = ServiceRecord(ServiceIdentifier.DPFIO, iso6523, "pem123", kontoId)
         sr.process = protocol
         sr.documentTypes = listOf(protocol)
         every { serviceRegistryLookup.getServiceRecord(any(), any()) } returns sr
