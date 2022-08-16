@@ -52,10 +52,11 @@ public class AltinnTransport {
                             !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
                 return mcScope.get().getIdentifier();
             }
-            if (SBDUtil.getSenderPartIdentifier(sbd).isPresent()) {
-                return sbd.getSenderIdentifier().getIdentifier();
-            }
         }
+        if (SBDUtil.getReceiverPartIdentifier(sbd).isPresent()) {
+            return sbd.getReceiverIdentifier().getIdentifier();
+        }
+
         return uuidGenerator.generate();
     }
 }

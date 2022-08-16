@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.meldingsutveksling.altinn.mock.brokerstreamed.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.pipes.Plumber;
 import no.difi.meldingsutveksling.pipes.PromiseMaker;
@@ -150,8 +151,9 @@ public class AltinnWsClient {
             // SendersReference is default set to random UUID.
             // Make sure not to consume messages with matching message channel pattern.
             Pattern uuidRegexpPattern = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
-            fileStream = fileStream.filter(f -> f.getSendersReference() == null ||
-                !uuidRegexpPattern.matcher(f.getSendersReference().getValue()).matches());
+            fileStream = fileStream
+                    .filter(f -> f.getSendersReference() == null || !uuidRegexpPattern.matcher(f.getSendersReference().getValue()).matches())
+                    .filter(f -> f.getSendersReference() != null && !Iso6523.isValid(f.getSendersReference().getValue()));
         }
         return fileStream
             .map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))

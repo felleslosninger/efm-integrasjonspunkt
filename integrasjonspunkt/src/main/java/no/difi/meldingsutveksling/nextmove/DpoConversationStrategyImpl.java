@@ -45,13 +45,12 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) {
         ifReceipt(message, mc -> message.getSbd().addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, mc.getChannel())));
         // If part identifier matches identifier set in IP-props, then it is utvidet adressering. If not, it is on-behalf-of.
-        SBDUtil.getSenderPartIdentifier(message.getSbd()).ifPresent(o -> {
-                    if (!o.equals(integrasjonspunktProperties.getOrg().getIdentifier().getOrganizationPartIdentifier())) {
-                        message.getSbd().setSenderIdentifier(o);
-                    }
-                }
-        );
-
+        if (message.getSbd().getSenderIdentifier().hasOrganizationPartIdentifier()) {
+            if (!message.getSbd().getSenderIdentifier().getOrganizationPartIdentifier()
+                    .equals(integrasjonspunktProperties.getOrg().getIdentifier().getOrganizationPartIdentifier())) {
+                SBDUtil.getSenderPartIdentifier(message.getSbd()).ifPresent(x -> message.getSbd().setSenderIdentifier(x));
+            }
+        }
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
             transport.send(message.getSbd());
             return;
