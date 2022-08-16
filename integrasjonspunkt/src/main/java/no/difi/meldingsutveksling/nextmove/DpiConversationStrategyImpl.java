@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpiConversationStrategy;
+import no.difi.meldingsutveksling.domain.ICD;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
@@ -75,7 +77,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
         } else {
             // Null receiver only allowed for print receiver
             KrrPrintResponse printDetails = printService.getPrintDetails();
-            ServiceRecord serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
+            ServiceRecord serviceRecord = new ServiceRecord(DPI, Iso6523.of(ICD.NO_ORG, printDetails.getPostkasseleverandoerAdresse()),
                     printDetails.getX509Sertifikat(), null);
             serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
             return serviceRecord;
