@@ -1,13 +1,13 @@
 Feature: Sending a Next Move DPV message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075946" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075946/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?securityLevel=3&conversationId=45efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946-administrasjon.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075946/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=45efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946-administrasjon.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    And a "GET" request to "http://localhost:9099/info/974720760" will respond with status "200" and the following "application/json" in "/restmocks/info/974720760.json"
-    And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
-    And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075946" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910075946/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?securityLevel=3&conversationId=45efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946-administrasjon.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910075946/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=45efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075946-administrasjon.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/info/0192:974720760" will respond with status "200" and the following "application/json" in "/restmocks/info/974720760.json"
+    And a "GET" request to "http://localhost:9099/info/0192:910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
+    And a "GET" request to "http://localhost:9099/virksert/0192:910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """

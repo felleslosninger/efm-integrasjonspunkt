@@ -1,10 +1,10 @@
 Feature: Sending a BEST/EDU message by the noarkExchange WebService
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075918?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
-    Given a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075918?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=6e9cab22-a682-461c-bcd4-f201bfb3de8c" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
+    Given a "GET" request to "http://localhost:9099/virksert/0192:910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
 
   Scenario: As a user I want to send a BEST/EDU message
 

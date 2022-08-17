@@ -1,10 +1,10 @@
 Feature: Sending a Next Move DPE message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
-    And a "GET" request to "http://localhost:9099/identifier/910075935/process/urn:no:difi:profile:einnsyn-innsynskrav:ver1.0?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935-innsynskrav.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910075935/process/urn:no:difi:profile:einnsyn-innsynskrav:ver1.0?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935-innsynskrav.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/virksert/0192:910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
 
   Scenario: As a user I want to send a DPE message

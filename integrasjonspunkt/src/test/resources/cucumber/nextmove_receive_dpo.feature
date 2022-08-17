@@ -1,9 +1,9 @@
 Feature: Receiving a Next Move DPO message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/974720760?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    And a "GET" request to "http://localhost:9099/identifier/910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:974720760?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910077473?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910077473/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a45" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-arkivmelding_response.json"
     And the Noark System is disabled
     And Altinn prepares a message with the following SBD:
     """

@@ -1,6 +1,6 @@
 {
   "infoRecord": {
-    "identifier": "910075935",
+    "identifier": "0192:910075935",
     "organizationName": "FIKS IO testorg",
     "postadresse": null,
     "entityType": {
@@ -9,7 +9,7 @@
   },
   "serviceRecords": [
     {
-      "organisationNumber": "910075935",
+      "organisationNumber": "0192:910075935",
       "pemCertificate": "",
       "process": "no.digdir.einnsyn.v1",
       "documentTypes": [

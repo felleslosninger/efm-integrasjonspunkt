@@ -1,6 +1,6 @@
 {
   "infoRecord": {
-    "identifier": "910075946",
+    "identifier": "0192:910075946",
     "organizationName": "TEST - C4",
     "postadresse": null,
     "entityType": {
@@ -9,7 +9,7 @@
   },
   "serviceRecords": [
     {
-      "organisationNumber": "910075946",
+      "organisationNumber": "0192:910075946",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICujCCAaKgAwIBAgIEXJssBTANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTEwMDc1OTQ2MCAXDTE5MDMyNzA3NTM0MVoYDzIxMTkwMzI3MDc1\nMzQxWjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTEwMDc1OTQ2MIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlGt9yLatup8yNOhhNm6Oj2J1FL4ch7U0ml0I\nkUnVXh61kui+88BZNSElauLQ1AAwyPdLR0R/zwL/1/r1Vx4qM9EsmkKW03ADuFdc\nlJG8fTNF9wqQYN/4TsdF/4UoNhpM+oWBgdcevRt7UhElqhTO++FPNUyKNOoDDUhc\n0tT1Y0HCzB5i0bSL9DEbCO/JZ7dLupYcytgoHuiEJi9PEe6XWLSQmQxM3dt8fCc8\nHzUBF8pz8xU1vK7u0NDxWTcSLrmTIm+cLXVJwHu9Id3KAyBaRoZW4saKSqogbSma\nvVjjAlKVka8ZH8E0ywrCyfd2lDaogwXR3pWL55dpfSiEtAMskQIDAQABMA0GCSqG\nSIb3DQEBCwUAA4IBAQB3DlehTps+AbEzJSpphEC8dqxK8uIAIRKRO5lU+dS9bOKg\nV/pkPCUYlxfmR9zIXA7BT3VF2ZsR/PnshyKpmSZ99/QkAqbULmZGyT7Y00QQas8o\nIF75TgIs7gsHLDciCk2eLf8oqtOMIx2ReZ3zXa9lcdEADkS/JQd75J1tQhAnevBQ\nUSmfSnlZosGbmw4y5kkJpaXbgk1tDtVasnnJFSpDStQg2HQ0glE3N/Iqgy7r3pvU\nQqjHN3mX4x6aD5icJ+dZB4f0iYSB5elBU4DibHBalg/pFBCu2rSwFS23KUGbl6Os\nwAhDEWsIC5un6mw5zeuLFkIc4XhiOdrFfOBxJlLz\n-----END CERTIFICATE-----\n",
       "process": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
       "documentTypes": [

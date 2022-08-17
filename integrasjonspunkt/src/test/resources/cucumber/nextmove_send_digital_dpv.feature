@@ -3,9 +3,9 @@ Feature: Sending a Next Move Digital DPV message
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/17912099997?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/17912099997.json"
     And a "GET" request to "http://localhost:9099/identifier/17912099997/process/urn:no:difi:profile:digitalpost:info:ver1.0?conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/17912099997-info.json"
-    And a "GET" request to "http://localhost:9099/identifier/974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
-    And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
-    And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    And a "GET" request to "http://localhost:9099/identifier/0192:974720760" will respond with status "200" and the following "application/json" in "/restmocks/identifier/974720760.json"
+    And a "GET" request to "http://localhost:9099/info/0192:910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
+    And a "GET" request to "http://localhost:9099/virksert/0192:910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
     And a SOAP request to "http://localhost:9876/ServiceEngineExternal/CorrespondenceAgencyExternal.svc" will respond with the following payload:
     """

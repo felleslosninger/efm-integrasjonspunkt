@@ -1,7 +1,7 @@
 Feature: Sending a nextmove DPFIO message
 
   Background:
-    And a "GET" request to "http://localhost:9099/identifier/910075935/process/no.digdir.einnsyn.v1?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935-einnsyn_fiksio.json"
+    And a "GET" request to "http://localhost:9099/identifier/0192:910075935/process/no.digdir.einnsyn.v1?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935-einnsyn_fiksio.json"
     And the Noark System is disabled
 
   Scenario: As a user I want to send a DPE message

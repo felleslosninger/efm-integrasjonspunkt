@@ -1,7 +1,7 @@
 Feature: Receiving a FIKS IO message
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910077473/process/no.digdir.einnsyn.v1?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-einnsyn_fiksio.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910077473/process/no.digdir.einnsyn.v1?conversationId=21efbd4c-413d-4e2c-bbc5-257ef4a65a91" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473-einnsyn_fiksio.json"
     And FIKS IO prepares a message with messageId "21efbd4c-413d-4e2c-bbc5-257ef4a65a91"
     And appends a file named "primary.html" with mimetype="text/html":
     """

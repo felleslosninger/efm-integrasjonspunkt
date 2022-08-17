@@ -1,6 +1,6 @@
 {
   "infoRecord": {
-    "identifier": "974720760",
+    "identifier": "0192:974720760",
     "organizationName": "Test - C2",
     "postadresse": null,
     "entityType": {
@@ -9,7 +9,7 @@
   },
   "serviceRecords": [
     {
-      "organisationNumber": "974720760",
+      "organisationNumber": "0192:974720760",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIID/DCCAuSgAwIBAgIEaxVcdTANBgkqhkiG9w0BAQsFADBeMRIwEAYDVQQKEwlE\naWZpIHRlc3QxEjAQBgNVBAUTCTk5MTgyNTgyNzE0MDIGA1UEAxMrRElGSSB0ZXN0\nIHZpcmtzb21oZXRzc2VydGlmaWF0IGludGVybWVkaWF0ZTAeFw0xNzEyMTgxMjU5\nNTZaFw0yMzAxMTgxMjU5NTdaMD0xEjAQBgNVBAUTCTkxMDA3NzQ3MzEnMCUGA1UE\nAxMeRElGSSB0ZXN0IHZpcmtzb21oZXRzc2VydGlmaWF0MIIBIjANBgkqhkiG9w0B\nAQEFAAOCAQ8AMIIBCgKCAQEAqbBpfiDgPFISHYT1rRphMXgiYb+BXW70Buw7MugQ\nimowWD8J6BbiZuFg9qSr7LbzOOloixzAt2s/+tRyFhhUTmJw9lpLbXPheSpGQ+1K\nTVNaa05bhIZONxMxWufGysa8jOx33RX2WsRqI7i9IoI2Ow2gFCSoBJY+AZsbNrc4\nleBOhACz7SZ1nNOqoOU4zMnyguZY0xZc7+ou96zvzowphCX9bD+Nvm7mo6QrSvBQ\nIcDcz7Ywj3aQJpGp9YSIXvImq0Fb+mDHrk7LGVpfb39taC08O7tjVMZTw1yHyCGD\nDT7tHkzjDsYfxouAFE+HTEzkJPs5h3dYZN/FQQP7bBT8vwIDAQABo4HiMIHfMIGL\nBgNVHSMEgYMwgYCAFC0wPplnLfjHrg8Rj8M6O7BdJ73AoWKkYDBeMRIwEAYDVQQK\nEwlEaWZpIHRlc3QxEjAQBgNVBAUTCTk5MTgyNTgyNzE0MDIGA1UEAxMrRElGSSB0\nZXN0IHZpcmtzb21oZXRzc2VydGlmaWF0IGludGVybWVkaWF0ZYIEK1VFqzAdBgNV\nHQ4EFgQUr9yaBMyiLsHl1ErRrvcob6GbysswCQYDVR0TBAIwADAVBgNVHSAEDjAM\nMAoGCGCEQgEBAQFkMA4GA1UdDwEB/wQEAwIEsDANBgkqhkiG9w0BAQsFAAOCAQEA\nK1lZceLAnL9fLOqilOINvPkJVcrt5KZzaCCgzmeCgpCeo48Yh1lFKUPl83JfHAQu\n2kq5ecHxHuRxszefo+ULkuvoQ8dYFdvYUf8UrFuphLYXe3W8X3IeHU3pO45P1Si1\ntv0ZLwwO15UtEzmTnMPhgbdVKaU+31mkhy2VA6e+gdI+DCHrAXxaSeD6IMMNCx+5\n97yVRj7AUlSE6PXSks3vqqYnIYLK37nzDqOoDYFO1UtH4A+jGoym/zH7pEVoJhSQ\nVhzOHwdbY/AJCthyPwqQOhcEufXtkW1y+QCbYANP9dkVwAV8sD9wktxDr1QW9rPs\nUZJFKulfhuqGgftVk1xYVA==\n-----END CERTIFICATE-----\n",
       "process": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
       "documentTypes": [

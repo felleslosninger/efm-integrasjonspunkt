@@ -1,6 +1,6 @@
 {
   "infoRecord": {
-    "identifier": "910075935",
+    "identifier": "0192:910075935",
     "organizationName": "TEST - C4",
     "postadresse": null,
     "entityType": {
@@ -9,7 +9,7 @@
   },
   "serviceRecords": [
     {
-      "organisationNumber": "910075935",
+      "organisationNumber": "0192:910075935",
       "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICujCCAaKgAwIBAgIEXJjE1jANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTEwMDc1OTM1MCAXDTE5MDMyNTEyMDg1NFoYDzIxMTkwMzI1MTIw\nODU0WjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTEwMDc1OTM1MIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxzANeDURMTI4Ro6CBTQNoVzoFV/EfxV8tgxF\noFwsqYlozhzO+Ou6SstjGW6cd0VdMhxuNlwE/jwt2Q+T3vpmFYkIuQdBpzSWLrv8\nPUrbGZxlbqhWZISd0kdpuBqdkLESHduDFO8zDM+9ARwmFnMfK1gfLeJ32rq68jjQ\nw8g4/TFcxdwrXR9LW/Vor6E3e+B3pomdNt6XuzXO4zsaX2/fZZaLxs+uk/3uU80Y\nYxDWLleGOI0fMDDJbcu508DwIt9elI4IMil07T279PdFtAOExbVfQKhGh80Sz0wo\nn0yYpSObZQYqOFjJEM7D3KV+k2/LwMWFjRBWe1HNlTR2CJHMiQIDAQABMA0GCSqG\nSIb3DQEBCwUAA4IBAQC28uZkvP1rYtixPE1V3x8mIDE0umiwMTYH2gCmRk8PlKop\nFa02JUSwzxWIy6BqHjT06BYdleOM7orCShAXCdfVqPciBEavXClBuRWexJl9+Het\nZmZCW2AZPgiMOoj3oO0V90vAosTllAMe1hASVUtDYHhJ+hbhQ2ur/5kxujVLS/e4\n7/d/g3e+7XwVOPi3/57xNgwgfCwRjKRH1rgzCFwNFQQUImYbBdXZHtHloGU/3LoP\nFkEKmvI0uYFlFD62f7Puwaw/iLWVwPVAIX4/Z7zwwOGtts/Rzu8pF5wC9hsdgC0i\nxhEQp8mR21TPk1VBbWBU7jfL1IsZ6gsAfWeYVxmU\n-----END CERTIFICATE-----\n",
       "process": "urn:no:difi:profile:einnsyn-innsynskrav:ver1.0",
       "documentTypes": [

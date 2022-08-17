@@ -1,8 +1,8 @@
 Feature: Capabilities
 
   Background:
-    Given a "GET" request to "http://localhost:9099/identifier/910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
-    Given a "GET" request to "http://localhost:9099/identifier/910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910077473" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
+    Given a "GET" request to "http://localhost:9099/identifier/0192:910075935" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935.json"
     Given a "GET" request to "http://localhost:9099/identifier/09118532322" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
 
   Scenario: As a user I want to get a list of all capabilities for 910077473
