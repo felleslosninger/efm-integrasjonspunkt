@@ -16,7 +16,7 @@ public class PutMessageObjectMother {
         envelope.setSender(senderAddress);
         envelope.setConversationId("123");
         AddressType receiverAddress = new AddressType();
-        receiverAddress.setOrgnr("42");
+        receiverAddress.setOrgnr("12345678");
         envelope.setReceiver(receiverAddress);
         request.setEnvelope(envelope);
         request.setPayload("<Melding><journpost><jpId>5</jpId></journpost></Melding>");

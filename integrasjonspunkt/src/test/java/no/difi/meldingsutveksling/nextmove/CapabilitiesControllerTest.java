@@ -55,7 +55,7 @@ public class CapabilitiesControllerTest {
         given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), isNull())).willReturn(capabilitiesDPI());
 
         mvc.perform(
-                get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                get("/api/capabilities/{receiverIdentifier}", "06068700602")
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -76,7 +76,7 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), isNull(), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("06068700602")), isNull(), isNull());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class CapabilitiesControllerTest {
         given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), any(Integer.class), isNull())).willReturn(capabilitiesDPI());
 
         mvc.perform(
-                get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                get("/api/capabilities/{receiverIdentifier}", "06068700602")
                         .param("securityLevel", "4")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -106,7 +106,7 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), eq(4), isNull());
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("06068700602")), eq(4), isNull());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class CapabilitiesControllerTest {
         given(capabilitiesFactory.getCapabilities(any(PartnerIdentifier.class), isNull(), anyString())).willReturn(capabilitiesDPI());
 
         mvc.perform(
-                get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                get("/api/capabilities/{receiverIdentifier}", "06068700602")
                         .param("process", "admin-process")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -136,7 +136,7 @@ public class CapabilitiesControllerTest {
                         )
                 );
 
-        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("01017012345")), isNull(), eq("admin-process"));
+        verify(capabilitiesFactory).getCapabilities(eq(PersonIdentifier.parse("06068700602")), isNull(), eq("admin-process"));
     }
 
     @Test
