@@ -25,7 +25,7 @@ public class OnBehalfOfNormalizer {
                 return;
             }
 
-            if (iso6523.getOrganizationIdentifier().equals(properties.getOrg().getIdentifier())) {
+            if (iso6523.equals(properties.getOrg().getIdentifier())) {
                 return;
             }
 

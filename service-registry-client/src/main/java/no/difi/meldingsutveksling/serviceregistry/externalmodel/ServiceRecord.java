@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.ICD;
@@ -17,6 +18,7 @@ public class ServiceRecord {
 
     public static final ServiceRecord EMPTY = new ServiceRecord();
 
+    @JsonProperty("organisationNumber")
     private PartnerIdentifier identifier;
     private String pemCertificate;
     private String orgnrPostkasse;
