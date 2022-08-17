@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.jackson.PartnerIdentifierModule;
 import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
@@ -63,7 +64,9 @@ public class ServiceRegistryLookupTest {
 
         @Bean
         ObjectMapper objectMapper() {
-            return new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new PartnerIdentifierModule());
+            return objectMapper;
         }
     }
 
@@ -173,7 +176,9 @@ public class ServiceRegistryLookupTest {
                 .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
             try {
-                return new ObjectMapper().writeValueAsString(resource);
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new PartnerIdentifierModule());
+                return objectMapper.writeValueAsString(resource);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

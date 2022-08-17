@@ -94,7 +94,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
         this.sbd = spy(new StandardBusinessDocument()
                 .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                        .addSender(new Partner())
+                        .addSender(new Partner().setIdentifier(new PartnerIdentification().setValue(SENDER_IDENTIFIER.getIdentifier())))
                         .addReceiver(new Partner())
                         .setDocumentIdentification(new DocumentIdentification()
                                 .setStandard("standard")
