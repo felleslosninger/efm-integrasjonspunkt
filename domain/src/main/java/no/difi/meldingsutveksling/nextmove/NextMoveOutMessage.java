@@ -14,6 +14,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.util.HashSet;
 
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
+
 @Entity
 @DiscriminatorValue("out")
 @NoArgsConstructor
@@ -41,7 +43,7 @@ public class NextMoveOutMessage extends NextMoveMessage {
                 sbd.getMessageId(),
                 sbd.getProcess(),
                 sbd.getReceiverIdentifier().getPrimaryIdentifier(),
-                sbd.getSenderIdentifier().getPrimaryIdentifier(),
+                getPartOrPrimaryIdentifier(sbd.getSenderIdentifier()),
                 serviceIdentifier,
                 sbd);
         message.setFiles(new HashSet<>());

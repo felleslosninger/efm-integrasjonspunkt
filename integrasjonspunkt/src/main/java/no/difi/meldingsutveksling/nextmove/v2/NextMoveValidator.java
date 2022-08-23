@@ -43,6 +43,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.MessageType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
 
 
 @Component
@@ -107,11 +108,11 @@ public class NextMoveValidator {
             }
         }
 
-        validateDpfForsendelseType(sbd, serviceIdentifier);
+        validateDpfForsendelse(sbd, serviceIdentifier);
 
     }
 
-    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+    private void validateDpfForsendelse(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (svarUtService.getIfAvailable() == null) {
             return;
         }
@@ -123,12 +124,24 @@ public class NextMoveValidator {
                 }
                 String forsendelseType = dpfSettings.getForsendelseType();
                 if (!isNullOrEmpty(forsendelseType)) {
-                    List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                    List<String> validTypes = svarUtService.getObject()
+                            .retreiveForsendelseTyper(getPartOrPrimaryIdentifier(sbd.getSenderIdentifier()));
                     if (!validTypes.contains(forsendelseType)) {
                         throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
                     }
                 }
             });
+
+            String senderIdentifier = getPartOrPrimaryIdentifier(sbd.getSenderIdentifier());
+            if (senderIdentifier.equals(props.getOrg().getNumber())) {
+                if (isNullOrEmpty(props.getFiks().getUt().getUsername())) {
+                    throw new MissingSvarUtCredentialsException(senderIdentifier);
+                }
+            } else {
+                if (!props.getFiks().getUt().getPaaVegneAv().containsKey(senderIdentifier)) {
+                    throw new MissingSvarUtCredentialsException(senderIdentifier);
+                }
+            }
         }
     }
 

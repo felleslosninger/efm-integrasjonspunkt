@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
 import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 
 @Getter
@@ -94,7 +95,7 @@ public class Conversation extends AbstractEntity<Long> {
         this.messageId = messageId;
         this.messageReference = messageReference;
         this.sender = sender.getIdentifier();
-        this.senderIdentifier = sender.getPrimaryIdentifier();
+        this.senderIdentifier = getPartOrPrimaryIdentifier(sender);
         if (receiver != null) {
             this.receiver = receiver.getIdentifier();
             this.receiverIdentifier = receiver.getPrimaryIdentifier();

@@ -4,9 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.Before;
 import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
@@ -15,6 +13,7 @@ import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
@@ -30,8 +29,8 @@ import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
-import no.difi.webservice.support.SoapFaultInterceptorLogger;
 import no.ks.fiks.io.client.FiksIOKlient;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
@@ -51,11 +50,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
-import org.springframework.ws.transport.http.AbstractHttpWebServiceMessageSender;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.Marshaller;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
 import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
@@ -72,6 +69,7 @@ import static org.mockito.Mockito.*;
         IntegrasjonspunktApplication.class,
         TestClockConfig.class,
         CucumberStepsConfiguration.SpringConfiguration.class,
+        CucumberStepsConfiguration.SvarUtConfiguration.class
 }, loader = SpringBootContextLoader.class)
 @CucumberContextConfiguration
 @SpringBootTest(
@@ -82,6 +80,23 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @TestPropertySource
 public class CucumberStepsConfiguration {
+
+    @Configuration
+    @Profile("cucumber")
+    @RequiredArgsConstructor
+    public static class SvarUtConfiguration {
+
+        private final SvarUtClientHolder svarUtClientHolder;
+        private final RequestCaptureClientInterceptor requestCaptureClientInterceptor;
+        private final IntegrasjonspunktProperties properties;
+
+        @PostConstruct
+        public void configureSvarUtClient() {
+            SvarUtWebServiceClientImpl client = svarUtClientHolder.getClient(properties.getOrg().getNumber());
+            client.setInterceptors(ArrayUtils.add(client.getInterceptors(), requestCaptureClientInterceptor));
+        }
+
+    }
 
     @Configuration
     @Profile("cucumber")
@@ -188,27 +203,6 @@ public class CucumberStepsConfiguration {
                     return properties;
                 }
             };
-        }
-
-        @SneakyThrows
-        @Bean
-        @Primary
-        public SvarUtWebServiceClientImpl svarUtClient(RequestCaptureClientInterceptor requestCaptureClientInterceptor, Jaxb2Marshaller marshaller, AbstractHttpWebServiceMessageSender svarUtMessageSender) {
-            SvarUtWebServiceClientImpl client = new SvarUtWebServiceClientImpl();
-            client.setDefaultUri("http://localhost:8080");
-            client.setMarshaller(marshaller);
-            client.setUnmarshaller(marshaller);
-
-            MessageFactory messageFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
-            client.setMessageFactory(new SaajSoapMessageFactory(messageFactory));
-            client.setMessageSender(svarUtMessageSender);
-
-            final ClientInterceptor[] interceptors = new ClientInterceptor[2];
-            interceptors[0] = SoapFaultInterceptorLogger.withLogMarkers(Markers.append("serviceidentifier", "fiks"));
-            interceptors[1] = requestCaptureClientInterceptor;
-            client.setInterceptors(interceptors);
-
-            return client;
         }
 
         @Bean

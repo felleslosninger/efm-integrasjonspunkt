@@ -30,6 +30,6 @@ public class SvarInnNextMoveForwarder implements Consumer<Forsendelse> {
             nextMoveQueue.enqueueIncomingMessage(svarInnPackage.getSbd(), ServiceIdentifier.DPF, svarInnPackage.getAsic());
             return null;
         }).await();
-        svarInnService.confirmMessage(forsendelse.getId());
+        svarInnService.confirmMessage(forsendelse);
     }
 }

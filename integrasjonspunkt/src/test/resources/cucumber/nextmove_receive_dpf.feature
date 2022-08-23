@@ -23,7 +23,7 @@ Feature: Receiving a Next Move DPF message
               "poststed": "Oslo",
               "navn": "Sømådalen og Bessaker Revisjon",
               "land": "Norge",
-              "orgnr": "910229028",
+              "orgnr": "910077473",
               "fnr": null
           },
           "id": "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
@@ -118,7 +118,7 @@ Feature: Receiving a Next Move DPF message
         } ],
         "receiver" : [ {
           "identifier" : {
-            "value" : "0192:910229028",
+            "value" : "0192:910077473",
             "authority" : "iso6523-actorid-upis"
           }
         } ],

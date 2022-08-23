@@ -45,7 +45,9 @@ public class NextMoveOutMessageFactory {
                 sbd.getMessageId(),
                 sbd.getProcess(),
                 sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
-                sbd.getSenderIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
+                        sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
+                        sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
     }
