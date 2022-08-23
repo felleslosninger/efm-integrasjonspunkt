@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,6 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
     private final IntegrasjonspunktProperties props;
-    private final PromiseMaker promiseMaker;
     private final BestEduAppReceiptService bestEduAppReceiptService;
 
     @Override
@@ -48,24 +46,21 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             return;
         }
 
-        promiseMaker.promise(reject -> {
-            InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message, reject);
+        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 
-            Object response = withLogstashMarker(markerFrom(message))
-                    .execute(() -> client.sendCorrespondence(correspondence));
+        Object response = withLogstashMarker(markerFrom(message))
+                .execute(() -> client.sendCorrespondence(correspondence));
 
-            if (response == null) {
-                throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
-            }
+        if (response == null) {
+            throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
+        }
 
-            String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
-            String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
-            conversationService.findConversation(message.getMessageId())
-                    .ifPresent(conversation -> conversationService.save(conversation
-                            .setServiceCode(serviceCode)
-                            .setServiceEditionCode(serviceEditionCode)));
-            return null;
-        }).await();
+        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
+        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
+        conversationService.findConversation(message.getMessageId())
+                .ifPresent(conversation -> conversationService.save(conversation
+                        .setServiceCode(serviceCode)
+                        .setServiceEditionCode(serviceEditionCode)));
 
         if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
             // Only log exceptions here to avoid sending message multiple times due to retry

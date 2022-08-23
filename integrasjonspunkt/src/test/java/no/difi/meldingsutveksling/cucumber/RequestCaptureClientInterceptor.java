@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.cucumber;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.client.WebServiceClientException;
@@ -54,9 +55,10 @@ public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter {
             if (payload.contains("sendForsendelseMedId")) {
                 messageSentHolder.set(svarUtDataParser.parse(payload, soapMessage.getAttachments()));
             } else {
-                InputStream encryptedAsic = soapMessage.getAttachments().next().getInputStream();
-                Message message = digipostAttachmentParser.parse(payload, encryptedAsic);
-                messageSentHolder.set(message);
+                try (InputStream encryptedAsic = soapMessage.getAttachments().next().getInputStream()) {
+                    Message message = digipostAttachmentParser.parse(payload, new InputStreamResource(encryptedAsic));
+                    messageSentHolder.set(message);
+                }
             }
         }
     }

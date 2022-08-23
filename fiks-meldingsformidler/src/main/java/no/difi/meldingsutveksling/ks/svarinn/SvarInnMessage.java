@@ -2,13 +2,14 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import lombok.NonNull;
 import lombok.Value;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 
 import java.util.function.Supplier;
 
 @Value(staticConstructor = "of")
 public class SvarInnMessage {
     @NonNull
-    private final Forsendelse forsendelse;
+    Forsendelse forsendelse;
     @NonNull
-    private final Supplier<SvarInnStreamedFile> streamFileSupplier;
+    Supplier<Document> documentSupplier;
 }

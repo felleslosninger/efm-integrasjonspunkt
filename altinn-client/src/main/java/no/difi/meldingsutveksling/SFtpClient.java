@@ -1,7 +1,12 @@
 package no.difi.meldingsutveksling;
 
 import com.jcraft.jsch.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
+import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +51,7 @@ public class SFtpClient {
         }
     }
 
-    public class ConnectException extends RuntimeException {
+    public static class ConnectException extends RuntimeException {
 
         public ConnectException(String message) {
             super(message);
@@ -61,8 +66,8 @@ public class SFtpClient {
         private final ChannelSftp sftp;
         private String remoteDirectory = "";
         private String localDirectory = "";
-        private Session localhost;
-        private Channel channel;
+        private final Session localhost;
+        private final Channel channel;
 
         public Connection(JSch jsch) throws JSchException {
             java.util.Properties config = new java.util.Properties();
@@ -103,11 +108,10 @@ public class SFtpClient {
 
         public void upload(AltinnPackage altinnPackage) {
             try {
-                OutputStream outputStream = sftp.put("test.zip"); // filename generator
-                altinnPackage.write(outputStream, null);
+                altinnPackage.write(new SFTPResource("test.zip"), null);
                 sftp.quit();
-            } catch (SftpException | IOException e) {
-                log.error("FTP put failed", e);
+            } catch (IOException e) {
+                throw new UploadException(e);
             }
         }
 
@@ -146,12 +150,8 @@ public class SFtpClient {
             return path;
         }
 
-        public InputStream getInputStream(String fileName) {
-            try {
-                return sftp.get(Paths.get(remoteDirectory, fileName).toString());
-            } catch (SftpException e) {
-                throw new UploadException(e);
-            }
+        public Resource getResource(String filename) {
+            return new SFTPResource(filename);
         }
 
         public class DownloadException extends RuntimeException {
@@ -159,5 +159,39 @@ public class SFtpClient {
                 super(e);
             }
         }
+
+        @RequiredArgsConstructor
+        private class SFTPResource extends AbstractResource implements WritableResource {
+
+            private final String filename;
+
+            @NonNull
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                try {
+                    return sftp.put(filename);
+                } catch (SftpException e) {
+                    throw new UploadException(e);
+                }
+            }
+
+            @NonNull
+            @Override
+            public String getDescription() {
+                return "SFTPResource";
+            }
+
+            @NonNull
+            @Override
+            public InputStream getInputStream() throws IOException {
+                try {
+                    return sftp.get(Paths.get(remoteDirectory, filename).toString());
+                } catch (SftpException e) {
+                    throw new UploadException(e);
+                }
+            }
+        }
+
     }
+
 }

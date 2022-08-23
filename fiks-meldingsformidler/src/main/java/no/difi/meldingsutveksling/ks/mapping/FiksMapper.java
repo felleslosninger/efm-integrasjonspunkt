@@ -4,36 +4,33 @@ import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.*;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import org.springframework.beans.factory.ObjectProvider;
+import no.difi.move.common.io.ResourceDataSource;
+import no.difi.move.common.io.pipe.Reject;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,20 +44,21 @@ public class FiksMapper {
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
-    private final ObjectProvider<CmsUtil> cmsUtilProvider;
-    private final Plumber plumber;
+    private final CreateCMSDocument createCMSDocument;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier;
 
     public FiksMapper(IntegrasjonspunktProperties properties,
                       ServiceRegistryLookup serviceRegistry,
                       OptionalCryptoMessagePersister optionalCryptoMessagePersister,
-                      ObjectProvider<CmsUtil> cmsUtilProvider,
-                      Plumber plumber, ArkivmeldingUtil arkivmeldingUtil) {
+                      CreateCMSDocument createCMSDocument,
+                      ArkivmeldingUtil arkivmeldingUtil,
+                      Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
-        this.cmsUtilProvider = cmsUtilProvider;
-        this.plumber = plumber;
+        this.createCMSDocument = createCMSDocument;
+        this.algorithmIdentifierSupplier = algorithmIdentifierSupplier;
         this.arkivmeldingUtil = arkivmeldingUtil;
     }
 
@@ -165,9 +163,9 @@ public class FiksMapper {
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) throws NextMoveException {
         String identifier = getArkivmeldingIdentifier(message);
-
-        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), identifier))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        try {
+            Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), identifier);
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
@@ -198,10 +196,15 @@ public class FiksMapper {
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
-        FileEntryStream fileEntryStream = optionalCryptoMessagePersister.readStream(messageId, file.getIdentifier(), reject);
+        Resource document = readDocument(messageId, file);
+        Resource encryptedDocument = createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
+                .resource(document)
+                .certificate(cert)
+                .keyEncryptionScheme(algorithmIdentifierSupplier.get())
+                .build(), reject);
 
         Dokument.Builder<Void> builder = Dokument.builder()
-                .withData(getDataHandler(cert, fileEntryStream.getInputStream(), reject))
+                .withData(new DataHandler(new ResourceDataSource(encryptedDocument)))
                 .withFilnavn(file.getFilename())
                 .withMimetype(file.getMimetype());
 
@@ -213,12 +216,12 @@ public class FiksMapper {
         return builder.build();
     }
 
-    private DataHandler getDataHandler(X509Certificate cert, InputStream is, Reject reject) {
-        PipedInputStream encrypted = plumber.pipe("encrypt attachment for FIKS forsendelse",
-                        inlet -> cmsUtilProvider.getIfAvailable().createCMSStreamed(is, inlet, cert), reject)
-                .outlet();
-
-        return new DataHandler(InputStreamDataSource.of(encrypted));
+    private Resource readDocument(String messageId, BusinessMessageFile file) {
+        try {
+            return optionalCryptoMessagePersister.read(messageId, file.getIdentifier());
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for messageId='%s'", file.getIdentifier(), messageId), e);
+        }
     }
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(Saksmappe sm, Journalpost jp) {

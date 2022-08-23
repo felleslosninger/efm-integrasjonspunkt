@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
-import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +13,6 @@ import javax.persistence.PersistenceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
-import java.sql.SQLException;
 
 @Slf4j
 @Component
@@ -21,54 +20,30 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 public class DBMessagePersister implements MessagePersister {
 
-    private final NextMoveMessageEntryRepository repo;
     private final BlobFactory blobFactory;
+    private final NextMoveMessageEntryRepository repo;
 
     @Override
     @Transactional
-    public void write(String messageId, String filename, byte[] message) throws IOException {
-        Blob contentBlob = blobFactory.createBlob(message);
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, contentBlob, (long) message.length);
-        repo.save(entry);
-    }
-
-    @Override
-    @Transactional
-    public void writeStream(String messageId, String filename, InputStream stream, long size) throws IOException {
-        Blob blob = blobFactory.createBlob(stream, size);
-        NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, blob, size);
-        repo.save(entry);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public byte[] read(String messageId, String filename) throws IOException {
-        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
-                .orElseThrow(() -> new IOException(String.format("File \'%s\' for message with id=%s not found in repository", filename, messageId)));
-
-        try {
-            return IOUtils.toByteArray(entry.getContent().getBinaryStream());
-        } catch (SQLException e) {
-            throw new IOException("Error reading data stream from database", e);
+    public void write(String messageId, String filename, Resource resource) throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            Blob blob = blobFactory.createBlob(inputStream, -1L);
+            NextMoveMessageEntry entry = NextMoveMessageEntry.of(messageId, filename, blob, -1L);
+            repo.save(entry);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public FileEntryStream readStream(String messageId, String filename) {
-        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename)
+    public Resource read(String messageId, String filename) throws IOException {
+        NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
                 .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));
-
-        try {
-            return FileEntryStream.of(entry.getContent().getBinaryStream(), entry.getSize());
-        } catch (SQLException e) {
-            throw new PersistenceException("Error reading data stream from database", e);
-        }
+        return new BlobResource(entry.getContent(), String.format("BLOB for messageId=%s, filename=%s", messageId, filename));
     }
 
     @Override
     @Transactional
-    public void delete(String messageId) {
+    public void delete(String messageId) throws IOException {
         repo.deleteByMessageId(messageId);
     }
 }

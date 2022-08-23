@@ -5,11 +5,12 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -35,12 +36,16 @@ public class AltinnTransport {
     }
 
     /**
-     * @param sbd             An SBD with a payload consisting of metadata only
-     * @param asicInputStream InputStream pointing to the encrypted ASiC package
+     * @param sbd  An SBD with a payload consisting of metadata only
+     * @param asic Resource pointing to the encrypted ASiC package
      */
-    public void send(StandardBusinessDocument sbd, InputStream asicInputStream) {
-        UploadRequest request = new AltinnWsRequest(getSendersReference(sbd), sbd, asicInputStream);
-        client.send(request);
+    public void send(StandardBusinessDocument sbd, Resource asic) {
+        UploadRequest request = new AltinnWsRequest(getSendersReference(sbd), sbd, asic);
+        try {
+            client.send(request);
+        } catch (Exception e) {
+            throw new NextMoveRuntimeException(String.format("Error sending message with messageId=%s to Altinn", sbd.getMessageId()), e);
+        }
     }
 
     private String getSendersReference(StandardBusinessDocument sbd) {

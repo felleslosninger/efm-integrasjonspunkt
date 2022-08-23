@@ -2,10 +2,7 @@ package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.dpi.Document;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
-import no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument;
-import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
@@ -20,7 +17,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ShipmentFactory {
@@ -36,37 +32,9 @@ public class ShipmentFactory {
                 .setChannel(channelNormalizer.normaiize(request.getMpcId()))
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
-                .setParcel(getParcel(request))
+                .setParcel(request.getParcel())
                 .setReceiverBusinessCertificate(X509CertificateHelper.createX509Certificate(request.getCertificate()))
                 .setLanguage(request.getLanguage());
-    }
-
-    private Parcel getParcel(MeldingsformidlerRequest request) {
-        return new Parcel()
-                .setMainDocument(toDpiClientDocument(request.getDocument()))
-                .setAttachments(request.getAttachments()
-                        .stream()
-                        .map(this::toDpiClientDocument)
-                        .collect(Collectors.toList()));
-    }
-
-    private no.difi.meldingsutveksling.dpi.client.domain.Document toDpiClientDocument(Document in) {
-        return new no.difi.meldingsutveksling.dpi.client.domain.Document()
-                .setTitle(in.getTitle())
-                .setFilename(in.getFilename())
-                .setMimeType(in.getMimeType())
-                .setResource(in.getResource())
-                .setMetadataDocument(toDpiClientMetadataDocument(in.getMetadataDocument()));
-    }
-
-    private MetadataDocument toDpiClientMetadataDocument(no.difi.meldingsutveksling.dpi.MetadataDocument in) {
-        if (in == null) {
-            return null;
-        }
-        return new no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument()
-                .setFilename(in.getFilename())
-                .setMimeType(in.getMimeType())
-                .setResource(in.getResource());
     }
 
     private BusinessMessage getBusinessMessage(MeldingsformidlerRequest request) {

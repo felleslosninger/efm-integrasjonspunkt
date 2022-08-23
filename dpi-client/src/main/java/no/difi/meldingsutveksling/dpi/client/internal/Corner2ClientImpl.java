@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.dpi.client.internal;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.dpi.client.Blame;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
-import no.difi.meldingsutveksling.dpi.client.domain.CmsEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.GetMessagesInput;
 import no.difi.meldingsutveksling.dpi.client.domain.Message;
 import no.difi.meldingsutveksling.dpi.client.domain.MessageStatus;
@@ -15,8 +14,11 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -76,7 +78,7 @@ public class Corner2ClientImpl implements Corner2Client {
     }
 
     @Override
-    public CmsEncryptedAsice getCmsEncryptedAsice(URI downloadurl) throws DpiException {
+    public InMemoryWithTempFileFallbackResource getCmsEncryptedAsice(URI downloadurl) throws DpiException {
         InMemoryWithTempFileFallbackResource cms = resourceFactory.getResource("dpi-", ".asic.cms");
         Flux<DataBuffer> dataBuffer = webClient.get()
                 .uri(downloadurl)
@@ -95,7 +97,7 @@ public class Corner2ClientImpl implements Corner2Client {
                     Blame.CLIENT);
         }
 
-        return new CmsEncryptedAsice(cms);
+        return cms;
     }
 
     @Override
@@ -104,8 +106,10 @@ public class Corner2ClientImpl implements Corner2Client {
                 .uri("/messages/in/{messageId}/read", messageId)
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this.dpiClientErrorHandler)
+                .onStatus(httpStatus -> httpStatus.is4xxClientError() && httpStatus != HttpStatus.NOT_FOUND, ClientResponse::createException)
+                .onStatus(HttpStatus::is5xxServerError, this.dpiClientErrorHandler)
                 .toBodilessEntity()
+                .onErrorResume(WebClientResponseException.NotFound.class, notFound -> Mono.empty())
                 .block();
     }
 }

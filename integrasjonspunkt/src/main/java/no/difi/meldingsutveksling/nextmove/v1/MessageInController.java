@@ -24,14 +24,13 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -134,7 +133,7 @@ public class MessageInController {
         }
 
         try {
-            byte[] asicBytes = cryptoMessagePersister.read(conversationId, ASIC_FILE);
+            Resource asic = cryptoMessagePersister.read(conversationId, ASIC_FILE);
             cryptoMessagePersister.delete(conversationId);
             inRepo.delete(message);
             conversationService.registerStatus(conversationId, ReceiptStatus.INNKOMMENDE_LEVERT);
@@ -147,13 +146,10 @@ public class MessageInController {
                 }
             }
 
-            InputStreamResource isr = new InputStreamResource(new ByteArrayInputStream(asicBytes));
-
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentLength(asicBytes.length)
-                    .body(isr);
+                    .body(asic);
         } catch (PersistenceException | IOException e) {
             Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);

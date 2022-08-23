@@ -2,12 +2,12 @@ package no.difi.meldingsutveksling.noarkexchange;
 
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.BestEduConverter;
+import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -28,13 +28,14 @@ import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -66,6 +67,7 @@ public class IntegrajonspunktReceiveImpl {
     private final InternalQueue internalQueue;
     private final ConversationIdEntityRepo conversationIdEntityRepo;
     private final MeldingFactory meldingFactory;
+    private final DecryptCMSDocument decryptCMSDocument;
 
     public IntegrajonspunktReceiveImpl(@Qualifier("localNoark") ObjectProvider<NoarkClient> localNoark,
                                        KeystoreHelper keystoreHelper,
@@ -77,7 +79,7 @@ public class IntegrajonspunktReceiveImpl {
                                        @Lazy NextMoveAdapter nextMoveAdapter,
                                        @Lazy InternalQueue internalQueue,
                                        ConversationIdEntityRepo conversationIdEntityRepo,
-                                       MeldingFactory meldingFactory) throws JAXBException {
+                                       MeldingFactory meldingFactory, DecryptCMSDocument decryptCMSDocument) throws JAXBException {
         this.localNoark = localNoark.getIfAvailable();
         this.keystoreHelper = keystoreHelper;
         this.conversationService = conversationService;
@@ -89,6 +91,7 @@ public class IntegrajonspunktReceiveImpl {
         this.internalQueue = internalQueue;
         this.conversationIdEntityRepo = conversationIdEntityRepo;
         this.meldingFactory = meldingFactory;
+        this.decryptCMSDocument = decryptCMSDocument;
 
         this.jaxbContext = JAXBContextFactory.createContext(new Class[]{Arkivmelding.class}, null);
     }
@@ -121,16 +124,26 @@ public class IntegrajonspunktReceiveImpl {
             }
             return putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
         } else {
-            byte[] asicBytes;
+            Resource encryptedAsic = getEncryptedAsic(sbd);
+            Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                    .resource(encryptedAsic)
+                    .keystoreHelper(keystoreHelper)
+                    .build());
             try {
-                asicBytes = messagePersister.read(sbd.getMessageId(), NextMoveConsts.ASIC_FILE);
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Unable to read persisted ASiC", e);
+                Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
+                MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
+                return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
+            } catch (Exception e) {
+                throw new NextMoveRuntimeException("Closing ASiC failed!", e);
             }
-            byte[] asic = new Decryptor(keystoreHelper).decrypt(asicBytes);
-            Arkivmelding arkivmelding = convertAsicEntryToArkivmelding(asic);
-            MeldingType meldingType = meldingFactory.create(arkivmelding, asic);
-            return putMessageRequestFactory.create(sbd, BestEduConverter.meldingTypeAsString(meldingType));
+        }
+    }
+
+    private Resource getEncryptedAsic(StandardBusinessDocument sbd) {
+        try {
+            return messagePersister.read(sbd.getMessageId(), NextMoveConsts.ASIC_FILE);
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException("Could not read ASiC!", e);
         }
     }
 
@@ -173,8 +186,8 @@ public class IntegrajonspunktReceiveImpl {
         }
     }
 
-    private Arkivmelding convertAsicEntryToArkivmelding(byte[] bytes) {
-        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+    private Arkivmelding convertAsicEntryToArkivmelding(Resource resource) {
+        try (ZipInputStream zipInputStream = new ZipInputStream(StreamUtils.nonClosing(resource.getInputStream()))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (NextMoveConsts.ARKIVMELDING_FILE.equals(entry.getName())) {
