@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -25,6 +26,7 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
+import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.ks.fiks.io.client.FiksIOKlient;
@@ -215,8 +217,8 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public CucumberKeyStore cucumberKeyStore(IntegrasjonspunktProperties properties) {
-            return new CucumberKeyStore(properties.getOrg().getKeystore());
+        public KeystoreHelper fiksKeystoreHelper(IntegrasjonspunktProperties properties) {
+            return new KeystoreHelper(properties.getFiks().getKeystore());
         }
 
         @Bean

@@ -7,8 +7,10 @@ import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
@@ -21,8 +23,6 @@ public class MessageInSteps {
 
     private final Holder<Message> messageInHolder;
     private final ObjectMapper objectMapper;
-
-    private JacksonTester<StandardBusinessDocument> json;
 
     @Before
     public void before() {
@@ -42,9 +42,12 @@ public class MessageInSteps {
                 .setSbd(sbd);
 
         if ("Altinn".equals(who)) {
-            message.attachment(new Attachment(body.getBytes())
-                    .setFileName(SBD_FILE)
-                    .setMimeType(MediaType.APPLICATION_JSON_VALUE));
+            message.attachment(Document.builder()
+                    .filename(SBD_FILE)
+                    .mimeType(MediaType.APPLICATION_JSON_VALUE)
+                    .resource(new ByteArrayResource(body.getBytes()))
+                    .build()
+            );
         }
 
         messageInHolder.set(message);
@@ -52,10 +55,10 @@ public class MessageInSteps {
 
     @And("^appends a file named \"([^\"]*)\" with mimetype=\"([^\"]*)\":$")
     public void appendsAFileNamedWithMimetype(String filename, String mimeType, String body) {
-        Attachment attachment = new Attachment(body.getBytes())
-                .setFileName(filename)
-                .setMimeType(mimeType);
-
-        messageInHolder.get().attachment(attachment);
+        messageInHolder.get().attachment(Document.builder()
+                .resource(new ByteArrayResource(body.getBytes()))
+                .filename(filename)
+                .mimeType(mimeType)
+                .build());
     }
 }

@@ -2,14 +2,14 @@ package no.difi.meldingsutveksling.api
 
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import java.io.InputStream
+import org.springframework.core.io.Resource
 
 interface NextMoveQueue {
 
     /**
-     * Enqueue an incoming nextmove message. [asicStream] is closed.
+     * Enqueue an incoming nextmove message. [asic] is closed.
      */
-    fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asicStream: InputStream?)
+    fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier, asic: Resource?)
 
     /**
      * Enqueue an incoming message.

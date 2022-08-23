@@ -37,9 +37,9 @@ public class MessageStatusMapper {
     public MessageStatus getMessageStatus(no.difi.meldingsutveksling.dpi.client.domain.MessageStatus in) {
         switch (in.getStatus()) {
             case OPPRETTET:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT, "Hjørne 2 ha mottatt meldingen");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT, "Hjørne 2 har mottatt meldingen");
             case SENDT:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 ha mottatt meldingen");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen");
             case FEILET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Generell melding om at det har skjedd en feil");
             default:

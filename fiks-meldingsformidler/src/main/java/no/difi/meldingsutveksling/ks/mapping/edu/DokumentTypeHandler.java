@@ -8,8 +8,8 @@ import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
  * Used to map a single EDU DokumentType to Forsendelse
  */
 public class DokumentTypeHandler implements Handler<Dokument.Builder> {
-    private DokumentType domainDocument;
-    private FileTypeHandler fileTypeHandler;
+    private final DokumentType domainDocument;
+    private final FileTypeHandler fileTypeHandler;
 
     public DokumentTypeHandler(DokumentType domainDocument, FileTypeHandler fileTypeHandler) {
         this.domainDocument = domainDocument;

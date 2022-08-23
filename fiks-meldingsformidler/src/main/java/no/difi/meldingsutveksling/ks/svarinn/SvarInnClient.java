@@ -4,12 +4,13 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.FiksConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.Reject;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.Reject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,14 +33,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Slf4j
 public class SvarInnClient {
 
-    @Getter
-    private final RestTemplate restTemplate;
+    private final Plumber plumber;
     @Getter
     private final String rootUri;
-    private final Plumber plumber;
     private final IntegrasjonspunktProperties props;
+    @Getter
+    private final RestTemplate restTemplate;
 
-    public SvarInnClient(IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder, Plumber plumber) {
+    public SvarInnClient(Plumber plumber, IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder) {
         this.plumber = plumber;
         this.props = props;
         this.rootUri = props.getFiks().getInn().getBaseUrl();
@@ -82,8 +83,8 @@ public class SvarInnClient {
         return Arrays.asList(Objects.requireNonNull(body));
     }
 
-    InputStream downloadZipFile(Forsendelse forsendelse, Reject reject) {
-        return plumber.pipe("downloading zip file", inlet ->
+    InputStreamResource downloadZipFile(Forsendelse forsendelse, Reject reject) {
+        return new InputStreamResource(plumber.pipe("downloading zip file", inlet ->
                 restTemplate.execute(forsendelse.getDownloadUrl(),
                         HttpMethod.GET,
                         request -> {
@@ -104,7 +105,7 @@ public class SvarInnClient {
                             log.info("File for forsendelse {} was downloaded ({} bytes)", forsendelse.getId(), bytes);
                             return null;
                         }), reject
-        ).outlet();
+        ).outlet());
     }
 
     void confirmMessage(Forsendelse forsendelse) {

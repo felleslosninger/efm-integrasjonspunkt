@@ -13,5 +13,6 @@ public class Capability {
     private PostalAddress postAddress;
     private PostalAddress returnAddress;
     private List<DocumentType> documentTypes;
+    private DigitalPostAddress digitalPostAddress;
 
 }

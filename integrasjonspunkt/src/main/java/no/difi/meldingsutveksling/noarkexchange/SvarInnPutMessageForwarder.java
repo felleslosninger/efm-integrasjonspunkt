@@ -22,9 +22,9 @@ import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarker
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.move.common.io.pipe.PromiseMaker;
+import no.difi.move.common.io.pipe.Reject;
 import org.slf4j.MDC;
 
 import java.time.Clock;

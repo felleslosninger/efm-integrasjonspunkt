@@ -12,6 +12,7 @@ import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
+import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -19,14 +20,6 @@ import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -66,15 +59,22 @@ public class DpiClientConfig {
     private final DigitalPostInnbyggerConfig properties;
 
     @Bean
-    public DpiClient dpiClient(CreateCmsEncryptedAsice createCmsEncryptedAsice,
-                               CreateSendMessageInput createSendMessageInput,
-                               Corner2Client corner2Client,
-                               MessageUnwrapper messageUnwrapper) {
+    public DpiClient dpiClient(
+            InMemoryWithTempFileFallbackResourceFactory resourceFactory,
+            CreateCMSEncryptedAsice createCmsEncryptedAsice,
+            CreateSendMessageInput createSendMessageInput,
+            Corner2Client corner2Client,
+            MessageUnwrapper messageUnwrapper,
+            KeystoreHelper dpiKeystoreHelper,
+            CreateManifest createManifest) {
         return new DpiClientImpl(
+                resourceFactory,
                 createCmsEncryptedAsice,
                 createSendMessageInput,
                 corner2Client,
-                messageUnwrapper);
+                messageUnwrapper,
+                dpiKeystoreHelper,
+                createManifest);
     }
 
     @Bean
@@ -186,20 +186,6 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public CreateCMSDocument createCMSDocument(AlgorithmIdentifier rsaesOaepIdentifier) {
-        return new CreateCMSDocument(CMSAlgorithm.AES256_CBC, rsaesOaepIdentifier);
-    }
-
-    @Bean
-    public AlgorithmIdentifier rsaesOaepIdentifier() {
-        AlgorithmIdentifier hash = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
-        AlgorithmIdentifier mask = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hash);
-        AlgorithmIdentifier pSource = new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]));
-        ASN1Encodable parameters = new RSAESOAEPparams(hash, mask, pSource);
-        return new AlgorithmIdentifier(PKCSObjectIdentifiers.id_RSAES_OAEP, parameters);
-    }
-
-    @Bean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
                 .threshold(properties.getTemporaryFileThreshold())
@@ -262,21 +248,6 @@ public class DpiClientConfig {
     @Bean
     public FileExtensionMapper fileExtensionMapper() {
         return new FileExtensionMapper();
-    }
-
-    @Bean
-    public CreateAsiceImpl createAsiceImpl(
-            CreateManifest createManifest,
-            KeystoreHelper dpiKeystoreHelper) {
-        return new CreateAsiceImpl(createManifest, dpiKeystoreHelper);
-    }
-
-    @Bean
-    public CreateCmsEncryptedAsice createCmsEncryptedAsice(
-            InMemoryWithTempFileFallbackResourceFactory resourceFactory,
-            CreateAsice createASiCE,
-            CreateCMSDocument createCMS) {
-        return new CreateCmsEncryptedAsice(resourceFactory, createASiCE, createCMS);
     }
 
     @Bean

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<StandardBusinessDocument xmlns:ns3="http://begrep.difi.no/sdp/schema_v10"
+                          xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
+                          xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader">
+    <StandardBusinessDocumentHeader>
+        <HeaderVersion>1.0</HeaderVersion>
+        <Sender>
+            <Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:0192">0192:111111111</Identifier>
+        </Sender>
+        <Receiver>
+            <Identifier Authority="urn:oasis:names:tc:ebcore:partyid-type:iso6523:0192">0192:222222222</Identifier>
+        </Receiver>
+        <DocumentIdentification>
+            <Standard>urn:no:difi:sdp:1.0</Standard>
+            <TypeVersion>1.0</TypeVersion>
+            <InstanceIdentifier>b6e442ca-2c62-42f2-abc3-fdbe9c96b9c2</InstanceIdentifier>
+            <Type>kvittering</Type>
+            <CreationDateAndTime>2022-04-27T10:10:05.893Z</CreationDateAndTime>
+        </DocumentIdentification>
+        <BusinessScope>
+            <Scope>
+                <Type>ConversationId</Type>
+                <InstanceIdentifier>6aa00d4b-a9fe-43c1-91ea-88908c118610</InstanceIdentifier>
+                <Identifier>urn:no:difi:sdp:1.0</Identifier>
+            </Scope>
+        </BusinessScope>
+    </StandardBusinessDocumentHeader>
+    <ns3:kvittering>
+        <ns2:Signature>
+            <ns2:SignedInfo>
+                <ns2:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <ns2:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <ns2:Reference URI="">
+                    <ns2:Transforms>
+                        <ns2:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    </ns2:Transforms>
+                    <ns2:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ns2:DigestValue></ns2:DigestValue>
+                </ns2:Reference>
+            </ns2:SignedInfo>
+            <ns2:SignatureValue/>
+            <ns2:KeyInfo>
+                <ns2:X509Data>
+                    <ns2:X509Certificate></ns2:X509Certificate>
+                </ns2:X509Data>
+            </ns2:KeyInfo>
+        </ns2:Signature>
+        <ns3:tidspunkt>2022-04-27T10:10:05.893Z</ns3:tidspunkt>
+        <ns3:levering/>
+    </ns3:kvittering>
+</StandardBusinessDocument>

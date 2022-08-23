@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.dpi.client.internal.domain;
 
 import lombok.Value;
-import no.difi.meldingsutveksling.dpi.client.domain.AsicEAttachable;
+import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.util.MimeType;
 
 @Value
 public class Signature implements AsicEAttachable {
@@ -15,8 +17,8 @@ public class Signature implements AsicEAttachable {
     }
 
     @Override
-    public String getMimeType() {
-        return "application/xml";
+    public MimeType getMimeType() {
+        return MediaType.APPLICATION_XML;
     }
 
     @Override

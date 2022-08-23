@@ -2,23 +2,18 @@ package no.difi.meldingsutveksling.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsUtil;
-import no.difi.meldingsutveksling.pipes.Plumber;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.meldingsutveksling.pipes.Reject;
-import no.difi.move.common.cert.KeystoreHelper;
-import org.springframework.beans.factory.ObjectProvider;
+import no.difi.move.common.io.OutputStreamResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FastByteArrayOutputStream;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
-import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
+import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
 @Component
 @Profile("cucumber")
@@ -26,44 +21,21 @@ import static no.difi.meldingsutveksling.pipes.PipeOperations.copyTo;
 public class AltinnZipFactory {
 
     private final ObjectMapper objectMapper;
-    private final AsicFactory asicFactory;
-    private final KeystoreHelper keystoreHelper;
-    private final ObjectProvider<CmsUtil> cmsUtilProvider;
-    private final Plumber plumber;
-    private final PromiseMaker promiseMaker;
+    private final CreateAsic createAsic;
 
-    @SneakyThrows
-    InputStream createAltinnZip(Message message) {
-        byte[] zipAsBytes = getAltinnZipAsBytes(message);
-        return new ByteArrayInputStream(zipAsBytes);
-    }
-
-    byte[] getAltinnZipAsBytes(Message message) {
-        return promiseMaker.promise(reject -> {
-            try {
-                return getBytes(message, reject);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to get AltinnZip", e);
-            }
-        }).await();
-    }
-
-    private byte[] getBytes(Message message, Reject reject) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    public ByteArrayResource createAltinnZip(Message message) throws IOException {
+        FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bos);
         out.putNextEntry(new ZipEntry(SBD_FILE));
         out.write(objectMapper.writeValueAsString(message.getSbd()).getBytes());
         out.closeEntry();
 
         out.putNextEntry(new ZipEntry(ASIC_FILE));
-
-        plumber.pipe("create asic", inlet -> asicFactory.createAsic(message, inlet), reject)
-                .andThen("CMS encrypt", (outlet, inlet) -> cmsUtilProvider.getIfAvailable().createCMSStreamed(outlet, inlet, keystoreHelper.getX509Certificate()))
-                .andFinally(copyTo(new BufferedOutputStream(out)));
+        createAsic.createAsic(message, new OutputStreamResource(out));
 
         out.closeEntry();
         out.close();
 
-        return bos.toByteArray();
+        return new ByteArrayResource(bos.toByteArray());
     }
 }

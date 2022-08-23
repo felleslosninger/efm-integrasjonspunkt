@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.Virksomhetmottaker;
 import java.time.OffsetDateTime;
 
 @Data
-public class Feil implements BusinessMessage, MaskinportentokenHolder {
+public class Feil implements BusinessMessage, MaskinportentokenHolder, TidspunktHolder {
 
     private Avsender avsender;
     private Virksomhetmottaker mottaker;
@@ -19,7 +19,7 @@ public class Feil implements BusinessMessage, MaskinportentokenHolder {
     private Type feiltype;
     private String detaljer;
 
-    private enum Type {
+    public enum Type {
         KLIENT, SERVER
     }
 }

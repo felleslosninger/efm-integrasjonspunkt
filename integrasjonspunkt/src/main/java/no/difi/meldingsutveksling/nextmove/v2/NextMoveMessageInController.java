@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.slf4j.MDC;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -57,10 +57,10 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "pop/{messageId}")
-    public ResponseEntity<InputStreamResource> popMessage(@PathVariable("messageId") String messageId) {
+    public ResponseEntity<Resource> popMessage(@PathVariable("messageId") String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         try {
-            InputStreamResource asic = messageService.popMessage(messageId);
+            Resource asic = messageService.popMessage(messageId);
             if (asic == null) {
                 return ResponseEntity.noContent().build();
             }

@@ -67,5 +67,6 @@ public class Forsendelse {
         private String navn;
         private String land;
         private String orgnr;
+        private String fnr;
     }
 }

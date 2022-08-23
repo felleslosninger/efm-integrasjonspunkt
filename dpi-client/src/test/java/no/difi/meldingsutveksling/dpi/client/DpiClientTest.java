@@ -6,6 +6,9 @@ import com.nimbusds.jose.Payload;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.dokumentpakking.config.DokumentpakkingConfig;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
+import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -17,13 +20,18 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.*;
 import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
+import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.ResourceUtils;
+import no.difi.move.common.io.pipe.Plumber;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
@@ -35,11 +43,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import reactor.test.StepVerifier;
 
 import javax.mail.BodyPart;
@@ -47,7 +58,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.mail.util.SharedByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -63,15 +73,27 @@ import static net.javacrumbs.jsonunit.core.ConfigurationWhen.paths;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.then;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-@SpringBootTest(classes = {DpiClientTestConfig.class, DpiClientConfig.class})
+@SpringBootTest(classes = {
+        DpiClientTestConfig.class,
+        DpiClientConfig.class,
+        DokumentpakkingConfig.class,
+        TaskExecutorConfig.class,
+        PromiseMaker.class,
+        Plumber.class
+})
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
+
+    @MockBean private TransactionTemplate transactionTemplate;
+    @Mock private TransactionStatus transactionStatus;
 
     @Autowired
     private DpiClient dpiClient;
@@ -81,6 +103,9 @@ class DpiClientTest {
 
     @Autowired
     private DecryptCMSDocument decryptCMSDocument;
+
+    @Autowired
+    private KeystoreHelper serverKeystoreHelper;
 
     @Autowired
     private ParcelParser parcelParser;
@@ -123,6 +148,9 @@ class DpiClientTest {
 
     @BeforeEach
     public void beforeEach(MockServerClient client) {
+        when(transactionTemplate.execute(any()))
+                .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
+
         client.when(request()
                         .withMethod("POST")
                         .withPath("/token"))
@@ -225,8 +253,7 @@ class DpiClientTest {
 
         assertThatThrownBy(() -> send(client, input, httpResponse))
                 .isInstanceOf(DpiException.class)
-                .hasMessage(String.format("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}"))
-                .hasCauseInstanceOf(WebClientResponseException.BadRequest.class);
+                .hasMessage(String.format("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}"));
     }
 
     @Test
@@ -319,10 +346,10 @@ class DpiClientTest {
                         .withBody(bytes)
                 );
 
-        CmsEncryptedAsice cmsEncryptedAsice = dpiClient.getCmsEncryptedAsice(URI.create("http://localhost:8900" + path));
+        InMemoryWithTempFileFallbackResource cmsEncryptedAsice = dpiClient.getCmsEncryptedAsice(URI.create("http://localhost:8900" + path));
 
-        assertThat(cmsEncryptedAsice.getResource().contentLength()).isEqualTo(1024 * 100);
-        assertThat(ResourceUtils.toByteArray(cmsEncryptedAsice.getResource())).isEqualTo(bytes);
+        assertThat(cmsEncryptedAsice.contentLength()).isEqualTo(1024 * 100);
+        assertThat(ResourceUtils.toByteArray(cmsEncryptedAsice)).isEqualTo(bytes);
 
         client.verify(request()
                 .withMethod("GET")
@@ -405,20 +432,28 @@ class DpiClientTest {
         assertThat(cmsPart.getFileName()).isEqualTo("asic.cms");
 
         SharedByteArrayInputStream content = (SharedByteArrayInputStream) cmsPart.getContent();
-        InputStream asicInputStream = decryptCMSDocument.decrypt(content);
-        Parcel parcel = parcelParser.parse(
-                standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
-                asicInputStream);
+        Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                .resource(new InputStreamResource(content))
+                .keystoreHelper(serverKeystoreHelper)
+                .build());
 
+        Parcel parcel = getParcel(standardBusinessDocument, asic);
         assertThat(parcel.getMainDocument().getFilename()).isEqualTo("svada.pdf");
-        assertThat(parcel.getMainDocument().getMimeType()).isEqualTo("application/pdf");
+        assertThat(parcel.getMainDocument().getMimeType()).isEqualTo(org.springframework.http.MediaType.APPLICATION_PDF);
         assertThat(ResourceUtils.toByteArray(parcel.getMainDocument().getResource()))
                 .isEqualTo(ResourceUtils.toByteArray(hoveddokument));
         assertThat(parcel.getAttachments()).hasSize(1);
         assertThat(parcel.getAttachments().get(0).getFilename()).isEqualTo("bilde.png");
-        assertThat(parcel.getAttachments().get(0).getMimeType()).isEqualTo("image/png");
+        assertThat(parcel.getAttachments().get(0).getMimeType()).isEqualTo(org.springframework.http.MediaType.IMAGE_PNG);
         assertThat(ResourceUtils.toByteArray(parcel.getAttachments().get(0).getResource()))
                 .isEqualTo(ResourceUtils.toByteArray(vedlegg));
+    }
+
+    @SneakyThrows
+    private Parcel getParcel(StandardBusinessDocument standardBusinessDocument, Resource asic) {
+        return parcelParser.parse(
+                standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
+                asic);
     }
 
     private MimeMultipart getMimeMultipart(HttpRequest httpRequest) throws MessagingException {

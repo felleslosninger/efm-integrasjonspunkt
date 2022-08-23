@@ -7,7 +7,9 @@ import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
+import no.difi.move.common.io.ResourceUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.ws.soap.saaj.SaajSoapMessage;
@@ -185,7 +187,8 @@ public class AltinnInSteps {
             pw.println("Content-Type: application/octet-stream");
             pw.println();
             pw.flush();
-            bos.write(altinnZipFactory.getAltinnZipAsBytes(messageInHolder.get()));
+            ByteArrayResource altinnZip = altinnZipFactory.createAltinnZip(messageInHolder.get());
+            ResourceUtils.copy(altinnZip, bos);
             bos.flush();
             pw.println();
             pw.println("--" + boundary);
@@ -209,6 +212,6 @@ public class AltinnInSteps {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         soapMessage.saveChanges();
         soapMessage.writeTo(out);
-        return new String(out.toByteArray());
+        return out.toString();
     }
 }

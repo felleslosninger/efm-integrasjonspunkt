@@ -1,15 +1,16 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.dpi.client.domain.Document;
-import no.difi.meldingsutveksling.dpi.client.domain.MetadataDocument;
-import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
+import lombok.Value;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.domain.MetadataDocument;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokument;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokumentData;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.Resource;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,57 +23,60 @@ public class ParcelParser {
     private final ManifestParser manifestParser;
     private final DocumentStorage documentStorage;
 
-    public Parcel parse(String messageId, InputStream asicInputStream) {
-        Map<String, Document> documents = new HashMap<>();
-        asicParser.parse(asicInputStream,
+    public Parcel parse(String messageId, Resource asic) {
+        Map<String, InternalDocument> documents = new HashMap<>();
+        asicParser.parse(asic,
                 ((filename, inputStream) -> {
                     documentStorage.write(messageId, filename, inputStream);
                     Resource resource = documentStorage.read(messageId, filename);
-                    documents.put(filename, getDocument(filename, resource));
+                    documents.put(filename, new InternalDocument(filename, resource));
                 }));
 
         SDPManifest manifest = getSdpManifest(documents);
 
-        return new Parcel()
-                .setMainDocument(getDocument(documents, manifest.getHoveddokument()))
-                .setAttachments(manifest.getVedleggs().stream()
+        return Parcel.builder()
+                .mainDocument(getDocument(documents, manifest.getHoveddokument()))
+                .attachments(manifest.getVedleggs().stream()
                         .map(p -> getDocument(documents, p))
-                        .collect(Collectors.toList())
-                );
-
+                        .collect(Collectors.toList()))
+                .build();
     }
 
-    private SDPManifest getSdpManifest(Map<String, Document> documents) {
+    private SDPManifest getSdpManifest(Map<String, InternalDocument> documents) {
         return manifestParser.parse(
                 getDocument(documents, "manifest.xml")
                         .getResource());
     }
 
-    private Document getDocument(Map<String, Document> documents, String filename) {
+    private InternalDocument getDocument(Map<String, InternalDocument> documents, String filename) {
         return Optional.ofNullable(documents.get(filename))
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No file named '%s' in ASICe!", filename)));
     }
 
-    private Document getDocument(Map<String, Document> documents, SDPDokument sdpDokument) {
-        return getDocument(documents, sdpDokument.getHref())
-                .setMimeType(sdpDokument.getMime())
-                .setTitle(sdpDokument.getTittel().getValue())
-                .setMetadataDocument(getMetadataDocument(sdpDokument.getData()));
+    private Document getDocument(Map<String, InternalDocument> documents, SDPDokument sdpDokument) {
+        InternalDocument document = getDocument(documents, sdpDokument.getHref());
+        return Document.builder()
+                .filename(document.getFilename())
+                .resource(document.getResource())
+                .mimeType(sdpDokument.getMime())
+                .title(sdpDokument.getTittel().getValue())
+                .metadataDocument(getMetadataDocument(sdpDokument.getData()))
+                .build();
     }
 
     private MetadataDocument getMetadataDocument(SDPDokumentData data) {
         if (data == null) {
             return null;
         }
-        return new MetadataDocument()
-                .setFilename(data.getHref())
-                .setMimeType(data.getMime());
+        return MetadataDocument.builder()
+                .filename(data.getHref())
+                .mimeType(data.getMime())
+                .build();
     }
 
-    private Document getDocument(String filename, Resource resource) {
-        return new Document()
-                .setFilename(filename)
-                .setResource(resource);
+    @Value
+    private static class InternalDocument {
+        String filename;
+        Resource resource;
     }
-
 }

@@ -1,34 +1,32 @@
 package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.move.common.io.WritableByteArrayResource;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ByteArrayResource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
-public class AltinnPackageTest {
+class AltinnPackageTest {
 
     @Test
-    public void testFrom() throws Exception {
+    void testFrom() throws Exception {
 
         UploadRequest uploadRequest = new MockRequest();
         AltinnPackage altinnPackage = AltinnPackage.from(uploadRequest);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        altinnPackage.write(outputStream, null);
+        WritableByteArrayResource output = new WritableByteArrayResource();
+        altinnPackage.write(output, null);
 
-        byte[] bytes = outputStream.toByteArray();
+        byte[] bytes = output.toByteArray();
 
-
-        AltinnPackage.from(new ByteArrayInputStream(bytes));
+        AltinnPackage.from(new ByteArrayResource(bytes));
     }
 
     @Test
-    public void testWrite() throws Exception {
+    void testWrite() throws Exception {
 
     }
 
     @Test
-    public void testFrom1() throws Exception {
+    void testFrom1() throws Exception {
 
     }
 }
