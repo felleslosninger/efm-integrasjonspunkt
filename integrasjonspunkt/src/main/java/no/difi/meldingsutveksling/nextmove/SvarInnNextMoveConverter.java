@@ -8,6 +8,7 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -50,6 +51,7 @@ public class SvarInnNextMoveConverter {
     private final IntegrasjonspunktProperties properties;
     private final KeystoreHelper keystoreHelper;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final UUIDGenerator uuidGenerator;
 
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse) {
@@ -108,6 +110,7 @@ public class SvarInnNextMoveConverter {
         no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory of = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
 
         Journalpost journalpost = of.createJournalpost();
+        journalpost.setSystemID(uuidGenerator.generate());
         journalpost.setOffentligTittel(forsendelse.getTittel());
 
         Korrespondansepart avsender = of.createKorrespondansepart();
@@ -121,6 +124,7 @@ public class SvarInnNextMoveConverter {
         journalpost.getKorrespondansepart().add(avsender);
 
         Saksmappe saksmappe = of.createSaksmappe();
+        saksmappe.setSystemID(uuidGenerator.generate());
         Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
         saksmappe.setSakssekvensnummer(BigInteger.valueOf(metadata.getSakssekvensnummer()));
         saksmappe.setSaksaar(BigInteger.valueOf(metadata.getSaksaar()));
@@ -131,9 +135,13 @@ public class SvarInnNextMoveConverter {
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+
         if (!isNullOrEmpty(metadata.getJournaldato())) {
             journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getJournaldato())));
+        } else {
+            journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault())));
         }
+
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
             journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getDokumentetsDato())));
         }
@@ -146,6 +154,7 @@ public class SvarInnNextMoveConverter {
 
         forsendelse.getFilmetadata().forEach(fmd -> {
             Dokumentbeskrivelse db = of.createDokumentbeskrivelse();
+            db.setSystemID(uuidGenerator.generate());
             db.setTittel(fmd.getFilnavn());
 
             Dokumentobjekt dobj = of.createDokumentobjekt();

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -50,7 +51,7 @@ public class DpfPollingConfig {
     }
 
     @Bean
-    public SvarInnNextMoveConverter svarInnNextMoveConverter(SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, KeystoreHelper keystoreHelper, ArkivmeldingUtil arkivmeldingUtil) {
-        return new SvarInnNextMoveConverter(svarInnService, asicHandler, createSBD, properties, keystoreHelper, arkivmeldingUtil);
+    public SvarInnNextMoveConverter svarInnNextMoveConverter(SvarInnService svarInnService, AsicHandler asicHandler, SBDFactory createSBD, IntegrasjonspunktProperties properties, KeystoreHelper keystoreHelper, ArkivmeldingUtil arkivmeldingUtil, UUIDGenerator uuidGenerator) {
+        return new SvarInnNextMoveConverter(svarInnService, asicHandler, createSBD, properties, keystoreHelper, arkivmeldingUtil, uuidGenerator);
     }
 }
