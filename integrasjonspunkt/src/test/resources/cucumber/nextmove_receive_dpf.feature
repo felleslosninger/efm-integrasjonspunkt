@@ -152,14 +152,18 @@ Feature: Receiving a Next Move DPF message
         <tidspunkt/>
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
+          <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
             <basisregistrering xsi:type="journalpost">
+              <systemID>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</systemID>
                 <dokumentbeskrivelse>
+                  <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
                   <tittel>primary.html</tittel>
                   <dokumentobjekt>
                     <referanseDokumentfil>primary.html</referanseDokumentfil>
                   </dokumentobjekt>
                 </dokumentbeskrivelse>
                 <dokumentbeskrivelse>
+                  <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
                   <tittel>before_the_law.txt</tittel>
                   <dokumentobjekt>
                     <referanseDokumentfil>before_the_law.txt</referanseDokumentfil>
