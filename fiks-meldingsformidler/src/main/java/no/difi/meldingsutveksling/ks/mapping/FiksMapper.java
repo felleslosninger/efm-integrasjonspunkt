@@ -209,7 +209,11 @@ public class FiksMapper {
                 .withMimetype(file.getMimetype());
 
         String ext = Stream.of(file.getFilename().split("\\.")).reduce((a, b) -> b).orElse("pdf");
-        if (properties.getFiks().getUt().getEkskluderesFraPrint().contains(ext)) {
+        if (ext.equalsIgnoreCase("pdf")) {
+            builder.withEkskluderesFraPrint(false);
+        } else if (properties.getFiks().getUt().getEkskluderesFraPrint().contains("*")) {
+            builder.withEkskluderesFraPrint(true);
+        } else if (properties.getFiks().getUt().getEkskluderesFraPrint().contains(ext)) {
             builder.withEkskluderesFraPrint(true);
         }
 

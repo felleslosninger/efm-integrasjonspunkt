@@ -44,7 +44,14 @@ public class DateTimeUtil {
     }
 
     public static XMLGregorianCalendar toXMLGregorianCalendar(long millis) {
+        if (millis < BugfixXsdYearZeroOrBefore.REPLACEMENT_MILLIS) {
+            return toXMLGregorianCalendar(toZonedDateTime(BugfixXsdYearZeroOrBefore.REPLACEMENT_MILLIS));
+        }
         return toXMLGregorianCalendar(toZonedDateTime(millis));
+    }
+
+    private static class BugfixXsdYearZeroOrBefore {
+        public static long REPLACEMENT_MILLIS = -62135596800000L;
     }
 
     private static ZonedDateTime toZonedDateTime(long millis) {
