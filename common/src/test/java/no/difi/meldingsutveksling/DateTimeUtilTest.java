@@ -16,8 +16,8 @@ public class DateTimeUtilTest {
 
     @Test
     public void testNegativeValues() {
-        assertEquals("1970-01-01T01:00:00.000+01:00", DateTimeUtil.toXMLGregorianCalendar(Long.parseLong("-62135769600000")).toString());
-        assertEquals("1970-01-01T01:00:00.000+01:00", DateTimeUtil.toXMLGregorianCalendar(Long.parseLong("-62177289687000")).toString());
+        assertEquals("0001-01-01T01:00:00.000+01:00", DateTimeUtil.toXMLGregorianCalendar(Long.parseLong("-62135769600000")).toString());
+        assertEquals("0001-01-01T01:00:00.000+01:00", DateTimeUtil.toXMLGregorianCalendar(Long.parseLong("-62177289687000")).toString());
     }
 
     @Test
