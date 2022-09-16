@@ -19,6 +19,7 @@ public class Forsendelse {
     private String tittel;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Filmetadata {
         private String filnavn;
         private String mimetype;
@@ -28,6 +29,7 @@ public class Forsendelse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Mottaker {
         private String orgnr;
         private String navn;
@@ -50,6 +52,7 @@ public class Forsendelse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MetadataForImport {
         private int sakssekvensnummer;
         private int saksaar;
@@ -60,6 +63,7 @@ public class Forsendelse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SvarSendesTil {
         private String adresse1;
         private String postnr;
