@@ -85,7 +85,7 @@ public class SvarInnNextMoveConverter {
                 .build();
     }
 
-    private ByteArrayResource getArkivmelding(Forsendelse forsendelse) {
+    ByteArrayResource getArkivmelding(Forsendelse forsendelse) {
         Arkivmelding arkivmelding = toArkivmelding(forsendelse);
         byte[] arkivmeldingBytes;
         try {
