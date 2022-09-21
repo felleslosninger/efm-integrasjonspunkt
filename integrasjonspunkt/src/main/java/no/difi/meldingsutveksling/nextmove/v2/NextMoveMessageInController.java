@@ -64,6 +64,9 @@ public class NextMoveMessageInController {
             if (asic == null) {
                 return ResponseEntity.noContent().build();
             }
+            if (!asic.isReadable()){
+                messageService.handleCorruptMessage(messageId);
+            }
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
                     .contentType(MIMETYPE_ASICE)

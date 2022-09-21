@@ -115,4 +115,16 @@ public class NextMoveMessageInService {
 
         return message.getSbd();
     }
+
+    @Transactional
+    public void handleCorruptMessage(String messageId) throws AsicPersistenceException {
+        NextMoveInMessage message = messageRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
+            String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
+            Audit.error(errorMsg, markerFrom(message));
+            messageRepo.delete(message);
+            conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
+            throw new AsicPersistenceException();
+    }
 }
