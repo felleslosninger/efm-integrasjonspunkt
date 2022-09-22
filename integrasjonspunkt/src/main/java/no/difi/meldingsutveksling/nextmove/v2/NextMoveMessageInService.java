@@ -7,10 +7,7 @@ import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
-import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
-import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
-import no.difi.meldingsutveksling.exceptions.NoContentException;
+import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
@@ -117,14 +114,14 @@ public class NextMoveMessageInService {
     }
 
     @Transactional
-    public void handleCorruptMessage(String messageId) throws AsicPersistenceException {
+    public void handleCorruptMessage(String messageId) {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
-            String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
-                    ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
-            Audit.error(errorMsg, markerFrom(message));
-            messageRepo.delete(message);
-            conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
-            throw new AsicPersistenceException();
+        String errorMsg = format("Can not retrieve file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+                ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
+        Audit.error(errorMsg, markerFrom(message));
+        messageRepo.delete(message);
+        conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
+        throw new AsicReadException(messageId);
     }
 }
