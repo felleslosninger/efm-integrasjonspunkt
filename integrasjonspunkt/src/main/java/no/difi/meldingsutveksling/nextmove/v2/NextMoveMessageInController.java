@@ -6,6 +6,7 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
+import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -63,6 +64,9 @@ public class NextMoveMessageInController {
             Resource asic = messageService.popMessage(messageId);
             if (asic == null) {
                 return ResponseEntity.noContent().build();
+            }
+            if (!asic.isReadable()) {
+                messageService.handleCorruptMessage(messageId);
             }
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
