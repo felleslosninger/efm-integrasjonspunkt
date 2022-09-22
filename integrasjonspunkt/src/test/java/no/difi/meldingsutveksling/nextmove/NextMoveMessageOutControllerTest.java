@@ -4,14 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
-import no.difi.meldingsutveksling.config.*;
+import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.config.MvcConfiguration;
+import no.difi.meldingsutveksling.config.SecurityConfiguration;
+import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
 import no.difi.meldingsutveksling.nextmove.v2.OnBehalfOfNormalizer;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -71,27 +73,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class NextMoveMessageOutControllerTest {
 
-    @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @MockBean private NextMoveMessageService messageService;
-    @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
-    @MockBean private OnBehalfOfNormalizer onBehalfOfNormalizer;
+    @MockBean
+    private NextMoveMessageService messageService;
 
-    @Mock private NextMoveOutMessage messageMock;
-    @Mock private IntegrasjonspunktProperties.Organization organization;
+    @MockBean
+    private OnBehalfOfNormalizer onBehalfOfNormalizer;
 
-    @Captor private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
-
-    @BeforeEach
-    public void before() {
-        given(organization.getNumber()).willReturn("910077473");
-        given(integrasjonspunktProperties.getOrg()).willReturn(organization);
-    }
+    @Mock
+    private NextMoveOutMessage messageMock;
+    @Captor
+    private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
 
     @AfterEach
     public void after() {
-        Mockito.verifyNoMoreInteractions(messageService, integrasjonspunktProperties, onBehalfOfNormalizer);
+        Mockito.verifyNoMoreInteractions(messageService, onBehalfOfNormalizer);
         Mockito.validateMockitoUsage();
     }
 
@@ -133,7 +133,6 @@ class NextMoveMessageOutControllerTest {
         verify(onBehalfOfNormalizer).normalize(any());
         verify(messageService).createMessage(any(StandardBusinessDocument.class), anyList());
         verify(messageService).sendMessage(34L);
-        verify(integrasjonspunktProperties).getOrg();
     }
 
     @Test
