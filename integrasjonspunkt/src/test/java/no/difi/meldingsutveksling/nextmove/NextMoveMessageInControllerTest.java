@@ -3,14 +3,14 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.config.SecurityConfiguration;
-import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.config.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
+import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -41,10 +42,11 @@ import java.util.zip.ZipOutputStream;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -62,6 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ValidationConfig.class,
         JacksonConfig.class,
         JacksonMockitoConfig.class,
+        IntegrasjonspunktHandlerExceptionResolver.class,
         NextMoveMessageInController.class})
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
@@ -69,14 +72,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class NextMoveMessageInControllerTest {
 
-    @Autowired private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-    @MockBean private NextMoveMessageInService messageService;
-    @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
+    @MockBean
+    private NextMoveMessageInService messageService;
+    @MockBean
+    private IntegrasjonspunktProperties integrasjonspunktProperties;
 
-    @Mock private IntegrasjonspunktProperties.Organization organization;
+    @Mock
+    private IntegrasjonspunktProperties.Organization organization;
 
-    @Captor private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;
 
     @BeforeEach
     public void before() {
@@ -331,6 +339,21 @@ class NextMoveMessageInControllerTest {
                 );
 
         verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
+    }
+
+    @Test
+    void popMessage_UnreadableAsic_ShouldReturnInternalServerError() throws Exception {
+        Resource asicResource = mock(Resource.class);
+        when(asicResource.isReadable()).thenReturn(false);
+        given(messageService.popMessage(anyString())).willReturn(asicResource);
+        doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
+
+        mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                .accept(AsicUtils.MIMETYPE_ASICE))
+                .andExpect(status().is5xxServerError())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof AsicReadException));
+
+        verify(messageService).handleCorruptMessage(ARKIVMELDING_SBD.getMessageId());
     }
 
     @Test

@@ -7,18 +7,12 @@ import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
-import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
-import no.difi.meldingsutveksling.exceptions.MessageNotLockedException;
-import no.difi.meldingsutveksling.exceptions.NoContentException;
+import no.difi.meldingsutveksling.exceptions.*;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.ResponseStatusSender;
-import no.difi.meldingsutveksling.nextmove.message.BugFix610;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -26,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.PersistenceException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -68,7 +61,7 @@ public class NextMoveMessageInService {
     }
 
     @Transactional
-    public InputStreamResource popMessage(String messageId) throws AsicPersistenceException {
+    public Resource popMessage(String messageId) throws AsicPersistenceException {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
 
@@ -76,19 +69,15 @@ public class NextMoveMessageInService {
             throw new MessageNotLockedException(messageId);
         }
 
-        if (SBDUtil.isReceipt(message.getSbd()) && (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if ((SBDUtil.isAvtalt(message.getSbd()) || SBDUtil.isReceipt(message.getSbd())) &&
+                (message.getFiles() == null || message.getFiles().isEmpty())) {
             return null;
         }
 
         try {
-            FileEntryStream fileEntry = cryptoMessagePersister.readStream(messageId, ASIC_FILE, throwable ->
-                    Audit.error(String.format("Can not read file \"%s\" for message [messageId=%s, sender=%s].",
-                            ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), throwable)
-            );
             Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()), markerFrom(message));
-            return new InputStreamResource(getInputStream(fileEntry, messageId));
-
-        } catch (PersistenceException e) {
+            return cryptoMessagePersister.read(messageId, ASIC_FILE);
+        } catch (PersistenceException | IOException e) {
             String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
             Audit.error(errorMsg, markerFrom(message), e);
@@ -97,18 +86,6 @@ public class NextMoveMessageInService {
             // throw checked AsicPersistanceException so that deletion transaction is not rolled back
             throw new AsicPersistenceException();
         }
-    }
-
-    private InputStream getInputStream(FileEntryStream fileEntry, String messageId) {
-        if (props.getNextmove().getApplyZipHeaderPatch()) {
-            try {
-                return BugFix610.applyPatch(fileEntry.getInputStream(), messageId);
-            } catch (IOException e) {
-                throw new NextMoveRuntimeException("Could not apply patch 610 to message", e);
-            }
-        }
-
-        return fileEntry.getInputStream();
     }
 
     @Transactional
@@ -134,5 +111,17 @@ public class NextMoveMessageInService {
         responseStatusSender.queue(message.getSbd(), message.getServiceIdentifier(), ReceiptStatus.LEVERT);
 
         return message.getSbd();
+    }
+
+    @Transactional
+    public void handleCorruptMessage(String messageId) {
+        NextMoveInMessage message = messageRepo.findByMessageId(messageId)
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
+        String errorMsg = format("Can not retrieve file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+                ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
+        Audit.error(errorMsg, markerFrom(message));
+        messageRepo.delete(message);
+        conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
+        throw new AsicReadException(messageId);
     }
 }

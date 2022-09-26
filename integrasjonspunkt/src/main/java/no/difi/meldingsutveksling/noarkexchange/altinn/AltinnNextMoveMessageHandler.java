@@ -14,14 +14,13 @@ import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
@@ -46,22 +45,20 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     @Override
     public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
         StandardBusinessDocument sbd = altinnPackage.getSbd();
+        Resource asic = altinnPackage.getAsic();
         log.debug(String.format("NextMove message id=%s", sbd.getMessageId()));
 
         if (!isNullOrEmpty(properties.getNoarkSystem().getType()) && SBDUtil.isArkivmelding(sbd) && !SBDUtil.isStatus(sbd)) {
             if (sbdService.isExpired(sbd)) {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, DPO, INCOMING);
-                if (altinnPackage.getAsicInputStream() != null) {
-                    altinnPackage.getAsicInputStream().close();
+                if (asic != null) {
                     altinnPackage.getTmpFile().delete();
                 }
                 return;
             }
-            if (altinnPackage.getAsicInputStream() != null) {
-                try (InputStream asicStream = altinnPackage.getAsicInputStream()) {
-                    messagePersister.writeStream(sbd.getMessageId(), ASIC_FILE, asicStream, -1L);
-                } catch (IOException e) {
-                    throw new NextMoveRuntimeException("Error persisting ASiC", e);
+            if (asic != null) {
+                try {
+                    messagePersister.write(sbd.getMessageId(), ASIC_FILE, asic);
                 } finally {
                     altinnPackage.getTmpFile().delete();
                 }
@@ -73,7 +70,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             internalQueue.enqueueNoark(sbd);
             conversationService.registerStatus(sbd.getMessageId(), ReceiptStatus.INNKOMMENDE_MOTTATT);
         } else {
-            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, altinnPackage.getAsicInputStream());
+            nextMoveQueue.enqueueIncomingMessage(sbd, DPO, asic);
             if (altinnPackage.getTmpFile() != null) {
                 altinnPackage.getTmpFile().delete();
             }

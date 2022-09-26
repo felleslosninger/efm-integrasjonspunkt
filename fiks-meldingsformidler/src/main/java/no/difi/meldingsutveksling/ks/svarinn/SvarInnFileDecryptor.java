@@ -1,32 +1,26 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
-import no.difi.meldingsutveksling.Decryptor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.move.common.cert.KeystoreHelper;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-
-import java.io.InputStream;
 
 @Component
 public class SvarInnFileDecryptor {
 
-    private final Decryptor decryptor;
+    private final DecryptCMSDocument decryptCMSDocument;
+    private final KeystoreHelper keystoreHelper;
 
-    public SvarInnFileDecryptor(IntegrasjonspunktProperties props) {
-        this.decryptor = new Decryptor(new KeystoreHelper(props.getFiks().getKeystore()));
+    public SvarInnFileDecryptor(DecryptCMSDocument decryptCMSDocument, IntegrasjonspunktProperties properties) {
+        this.decryptCMSDocument = decryptCMSDocument;
+        this.keystoreHelper = new KeystoreHelper(properties.getFiks().getKeystore());
     }
 
-    /**
-     * Decrypts input using SvarInn cipher algorithms and the integrasjonspunkt keystore
-     *
-     * @param input
-     * @return
-     */
-    public byte[] decrypt(byte[] input) {
-        return decryptor.decrypt(input);
-    }
-
-    public InputStream decryptCMSStreamed(InputStream encrypted) {
-        return decryptor.decryptCMSStreamed(encrypted);
+    public Resource decrypt(Resource encrypted) {
+        return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
+                .resource(encrypted)
+                .keystoreHelper(keystoreHelper)
+                .build());
     }
 }

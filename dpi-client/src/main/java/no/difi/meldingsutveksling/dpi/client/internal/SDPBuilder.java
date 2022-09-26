@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
-import no.difi.meldingsutveksling.dpi.client.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.PersonmottakerHolder;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;
@@ -44,7 +44,7 @@ public class SDPBuilder {
                 .withTittel(getTittel(document, spraakkode))
                 .withData(getDokumentData(document))
                 .withHref(document.getFilename())
-                .withMime(document.getMimeType())
+                .withMime(document.getMimeType().toString())
                 .build();
     }
 
@@ -52,7 +52,7 @@ public class SDPBuilder {
         return Optional.ofNullable(document.getMetadataDocument())
                 .map(d -> SDPDokumentData.builder()
                         .withHref(d.getFilename())
-                        .withMime(d.getMimeType())
+                        .withMime(d.getMimeType().toString())
                         .build())
                 .orElse(null);
     }

@@ -5,8 +5,8 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
-import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import org.springframework.ws.client.core.WebServiceTemplate;
@@ -24,18 +24,19 @@ public class MockWebServiceSteps {
 
     private final MockWebServiceServerCustomizer mockWebServiceServerCustomizer;
     private final CorrespondenceAgencyClient correspondenceAgencyClient;
-    private final SvarUtWebServiceClientImpl svarUtWebServiceClient;
+    private final SvarUtClientHolder svarUtClientHolder;
     private final CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory;
     private final SikkerDigitalPostKlient sikkerDigitalPostKlient;
     private final Holder<List<String>> webServicePayloadHolder;
+    private final IntegrasjonspunktProperties properties;
 
     @Before
     @SneakyThrows
     public void before() {
         mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
-        mockWebServiceServerCustomizer.customize(svarUtWebServiceClient.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(cachingWebServiceTemplateFactory.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(sikkerDigitalPostKlient.getMeldingTemplate());
+        mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate());
     }
 
     @After
@@ -57,7 +58,7 @@ public class MockWebServiceSteps {
             return sikkerDigitalPostKlient.getMeldingTemplate();
         }
 
-        return svarUtWebServiceClient.getWebServiceTemplate();
+        return svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate();
     }
 
     @And("^a SOAP request to \"([^\"]*)\" will respond with the following payload:$")

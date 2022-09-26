@@ -1,10 +1,11 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
-import no.difi.meldingsutveksling.dpi.client.internal.domain.Manifest;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.xml.sax.SAXParseException;
@@ -41,7 +42,10 @@ public class CreateManifest {
         ByteArrayOutputStream manifestStream = new ByteArrayOutputStream();
         try {
             marshaller.marshal(sdpManifest, new StreamResult(manifestStream));
-            return new Manifest(new ByteArrayResource(manifestStream.toByteArray()));
+            return Manifest.builder()
+                    .resource(new ByteArrayResource(manifestStream.toByteArray()))
+                    .mimeType(MediaType.APPLICATION_XML)
+                    .build();
         } catch (MarshallingFailureException e) {
             if (e.getMostSpecificCause() instanceof SAXParseException) {
                 throw new IllegalArgumentException("Kunne ikke validere generert Manifest XML. Sjekk at alle påkrevde input er satt og ikke er null",

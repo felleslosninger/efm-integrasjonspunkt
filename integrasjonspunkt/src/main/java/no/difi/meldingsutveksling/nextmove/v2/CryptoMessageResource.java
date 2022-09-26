@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
-import no.difi.meldingsutveksling.pipes.Reject;
 import org.springframework.core.io.AbstractResource;
 
 import java.io.IOException;
@@ -20,15 +19,11 @@ public class CryptoMessageResource extends AbstractResource {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private final Reject reject;
 
-    public CryptoMessageResource(String messageId, String filename, OptionalCryptoMessagePersister optionalCryptoMessagePersister, Reject reject) {
+    public CryptoMessageResource(String messageId, String filename, OptionalCryptoMessagePersister optionalCryptoMessagePersister) {
         this.messageId = messageId;
         this.filename = filename;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
-        this.reject = reject;
     }
 
     public String getMessageId() {
@@ -49,6 +44,6 @@ public class CryptoMessageResource extends AbstractResource {
     @NonNull
     @Override
     public InputStream getInputStream() throws IOException {
-        return optionalCryptoMessagePersister.readStream(messageId, filename, reject).getInputStream();
+        return optionalCryptoMessagePersister.read(messageId, filename).getInputStream();
     }
 }

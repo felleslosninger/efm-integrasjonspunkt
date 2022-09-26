@@ -17,9 +17,9 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.util.logger
 import org.slf4j.MDC
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.io.InputStream
 
 
 @Component
@@ -43,14 +43,13 @@ open class NextMoveQueueImpl(
     override fun enqueueIncomingMessage(
         sbd: StandardBusinessDocument,
         serviceIdentifier: ServiceIdentifier,
-        asicStream: InputStream?
+        asic: Resource?
     ) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.messageId)
         when {
             sbd.any !is BusinessMessage<*> -> throw MeldingsUtvekslingRuntimeException("SBD payload not of a known type")
             sbdService.isExpired(sbd) -> {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, ConversationDirection.INCOMING)
-                asicStream?.close()
                 return
             }
             SBDUtil.isStatus(sbd) -> {
@@ -60,25 +59,24 @@ open class NextMoveQueueImpl(
             }
         }
 
+        if(asic != null) {
+            messagePersister.write(sbd.messageId, NextMoveConsts.ASIC_FILE, asic)
+        }
 
         if (!messageRepo.findByMessageId(sbd.messageId).isPresent) {
             val message = messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier))
 
-            asicStream?.use { messagePersister.writeStream(sbd.messageId, NextMoveConsts.ASIC_FILE, it, -1L) }
-
-            SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
-                messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
-            }
-            conversationService.registerConversation(
-                sbd,
-                serviceIdentifier,
-                ConversationDirection.INCOMING,
-                ReceiptStatus.INNKOMMENDE_MOTTATT
-            )
-            statusSender.queue(message.sbd, serviceIdentifier, ReceiptStatus.MOTTATT)
-
+        SBDUtil.getOptionalMessageChannel(sbd).ifPresent {
+            messageChannelRepository.save(MessageChannelEntry(sbd.messageId, it.identifier))
+        }
+        conversationService.registerConversation(
+            sbd,
+            serviceIdentifier,
+            ConversationDirection.INCOMING,
+            ReceiptStatus.INNKOMMENDE_MOTTATT
+        )
+        statusSender.queue(message.sbd, serviceIdentifier, ReceiptStatus.MOTTATT)
             log.info(markerFrom(message), "Message [id=${message.messageId}, serviceIdentifier=$serviceIdentifier] put on local queue",)
-
         } else {
             log.warn("Received duplicate message with id=${sbd.messageId}, message discarded.")
         }

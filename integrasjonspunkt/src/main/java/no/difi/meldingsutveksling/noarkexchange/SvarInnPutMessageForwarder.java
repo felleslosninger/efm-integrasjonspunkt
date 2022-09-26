@@ -22,9 +22,9 @@ import no.difi.meldingsutveksling.noarkexchange.logging.PutMessageResponseMarker
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageResponseType;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.DokumentType;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.move.common.io.pipe.PromiseMaker;
+import no.difi.move.common.io.pipe.Reject;
 import org.slf4j.MDC;
 
 import java.time.Clock;
@@ -119,7 +119,7 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
 
         String missingFields = getMissingFields(forsendelse, putMessage, builder.getDokumentTypeList());
         if (!missingFields.isEmpty()) {
-            handleError(putMessage, forsendelse.getId(), "Validation failed - missing fields: " + missingFields);
+            handleError(putMessage, forsendelse, "Validation failed - missing fields: " + missingFields);
             return;
         }
 
@@ -127,26 +127,26 @@ public class SvarInnPutMessageForwarder implements Consumer<Forsendelse> {
         if ("OK".equals(response.getResult().getType())) {
             Audit.info("Message successfully forwarded");
             conversationService.registerStatus(c.getMessageId(), INNKOMMENDE_LEVERT);
-            svarInnService.confirmMessage(forsendelse.getId());
+            svarInnService.confirmMessage(forsendelse);
         } else if ("WARNING".equals(response.getResult().getType())) {
             Audit.info(format("Archive system responded with warning for message with fiks-id %s",
                     forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
             conversationService.registerStatus(c.getMessageId(), INNKOMMENDE_LEVERT);
-            svarInnService.confirmMessage(forsendelse.getId());
+            svarInnService.confirmMessage(forsendelse);
         } else {
             Audit.error(format("Message with fiks-id %s failed", forsendelse.getId()), PutMessageResponseMarkers.markerFrom(response));
-            handleError(putMessage, forsendelse.getId(), "Archive system responded with error: " + response.getResult().getMessage().get(0).getText());
+            handleError(putMessage, forsendelse, "Archive system responded with error: " + response.getResult().getMessage().get(0).getText());
         }
     }
 
-    private void handleError(PutMessageRequestType message, String fiksId, String errorMsg) {
+    private void handleError(PutMessageRequestType message, Forsendelse forsendelse, String errorMsg) {
         if (properties.getFiks().getInn().isMailOnError()) {
-            Audit.info(format("Sending message with id=%s by mail", fiksId));
+            Audit.info(format("Sending message with id=%s by mail", forsendelse.getId()));
             fiksMailClient.sendEduMelding(message);
             conversationService.registerStatus(message.getEnvelope().getConversationId(), INNKOMMENDE_LEVERT);
-            svarInnService.confirmMessage(fiksId);
+            svarInnService.confirmMessage(forsendelse);
         } else {
-            svarInnService.setErrorStateForMessage(fiksId, errorMsg);
+            svarInnService.setErrorStateForMessage(forsendelse, errorMsg);
             conversationService.registerStatus(message.getEnvelope().getConversationId(), FEIL, errorMsg);
         }
     }
