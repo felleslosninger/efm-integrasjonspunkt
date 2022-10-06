@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.move.common.cert.KeystoreHelper;
 import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSException;
@@ -21,6 +22,7 @@ import java.security.PrivateKey;
 import java.util.Objects;
 
 @RequiredArgsConstructor
+@Slf4j
 public class DecryptCMSDocument {
 
     public Resource decrypt(Input input) {
@@ -42,9 +44,23 @@ public class DecryptCMSDocument {
         @NonNull
         @Override
         public InputStream getInputStream() throws IOException {
-            RecipientInformation recipientInformation = getRecipientInformation(input.getResource());
+            InputStream encryptedInputStream = input.getResource().getInputStream();
+            RecipientInformation recipientInformation = getRecipientInformation(encryptedInputStream);
             CMSTypedStream contentStream = getCmsTypedStream(recipientInformation);
-            return new BufferedInputStream(contentStream.getContentStream());
+            return new BufferedInputStream(contentStream.getContentStream()) {
+
+                @Override
+                public void close() throws IOException {
+                    super.close();
+                    try {
+                        // Explicitly closes the encrypted input stream that was opened. Avoids holding on to file
+                        // handles in cases when the input stream was opened from a FileSystemResource.
+                        encryptedInputStream.close();
+                    } catch (IOException | IllegalStateException e) {
+                        log.debug("Could not close encrypted input stream", e);
+                    }
+                }
+            };
         }
 
         private CMSTypedStream getCmsTypedStream(RecipientInformation recipientInformation) throws IOException {
@@ -55,16 +71,16 @@ public class DecryptCMSDocument {
             }
         }
 
-        private RecipientInformation getRecipientInformation(Resource resource) {
-            return getParser(resource).getRecipientInfos().getRecipients()
+        private RecipientInformation getRecipientInformation(InputStream encryptedInputStream) {
+            return getParser(encryptedInputStream).getRecipientInfos().getRecipients()
                     .stream()
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("No recipients in CMS document."));
         }
 
-        private CMSEnvelopedDataParser getParser(Resource resource) {
+        private CMSEnvelopedDataParser getParser(InputStream encryptedInputStream) {
             try {
-                return new CMSEnvelopedDataParser(resource.getInputStream());
+                return new CMSEnvelopedDataParser(encryptedInputStream);
             } catch (CMSException | IOException e) {
                 throw new IllegalStateException("Couldn't create CMS parser", e);
             }
