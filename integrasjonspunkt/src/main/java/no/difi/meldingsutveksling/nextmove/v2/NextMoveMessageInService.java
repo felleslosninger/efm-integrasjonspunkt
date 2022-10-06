@@ -100,7 +100,7 @@ public class NextMoveMessageInService {
         try {
             cryptoMessagePersister.delete(messageId);
         } catch (IOException e) {
-            log.error("Error deleting files from message with id={}", messageId, e);
+            log.warn("Error deleting files from message with id={}", messageId, e);
         }
 
         messageRepo.delete(message);
