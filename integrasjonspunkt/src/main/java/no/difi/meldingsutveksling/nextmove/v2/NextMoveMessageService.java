@@ -87,7 +87,7 @@ public class NextMoveMessageService {
         try {
             messagePersister.delete(messageId);
         } catch (IOException e) {
-            log.error("Error deleting files from message with id={}", messageId, e);
+            log.warn("Error deleting files from message with id={}", messageId, e);
         }
 
         messageRepo.findIdByMessageId(messageId).ifPresent(
