@@ -2,9 +2,8 @@ package no.difi.meldingsutveksling;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
+import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.slf4j.Marker;
-
-import java.io.InputStream;
 
 public class TryAltinnClient {
 
@@ -31,7 +30,7 @@ public class TryAltinnClient {
         }
 
         @Override
-        public InputStream getAsicInputStream() {
+        public InMemoryWithTempFileFallbackResource getAsic() {
             return null;
         }
 

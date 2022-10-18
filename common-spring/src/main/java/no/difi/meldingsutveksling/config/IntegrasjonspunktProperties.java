@@ -270,6 +270,8 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String statusDocumentType;
         @NotNull
+        private Integer statusPollingPageSize;
+        @NotNull
         private Boolean useDbPersistence;
     }
 

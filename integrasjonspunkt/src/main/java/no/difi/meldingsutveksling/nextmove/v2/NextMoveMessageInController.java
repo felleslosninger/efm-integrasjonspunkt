@@ -6,12 +6,13 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
+import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.slf4j.MDC;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -57,12 +58,15 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "pop/{messageId}")
-    public ResponseEntity<InputStreamResource> popMessage(@PathVariable("messageId") String messageId) {
+    public ResponseEntity<Resource> popMessage(@PathVariable("messageId") String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         try {
-            InputStreamResource asic = messageService.popMessage(messageId);
+            Resource asic = messageService.popMessage(messageId);
             if (asic == null) {
                 return ResponseEntity.noContent().build();
+            }
+            if (!asic.isReadable()) {
+                messageService.handleCorruptMessage(messageId);
             }
             return ResponseEntity.ok()
                     .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)

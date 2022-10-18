@@ -37,7 +37,7 @@ public class StatusPolling {
         if (!props.getFeature().isEnableReceipts()) {
             return;
         }
-        int pageSize = 10000;
+        int pageSize = props.getNextmove().getStatusPollingPageSize();
         int pageIndex = 0;
 
         Page<Long> page;

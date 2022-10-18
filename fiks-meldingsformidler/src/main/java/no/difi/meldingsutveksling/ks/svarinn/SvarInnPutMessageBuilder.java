@@ -4,9 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
+import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
 import no.difi.meldingsutveksling.core.Receiver;
 import no.difi.meldingsutveksling.core.Sender;
-import no.difi.meldingsutveksling.bestedu.PutMessageRequestFactory;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverter;
 import no.difi.meldingsutveksling.noarkexchange.receive.PayloadConverterImpl;
 import no.difi.meldingsutveksling.noarkexchange.schema.PutMessageRequestType;
@@ -15,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -37,30 +39,30 @@ public class SvarInnPutMessageBuilder {
 
     private final List<DokumentType> dokumentTypeList = new ArrayList<>();
 
-    public SvarInnPutMessageBuilder streamedFile(SvarInnStreamedFile streamedFile) {
+    public SvarInnPutMessageBuilder streamedFile(Document document) {
         final DokumentType dokumentType = objectFactory.createDokumentType();
 
-        String mimeType = streamedFile.getMimeType();
+        String mimeType = document.getMimeType().toString();
         dokumentType.setVeMimeType(mimeType);
         dokumentType.setVeDokformat(MimeTypeExtensionMapper.getExtension(mimeType));
 
-        dokumentType.setDbTittel(streamedFile.getFileName());
-        dokumentType.setVeFilnavn(streamedFile.getFileName());
+        dokumentType.setDbTittel(document.getFilename());
+        dokumentType.setVeFilnavn(document.getFilename());
         // Value does not exist in FIKS, must be hard coded
         dokumentType.setVeVariant("P");
         final FilType fil = objectFactory.createFilType();
-        fil.setBase64(getContent(streamedFile));
+        fil.setBase64(getContent(document));
         dokumentType.setFil(fil);
         dokumentTypeList.add(dokumentType);
         return this;
     }
 
-    private byte[] getContent(SvarInnStreamedFile streamedFile) {
-        try {
-            return IOUtils.toByteArray(streamedFile.getInputStream());
+    private byte[] getContent(Document document) {
+        try (InputStream inputStream = document.getResource().getInputStream()) {
+            return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
             throw new SvarInnForsendelseException(
-                    String.format("Couldn't get content of file %s", streamedFile.getFileName()), e);
+                    String.format("Couldn't get content of file %s", document.getFilename()), e);
         }
     }
 

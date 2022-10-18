@@ -8,8 +8,7 @@ import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksStatusMapper;
-import no.difi.meldingsutveksling.ks.svarut.ForsendelseIdService;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClient;
+import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
@@ -20,7 +19,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,9 +35,8 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
 public class DpfStatusStrategy implements StatusStrategy {
 
     private final ConversationService conversationService;
-    private final ForsendelseIdService forsendelseIdService;
     private final FiksStatusMapper fiksStatusMapper;
-    private final SvarUtWebServiceClient client;
+    private final SvarUtService svarUtService;
     private final IntegrasjonspunktProperties props;
     private final SBDFactory sbdFactory;
     private final NextMoveQueue nextMoveQueue;
@@ -53,7 +50,7 @@ public class DpfStatusStrategy implements StatusStrategy {
     public void updateStatuses(Set<Conversation> conversations) {
         // Check for missing ids first
         Set<Conversation> missingIds = conversations.stream()
-                .filter(c -> forsendelseIdService.getForsendelseId(c) == null)
+                .filter(c -> svarUtService.getForsendelseId(c) == null)
                 .peek(c -> conversationService.registerStatus(c, fiksStatusMapper.noForsendelseId()))
                 .collect(Collectors.toSet());
         if (!missingIds.isEmpty()) {
@@ -61,29 +58,29 @@ public class DpfStatusStrategy implements StatusStrategy {
                     .map(Conversation::getMessageId).collect(Collectors.joining(", ")));
         }
 
-        Map<String, Conversation> forsendelseIdMap = conversations.stream()
+        conversations.stream()
                 .filter(c -> !missingIds.contains(c))
-                .collect(Collectors.toMap(forsendelseIdService::getForsendelseId, c -> c));
+                .collect(Collectors.groupingBy(Conversation::getSenderIdentifier, Collectors.toMap(svarUtService::getForsendelseId, c -> c)))
+                .forEach((sender, idMap) -> {
+                    svarUtService.getForsendelseStatuser(props.getFiks().getUt().getEndpointUrl().toString(), sender, idMap.keySet()).forEach(s -> {
+                        Conversation c = idMap.get(s.getForsendelsesid());
+                        MessageStatus status = fiksStatusMapper.mapFrom(s.getForsendelseStatus());
+                        if (!c.hasStatus(status)) {
+                            if (ReceiptStatus.valueOf(status.getStatus()) == LEST &&
+                                    c.getDocumentIdentifier().equals(props.getArkivmelding().getDefaultDocumentType()) &&
+                                    isNullOrEmpty(props.getNoarkSystem().getType()) &&
+                                    props.getArkivmelding().isGenerateReceipts()) {
+                                nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPF);
+                            }
+                            conversationService.registerStatus(c, status);
+                        }
 
-        if (!forsendelseIdMap.isEmpty()) {
-            client.getForsendelseStatuser(props.getFiks().getUt().getEndpointUrl().toString(), forsendelseIdMap.keySet()).forEach(s -> {
-                Conversation c = forsendelseIdMap.get(s.getForsendelsesid());
-                MessageStatus status = fiksStatusMapper.mapFrom(s.getForsendelseStatus());
-                if (!c.hasStatus(status)) {
-                    if (ReceiptStatus.valueOf(status.getStatus()) == LEST &&
-                            c.getDocumentIdentifier().equals(props.getArkivmelding().getDefaultDocumentType()) &&
-                            isNullOrEmpty(props.getNoarkSystem().getType()) &&
-                            props.getArkivmelding().isGenerateReceipts()) {
-                        nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPF);
-                    }
-                    conversationService.registerStatus(c, status);
-                }
+                        if (!c.isPollable()) {
+                            svarUtService.deleteForsendelseIdByMessageId(c.getMessageId());
+                        }
+                    });
+                });
 
-                if (!c.isPollable()) {
-                    forsendelseIdService.delete(c.getMessageId());
-                }
-            });
-        }
     }
 
     @NotNull

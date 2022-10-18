@@ -23,15 +23,14 @@ import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidat
 import no.difi.meldingsutveksling.validation.VirksertCertificateException;
 import no.difi.meldingsutveksling.validation.group.ValidationGroupFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.CertificateExpiredException;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +43,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.MessageType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
 
 
 @Component
@@ -108,11 +108,11 @@ public class NextMoveValidator {
             }
         }
 
-        validateDpfForsendelseType(sbd, serviceIdentifier);
+        validateDpfForsendelse(sbd, serviceIdentifier);
 
     }
 
-    private void validateDpfForsendelseType(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+    private void validateDpfForsendelse(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         if (svarUtService.getIfAvailable() == null) {
             return;
         }
@@ -124,12 +124,24 @@ public class NextMoveValidator {
                 }
                 String forsendelseType = dpfSettings.getForsendelseType();
                 if (!isNullOrEmpty(forsendelseType)) {
-                    List<String> validTypes = svarUtService.getObject().retreiveForsendelseTyper();
+                    List<String> validTypes = svarUtService.getObject()
+                            .retreiveForsendelseTyper(getPartOrPrimaryIdentifier(sbd.getSenderIdentifier()));
                     if (!validTypes.contains(forsendelseType)) {
                         throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));
                     }
                 }
             });
+
+            String senderIdentifier = getPartOrPrimaryIdentifier(sbd.getSenderIdentifier());
+            if (senderIdentifier.equals(props.getOrg().getNumber())) {
+                if (isNullOrEmpty(props.getFiks().getUt().getUsername())) {
+                    throw new MissingSvarUtCredentialsException(senderIdentifier);
+                }
+            } else {
+                if (!props.getFiks().getUt().getPaaVegneAv().containsKey(senderIdentifier)) {
+                    throw new MissingSvarUtCredentialsException(senderIdentifier);
+                }
+            }
         }
     }
 
@@ -207,9 +219,9 @@ public class NextMoveValidator {
                 .findAny()
                 .orElseThrow(MissingArkivmeldingException::new);
 
-
-        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        try {
+            Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier());
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
