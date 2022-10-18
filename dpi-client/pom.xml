@@ -74,7 +74,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.arkinator</groupId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
             <artifactId>mockserver-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
