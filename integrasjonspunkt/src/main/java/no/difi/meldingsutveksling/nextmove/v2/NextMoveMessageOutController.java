@@ -110,7 +110,6 @@ public class NextMoveMessageOutController {
     }
 
     @PutMapping(value = "/{messageId}")
-    @Transactional
     public void uploadFile(@PathVariable("messageId") String messageId,
                            @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
                            @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
