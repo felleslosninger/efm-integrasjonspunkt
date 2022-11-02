@@ -74,7 +74,7 @@ public class DpfStatusStrategy implements StatusStrategy {
                         }
                         MessageStatus status = fiksStatusMapper.mapFrom(s.getForsendelseStatus());
                         if (status == null) {
-                            log.error("Skipped processing status for KS SvarUt forsendelse: could not resolve eFormidling status");
+                            log.debug("Skipped processing status for KS SvarUt forsendelse: status was other than LEST");
                             return;
                         }
                         if (c.getDocumentIdentifier() == null) {
