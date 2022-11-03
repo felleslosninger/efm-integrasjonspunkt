@@ -203,6 +203,11 @@ public class DpiConfig {
             public DpiReceiptConverter identityDpiReceiptConverter() {
                 return p -> p;
             }
+
+            @Bean
+            public MessageStatusDecorator messageStatusNoActionDecorator() {
+                return (c, p) -> p;
+            }
         }
 
         @Configuration
@@ -219,6 +224,12 @@ public class DpiConfig {
                                                                                  UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
                 return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
             }
+
+            @Bean
+            public MessageStatusRawReceiptXmlDecorator messageStatusRawReceiptXmlDecorator() throws JAXBException {
+                return new MessageStatusRawReceiptXmlDecorator();
+            }
+
         }
     }
 
