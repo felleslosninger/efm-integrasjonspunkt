@@ -19,6 +19,8 @@ public class DpiReceiptHandler {
 
     @Transactional
     public void handleReceipt(ExternalReceipt externalReceipt) {
+        externalReceipt.confirmReceipt();
+
         final String conversationId = externalReceipt.getConversationId();
         Optional<Conversation> conversation = conversationService.findConversation(conversationId, ConversationDirection.OUTGOING);
 
@@ -29,7 +31,6 @@ public class DpiReceiptHandler {
             log.warn("Unknown conversationID = {}", conversationId);
         }
 
-        externalReceipt.confirmReceipt();
         log.debug(externalReceipt.logMarkers(), "Confirmed receipt (DPI)");
     }
 
