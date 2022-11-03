@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -42,6 +43,9 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
         }
 
         svarUtService.send(message);
+
+        // SvarUt garanterer leveranse etter ok mottak av melding
+        conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT);
 
         Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",
                 message.getMessageId(), message.getServiceIdentifier()),
