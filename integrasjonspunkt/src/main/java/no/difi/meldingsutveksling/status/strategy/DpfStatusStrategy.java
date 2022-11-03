@@ -63,8 +63,24 @@ public class DpfStatusStrategy implements StatusStrategy {
                 .collect(Collectors.groupingBy(Conversation::getSenderIdentifier, Collectors.toMap(svarUtService::getForsendelseId, c -> c)))
                 .forEach((sender, idMap) -> {
                     svarUtService.getForsendelseStatuser(props.getFiks().getUt().getEndpointUrl().toString(), sender, idMap.keySet()).forEach(s -> {
+                        if (s == null) {
+                            log.error("Skipped processing status for KS SvarUt forsendelse: status was null");
+                            return;
+                        }
                         Conversation c = idMap.get(s.getForsendelsesid());
+                        if (c == null) {
+                            log.error("Skipped processing status for KS SvarUt forsendelse: could not resolve eFormidling conversation");
+                            return;
+                        }
                         MessageStatus status = fiksStatusMapper.mapFrom(s.getForsendelseStatus());
+                        if (status == null) {
+                            log.debug("Skipped processing status for KS SvarUt forsendelse: status was other than LEST");
+                            return;
+                        }
+                        if (c.getDocumentIdentifier() == null) {
+                            log.error("Skipped processing status for KS SvarUt forsendelse: missing document type for eFormidling conversation");
+                            return;
+                        }
                         if (!c.hasStatus(status)) {
                             if (ReceiptStatus.valueOf(status.getStatus()) == LEST &&
                                     c.getDocumentIdentifier().equals(props.getArkivmelding().getDefaultDocumentType()) &&
