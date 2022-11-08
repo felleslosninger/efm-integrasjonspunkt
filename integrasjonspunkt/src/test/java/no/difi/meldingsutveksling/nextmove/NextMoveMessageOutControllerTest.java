@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.MvcConfiguration;
@@ -83,6 +84,9 @@ class NextMoveMessageOutControllerTest {
 
     @MockBean
     private OnBehalfOfNormalizer onBehalfOfNormalizer;
+
+    @MockBean
+    private ArkivmeldingUtil arkivmeldingUtil;
 
     @Mock
     private NextMoveOutMessage messageMock;
