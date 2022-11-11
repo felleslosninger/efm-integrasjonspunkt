@@ -367,11 +367,6 @@
                 <version>2.7.0</version>
             </dependency>
             <dependency>
-                <groupId>no.difi.vefa</groupId>
-                <artifactId>sbdh</artifactId>
-                <version>0.9.3</version>
-            </dependency>
-            <dependency>
                 <groupId>com.azure</groupId>
                 <artifactId>azure-messaging-servicebus</artifactId>
                 <version>7.5.2</version>
