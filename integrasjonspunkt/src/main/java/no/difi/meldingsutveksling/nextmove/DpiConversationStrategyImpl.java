@@ -62,27 +62,25 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     }
 
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
+        ServiceRecord serviceRecord;
+        KrrPrintResponse printDetails = printService.getPrintDetails();
         if (message.getReceiver() != null) {
             try {
-                ServiceRecord serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),
                         message.getSbd().getDocumentType());
-                KrrPrintResponse printDetails = printService.getPrintDetails();
-                serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
                 serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
-                return serviceRecord;
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
         } else {
             // Null receiver only allowed for print receiver
-            KrrPrintResponse printDetails = printService.getPrintDetails();
-            ServiceRecord serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
+            serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
                     printDetails.getX509Sertifikat(), null);
-            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
-            return serviceRecord;
         }
+        serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+        return serviceRecord;
     }
 }
