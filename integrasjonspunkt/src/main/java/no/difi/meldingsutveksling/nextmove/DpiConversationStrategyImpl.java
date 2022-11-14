@@ -64,11 +64,15 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
         if (message.getReceiver() != null) {
             try {
-                return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                ServiceRecord serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),
                         message.getSbd().getDocumentType());
+                KrrPrintResponse printDetails = printService.getPrintDetails();
+                serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+                serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
+                return serviceRecord;
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
