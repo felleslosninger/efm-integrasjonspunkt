@@ -71,7 +71,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                                 .process(message.getProcessIdentifier())
                                 .build(),
                         message.getSbd().getDocumentType());
-                serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
+//                serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
@@ -80,7 +80,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
             serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
                     printDetails.getX509Sertifikat(), null);
         }
-        serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+//        serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
         return serviceRecord;
     }
 }
