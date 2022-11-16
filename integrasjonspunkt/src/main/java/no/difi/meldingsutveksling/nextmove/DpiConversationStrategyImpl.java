@@ -24,6 +24,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
+    private static final String PRINT_DOCUMENT_TYPE = "urn:no:difi:digitalpost:xsd:fysisk::print";
     private final ServiceRegistryLookup sr;
     private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
@@ -64,14 +65,18 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
         ServiceRecord serviceRecord;
         KrrPrintResponse printDetails = printService.getPrintDetails();
+        String documentType = message.getSbd().getDocumentType();
+        boolean isPrint = documentType.equals(PRINT_DOCUMENT_TYPE);
         if (message.getReceiver() != null) {
             try {
                 serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),
-                        message.getSbd().getDocumentType());
-//                serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
+                        documentType);
+                if (isPrint) {
+                    serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
+                }
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
@@ -80,7 +85,9 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
             serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
                     printDetails.getX509Sertifikat(), null);
         }
-//        serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+        if (isPrint) {
+            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+        }
         return serviceRecord;
     }
 }
