@@ -7,16 +7,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
+import no.difi.meldingsutveksling.nextmove.KrrPrintResponse;
+import no.difi.meldingsutveksling.nextmove.PrintService;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientFactory;
@@ -222,6 +224,16 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
+        public PrintService printService() {
+            PrintService mock = mock(PrintService.class);
+            KrrPrintResponse printResponse = new KrrPrintResponse();
+            printResponse.setPostkasseleverandoerAdresse("987464291");
+            printResponse.setX509Sertifikat("-----BEGIN CERTIFICATE-----\nMIICujCCAaKgAwIBAgIEXIe4JzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTg3NDY0MjkxMCAXDTE5MDMxMjEzNDYxNVoYDzIxMTkwMzEyMTM0\nNjE1WjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTg3NDY0MjkxMIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz3fGUUZG9mQmiaXrY5j6EKofssPirvbkyqUD\n893jG2DGybjooSlsIub+NMJx3Dl+5jC9YIB6/BXglfReOg0LvvcoMR7Dr6rOCcKO\nWGMFhaCqlemEJ+HVCj6aOQ87lu+Zbb6hXTxkC1tTLd9x85hPXOH5x53MVzysj43e\nW+CG9VGXcwQBxksuyP+NRI8hEbwlCPcNjNg6u8X2akhKM4JyeaIpGdXNG2EmA0bd\nIaej6oAtZJ79x+3eR3MJR9TB5mauDZng9k5SxC9PxEENzhDaar8aXQrEFCFsRKEI\nnanOOvfihVoFeTxbsca6OeeSBaMNC11egRr+Ks1LsRCs+GF7AwIDAQABMA0GCSqG\nSIb3DQEBCwUAA4IBAQC9dlBI0kOkEQe6FCebfen38ns+kyqVk2I+xJ0MFxyJTd93\nF03BKv3y7WaYkYMBQBa2gyMqRCrH9q1ZNjKX4kjI/g0Hd7Kvqaup44kOaWrnA3pJ\n+5/OvGEdWdhrrKUrXhO7L7lbgu5jvX7emEpn1E8V+8WMDMHg1JMNNflJ0ZXgOU3e\n1tXkzuCBQWguDwdkoX923lUdGeD6h7SnTKzEvoXx2zHDQ0qUTl9W43vmCoxmmmhE\nzsJMnNUh8hK6NolPu7ZLPvkOEr+oLRKfDK6UR2pqVRJpvfCK9r+fDBTh1gmK144I\n6GRg5gVjSwEquF9GzTZ1PW8HNaxLsgA0EuVWZXfh\n-----END CERTIFICATE-----\n");
+            when(mock.getPrintDetails()).thenReturn(printResponse);
+            return mock;
+        }
+
+        @Bean
         public Holder<ZipContent> zipContentHolder() {
             return new Holder<>();
         }
@@ -252,20 +264,30 @@ public class CucumberStepsConfiguration {
         }
     }
 
-    @Autowired private IntegrasjonspunktProperties integrasjonspunktProperties;
+    @Autowired
+    private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @TempDir
     File temporaryFolder;
 
-    @MockBean public UUIDGenerator uuidGenerator;
-    @MockBean public InternalQueue internalQueue;
-    @MockBean public ServiceBusRestTemplate serviceBusRestTemplate;
-    @MockBean public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
-    @MockBean public SvarUtConnectionCheck svarUtConnectionCheck;
-    @MockBean public SvarInnConnectionCheck svarInnConnectionCheck;
-    @MockBean public AltinnConnectionCheck altinnConnectionCheck;
-    @MockBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
-    @MockBean public FiksIOKlient fiksIOKlient;
+    @MockBean
+    public UUIDGenerator uuidGenerator;
+    @MockBean
+    public InternalQueue internalQueue;
+    @MockBean
+    public ServiceBusRestTemplate serviceBusRestTemplate;
+    @MockBean
+    public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
+    @MockBean
+    public SvarUtConnectionCheck svarUtConnectionCheck;
+    @MockBean
+    public SvarInnConnectionCheck svarInnConnectionCheck;
+    @MockBean
+    public AltinnConnectionCheck altinnConnectionCheck;
+    @MockBean
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
+    @MockBean
+    public FiksIOKlient fiksIOKlient;
 
     @Before
     public void before() {
