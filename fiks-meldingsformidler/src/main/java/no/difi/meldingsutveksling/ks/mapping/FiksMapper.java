@@ -137,6 +137,16 @@ public class FiksMapper {
     }
 
     private Adresse getSvarSendesTil(NextMoveOutMessage message, Journalpost journalpost) {
+        boolean partTypeNull = false;
+        for (Korrespondansepart part : journalpost.getKorrespondansepart()){
+            if (part.getKorrespondanseparttype() == null) {
+                partTypeNull = true;
+            }
+        }
+        if (partTypeNull){
+            journalpost.getKorrespondansepart().clear();
+            log.warn("Invalid value for korrespondanseparttype element in Noark5 arkivmelding");
+        }
         return journalpost.getKorrespondansepart().stream()
                 .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
                 .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
