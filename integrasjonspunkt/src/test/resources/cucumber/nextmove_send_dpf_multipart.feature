@@ -7,7 +7,7 @@ Feature: Sending a Next Move DPO multipart/form message
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
 
-  Scenario: As a user I (probably don't) want to send a DPF multipart/form message with invalid korrespondanseparttype
+  Scenario: As a user I (probably don't) want to send a DPF multipart/form message with invalid korrespondanseparttype, however it should be allowed.
 
     Given I prepare a multipart request
     And I add a part named "sbd" with content type "application/json" and body:
@@ -30,7 +30,7 @@ Feature: Sending a Next Move DPO multipart/form message
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b920",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-8cd54952b921",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
@@ -144,4 +144,4 @@ Feature: Sending a Next Move DPO multipart/form message
     """
     Testing 1 2 3
     """
-    Then I post the multipart request and get a "BAD_REQUEST" response
+    Then I post the multipart request and get a "OK" response
