@@ -86,6 +86,22 @@ public class NextMoveMessageOutSteps {
                 .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
     }
 
+    @Then("^I post the multipart request and get a \"([^\"]+)\" response$")
+    public void iPostTheMultipartRequestAndGetStatusResponse(String expectedStatusName) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        this.response = testRestTemplate.exchange(
+                "/api/messages/out/multipart",
+                HttpMethod.POST,
+                new HttpEntity<>(multipart, headers),
+                String.class);
+
+        assertThat(response.getStatusCode())
+                .withFailMessage(response.toString())
+                .isEqualTo(HttpStatus.valueOf(expectedStatusName));
+    }
+
     @Given("^I POST the following message:$")
     public void iPostTheFollowingMessage(String body) throws IOException {
         HttpHeaders headers = new HttpHeaders();
