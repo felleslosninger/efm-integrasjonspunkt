@@ -102,7 +102,7 @@ public class IntegrajonspunktReceiveImpl {
             try {
                 messagePersister.delete(sbd.getMessageId());
             } catch (IOException e) {
-                log.error(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
+                log.warn(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
             }
             return;
         }
@@ -124,6 +124,8 @@ public class IntegrajonspunktReceiveImpl {
             }
             return putMessageRequestFactory.create(sbd, BestEduConverter.appReceiptAsString(appReceiptType));
         } else {
+
+
             Resource encryptedAsic = getEncryptedAsic(sbd);
             Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
                     .resource(encryptedAsic)
@@ -167,7 +169,7 @@ public class IntegrajonspunktReceiveImpl {
                 try {
                     messagePersister.delete(sbd.getMessageId());
                 } catch (IOException e) {
-                    log.error(String.format("Unable to delete files for message with id=%s", sbd.getMessageId()), e);
+                    log.warn(String.format("Unable to delete files for message with id=%s", sbd.getMessageId()), e);
                 }
             } else {
                 Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
@@ -187,7 +189,7 @@ public class IntegrajonspunktReceiveImpl {
     }
 
     private Arkivmelding convertAsicEntryToArkivmelding(Resource resource) {
-        try (ZipInputStream zipInputStream = new ZipInputStream(StreamUtils.nonClosing(resource.getInputStream()))) {
+        try (ZipInputStream zipInputStream = new ZipInputStream(resource.getInputStream())) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (NextMoveConsts.ARKIVMELDING_FILE.equals(entry.getName())) {
