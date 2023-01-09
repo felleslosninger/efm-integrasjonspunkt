@@ -136,7 +136,7 @@ public class MeldingFactory {
     }
 
     private byte[] getFileFromAsic(String fileName, Resource asic) throws IOException {
-        try (ZipInputStream zipInputStream = new ZipInputStream(StreamUtils.nonClosing(asic.getInputStream()))) {
+        try (ZipInputStream zipInputStream = new ZipInputStream(asic.getInputStream())) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (fileName.equals(entry.getName())) {
