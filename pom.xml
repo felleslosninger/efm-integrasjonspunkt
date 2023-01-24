@@ -81,6 +81,7 @@
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.70</bouncycastle.version>
+        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
         <dokka.skip>true</dokka.skip>
 
         <argLine>-Dfile.encoding=UTF-8</argLine>
@@ -123,7 +124,7 @@
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.5.2.RELEASE</version>
+                <version>${spring-security-oauth2.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
