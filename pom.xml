@@ -740,7 +740,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>1.4.3</version>
+                <version>8.0.1</version>
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
