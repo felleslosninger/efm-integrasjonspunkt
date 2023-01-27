@@ -12,6 +12,7 @@ import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipient;
+import org.bouncycastle.crypto.io.InvalidCipherTextIOException;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 
@@ -51,7 +52,11 @@ public class DecryptCMSDocument {
 
                 @Override
                 public void close() throws IOException {
-                    super.close();
+                    try {
+                        super.close();
+                    } catch (IOException e) {
+                        log.debug("Could not close input stream", e);
+                    }
                     try {
                         // Explicitly closes the encrypted input stream that was opened. Avoids holding on to file
                         // handles in cases when the input stream was opened from a FileSystemResource.
