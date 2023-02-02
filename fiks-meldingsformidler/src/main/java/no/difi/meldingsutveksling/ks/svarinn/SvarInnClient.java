@@ -58,12 +58,8 @@ public class SvarInnClient {
             return createHeaders(fiksAuth.getUsername(), fiksAuth.getPassword());
         }
 
-        if (orgnr.equals(props.getFiks().getInn().getOrgnr()) && !isNullOrEmpty(props.getFiks().getInn().getUsername())) {
-            return createHeaders(props.getFiks().getInn().getUsername(),
-                    props.getFiks().getInn().getPassword());
-        }
-
-        throw new IllegalArgumentException("FIKS SvarInn authentication not provided for orgnr " + orgnr);
+        return createHeaders(props.getFiks().getInn().getUsername(),
+                props.getFiks().getInn().getPassword());
     }
 
     private HttpHeaders createHeaders(String username, String password) {
@@ -91,13 +87,10 @@ public class SvarInnClient {
                             if (props.getFiks().getInn().getPaaVegneAv().containsKey(forsendelse.getMottaker().getOrgnr())) {
                                 FiksConfig.FiksCredentials fiksCredentials = props.getFiks().getInn().getPaaVegneAv().get(forsendelse.getMottaker().getOrgnr());
                                 request.getHeaders().setBasicAuth(fiksCredentials.getUsername(), fiksCredentials.getPassword(), UTF_8);
-                            } else if (forsendelse.getMottaker().getOrgnr().equals(props.getFiks().getInn().getOrgnr()) &&
-                                    !isNullOrEmpty(props.getFiks().getInn().getUsername())) {
+                            } else {
                                 request.getHeaders().setBasicAuth(props.getFiks().getInn().getUsername(),
                                         props.getFiks().getInn().getPassword(),
                                         UTF_8);
-                            } else {
-                                throw new IllegalArgumentException("FIKS SvarInn authentication not provided for orgnr " + forsendelse.getMottaker().getOrgnr());
                             }
                         }, response -> {
                             InputStream body = new AutoCloseInputStream(response.getBody());
