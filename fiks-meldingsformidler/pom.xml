@@ -9,10 +9,6 @@
 
     <artifactId>fiks-meldingsformidler</artifactId>
 
-    <properties>
-        <mockito.version>2.23.4</mockito.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -64,11 +60,6 @@
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
