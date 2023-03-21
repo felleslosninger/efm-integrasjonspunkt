@@ -33,5 +33,8 @@ public class AltinnFormidlingsTjenestenConfig {
     @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
     private String messageChannel;
     private Set<String> reportees = Sets.newHashSet();
+    @NotNull
+    private Integer defaultTtlHours;
+
 
 }
