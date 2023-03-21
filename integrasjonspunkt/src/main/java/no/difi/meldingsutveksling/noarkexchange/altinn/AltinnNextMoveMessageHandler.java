@@ -77,9 +77,20 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         }
 
         if (SBDUtil.isReceipt(sbd)) {
-            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt ->
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST)
-            );
+            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt -> {
+                if ("ERROR".equals(receipt.getReceiptType())) {
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.FEIL);
+                } else if ("WARNING".equals(receipt.getReceiptType())) {
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
+                } else if ("NOTSUPPORTED".equals(receipt.getReceiptType())) {
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.FEIL);
+                } else if ("OK".equals(receipt.getReceiptType())) {
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
+                } else {
+                    log.warn("Non-standard Arkivmelding receipt type: " +  receipt.getReceiptType());
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
+                }
+            });
         }
     }
 
