@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.AltinnPackage;
@@ -16,6 +18,8 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -41,6 +45,8 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     private final SBDService sbdService;
     private final TimeToLiveHelper timeToLiveHelper;
     private final MessageChannelRepository messageChannelRepository;
+    private final MessageStatusFactory messageStatusFactory;
+
 
     @Override
     public void handleAltinnPackage(AltinnPackage altinnPackage) throws IOException {
@@ -77,20 +83,33 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         }
 
         if (SBDUtil.isReceipt(sbd)) {
-            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt -> {
-                if ("ERROR".equals(receipt.getReceiptType())) {
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.FEIL);
-                } else if ("WARNING".equals(receipt.getReceiptType())) {
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
-                } else if ("NOTSUPPORTED".equals(receipt.getReceiptType())) {
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.FEIL);
-                } else if ("OK".equals(receipt.getReceiptType())) {
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
-                } else {
-                    log.warn("Non-standard Arkivmelding receipt type: " +  receipt.getReceiptType());
-                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
-                }
-            });
+            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt ->
+                conversationService.registerStatus(receipt.getRelatedToMessageId(), toReceiptStatus(receipt),
+                        toDescription(receipt), toRawReceipt(receipt))
+            );
+        }
+    }
+
+    private ReceiptStatus toReceiptStatus(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+        if ("ERROR".equals(arkivmeldingKvittering.getReceiptType())) {
+            return ReceiptStatus.FEIL;
+        } else if ("NOTSUPPORTED".equals(arkivmeldingKvittering.getReceiptType())) {
+            return ReceiptStatus.FEIL;
+        } else {
+            // Tolker OK, WARNING og eventuelle ukjente verdier som LEST
+            return ReceiptStatus.LEST;
+        }
+    }
+
+    private String toDescription(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+        return "ArkivmeldingKvittering: " + arkivmeldingKvittering.getReceiptType();
+    }
+
+    private String toRawReceipt(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+        try {
+            return new ObjectMapper().writeValueAsString(arkivmeldingKvittering);
+        } catch (JsonProcessingException e) {
+            return null;
         }
     }
 
