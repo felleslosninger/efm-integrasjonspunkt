@@ -89,6 +89,8 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String clientType;
 
+    private String receiptType;
+
     @NotNull
     private String c2Type;
 
