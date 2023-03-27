@@ -90,6 +90,15 @@ public class DefaultConversationService implements ConversationService {
     }
 
     @NotNull
+    @Override
+    @Transactional
+    public Optional<Conversation> registerStatus(@NotNull String messageId, @NotNull ReceiptStatus status, @NotNull String description, @NotNull String rawReceipt) {
+        MessageStatus messageStatus = messageStatusFactory.getMessageStatus(status, description);
+        messageStatus.setRawReceipt(rawReceipt);
+        return registerStatus(messageId, messageStatus);
+    }
+
+    @NotNull
     @SuppressWarnings("squid:S2250")
     public Conversation registerStatus(Conversation conversation, @NotNull MessageStatus status) {
         MDC.put(NextMoveConsts.CORRELATION_ID, conversation.getMessageId());
