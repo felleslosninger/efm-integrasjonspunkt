@@ -44,7 +44,7 @@ public class DpiStatusPolling {
     }
 
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedDelayString = "${difi.move.dpi.pollingrate}")
     public void dpiReceiptsScheduledTask() throws ExecutionException, InterruptedException {
         if (properties.getFeature().isEnableReceipts() && properties.getFeature().isEnableDPI()) {
             List<Future<?>> futures = getMpcIdList()

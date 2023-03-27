@@ -205,6 +205,9 @@ public class IntegrasjonspunktProperties {
         private Long daysToReply;
         @NotNull
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
+
 
     }
 
@@ -303,6 +306,9 @@ public class IntegrasjonspunktProperties {
         private Integer connectTimeout;
         @NotNull
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
+
     }
 
     @Data

@@ -89,6 +89,8 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String clientType;
 
+    private String receiptType;
+
     @NotNull
     private String c2Type;
 
@@ -118,6 +120,9 @@ public class DigitalPostInnbyggerConfig {
 
     @Valid
     private Server server;
+
+    @NotNull
+    private Integer defaultTtlHours;
 
     @Data
     public static class Asice {
