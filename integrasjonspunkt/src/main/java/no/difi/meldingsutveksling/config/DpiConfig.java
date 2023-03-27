@@ -52,8 +52,9 @@ public class DpiConfig {
     }
 
     @Bean
-    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService) {
-        return new DpiReceiptHandler(conversationService);
+    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService,
+                                               IntegrasjonspunktProperties properties) {
+        return new DpiReceiptHandler(conversationService, properties);
     }
 
     @Bean
