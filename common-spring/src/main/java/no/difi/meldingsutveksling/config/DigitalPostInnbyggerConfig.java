@@ -121,6 +121,9 @@ public class DigitalPostInnbyggerConfig {
     @Valid
     private Server server;
 
+    @NotNull
+    private Integer defaultTtlHours;
+
     @Data
     public static class Asice {
 
