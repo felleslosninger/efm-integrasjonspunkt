@@ -52,6 +52,7 @@ public class DpiStatusStrategy implements StatusStrategy {
 
     @Override
     public boolean isStopPolling(@NotNull MessageStatus status) {
-        return ReceiptStatus.MOTTATT.toString().equals(status.getStatus());
+        return ReceiptStatus.MOTTATT.toString().equals(status.getStatus())
+                || ReceiptStatus.LEVERT.toString().equals(status.getStatus());
     }
 }
