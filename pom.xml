@@ -602,6 +602,11 @@
                 <artifactId>stax-ex</artifactId>
                 <version>1.8.3</version>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.33</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
