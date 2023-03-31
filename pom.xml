@@ -6,13 +6,13 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
-    <version>2.14.0</version>
+    <version>2.15.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.2</version>
+        <version>2.7.10</version>
         <relativePath/>
     </parent>
 
@@ -68,24 +68,21 @@
     </repositories>
 
     <properties>
-        <spring.cloud.version>2021.0.0</spring.cloud.version>
+        <spring.cloud.version>2021.0.5</spring.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <commons.io.version>2.7</commons.io.version>
+        <commons.io.version>2.11.0</commons.io.version>
         <commons.compress.version>1.21</commons.compress.version>
         <commons.text.version>1.10.0</commons.text.version>
-        <apache.commons.version>10.0-b28</apache.commons.version>
-        <logback.version>1.2.3</logback.version>
-
         <sikker-digital-post-klient.version>6.3</sikker-digital-post-klient.version>
-        <junit.platform.version>1.8.1</junit.platform.version>
-        <cucumber.version>7.0.0</cucumber.version>
-        <apache.wss4j.version>2.1.11</apache.wss4j.version>
-        <efm-common.version>1.17.0</efm-common.version>
-        <lombok.version>1.18.16</lombok.version>
+        <junit.platform.version>1.9.2</junit.platform.version>
+        <cucumber.version>7.11.0</cucumber.version>
+        <efm-common.version>1.18.0</efm-common.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
-        <kotlin.version>1.6.0</kotlin.version>
-        <bouncycastle.version>1.67</bouncycastle.version>
+        <kotlin.version>1.8.0</kotlin.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
+        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
+        <xmlsec.version>3.0.1</xmlsec.version>
         <dokka.skip>true</dokka.skip>
 
         <argLine>-Dfile.encoding=UTF-8</argLine>
@@ -128,7 +125,7 @@
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.3.6.RELEASE</version>
+                <version>${spring-security-oauth2.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
@@ -294,7 +291,7 @@
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
-                <version>2.3.0</version>
+                <version>${xmlsec.version}</version>
             </dependency>
 
             <dependency>
@@ -395,7 +392,7 @@
             <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
-                <version>1.4</version>
+                <version>1.5</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -605,6 +602,11 @@
                 <artifactId>stax-ex</artifactId>
                 <version>1.8.3</version>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.33</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -640,6 +642,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>asm</artifactId>
@@ -743,7 +746,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>1.4.3</version>
+                <version>8.0.1</version>
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>

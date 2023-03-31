@@ -48,6 +48,8 @@ public class FiksConfig {
         private String integrasjonsId;
         private String integrasjonsPassord;
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
     }
 
     @Data
@@ -63,6 +65,8 @@ public class FiksConfig {
         private DataSize uploadSizeLimit;
         private Set<String> ekskluderesFraPrint = Sets.newHashSet();
         private Map<String, FiksCredentials> paaVegneAv = Maps.newHashMap();
+        @NotNull
+        private Integer defaultTtlHours;
     }
 
     @Data

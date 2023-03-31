@@ -55,6 +55,7 @@ difi:
                     password: test
                     path: classpath:/c2.jks
                     type: jks
+            defaultTtlHours: 24
         fiks:
             keystore:
                 alias: ${difi.move.dpi.keystore.alias}
