@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.*;
 import no.difi.meldingsutveksling.domain.ICD;
@@ -73,17 +74,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class NextMoveMessageOutControllerTest {
 
-    @Autowired private MockMvc mvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @MockBean private NextMoveMessageService messageService;
-    @MockBean private IntegrasjonspunktProperties integrasjonspunktProperties;
-    @MockBean private OnBehalfOfNormalizer onBehalfOfNormalizer;
+    @MockBean
+    private NextMoveMessageService messageService;
 
-    @Mock private NextMoveOutMessage messageMock;
-    @Mock private IntegrasjonspunktProperties.Organization organization;
+    @MockBean
+    private IntegrasjonspunktProperties integrasjonspunktProperties;
 
-    @Captor private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
+    @MockBean
+    private OnBehalfOfNormalizer onBehalfOfNormalizer;
+
+    @MockBean
+    private ArkivmeldingUtil arkivmeldingUtil;
+
+    @Mock
+    private NextMoveOutMessage messageMock;
+
+    @Mock
+    private IntegrasjonspunktProperties.Organization organization;
+
+    @Captor
+    private ArgumentCaptor<NextMoveUploadedFile> nextMoveUploadedFileArgumentCaptor;
 
     @BeforeEach
     public void before() {
@@ -93,7 +108,7 @@ class NextMoveMessageOutControllerTest {
 
     @AfterEach
     public void after() {
-        Mockito.verifyNoMoreInteractions(messageService, integrasjonspunktProperties, onBehalfOfNormalizer);
+        Mockito.verifyNoMoreInteractions(messageService, onBehalfOfNormalizer);
         Mockito.validateMockitoUsage();
     }
 
@@ -135,7 +150,6 @@ class NextMoveMessageOutControllerTest {
         verify(onBehalfOfNormalizer).normalize(any());
         verify(messageService).createMessage(any(StandardBusinessDocument.class), anyList());
         verify(messageService).sendMessage(34L);
-        verify(integrasjonspunktProperties).getOrg();
     }
 
     @Test

@@ -24,10 +24,9 @@ RUN apt-get update && apt-get install -y \
 WORKDIR ${APP_DIR}
 
 # Add jar last, since this changes the most
-ADD /target/integrasjonspunkt.jar ${APP_DIR}/app.jar
-
 RUN chown -R java:java ${APP_DIR}
 RUN chmod +x ${APP_DIR}/*
+COPY --chown=java:java /target/integrasjonspunkt.jar ${APP_DIR}/app.jar
 
 USER java
 

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -24,11 +23,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class MultipartParser {
 
     @SneakyThrows
-    Map<String, FileItem> parse(String contentType, byte[] body) {
+    Map<String, FileItemResource> parse(String contentType, byte[] body) {
         RequestContext requestContext = new SimpleRequestContext(UTF_8, contentType, body);
         return getFileUpload().parseRequest(requestContext)
                 .stream()
-                .collect(Collectors.toMap(FileItem::getFieldName, Function.identity()));
+                .collect(Collectors.toMap(FileItem::getFieldName, FileItemResource::new));
     }
 
     @NotNull
@@ -61,4 +60,5 @@ public class MultipartParser {
             return new ByteArrayInputStream(content);
         }
     }
+
 }

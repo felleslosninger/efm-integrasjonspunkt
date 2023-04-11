@@ -2,6 +2,7 @@
 *.cer
 *.crt
 *.orig
+.run
 
 pom.xml.versionsBackup
 

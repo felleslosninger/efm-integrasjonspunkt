@@ -12,16 +12,15 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry;
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.function.Consumer;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -58,12 +57,9 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                try (InputStream is = asicHandler.createEncryptedAsic(message, reject)) {
-                    transport.send(message.getSbd(), is);
-                    return null;
-                } catch (IOException e) {
-                    throw new NextMoveRuntimeException(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), e);
-                }
+                Resource encryptedAsic = asicHandler.createCmsEncryptedAsice(message, reject);
+                transport.send(message.getSbd(), encryptedAsic);
+                return null;
             }).await();
         } catch (Exception e) {
             Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);

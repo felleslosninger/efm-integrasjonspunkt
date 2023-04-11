@@ -22,7 +22,7 @@ Feature: Receiving a DPF message and forward to Noark P360
               "poststed": "Oslo",
               "navn": "Sømådalen og Bessaker Revisjon",
               "land": "Norge",
-              "orgnr": "910229028",
+              "orgnr": "910077473",
               "fnr": null
           },
           "id": "d4751d30-c9e5-4648-9612-956cdb5e53bc",
@@ -126,7 +126,7 @@ Feature: Receiving a DPF message and forward to Noark P360
                 <ref>d4751d30-c9e5-4648-9612-956cdb5e53bc</ref>
             </sender>
             <receiver>
-                <orgnr>910229028</orgnr>
+                <orgnr>910077473</orgnr>
                 <name>Sømådalen og Bessaker Revisjon</name>
             </receiver>
         </envelope>

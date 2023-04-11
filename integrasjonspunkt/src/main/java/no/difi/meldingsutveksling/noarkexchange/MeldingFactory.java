@@ -9,9 +9,10 @@ import no.difi.meldingsutveksling.domain.arkivmelding.*;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.ObjectFactory;
 import no.difi.meldingsutveksling.noarkexchange.schema.core.*;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.stream.Stream;
@@ -27,7 +28,7 @@ public class MeldingFactory {
 
     private final ArkivmeldingUtil arkivmeldingUtil;
 
-    public MeldingType create(Arkivmelding am, byte[] asic) {
+    public MeldingType create(Arkivmelding am, Resource asic) {
         Saksmappe sm = arkivmeldingUtil.getSaksmappe(am);
         Journalpost jp = arkivmeldingUtil.getJournalpost(am);
 
@@ -108,7 +109,7 @@ public class MeldingFactory {
         return meldingType;
     }
 
-    private DokumentType createDokumentType(Dokumentbeskrivelse db, Dokumentobjekt dobj, byte[] asic) {
+    private DokumentType createDokumentType(Dokumentbeskrivelse db, Dokumentobjekt dobj, Resource asic) {
         ObjectFactory of = new ObjectFactory();
         DokumentType dokumentType = of.createDokumentType();
         String filename = dobj.getReferanseDokumentfil();
@@ -134,8 +135,8 @@ public class MeldingFactory {
         return dokumentType;
     }
 
-    private byte[] getFileFromAsic(String fileName, byte[] bytes) throws IOException {
-        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
+    private byte[] getFileFromAsic(String fileName, Resource asic) throws IOException {
+        try (ZipInputStream zipInputStream = new ZipInputStream(asic.getInputStream())) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (fileName.equals(entry.getName())) {

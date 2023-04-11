@@ -4,24 +4,22 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.slf4j.Marker;
-
-import java.io.InputStream;
+import org.springframework.core.io.Resource;
 
 public class AltinnWsRequest implements UploadRequest {
 
     private final String senderReference;
     private final StandardBusinessDocument sbd;
-    private InputStream asicInputStream;
+    private final Resource asic;
 
     public AltinnWsRequest(String senderReference, StandardBusinessDocument sbd) {
-        this.senderReference = senderReference;
-        this.sbd = sbd;
+        this(senderReference, sbd, null);
     }
 
-    public AltinnWsRequest(String senderReference, StandardBusinessDocument sbd, InputStream is) {
+    public AltinnWsRequest(String senderReference, StandardBusinessDocument sbd, Resource asic) {
         this.senderReference = senderReference;
         this.sbd = sbd;
-        this.asicInputStream = is;
+        this.asic = asic;
     }
 
     @Override
@@ -45,8 +43,8 @@ public class AltinnWsRequest implements UploadRequest {
     }
 
     @Override
-    public InputStream getAsicInputStream() {
-        return this.asicInputStream;
+    public Resource getAsic() {
+        return this.asic;
     }
 
     /**

@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.MultipartFileToLargeException;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,11 +44,12 @@ public class NextMoveMessageOutController {
 
     private final NextMoveMessageService messageService;
     private final OnBehalfOfNormalizer onBehalfOfNormalizer;
+    private final ArkivmeldingUtil arkivmeldingUtil;
 
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public StandardBusinessDocument createAndSendMessage(@RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
                                                          @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent,
-                                                         MultipartRequest multipartRequest) {
+                                                         MultipartRequest multipartRequest) throws IOException, JAXBException {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         MDC.put(HttpHeaders.USER_AGENT, userAgent);
         onBehalfOfNormalizer.normalize(sbd);
@@ -70,7 +74,6 @@ public class NextMoveMessageOutController {
                 .ifPresent(d -> {
                     throw new DuplicateFilenameException(d);
                 });
-
         NextMoveOutMessage message = messageService.createMessage(sbd, files);
         messageService.sendMessage(message.getId());
         return message.getSbd();
@@ -110,7 +113,6 @@ public class NextMoveMessageOutController {
     }
 
     @PutMapping(value = "/{messageId}")
-    @Transactional
     public void uploadFile(@PathVariable("messageId") String messageId,
                            @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
                            @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,

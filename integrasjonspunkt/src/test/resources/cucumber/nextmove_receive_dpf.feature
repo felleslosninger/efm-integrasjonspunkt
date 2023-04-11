@@ -23,7 +23,7 @@ Feature: Receiving a Next Move DPF message
               "poststed": "Oslo",
               "navn": "Sømådalen og Bessaker Revisjon",
               "land": "Norge",
-              "orgnr": "910229028",
+              "orgnr": "910077473",
               "fnr": null
           },
           "id": "81264cfa-1ba5-4fb5-a95d-48c824ed3bbb",
@@ -118,7 +118,7 @@ Feature: Receiving a Next Move DPF message
         } ],
         "receiver" : [ {
           "identifier" : {
-            "value" : "0192:910229028",
+            "value" : "0192:910077473",
             "authority" : "iso6523-actorid-upis"
           }
         } ],
@@ -152,14 +152,18 @@ Feature: Receiving a Next Move DPF message
         <tidspunkt/>
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
+          <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
             <basisregistrering xsi:type="journalpost">
+              <systemID>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</systemID>
                 <dokumentbeskrivelse>
+                  <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
                   <tittel>primary.html</tittel>
                   <dokumentobjekt>
                     <referanseDokumentfil>primary.html</referanseDokumentfil>
                   </dokumentobjekt>
                 </dokumentbeskrivelse>
                 <dokumentbeskrivelse>
+                  <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
                   <tittel>before_the_law.txt</tittel>
                   <dokumentobjekt>
                     <referanseDokumentfil>before_the_law.txt</referanseDokumentfil>

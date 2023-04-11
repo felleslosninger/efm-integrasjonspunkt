@@ -17,7 +17,6 @@ import no.altinn.services.serviceengine.reporteeelementlist._2010._10.BinaryAtta
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
 import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.InputStreamDataSource;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -25,21 +24,19 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nextmove.message.FileEntryStream;
-import no.difi.meldingsutveksling.pipes.Reject;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.move.common.io.ResourceDataSource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -67,35 +64,35 @@ public class CorrespondenceAgencyMessageFactory {
     private final no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory notificationObjectFactory = new no.altinn.schemas.services.serviceengine.notification._2009._10.ObjectFactory();
 
     @SneakyThrows
-    public InsertCorrespondenceV2 create(NextMoveOutMessage message, Reject reject) {
+    public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
         if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            return handleArkivmeldingMessage(message, reject);
+            return handleArkivmeldingMessage(message);
         }
 
         if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
-            return handleDigitalDpvMessage(message, reject);
+            return handleDigitalDpvMessage(message);
         }
 
         throw new NextMoveRuntimeException(String.format("StandardBusinessDocument.any not instance of %s or %s, aborting",
-            ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
+                ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
-    private InsertCorrespondenceV2 handleDigitalDpvMessage(NextMoveOutMessage message, Reject reject) {
+    private InsertCorrespondenceV2 handleDigitalDpvMessage(NextMoveOutMessage message) {
         DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
-        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles(), reject));
+        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles()));
 
         return create(message,
-            msg.getTittel(),
-            msg.getSammendrag(),
-            msg.getInnhold(),
-            attachmentExternalBEV2List);
+                msg.getTittel(),
+                msg.getSammendrag(),
+                msg.getInnhold(),
+                attachmentExternalBEV2List);
     }
 
-    private InsertCorrespondenceV2 handleArkivmeldingMessage(NextMoveOutMessage message, Reject reject) {
+    private InsertCorrespondenceV2 handleArkivmeldingMessage(NextMoveOutMessage message) {
         Map<String, BusinessMessageFile> fileMap = message.getFiles().stream()
-            .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
+                .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
         Arkivmelding arkivmelding = getArkivmelding(message, fileMap);
         Journalpost jp = arkivmeldingUtil.getJournalpost(arkivmelding);
@@ -103,53 +100,58 @@ public class CorrespondenceAgencyMessageFactory {
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
 
         List<BusinessMessageFile> files = arkivmeldingUtil.getFilenames(arkivmelding)
-            .stream()
-            .map(fileMap::get)
-            .filter(Objects::nonNull).collect(Collectors.toList());
+                .stream()
+                .map(fileMap::get)
+                .filter(Objects::nonNull).collect(Collectors.toList());
 
-        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files, reject));
+        attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), files));
 
         return create(message,
-            jp.getOffentligTittel(),
-            jp.getOffentligTittel(),
-            jp.getTittel(),
-            attachmentExternalBEV2List);
+                jp.getOffentligTittel(),
+                jp.getOffentligTittel(),
+                jp.getTittel(),
+                attachmentExternalBEV2List);
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, Map<String, BusinessMessageFile> fileMap) {
         BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
-            .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
+                .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
 
-
-        try (InputStream is = new ByteArrayInputStream(optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier()))) {
-            return arkivmeldingUtil.unmarshalArkivmelding(is);
+        try {
+            Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier());
+            return arkivmeldingUtil.unmarshalArkivmelding(resource);
         } catch (JAXBException | IOException e) {
             throw new NextMoveRuntimeException("Failed to get Arkivmelding", e);
         }
     }
 
-    private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files, Reject reject) {
+    private List<BinaryAttachmentV2> getAttachments(String messageId, Collection<BusinessMessageFile> files) {
         return files
-            .stream()
-            .sorted(Comparator.comparing(BusinessMessageFile::getDokumentnummer))
-            .map(file -> getBinaryAttachmentV2(messageId, file, reject))
-            .collect(Collectors.toList());
+                .stream()
+                .sorted(Comparator.comparing(BusinessMessageFile::getDokumentnummer))
+                .map(file -> getBinaryAttachmentV2(messageId, file))
+                .collect(Collectors.toList());
     }
 
-    private BinaryAttachmentV2 getBinaryAttachmentV2(String messageId, BusinessMessageFile file, Reject reject) {
-        FileEntryStream fileEntry = getFileEntry(messageId, file, reject);
+    private BinaryAttachmentV2 getBinaryAttachmentV2(String messageId, BusinessMessageFile file) {
+        Resource resource = getResource(messageId, file);
         BinaryAttachmentV2 binaryAttachmentV2 = new BinaryAttachmentV2();
         binaryAttachmentV2.setFunctionType(AttachmentFunctionType.fromValue("Unspecified"));
         binaryAttachmentV2.setFileName(reporteeFactory.createBinaryAttachmentV2FileName(file.getFilename()));
         binaryAttachmentV2.setName(reporteeFactory.createBinaryAttachmentV2Name(file.getTitle()));
         binaryAttachmentV2.setEncrypted(false);
         binaryAttachmentV2.setSendersReference(reporteeFactory.createBinaryAttachmentV2SendersReference("AttachmentReference_as123452"));
-        binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(InputStreamDataSource.of(fileEntry.getInputStream()))));
+        binaryAttachmentV2.setData(reporteeFactory.createBinaryAttachmentV2Data(new DataHandler(new ResourceDataSource(resource))));
         return binaryAttachmentV2;
     }
 
-    private FileEntryStream getFileEntry(String messageId, BusinessMessageFile f, Reject reject) {
-        return optionalCryptoMessagePersister.readStream(messageId, f.getIdentifier(), reject);
+    private Resource getResource(String messageId, BusinessMessageFile f) {
+        try {
+            return optionalCryptoMessagePersister.read(messageId, f.getIdentifier());
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(String.format("Could read file named '%s' for messageId=%s",
+                    f.getIdentifier(), f.getFilename()), e);
+        }
     }
 
     public InsertCorrespondenceV2 create(NextMoveOutMessage message,
@@ -183,7 +185,7 @@ public class CorrespondenceAgencyMessageFactory {
         correspondence.setVisibleDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock)));
 
         Optional<Integer> daysToReply = getDpvSettings(message)
-            .flatMap(s -> s.getDagerTilSvarfrist() != null ? Optional.of(s.getDagerTilSvarfrist()) : Optional.empty());
+                .flatMap(s -> s.getDagerTilSvarfrist() != null ? Optional.of(s.getDagerTilSvarfrist()) : Optional.empty());
         if (daysToReply.isPresent()) {
             if (daysToReply.get() > 0) {
                 correspondence.setDueDateTime(DateTimeUtil.toXMLGregorianCalendar(OffsetDateTime.now(clock).plusDays(daysToReply.get())));
@@ -196,8 +198,8 @@ public class CorrespondenceAgencyMessageFactory {
 
         // The date and time the message can be deleted by the user
         correspondence.setAllowSystemDeleteDateTime(
-            objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
-                DateTimeUtil.toXMLGregorianCalendar(getAllowSystemDeleteDateTime())));
+                objectFactory.createMyInsertCorrespondenceV2AllowSystemDeleteDateTime(
+                        DateTimeUtil.toXMLGregorianCalendar(getAllowSystemDeleteDateTime())));
 
         correspondence.setContent(objectFactory.createMyInsertCorrespondenceV2Content(getExternalContentV2(messageTitle, messageSummary, messageBody, attachments)));
         correspondence.setNotifications(objectFactory.createMyInsertCorrespondenceV2Notifications(getNotificationBEList(message)));
@@ -254,19 +256,19 @@ public class CorrespondenceAgencyMessageFactory {
         transportMap.put(DpvVarselTransportType.EPOSTOGSMS, TransportType.BOTH);
 
         TransportType transportType = getDpvSettings(msg)
-            .flatMap(s -> s.getVarselTransportType() != null ? Optional.of(s.getVarselTransportType()) : Optional.empty())
-            .map(transportMap::get)
-            .orElseGet(() -> {
-                if (config.isNotifyEmail() && config.isNotifySms()) {
-                    return TransportType.BOTH;
-                } else if (config.isNotifySms()) {
-                    return TransportType.SMS;
-                } else if (config.isNotifyEmail()) {
-                    return TransportType.EMAIL;
-                } else {
-                    return TransportType.BOTH;
-                }
-            });
+                .flatMap(s -> s.getVarselTransportType() != null ? Optional.of(s.getVarselTransportType()) : Optional.empty())
+                .map(transportMap::get)
+                .orElseGet(() -> {
+                    if (config.isNotifyEmail() && config.isNotifySms()) {
+                        return TransportType.BOTH;
+                    } else if (config.isNotifySms()) {
+                        return TransportType.SMS;
+                    } else if (config.isNotifyEmail()) {
+                        return TransportType.EMAIL;
+                    } else {
+                        return TransportType.BOTH;
+                    }
+                });
 
         List<Notification2009> notifications = new ArrayList<>();
         notifications.add(createNotification(msg, transportType));
@@ -294,8 +296,8 @@ public class CorrespondenceAgencyMessageFactory {
 
     private String getVarselType(NextMoveOutMessage msg) {
         return getDpvSettings(msg).flatMap(s -> s.getVarselType() != null ? Optional.of(s.getVarselType()) : Optional.empty())
-            .orElse(DpvVarselType.VARSEL_DPV_MED_REVARSEL)
-            .getFullname();
+                .orElse(DpvVarselType.VARSEL_DPV_MED_REVARSEL)
+                .getFullname();
     }
 
     private Optional<DpvSettings> getDpvSettings(NextMoveOutMessage msg) {
@@ -324,12 +326,12 @@ public class CorrespondenceAgencyMessageFactory {
         ServiceRecord serviceRecord = getServiceRecord(msg);
         if (config.getSensitiveServiceCode().equals(serviceRecord.getService().getServiceCode())) {
             return getDpvSettings(msg).flatMap(s -> !isNullOrEmpty(s.getTaushetsbelagtVarselTekst()) ? Optional.of(s.getTaushetsbelagtVarselTekst()) : Optional.empty())
-                .orElse(config.getSensitiveNotificationText())
-                .replace("$reporterName$", getSenderName(msg));
+                    .orElse(config.getSensitiveNotificationText())
+                    .replace("$reporterName$", getSenderName(msg));
         }
         return getDpvSettings(msg).flatMap(s -> !isNullOrEmpty(s.getVarselTekst()) ? Optional.of(s.getVarselTekst()) : Optional.empty())
-            .orElse(config.getNotificationText())
-            .replace("$reporterName$", getSenderName(msg));
+                .orElse(config.getNotificationText())
+                .replace("$reporterName$", getSenderName(msg));
     }
 
     private String getSenderName(NextMoveOutMessage msg) {
@@ -346,15 +348,15 @@ public class CorrespondenceAgencyMessageFactory {
 
     public CorrespondenceStatusHistoryRequest createReceiptRequest(Set<Conversation> conversations) {
         no.altinn.services.serviceengine.correspondence._2009._10.ObjectFactory of = new no.altinn.services
-            .serviceengine.correspondence._2009._10.ObjectFactory();
+                .serviceengine.correspondence._2009._10.ObjectFactory();
         CorrespondenceStatusHistoryRequest historyRequest = of.createCorrespondenceStatusHistoryRequest();
 
         com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory arrayOf = new com.microsoft.schemas._2003._10.serialization.arrays.ObjectFactory();
         ArrayOfstring arrayOfstring = arrayOf.createArrayOfstring();
 
         conversations.stream()
-            .map(Conversation::getMessageId)
-            .forEach(id -> arrayOfstring.getString().add(id));
+                .map(Conversation::getMessageId)
+                .forEach(id -> arrayOfstring.getString().add(id));
 
         JAXBElement<ArrayOfstring> strings = of.createCorrespondenceStatusHistoryRequestCorrespondenceSendersReferences(arrayOfstring);
         historyRequest.setCorrespondenceSendersReferences(strings);

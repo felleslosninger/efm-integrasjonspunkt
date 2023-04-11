@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.dpi.client.domain.Document;
-import no.difi.meldingsutveksling.dpi.client.domain.Parcel;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.move.common.cert.X509CertificateHelper;
 import org.springframework.core.io.Resource;
@@ -39,20 +39,21 @@ public class ShipmentFactory {
     }
 
     private Parcel getParcel(DpiTestInput input) {
-        return new Parcel()
-                .setMainDocument(getDocument(input.getMainDocument()))
-                .setAttachments(input.getAttachments()
+        return Parcel.builder()
+                .mainDocument(getDocument(input.getMainDocument()))
+                .attachments(input.getAttachments()
                         .stream()
                         .map(this::getDocument)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     private Document getDocument(Resource resource) {
-        return new Document()
-                .setTitle(resource.getDescription())
-                .setFilename(resource.getFilename())
-                .setResource(resource)
-                .setMimeType(fileExtensionMapper.getMimetype(resource));
+        return Document.builder()
+                .title(resource.getDescription())
+                .filename(resource.getFilename())
+                .resource(resource)
+                .mimeType(fileExtensionMapper.getMimetype(resource))
+                .build();
     }
-
 }

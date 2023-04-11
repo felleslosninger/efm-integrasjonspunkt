@@ -30,7 +30,6 @@ public class SenderValueValidator implements ConstraintValidator<SenderValue, St
             return (sbdhSenderComponents[0] + ":" + sbdhSenderComponents[1])
                     .equals(hostIdentifierComponents[0] + ":" + hostIdentifierComponents[1]);
         }
-
         return Objects.equals(expectedValue, value);
     }
 }

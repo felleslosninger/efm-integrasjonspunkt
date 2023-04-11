@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.ToString;
@@ -8,9 +9,11 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -27,6 +30,15 @@ public class FiksConfig {
     FiksIO io = new FiksIO();
 
     @Data
+    @ToString(exclude = "password")
+    public static class FiksCredentials {
+        @NotEmpty
+        private String username;
+        @NotEmpty
+        private String password;
+    }
+
+    @Data
     @ToString(exclude = "integrasjonsPassord")
     public static class FiksIO {
         private String senderOrgnr;
@@ -36,6 +48,8 @@ public class FiksConfig {
         private String integrasjonsId;
         private String integrasjonsPassord;
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
     }
 
     @Data
@@ -50,6 +64,9 @@ public class FiksConfig {
         private URL endpointUrl;
         private DataSize uploadSizeLimit;
         private Set<String> ekskluderesFraPrint = Sets.newHashSet();
+        private Map<String, FiksCredentials> paaVegneAv = Maps.newHashMap();
+        @NotNull
+        private Integer defaultTtlHours;
     }
 
     @Data
@@ -71,5 +88,7 @@ public class FiksConfig {
         private Integer connectTimeout;
         @NotNull
         private Integer readTimeout;
+        private String orgnr;
+        private Map<String, FiksCredentials> paaVegneAv = Maps.newHashMap();
     }
 }

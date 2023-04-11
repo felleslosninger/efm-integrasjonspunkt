@@ -14,9 +14,9 @@ import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
 import no.difi.meldingsutveksling.nextmove.PrintService;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.status.*;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -52,8 +52,9 @@ public class DpiConfig {
     }
 
     @Bean
-    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService) {
-        return new DpiReceiptHandler(conversationService);
+    public DpiReceiptHandler dpiReceiptHandler(ConversationService conversationService,
+                                               IntegrasjonspunktProperties properties) {
+        return new DpiReceiptHandler(conversationService, properties);
     }
 
     @Bean
@@ -203,6 +204,11 @@ public class DpiConfig {
             public DpiReceiptConverter identityDpiReceiptConverter() {
                 return p -> p;
             }
+
+            @Bean
+            public MessageStatusDecorator messageStatusNoActionDecorator() {
+                return (c, p) -> p;
+            }
         }
 
         @Configuration
@@ -219,6 +225,12 @@ public class DpiConfig {
                                                                                  UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
                 return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
             }
+
+            @Bean
+            public MessageStatusRawReceiptXmlDecorator messageStatusRawReceiptXmlDecorator() throws JAXBException {
+                return new MessageStatusRawReceiptXmlDecorator();
+            }
+
         }
     }
 

@@ -6,22 +6,28 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
+import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import java.io.IOException;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -57,17 +63,34 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "pop/{messageId}")
-    public ResponseEntity<InputStreamResource> popMessage(@PathVariable("messageId") String messageId) {
+    @Transactional
+    public void popMessage(@PathVariable("messageId") String messageId, HttpServletResponse response) throws IOException {
+        // Me tek i bruk underliggande Java Servlet API for å jobbe rundt problem knytt til transaksjonar i Spring og
+        // strømming av BLOB fra Postgres:
+        //
+        // - Postgres krev open transaksjon for å strømme BLOB
+        // - Spring avslutter transaksjonen i WebMVC-controlleren
+        // - Dersom WebMVC-controlleren returnerer ein strøm blir denne behandla utanfor WebMVC-controlleren
+        // - Derfor manglar transaksjonen på det tidspunktet strømmen blir behandla - dette resulterer i ein feil
+        //
+        // For å unngå dette bruker me underliggande Java Servlet API som lar oss gjere strømming i WebMVC-controlleren.
+
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         try {
-            InputStreamResource asic = messageService.popMessage(messageId);
+            Resource asic = messageService.popMessage(messageId);
             if (asic == null) {
-                return ResponseEntity.noContent().build();
+                response.setStatus(HttpStatus.NO_CONTENT.value());
+                return;
             }
-            return ResponseEntity.ok()
-                    .header(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE)
-                    .contentType(MIMETYPE_ASICE)
-                    .body(asic);
+            if (!asic.isReadable()) {
+                messageService.handleCorruptMessage(messageId);
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                return;
+            }
+            response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE);
+            response.setHeader("Content-Type", MIMETYPE_ASICE.toString());
+            response.setStatus(HttpStatus.OK.value());
+            IOUtils.copy(asic.getInputStream(), response.getOutputStream());
         } catch (AsicPersistenceException e) {
             throw new FileNotFoundException(ASIC_FILE);
         }

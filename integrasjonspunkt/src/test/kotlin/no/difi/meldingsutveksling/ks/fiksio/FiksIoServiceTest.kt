@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import no.difi.meldingsutveksling.pipes.PromiseMaker
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
@@ -38,9 +37,6 @@ internal class FiksIoServiceTest {
     lateinit var objectMapper: ObjectMapper
 
     @MockK
-    lateinit var promiseMaker: PromiseMaker
-
-    @MockK
     lateinit var conversationService: ConversationService
 
     private lateinit var fiksIoService: FiksIoService
@@ -48,7 +44,7 @@ internal class FiksIoServiceTest {
     @BeforeEach
     fun before() {
         MockKAnnotations.init(this)
-        fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService, promiseMaker)
+        fiksIoService = FiksIoService(fiksIOKlient, serviceRegistryLookup, persister, conversationService)
     }
 
     @AfterEach
@@ -71,11 +67,13 @@ internal class FiksIoServiceTest {
 
         every { conversationService.registerStatus(any(), *anyVararg()) } returns Optional.empty()
 
-        val sbd = spyk(StandardBusinessDocument()
-            .setAny(
-                FiksIoMessage()
-                    .setSikkerhetsnivaa(3)
-            ))
+        val sbd = spyk(
+            StandardBusinessDocument()
+                .setAny(
+                    FiksIoMessage()
+                        .setSikkerhetsnivaa(3)
+                )
+        )
 
         mockkStatic(SBDUtil::class)
         every { sbd.conversationId } returns convId

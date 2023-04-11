@@ -8,13 +8,13 @@ import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.domain.NextMoveStreamedFile;
-import no.difi.meldingsutveksling.domain.StreamedFile;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
@@ -25,17 +25,17 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnService;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.io.pipe.Reject;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
 import java.util.Optional;
 import java.util.TimeZone;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.util.StringUtils.hasText;
@@ -50,9 +50,10 @@ public class SvarInnNextMoveConverter {
     private final IntegrasjonspunktProperties properties;
     private final KeystoreHelper keystoreHelper;
     private final ArkivmeldingUtil arkivmeldingUtil;
+    private final UUIDGenerator uuidGenerator;
 
     @Transactional
-    public SvarInnPackage convert(Forsendelse forsendelse) {
+    public SvarInnPackage convert(Forsendelse forsendelse, Reject reject) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
                 Iso6523.of(ICD.NO_ORG, hasText(forsendelse.getSvarSendesTil().getOrgnr()) ?
                         forsendelse.getSvarSendesTil().getOrgnr() :
@@ -66,32 +67,25 @@ public class SvarInnNextMoveConverter {
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
-        NextMoveStreamedFile arkivmeldingFile = getArkivmeldingFile(forsendelse);
 
-        Stream<StreamedFile> attachments = Stream.concat(
-                Stream.of(arkivmeldingFile),
-                svarInnService.getAttachments(forsendelse,
-                        reject -> {
-                            throw new NextMoveRuntimeException("Failed to get attachments from SvarInn", reject);
-                        }));
-
-        InputStream asicStream = asicHandler.archiveAndEncryptAttachments(arkivmeldingFile,
-                attachments,
+        Resource asic = asicHandler.createCmsEncryptedAsice(
                 NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
-                keystoreHelper.getX509Certificate(),
-                reject -> {
-                    throw new NextMoveRuntimeException("Failed to create ASiC", reject);
-                });
+                getArkivmeldingFile(forsendelse),
+                svarInnService.getAttachments(forsendelse, reject),
+                keystoreHelper.getX509Certificate(), reject);
 
-        return new SvarInnPackage(sbd, asicStream);
+        return new SvarInnPackage(sbd, asic);
     }
 
-    private NextMoveStreamedFile getArkivmeldingFile(Forsendelse forsendelse) {
-        ByteArrayInputStream arkivmeldingStream = getArkivmeldingStream(forsendelse);
-        return new NextMoveStreamedFile(NextMoveConsts.ARKIVMELDING_FILE, arkivmeldingStream, MediaType.APPLICATION_XML_VALUE);
+    private Document getArkivmeldingFile(Forsendelse forsendelse) {
+        return Document.builder()
+                .filename(NextMoveConsts.ARKIVMELDING_FILE)
+                .mimeType(MediaType.APPLICATION_XML_VALUE)
+                .resource(getArkivmelding(forsendelse))
+                .build();
     }
 
-    private ByteArrayInputStream getArkivmeldingStream(Forsendelse forsendelse) {
+    private ByteArrayResource getArkivmelding(Forsendelse forsendelse) {
         Arkivmelding arkivmelding = toArkivmelding(forsendelse);
         byte[] arkivmeldingBytes;
         try {
@@ -101,13 +95,14 @@ public class SvarInnNextMoveConverter {
             throw new NextMoveRuntimeException("Error marshalling arkivmelding");
         }
 
-        return new ByteArrayInputStream(arkivmeldingBytes);
+        return new ByteArrayResource(arkivmeldingBytes);
     }
 
     private Arkivmelding toArkivmelding(Forsendelse forsendelse) {
         no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory of = new no.arkivverket.standarder.noark5.arkivmelding.ObjectFactory();
 
         Journalpost journalpost = of.createJournalpost();
+        journalpost.setSystemID(uuidGenerator.generate());
         journalpost.setOffentligTittel(forsendelse.getTittel());
 
         Korrespondansepart avsender = of.createKorrespondansepart();
@@ -121,6 +116,7 @@ public class SvarInnNextMoveConverter {
         journalpost.getKorrespondansepart().add(avsender);
 
         Saksmappe saksmappe = of.createSaksmappe();
+        saksmappe.setSystemID(uuidGenerator.generate());
         Forsendelse.MetadataFraAvleverendeSystem metadata = forsendelse.getMetadataFraAvleverendeSystem();
         saksmappe.setSakssekvensnummer(BigInteger.valueOf(metadata.getSakssekvensnummer()));
         saksmappe.setSaksaar(BigInteger.valueOf(metadata.getSaksaar()));
@@ -131,9 +127,13 @@ public class SvarInnNextMoveConverter {
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+
         if (!isNullOrEmpty(metadata.getJournaldato())) {
             journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getJournaldato())));
+        } else {
+            journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault())));
         }
+
         if (!isNullOrEmpty(metadata.getDokumentetsDato())) {
             journalpost.setDokumentetsDato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getDokumentetsDato())));
         }
@@ -146,6 +146,7 @@ public class SvarInnNextMoveConverter {
 
         forsendelse.getFilmetadata().forEach(fmd -> {
             Dokumentbeskrivelse db = of.createDokumentbeskrivelse();
+            db.setSystemID(uuidGenerator.generate());
             db.setTittel(fmd.getFilnavn());
 
             Dokumentobjekt dobj = of.createDokumentobjekt();

@@ -10,13 +10,13 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
+import org.springframework.core.io.Resource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,9 +38,8 @@ public class AltinnClient {
     public void download(String fileName) {
         SFtpClient sFtpClient = new SFtpClient("localhost");
         try (SFtpClient.Connection connection = sFtpClient.connect("test_key")) {
-            InputStream inputStream = connection.getInputStream(fileName);
-            AltinnPackage altinnPackage = AltinnPackage.from(inputStream);
-            inputStream.close();
+            Resource altinnZip = connection.getResource(fileName);
+            AltinnPackage altinnPackage = AltinnPackage.from(altinnZip);
             printIt(altinnPackage);
         } catch (Exception e) {
             throw new MeldingsUtvekslingRuntimeException("SFTP connection failed", e);

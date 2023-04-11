@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import lombok.Builder;
 import lombok.Value;
+import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
@@ -10,14 +11,12 @@ import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Value
 @Builder(builderClassName = "Builder")
 public class MeldingsformidlerRequest {
 
-    Document document;
-    List<Document> attachments;
+    Parcel parcel;
     PersonIdentifier mottakerPid;
     String subject;
     Iso6523 sender;
@@ -30,24 +29,24 @@ public class MeldingsformidlerRequest {
     OffsetDateTime expectedResponseDateTime;
 
     /**
-     * @return postkasse adresse as defined in KRR for the recipient person
+     * postkasse adresse as defined in KRR for the recipient person
      */
     String postkasseAdresse;
 
     /**
-     * @return virksomhetssertifikat of the sending virksomhet
+     * virksomhetssertifikat of the sending virksomhet
      */
     byte[] certificate;
 
     /**
-     * @return the organization number of the postkasse provider as defined in KRR
+     * the organization number of the postkasse provider as defined in KRR
      */
     Iso6523 postkasseProvider;
 
     /**
      * Needed if email notification is enabled
-     *
-     * @return the email adress of the person(s) to be notified
+     * <p>
+     * the email adress of the person(s) to be notified
      */
     String emailAddress;
     String smsVarslingstekst;
@@ -64,8 +63,8 @@ public class MeldingsformidlerRequest {
      * <p>
      * The major techincal difference between digital post and physical/print is that the latter does not have a
      * postkasseadresse.
-     *
-     * @return true if DPI print provider should be used instead of the preferred Digital mailbox
+     * <p>
+     * true if DPI print provider should be used instead of the preferred Digital mailbox
      */
     boolean printProvider;
     PostAddress postAddress;

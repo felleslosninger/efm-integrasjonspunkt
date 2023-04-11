@@ -45,7 +45,9 @@ public class NextMoveOutMessageFactory {
                 sbd.getMessageId(),
                 sbd.getProcess(),
                 sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
-                sbd.getSenderIdentifier().getPrimaryIdentifier(),
+                sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
+                        sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
+                        sbd.getSenderIdentifier().getPrimaryIdentifier(),
                 serviceIdentifier,
                 sbd);
     }
@@ -77,7 +79,7 @@ public class NextMoveOutMessageFactory {
         }
 
         if (!sbd.getExpectedResponseDateTime().isPresent()) {
-            OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(properties.getNextmove().getDefaultTtlHours());
+            OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(getDefaultTtlHours(serviceIdentifier));
 
             Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)
                     .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
@@ -104,6 +106,25 @@ public class NextMoveOutMessageFactory {
 
         if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);
+        }
+    }
+
+    private Integer getDefaultTtlHours(ServiceIdentifier serviceIdentifier) {
+        switch (serviceIdentifier) {
+            case DPO:
+                return properties.getDpo().getDefaultTtlHours();
+            case DPI:
+                return properties.getDpi().getDefaultTtlHours();
+            case DPE:
+                return properties.getNextmove().getServiceBus().getDefaultTtlHours();
+            case DPF:
+                return properties.getFiks().getUt().getDefaultTtlHours();
+            case DPV:
+                return properties.getDpv().getDefaultTtlHours();
+            case DPFIO:
+                return properties.getFiks().getIo().getDefaultTtlHours();
+            default:
+                return properties.getNextmove().getDefaultTtlHours();
         }
     }
 

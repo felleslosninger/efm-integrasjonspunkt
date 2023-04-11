@@ -19,7 +19,10 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "message_status")
+@Table(name = "message_status",
+        indexes = {
+            @Index(columnList = "conv_id")
+        })
 @NamedEntityGraph(name = "MessageStatus.conversation", attributeNodes = @NamedAttributeNode("conversation"))
 public class MessageStatus extends AbstractEntity<Long> {
 
@@ -36,7 +39,7 @@ public class MessageStatus extends AbstractEntity<Long> {
         return conversation.getId();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "conv_id")
     @JsonIgnore
     private Conversation conversation;

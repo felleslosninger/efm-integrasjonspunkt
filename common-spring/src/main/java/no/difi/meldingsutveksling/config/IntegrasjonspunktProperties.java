@@ -205,6 +205,9 @@ public class IntegrasjonspunktProperties {
         private Long daysToReply;
         @NotNull
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
+
 
     }
 
@@ -270,6 +273,8 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String statusDocumentType;
         @NotNull
+        private Integer statusPollingPageSize;
+        @NotNull
         private Boolean useDbPersistence;
     }
 
@@ -301,6 +306,9 @@ public class IntegrasjonspunktProperties {
         private Integer connectTimeout;
         @NotNull
         private DataSize uploadSizeLimit;
+        @NotNull
+        private Integer defaultTtlHours;
+
     }
 
     @Data

@@ -7,14 +7,16 @@ import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.ICD
 import no.difi.meldingsutveksling.domain.Iso6523
-import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
+import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
 import no.ks.fiks.io.client.model.MottattMelding
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Component
+import java.io.InputStream
 import javax.annotation.PostConstruct
 
 @Component
@@ -48,7 +50,12 @@ class FiksIoSubscriber(
             MessageType.FIKSIO,
             FiksIoMessage()
         )
-        nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPFIO, mottattMelding.kryptertStream)
+
+        nextMoveQueue.enqueueIncomingMessage(
+            sbd,
+            ServiceIdentifier.DPFIO,
+            InputStreamResource(mottattMelding.kryptertStream)
+        )
         svarSender.ack()
     }
 

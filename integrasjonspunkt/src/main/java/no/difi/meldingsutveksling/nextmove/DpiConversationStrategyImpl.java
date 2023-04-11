@@ -12,11 +12,11 @@ import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerException;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerRequest;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.meldingsutveksling.pipes.PromiseMaker;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.move.common.io.pipe.PromiseMaker;
 import org.jetbrains.annotations.NotNull;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
@@ -26,6 +26,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
+    private static final String PRINT_DOCUMENT_TYPE = "urn:no:difi:digitalpost:xsd:fysisk::print";
     private final ServiceRegistryLookup sr;
     private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
@@ -64,23 +65,31 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     }
 
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
+        ServiceRecord serviceRecord;
+        KrrPrintResponse printDetails = printService.getPrintDetails();
+        String documentType = message.getSbd().getDocumentType();
+        boolean isPrint = documentType.equals(PRINT_DOCUMENT_TYPE);
         if (message.getReceiver() != null) {
             try {
-                return sr.getServiceRecord(SRParameter.builder(message.getReceiver())
+                serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiver())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),
-                        message.getSbd().getDocumentType());
+                        documentType);
+                if (isPrint) {
+                    serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
+                }
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
         } else {
             // Null receiver only allowed for print receiver
-            KrrPrintResponse printDetails = printService.getPrintDetails();
-            ServiceRecord serviceRecord = new ServiceRecord(DPI, Iso6523.of(ICD.NO_ORG, printDetails.getPostkasseleverandoerAdresse()),
+            serviceRecord = new ServiceRecord(DPI, Iso6523.of(ICD.NO_ORG, printDetails.getPostkasseleverandoerAdresse()),
                     printDetails.getX509Sertifikat(), null);
-            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
-            return serviceRecord;
         }
+        if (isPrint) {
+            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
+        }
+        return serviceRecord;
     }
 }
