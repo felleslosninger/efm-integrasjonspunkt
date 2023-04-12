@@ -9,7 +9,7 @@ ENV APP_DIR=/opt/integrasjonspunkt \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
     KEYSTOREPASS=changeit
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     ca-certificates \
     curl \
     openssl  && \
