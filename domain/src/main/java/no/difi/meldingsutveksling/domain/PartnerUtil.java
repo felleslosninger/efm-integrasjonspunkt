@@ -8,7 +8,7 @@ public class PartnerUtil {
     public static String getPartOrPrimaryIdentifier(PartnerIdentifier identifier) {
         return identifier.hasOrganizationPartIdentifier() ?
                 identifier.getOrganizationPartIdentifier() :
-                identifier.getPrimaryIdentifier();
+                identifier.getIdentifier();
     }
 
 }

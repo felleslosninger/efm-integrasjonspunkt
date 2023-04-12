@@ -133,7 +133,7 @@ public class NextMoveValidator {
             });
 
             String senderIdentifier = getPartOrPrimaryIdentifier(sbd.getSenderIdentifier());
-            if (senderIdentifier.equals(props.getOrg().getNumber())) {
+            if (senderIdentifier.equals(props.getOrg().getIdentifier().getIdentifier())) {
                 if (isNullOrEmpty(props.getFiks().getUt().getUsername())) {
                     throw new MissingSvarUtCredentialsException(senderIdentifier);
                 }

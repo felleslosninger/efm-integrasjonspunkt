@@ -37,7 +37,7 @@ public class ServiceBusUtil {
     @PostConstruct
     private void init() {
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
-                properties.getOrg().getNumber() +
+                properties.getOrg().getIdentifier().getIdentifier() +
                 properties.getNextmove().getServiceBus().getMode();
     }
 
@@ -61,7 +61,7 @@ public class ServiceBusUtil {
 
         try {
             ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(
-                    SRParameter.builder(message.getReceiverIdentifier())
+                    SRParameter.builder(message.getReceiver())
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
                     message.getSbd().getDocumentType());
