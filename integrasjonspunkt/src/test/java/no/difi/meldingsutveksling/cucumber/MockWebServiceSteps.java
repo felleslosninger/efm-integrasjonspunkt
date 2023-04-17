@@ -36,7 +36,7 @@ public class MockWebServiceSteps {
         mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(cachingWebServiceTemplateFactory.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(sikkerDigitalPostKlient.getMeldingTemplate());
-        mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getIdentifier()).getWebServiceTemplate());
+        mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getPrimaryIdentifier()).getWebServiceTemplate());
     }
 
     @After
@@ -58,7 +58,7 @@ public class MockWebServiceSteps {
             return sikkerDigitalPostKlient.getMeldingTemplate();
         }
 
-        return svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getIdentifier()).getWebServiceTemplate();
+        return svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getPrimaryIdentifier()).getWebServiceTemplate();
     }
 
     @And("^a SOAP request to \"([^\"]*)\" will respond with the following payload:$")

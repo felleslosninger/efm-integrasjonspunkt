@@ -94,7 +94,7 @@ public class CucumberStepsConfiguration {
 
         @PostConstruct
         public void configureSvarUtClient() {
-            SvarUtWebServiceClientImpl client = svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getIdentifier());
+            SvarUtWebServiceClientImpl client = svarUtClientHolder.getClient(properties.getOrg().getIdentifier().getPrimaryIdentifier());
             client.setInterceptors(ArrayUtils.add(client.getInterceptors(), requestCaptureClientInterceptor));
         }
 

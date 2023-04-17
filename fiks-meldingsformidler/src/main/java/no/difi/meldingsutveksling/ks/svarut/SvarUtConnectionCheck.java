@@ -18,7 +18,7 @@ public class SvarUtConnectionCheck {
     public void checkTheConnection() {
         try {
             if (!isNullOrEmpty(properties.getFiks().getUt().getUsername())) {
-                svarUtService.retreiveForsendelseTyper(properties.getOrg().getIdentifier().getIdentifier());
+                svarUtService.retreiveForsendelseTyper(properties.getOrg().getIdentifier().getPrimaryIdentifier());
             }
 
             properties.getFiks().getUt().getPaaVegneAv().keySet().forEach(svarUtService::retreiveForsendelseTyper);

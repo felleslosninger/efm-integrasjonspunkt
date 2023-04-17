@@ -59,7 +59,7 @@ public class SvarUtService {
                 SendForsendelseMedId forsendelse = getForsendelse(message, serviceRecord, reject);
                 saveForsendelseIdMapping(message.getMessageId(), forsendelse.getForsendelsesid());
                 SvarUtRequest svarUtRequest = new SvarUtRequest(getFiksUtUrl(), forsendelse);
-                return svarUtClientHolder.getClient(message.getSender().getIdentifier()).sendMessage(svarUtRequest);
+                return svarUtClientHolder.getClient(message.getSender().getPrimaryIdentifier()).sendMessage(svarUtRequest);
             } catch (NextMoveException e) {
                 throw new NextMoveRuntimeException("Couldn't create Forsendelse", e);
             }

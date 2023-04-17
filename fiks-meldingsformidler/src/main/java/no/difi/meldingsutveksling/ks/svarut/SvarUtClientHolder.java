@@ -34,7 +34,7 @@ public class SvarUtClientHolder {
     @PostConstruct
     public void init() {
         if (!isNullOrEmpty(properties.getFiks().getUt().getUsername())) {
-            clients.put(properties.getOrg().getIdentifier().getIdentifier(),
+            clients.put(properties.getOrg().getIdentifier().getPrimaryIdentifier(),
                     svarUtClient(properties.getFiks().getUt().getUsername(),
                             properties.getFiks().getUt().getPassword()));
         }

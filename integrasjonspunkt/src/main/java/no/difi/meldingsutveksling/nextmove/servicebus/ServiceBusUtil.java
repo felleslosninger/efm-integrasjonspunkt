@@ -37,7 +37,7 @@ public class ServiceBusUtil {
     @PostConstruct
     private void init() {
         this.localQueuePath = NEXTMOVE_QUEUE_PREFIX +
-                properties.getOrg().getIdentifier().getIdentifier() +
+                properties.getOrg().getIdentifier().getPrimaryIdentifier() +
                 properties.getNextmove().getServiceBus().getMode();
     }
 
