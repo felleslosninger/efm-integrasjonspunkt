@@ -83,7 +83,7 @@
             Zqze2ILjMdBwM/edPQgGqhpgn2UDNTE8SmVLDmnq0hGBR9sAA0XedFjA0Cvxi7Al
             X4Bb9MuAQzrfTcFikvJmvmUY4+935G70lrW1oSXZugFqgAM8FVJP1pY=
         </Certificate>
-        <!--/BPCl3RootCaG2HT.pem -->
+        <!-- CN=Buypass Class 3 Test4 Root CA G2 HT, NTRNO-983163327, C=NO -->
         <Certificate>
             MIIFmjCCA4KgAwIBAgIKc0bhYk3LwPKpvDANBgkqhkiG9w0BAQ0FADBqMQswCQYD
             VQQGEwJOTzEYMBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlw
@@ -155,7 +155,7 @@
             5JcqXRNivUbZ4S+tbr+oAVC+SSGNJsH4kMb2DsN82r58DhclZKOgxg==
         </Certificate>
 
-        <!--BPCl3RootCaG2ST.pem-->
+        <!-- CN=Buypass Class 3 Test4 Root CA G2 ST, O=NTRNO-983163327, C=NO -->
         <Certificate>
             MIIFmjCCA4KgAwIBAgIKBvUDpJqhmGINMTANBgkqhkiG9w0BAQ0FADBqMQswCQYD
             VQQGEwJOTzEYMBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlw
@@ -223,7 +223,7 @@
             NFF8
         </Certificate>
 
-        <!--BPCl3CaG2STBS.pem-->
+        <!-- CN=Buypass Class 3 Test4 CA G2 ST Business, O=NTRNO-983163327, C=NO -->
         <Certificate>
             MIIGkjCCBHqgAwIBAgIKTVM0Fs8tjvuXVzANBgkqhkiG9w0BAQ0FADBqMQswCQYD
             VQQGEwJOTzEYMBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlw
@@ -263,7 +263,7 @@
             czBqUwOW
         </Certificate>
 
-        <!--BPCl3CaG2HTBS.pem-->
+        <!--CN=Buypass Class 3 Test4 CA G2 HT Business, O=NTRNO-983163327, C=NO -->
         <Certificate>
             MIIGkjCCBHqgAwIBAgIKIaxeEsZ8hwNbZDANBgkqhkiG9w0BAQ0FADBqMQswCQYD
             VQQGEwJOTzEYMBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlw
