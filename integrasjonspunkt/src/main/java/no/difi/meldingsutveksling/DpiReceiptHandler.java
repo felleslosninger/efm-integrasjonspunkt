@@ -13,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEVERT;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.MOTTATT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,7 +32,7 @@ public class DpiReceiptHandler {
         if (conversation.isPresent()) {
             MessageStatus status = externalReceipt.toMessageStatus();
             boolean isProxyClient = "xmlsoap".equals(properties.getDpi().getReceiptType());
-            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && !isProxyClient) {
+            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && !isProxyClient && !conversation.get().getMessageStatuses().stream().anyMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                 // Ensures that status MOTTATT is registered before LEVERT
                 // If MOTTATT was previously registered this attempt will be discarded and not cause duplicates
                 // If integrasjonspunktet is configured for use from the DPI proxy client MOTTATT won't be registered at
