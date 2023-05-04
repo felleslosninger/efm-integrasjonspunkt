@@ -1,0 +1,26 @@
+{
+  "infoRecord": {
+    "identifier": "0192:910075918:extended:0",
+    "organizationName": "TEST - C4",
+    "postadresse": null,
+    "entityType": {
+      "name": "ORGL"
+    }
+  },
+  "serviceRecords": [
+    {
+      "organisationNumber": "0192:910075918:extended:0",
+      "pemCertificate": "-----BEGIN CERTIFICATE-----\nMIICujCCAaKgAwIBAgIEXIe4TjANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\nSUZJIHRlc3QgOTEwMDc1OTE4MCAXDTE5MDMxMjEzNDY1NFoYDzIxMTkwMzEyMTM0\nNjU0WjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTEwMDc1OTE4MIIBIjANBgkqhkiG\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEArdbwXXtDgA3SJiNlYoG1F65zzOMqxJyd4Rvl\n8ofMP7gVfze9E2ydRg05m/dzQPIRhOPPlzsYwBBtkIH+iy+lJ6lh+l62SLXLhUCF\n4Z36uxbIIw8C/w0VMuiuoYwMig7AKX+hwqa2qCmL45b9eRMXkMMrZuWQvloXCONQ\nyCrQ5uNkZ/sGCiHqPekobjQ4AU0m/W0O2+NbyBsddZQ88BnBhEZyMj7K8xul0pM0\nT5JkGybfKVBYooyHFeWfJTZ+z8sae8cB4b6XJtjil3MPfOgIU1W2cj8hkY7DyGfI\n7pjwAKNL45S2F0v2jaI37a5p4x5BzSvmDksh2pmevkwGBHRkMQIDAQABMA0GCSqG\nSIb3DQEBCwUAA4IBAQAKZACSKEWNvcVzKuP/e17w/abzLRB4iIrFktb1wlJV4Zab\n5LP8spP6yfpTRSnle7P+K145dSSYCnsutFe7aZ0wOSLKQLOUWCmZFHSXlSYymss1\nx3aRk8Cg3itMuRwrViugHpWpJq+TRMq863W7sPgGLLAoGBIdWa9swI9JdazGD7/o\nyUTK1+GOI2yciDQaFiH+HlP9auGCs8X0HlZizYtJqivbSyGM9nH0Z0/T5asTHFig\nARLdWrnH1oKfEfE3sN/whPXoZtHyD/39u+Sk/FIzjnNEIrSHgpkSN6lY3DfjYH+k\nF/OZ/A6+cmGBmH7aMO7GIVR2NZgUeVj7Bu1W7WkP\n-----END CERTIFICATE-----",
+      "process": "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0",
+      "documentTypes": [
+        "urn:no:difi:arkivmelding:xsd::arkivmelding"
+      ],
+      "service": {
+        "identifier": "DPO",
+        "endpointUrl": "http://localhost:9800",
+        "serviceCode": "4192",
+        "serviceEditionCode": "270815"
+      }
+    }
+  ]
+}
