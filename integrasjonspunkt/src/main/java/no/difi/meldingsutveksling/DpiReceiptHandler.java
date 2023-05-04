@@ -45,7 +45,7 @@ public class DpiReceiptHandler {
 
             // If MOTTATT comes after LEVERT.
             if (ReceiptStatus.valueOf(status.getStatus()) == MOTTATT) {
-                if (!isProxyClient && !conversation.get().getMessageStatuses().stream().anyMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
+                if (!isProxyClient && conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                     conversationService.registerStatus(conversation.get(), status);
                     log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
                 }
