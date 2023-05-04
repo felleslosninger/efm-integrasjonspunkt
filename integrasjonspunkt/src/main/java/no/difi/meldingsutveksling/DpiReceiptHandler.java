@@ -34,7 +34,7 @@ public class DpiReceiptHandler {
             boolean isProxyClient = "xmlsoap".equals(properties.getDpi().getReceiptType());
 
             // If LEVERT comes before MOTTATT
-            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && !isProxyClient && !conversation.get().getMessageStatuses().stream().anyMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
+            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && !isProxyClient && conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                 // Ensures that status MOTTATT is registered before LEVERT
                 // If MOTTATT was previously registered this attempt will be discarded and not cause duplicates
                 // If integrasjonspunktet is configured for use from the DPI proxy client MOTTATT won't be registered at
