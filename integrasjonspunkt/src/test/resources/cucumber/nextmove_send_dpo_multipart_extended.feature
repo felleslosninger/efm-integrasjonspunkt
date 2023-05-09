@@ -29,7 +29,7 @@ Feature: Sending a Next Move DPO multipart/form message to an extended address
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b920",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b945",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
@@ -229,7 +229,7 @@ Feature: Sending a Next Move DPO multipart/form message to an extended address
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b920",
+          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b945",
           "type" : "arkivmelding",
           "creationDateAndTime" : "2019-03-25T11:35:00+01:00"
         },

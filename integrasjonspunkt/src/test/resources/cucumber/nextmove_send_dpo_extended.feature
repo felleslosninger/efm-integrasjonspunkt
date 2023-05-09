@@ -29,7 +29,7 @@ Feature: Sending a Next Move DPO message to an extended address
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952d916",
                 "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding",
                 "type": "arkivmelding",
                 "typeVersion": "2.0"
@@ -225,7 +225,7 @@ Feature: Sending a Next Move DPO message to an extended address
         "documentIdentification" : {
           "standard" : "urn:no:difi:arkivmelding:xsd::arkivmelding",
           "typeVersion" : "2.0",
-          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952b916",
+          "instanceIdentifier" : "ff88849c-e281-4809-8555-7cd54952d916",
           "type" : "arkivmelding",
           "creationDateAndTime" : "2019-03-25T11:35:00+01:00"
         },
@@ -351,7 +351,7 @@ Feature: Sending a Next Move DPO message to an extended address
     """
     Testing 1 2 3
     """
-    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b916" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952d916" are:
     """
     {
       "content" : [ {
@@ -359,14 +359,14 @@ Feature: Sending a Next Move DPO message to an extended address
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952d916",
         "convId" : 166
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952d916",
         "convId" : 166
       } ],
       "pageable" : {
@@ -418,7 +418,7 @@ Feature: Sending a Next Move DPO message to an extended address
             },
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
-                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952d916",
                 "standard": "urn:no:difi:eformidling:xsd::status",
                 "type": "status",
                 "typeVersion": "2.0"
@@ -448,7 +448,7 @@ Feature: Sending a Next Move DPO message to an extended address
     """
     And Altinn sends the message
     And the application checks for new DPO messages
-    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952b916" are:
+    And the message statuses for the conversation with id = "ff88849c-e281-4809-8555-7cd54952d916" are:
     """
     {
       "content" : [ {
@@ -456,21 +456,21 @@ Feature: Sending a Next Move DPO message to an extended address
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "OPPRETTET",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952d916",
         "convId" : 166
       }, {
         "id" : 170,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "SENDT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952d916",
         "convId" : 166
       }, {
         "id" : 171,
         "lastUpdate" : "2019-03-25T12:38:23+01:00",
         "status" : "LEVERT",
         "conversationId" : "37efbd4c-413d-4e2c-bbc5-257ef4a65a56",
-        "messageId" : "ff88849c-e281-4809-8555-7cd54952b916",
+        "messageId" : "ff88849c-e281-4809-8555-7cd54952d916",
         "convId" : 166
       } ],
       "pageable" : {
