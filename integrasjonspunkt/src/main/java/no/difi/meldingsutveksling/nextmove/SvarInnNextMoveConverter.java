@@ -163,6 +163,7 @@ public class SvarInnNextMoveConverter {
         arkivmelding.setSystem("Integrasjonspunkt");
         arkivmelding.setMeldingId(forsendelse.getId());
         arkivmelding.setTidspunkt(Optional.ofNullable(metadata.getDokumentetsDato())
+                .map(Long::parseLong)
                 .map(DateTimeUtil::toXMLGregorianCalendar)
                 .map(DateTimeUtil::atStartOfDay)
                 .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
