@@ -149,7 +149,7 @@ Feature: Receiving a Next Move DPF message
     <arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding">
         <system>Integrasjonspunkt</system>
         <meldingId>81264cfa-1ba5-4fb5-a95d-48c824ed3bbb</meldingId>
-        <tidspunkt/>
+        <tidspunkt>2016-03-21T00:00:00+01:00</tidspunkt>
         <antallFiler>0</antallFiler>
         <mappe xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="saksmappe">
           <systemID>ac5efbd4c-413d-4e2c-bbc5-257ef4a65b23</systemID>
