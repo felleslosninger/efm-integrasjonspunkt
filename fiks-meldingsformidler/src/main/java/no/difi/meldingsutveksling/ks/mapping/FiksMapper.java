@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.ks.mapping;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
+import no.arkivverket.standarder.noark5.metadatakatalog.TilknyttetRegistreringSom;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
@@ -27,6 +28,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -156,11 +158,19 @@ public class FiksMapper {
         return sikkerhetsnivaa != null && sikkerhetsnivaa == 4;
     }
 
-    private Set<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
+    private List<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
         return journalpost.getDokumentbeskrivelseAndDokumentobjekt().stream()
                 .filter(Dokumentbeskrivelse.class::isInstance)
                 .map(Dokumentbeskrivelse.class::cast)
-                .collect(Collectors.toSet());
+                .sorted((o1, o2) -> {
+                    if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
+                        return -1;
+                    } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
+                        return 1;
+                    }
+                    return 0;
+                })
+                .collect(Collectors.toList());
     }
 
     private Adresse getMottaker(NextMoveOutMessage message) {
@@ -186,12 +196,20 @@ public class FiksMapper {
                 .orElseThrow(() -> new NextMoveException(format("No attachement \"%s\" found", ARKIVMELDING_FILE)));
     }
 
-    private Set<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, Set<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
+    private List<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, List<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
         return docs.stream()
+                .sorted((o1, o2) -> {
+                    if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
+                        return -1;
+                    } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
+                        return 1;
+                    }
+                    return 0;
+                })
                 .flatMap(p -> p.getDokumentobjekt().stream())
                 .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
                 .map(file -> getDocument(message.getMessageId(), file, cert, reject))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private BusinessMessageFile getBusinessMessageFile(NextMoveOutMessage message, String referanseDokumentfil) {
