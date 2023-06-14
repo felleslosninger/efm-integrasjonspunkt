@@ -262,9 +262,12 @@ public class FiksMapper {
         return x == null ? 0 : x.intValueExact();
     }
 
-    private Adresse mottakerFrom(Korrespondansepart kp, String orgnr) {
+    private Adresse mottakerFrom(Korrespondansepart kp, String overrideKorrespondansePartOrgNo) {
         return Adresse.builder()
-                .withDigitalAdresse(OrganisasjonDigitalAdresse.builder().withOrgnr(orgnr).build())
+                .withDigitalAdresse(OrganisasjonDigitalAdresse.builder().withOrgnr(
+                        properties.getFiks().getUt().isSvarSendesTilKorrespondansepart()
+                        ? kp.getAdministrativEnhet()
+                        : overrideKorrespondansePartOrgNo).build())
                 .withPostAdresse(PostAdresse.builder()
                         .withNavn(kp.getKorrespondansepartNavn())
                         .withAdresse1(String.join(" ", kp.getPostadresse()))
