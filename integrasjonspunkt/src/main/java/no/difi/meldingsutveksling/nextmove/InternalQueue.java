@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.IntegrajonspunktReceiveImpl;
 import no.difi.move.common.io.pipe.PromiseRuntimeException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,10 +88,18 @@ public class InternalQueue {
     @JmsListener(destination = "${difi.move.queue.noark-name}", containerFactory = "myJmsContainerFactory")
     public void noarkListener(byte[] message, Session session) {
         StandardBusinessDocument sbd = documentConverter.unmarshallFrom(message);
+
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         try {
             integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
+            if (ExceptionUtils.hasCause(e, OutOfMemoryError.class)) {
+                // Forsøk på sending av for store meldinger med BEST/EDU fører til OutOfMemoryError
+                // Det er lite sannsynlig at gjentatte forsøk på å sende samme melding vil fungere
+                // Unngår derfor å prøve på nytt ved denne feilsituasjonen
+                Audit.error("Failed delivering message to archive.. no retry", markerFrom(sbd), e);
+                return;
+            }
             Audit.warn("Failed delivering message to archive.. queue will retry", markerFrom(sbd), e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }
