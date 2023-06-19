@@ -93,7 +93,7 @@ public class InternalQueue {
         try {
             integrajonspunktReceive.forwardToNoarkSystem(sbd);
         } catch (Exception e) {
-            if (ExceptionUtils.hasCause(e, OutOfMemoryError.class)) {
+            if (ExceptionUtils.indexOfType(e, OutOfMemoryError.class) >= 0) {
                 // Forsøk på sending av for store meldinger med BEST/EDU fører til OutOfMemoryError
                 // Det er lite sannsynlig at gjentatte forsøk på å sende samme melding vil fungere
                 // Unngår derfor å prøve på nytt ved denne feilsituasjonen
