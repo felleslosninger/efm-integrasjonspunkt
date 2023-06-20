@@ -23,7 +23,6 @@ public enum DpiMessageType implements StandardBusinessDocumentType {
     private final String type;
     private final Class<? extends BusinessMessage> clazz;
     private final Direction direction;
-    private final URI schemaUri;
     private final String standard;
     private final String process;
 
@@ -31,7 +30,6 @@ public enum DpiMessageType implements StandardBusinessDocumentType {
         this.type = type;
         this.clazz = clazz;
         this.direction = direction;
-        this.schemaUri = URI.create(String.format("https://docs.digdir.no/schemas/dpi/innbyggerpost_dpi_%s_1_0.schema.json", type));
         this.standard = String.format("urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:%s::1.0", type);
         this.process = direction == Direction.OUTGOING ? String.format("urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:%s:ver1.0", type) : null;
     }
