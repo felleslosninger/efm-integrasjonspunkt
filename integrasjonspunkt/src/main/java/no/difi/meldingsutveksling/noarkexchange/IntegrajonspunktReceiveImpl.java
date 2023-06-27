@@ -102,7 +102,7 @@ public class IntegrajonspunktReceiveImpl {
             try {
                 messagePersister.delete(sbd.getMessageId());
             } catch (IOException e) {
-                log.warn(markerFrom(sbd), "Could not delete files for expired message {}", sbd.getMessageId(), e);
+                log.warn(markerFrom(sbd), "Error deleting files in IntegrajonspunktReceiveImpl.forwardToNoarkSystem() for expired message {}", sbd.getMessageId(), e);
             }
             return;
         }
@@ -169,7 +169,7 @@ public class IntegrajonspunktReceiveImpl {
                 try {
                     messagePersister.delete(sbd.getMessageId());
                 } catch (IOException e) {
-                    log.warn(String.format("Unable to delete files for message with id=%s", sbd.getMessageId()), e);
+                    log.warn(String.format("Error deleting files in IntegrajonspunktReceiveImpl.forwardToNoarkSystemAndSendReceipts() for message with id=%s", sbd.getMessageId()), e);
                 }
             } else {
                 Audit.error(String.format("Unexpected response from archive for message [id=%s]", sbd.getMessageId()), markerFrom(response));
