@@ -42,7 +42,7 @@ public class TimeToLiveExpiredHandler {
                     try {
                         messagePersister.delete(messageId);
                     } catch (IOException e) {
-                        log.error(markerFrom(conversation), "Could not delete files for expired message {}", messageId, e);
+                        log.warn(markerFrom(conversation), "Error deleting files in TimeToLiveExpiredHandler.setExpired() for expired message {}", messageId, e);
                     }
 
                     businessMessageFileRepository.deleteFilesByMessageId(id);

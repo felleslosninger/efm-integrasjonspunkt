@@ -97,9 +97,6 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String uri;
 
-    @NotNull
-    private String schema;
-
     @Valid
     @NotNull
     private Timeout timeout;

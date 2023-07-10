@@ -40,6 +40,7 @@
             <Policy>2.16.578.1.26.1.0.3.2</Policy>
             <Policy>2.16.578.1.29.913.1.1.0</Policy>
             <Policy>2.16.578.1.1.1.1.100</Policy>
+            <Policy>2.16.578.1.29.13.210.1.0</Policy>
         </Chain>
         <Class>no.difi.certvalidator.extra.NorwegianOrganizationNumberRule</Class>
         <CRL/>
@@ -107,6 +108,127 @@
             47cVEAeqwOAtF/Cu6IRnvjV1Vse3wjRFy/mpNlbOq9IQBkBdXb2uXzRt78JmNWw0
             DGMYnXhJ13mUKFJJrZr6K6rRBFT7lkf0k+QnSkAvNA==
         </Certificate>
+
+        <!--
+        C = NO
+        organizationIdentifier = NTRNO-983163327
+        O = Buypass AS
+        CN = Buypass Class 3 Root CA G2 ST
+        -->
+        <Certificate>
+            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
+            F+nys69/9967LDYlkEHBfafbUrN5HjQtB1E=
+        </Certificate>
+
+        <!--
+        C = NO
+        organizationIdentifier = NTRNO-983163327
+        O = Buypass AS
+        CN = Buypass Class 3 Root CA G2 HT
+        -->
+        <Certificate>
+            MIIFtjCCA56gAwIBAgILAOdVUZrq/dCxOUMwDQYJKoZIhvcNAQENBQAwZDELMAkG
+            A1UEBhMCTk8xGDAWBgNVBGEMD05UUk5PLTk4MzE2MzMyNzETMBEGA1UECgwKQnV5
+            cGFzcyBBUzEmMCQGA1UEAwwdQnV5cGFzcyBDbGFzcyAzIFJvb3QgQ0EgRzIgSFQw
+            HhcNMjAxMTEwMTE1NzUzWhcNNDUxMTEwMTE1NzUzWjBkMQswCQYDVQQGEwJOTzEY
+            MBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlwYXNzIEFTMSYw
+            JAYDVQQDDB1CdXlwYXNzIENsYXNzIDMgUm9vdCBDQSBHMiBIVDCCAiIwDQYJKoZI
+            hvcNAQEBBQADggIPADCCAgoCggIBALL5caPu+FWqlulauITBYhyrY98ZJvoSgZd3
+            NlAi6Lnyo97pyp+Q/lewOlv7HijTO7wRjURm0oV/BbGPfwuYPyoj/ky7wUDbr0oi
+            iCHjxUjQPpAkHBnGfgTfFNZ5XrLYJudry5gvT1QdKKmc5W7xVlXyM1yZstmpRi0a
+            0c+q012BijKAFE1tSZDGPICgMvuYGZKBrDi0wYok4mr6nnawlLAilb6UUC4NrU1K
+            fClPLoGu+3sbiuM6G2pOjDrGR3P3sn/yHadD2WIDu+EwmD0izQK+GVYJTMG8JcTK
+            pu28ZSuR3ny19rFQXPOOMJmEGp0W0lCBm3kM54OGdQD9y2cvuvyUDIq4nsu0RHtW
+            f01YkQkc85+BzSGZ0ulxDAhzr1xaxJBxZiW4c11Z976+1x7xwupjJreH/lr4ri7K
+            dGTHjvAZnbYQMv9WiE3pbUsrBFOrt/2fRHtZZ+GVG9DwXg6nMK1BAuEabubIaDxG
+            ydK+xIUWMLklLSwfFxu0nA1QfXEMjNU3IeiqEiE/lnrySC2Cd9a+Sn1eyjtWKRHR
+            Ir0XFl6bl54q43LRWjm0n3INM28F7ThN9Ze4xdtem11It/nfqfDL1pT5GLwaGFTp
+            KE0wD3Kb/pmG+RxtZyzcz8w7REbQxc7do3+w4R78wX/mINIIprh1EIhIUBZAqoH7
+            5TUkyZkrAgMBAAGjaTBnMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFLgcn+20
+            350BTM10v0h4DnADC7kMMA4GA1UdDwEB/wQEAwIBBjAlBggrBgEFBQcBAwQZMBcw
+            FQYIKwYBBQUHCwIwCQYHBACL7EkBAjANBgkqhkiG9w0BAQ0FAAOCAgEAh7ZZxpPg
+            ejy1+9aCRm/NuYpn0vzSflub86J+GQv9mizKCTfQWYBCk5Y9T5ECDbybQ/JOv6Kw
+            Cl6THmRYoR5dKMlkQ6rKdMdcai5c+rhUqlCovKsVH04QTP8+6tuaGxFhUuAgEq/N
+            4VDU6QHNusqcC3Mh0LSQnriS9D+mPGVs87Xefy5zdDnuXR0WcBTP4QUedzGO0Yu1
+            75u322TSjePwlulq+fl2VHM7wlp1ns0kHhYc8jbcm0F1kzHxrSpR3ghRg380Q356
+            aa16BsmoKsOR5K5De61GLW66MguX+9BGSrParMtMMWIC0y+vV7jviZwa55vktfGr
+            sdHLHmUBE+MvegGG2vrRWK4hciZwRto1GwRdCpTUKrjcz2kyS1EEzbWh1i7KE7z6
+            crkKcJPHuMdHYS5ETITw2QHmDkz7Vz4zdzl5Vpp4+4GaSFLhYuV5wrCk/KrQee7J
+            t6K25rOIqdo8GM+h1/BxvYIen5JdpCC6sMigyDD/DUVufUh8kjxYGooX+OdxHN2i
+            ySoO+ZVSlyKk9fk/WVh7cQ5bxIncD2Scq5bRhdWPEc+CGNf0BwFU6LaINj6alC19
+            RDC3C9CQ5EBtmMYKZz/14cuenv99eaiqL06mddVqIMx9wJVwIpP4TcMBNebeXuPu
+            lHDJsS/SQGzWF9myL3Cy0h1jioIsus1Rk8A=
+        </Certificate>
+
+        <!--
+        C = NO
+        2.5.4.97 = NTRNO-988312495
+        O = Commfides Norge AS
+        CN = Commfides Root CA - G3
+        -->
+        <Certificate>
+            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
+            YU4e4iphK8waknrXUzPldShAogZWBnUzI2w=
+        </Certificate>
     </CertificateBucket>
 
     <CertificateBucket name="intermediate">
@@ -171,6 +293,183 @@
             sU72MTdtInF00qMCiif+tIBDvrLnoMgawZlQK1wgxv0U8sdYl/GnR3UmVNGlxOLD
             ODOGE5NeHV/eRZJ1gaTgNt/M2oDthqJ5SNpc05k+SELSwtEUo71dR2hdKKIUcsiM
             k9s3q+DYos59SMK4RVCnWkNXsDuAw9q316+2IrMERfkJSUY=
+        </Certificate>
+
+        <!--
+        C = NO
+        organizationIdentifier = NTRNO-983163327
+        O = Buypass AS
+        CN = Buypass Class 3 CA G2 HT Business
+        -->
+        <Certificate>
+            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
+        </Certificate>
+
+        <!--
+        C = NO
+        organizationIdentifier = NTRNO-983163327
+        O = Buypass AS
+        CN = Buypass Class 3 CA G2 HT Person
+        -->
+        <Certificate>
+            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
+            xhtZdMvSqc8m6TkBOVNywwaGXXilG1dCaSTkA1A=
+        </Certificate>
+
+        <!--
+        C = NO
+        organizationIdentifier = NTRNO-983163327
+        O = Buypass AS
+        CN = Buypass Class 3 CA G2 ST Business
+        -->
+        <Certificate>
+            MIIGezCCBGOgAwIBAgILANcF2TfqKJjzbYgwDQYJKoZIhvcNAQENBQAwZDELMAkG
+            A1UEBhMCTk8xGDAWBgNVBGEMD05UUk5PLTk4MzE2MzMyNzETMBEGA1UECgwKQnV5
+            cGFzcyBBUzEmMCQGA1UEAwwdQnV5cGFzcyBDbGFzcyAzIFJvb3QgQ0EgRzIgU1Qw
+            HhcNMjAxMTEwMTIxMTEzWhcNNDAxMTEwMTIxMTEzWjBoMQswCQYDVQQGEwJOTzEY
+            MBYGA1UEYQwPTlRSTk8tOTgzMTYzMzI3MRMwEQYDVQQKDApCdXlwYXNzIEFTMSow
+            KAYDVQQDDCFCdXlwYXNzIENsYXNzIDMgQ0EgRzIgU1QgQnVzaW5lc3MwggIiMA0G
+            CSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDqw8/QQ+dL0Niv6BfiM8VRtO7EtgZq
+            K3Qkm5fJBq1OxSSMTG9VwC4gLOvMrfL42IuLVw8ktwGGKdgWoHNPDVCN0lnILsNC
+            sB2um1ItX5WkTnv6rpi1dcFFigUAQpRe0WadeW2QXsAV0PYdtkEuiowhIVIR25PT
+            v+9t2pEc5iJ27Y1jLsua6UxIb+EINymtTqgJkc3prggRi6DpeFfgCGewEvccJeQr
+            EuP+yt2ldHOda2+EWOLGUIcTNQWepTX4dboard7xIoPwPlknIPASp0M8tL/XLhrI
+            gxow2cz8yqgZnxFfu6kpwWqg/9UQQTaJE0bT4kdp0325qt38yyzxflVXpWgB56K3
+            +1WP1oi8to1c32AYr48/T6G8jelu0LFvEq1eaijpeklrSiAlms7mERudnrokZCKR
+            j+2SQ5f0b5y/D45N2OghAPxz4v8IfHI/jns7UXnF5pBbwZNRYgCTgAlEO9vk0Y8l
+            dQsXfOUF+IpYPCMfIZv17pCE9sjMT74J8nfbFC/viaxI5b+CpBgp7XIQDCyVNDUJ
+            MLvSoH0V7QpXJuU2jsuqc2vsPjORdTZKO++cPC5yw4zWbz8rycW3ii4D2WDhMR9M
+            tj1W43mY9lbguQ6uG2Z5xEqwLL+Gs9o6gqkAaYwC3yn8M+gZgV46WW8QJ2wlPcyk
+            cCDmFBhWb8BSVQIDAQABo4IBKDCCASQwDwYDVR0TAQH/BAUwAwEB/zAfBgNVHSME
+            GDAWgBQXU4UmZpfHJhINn97MtEQy6pTU0TAdBgNVHQ4EFgQUgUWcKZVmODftO1RO
+            jjLlliF51WQwDgYDVR0PAQH/BAQDAgEGMBEGA1UdIAQKMAgwBgYEVR0gADA9BgNV
+            HR8ENjA0MDKgMKAuhixodHRwOi8vY3JsLmJ1eXBhc3NjYS5jb20vQlBDbDNSb290
+            Q2FHMlNULmNybDBIBggrBgEFBQcBAQQ8MDowOAYIKwYBBQUHMAKGLGh0dHA6Ly9j
+            cnQuYnV5cGFzc2NhLmNvbS9CUENsM1Jvb3RDYUcyU1QuY2VyMCUGCCsGAQUFBwED
+            BBkwFzAVBggrBgEFBQcLAjAJBgcEAIvsSQECMA0GCSqGSIb3DQEBDQUAA4ICAQB5
+            jLdhzRbmm6hRX9yDwlHCM7Hd9gslAkhfvHvnElRxM9e9tt1c6xFO88qqYfTRmEDh
+            jEC0o/3OrhcMnuT7Jm/jncqGe8dfiHKj5jzXi/zqGdPhnOmm39bzPhI2uvY4AWKr
+            XN1badgUs7XePcmAtvJDhA0G1CjKyUN+2sO63wh5CLJrRi9TWfkiTD/bQIUMcDQl
+            sJDRWIkekidVm5qq0/zlQM1jz2QVGJcM8e8xjlfb/reUF9VSdzFpuOJh00fc+h7X
+            wzOtAhaiiUnu2DK1O9B0GE7ZP9AuH67NODBKCVqkGIZ87U/jnZYujSJ6ivMJOvwf
+            eiXeQgUrpHyKWV7jYAo+4SMHBTXXR1WcN8Eu8wAuahSQ5XCwdYxt/TnvRqY8bpQ0
+            yQPScksc7y/IrZv2Wvk45XCobaESx2wmrSf4jXxEWVbA25+6q57H3sKDxfgDxU0r
+            W5ZNLUN1k0FsVBvncwDuXK0B3zdvqEMvRFgdQfLF+djdACGshzD8r9fMw7qvY5EP
+            cU/mDVq3tgfRftdsiw2ON2ud4kjspcSkhk7PRq+V+JZ1/cHysdzop+S1oP0a5ctQ
+            bH0v5nS8lrdnoK9JAY0ISOsZ6eFqfNiEJnhEzBzwd2fi/kK9gMvJxcjbBFvATKUp
+            EY2Xf4cOziOshH6UwF5z9UrIFAfYmHI30mJqp0VlLA==
+        </Certificate>
+
+        <!--
+        CN = Commfides Legal Person - G3
+        2.5.4.97 = NTRNO-988312495
+        O = Commfides Norge AS
+        C = NO
+        -->
+        <Certificate>
+            MIIGkzCCBHugAwIBAgIUUtFSPx0wYKY72dMSzmjhLwfyyY4wDQYJKoZIhvcNAQEN
+            BQAwZTELMAkGA1UEBhMCTk8xGzAZBgNVBAoMEkNvbW1maWRlcyBOb3JnZSBBUzEY
+            MBYGA1UEYQwPTlRSTk8tOTg4MzEyNDk1MR8wHQYDVQQDDBZDb21tZmlkZXMgUm9v
+            dCBDQSAtIEczMB4XDTIxMDgwNTA4NTQ1OFoXDTQxMDgxNDA4NTQ1N1owajELMAkG
+            A1UEBhMCTk8xGzAZBgNVBAoMEkNvbW1maWRlcyBOb3JnZSBBUzEYMBYGA1UEYQwP
+            TlRSTk8tOTg4MzEyNDk1MSQwIgYDVQQDDBtDb21tZmlkZXMgTGVnYWwgUGVyc29u
+            IC0gRzMwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQCYdx/+zuF54HIc
+            4wY4OxTeZr/LWaEwaBRYIfRwBo96SjbWSLQuXceIWKDx9QaFhp2s5osRPg+QCR38
+            Ai0FFp8fpWPtFd5uNnZXl9GAkShtcLJEZAEASykw6pmKSP+GxIOH5CDsZmF7pn27
+            YdRTGNmEofx7F3MDjYKNmUC/MKlwF2qcJzE+dS3NyIFNLzJUQAHW41tJt7BzwPqT
+            eD4IUsaQSILc7G5tV/DxNXvDG1dF1bEk3y6Rnr3zMsuXDM25wuZW/8krnGoR0Dpl
+            bF4cC5liCEROMsVDMX621VKB6uRiO/k0jGVs7WjgxVqmxQCl+A4LnK5pZRB3CQJL
+            ICNqdUFLSHm3L3bWjnkoCRD8Sm1HMbVxfipzWG/1e6Yr8hR+4EJrfc6gJq1bg1Wq
+            yAnxD1IdHBFDDdW0mZ8BGUKdukPxmCw6pUouwb5d42m71+qnClOmeWTqsnsn69qM
+            9ZEcy59bjdNA1HVh1x8sdk+F42tpfjYlgixY5HfJCDpk/FNYTmCx9fYp4eNnS7Ow
+            JxoNXF8Cgr6nBAQ1gaR6hR93qPnuFhDpRsEy80p2rXurbDH6dhgxwyPTbPpfPv3S
+            cA8OTe/zC9ZzyzlMmKxNDKP5e93rOAR+mkJ08P0ZlAdng6NFZJJc+i5jV6hc7Mno
+            jEctv8DxQi0PRlUIlcaRUi3XdA7KeQIDAQABo4IBNDCCATAwDwYDVR0TAQH/BAUw
+            AwEB/zAfBgNVHSMEGDAWgBTK4eLphq2BkR9YmmMABu71R5QLVjBOBggrBgEFBQcB
+            AQRCMEAwPgYIKwYBBQUHMAKGMmh0dHA6Ly9jcnQuY29tbWZpZGVzLmNvbS9HMy9D
+            b21tZmlkZXNSb290Q0EtRzMuY3J0MBEGA1UdIAQKMAgwBgYEVR0gADAlBggrBgEF
+            BQcBAwQZMBcwFQYIKwYBBQUHCwIwCQYHBACL7EkBAjBDBgNVHR8EPDA6MDigNqA0
+            hjJodHRwOi8vY3JsLmNvbW1maWRlcy5jb20vRzMvQ29tbWZpZGVzUm9vdENBLUcz
+            LmNybDAdBgNVHQ4EFgQU8TRI4L5hMZwjFgJ6ZPGlR8fl52kwDgYDVR0PAQH/BAQD
+            AgEGMA0GCSqGSIb3DQEBDQUAA4ICAQABLK8P1hd1lvyTIC1954gMt5dRxLEcsu1L
+            oi5Wiq+XkZeapJQcSanyyYJjCDAtXVO2ZM1AcWtdK7YKqOrl29pfIjLV87ri/YMZ
+            IfsnG/2JUgX4nrcrB4suXWDinI9pZtVvC2+vZw0O0NTyFqZsuEPlxIZgv6396jxz
+            KCFuJ7hBIMeuNdQohCJiXB0nAFomtzZ82Ig55n4ag6bpFD3t57urvCk6mUq5Xz8/
+            A8yFSNxSjFA15QxYIXB47J24eRKE/30gM9KS0OuCLwo5sA5oOaA7KBMt0tUPM03z
+            wHHiITR7S+d4pkbAYW02ulWmCBuWIl/ESy6yXS7IXCmUkHqUfgRWfudZ+MC1R2/6
+            39rrnm/R6jc9UbJyOqvOeS2ZOQDeTQJYq1QcF40BaTVU+GZ0cqFXfqkerxOXOmaT
+            DVwns6C3aYnPnZQ0RGqlyELNObEWTsYo4Bt/WK30J1tF9ekMk7qqM9Jz+gjDOePo
+            aG3s/C+G77/8mbcu3HmBnXKVa7il5ttV5Y0lCkXBOl7q/FLtLFzUat6unM9judC6
+            oMpIVk0XnxaTUZTkVLXQUfLWe6wO8BKLgdHkBZNrm3OzVdliLYliR/FqGZEQdut4
+            ueBESf0Q6DOCi9L1YwFyvERyPV5QbCWmj7bYjyf8QvLCrPhQONQuHIBjuFeHa9AU
+            dkSrvIgHBQ==
         </Certificate>
     </CertificateBucket>
 

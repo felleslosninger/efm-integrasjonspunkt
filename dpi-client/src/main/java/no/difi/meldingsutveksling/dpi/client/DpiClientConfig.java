@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.SchemaStore;
-import net.jimblackler.jsonschemafriend.UrlRewriter;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
@@ -25,6 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,7 +33,6 @@ import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.Security;
@@ -57,6 +56,8 @@ public class DpiClientConfig {
     }
 
     private final DigitalPostInnbyggerConfig properties;
+
+    private final ResourceLoader resourceLoader;
 
     @Bean
     public DpiClient dpiClient(
@@ -196,48 +197,37 @@ public class DpiClientConfig {
 
     @Bean
     @SneakyThrows
-    public JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator(UrlRewriter urlRewriter) {
+    public JsonDigitalPostSchemaValidator jsonDigitalPostSchemaValidator() {
         Path diskCacheName = FileSystems.getDefault().getPath(System.getProperty("java.io.tmpdir"))
                 .resolve("net.jimblackler.jsonschemafriend")
                 .resolve("cache");
         FileUtils.deleteDirectory(diskCacheName.toFile());
-        return new JsonDigitalPostSchemaValidator(new Validator(), getSchemaMap(urlRewriter));
+        return new JsonDigitalPostSchemaValidator(new Validator(), getSchemaMap());
     }
 
-    private Map<String, Schema> getSchemaMap(UrlRewriter urlRewriter) {
-        SchemaStore schemaStore = new SchemaStore(urlRewriter);
+    @SneakyThrows
+    private Map<String, Schema> getSchemaMap() {
+        SchemaStore schemaStore = new SchemaStore();
+        loadSchema(schemaStore, "classpath:schema/json-schema.org/draft-07/schema");
+        loadSchema(schemaStore, "classpath:schema/docs.digdir.no/schemas/common/sbdh.schema.json");
+        loadSchema(schemaStore, "classpath:schema/docs.digdir.no/schemas/dpi/commons.schema.json");
         return Collections.unmodifiableMap(
                 Arrays.stream(DpiMessageType.values())
-                        .collect(Collectors.toMap(DpiMessageType::getType, p -> loadSchema(schemaStore, p.getSchemaUri()))));
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "schema", prefix = "difi.move.dpi", havingValue = "online")
-    public UrlRewriter onlineUrlRewriter() {
-        return uri -> uri;
-    }
-
-    @Bean
-    @SneakyThrows
-    @ConditionalOnProperty(name = "schema", prefix = "difi.move.dpi", havingValue = "offline", matchIfMissing = true)
-    public UrlRewriter offlineUrlRewriter() {
-        String path = getClass().getProtectionDomain()
-                .getCodeSource()
-                .getLocation()
-                .toURI()
-                .getPath();
-
-        log.info("JAR path = {}", path);
-
-        return uri -> {
-            String name = String.format("file:%sschema/%s%s", path, uri.getHost(), uri.getPath());
-            return URI.create(name);
-        };
+                        .collect(Collectors.toMap(DpiMessageType::getType, p -> loadSchema(schemaStore, p))));
     }
 
     @SneakyThrows
-    private Schema loadSchema(SchemaStore schemaStore, URI schemaUri) {
-        return schemaStore.loadSchema(schemaUri);
+    private Schema loadSchema(SchemaStore schemaStore, DpiMessageType dpiMessageType) {
+        String classpathLocation = "classpath:schema/docs.digdir.no/schemas/dpi/innbyggerpost_dpi_"
+                .concat(dpiMessageType.getType())
+                .concat("_1_0.schema.json");
+        return loadSchema(schemaStore, classpathLocation);
+    }
+
+    @SneakyThrows
+    private Schema loadSchema(SchemaStore schemaStore, String classpathLocation) {
+        InputStream inputStream = resourceLoader.getResource(classpathLocation).getInputStream();
+        return schemaStore.loadSchema(inputStream);
     }
 
     @Bean

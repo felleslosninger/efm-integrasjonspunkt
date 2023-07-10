@@ -6,7 +6,6 @@ import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
-import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -19,15 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.io.IOException;
+import java.io.InputStream;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -90,10 +88,19 @@ public class NextMoveMessageInController {
             response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_FILENAME + ASIC_FILE);
             response.setHeader("Content-Type", MIMETYPE_ASICE.toString());
             response.setStatus(HttpStatus.OK.value());
-            IOUtils.copy(asic.getInputStream(), response.getOutputStream());
+            copyStreamToResponse(asic, response);
         } catch (AsicPersistenceException e) {
             throw new FileNotFoundException(ASIC_FILE);
         }
+    }
+
+    private static void copyStreamToResponse(Resource asic, HttpServletResponse response) {
+        try (InputStream inputStream = asic.getInputStream()) {
+            IOUtils.copy(inputStream, response.getOutputStream());
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to copy stream!", e);
+        }
+
     }
 
     @DeleteMapping(value = "/{messageId}")
