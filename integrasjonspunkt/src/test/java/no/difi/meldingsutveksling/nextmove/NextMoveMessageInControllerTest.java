@@ -344,6 +344,7 @@ class NextMoveMessageInControllerTest {
     @Test
     void popMessage_UnreadableAsic_ShouldReturnInternalServerError() throws Exception {
         Resource asicResource = mock(Resource.class);
+        when(asicResource.exists()).thenReturn(true);
         when(asicResource.isReadable()).thenReturn(false);
         given(messageService.popMessage(anyString())).willReturn(asicResource);
         doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
