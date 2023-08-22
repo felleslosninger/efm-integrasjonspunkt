@@ -69,8 +69,7 @@ public class NextMoveMessageInService {
             throw new MessageNotLockedException(messageId);
         }
 
-        if ((SBDUtil.isAvtalt(message.getSbd()) || SBDUtil.isReceipt(message.getSbd())) &&
-                (message.getFiles() == null || message.getFiles().isEmpty())) {
+        if (SBDUtil.isReceipt(message.getSbd())) {
             return null;
         }
 

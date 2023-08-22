@@ -340,10 +340,10 @@ class NextMoveMessageInControllerTest {
 
         verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
     }
-
     @Test
     void popMessage_UnreadableAsic_ShouldReturnInternalServerError() throws Exception {
         Resource asicResource = mock(Resource.class);
+        when(asicResource.exists()).thenReturn(true);
         when(asicResource.isReadable()).thenReturn(false);
         given(messageService.popMessage(anyString())).willReturn(asicResource);
         doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
@@ -355,6 +355,21 @@ class NextMoveMessageInControllerTest {
 
         verify(messageService).handleCorruptMessage(ARKIVMELDING_SBD.getMessageId());
     }
+
+    @Test
+    void popMessage_EmptyAsic_ShouldReturnNoContent() throws Exception {
+        Resource asicResource = mock(Resource.class);
+        when(asicResource.exists()).thenReturn(false);
+        given(messageService.popMessage(anyString())).willReturn(asicResource);
+        doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
+
+        mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                .accept(AsicUtils.MIMETYPE_ASICE))
+                .andExpect(status().is2xxSuccessful());
+
+        verify(messageService, never()).handleCorruptMessage(ARKIVMELDING_SBD.getMessageId());
+    }
+
 
     @Test
     void deleteMessage() throws Exception {
