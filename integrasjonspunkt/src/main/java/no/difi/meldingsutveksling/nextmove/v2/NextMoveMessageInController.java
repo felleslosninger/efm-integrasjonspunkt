@@ -80,6 +80,10 @@ public class NextMoveMessageInController {
                 response.setStatus(HttpStatus.NO_CONTENT.value());
                 return;
             }
+            if (!asic.exists()) {
+                response.setStatus(HttpStatus.NO_CONTENT.value());
+                return;
+            }
             if (!asic.isReadable()) {
                 messageService.handleCorruptMessage(messageId);
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
