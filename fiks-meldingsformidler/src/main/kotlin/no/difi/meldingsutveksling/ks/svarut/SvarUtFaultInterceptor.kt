@@ -37,10 +37,16 @@ class SvarUtFaultInterceptor : ClientInterceptor {
         val markers = Markers.append("service_identifier", "DPF")
             .and<LogstashMarker>(Markers.append("soap_fault", soapFault))
         log.error(markers, "Failed to send message")
+        return isUnrecoverable(soapFault)
+    }
+
+    private fun isUnrecoverable(soapFault: String): Boolean {
         when {
             soapFault.contains("Duplikat") ||
                     soapFault.contains("Forsendelse med samme mottaker") ||
-                    soapFault.contains("Ugyldig innhold") -> throw QueueInterruptException(soapFault)
+                    soapFault.contains("Ugyldig innhold") ||
+                    soapFault.contains("Feil under lesing av") ||
+                    soapFault.contains("Kan ikke lagre tomt dokument") -> throw QueueInterruptException(soapFault)
             else -> throw SoapFaultException("Failed to send message")
         }
     }
