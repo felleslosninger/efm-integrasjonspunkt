@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
 import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -67,6 +68,8 @@ public class StatusPolling {
             strategy.checkStatus(conversations);
         } catch (Exception e) {
             log.error(format("Exception during receipt polling for %s", si), e);
+        } finally {
+            MDC.clear();
         }
     }
 }
