@@ -41,6 +41,7 @@
             <Policy>2.16.578.1.29.913.1.1.0</Policy>
             <Policy>2.16.578.1.1.1.1.100</Policy>
             <Policy>2.16.578.1.29.13.210.1.0</Policy>
+            <Policy>2.16.578.1.29.13.210.1.1</Policy>
         </Chain>
         <Class>no.difi.certvalidator.extra.NorwegianOrganizationNumberRule</Class>
         <CRL/>
