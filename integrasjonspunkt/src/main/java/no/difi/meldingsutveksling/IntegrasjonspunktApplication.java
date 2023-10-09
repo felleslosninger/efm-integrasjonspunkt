@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling;
 
-import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.meldingsutveksling.config.VaultProtocolResolver;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -32,14 +30,6 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             + "/r/nTo fix this, download and replace policy files for the appropriate java version (found in ${java.home}/jre/lib/security/)"
             + "/r/n- Java7: http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html"
             + "/r/n- Java8: http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html";
-
-    @Bean
-    public ServletRegistrationBean servletNoArk() {
-        WSSpringServlet servlet = new WSSpringServlet();
-        ServletRegistrationBean reg = new ServletRegistrationBean<>(servlet, "/noarkExchange");
-        reg.setLoadOnStartup(1);
-        return reg;
-    }
 
     @Bean
     public static Validator configurationPropertiesValidator() {

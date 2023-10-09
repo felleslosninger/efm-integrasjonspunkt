@@ -30,7 +30,6 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -106,7 +105,7 @@ public class FiksMapper {
                 .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
                 .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())
                 .withKryptert(properties.getFiks().isKryptert())
-                .withAvgivendeSystem(properties.getNoarkSystem().getType())
+                .withAvgivendeSystem("")
                 .withPrintkonfigurasjon(getPrintkonfigurasjon())
                 .withMottaker(getMottaker(message))
                 .withSvarSendesTil(getSvarSendesTil(message, journalpost))

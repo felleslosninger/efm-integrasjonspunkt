@@ -2,7 +2,6 @@ Feature: Receiving a Next Move DPF message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910229028/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=81264cfa-1ba5-4fb5-a95d-48c824ed3bbb" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910229028-administrasjon.json"
-    And the Noark System is disabled
     And Fiks prepares a message with the following body:
     """
     [

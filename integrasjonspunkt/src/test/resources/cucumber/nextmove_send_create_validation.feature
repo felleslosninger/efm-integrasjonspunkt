@@ -8,7 +8,6 @@ Feature: Validation when attempting to send a Next Move DPO message
     And a "GET" request to "http://localhost:9099/identifier/09118532322?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322.json"
     And a "GET" request to "http://localhost:9099/identifier/17912099997?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/17912099997.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And the Noark System is disabled
 
   Scenario Outline: As a user I want the message service to validate my input
     Given I POST the following message:
