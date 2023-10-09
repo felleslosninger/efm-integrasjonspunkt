@@ -10,7 +10,6 @@ Feature: Sending a Next Move DPF message
     And a "GET" request to "http://localhost:9099/info/910075924" will respond with status "200" and the following "application/json" in "/restmocks/info/910075924.json"
     And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And the Noark System is disabled
     And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" with element "retreiveForsendelseTyper" will respond with the following payload:
     """
     <ser:retreiveForsendelseTyperResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">

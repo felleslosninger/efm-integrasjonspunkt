@@ -25,7 +25,6 @@ public class MockWebServiceSteps {
     private final MockWebServiceServerCustomizer mockWebServiceServerCustomizer;
     private final CorrespondenceAgencyClient correspondenceAgencyClient;
     private final SvarUtClientHolder svarUtClientHolder;
-    private final CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory;
     private final SikkerDigitalPostKlient sikkerDigitalPostKlient;
     private final Holder<List<String>> webServicePayloadHolder;
     private final IntegrasjonspunktProperties properties;
@@ -34,7 +33,6 @@ public class MockWebServiceSteps {
     @SneakyThrows
     public void before() {
         mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
-        mockWebServiceServerCustomizer.customize(cachingWebServiceTemplateFactory.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(sikkerDigitalPostKlient.getMeldingTemplate());
         mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate());
     }
@@ -52,8 +50,6 @@ public class MockWebServiceSteps {
     private WebServiceTemplate getWebServiceTemplate(String url) {
         if (url.startsWith("http://localhost:9876")) {
             return correspondenceAgencyClient.getWebServiceTemplate();
-        } else if (url.startsWith("http://localhost:8088/testExchangeBinding")) {
-            return cachingWebServiceTemplateFactory.getWebServiceTemplate();
         } else if (url.startsWith("http://localhost:3193")) {
             return sikkerDigitalPostKlient.getMeldingTemplate();
         }

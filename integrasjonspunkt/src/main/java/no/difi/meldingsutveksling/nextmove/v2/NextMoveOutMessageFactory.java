@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
@@ -130,7 +129,6 @@ public class NextMoveOutMessageFactory {
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
         MessageType messageType = MessageType.valueOfType(sbd.getType())
-                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         if (messageType == MessageType.PRINT) {

@@ -8,8 +8,6 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.mail.MailClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
@@ -57,11 +55,6 @@ public class IntegrasjonspunktBeans {
     @Bean
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
-    }
-
-    @Bean(name = "fiksMailClient")
-    public NoarkClient fiksMailClient(IntegrasjonspunktProperties properties) {
-        return new MailClient(properties, properties.getFiks().getInn().getMailSubject());
     }
 
     @Bean
