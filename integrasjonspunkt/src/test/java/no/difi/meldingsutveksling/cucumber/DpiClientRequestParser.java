@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Component
 @Profile("cucumber")
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json")
 public class DpiClientRequestParser {
 
     private final MultipartParser multipartParser;

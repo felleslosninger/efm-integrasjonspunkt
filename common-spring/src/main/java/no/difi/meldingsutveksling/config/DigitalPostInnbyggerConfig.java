@@ -86,9 +86,6 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String krrPrintUrl;
 
-    @NotNull
-    private String clientType;
-
     private String receiptType;
 
     @NotNull
