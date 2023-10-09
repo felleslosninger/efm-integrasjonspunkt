@@ -91,14 +91,8 @@
 
     <modules>
         <module>api</module>
-        <module>bestedu</module>
         <module>common</module>
         <module>common-spring</module>
-        <module>noarkexchange</module>
-        <module>noarkexchange-template</module>
-        <module>noarkexchange-p360</module>
-        <module>noarkexchange-ephorte</module>
-        <module>noarkexchange-websak</module>
         <module>altinnexchange</module>
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
@@ -140,11 +134,6 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>bestedu</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>dokumentpakking</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -166,16 +155,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>nextmove</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>noarkexchange</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>noarkexchange-template</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -211,21 +190,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>altinnexchange</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>noarkexchange-ephorte</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>noarkexchange-p360</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>noarkexchange-websak</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

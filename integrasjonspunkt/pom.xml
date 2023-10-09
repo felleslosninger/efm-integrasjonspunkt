@@ -205,26 +205,6 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange-ephorte</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange-p360</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange-websak</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange-template</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>api</artifactId>
         </dependency>
         <dependency>
@@ -234,10 +214,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common-spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>bestedu</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

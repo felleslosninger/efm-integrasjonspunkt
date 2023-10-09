@@ -77,8 +77,6 @@ public class FiksConfig {
         private String baseUrl;
         private String username;
         private String password;
-        private boolean mailOnError;
-        private String mailSubject;
         private String fallbackSenderOrgNr;
         @NotNull
         private String process;

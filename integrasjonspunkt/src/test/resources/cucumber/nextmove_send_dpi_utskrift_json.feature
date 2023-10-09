@@ -6,7 +6,6 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
     And a "GET" request to "http://localhost:9099/identifier/09118532322/process/urn:no:difi:profile:digitalpost:info:ver1.0?securityLevel=3&conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322-info.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And the Noark System is disabled
 
   Scenario: As a user I want to send a DPI message
     Given I POST the following message:
