@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.clock.TestClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
-import no.difi.meldingsutveksling.dpi.xmlsoap.SikkerDigitalPostKlientFactory;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -25,12 +24,9 @@ import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
-import no.difi.sdp.client2.SikkerDigitalPostKlient;
-import no.difi.sdp.client2.domain.AktoerOrganisasjonsnummer;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +36,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -138,26 +133,6 @@ public class CucumberStepsConfiguration {
             return new WireMockMonitor(wireMockServer);
         }
 
-        @Primary
-        @Bean
-        public SikkerDigitalPostKlient sikkerDigitalPostKlient(IntegrasjonspunktProperties properties,
-                                                               RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
-            SikkerDigitalPostKlientFactory factory = new SikkerDigitalPostKlientFactory(properties);
-            SikkerDigitalPostKlient klient = factory.createSikkerDigitalPostKlient(
-                    AktoerOrganisasjonsnummer.of("910077473"));
-            klient.getMeldingTemplate().setInterceptors(new ClientInterceptor[]{
-                    requestCaptureClientInterceptor, new FakeEbmsClientInterceptor()});
-
-            Jaxb2Marshaller marshaller = (Jaxb2Marshaller) klient.getMeldingTemplate().getMarshaller();
-
-            Map<String, Object> marshallerProperties = new HashMap<>();
-            marshallerProperties.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshallerProperties.put(XMLMarshaller.PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
-            marshaller.setMarshallerProperties(marshallerProperties);
-
-            return klient;
-        }
-
         @Bean
         @Primary
         public CorrespondenceAgencyClient correspondenceAgencyClient(
@@ -245,8 +220,6 @@ public class CucumberStepsConfiguration {
     public InternalQueue internalQueue;
     @MockBean
     public ServiceBusRestTemplate serviceBusRestTemplate;
-    @MockBean
-    public SikkerDigitalPostKlientFactory sikkerDigitalPostKlientFactory;
     @MockBean
     public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockBean
