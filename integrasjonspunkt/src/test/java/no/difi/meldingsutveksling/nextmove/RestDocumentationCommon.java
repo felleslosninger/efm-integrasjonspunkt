@@ -1,16 +1,14 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.experimental.UtilityClass;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Utskrift;
+import no.difi.meldingsutveksling.dpi.client.domain.sbd.Retur;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
-import no.difi.sdp.client2.domain.fysisk_post.Posttype;
-import no.difi.sdp.client2.domain.fysisk_post.Returhaandtering;
-import no.difi.sdp.client2.domain.fysisk_post.Utskriftsfarge;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.restdocs.headers.HeaderDescriptor;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -367,7 +365,7 @@ class RestDocumentationCommon {
                         "contain one or more business documents of a single document type or\n" +
                         "closely related types. The industry standard body (as referenced in the\n" +
                         "‘Standard’ element) is responsible for defining the Type value to be used\n" +
-                        "in this field. Currently NextMove supports the following types: " + no.difi.meldingsutveksling.MessageType.stream(ApiType.NEXTMOVE)
+                        "in this field. Currently NextMove supports the following types: " + no.difi.meldingsutveksling.MessageType.stream()
                         .map(no.difi.meldingsutveksling.MessageType::getType)
                         .collect(Collectors.joining(", "))
                 ),
@@ -546,12 +544,12 @@ class RestDocumentationCommon {
                                 .description("Postal address of the recipient."),
                         messageFields.withPath("utskriftsfarge")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Used to specify type of print. Can be one of: %s", Arrays.stream(Utskriftsfarge.values())
+                                .description(String.format("Used to specify type of print. Can be one of: %s", Arrays.stream(PrintColor.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", ")))),
                         messageFields.withPath("posttype")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Mail type. Can be one of: %s", Arrays.stream(Posttype.values())
+                                .description(String.format("Mail type. Can be one of: %s", Arrays.stream(Utskrift.Posttype.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", ")))),
                         messageFields.withPath("retur")
@@ -607,7 +605,7 @@ class RestDocumentationCommon {
                                 .description("Postal address of the sender."),
                         fields.withPath("returhaandtering")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Used to specify type of return. Can be one of: %s", Arrays.stream(Returhaandtering.values())
+                                .description(String.format("Used to specify type of return. Can be one of: %s", Arrays.stream(Retur.Returposthaandtering.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", "))))
                 )
