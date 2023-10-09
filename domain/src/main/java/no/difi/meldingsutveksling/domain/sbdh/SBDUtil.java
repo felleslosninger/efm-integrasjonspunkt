@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.MessageInfo;
@@ -47,13 +46,6 @@ public class SBDUtil {
         return sbd.getScope(ScopeType.JOURNALPOST_ID)
                 .map(Scope::getInstanceIdentifier)
                 .orElse("");
-    }
-
-    public static boolean isNextMove(StandardBusinessDocument sbd) {
-        return MessageType.valueOfType(sbd.getType())
-                .map(MessageType::getApi)
-                .filter(t -> t == ApiType.NEXTMOVE)
-                .isPresent();
     }
 
     public static boolean isReceipt(StandardBusinessDocument sbd) {

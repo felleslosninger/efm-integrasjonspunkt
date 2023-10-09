@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.validation;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 
 import javax.validation.ConstraintValidator;
@@ -16,6 +15,6 @@ public class MessageTypeValidator implements ConstraintValidator<no.difi.melding
     }
 
     public boolean isValid(String s, ConstraintValidatorContext context) {
-        return MessageType.valueOf(s, ApiType.NEXTMOVE).isPresent();
+        return MessageType.valueOf(s, null).isPresent();
     }
 }

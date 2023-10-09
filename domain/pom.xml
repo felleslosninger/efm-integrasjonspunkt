@@ -18,10 +18,6 @@
     <dependencies>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>noarkexchange</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>validation</artifactId>
         </dependency>
         <dependency>

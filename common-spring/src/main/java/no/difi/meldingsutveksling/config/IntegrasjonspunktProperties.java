@@ -56,9 +56,6 @@ public class IntegrasjonspunktProperties {
     private PostVirksomheter dpv;
 
     @Valid
-    private NorskArkivstandardSystem noarkSystem = new NorskArkivstandardSystem();
-
-    @Valid
     @NestedConfigurationProperty
     private DigitalPostInnbyggerConfig dpi;
 
@@ -149,8 +146,6 @@ public class IntegrasjonspunktProperties {
         private Integer concurrency;
         @NotNull
         private String nextmoveName;
-        @NotNull
-        private String noarkName;
         @NotNull
         private String dlqName;
     }
@@ -304,24 +299,6 @@ public class IntegrasjonspunktProperties {
         private DataSize uploadSizeLimit;
         @NotNull
         private Integer defaultTtlHours;
-
-    }
-
-    @Data
-    @ToString(exclude = "password")
-    public static class NorskArkivstandardSystem {
-        private String endpointURL;
-        private String username;
-        private String password;
-        /**
-         * If the authentication is of type NTLM (Windows) this is the domain the username belongs to
-         */
-        private String domain;
-        /**
-         * The type of archive system you are using, eg. Ephorte, p360, websak, mail...
-         */
-        @LoggedProperty
-        private String type;
 
     }
 
