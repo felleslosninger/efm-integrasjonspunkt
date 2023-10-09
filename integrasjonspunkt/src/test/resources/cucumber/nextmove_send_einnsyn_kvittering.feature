@@ -2,7 +2,6 @@ Feature: Sending a Next Move eInnsyn kvittering message
 
   Background:
     Given a "GET" request to "http://localhost:9099/identifier/910075935/process/urn:no:difi:profile:einnsyn:response:ver1.0?conversationId=217b18b4-a486-4999-8979-ef0957e9bdd6" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075935-einnsyn_response.json"
-    And the Noark System is disabled
 
   Scenario: As a user I want to send an eInnsyn kvittering
     Given I POST the following message:

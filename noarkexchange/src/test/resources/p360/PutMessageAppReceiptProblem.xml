@@ -1,5 +1,0 @@
-<s:Envelope encoding="utf-8" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><PutMessageRequest xmlns="http://www.arkivverket.no/Noark/Exchange/types"><envelope contentNamespace="?" conversationId="?" xmlns=""><sender><orgnr>987464291</orgnr></sender><receiver><orgnr>974720760</orgnr></receiver></envelope><payload xsi:type="xsd:string" xmlns="">&lt;AppReceipt type="OK" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.arkivverket.no/Noark/Exchange/types"&gt;
-    &lt;message code="ID" xmlns=""&gt;
-    &lt;text&gt;210725&lt;/text&gt;
-    &lt;/message&gt;
-    &lt;/AppReceipt&gt;</payload></PutMessageRequest></s:Body></s:Envelope>

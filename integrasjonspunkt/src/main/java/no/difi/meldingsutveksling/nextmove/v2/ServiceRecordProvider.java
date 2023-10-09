@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -52,7 +51,7 @@ public class ServiceRecordProvider {
     }
 
     ServiceIdentifier getServiceIdentifier(StandardBusinessDocument sbd) {
-        MessageType messageType = MessageType.valueOf(sbd.getType(), ApiType.NEXTMOVE)
+        MessageType messageType = MessageType.valueOf(sbd.getType(), null)
             .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         // Allow empty receiver for DPI print

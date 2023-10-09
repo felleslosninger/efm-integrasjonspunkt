@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.noarkexchange.BestEduAppReceiptService;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
@@ -33,7 +31,6 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
     private final IntegrasjonspunktProperties props;
-    private final BestEduAppReceiptService bestEduAppReceiptService;
 
     @Override
     @Transactional
@@ -61,15 +58,6 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
                 .ifPresent(conversation -> conversationService.save(conversation
                         .setServiceCode(serviceCode)
                         .setServiceEditionCode(serviceEditionCode)));
-
-        if (!isNullOrEmpty(props.getNoarkSystem().getType())) {
-            // Only log exceptions here to avoid sending message multiple times due to retry
-            try {
-                bestEduAppReceiptService.sendAppReceiptToLocalNoark(message);
-            } catch (Exception e) {
-                log.error(markerFrom(message), "Error sending AppReceipt for DPV message", e);
-            }
-        }
     }
 
 }

@@ -7,7 +7,6 @@ Feature: Sending a Next Move DPI message (XML SOAP)
     And a "GET" request to "http://localhost:9099/identifier/09118532322/process/urn:no:difi:profile:digitalpost:info:ver1.0?securityLevel=3&conversationId=97efbd4c-413d-4e2c-bbc5-257ef4a61212" will respond with status "200" and the following "application/json" in "/restmocks/identifier/09118532322-info.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And the Noark System is disabled
     And a SOAP request to "http://localhost:3193/dpi/9908:910077473/9908:910077473" will respond with the following payload:
     """
     <dummy></dummy>

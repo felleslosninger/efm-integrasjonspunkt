@@ -15,7 +15,6 @@ pom.xml.versionsBackup
 /**/generated-sources
 /**/generated-sources/jaxb
 /**/generated-sources/wsimport
-/noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
 /integrasjonspunkt-logs
 /integrasjonspunkt/integrasjonspunkt-logs/
 /integrasjonspunkt-logs/application.log
