@@ -32,14 +32,10 @@
             <artifactId>jhades</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.difi.sdp</groupId>
-            <artifactId>sikker-digital-post-klient-java</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>wss4j-ws-security-dom</artifactId>
-                    <groupId>org.apache.wss4j</groupId>
-                </exclusion>
-            </exclusions>
+            <!-- Berre nødvendig for DPI proxyklient, for å oversette kvitteringar til gamalt format -->
+            <groupId>no.digipost</groupId>
+            <artifactId>sdp-xsd</artifactId>
+            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

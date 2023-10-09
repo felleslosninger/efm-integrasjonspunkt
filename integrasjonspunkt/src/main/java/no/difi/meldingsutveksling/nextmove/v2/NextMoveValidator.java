@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.difi.meldingsutveksling.ApiType;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -81,7 +80,6 @@ public class NextMoveValidator {
         validateCertificate();
 
         MessageType messageType = MessageType.valueOfType(sbd.getType())
-                .filter(p -> p.getApi() == ApiType.NEXTMOVE)
                 .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);

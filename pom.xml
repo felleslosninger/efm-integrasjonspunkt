@@ -73,7 +73,6 @@
         <commons.io.version>2.13.0</commons.io.version>
         <commons.compress.version>1.21</commons.compress.version>
         <commons.text.version>1.10.0</commons.text.version>
-        <sikker-digital-post-klient.version>6.4.RC1</sikker-digital-post-klient.version>
         <junit.platform.version>1.9.2</junit.platform.version>
         <cucumber.version>7.11.0</cucumber.version>
         <efm-common.version>1.18.0</efm-common.version>
@@ -237,19 +236,6 @@
                 <groupId>no.difi.commons</groupId>
                 <artifactId>commons-asic</artifactId>
                 <version>0.11.0</version>
-            </dependency>
-
-            <!-- DPI -->
-            <dependency>
-                <groupId>no.difi.sdp</groupId>
-                <artifactId>sikker-digital-post-klient-java</artifactId>
-                <version>${sikker-digital-post-klient.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
