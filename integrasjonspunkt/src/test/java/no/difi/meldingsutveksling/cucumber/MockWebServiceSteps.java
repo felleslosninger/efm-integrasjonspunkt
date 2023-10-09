@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.sdp.client2.SikkerDigitalPostKlient;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.test.client.MockWebServiceServer;
 import org.springframework.ws.test.client.RequestMatchers;
@@ -25,7 +24,6 @@ public class MockWebServiceSteps {
     private final MockWebServiceServerCustomizer mockWebServiceServerCustomizer;
     private final CorrespondenceAgencyClient correspondenceAgencyClient;
     private final SvarUtClientHolder svarUtClientHolder;
-    private final SikkerDigitalPostKlient sikkerDigitalPostKlient;
     private final Holder<List<String>> webServicePayloadHolder;
     private final IntegrasjonspunktProperties properties;
 
@@ -33,7 +31,6 @@ public class MockWebServiceSteps {
     @SneakyThrows
     public void before() {
         mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
-        mockWebServiceServerCustomizer.customize(sikkerDigitalPostKlient.getMeldingTemplate());
         mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate());
     }
 
@@ -50,8 +47,6 @@ public class MockWebServiceSteps {
     private WebServiceTemplate getWebServiceTemplate(String url) {
         if (url.startsWith("http://localhost:9876")) {
             return correspondenceAgencyClient.getWebServiceTemplate();
-        } else if (url.startsWith("http://localhost:3193")) {
-            return sikkerDigitalPostKlient.getMeldingTemplate();
         }
 
         return svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate();
