@@ -11,7 +11,7 @@ ENV APP_DIR=/opt/integrasjonspunkt \
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     ca-certificates \
-    curl \
+    wget \
     openssl  && \
     update-ca-certificates && \
     rm -rf /var/cache/apt/* && \
@@ -30,6 +30,6 @@ COPY --chown=java:java /target/integrasjonspunkt.jar ${APP_DIR}/app.jar
 
 USER java
 
-HEALTHCHECK CMD curl -s --fail http://localhost:9093/manage/health > /dev/null || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s CMD wget --no-verbose --tries=1 --spider http://localhost:9093/manage/health || exit 1
 
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar ${APP_DIR}/app.jar", "$@"]
