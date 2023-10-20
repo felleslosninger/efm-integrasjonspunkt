@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -19,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -44,11 +42,7 @@ public class MessageStatusController {
             @RequestParam(value = "toDateTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDateTime,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        if (fromDateTime != null && toDateTime != null) {
-            return statusRepo.findByLastUpdateBetween(fromDateTime, toDateTime, pageable);
-        } else {
             return statusRepo.find(input, pageable);
-        }
     }
 
     @GetMapping("{messageId}")

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.status;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -9,7 +10,6 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
@@ -24,9 +24,6 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
     @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findFirstByOrderByLastUpdateAsc();
-
-    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"conversation"})
-    Page<MessageStatus> findByLastUpdateBetween(OffsetDateTime fromDateTime, OffsetDateTime toDateTime, Pageable pageable);
 
     @Override
     default void customize(QuerydslBindings bindings, QMessageStatus root) {
@@ -57,6 +54,12 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
         if (input.getStatus() != null) {
             builder.and(messageStatus.status.eq(input.getStatus()));
+        }
+
+        if (input.getFromDateTime() != null && input.getToDateTime() != null) {
+            BooleanExpression fromDateTimePredicate = messageStatus.lastUpdate.after(input.fromDateTime);
+            BooleanExpression toDateTimePredicate = messageStatus.lastUpdate.before(input.toDateTime);
+            builder.and(fromDateTimePredicate.and(toDateTimePredicate));
         }
 
         return builder;
