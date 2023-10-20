@@ -9,7 +9,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
@@ -24,6 +24,9 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
     @EntityGraph("MessageStatus.conversation")
     Optional<MessageStatus> findFirstByOrderByLastUpdateAsc();
+
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"conversation"})
+    Page<MessageStatus> findByLastUpdateBetween(OffsetDateTime fromDateTime, OffsetDateTime toDateTime, Pageable pageable);
 
     @Override
     default void customize(QuerydslBindings bindings, QMessageStatus root) {
