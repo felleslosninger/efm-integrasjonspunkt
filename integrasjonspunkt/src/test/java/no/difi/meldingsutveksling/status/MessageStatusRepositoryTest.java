@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
 import io.vavr.collection.List;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -21,10 +22,10 @@ class MessageStatusRepositoryTest {
         OffsetDateTime fromDateTime = OffsetDateTime.parse("2023-06-09T10:00:00.600+02:00");
         OffsetDateTime toDateTime = OffsetDateTime.parse("2023-06-10T10:00:00.600+02:00");
 
-        MessageStatus message1 = new MessageStatus("MOTTATT", fromDateTime.minusMinutes(30), "Message 1");
-        MessageStatus message2 = new MessageStatus("LEVERT", fromDateTime.plusMinutes(15), "Message 2");
-        MessageStatus message3 = new MessageStatus("OPPRETTET", toDateTime.minusMinutes(15), "Message 3");
-        MessageStatus message4 = new MessageStatus("LEVERT", toDateTime.plusMinutes(30), "Message 4");
+        MessageStatus message1 = MessageStatus.of(ReceiptStatus.MOTTATT, fromDateTime.minusMinutes(30), "Message 1");
+        MessageStatus message2 = MessageStatus.of(ReceiptStatus.LEVERT, fromDateTime.plusMinutes(15), "Message 2");
+        MessageStatus message3 = MessageStatus.of(ReceiptStatus.OPPRETTET, toDateTime.minusMinutes(15), "Message 3");
+        MessageStatus message4 = MessageStatus.of(ReceiptStatus.LEVERT, toDateTime.plusMinutes(30), "Message 4");
 
         messageStatusRepository.saveAll(List.of(message1, message2, message3, message4));
 
