@@ -69,7 +69,7 @@ public class MessageStatus extends AbstractEntity<Long> {
         return conversation.getConversationId();
     }
 
-    private MessageStatus(String status, OffsetDateTime lastUpdate, String description) {
+    MessageStatus(String status, OffsetDateTime lastUpdate, String description) {
         this.status = status;
         this.lastUpdate = lastUpdate;
         this.description = description;
