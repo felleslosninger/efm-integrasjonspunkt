@@ -57,9 +57,8 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
         }
 
         if (input.getFromDateTime() != null && input.getToDateTime() != null) {
-            BooleanExpression fromDateTimePredicate = messageStatus.lastUpdate.after(input.fromDateTime);
-            BooleanExpression toDateTimePredicate = messageStatus.lastUpdate.before(input.toDateTime);
-            builder.and(fromDateTimePredicate.and(toDateTimePredicate));
+            BooleanExpression fromDateTimePredicate = messageStatus.lastUpdate.between(input.fromDateTime,input.toDateTime);
+            builder.and(fromDateTimePredicate);
         }
 
         return builder;
