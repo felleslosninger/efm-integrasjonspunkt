@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -21,30 +24,31 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus1;
-import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus2;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.*;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
@@ -168,6 +172,41 @@ public class MessageStatusControllerTest {
                 .andDo(document("statuses/find/paging"));
 
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
+    }
+
+    @Test
+    void testFindMessageStatusInDateRange() throws Exception {
+        OffsetDateTime fromDateTime = OffsetDateTime.parse("2021-06-09T10:18:40.868+02:00");
+        OffsetDateTime toDateTime = OffsetDateTime.parse("2023-06-10T10:18:41.121+02:00");
+
+        List<MessageStatus> mockData = Arrays.asList(
+                messageStatus1(),
+                messageStatus2(),
+                messageStatus3()
+        );
+
+        Pageable pageable = Pageable.unpaged();
+        Page<MessageStatus> page = new PageImpl<>(mockData, pageable, mockData.size());
+
+        when(statusRepo.find(
+                any(MessageStatusQueryInput.class),
+                any(Pageable.class)
+        )).thenReturn(page);
+
+        MvcResult mvcResult = mvc.perform(get("/api/statuses")
+                        .param("fromDateTime", fromDateTime.toString())
+                        .param("toDateTime", toDateTime.toString())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(jsonResponse);
+
+        assertEquals(1, jsonNode.get("totalPages").asInt());
+        assertEquals(3, jsonNode.get("totalElements").asInt());
     }
 
     @Test

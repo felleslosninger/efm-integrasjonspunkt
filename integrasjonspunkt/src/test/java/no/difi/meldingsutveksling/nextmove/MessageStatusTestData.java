@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Data;
 import lombok.experimental.UtilityClass;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
 import java.time.OffsetDateTime;
 
@@ -49,6 +49,18 @@ class MessageStatusTestData {
                 .setLastUpdate(OffsetDateTime.parse("2019-10-23T15:43:12+02:00"))
                 .setDescription("Levert")
                 .setRawReceipt("The raw receipt 2"));
+    }
+
+    static MessageStatus messageStatus3() {
+        return getMessageStatus(new MessageStatusDTO()
+                .setId(12L)
+                .setConvId(6L)
+                .setMessageId("49c5d26b-6fef-4259-991e-84497288673e")
+                .setConversationId("22ea640b-96ab-4c1b-98a8-950ab254a501")
+                .setStatus(ReceiptStatus.LEVERT.toString())
+                .setLastUpdate(OffsetDateTime.parse("2023-09-17T15:43:12+02:00"))
+                .setDescription("Levert")
+                .setRawReceipt("The raw receipt 3"));
     }
 
     static MessageStatus messageStatus(Long id, ReceiptStatus status, Conversation conversation) {
