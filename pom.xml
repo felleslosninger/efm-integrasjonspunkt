@@ -82,7 +82,7 @@
         <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.76</bouncycastle.version>
         <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
-        <xmlsec.version>3.0.2</xmlsec.version>
+        <xmlsec.version>3.0.3</xmlsec.version>
         <dokka.skip>true</dokka.skip>
 
         <argLine>-Dfile.encoding=UTF-8</argLine>
