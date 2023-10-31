@@ -68,6 +68,7 @@
     </repositories>
 
     <properties>
+        <activemq.version>5.16.7</activemq.version>
         <spring.cloud.version>2021.0.8</spring.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.io.version>2.13.0</commons.io.version>
