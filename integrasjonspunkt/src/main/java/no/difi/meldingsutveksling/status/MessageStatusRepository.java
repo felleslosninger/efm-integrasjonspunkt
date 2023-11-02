@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.status;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -9,7 +10,6 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
 import java.util.Optional;
 
 public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
@@ -54,6 +54,11 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
         if (input.getStatus() != null) {
             builder.and(messageStatus.status.eq(input.getStatus()));
+        }
+
+        if (input.getFromDateTime() != null && input.getToDateTime() != null) {
+            BooleanExpression dateRangePredicate = messageStatus.lastUpdate.between(input.fromDateTime,input.toDateTime);
+            builder.and(dateRangePredicate);
         }
 
         return builder;
