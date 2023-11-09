@@ -79,40 +79,23 @@
     </tr>
     </tbody>
 </table>
-<nav th:with="uri = ${#httpServletRequest.getRequestURL()}, qs = (${search} != null ? '?search=' + ${search} : '?') + (${direction} != null ? '&direction=' + ${direction} : '') + (${created} != null ? '&created=' + ${created} : '')"
-     aria-label="Page navigation" class="text-center" th:if="${page.totalPages &gt; 1}">
-    <ul class="pagination">
-        <li class="page-item" th:if="${page.number &gt; 0}">
-            <a class="page-link" th:href="@{${uri} + ${qs} + '&page=' + ${page.number - 1} }" aria-label="Previous">
+<nav aria-label="Page navigation" class="text-center" th:if="${page.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:if="${page.number > 0}">
+            <a class="page-link" th:href="@{/conversations(page=${page.number - 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
-        <li class="page-item" th:if="${page.number - 1 &gt; -1}">
-            <a class="page-link"
-               th:href="@{${uri} + ${qs} + '&page=' + ${page.number - 1} }"
-               th:text="${page.number}"></a>
+        <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, page.totalPages - 1)}" style="margin-right: 8px;">
+            <a class="page-link" th:href="@{/conversations(page=${pageNumber}, search=${search}, direction=${direction}, created=${created})}"
+               th:text="${pageNumber + 1}" th:class="${pageNumber == page.number ? 'active' : ' '}"></a>
         </li>
-        <li class="page-item active">
-            <a class="page-link"
-               th:href="@{${uri} + ${qs} + '&page=' + ${page.number} }"
-               th:text="${page.number + 1}"></a></li>
-        <li class="page-item" th:if="${page.number + 1 &lt; page.totalPages}">
-            <a class="page-link"
-               th:href="@{${uri} + ${qs} + '&page=' + ${page.number + 1} }"
-               th:text="${page.number + 2}"></a></li>
-        <li class="page-item" th:if="${page.number + 2 &lt; page.totalPages}">
-            <a class="page-link"
-               th:href="@{${uri} + ${qs} + '&page=' + ${page.number + 2} }"
-               th:text="${page.number + 3}"></a></li>
-        <li class="page-item" th:if="${page.number + 1 &lt; page.totalPages}">
-            <a class="page-link"
-               th:href="@{${uri} + ${qs} + '&page=' + ${page.number + 1} }"
-               aria-label="Next">
+        <li class="page-item" th:if="${page.number + 1 < page.totalPages}">
+            <a class="page-link" th:href="@{/conversations(page=${page.number + 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
     </ul>
 </nav>
-
 </body>
 </html>
