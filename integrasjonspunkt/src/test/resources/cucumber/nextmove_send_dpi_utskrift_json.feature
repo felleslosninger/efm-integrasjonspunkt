@@ -8,7 +8,7 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
     And the Noark System is disabled
 
-  Scenario: As a user I want to send a DPI message
+  Scenario: As a user I want to send a DPI print message
     Given I POST the following message:
     """
     {
@@ -74,9 +74,9 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
                     "adresselinje2": "argh",
                     "adresselinje3": "uff",
                     "adresselinje4": "off",
-                    "postnummer": "",
-                    "poststed": "",
-                    "land": "Sweden"
+                    "postnummer": "0195",
+                    "poststed": "Oslo",
+                    "land": "Norge"
                 },
                 "returhaandtering": "DIREKTE_RETUR"
             }
@@ -229,15 +229,16 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
         },
         "maskinportentoken" : "DummyMaskinportenToken",
         "utskriftstype" : "SORT_HVIT",
-        "retur" : {
-          "mottaker" : {
-            "navn" : "Dr. Sprøyte Gal",
-            "adresselinje1" : "Sadistveien 1",
-            "adresselinje2" : "argh",
-            "adresselinje3" : "uff",
-            "adresselinje4" : "off",
-            "land" : "Sweden"
-          },
+        "retur":{
+                "mottaker":{
+                    "navn": "Dr. Sprøyte Gal",
+                    "adresselinje1": "Sadistveien 1",
+                    "adresselinje2": "argh",
+                    "adresselinje3": "uff",
+                    "adresselinje4": "off",
+                    "postnummer": "0195",
+                    "poststed": "Oslo"
+                },
           "returposthaandtering" : "DIREKTE_RETUR"
         },
         "posttype" : "B"
@@ -352,3 +353,144 @@ Feature: Sending a Next Move DPI utskrift message (JSON)
     """
     Testing 1 2 3
     """
+
+  Scenario: As a user I want to send a DPI print message without return address information
+    Given I POST the following message:
+    """
+    {
+        "standardBusinessDocumentHeader": {
+            "businessScope": {
+                "scope": [
+                    {
+                        "scopeInformation": [
+                            {
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
+                            }
+                        ],
+                        "identifier": "urn:no:difi:profile:digitalpost:info:ver1.0",
+                        "instanceIdentifier": "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
+                        "type": "ConversationId"
+                    }
+                ]
+            },
+            "documentIdentification": {
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
+                "instanceIdentifier": "bb74b391-177e-41b8-a7bb-14eb5b06ec3c",
+                "standard": "urn:no:difi:digitalpost:xsd:fysisk::print",
+                "type": "print",
+                "typeVersion": "2.0"
+            },
+            "headerVersion": "1.0",
+             "receiver": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "09118532322"
+                    }
+                }
+            ],
+            "sender": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910077473"
+                    }
+                }
+            ]
+        },
+        "print": {
+            "hoveddokument": "arkivmelding.xml",
+            "avsenderId": "avsender910077473",
+            "fakturaReferanse": "faktura910077473",
+            "mottaker":{
+                "navn": "Ola Nordmann",
+                "adresselinje1": "Fjellveien 1",
+                "adresselinje2": "Langt oppi lia",
+                "adresselinje3": "der trollene bor",
+                "postnummer": "3400",
+                "poststed": "FJELLET",
+                "land": "Norway"
+            },
+            "utskriftsfarge" : "SORT_HVIT",
+            "posttype": "B_OEKONOMI",
+            "retur":{
+                "mottaker":{
+                    "navn": "Dr. Sprøyte Gal",
+                    "adresselinje1": "Sadistveien 1",
+                    "adresselinje2": "argh",
+                    "adresselinje3": "uff",
+                    "adresselinje4": "off",
+                    "postnummer": "",
+                    "poststed": "",
+                    "land": "Norge"
+                },
+                "returhaandtering": "DIREKTE_RETUR"
+            }
+        }
+    }
+    """
+    Then the response status is "BAD_REQUEST"
+
+  Scenario: As a user I want to send a DPI print message without receiver address information
+    Given I POST the following message:
+    """
+    {
+        "standardBusinessDocumentHeader": {
+            "businessScope": {
+                "scope": [
+                    {
+                        "scopeInformation": [
+                            {
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
+                            }
+                        ],
+                        "identifier": "urn:no:difi:profile:digitalpost:info:ver1.0",
+                        "instanceIdentifier": "97efbd4c-413d-4e2c-bbc5-257ef4a61212",
+                        "type": "ConversationId"
+                    }
+                ]
+            },
+            "documentIdentification": {
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
+                "instanceIdentifier": "95e6f67a-ad3c-467b-bab7-61234b27a220",
+                "standard": "urn:no:difi:digitalpost:xsd:fysisk::print",
+                "type": "print",
+                "typeVersion": "2.0"
+            },
+            "headerVersion": "1.0",
+            "sender": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910077473"
+                    }
+                }
+            ]
+        },
+        "print": {
+            "hoveddokument": "arkivmelding.xml",
+            "avsenderId": "avsender910077473",
+            "fakturaReferanse": "faktura910077473",
+            "mottaker":{
+                "navn": "Ola Nordmann",
+                "land": "Norway"
+            },
+            "utskriftsfarge" : "SORT_HVIT",
+            "posttype": "B_OEKONOMI",
+            "retur":{
+                "mottaker":{
+                    "navn": "Dr. Sprøyte Gal",
+                    "adresselinje1": "Sadistveien 1",
+                    "adresselinje2": "argh",
+                    "adresselinje3": "uff",
+                    "adresselinje4": "off",
+                    "postnummer": "",
+                    "poststed": "",
+                    "land": "Norge"
+                },
+                "returhaandtering": "DIREKTE_RETUR"
+            }
+        }
+    }
+    """
+    Then the response status is "BAD_REQUEST"
