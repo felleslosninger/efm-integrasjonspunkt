@@ -133,7 +133,11 @@ public class SvarInnNextMoveConverter {
                 : "0";
         journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(journalsekvensnummer)));
 
-        journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
+        String journalpostnummer = metadata.getJournalpostnummer() != null
+                ? metadata.getJournalpostnummer()
+                : "0";
+        journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(journalpostnummer)));
+
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
 
