@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXBException;
 import java.math.BigInteger;
+import java.time.Year;
 import java.util.GregorianCalendar;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -122,7 +123,11 @@ public class SvarInnNextMoveConverter {
         saksmappe.setSaksaar(BigInteger.valueOf(metadata.getSaksaar()));
         saksmappe.setSaksansvarlig(metadata.getSaksBehandler());
 
-        journalpost.setJournalaar(BigInteger.valueOf(Long.parseLong(metadata.getJournalaar())));
+        String currentYear = metadata.getJournalaar() != null
+                ? metadata.getJournalaar()
+                : Year.now().toString();
+        journalpost.setJournalaar(BigInteger.valueOf(Long.parseLong(currentYear)));
+
         journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalsekvensnummer())));
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
@@ -139,7 +144,7 @@ public class SvarInnNextMoveConverter {
         }
 
         if (!isNullOrEmpty(sst.getFnr())) {
-            journalpost.setTittel(getTittel(forsendelse) + " (eDialog fra "+sst.getFnr()+")");
+            journalpost.setTittel(getTittel(forsendelse) + " (eDialog fra " + sst.getFnr() + ")");
         } else {
             journalpost.setTittel(getTittel(forsendelse));
         }
