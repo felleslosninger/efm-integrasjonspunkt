@@ -29,7 +29,7 @@ public class ShipmentFactory {
                 .setReceiver(request.getPostkasseProvider())
                 .setMessageId(request.getMessageId())
                 .setConversationId(request.getConversationId())
-                .setChannel(channelNormalizer.normaiize(request.getMpcId()))
+                .setChannel(channelNormalizer.normalize(request.getMpcId()))
                 .setExpectedResponseDateTime(request.getExpectedResponseDateTime())
                 .setBusinessMessage(getBusinessMessage(request))
                 .setParcel(request.getParcel())
