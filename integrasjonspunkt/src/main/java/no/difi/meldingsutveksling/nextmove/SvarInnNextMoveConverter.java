@@ -128,7 +128,11 @@ public class SvarInnNextMoveConverter {
                 : Year.now().toString();
         journalpost.setJournalaar(BigInteger.valueOf(Long.parseLong(currentYear)));
 
-        journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalsekvensnummer())));
+        String journalsekvensnummer = metadata.getJournalsekvensnummer() != null
+                ? metadata.getJournalsekvensnummer()
+                : "0";
+        journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(journalsekvensnummer)));
+
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(metadata.getJournalpostnummer())));
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
