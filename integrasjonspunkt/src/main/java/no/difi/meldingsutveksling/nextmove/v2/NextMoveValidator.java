@@ -144,11 +144,20 @@ public class NextMoveValidator {
         return hasAdresselinje1 && (isNorwegian || hasCountry);
     }
 
-    private static boolean isNorwegian(PostAddress address) {
+    private static boolean isLandFieldNorwegian(PostAddress address) {
         String country = address.getLand();
         return StringUtils.hasText(country)
                 && country.equalsIgnoreCase("Norge")
+                || country.equalsIgnoreCase("Noreg")
                 || country.equalsIgnoreCase("Norway");
+    }
+
+    private static boolean isLandCodeNorwegian(PostAddress address) {
+        return address.getLandkode().equalsIgnoreCase("no");
+    }
+
+    private static boolean isNorwegian(PostAddress address) {
+        return isLandCodeNorwegian(address) || isLandFieldNorwegian(address);
     }
 
     private void validateDpfForsendelse(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
