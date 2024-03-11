@@ -104,12 +104,9 @@ public class ShipmentFactory {
             }
         });
 
-        if(postAddress.getLand()!=null){
-            adresseInformasjon.setLand(postAddress.getLand());
-        }
-        if(postAddress.getLandkode()!=null){
-            adresseInformasjon.setLandkode(postAddress.getLandkode());
-        }
+        adresseInformasjon.setLand(postAddress.getLand());
+        adresseInformasjon.setLandkode(postAddress.getLandkode());
+
         return adresseInformasjon;
     }
 
@@ -133,7 +130,7 @@ public class ShipmentFactory {
         boolean isNorwegianLandString = false;
         boolean isNorwegianLandCode = false;
         if (StringUtils.hasText(postAddress.getLand())) {
-            isNorwegianLandString = "Norway".equalsIgnoreCase(postAddress.getLand()) || "Norge".equalsIgnoreCase(postAddress.getLand());
+            isNorwegianLandString = "Norway".equalsIgnoreCase(postAddress.getLand()) || "Norge".equalsIgnoreCase(postAddress.getLand())|| "Noreg".equalsIgnoreCase(postAddress.getLand());
         }
         if (StringUtils.hasText(postAddress.getLandkode())) {
             isNorwegianLandString = "Norway".equalsIgnoreCase(postAddress.getLandkode());

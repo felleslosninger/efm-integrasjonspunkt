@@ -123,25 +123,26 @@ public class NextMoveValidator {
         if (receiverAddress == null) {
             throw new MissingAddressInformationException("mottaker");
         }
-        if(isAddressInvalid(receiverAddress)){
+        if(!isAddressValid(receiverAddress)){
             throw new MissingAddressInformationException("mottaker.postnummer/poststed/adresselinje1");
         }
         MailReturn returnAddress = businessMessage.getRetur();
         if (returnAddress == null) {
             throw new MissingAddressInformationException("retur");
         }
-        if(isAddressInvalid(returnAddress.getMottaker())){
+        if(!isAddressValid(returnAddress.getMottaker())){
             throw new MissingAddressInformationException("retur.postnummer/poststed/adresselinje1");
         }
     }
 
-    private static boolean isAddressInvalid(PostAddress address){
-        boolean hasAdresselinje1 = Strings.isNullOrEmpty(address.getAdresselinje1());
-        boolean isNorwegian =  isNorwegian(address) && Strings.isNullOrEmpty(address.getPostnummer())
-                            || isNorwegian(address) && Strings.isNullOrEmpty(address.getPoststed());
-        boolean hasCountry = Strings.isNullOrEmpty(address.getLand());
+    private static boolean isAddressValid(PostAddress address){
+        boolean hasAdresselinje1 = !Strings.isNullOrEmpty(address.getAdresselinje1());
+        boolean isNorwegian =  isNorwegian(address) && !Strings.isNullOrEmpty(address.getPostnummer())
+                            || isNorwegian(address) && !Strings.isNullOrEmpty(address.getPoststed());
+        boolean hasCountry = !Strings.isNullOrEmpty(address.getLand());
+        boolean hasCountryCode = !Strings.isNullOrEmpty(address.getLandkode());
 
-        return hasAdresselinje1 && (isNorwegian || hasCountry);
+        return hasAdresselinje1 && (isNorwegian || hasCountry || hasCountryCode);
     }
 
     private static boolean isLandFieldNorwegian(PostAddress address) {
@@ -153,10 +154,16 @@ public class NextMoveValidator {
     }
 
     private static boolean isLandCodeNorwegian(PostAddress address) {
+        if(address.getLandkode() == null){
+            return false;
+        }
         return address.getLandkode().equalsIgnoreCase("no");
     }
 
     private static boolean isNorwegian(PostAddress address) {
+        if(address.getLand() == null){
+            return false;
+        }
         return isLandCodeNorwegian(address) || isLandFieldNorwegian(address);
     }
 
