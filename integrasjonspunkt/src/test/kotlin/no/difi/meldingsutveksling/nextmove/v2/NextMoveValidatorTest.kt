@@ -224,9 +224,35 @@ class NextMoveValidatorTest {
 
     @Test
     fun `print address without adresselinje 1 throws exception`() {
+        val dpiPrintMessage = mockk<DpiPrintMessage>()
+        val mottaker = mockk<PostAddress>()
         every { sbd.type } returns "print"
-        every { sbd.any } returns mockkClass(PostAddress::class)
-        every { (sbd.any as PostAddress).adresselinje1 } returns null
+        every { sbd.any } returns dpiPrintMessage
+        every { mottaker.adresselinje1 } returns null
+        every { mottaker.postnummer } returns "5134"
+        every { mottaker.poststed } returns "Flaktveit"
+        every { mottaker.land } returns "Bergen"
+        every { mottaker.landkode } returns "NO"
+        every { mottaker.land } returns "norge"
+        every {dpiPrintMessage.mottaker} returns mottaker
+
         assertThrows(MissingAddressInformationException::class.java) { nextMoveValidator.validate(sbd) }
     }
+
+    @Test
+    fun `print address with adresselinje1 but not (norwegian address || foreign address country || foreign address country code) exception`() {
+        val dpiPrintMessage = mockk<DpiPrintMessage>()
+        val mottaker = mockk<PostAddress>()
+        every { sbd.type } returns "print"
+        every { sbd.any } returns dpiPrintMessage
+        every { mottaker.adresselinje1 } returns "adresselinje 1 korrekt utfylt"
+        every { mottaker.postnummer } returns null
+        every { mottaker.poststed } returns null
+        every { mottaker.land } returns null
+        every { mottaker.landkode } returns null
+        every { dpiPrintMessage.mottaker} returns mottaker
+
+        assertThrows(MissingAddressInformationException::class.java) { nextMoveValidator.validate(sbd) }
+    }
+
 }
