@@ -123,30 +123,56 @@ public class NextMoveValidator {
         if (receiverAddress == null) {
             throw new MissingAddressInformationException("mottaker");
         }
-        boolean receiverIsNorwegian = isNorwegian(receiverAddress);
-        if (Strings.isNullOrEmpty(receiverAddress.getAdresselinje1())
-                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPostnummer())
-                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPoststed())) {
+        if(!isAddressValid(receiverAddress)){
             throw new MissingAddressInformationException("mottaker.postnummer/poststed/adresselinje1");
         }
         MailReturn returnAddress = businessMessage.getRetur();
         if (returnAddress == null) {
             throw new MissingAddressInformationException("retur");
         }
-        PostAddress returnReceiver = returnAddress.getMottaker();
-        boolean returnToNorway = isNorwegian(returnReceiver);
-        if (Strings.isNullOrEmpty(returnReceiver.getAdresselinje1())
-                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPostnummer())
-                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPoststed())) {
+        if(!isAddressValid(returnAddress.getMottaker())){
             throw new MissingAddressInformationException("retur.postnummer/poststed/adresselinje1");
         }
     }
 
-    private static boolean isNorwegian(PostAddress address) {
+    private static boolean isAddressValid(PostAddress address){
+        boolean hasAdresselinje1 = !Strings.isNullOrEmpty(address.getAdresselinje1());
+        boolean isNorwegian =  isNorwegian(address)
+                                && !Strings.isNullOrEmpty(address.getPostnummer())
+                                && !Strings.isNullOrEmpty(address.getPoststed());
+        boolean isForeignCountry = isForeignCountry(address);
+        return hasAdresselinje1 && (isNorwegian || isForeignCountry);
+    }
+
+    private static boolean isForeignCountry(PostAddress address) {
+        if(Strings.isNullOrEmpty(address.getLand()) && Strings.isNullOrEmpty(address.getLandkode())){
+            return false;
+        }
+        if(isNorwegian(address)){
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isLandFieldNorwegian(PostAddress address) {
         String country = address.getLand();
-        return StringUtils.hasText(country)
-                && country.equalsIgnoreCase("Norge")
+        if(Strings.isNullOrEmpty(country)){
+            return false;
+        }
+        return country.equalsIgnoreCase("Norge")
+                || country.equalsIgnoreCase("Noreg")
                 || country.equalsIgnoreCase("Norway");
+    }
+
+    private static boolean isLandCodeNorwegian(PostAddress address) {
+        if(address.getLandkode() == null){
+            return false;
+        }
+        return address.getLandkode().equalsIgnoreCase("no");
+    }
+
+    private static boolean isNorwegian(PostAddress address) {
+        return isLandCodeNorwegian(address) || isLandFieldNorwegian(address);
     }
 
     private void validateDpfForsendelse(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
