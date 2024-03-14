@@ -137,18 +137,29 @@ public class NextMoveValidator {
 
     private static boolean isAddressValid(PostAddress address){
         boolean hasAdresselinje1 = !Strings.isNullOrEmpty(address.getAdresselinje1());
-        boolean isNorwegian =  isNorwegian(address) && !Strings.isNullOrEmpty(address.getPostnummer())
-                            || isNorwegian(address) && !Strings.isNullOrEmpty(address.getPoststed());
-        boolean hasCountry = !Strings.isNullOrEmpty(address.getLand());
-        boolean hasCountryCode = !Strings.isNullOrEmpty(address.getLandkode());
+        boolean isNorwegian =  isNorwegian(address)
+                                && !Strings.isNullOrEmpty(address.getPostnummer())
+                                && !Strings.isNullOrEmpty(address.getPoststed());
+        boolean isForeignCountry = isForeignCountry(address);
+        return hasAdresselinje1 && (isNorwegian || isForeignCountry);
+    }
 
-        return hasAdresselinje1 && (isNorwegian || hasCountry || hasCountryCode);
+    private static boolean isForeignCountry(PostAddress address) {
+        if(Strings.isNullOrEmpty(address.getLand()) && Strings.isNullOrEmpty(address.getLandkode())){
+            return false;
+        }
+        if(isNorwegian(address)){
+            return false;
+        }
+        return true;
     }
 
     private static boolean isLandFieldNorwegian(PostAddress address) {
         String country = address.getLand();
-        return StringUtils.hasText(country)
-                && country.equalsIgnoreCase("Norge")
+        if(Strings.isNullOrEmpty(country)){
+            return false;
+        }
+        return country.equalsIgnoreCase("Norge")
                 || country.equalsIgnoreCase("Noreg")
                 || country.equalsIgnoreCase("Norway");
     }
@@ -161,9 +172,6 @@ public class NextMoveValidator {
     }
 
     private static boolean isNorwegian(PostAddress address) {
-        if(address.getLand() == null){
-            return false;
-        }
         return isLandCodeNorwegian(address) || isLandFieldNorwegian(address);
     }
 
