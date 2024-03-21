@@ -240,7 +240,7 @@ class NextMoveValidatorTest {
     }
 
     @Test
-    fun `print address with adresselinje1 but not (norwegian address || foreign address country || foreign address country code) exception`() {
+    fun `print address with adresselinje1 but NOT (norwegian address OR foreign country OR foreign country code) exception`() {
         val dpiPrintMessage = mockk<DpiPrintMessage>()
         val mottaker = mockk<PostAddress>()
         every { sbd.type } returns "print"

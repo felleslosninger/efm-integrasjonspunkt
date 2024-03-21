@@ -121,27 +121,30 @@ public class NextMoveValidator {
         DpiPrintMessage businessMessage = (DpiPrintMessage) sbd.getAny();
         PostAddress receiverAddress = businessMessage.getMottaker();
         if (receiverAddress == null) {
-            throw new MissingAddressInformationException("mottaker");
+            throw new MissingAddressInformationException("empty receiver address");
         }
         if(!isAddressValid(receiverAddress)){
-            throw new MissingAddressInformationException("mottaker.postnummer/poststed/adresselinje1");
+            throw new MissingAddressInformationException("receiver address: one of the following attributes are missing: adresselinje1, postnummer/poststed or country/country code");
         }
         MailReturn returnAddress = businessMessage.getRetur();
         if (returnAddress == null) {
-            throw new MissingAddressInformationException("retur");
+            throw new MissingAddressInformationException("empty return address");
         }
         if(!isAddressValid(returnAddress.getMottaker())){
-            throw new MissingAddressInformationException("retur.postnummer/poststed/adresselinje1");
+            throw new MissingAddressInformationException("Computer says no because: Return address: one of the following attributes are missing: adresselinje1, postnummer/poststed or country/country code.");
         }
     }
 
     private static boolean isAddressValid(PostAddress address){
-        boolean hasAdresselinje1 = !Strings.isNullOrEmpty(address.getAdresselinje1());
         boolean isNorwegian =  isNorwegian(address)
                                 && !Strings.isNullOrEmpty(address.getPostnummer())
                                 && !Strings.isNullOrEmpty(address.getPoststed());
         boolean isForeignCountry = isForeignCountry(address);
-        return hasAdresselinje1 && (isNorwegian || isForeignCountry);
+        return hasAdresselinje1(address) && (isNorwegian || isForeignCountry);
+    }
+
+    private static boolean hasAdresselinje1(PostAddress address) {
+        return  !Strings.isNullOrEmpty(address.getAdresselinje1());
     }
 
     private static boolean isForeignCountry(PostAddress address) {
