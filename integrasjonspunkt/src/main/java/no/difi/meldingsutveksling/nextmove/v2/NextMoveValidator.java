@@ -160,7 +160,7 @@ public class NextMoveValidator {
     private static boolean isLandFieldNorwegian(PostAddress address) {
         String country = address.getLand();
         if(Strings.isNullOrEmpty(country)){
-            return false;
+            return true;
         }
         return country.equalsIgnoreCase("Norge")
                 || country.equalsIgnoreCase("Noreg")
@@ -169,7 +169,7 @@ public class NextMoveValidator {
 
     private static boolean isLandCodeNorwegian(PostAddress address) {
         if(address.getLandkode() == null){
-            return false;
+            return true;
         }
         return address.getLandkode().equalsIgnoreCase("no");
     }
