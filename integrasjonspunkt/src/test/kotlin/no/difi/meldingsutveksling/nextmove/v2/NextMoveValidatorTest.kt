@@ -228,6 +228,7 @@ class NextMoveValidatorTest {
         val mottaker = mockk<PostAddress>()
         every { sbd.type } returns "print"
         every { sbd.any } returns dpiPrintMessage
+        every { mottaker.navn } returns "navn"
         every { mottaker.adresselinje1 } returns null
         every { mottaker.postnummer } returns "5134"
         every { mottaker.poststed } returns "Flaktveit"
@@ -245,6 +246,7 @@ class NextMoveValidatorTest {
         val mottaker = mockk<PostAddress>()
         every { sbd.type } returns "print"
         every { sbd.any } returns dpiPrintMessage
+        every { mottaker.navn } returns "navn"
         every { mottaker.adresselinje1 } returns "adresselinje 1 korrekt utfylt"
         every { mottaker.postnummer } returns null
         every { mottaker.poststed } returns null
@@ -261,6 +263,7 @@ class NextMoveValidatorTest {
         val mottaker = mockk<PostAddress>()
         every { sbd.type } returns "print"
         every { sbd.any } returns dpiPrintMessage
+        every { mottaker.navn } returns "navn"
         every { mottaker.adresselinje1 } returns "adresselinje 1 korrekt utfylt"
         every { mottaker.postnummer } returns null
         every { mottaker.poststed } returns null
