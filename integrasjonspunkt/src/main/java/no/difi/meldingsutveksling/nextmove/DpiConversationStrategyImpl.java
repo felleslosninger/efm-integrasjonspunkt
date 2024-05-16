@@ -24,12 +24,10 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
-    private static final String PRINT_DOCUMENT_TYPE = "urn:no:difi:digitalpost:xsd:fysisk::print";
     private final ServiceRegistryLookup sr;
     private final MeldingsformidlerRequestFactory meldingsformidlerRequestFactory;
     private final MeldingsformidlerClient meldingsformidlerClient;
     private final ConversationService conversationService;
-    private final PrintService printService;
     private final PromiseMaker promiseMaker;
 
     @Override
@@ -46,7 +44,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                MeldingsformidlerRequest request = meldingsformidlerRequestFactory.getMeldingsformidlerRequest(message, serviceRecord, reject);
+                MeldingsformidlerRequest request = meldingsformidlerRequestFactory.getMeldingsformidlerRequest(message, reject);
 
                 try {
                     meldingsformidlerClient.sendMelding(request);
@@ -63,31 +61,21 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     }
 
     private ServiceRecord getServiceRecord(NextMoveOutMessage message) {
-        ServiceRecord serviceRecord;
-        KrrPrintResponse printDetails = printService.getPrintDetails();
         String documentType = message.getSbd().getDocumentType();
-        boolean isPrint = documentType.equals(PRINT_DOCUMENT_TYPE);
         if (message.getReceiver() != null) {
             try {
-                serviceRecord = sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
+                return sr.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                                 .conversationId(message.getConversationId())
                                 .process(message.getProcessIdentifier())
                                 .build(),
                         documentType);
-                if (isPrint) {
-                    serviceRecord.setPemCertificate(printDetails.getX509Sertifikat());
-                }
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
-        } else {
+        }
             // Null receiver only allowed for print receiver
-            serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
-                    printDetails.getX509Sertifikat(), null);
-        }
-        if (isPrint) {
-            serviceRecord.setOrgnrPostkasse(printDetails.getPostkasseleverandoerAdresse());
-        }
-        return serviceRecord;
+//            TODO What to replace this with? serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
+//                    printDetails.getX509Sertifikat(), null);
+        return null;
     }
 }

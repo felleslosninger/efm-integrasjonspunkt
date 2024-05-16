@@ -37,7 +37,7 @@ public class MeldingsformidlerRequestFactory {
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final MpcIdHolder mpcIdHolder;
 
-    public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
+    public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, Reject reject) {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
                 .parcel(getParcel(nextMoveMessage))
                 .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
@@ -46,12 +46,6 @@ public class MeldingsformidlerRequestFactory {
                 .conversationId(nextMoveMessage.getConversationId())
                 .mpcId(mpcIdHolder.getNextMpcId())
                 .expectedResponseDateTime(nextMoveMessage.getSbd().getExpectedResponseDateTime().orElse(null))
-                .postkasseAdresse(serviceRecord.getPostkasseAdresse())
-                .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
-                .postkasseProvider(Iso6523.of(ICD.NO_ORG, serviceRecord.getOrgnrPostkasse()))
-                .emailAddress(serviceRecord.getEpostAdresse())
-                .mobileNumber(getMobilnummer(serviceRecord))
-                .notifiable(serviceRecord.isKanVarsles())
                 .virkningsdato(OffsetDateTime.now(clock))
                 .language(properties.getDpi().getLanguage())
                 .printColor(PrintColor.SORT_HVIT)

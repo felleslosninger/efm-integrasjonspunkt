@@ -13,7 +13,6 @@ difi:
             client-type: json
             c2-type: web
             priority: NORMAL
-            krr-print-url: https://krr-ver1.digdir.no/rest/v1/printSertifikat
             print-settings:
                 return-type: SHREDDING
                 ink-type: BLACK_WHITE

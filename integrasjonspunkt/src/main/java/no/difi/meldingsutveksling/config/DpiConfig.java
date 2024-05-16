@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.dpi.json.*;
 import no.difi.meldingsutveksling.dpi.xmlsoap.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
-import no.difi.meldingsutveksling.nextmove.PrintService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.status.*;
 import no.difi.move.common.io.pipe.PromiseMaker;
@@ -71,11 +70,10 @@ public class DpiConfig {
             MeldingsformidlerRequestFactory meldingsformidlerRequestFactory,
             MeldingsformidlerClient meldingsformidlerClient,
             ConversationService conversationService,
-            PrintService printService,
             PromiseMaker promiseMaker
 
     ) {
-        return new DpiConversationStrategyImpl(sr, meldingsformidlerRequestFactory, meldingsformidlerClient, conversationService, printService, promiseMaker);
+        return new DpiConversationStrategyImpl(sr, meldingsformidlerRequestFactory, meldingsformidlerClient, conversationService, promiseMaker);
     }
 
     @Bean
