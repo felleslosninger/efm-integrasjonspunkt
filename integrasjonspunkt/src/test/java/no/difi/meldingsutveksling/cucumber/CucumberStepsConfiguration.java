@@ -17,7 +17,6 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
-import no.difi.meldingsutveksling.nextmove.KrrPrintResponse;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
 import no.difi.meldingsutveksling.noarkexchange.NoarkClientFactory;
