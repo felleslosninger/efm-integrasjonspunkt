@@ -44,7 +44,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
 
         try {
             promiseMaker.promise(reject -> {
-                MeldingsformidlerRequest request = meldingsformidlerRequestFactory.getMeldingsformidlerRequest(message, reject);
+                MeldingsformidlerRequest request = meldingsformidlerRequestFactory.getMeldingsformidlerRequest(message, serviceRecord, reject);
 
                 try {
                     meldingsformidlerClient.sendMelding(request);
@@ -54,7 +54,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                 }
 
                 return null;
-            }).await();
+        }).await();
         } catch (Exception e) {
             throw new NextMoveException(e);
         }
@@ -69,13 +69,11 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
                                 .process(message.getProcessIdentifier())
                                 .build(),
                         documentType);
+
             } catch (ServiceRegistryLookupException e) {
                 throw new MeldingsUtvekslingRuntimeException(e);
             }
         }
-            // Null receiver only allowed for print receiver
-//            TODO What to replace this with? serviceRecord = new ServiceRecord(DPI, printDetails.getPostkasseleverandoerAdresse(),
-//                    printDetails.getX509Sertifikat(), null);
-        return null;
+        throw new NullPointerException("Message receiver is null. This should never happen!!!");
     }
 }
