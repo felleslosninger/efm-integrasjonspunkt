@@ -9,7 +9,7 @@
 </head>
 <body>
 <h2>Conversations</h2>
-<form th:action="@{/conversations}" method="get" class="col-12 col-sm-6">
+<form th:action="@{conversations}" method="get" class="col-12 col-sm-6">
     <div class="input-group">
         <input class="form-control" type="text" th:name="search" th:placeholder="'Search'" th:value="${search != null} ? ${search}">
         <select class="form-control" th:name="direction">
@@ -20,7 +20,7 @@
         <input class="form-control" type="date" th:name="created" th:placeHolder="'dd-MM-yyyy'" th:value="${created != null} ? ${created}">
         <div class="input-group-append">
             <button type="submit" class="input-group-text " id="inputGroupPrepend2">Search</button>
-            <a th:href="@{/conversations}" class="input-group-text">Reset</a>
+            <a th:href="@{conversations}" class="input-group-text">Reset</a>
         </div>
     </div>
 </form>
@@ -47,7 +47,7 @@
     <script th:inline="javascript">
         function sendDelete(id) {
             let xhttp = new XMLHttpRequest();
-            xhttp.open("DELETE", "/api/conversations/"+id, true);
+            xhttp.open("DELETE", "api/conversations/"+id, true);
             xhttp.onload = function () {
                 location.reload();
             };
@@ -55,7 +55,7 @@
         }
 
         function openStatus(id) {
-            window.open('/api/statuses/'+id, '_blank');
+            window.open('api/statuses/'+id, '_blank');
         }
     </script>
 
@@ -82,16 +82,16 @@
 <nav aria-label="Page navigation" class="text-center" th:if="${page.totalPages > 1}">
     <ul class="pagination justify-content-center">
         <li class="page-item" th:if="${page.number > 0}">
-            <a class="page-link" th:href="@{/conversations(page=${page.number - 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Previous">
+            <a class="page-link" th:href="@{conversations(page=${page.number - 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, page.totalPages - 1)}" style="margin-right: 8px;">
-            <a class="page-link" th:href="@{/conversations(page=${pageNumber}, search=${search}, direction=${direction}, created=${created})}"
+            <a class="page-link" th:href="@{conversations(page=${pageNumber}, search=${search}, direction=${direction}, created=${created})}"
                th:text="${pageNumber + 1}" th:class="${pageNumber == page.number ? 'active' : ' '}"></a>
         </li>
         <li class="page-item" th:if="${page.number + 1 < page.totalPages}">
-            <a class="page-link" th:href="@{/conversations(page=${page.number + 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Next">
+            <a class="page-link" th:href="@{conversations(page=${page.number + 1}, search=${search}, direction=${direction}, created=${created})}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
