@@ -77,7 +77,7 @@
         <sikker-digital-post-klient.version>6.4.RC1</sikker-digital-post-klient.version>
         <junit.platform.version>1.9.2</junit.platform.version>
         <cucumber.version>7.11.0</cucumber.version>
-        <efm-common.version>1.20.0</efm-common.version>
+        <efm-common.version>1.23.0</efm-common.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
