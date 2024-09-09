@@ -55,7 +55,7 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
     public void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback) {
         dpiClient.getMessages(new GetMessagesInput()
                         .setSenderId(avsenderidentifikator)
-                        .setChannel(channelNormalizer.normaiize(mpcId))
+                        .setChannel(channelNormalizer.normalize(mpcId))
                 )
                 .map(JsonExternalReceipt::new)
                 .toStream()
