@@ -81,7 +81,7 @@
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
-        <bouncycastle.version>1.76</bouncycastle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
         <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
         <xmlsec.version>3.0.3</xmlsec.version>
         <dokka.skip>true</dokka.skip>
