@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class MissingAddressInformationException extends HttpStatusCodeException {
 
-    public MissingAddressInformationException(String errorMessage) {
-        super(HttpStatus.BAD_REQUEST, MissingAddressInformationException.class.getName(), errorMessage);
+    public MissingAddressInformationException(String jsonFieldName) {
+        super(HttpStatus.BAD_REQUEST, MissingAddressInformationException.class.getName(), jsonFieldName);
     }
 }
