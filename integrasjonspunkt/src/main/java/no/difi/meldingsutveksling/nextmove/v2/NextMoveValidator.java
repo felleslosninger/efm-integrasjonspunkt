@@ -123,22 +123,23 @@ public class NextMoveValidator {
         if (receiverAddress == null) {
             throw new MissingAddressInformationException("mottaker");
         }
-        if(isAddressInvalid(receiverAddress)){
+        boolean receiverIsNorwegian = isNorwegian(receiverAddress);
+        if (Strings.isNullOrEmpty(receiverAddress.getAdresselinje1())
+                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPostnummer())
+                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPoststed())) {
             throw new MissingAddressInformationException("mottaker.postnummer/poststed/adresselinje1");
         }
         MailReturn returnAddress = businessMessage.getRetur();
         if (returnAddress == null) {
             throw new MissingAddressInformationException("retur");
         }
-        if(isAddressInvalid(returnAddress.getMottaker())){
+        PostAddress returnReceiver = returnAddress.getMottaker();
+        boolean returnToNorway = isNorwegian(returnReceiver);
+        if (Strings.isNullOrEmpty(returnReceiver.getAdresselinje1())
+                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPostnummer())
+                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPoststed())) {
             throw new MissingAddressInformationException("retur.postnummer/poststed/adresselinje1");
         }
-    }
-
-    private static boolean isAddressInvalid(PostAddress address){
-        return  (Strings.isNullOrEmpty(address.getAdresselinje1())
-                || isNorwegian(address) && Strings.isNullOrEmpty(address.getPostnummer())
-                || isNorwegian(address) && Strings.isNullOrEmpty(address.getPoststed()));
     }
 
     private static boolean isNorwegian(PostAddress address) {
