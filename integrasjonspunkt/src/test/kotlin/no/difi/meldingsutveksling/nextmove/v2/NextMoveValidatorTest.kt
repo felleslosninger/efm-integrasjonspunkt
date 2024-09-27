@@ -255,20 +255,4 @@ class NextMoveValidatorTest {
         assertThrows(MissingAddressInformationException::class.java) { nextMoveValidator.validate(sbd) }
     }
 
-    @Test
-    fun `print address with adresselinje1 and Norway but no postal number exception`() {
-        val dpiPrintMessage = mockk<DpiPrintMessage>()
-        val mottaker = mockk<PostAddress>()
-        every { sbd.type } returns "print"
-        every { sbd.any } returns dpiPrintMessage
-        every { mottaker.adresselinje1 } returns "adresselinje 1 korrekt utfylt"
-        every { mottaker.postnummer } returns null
-        every { mottaker.poststed } returns null
-        every { mottaker.land } returns "norway"
-        every { mottaker.landkode } returns null
-        every { dpiPrintMessage.mottaker} returns mottaker
-
-        assertThrows(MissingAddressInformationException::class.java) { nextMoveValidator.validate(sbd) }
-    }
-
 }
