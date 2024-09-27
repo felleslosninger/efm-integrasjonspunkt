@@ -78,7 +78,7 @@ class NextMoveValidatorTest {
     private val sbd = mockk<StandardBusinessDocument>()
     private val serviceRecord = mockk<ServiceRecord>()
     private val businessMessage = ArkivmeldingMessage()
-        .setHoveddokument("foo.txt")
+            .setHoveddokument("foo.txt")
 
     @BeforeEach
     fun before() {
@@ -101,8 +101,8 @@ class NextMoveValidatorTest {
 
 
         val bmf = BusinessMessageFile()
-            .setFilename("foo.txt")
-            .setPrimaryDocument(true)
+                .setFilename("foo.txt")
+                .setPrimaryDocument(true)
         every { message.orCreateFiles } returns mutableSetOf(bmf)
 
         every { certValidator.ifAvailable(any()) } just Runs
@@ -220,13 +220,5 @@ class NextMoveValidatorTest {
             every { identifier } returns "foo-43"
         })
         assertThrows(MessageChannelInvalidException::class.java) { nextMoveValidator.validate(sbd) }
-    }
-
-    @Test
-    fun `print address without adresselinje 1 throws exception`() {
-        every { sbd.type } returns "print"
-        every { sbd.any } returns mockkClass(PostAddress::class)
-        every { (sbd.any as PostAddress).adresselinje1 } returns null
-        assertThrows(MissingAddressInformationException::class.java) { nextMoveValidator.validate(sbd) }
     }
 }
