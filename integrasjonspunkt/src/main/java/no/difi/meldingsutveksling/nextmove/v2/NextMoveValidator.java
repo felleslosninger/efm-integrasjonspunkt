@@ -136,12 +136,9 @@ public class NextMoveValidator {
     }
 
     private static boolean isAddressInvalid(PostAddress address){
-        boolean hasAdresselinje1 = Strings.isNullOrEmpty(address.getAdresselinje1());
-        boolean isNorwegian =  isNorwegian(address) && Strings.isNullOrEmpty(address.getPostnummer())
-                            || isNorwegian(address) && Strings.isNullOrEmpty(address.getPoststed());
-        boolean hasCountry = Strings.isNullOrEmpty(address.getLand());
-
-        return hasAdresselinje1 && (isNorwegian || hasCountry);
+        return  (Strings.isNullOrEmpty(address.getAdresselinje1())
+                || isNorwegian(address) && Strings.isNullOrEmpty(address.getPostnummer())
+                || isNorwegian(address) && Strings.isNullOrEmpty(address.getPoststed()));
     }
 
     private static boolean isNorwegian(PostAddress address) {
