@@ -67,6 +67,7 @@ public class FiksConfig {
         private Map<String, FiksCredentials> paaVegneAv = Maps.newHashMap();
         @NotNull
         private Integer defaultTtlHours;
+        private boolean svarSendesTilKorrespondansepart;
     }
 
     @Data
