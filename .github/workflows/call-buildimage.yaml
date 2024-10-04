@@ -20,9 +20,9 @@ jobs:
       uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@main
       needs: [build-install-and-deploy-libs]
       with:
-        application-path: serviceregistry-server/
-        image-name: efm-service-registry
-        java-version: 11
+        application-path: integrasjonspunkt/
+        image-name: integrasjonspunkt
+        java-version: 8
         slack-channel-id: C05NLQCFR41
         update-versions: "false"
       secrets: inherit  
