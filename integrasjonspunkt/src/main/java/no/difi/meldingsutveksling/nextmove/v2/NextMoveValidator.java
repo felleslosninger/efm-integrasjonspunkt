@@ -144,6 +144,9 @@ public class NextMoveValidator {
 
     private static boolean isNorwegian(PostAddress address) {
         String country = address.getLand();
+        if (null == country) {
+            return true;
+        }
         return StringUtils.hasText(country)
                 && country.equalsIgnoreCase("Norge")
                 || country.equalsIgnoreCase("Norway");
