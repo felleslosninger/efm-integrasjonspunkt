@@ -119,6 +119,7 @@
                         <goals>
                             <goal>build-info</goal>
                             <goal>repackage</goal>
+                            <goal>build-image</goal>
                         </goals>
                     </execution>
                 </executions>
