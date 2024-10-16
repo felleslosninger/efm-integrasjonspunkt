@@ -1,0 +1,66 @@
+eureka:
+  client:
+    enabled: false
+
+app:
+  logger:
+    enableLogstash: false
+
+difi:
+  move:
+    org:
+      number: 910075918
+      keystore:
+        alias: 910075918
+        password: changeit
+        path: cloud:mock.jks
+
+    serviceregistryEndpoint: http://localhost:8090
+    sign:
+      enable: false
+    oidc:
+      enable: false
+
+    feature:
+      enableDPI: true
+      enableDPV: true
+      enableDPF: true
+      enableDPO: true
+      enableDPE: true
+
+    dpi:
+      client-type: json
+      endpoint: http://localhost:8080/as4
+      uri: http://localhost:8080/api/c2
+      certificate:
+        recipe: classpath:/pki/recipe-dpi-move-difiSigned.xml
+      oidc:
+        mock:
+          token: foo123
+
+    dpv:
+      username: whatever
+      password: whatever
+      endpointUrl: http://localhost:8001/dpv/
+
+    fiks:
+      ut:
+        endpointUrl: http://localhost:8001/dpf
+        username: username
+        password: password
+      inn:
+        baseUrl: http://localhost:8001/svarinn
+        username: 910075918
+        password: password
+        mailOnError: false
+      pollingrate: 10000
+
+    dpo:
+      streamingserviceUrl: http://localhost:8001/dpo/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
+      brokerserviceUrl: http://localhost:8001/dpo/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+
+    nextmove:
+      serviceBus:
+        baseUrl: localhost:8001/dpe
+        useHttps: false
+        

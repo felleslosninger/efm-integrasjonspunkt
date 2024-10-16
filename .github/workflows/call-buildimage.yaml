@@ -25,6 +25,6 @@ jobs:
         java-version: 8
         slack-channel-id: C05NLQCFR41
         update-versions: "false"
-        #fetch-depth: 0
+        fetch-depth: 0
       secrets: inherit  
   

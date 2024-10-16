@@ -1,0 +1,63 @@
+### Integrasjonspunkt properties ###
+
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: https://test-meldingsutveksling.dificloud.net/discovery/eureka
+
+difi:
+    move:
+        serviceregistryEndpoint: https://test-meldingsutveksling.dificloud.net/serviceregistry
+
+        org:
+            #number: 
+            keystore:
+                alias: 974720760
+                password: changeit
+                path: crt/test-certificates.jks
+
+        oidc:
+            url: https://test.maskinporten.no/token
+            audience: https://test.maskinporten.no/
+            clientId: test_move
+            keystore:
+                path: changeit
+                alias: digdir-test-eformidling
+                password: changeit
+
+        dpi:
+            mpcId: no_difi_move_integrasjonspunkt-dev
+            endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
+
+        fiks:
+            inn:
+                baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+            pollingrate: 15000
+
+        nextmove:
+            serviceBus:
+                pollingrate: 5000
+
+logging:
+    level:
+        org:
+            springframework:
+                ws:
+                    client:
+                        MessageTracing: INFO
+                    server:
+                        MessageTracing: INFO
+        mf:
+            logger:
+                translog: TRACE
+        no:
+            difi:
+                sdp:
+                    client2:
+                        internal:
+                            DigipostMessageSenderFacade: TRACE
+
+spring:
+    config:
+        import: optional:file:integrasjonspunkt-local.properties
+        

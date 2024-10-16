@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: integrasjonspunkt
+  profiles:
+    active: production
+  cloud:
+    config:
+      enabled: false
+
+logging:
+  level:
+    net:
+      logstash:
+        logback: WARN
+    ch:
+      qos:
+        logback: WARN
+  file:
+    name: integrasjonspunkt-logs/application.log
+
+app:
+  logger:
+    destination: stream-meldingsutveksling.difi.no:443
+    enableLogstash: true
