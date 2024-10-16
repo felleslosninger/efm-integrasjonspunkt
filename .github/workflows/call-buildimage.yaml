@@ -17,8 +17,8 @@ jobs:
 #    secrets: inherit
     
   call-workflow-image-build-publish:
-#      uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@til-bundy
-      needs: [build-install-and-deploy-libs]
+      uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@til-bundy
+     # needs: [build-install-and-deploy-libs]
       with:
         application-path: integrasjonspunkt/
         image-name: integrasjonspunkt
