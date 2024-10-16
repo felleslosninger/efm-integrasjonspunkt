@@ -17,7 +17,7 @@ jobs:
 #    secrets: inherit
     
   call-workflow-image-build-publish:
-      uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@til-bundy
+      uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
      # needs: [build-install-and-deploy-libs]
       with:
         application-path: integrasjonspunkt/
@@ -25,6 +25,6 @@ jobs:
         java-version: 8
         slack-channel-id: C05NLQCFR41
         update-versions: "false"
-        fetch-depth: 0
+        #fetch-depth: 0
       secrets: inherit  
   
