@@ -1,0 +1,59 @@
+### Integrasjonspunkt properties ###
+
+#spring:
+#  config:
+#    import: configserver:https://test-meldingsutveksling.dificloud.net/discovery/config
+
+eureka:
+  client:
+    enabled: false
+
+difi:
+  move:
+    serviceregistryEndpoint: https://test-meldingsutveksling.dificloud.net/serviceregistry
+
+## KEYSTORE
+    org:
+      keystore:
+        alias: 974720760
+        password: changeit
+        path: crt/test-certificates.jks
+
+    dpi:
+      mpcId: no_difi_move_integrasjonspunkt-dev
+      feature:
+        enablePrint: true
+
+    feature:
+      enableDsfPrintLookup: false
+
+    ## Idporten Oidc
+    oidc:
+      url: https://yt2.maskinporten.no/token
+      audience: https://yt2.maskinporten.no/
+      keystore:
+        path: ${difi.move.org.keystore.path}
+        alias: ${difi.move.org.keystore.alias}
+        password: ${difi.move.org.keystore.password}
+
+    ## FIKS settings
+    fiks:
+      inn:
+        baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+      pollingrate: 15000
+
+    ## Servicebus
+    nextmove:
+      serviceBus:
+        pollingrate: 5000
+
+logging:
+  level: 
+    no:
+      difi: INFO
+      digdir: INFO
+
+spring:
+  config:
+    import: optional:file:integrasjonspunkt-local.yml
+    

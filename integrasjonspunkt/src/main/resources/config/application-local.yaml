@@ -1,0 +1,189 @@
+# Integrasjonspunkt properties
+
+#difi:
+#  move:
+#    nextmove:
+#      useDbPersistence: true
+#    datasource:
+#      url: jdbc:postgresql://localhost:5438/postgres
+#      username: postgres
+#      password: postgres
+
+## ORGANIZATION
+#### KEYSTORE
+
+#### DPE/V/O-Oppsett:
+#difi:
+#  move:
+#    org:
+#      identifier: 0192:910075918
+#      identifier: 0192:910075918:hoppsanhei:0
+#      number: 910075918
+#      keystore:
+#        path: file:/Users/lars/workspace/resources/jks/altinn-2023.jks
+#        password: changeit
+#        alias: 910075918
+
+#difi:
+#  move:
+#    org:
+#      number: 991825827
+#      keystore:
+#        alias: digdir-test
+#        path: cloud:digdir-test.jks
+#    dpi:
+#      mpcId: kanal
+#    feature:
+#      statusQueueIncludes: DPI
+
+#### DPI-Oppsett:
+
+difi:
+    move:
+        serviceregistryEndpoint: http://localhost:9099
+        org:
+            number: 991825827
+            keystore:
+                alias: digdir-test-eformidling
+                password: MeldingTeHumor2023!
+                path: file:/Users/lars/workspace/resources/jks/eformidling-test-auth.jks
+        noarkSystem:
+            enable: false
+        dpi:
+            client-type: json
+            receipt-type: json
+            mpcId: LarsSittIP
+        feature:
+            enableDPI: true
+            enableDPE: false
+            enableDPO: false
+            enableDPV: false
+            enableDPF: false
+            enableDPFIO: false
+
+#DPE
+#difi:
+#  move:
+#    nextmove:
+#      serviceBus:
+#        mode: innsyn
+#        receiptQueue: innsyn
+#        batchRead: true
+
+#DPV
+#difi:
+#  move:
+#    dpv:
+#      username: AAS_TEST
+#      password: 6GMSx5n8
+
+#DPF
+#difi:
+#  move:
+#    oidc:
+#      keystore:
+#        path: cloud:digdir-test.jks
+#        alias: digdir-test
+#        alias: 910075918
+#      clientId: test_move
+#    fiks:
+#      inn:
+#        username: f9d33007-0c96-4aaa-8258-609eac9dd90f
+#        password: F{ArsK~OY1vFDvoMxxWD@FwbwhvkI38M)SZZ5X^~lazbACd@9E
+#      ut:
+#        username: difi_test
+#        password: 0efeeb90-c370-4247-ac8b-46f6e569f7e7
+#      inn:
+#        mailOnError: false
+#      keystore:
+#        alias: 910229028
+#        password: changeit
+#        path: file:/Users/lars/workspace/resources/jks/altinn-2023.jks
+#        type: JKS
+#      io:
+#        konto-id: 2ae460f4-4001-4339-8248-7826b6d1cffa
+#        integrasjons-id: b4459ff8-f72f-475a-a6db-be9758c36060
+#        integrasjons-passord: Ho-cGzGIYqP5d_g7bAd%m@ZonnFRbE8^Iq2RPuhWwxNYQ7NdEv
+#        sender-orgnr: ${difi.move.org.number}
+
+## ALTINN: Correspondance agency
+#difi:
+#  move:
+#    dpo:
+#      username: 7408
+#      password: BAKKER7
+#      streamingserviceUrl:
+#      brokerserviceUrl:
+##ALTINN PROD FOR STAGING:
+#difi:
+#  move:
+#    dpo:
+#      username: 760963
+#      password: DifiMove16
+
+## ALTINN Post til virksomheter: Correspondance agency
+#difi:
+#  move:
+#    dpv:
+#      externalServiceCode: # required
+#      externalServiceEditionCode: # required
+#      username: # required
+#      password: # required
+#      sms:
+#        varslingstekst: Melding mottatt i innboks
+#      email:
+#        emne: Emne: melding mottatt i innboks
+#        varslingstekst: Tekst: melding mottatt i innboks
+
+## Digital post innbygger
+
+#difi:
+#  move:
+#    dpi:
+#      endpoint: # required
+#      keystore:
+#        alias: # required
+#        path: # required
+#        password: # required
+#      securityLevel: # 3 (default) or 4
+
+# FIKS
+## FIKS settings
+# difi:
+#  move:
+#    fiks:
+#      inn:
+#        baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+
+#For FIKS SvarInn (mottaker)
+#difi:
+#  move:
+#    fiks:
+#      inn:
+#        username: # username for receiving messages
+#        password: # password for receiving messages
+#
+##For FIKS SvarUt (avsender)
+#difi:
+#  move:
+#    fiks:
+#      ut:
+#        username: # username for sending messages
+#        password: # password for sending messages
+
+## NOARK settings
+#difi:
+#  move:
+#    noarkSystem:
+#      type:
+#      endpointURL:
+#      username:
+#      password:
+#      domain:
+
+## Feature toggles
+#difi:
+#  move:
+#    feature:
+#      enableQueue:
+#      returnOkOnEmptyPayload:

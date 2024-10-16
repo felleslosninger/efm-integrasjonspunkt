@@ -128,6 +128,7 @@ out/
 .java-version
 # mpeltonen/sbt-idea plugin
 .idea_modules/
+.vscode
 
 # JIRA plugin
 atlassian-ide-plugin.xml
@@ -137,6 +138,8 @@ com_crashlytics_export_strings.xml
 
 # Local properties
 integrasjonspunkt-local.properties
+integrasjonspunkt/src/main/resources/config/application-local.properties
+integrasjonspunkt/src/main/resources/config/application-local.yml
 integrasjonspunkt-local.properties.bak
 integrasjonspunkt/application.properties
 

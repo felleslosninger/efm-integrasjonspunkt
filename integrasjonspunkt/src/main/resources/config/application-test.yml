@@ -1,0 +1,54 @@
+### Integrasjonspunkt properties ###
+
+difi:
+  move:
+    serviceregistryEndpoint: https://qa-meldingsutveksling.difi.no/serviceregistry
+    dpi:
+        mpcId: no_difi_move_integrasjonspunkt-staging
+        certificate:
+            recipe: classpath:/pki/recipe-dpi-norway-test.xml
+
+## FIKS settings
+fiks:
+    inn:
+    baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+
+## Service toggles
+feature:
+    enableDPO: false
+    enableDPV: false
+    enableDPI: false
+    enableDPF: false
+    enableDPE: true
+
+## Idporten Oidc
+oidc:
+    url: https://test.maskinporten.no/token
+    audience: https://test.maskinporten.no/
+    keystore:
+    path: ${difi.move.org.keystore.path}
+    alias: ${difi.move.org.keystore.alias}
+    password: ${difi.move.org.keystore.password}
+
+## DPO
+dpo:
+    streamingserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
+    brokerserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+
+## DPI
+dpi:
+    endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
+
+    arkivmelding:
+      generate-receipts: false
+
+eureka:
+  client:
+    region: DIFI-MOVE-staging
+    serviceUrl:
+      defaultZone: https://qa-meldingsutveksling.difi.no/discovery/eureka
+
+spring:
+  config:
+    import: optional:file:integrasjonspunkt-local.properties
+    

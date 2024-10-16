@@ -1,0 +1,65 @@
+eureka:
+    client:
+        enabled: false
+
+app:
+    logger:
+        enableLogstash: false
+
+difi:
+    move:
+        org:
+            number: 910075918
+            keystore:
+                
+                alias: 910075918
+                password: changeit
+                path: cloud:mock.jks
+
+        serviceregistryEndpoint: http://host.docker.internal:8090
+        sign:
+            enable: false
+        oidc:
+            enable: false
+
+        feature:
+            enableDPI: true
+            enableDPV: true
+            enableDPF: true
+            enableDPO: true
+            enableDPE: true
+
+        dpi:
+            endpoint: http://host.docker.internal:8080/as4
+            trustStore:
+                path: cloud:mock-truststore.jks
+                password: changeit
+            certificate:
+                recipe: classpath:/pki/recipe-dpi-move-difiSigned.xml
+
+        dpv:
+            username: whatever
+            password: whatever
+            endpointUrl: http://host.docker.internal:8001/dpv/
+
+        fiks:
+            ut:
+                endpointUrl: http://host.docker.internal:8001/dpf
+                username: username
+                password: password
+            inn:
+                baseUrl: http://host.docker.internal:8001/svarinn
+                username: 910075918
+                password: password
+                mailOnError: false
+            pollingrate: 10000
+
+        dpo:
+            streamingserviceUrl: http://host.docker.internal:8001/dpo/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
+            brokerserviceUrl: http://host.docker.internal:8001/dpo/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+
+        nextmove:
+            serviceBus:
+                baseUrl: host.docker.internal:8001/dpe
+                useHttps: false
+                

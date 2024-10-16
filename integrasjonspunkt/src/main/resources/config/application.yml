@@ -1,0 +1,206 @@
+### Integrasjonspunkt properties ###
+
+# SSL
+server:
+  port: 9093
+  connection-timeout: 300000
+  ssl:
+    enabled: ${difi.ssl.enabled:false}
+    key-store-type: ${difi.ssl.key-store-type:JKS}
+    key-store: ${difi.ssl.key-store}
+    key-store-password: ${difi.ssl.key-store-password}
+    key-alias: ${difi.ssl.key-alias}
+
+# Basic auth
+difi:
+  move:
+    feature:
+      enable-auth: ${difi.security.enable:false}
+    serviceregistryEndpoint: https://meldingsutveksling.difi.no/serviceregistry
+    arkivmelding:
+      default-process: urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
+      dpv-default-process: ${difi.move.arkivmelding.default-process}
+      default-document-type: urn:no:difi:arkivmelding:xsd::arkivmelding
+      receipt-process: urn:no:difi:profile:arkivmelding:response:ver1.0
+      receipt-document-type: urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering
+      generate-receipts: true
+    avtalt:
+      receipt-process: urn:no:difi:profile:avtalt:response:ver1.0
+    einsyn:
+      default-journal-process: urn:no:difi:profile:einnsyn:journalpost:ver1.0
+      default-journal-document-type: urn:no:difi:einnsyn:xsd::publisering
+      default-innsynskrav-process: urn:no:difi:profile:einnsyn:innsynskrav:ver1.0
+      default-innsynskrav-document-type: urn:no:difi:einnsyn:xsd::innsynskrav
+      receipt-process: urn:no:difi:profile:einnsyn:response:ver1.0
+    nextmove:
+      status-document-type: urn:no:difi:eformidling:xsd::status
+      default-ttl-hours: 24
+      useDbPersistence: false
+      apply-zip-header-patch: false
+      filedir: messages
+      lockTimeoutMinutes: 5
+      serviceBus:
+        enable: ${difi.move.feature.enableDPE}
+        sasKeyName: MoveDPE-pilotPolicy
+        sasToken: <token>
+        mode: innsyn
+        baseUrl: efm-dpe-qa.servicebus.windows.net
+        useHttps: true
+        pollingrate: 20000
+        readMaxMessages: 50
+        batchRead: false
+        connectTimeout: 15000
+        default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+      status-services: DPO,DPE
+      statusPollingCron: 0 * * * * *
+      statusPollingPageSize: 2000
+    dpo:
+      streamingserviceUrl: https://tt02.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
+      brokerserviceUrl: https://tt02.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+      serviceCode: 4192
+      serviceEditionCode: 270815
+      connectTimeout: 3000
+      requestTimeout: 30000
+      upload-size-limit: 1GB
+      default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+    dpv:
+      endpointUrl: https://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
+      notifyEmail: true
+      notifySms: true
+      notification-text: "$reporteeName$: Du har mottatt en melding fra $reporterName$."
+      sensitive-service-code: 5504
+      sensitive-notification-text: "$reporteeName$, har mottatt en taushetsbelagt melding fra $reporterName$. For \u00E5 f\u00E5 tilgang til meldingen, er det n\u00F8dvendig at noen i $reporteeName$ har f\u00E5tt tildelt rollen \u00ABTaushetsbelagt post fra det offentlige\u00BB i Altinn. Dersom dere er usikre p\u00E5 om noen har slik tilgang, anbefaler vi sterkt at dette sjekkes."
+      allow-forwarding: true
+      daysToReply: 7
+      upload-size-limit: 200MB
+      enableDueDate: true
+      default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+    dpi:
+      keystore:
+        alias: ${difi.move.org.keystore.alias}
+        path: ${difi.move.org.keystore.path}
+        password: ${difi.move.org.keystore.password}
+        type: ${difi.move.org.keystore.type}
+        lockProvider: ${difi.move.org.keystore.lockProvider}
+      mpcId: no_difi_move_integrasjonspunkt
+      mpcConcurrency: 1
+      pollWithoutAvsenderidentifikator: true
+      language: NO
+      priority: NORMAL
+      printSettings:
+        returnType: SHREDDING
+        inkType: BLACK_WHITE
+        shippingType: ECONOMY
+      upload-size-limit: 150MB
+      client-type: json
+      clientMaxConnectionPoolSize: 10
+      krr-print-url: https://test.kontaktregisteret.no/rest/v2/printSertifikat
+      uri: https://srest.qa.dataplatfor.ms/dpi
+      c2-type: web
+      certificate:
+        recipe: classpath:/pki/recipe-dpi-move-difiSigned.xml
+      timeout:
+        connect: 5000
+        read: 60000
+        write: 60000
+      oidc:
+        enable: ${difi.move.oidc.enable}
+        url: ${difi.move.oidc.url}
+        audience: ${difi.move.oidc.audience}
+        clientId: ${difi.move.oidc.clientId}
+        scopes: digitalpostinnbygger:send
+      temporary-file-threshold: 1000000
+      initialBufferSize: 100000
+      default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+      pollingrate: 10000
+    fiks:
+      inn:
+        enable: ${difi.move.feature.enableDPF}
+        baseUrl: https://svarut.ks.no/tjenester/svarinn
+        process: urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
+        document-type: urn:no:difi:arkivmelding:xsd::arkivmelding
+        connectTimeout: 10000
+        readTimeout: 30000
+        orgnr: ${difi.move.org.number}
+        fallback-sender-org-nr: 999999999
+        username: ""
+        password: ""
+        mailOnError: true
+        mailSubject: Melding hentet fra SvarInn med utilstrekkelig metadata for levering via BestEdu
+      keystore:
+        alias: ${difi.move.org.keystore.alias}
+        path: ${difi.move.org.keystore.path}
+        password: ${difi.move.org.keystore.password}
+        type: ${difi.move.org.keystore.type}
+        lockProvider: ${difi.move.org.keystore.lockProvider}
+      pollingrate: 900000
+      ut:
+        username: ""
+        password: ""
+        endpointUrl: https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9
+        kun-digital-levering: false
+        upload-size-limit: 1GB
+        default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+      io:
+        host: io.fiks.test.ks.no
+        api-host: api.fiks.test.ks.no
+        upload-size-limit: 2GB
+        default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
+
+spring:
+  datasource:
+    url: ${difi.datasource.url}
+    username: ${difi.datasource.username:sa}
+    password: ${difi.datasource.password:}
+    hikari:
+      maximum-pool-size: 50
+    autoCommit: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+      properties:
+        hibernate.current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        hibernate.jdbc.time_zone: Europe/Oslo
+    open-in-view: false
+  liquibase:
+    enabled: true
+  profiles:
+    active: production
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  security:
+    user:
+      name: ${difi.security.user.name:#{null}}
+      password: ${difi.security.user.password:#{null}}
+
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: /manage
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  info:
+    git:
+      mode: full
+
+eureka:
+  instance:
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}:${difi.move.org.number}
+      orgnumber: ${difi.move.org.number}
+      version: @project.version@
+      commitId: ${buildNumber}
+      branch: ${scmBranch}

@@ -1,0 +1,11 @@
+app:
+    logger:
+        destination: test-stream-meldingsutveksling.dificloud.net:443
+
+spring:
+    cloud:
+        config:
+            enabled: true
+            uri: https://test-meldingsutveksling.dificloud.net/discovery/config
+            fail-fast: true
+            
