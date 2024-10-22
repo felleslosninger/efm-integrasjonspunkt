@@ -11,6 +11,7 @@ pom.xml.versionsBackup
 *.log
 /**/*.iml
 /**/target
+/**/target
 /**/generated-sources
 /**/generated-sources/jaxb
 /**/generated-sources/wsimport
@@ -95,6 +96,7 @@ $RECYCLE.BIN/
 
 ## Directory-based project format:
 .idea/
+.vscode/
 # if you remove the above rule, at least ignore the follwing:
 
 # User-specific stuff:
