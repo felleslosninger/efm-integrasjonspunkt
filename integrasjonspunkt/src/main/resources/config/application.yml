@@ -109,11 +109,11 @@ difi:
       cryptoMessagePersister: 'true'
       enableDPFIO: 'false'
       enableReceipts: 'true'
-      enableDPE: 'true'
+      enableDPE: 'false'
       enableDPF: 'false'
       enableDPI: 'false'
       enableQueue: 'true'
-      enableDPO: 'false'
+      enableDPO: 'true'
       enableDPV: 'false'
       retryOnDeadLock: 'true'
     nextmove:

@@ -5,7 +5,7 @@ difi:
         password: changeit
         path: crt/test-certificates.jks
         alias: '974720760'
-    serviceregistryEndpoint: https://test-meldingsutveksling.dificloud.net/serviceregistry
+    serviceregistryEndpoint: https://eformidling.dev/adressetjeneste
     oidc:
       keystore:
         alias: digdir-test-eformidling
@@ -48,4 +48,4 @@ logging:
 eureka:
   client:
     serviceUrl:
-      defaultZone: https://test-meldingsutveksling.dificloud.net/discovery/eureka
+      defaultZone: https://eformidling.dev/discovery/eureka

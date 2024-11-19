@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    config:
+      enabled: 'true'
+      uri: https://test-meldingsutveksling.dificloud.net/discovery/config
+      fail-fast: 'true'

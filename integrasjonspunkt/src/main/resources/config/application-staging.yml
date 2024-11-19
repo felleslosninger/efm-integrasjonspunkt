@@ -2,7 +2,7 @@ eureka:
   client:
     region: DIFI-MOVE-staging
     serviceUrl:
-      defaultZone: https://qa-meldingsutveksling.difi.no/discovery/eureka
+      defaultZone: https://eformidling.dev/discovery/eureka
 difi:
   move:
     feature:

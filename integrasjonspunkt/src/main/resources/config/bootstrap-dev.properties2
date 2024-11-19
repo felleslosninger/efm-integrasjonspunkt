@@ -1,0 +1,5 @@
+app.logger.destination=qa-stream-meldingsutveksling.difi.no:443
+
+spring.cloud.config.enabled=true
+spring.cloud.config.uri=https://eformidling.dev/discovery/eureka/config
+spring.cloud.config.fail-fast=false
