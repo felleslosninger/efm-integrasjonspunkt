@@ -43,7 +43,7 @@ difi:
 eureka:
   client:
     serviceUrl:
-      defaultZone: https://meldingsutveksling.difi.no/discovery/eureka
+      defaultZone: https://eformidling.no/discovery
     region: DIFI-MOVE-PROD
 spring:
   config:

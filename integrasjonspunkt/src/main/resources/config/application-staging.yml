@@ -2,7 +2,7 @@ eureka:
   client:
     region: DIFI-MOVE-staging
     serviceUrl:
-      defaultZone: https://eformidling.dev/discovery/eureka
+      defaultZone: https://test.eformidling.no/discovery
 difi:
   move:
     feature:
@@ -11,7 +11,7 @@ difi:
       enableDPI: 'false'
       enableDPO: 'false'
       enableDPV: 'false'
-    serviceregistryEndpoint: https://qa-meldingsutveksling.difi.no/serviceregistry
+    serviceregistryEndpoint: https://test.eformidling.no/adressetjeneste
     oidc:
       keystore:
         alias: ${difi.move.org.keystore.alias}

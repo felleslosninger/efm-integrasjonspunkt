@@ -10,7 +10,7 @@ difi:
         enablePrint: 'true'
       endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
       mpcId: no_difi_move_integrasjonspunkt-dev
-    serviceregistryEndpoint: https://test-meldingsutveksling.dificloud.net/serviceregistry
+    serviceregistryEndpoint: https://test.eformidling.no/adressetjeneste/
     oidc:
       keystore:
         alias: ${difi.move.org.keystore.alias}

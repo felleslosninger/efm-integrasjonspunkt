@@ -255,7 +255,7 @@ difi:
     sign:
       enable: 'true'
       jwkUrl: ${difi.move.serviceregistryEndpoint}/jwk
-    serviceregistryEndpoint: https://meldingsutveksling.difi.no/serviceregistry
+    serviceregistryEndpoint: https://eformidling.no/adressetjeneste
     avtalt:
       receipt-process: urn:no:difi:profile:avtalt:response:ver1.0
     webhooks:

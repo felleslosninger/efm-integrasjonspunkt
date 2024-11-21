@@ -2,5 +2,5 @@ spring:
   cloud:
     config:
       enabled: 'true'
-      uri: https://test-meldingsutveksling.dificloud.net/discovery/config
+      uri: https://test.eformidling.no/discovery/
       fail-fast: 'true'
