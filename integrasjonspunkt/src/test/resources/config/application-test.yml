@@ -1,0 +1,52 @@
+difi:
+  move:
+    noarkSystem:
+      password: noarkPass
+      endpointURL: http://localhost:8088/testExchangeBinding
+      domain: testdomain
+      username: noarkUser
+      type: p360
+    org:
+      number: '910075918'
+      keystore:
+        password: changeit
+        path: 910075918.jks
+        alias: '910075918'
+    dpi:
+      mpcId: no_difi_move_integrasjonspunkt-test
+      printSettings:
+        returnType: SHREDDING
+        inkType: BLACK_WHITE
+        shippingType: ECONOMY
+      endpoint: ''
+    dpo:
+      username: testuser
+      password: testpass
+    feature:
+      enableReceipts: 'false'
+      enableDPE: 'false'
+      enableQueue: 'false'
+      enableDPO: 'true'
+    serviceregistryEndpoint: http://localhost:9099
+app:
+  local:
+    properties:
+      enable: 'false'
+server:
+  port: '9092'
+spring:
+  cloud:
+    config:
+      enabled: 'false'
+  datasource:
+    url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  liquibase:
+    enabled: 'false'
+eureka:
+  client:
+    enabled: 'false'
+user:
+  home: .
+management:
+  endpoints:
+    enabled-by-default: 'false'

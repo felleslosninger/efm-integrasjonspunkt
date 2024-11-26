@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @JsonTest
-@TestPropertySource("classpath:/config/application-test.properties")
+@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 @Import({JacksonConfig.class, TestClockConfig.class})
 public class JacksonConfigTest {

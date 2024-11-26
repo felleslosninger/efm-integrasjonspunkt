@@ -70,7 +70,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         MvcConfiguration.class})
 @WebMvcTest(NextMoveMessageOutController.class)
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.properties")
+@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 class NextMoveMessageOutControllerTest {
 

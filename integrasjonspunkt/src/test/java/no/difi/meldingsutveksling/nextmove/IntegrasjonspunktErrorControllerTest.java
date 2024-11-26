@@ -61,7 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ValidationConfig.class})
 @WebMvcTest(IntegrasjonspunktErrorController.class)
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.properties")
+@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class IntegrasjonspunktErrorControllerTest {
