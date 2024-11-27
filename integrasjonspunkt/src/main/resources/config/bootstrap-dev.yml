@@ -6,4 +6,4 @@ spring:
     config:
       enabled: 'true'
       uri: https://eformidling.dev/discovery/eureka/config
-      fail-fast: 'false'
+      fail-fast: 'true'
