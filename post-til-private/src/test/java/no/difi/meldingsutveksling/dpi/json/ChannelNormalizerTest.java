@@ -10,6 +10,6 @@ class ChannelNormalizerTest {
 
     @Test
     void testNormalize() {
-        assertThat(target.normaiize("no.difi.move.integrasjonspunkt")).isEqualTo("no_difi_move_integrasjonspunkt");
+        assertThat(target.normalize("no.difi.move.integrasjonspunkt")).isEqualTo("no_difi_move_integrasjonspunkt");
     }
 }

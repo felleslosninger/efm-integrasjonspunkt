@@ -2,8 +2,6 @@ package no.difi.meldingsutveksling.config;
 
 import com.google.common.collect.Sets;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.properties.LoggedProperty;
@@ -44,9 +42,6 @@ public class IntegrasjonspunktProperties {
     @Valid
     @NestedConfigurationProperty
     private AltinnFormidlingsTjenestenConfig dpo;
-
-    @Valid
-    private ElmaConfig elma;
 
     @Valid
     private Arkivmelding arkivmelding;
@@ -142,6 +137,7 @@ public class IntegrasjonspunktProperties {
         private boolean disable;
 
     }
+
     @Data
     public static class Queue {
         @NotNull
@@ -334,14 +330,6 @@ public class IntegrasjonspunktProperties {
     public static class Sms {
         @Size(max = 160)
         private String varslingstekst;
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ElmaConfig {
-
-        @NonNull
-        private String url;
     }
 
     @Data

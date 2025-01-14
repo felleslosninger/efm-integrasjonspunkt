@@ -13,12 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -37,9 +38,11 @@ public class MessageStatusController {
     @Transactional(readOnly = true)
     public Page<MessageStatus> find(
             @Valid MessageStatusQueryInput input,
+            @RequestParam(value = "fromDateTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromDateTime,
+            @RequestParam(value = "toDateTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDateTime,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        return statusRepo.find(input, pageable);
+            return statusRepo.find(input, pageable);
     }
 
     @GetMapping("{messageId}")

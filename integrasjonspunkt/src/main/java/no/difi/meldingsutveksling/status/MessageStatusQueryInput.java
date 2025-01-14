@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.status;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.OffsetDateTime;
 
 @Data
 public class MessageStatusQueryInput {
@@ -10,5 +12,10 @@ public class MessageStatusQueryInput {
     String messageId;
     String status;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    OffsetDateTime fromDateTime;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    OffsetDateTime toDateTime;
 }
 

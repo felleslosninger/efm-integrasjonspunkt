@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                     .httpStrictTransportSecurity()
                     .includeSubDomains(true);
             http.authorizeRequests()
-                    .antMatchers("/manage/health").permitAll()
+                    .antMatchers("/manage/health", "/health").permitAll()
                     .anyRequest().authenticated()
                     .and().httpBasic();
 

@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
@@ -95,6 +96,10 @@ public class NextMoveValidator {
             throw new ServiceNotEnabledException(serviceIdentifier);
         }
 
+        if (messageType == MessageType.PRINT) {
+            validatePrintBusinessMessage(sbd);
+        }
+
         if (!messageType.fitsDocumentIdentifier(sbd.getDocumentType()) && serviceIdentifier != DPFIO) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, sbd.getDocumentType());
         }
@@ -108,6 +113,41 @@ public class NextMoveValidator {
 
         validateDpfForsendelse(sbd, serviceIdentifier);
 
+    }
+
+    private static void validatePrintBusinessMessage(StandardBusinessDocument sbd) {
+        DpiPrintMessage businessMessage = (DpiPrintMessage) sbd.getAny();
+        PostAddress receiverAddress = businessMessage.getMottaker();
+        if (receiverAddress == null) {
+            throw new MissingAddressInformationException("mottaker");
+        }
+        boolean receiverIsNorwegian = isNorwegian(receiverAddress);
+        if (Strings.isNullOrEmpty(receiverAddress.getAdresselinje1())
+                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPostnummer())
+                || receiverIsNorwegian && Strings.isNullOrEmpty(receiverAddress.getPoststed())) {
+            throw new MissingAddressInformationException("mottaker.postnummer/poststed/adresselinje1");
+        }
+        MailReturn returnAddress = businessMessage.getRetur();
+        if (returnAddress == null) {
+            throw new MissingAddressInformationException("retur");
+        }
+        PostAddress returnReceiver = returnAddress.getMottaker();
+        boolean returnToNorway = isNorwegian(returnReceiver);
+        if (Strings.isNullOrEmpty(returnReceiver.getAdresselinje1())
+                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPostnummer())
+                || returnToNorway && Strings.isNullOrEmpty(returnReceiver.getPoststed())) {
+            throw new MissingAddressInformationException("retur.postnummer/poststed/adresselinje1");
+        }
+    }
+
+    private static boolean isNorwegian(PostAddress address) {
+        String country = address.getLand();
+        if (null == country) {
+            return true;
+        }
+        return StringUtils.hasText(country)
+                && country.equalsIgnoreCase("Norge")
+                || country.equalsIgnoreCase("Norway");
     }
 
     private void validateDpfForsendelse(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
