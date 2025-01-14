@@ -1,4 +1,3 @@
-#Move-Integrasjonspunkt
+# Move Integrasjonspunkt v3
 
-[![Build Status](https://travis-ci.org/difi/move-integrasjonspunkt.svg?branch=master)](https://travis-ci.org/difi/move-integrasjonspunkt)
-
+Dette blir Java 21 og SpringBoot 3 versjon på sikt.
