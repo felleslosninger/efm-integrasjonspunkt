@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.receipt
 
 import no.difi.meldingsutveksling.status.ConversationRepository
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -19,7 +19,7 @@ import java.time.LocalDate
 open class ConversationWebController(
     private val conversationRepository: ConversationRepository
 ) {
-    val log = logger()
+    val log = LoggerFactory.getLogger(ConversationWebController::class.java)
 
     @GetMapping
     @Transactional(readOnly = true)
