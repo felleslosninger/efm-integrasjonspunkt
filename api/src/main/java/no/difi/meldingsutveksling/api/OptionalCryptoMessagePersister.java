@@ -11,4 +11,5 @@ public interface OptionalCryptoMessagePersister {
     Resource read(String messageId, String filename) throws IOException;
 
     void delete(String messageId) throws IOException;
+
 }
