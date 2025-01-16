@@ -4,7 +4,7 @@ import io.micrometer.core.annotation.Timed
 import no.difi.meldingsutveksling.api.DpfioConversationStrategy
 import no.difi.meldingsutveksling.ks.fiksio.FiksIoService
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
 open class DpfIoConversationStrategyImpl(private val fiksIoService: FiksIoService) : DpfioConversationStrategy {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(DpfIoConversationStrategyImpl::class.java)
 
     @Timed
     override fun send(message: NextMoveOutMessage) {

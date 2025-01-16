@@ -17,7 +17,7 @@ import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
 import no.difi.meldingsutveksling.status.MessageStatus
 import no.difi.meldingsutveksling.status.MessageStatusFactory
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,7 +29,7 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
                         private val properties: IntegrasjonspunktProperties,
                         private val nextMoveQueue: NextMoveQueue) : StatusStrategy {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(DpvStatusStrategy::class.java)
 
     override fun checkStatus(conversations: MutableSet<Conversation>) {
         log.debug("Checking status for ${conversations.size} DPV messages..")
