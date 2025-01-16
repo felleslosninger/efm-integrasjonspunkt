@@ -6,10 +6,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
-import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
-import no.difi.meldingsutveksling.util.logger
+import no.difi.meldingsutveksling.sbd.SBDFactory
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
@@ -20,7 +20,7 @@ class ResponseStatusSender(
     val proxy: ResponseStatusSenderProxy,
     val props: IntegrasjonspunktProperties
 ) {
-    val log = logger()
+    val log = LoggerFactory.getLogger(ResponseStatusSender::class.java)
 
     fun queue(sbd: StandardBusinessDocument, si: ServiceIdentifier, status: ReceiptStatus) {
         if (si in props.nextmove.statusServices) {

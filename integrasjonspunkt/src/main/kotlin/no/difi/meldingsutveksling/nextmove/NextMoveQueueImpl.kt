@@ -11,11 +11,10 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
 import no.difi.meldingsutveksling.dpo.MessageChannelEntry
 import no.difi.meldingsutveksling.dpo.MessageChannelRepository
-import no.difi.meldingsutveksling.logging.Audit
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Component
@@ -33,7 +32,7 @@ open class NextMoveQueueImpl(
     private val messageChannelRepository: MessageChannelRepository
 ) : NextMoveQueue {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(NextMoveQueueImpl::class.java)
 
     override fun enqueueIncomingMessage(sbd: StandardBusinessDocument, serviceIdentifier: ServiceIdentifier) {
         enqueueIncomingMessage(sbd, serviceIdentifier, null)
