@@ -140,6 +140,7 @@ com_crashlytics_export_strings.xml
 integrasjonspunkt-local-steinar.properties
 integrasjonspunkt-local2.yml
 integrasjonspunkt-local.properties.bak
+integrasjonspunkt-local-*-only.properties.bak
 integrasjonspunkt/application.properties
 integrasjonspunkt-local.properties
 integrasjonspunkt-local.yml
