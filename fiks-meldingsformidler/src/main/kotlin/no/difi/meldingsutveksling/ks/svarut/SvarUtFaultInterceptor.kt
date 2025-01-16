@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.ks.svarut
 import net.logstash.logback.marker.LogstashMarker
 import net.logstash.logback.marker.Markers
 import no.difi.meldingsutveksling.QueueInterruptException
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.ws.client.WebServiceClientException
 import org.springframework.ws.client.support.interceptor.ClientInterceptor
@@ -17,7 +17,7 @@ import javax.xml.transform.stream.StreamResult
 @Component
 class SvarUtFaultInterceptor : ClientInterceptor {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(SvarUtFaultInterceptor::class.java)
 
     /**
      * Processes the incoming response fault. Called for response fault messages before payload handling in the [ ].

@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.config
 
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.Ordered
@@ -10,13 +10,12 @@ import org.springframework.vault.authentication.TokenAuthentication
 import org.springframework.vault.client.VaultEndpoint
 import org.springframework.vault.core.VaultTemplate
 import org.springframework.vault.core.util.KeyValueDelegate
-import java.lang.RuntimeException
 import java.net.URI
 import java.util.*
 
 class VaultProtocolResolver : ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(VaultProtocolResolver::class.java)
     private val vaultResources = mutableMapOf<String, ByteArrayResource>()
 
     override fun initialize(c: ConfigurableApplicationContext) {
