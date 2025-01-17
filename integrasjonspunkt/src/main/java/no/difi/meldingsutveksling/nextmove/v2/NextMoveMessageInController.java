@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -56,13 +56,13 @@ public class NextMoveMessageInController {
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
-        Audit.info(String.format("Message [id=%s] locked until %s", message.getMessageId(), message.getLockTimeout()), markerFrom(message));
+        Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
 
     @GetMapping(value = "pop/{messageId}")
     @Transactional
-    public void popMessage(@PathVariable("messageId") String messageId, HttpServletResponse response) throws IOException {
+    public void popMessage(@PathVariable String messageId, HttpServletResponse response) throws IOException {
         // Me tek i bruk underliggande Java Servlet API for å jobbe rundt problem knytt til transaksjonar i Spring og
         // strømming av BLOB fra Postgres:
         //
@@ -109,7 +109,7 @@ public class NextMoveMessageInController {
 
     @DeleteMapping(value = "/{messageId}")
     @Transactional
-    public StandardBusinessDocument deleteMessage(@PathVariable("messageId") String messageId) {
+    public StandardBusinessDocument deleteMessage(@PathVariable String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         return messageService.deleteMessage(messageId);
     }

@@ -34,10 +34,10 @@ public class Adresseregister {
                     message.getSbd().getDocumentType()));
         } catch (ServiceRegistryLookupException e) {
             log.error(markerFrom(message), "Could not fetch service record for identifier {}", message.getReceiverIdentifier());
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch service record for identifier %s", message.getReceiverIdentifier()));
+            throw new MeldingsUtvekslingRuntimeException("Could not fetch service record for identifier %s".formatted(message.getReceiverIdentifier()));
         } catch (CertificateException e) {
             log.error(markerFrom(message), "Could not fetch certificate for receiver {}", message.getReceiverIdentifier());
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not fetch certificate for identifier %s", message.getReceiverIdentifier()));
+            throw new MeldingsUtvekslingRuntimeException("Could not fetch certificate for identifier %s".formatted(message.getReceiverIdentifier()));
         }
     }
 

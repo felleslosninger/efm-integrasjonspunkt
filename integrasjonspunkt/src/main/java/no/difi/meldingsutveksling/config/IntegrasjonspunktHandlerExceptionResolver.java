@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,12 +26,12 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
     protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
         try {
-            if (ex instanceof HttpStatusCodeException) {
+            if (ex instanceof HttpStatusCodeException exception) {
                 return handleHttpStatusCodeException(
-                        (HttpStatusCodeException) ex, request, response);
-            } else if (ex instanceof ConstraintViolationException) {
+                        exception, request, response);
+            } else if (ex instanceof ConstraintViolationException exception) {
                 return handleConstraintViolationException(
-                        (ConstraintViolationException) ex, response);
+                        exception, response);
             }
         } catch (EOFException e) {
             if (logger.isWarnEnabled()) {

@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.io.IOException;
 
 @Converter
@@ -36,7 +36,7 @@ public class StandardBusinessDocumentConverter implements AttributeConverter<Sta
         try {
             return getObjectMapper().readValue(dbData, StandardBusinessDocument.class);
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Couldn't convert String to SBD: %s", dbData), e);
+            throw new NextMoveRuntimeException("Couldn't convert String to SBD: %s".formatted(dbData), e);
         }
     }
 

@@ -11,8 +11,8 @@ import no.digipost.org.w3.xmldsig.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +28,7 @@ class XmlSoapDpiReceiptHelper {
 
     static String getAuthority(PartnerIdentification p) {
         Iso6523 iso6523 = Iso6523.parse(p.getValue());
-        return String.format("urn:oasis:names:tc:ebcore:partyid-type:iso6523:%s", iso6523.getIcd().getCode());
+        return "urn:oasis:names:tc:ebcore:partyid-type:iso6523:%s".formatted(iso6523.getIcd().getCode());
     }
 
     @NotNull

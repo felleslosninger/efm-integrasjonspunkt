@@ -25,10 +25,10 @@ open class ConversationWebController(
     @Transactional(readOnly = true)
     open fun home(
         model: Model,
-        @RequestParam(value = "search", required = false) search: String?,
-        @RequestParam(value = "direction", required = false) direction: String?,
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) direction: String?,
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        @RequestParam(value = "created", required = false) created: LocalDate?,
+        @RequestParam(required = false) created: LocalDate?,
         @PageableDefault(sort = ["lastUpdate"], direction = Sort.Direction.DESC, size = 20) pageable: Pageable
     ): String {
         val findAll = conversationRepository.findWithMessageStatuses(search, direction, created, pageable)

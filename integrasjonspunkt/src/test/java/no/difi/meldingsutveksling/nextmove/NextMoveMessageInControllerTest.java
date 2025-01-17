@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -28,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -42,7 +40,6 @@ import java.util.zip.ZipOutputStream;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -57,7 +54,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
         SecurityConfiguration.class,
         FixedClockConfig.class,
@@ -116,7 +112,7 @@ class NextMoveMessageInControllerTest {
                                         parameterWithName("conversationId").optional().description("Filter on conversationId."),
                                         parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
                                         parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
                                                 .map(Enum::name)
                                                 .collect(Collectors.joining(", ")))),
                                         parameterWithName("process").optional().description("Filter on process.")
@@ -217,7 +213,7 @@ class NextMoveMessageInControllerTest {
                                         parameterWithName("conversationId").optional().description("Filter on conversationId."),
                                         parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
                                         parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
                                                 .map(Enum::name)
                                                 .collect(Collectors.joining(", ")))),
                                         parameterWithName("process").optional().description("Filter on process.")
@@ -250,7 +246,7 @@ class NextMoveMessageInControllerTest {
                                         getDefaultHeaderDescriptors()
                                 ),
                                 requestParameters(
-                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on serviceIdentifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
                                                 .map(Enum::name)
                                                 .collect(Collectors.joining(", "))))
                                 ),

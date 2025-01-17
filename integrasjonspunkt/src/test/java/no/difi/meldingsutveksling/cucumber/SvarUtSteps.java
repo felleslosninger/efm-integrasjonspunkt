@@ -4,11 +4,12 @@ import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.xmlunit.builder.DiffBuilder;
 
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RequiredArgsConstructor
 public class SvarUtSteps {
@@ -26,7 +27,7 @@ public class SvarUtSteps {
     public void anUploadToFiksInitiatedWith(String expectedPayload) {
         List<String> payloads = webServicePayloadHolder.get();
 
-        MatcherAssert.assertThat(
+        assertThat(
                 payloads.stream()
                         .map(this::hideData)
                         .anyMatch(p -> !DiffBuilder.compare(p)

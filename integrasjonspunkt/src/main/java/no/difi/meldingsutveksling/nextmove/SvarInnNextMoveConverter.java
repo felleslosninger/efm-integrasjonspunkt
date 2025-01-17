@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import java.math.BigInteger;
 import java.time.Year;
 import java.util.GregorianCalendar;

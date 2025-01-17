@@ -12,7 +12,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -89,7 +89,7 @@ public class InternalQueue {
             objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(nextmoveQueue, bos.toByteArray());
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Unable to marshall NextMove message with id=%s", msg.getMessageId()), e);
+            throw new NextMoveRuntimeException("Unable to marshall NextMove message with id=%s".formatted(msg.getMessageId()), e);
         }
     }
 

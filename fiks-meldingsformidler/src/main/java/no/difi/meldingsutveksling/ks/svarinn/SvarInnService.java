@@ -27,7 +27,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
@@ -106,7 +105,7 @@ public class SvarInnService {
         });
 
         if (!forsendelser.isEmpty()) {
-            Audit.info(format("%d new messages in FIKS", forsendelser.size()));
+            Audit.info("%d new messages in FIKS".formatted(forsendelser.size()));
         }
         return forsendelser;
     }

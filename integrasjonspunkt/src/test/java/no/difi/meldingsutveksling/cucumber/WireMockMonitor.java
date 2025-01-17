@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.cucumber;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.RequiredArgsConstructor;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 @RequiredArgsConstructor
 public class WireMockMonitor {

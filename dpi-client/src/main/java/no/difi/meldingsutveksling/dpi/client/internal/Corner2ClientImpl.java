@@ -92,7 +92,7 @@ public class Corner2ClientImpl implements Corner2Client {
                     .share().blockLast();
         } catch (IOException e) {
             throw new DpiException(
-                    String.format("Downloading CMS encrypted archive failed for URL: %s", downloadurl),
+                    "Downloading CMS encrypted archive failed for URL: %s".formatted(downloadurl),
                     e,
                     Blame.CLIENT);
         }

@@ -15,8 +15,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
-import javax.validation.Valid;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
@@ -42,14 +42,14 @@ public class ConversationController {
     @JsonView(Views.Conversation.class)
     @Transactional
     public Conversation getById(
-            @PathVariable("id") Long id) {
+            @PathVariable Long id) {
         return conversationRepository.findByIdAndDirection(id, OUTGOING)
                 .orElseThrow(() -> new ConversationNotFoundException(id));
     }
 
     @DeleteMapping("{id}")
     @Transactional
-    public void deleteById(@PathVariable("id") Long id) {
+    public void deleteById(@PathVariable Long id) {
         conversationRepository.deleteById(id);
     }
 
@@ -57,7 +57,7 @@ public class ConversationController {
     @JsonView(Views.Conversation.class)
     @Transactional
     public Conversation getByMessageId(
-            @PathVariable("messageId") String messageId) {
+            @PathVariable String messageId) {
         return conversationRepository.findByMessageIdAndDirection(messageId, OUTGOING)
                 .stream()
                 .findFirst()
@@ -66,7 +66,7 @@ public class ConversationController {
 
     @DeleteMapping("messageId/{messageId}")
     @Transactional
-    public void deleteByMessageId(@PathVariable("messageId") String messageId) {
+    public void deleteByMessageId(@PathVariable String messageId) {
         conversationRepository.deleteByMessageId(messageId);
     }
 
