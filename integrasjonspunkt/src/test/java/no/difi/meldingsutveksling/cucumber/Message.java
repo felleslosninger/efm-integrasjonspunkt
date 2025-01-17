@@ -39,7 +39,7 @@ public class Message {
         return attachments.stream()
                 .filter(p -> p.getFilename().equals(filename))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("File not found for %s", filename)));
+                .orElseThrow(() -> new IllegalArgumentException("File not found for %s".formatted(filename)));
     }
 
 }

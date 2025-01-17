@@ -3,8 +3,8 @@ package no.difi.meldingsutveksling.validation;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class SbdScopeConditionalInstanceIdentifierUuidValidator implements
         ConstraintValidator<SbdScopeConditionalInstanceIdentifierUuid, Scope> {

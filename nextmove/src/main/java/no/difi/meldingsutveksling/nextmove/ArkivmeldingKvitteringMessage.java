@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 

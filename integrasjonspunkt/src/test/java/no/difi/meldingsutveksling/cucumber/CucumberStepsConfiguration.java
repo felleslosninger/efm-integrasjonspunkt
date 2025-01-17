@@ -44,8 +44,8 @@ import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import javax.annotation.PostConstruct;
-import javax.xml.bind.Marshaller;
+import jakarta.annotation.PostConstruct;
+import jakarta.xml.bind.Marshaller;
 import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
@@ -54,7 +54,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {
         IntegrasjonspunktApplication.class,

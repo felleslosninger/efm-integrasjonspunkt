@@ -20,7 +20,7 @@ public class IdentifierRelayController {
     private final ServiceRegistryLookup serviceRegistryLookup;
 
     @GetMapping(value = "/servicerecord/{identifier}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getServiceRecord(@PathVariable("identifier") String identifier) {
+    public ResponseEntity getServiceRecord(@PathVariable String identifier) {
         ServiceRecord serviceRecord = null;
         try {
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(identifier).build());

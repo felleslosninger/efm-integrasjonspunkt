@@ -27,12 +27,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.WritableResource;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.soap.MTOMFeature;
-import javax.xml.ws.soap.SOAPBinding;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.ws.BindingProvider;
+import jakarta.xml.ws.soap.MTOMFeature;
+import jakarta.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

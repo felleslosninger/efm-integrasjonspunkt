@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @RequiredArgsConstructor
 public class CorrespondenceAgencyConnectionCheck {

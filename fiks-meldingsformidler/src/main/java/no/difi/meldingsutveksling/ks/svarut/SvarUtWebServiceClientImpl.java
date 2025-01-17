@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.ks.svarut;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.Set;
 

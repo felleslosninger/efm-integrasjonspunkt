@@ -4,18 +4,15 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = MessageStatusRawReceiptXmlDecorator.class)
+@SpringJUnitConfig(classes = MessageStatusRawReceiptXmlDecorator.class)
 public class MessageStatusRawReceiptXmlDecoratorTest {
 
     @Autowired

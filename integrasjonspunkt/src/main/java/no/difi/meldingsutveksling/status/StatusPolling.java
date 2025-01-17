@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
@@ -67,7 +66,7 @@ public class StatusPolling {
             StatusStrategy strategy = statusStrategyFactory.getStrategy(si);
             strategy.checkStatus(conversations);
         } catch (Exception e) {
-            log.error(format("Exception during receipt polling for %s", si), e);
+            log.error("Exception during receipt polling for %s".formatted(si), e);
         } finally {
             MDC.clear();
         }

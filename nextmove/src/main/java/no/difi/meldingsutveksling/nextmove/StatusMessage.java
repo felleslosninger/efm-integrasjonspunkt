@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.*;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @Getter
 @Setter

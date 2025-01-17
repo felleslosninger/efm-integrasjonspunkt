@@ -30,8 +30,8 @@ public enum DpiMessageType implements StandardBusinessDocumentType {
         this.type = type;
         this.clazz = clazz;
         this.direction = direction;
-        this.standard = String.format("urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:%s::1.0", type);
-        this.process = direction == Direction.OUTGOING ? String.format("urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:%s:ver1.0", type) : null;
+        this.standard = "urn:fdc:digdir.no:2020:innbyggerpost:xsd::innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:%s::1.0".formatted(type);
+        this.process = direction == Direction.OUTGOING ? "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:%s:ver1.0".formatted(type) : null;
     }
 
     public static DpiMessageType fromType(String type) {

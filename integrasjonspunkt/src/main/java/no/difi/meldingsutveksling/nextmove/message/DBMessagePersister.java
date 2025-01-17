@@ -9,7 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -37,8 +37,8 @@ public class DBMessagePersister implements MessagePersister {
     @Transactional(readOnly = true)
     public Resource read(String messageId, String filename) throws IOException {
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
-                .orElseThrow(() -> new PersistenceException(String.format("Entry for conversationId=%s, filename=%s not found in database", messageId, filename)));
-        return new BlobResource(entry.getContent(), String.format("BLOB for messageId=%s, filename=%s", messageId, filename));
+                .orElseThrow(() -> new PersistenceException("Entry for conversationId=%s, filename=%s not found in database".formatted(messageId, filename)));
+        return new BlobResource(entry.getContent(), "BLOB for messageId=%s, filename=%s".formatted(messageId, filename));
     }
 
     @Override

@@ -21,7 +21,7 @@ public enum ServiceBusQueueMode {
                 .filter(p -> p.fullname().equals(fullname))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("No ServiceBusQueueMode with fullname = '%s'", fullname))
+                        "No ServiceBusQueueMode with fullname = '%s'".formatted(fullname))
                 );
     }
 }

@@ -162,7 +162,7 @@ public class MeldingsformidlerRequestFactory {
                 .stream()
                 .filter(p -> p.getFilename().equals(metadataFilename))
                 .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException(String.format("Metadata document %s specified for %s, but is not attached", metadataFilename, file.getFilename())));
+                .orElseThrow(() -> new NextMoveRuntimeException("Metadata document %s specified for %s, but is not attached".formatted(metadataFilename, file.getFilename())));
 
         return MetadataDocument.builder()
                 .filename(metadataFilename)

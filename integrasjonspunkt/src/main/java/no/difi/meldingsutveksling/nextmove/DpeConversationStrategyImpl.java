@@ -12,7 +12,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Component
@@ -29,7 +28,7 @@ public class DpeConversationStrategyImpl implements DpeConversationStrategy {
     @Timed
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         serviceBus.send(message);
-        Audit.info(format("Message [id=%s, serviceIdentifier=%s] sent to service bus",
+        Audit.info("Message [id=%s, serviceIdentifier=%s] sent to service bus".formatted(
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }
