@@ -30,7 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -61,7 +61,7 @@ public class MessageInController {
     private final NextMoveMessageInService messageService;
 
     @GetMapping("/peek")
-    public ResponseEntity peek(@RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier) {
+    public ResponseEntity peek(@RequestParam(required = false) String serviceIdentifier) {
 
         NextMoveInMessageQueryInput query = new NextMoveInMessageQueryInput().setServiceIdentifier("DPE");
 
@@ -106,16 +106,16 @@ public class MessageInController {
     @PostMapping("/pop")
     @Transactional
     public ResponseEntity popPost(
-            @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) String conversationId) {
+            @RequestParam(required = false) String serviceIdentifier,
+            @RequestParam(required = false) String conversationId) {
         return pop(serviceIdentifier, conversationId);
     }
 
     @GetMapping("/pop")
     @Transactional
     public ResponseEntity pop(
-            @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) String conversationId) {
+            @RequestParam(required = false) String serviceIdentifier,
+            @RequestParam(required = false) String conversationId) {
 
         NextMoveInMessage message;
         if (Strings.isNullOrEmpty(conversationId)) {
@@ -151,7 +151,7 @@ public class MessageInController {
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(asic);
         } catch (PersistenceException | IOException e) {
-            Audit.error(String.format("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue",
+            Audit.error("Can not read file \"%s\" for message [conversationId=%s, sender=%s]. Removing message from queue".formatted(
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier()), markerFrom(message), e);
             throw new FileNotFoundException(ASIC_FILE);
         }
@@ -159,8 +159,8 @@ public class MessageInController {
 
     @GetMapping("/delete")
     public ResponseEntity delete(
-            @RequestParam(value = "serviceIdentifier", required = false) String serviceIdentifier,
-            @RequestParam(value = "conversationId", required = false) String conversationId) {
+            @RequestParam(required = false) String serviceIdentifier,
+            @RequestParam(required = false) String conversationId) {
         return ResponseEntity.ok().build();
     }
 }

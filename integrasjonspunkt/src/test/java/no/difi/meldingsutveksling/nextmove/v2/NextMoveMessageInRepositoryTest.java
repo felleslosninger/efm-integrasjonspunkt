@@ -86,8 +86,7 @@ class NextMoveMessageInRepositoryTest {
         IntStream.range(0, 100)
                 .parallel()
                 .mapToObj(this::peekLock)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .forEach(message -> assertThat(messages.remove(message)).isTrue());
 
         assertThat(messages.size()).isLessThan(50);

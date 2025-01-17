@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.JAXBException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +47,7 @@ public class NextMoveMessageOutController {
     private final ArkivmeldingUtil arkivmeldingUtil;
 
     @PostMapping(value = "multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public StandardBusinessDocument createAndSendMessage(@RequestParam("sbd") @NotNull @Valid StandardBusinessDocument sbd,
+    public StandardBusinessDocument createAndSendMessage(@RequestParam @NotNull @Valid StandardBusinessDocument sbd,
                                                          @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent,
                                                          MultipartRequest multipartRequest) throws IOException, JAXBException {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
@@ -100,23 +100,23 @@ public class NextMoveMessageOutController {
 
     @GetMapping("/{messageId}")
     @Transactional
-    public StandardBusinessDocument getMessage(@PathVariable("messageId") String messageId) {
+    public StandardBusinessDocument getMessage(@PathVariable String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         return messageService.getMessage(messageId).getSbd();
     }
 
     @DeleteMapping("/{messageId}")
     @Transactional
-    public void deleteMessage(@PathVariable("messageId") String messageId) {
+    public void deleteMessage(@PathVariable String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         messageService.deleteMessage(messageId);
     }
 
     @PutMapping(value = "/{messageId}")
-    public void uploadFile(@PathVariable("messageId") String messageId,
+    public void uploadFile(@PathVariable String messageId,
                            @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
                            @RequestHeader(HttpHeaders.CONTENT_DISPOSITION) String contentDisposition,
-                           @RequestParam(value = "title", required = false) String title,
+                           @RequestParam(required = false) String title,
                            HttpServletRequest request) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         NextMoveOutMessage message = messageService.getMessage(messageId);
@@ -124,7 +124,7 @@ public class NextMoveMessageOutController {
     }
 
     @PostMapping("/{messageId}")
-    public void sendMessage(@PathVariable("messageId") String messageId) {
+    public void sendMessage(@PathVariable String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         NextMoveOutMessage message = messageService.getMessage(messageId);
         messageService.sendMessage(message);

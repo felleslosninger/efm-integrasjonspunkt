@@ -10,8 +10,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import java.util.HashSet;
 
 import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;

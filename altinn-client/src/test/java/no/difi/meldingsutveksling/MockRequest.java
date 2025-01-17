@@ -5,12 +5,14 @@ import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import org.slf4j.Marker;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 class MockRequest implements UploadRequest {
 
     private final String reference;
 
     MockRequest() {
-        reference = String.valueOf((int) (Math.random() * 100000));
+        reference = String.valueOf((int) (ThreadLocalRandom.current().nextDouble() * 100000));
     }
 
     @Override

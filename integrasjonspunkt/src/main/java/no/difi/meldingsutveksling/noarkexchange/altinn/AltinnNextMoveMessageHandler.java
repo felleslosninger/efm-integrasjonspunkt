@@ -30,7 +30,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
     public void handleAltinnPackage(AltinnPackage altinnPackage) {
         StandardBusinessDocument sbd = altinnPackage.getSbd();
         Resource asic = altinnPackage.getAsic();
-        log.debug(String.format("NextMove message id=%s", sbd.getMessageId()));
+        log.debug("NextMove message id=%s".formatted(sbd.getMessageId()));
 
         nextMoveQueue.enqueueIncomingMessage(sbd, DPO, asic);
         if (altinnPackage.getTmpFile() != null) {

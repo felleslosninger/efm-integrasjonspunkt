@@ -19,12 +19,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
 @Slf4j
@@ -67,12 +66,12 @@ public class DefaultDpoPolling implements DpoPolling {
     private void handleFileReference(AltinnWsClient client, FileReference reference, String orgnr) {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), orgnr);
-            log.debug(format("Downloading message with altinnId=%s", reference.getValue()));
+            log.debug("Downloading message with altinnId=%s".formatted(reference.getValue()));
             AltinnPackage altinnPackage = client.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
-            Audit.info(format("Downloaded message with id=%s", sbd.getMessageId()), logstashMarkers);
+            Audit.info("Downloaded message with id=%s".formatted(sbd.getMessageId()), logstashMarkers);
 
             try {
                 UUID.fromString(sbd.getMessageId());
@@ -87,7 +86,7 @@ public class DefaultDpoPolling implements DpoPolling {
             client.confirmDownload(request);
             log.debug(markerFrom(reference).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
-            log.error(format("Error during Altinn message polling, message altinnId=%s", reference.getValue()), e);
+            log.error("Error during Altinn message polling, message altinnId=%s".formatted(reference.getValue()), e);
         }
     }
 }

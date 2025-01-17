@@ -4,9 +4,9 @@ import com.google.common.collect.Maps;
 import lombok.*;
 import no.difi.meldingsutveksling.validation.Avsenderidentifikator;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.Map;
 
 @Getter

@@ -14,6 +14,12 @@
     <dependency>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>common</artifactId>
+   <exclusions>
+    <exclusion>
+     <groupId>junit</groupId>
+     <artifactId>junit</artifactId>
+    </exclusion>
+   </exclusions>
     </dependency>
     <dependency>
         <groupId>no.difi.meldingsutveksling</groupId>
@@ -52,12 +58,6 @@
         <artifactId>jsch</artifactId>
         <version>0.1.54</version>
     </dependency>
-
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>test</scope>
-    </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
@@ -78,8 +78,8 @@
         <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>javax.xml.ws</groupId>
-        <artifactId>jaxws-api</artifactId>
+        <groupId>jakarta.xml.ws</groupId>
+        <artifactId>jakarta.xml.ws-api</artifactId>
     </dependency>
     <dependency>
         <groupId>com.sun.xml.ws</groupId>

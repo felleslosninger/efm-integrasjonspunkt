@@ -9,8 +9,8 @@ import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.*;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.stream.XMLOutputFactory;
 
 import static no.difi.meldingsutveksling.dpi.json.XmlSoapDpiReceiptHelper.*;

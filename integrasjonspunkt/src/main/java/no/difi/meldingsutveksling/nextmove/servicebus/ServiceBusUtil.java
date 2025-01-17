@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.NEXTMOVE_QUEUE_PREFIX;
 import static no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusQueueMode.*;
@@ -67,7 +67,7 @@ public class ServiceBusUtil {
                     message.getSbd().getDocumentType());
 
             if (!StringUtils.hasText(serviceRecord.getService().getEndpointUrl())) {
-                throw new NextMoveRuntimeException(String.format("No endpointUrl defined for process %s", serviceRecord.getProcess()));
+                throw new NextMoveRuntimeException("No endpointUrl defined for process %s".formatted(serviceRecord.getProcess()));
             }
             return prefix + serviceRecord.getService().getEndpointUrl();
         } catch (ServiceRegistryLookupException e) {

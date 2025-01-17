@@ -58,7 +58,6 @@ class XMLUtil {
             return (Element) sigNode.item(0);
         }
 
-        throw new MeldingsUtvekslingRuntimeException(String.format(
-                "%d %s children of %s", sigNode.getLength(), localName, getPath(in)));
+        throw new MeldingsUtvekslingRuntimeException("%d %s children of %s".formatted(sigNode.getLength(), localName, getPath(in)));
     }
 }

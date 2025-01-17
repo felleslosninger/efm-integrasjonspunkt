@@ -7,7 +7,7 @@ import org.springframework.xml.transform.StringResult;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.*;
+import jakarta.xml.bind.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 @Component

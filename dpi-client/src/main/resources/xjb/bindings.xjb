@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jaxb:bindings version="2.1"
-               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-               xmlns:xs="http://www.w3.org/2001/XMLSchema"
-               xmlns:annox="http://annox.dev.java.net">
+<bindings
+          xmlns="https://jakarta.ee/xml/ns/jaxb"
+          xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+          jaxb:extensionBindingPrefixes="xjc"
+          jaxb:version="3.0"
+>
 
     <jaxb:globalBindings generateElementProperty="false">
         <jaxb:javaType name="java.time.ZonedDateTime" xmlType="xs:dateTime"
@@ -32,4 +34,4 @@
         </jaxb:bindings>
     </jaxb:bindings>
 
-</jaxb:bindings>
+</bindings>

@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import javax.validation.ClockProvider;
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.ClockProvider;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.time.Clock;
 
 
@@ -31,9 +31,8 @@ public class ValidationConfig {
 
         return new LocalValidatorFactoryBean() {
             @Override
-            protected void postProcessConfiguration(javax.validation.Configuration<?> configuration) {
-                if (configuration instanceof HibernateValidatorConfiguration) {
-                    HibernateValidatorConfiguration config = (HibernateValidatorConfiguration) configuration;
+            protected void postProcessConfiguration(jakarta.validation.Configuration<?> configuration) {
+                if (configuration instanceof HibernateValidatorConfiguration config) {
                     config.clockProvider(clockProvider);
                 }
             }

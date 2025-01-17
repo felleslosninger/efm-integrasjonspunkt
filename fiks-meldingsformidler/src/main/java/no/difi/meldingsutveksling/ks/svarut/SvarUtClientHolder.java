@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import javax.annotation.PostConstruct;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
+import jakarta.annotation.PostConstruct;
+import jakarta.xml.soap.MessageFactory;
+import jakarta.xml.soap.SOAPConstants;
 import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
