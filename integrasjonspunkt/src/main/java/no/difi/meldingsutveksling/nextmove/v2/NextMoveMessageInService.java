@@ -18,13 +18,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -74,10 +73,10 @@ public class NextMoveMessageInService {
         }
 
         try {
-            Audit.info(String.format("Pop - returning ASiC stream for message with id=%s", message.getMessageId()), markerFrom(message));
+            Audit.info("Pop - returning ASiC stream for message with id=%s".formatted(message.getMessageId()), markerFrom(message));
             return cryptoMessagePersister.read(messageId, ASIC_FILE);
         } catch (PersistenceException | IOException e) {
-            String errorMsg = format("Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+            String errorMsg = "Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.".formatted(
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
             Audit.error(errorMsg, markerFrom(message), e);
             messageRepo.delete(message);
@@ -104,7 +103,7 @@ public class NextMoveMessageInService {
 
         messageRepo.delete(message);
         conversationService.registerStatus(messageId, ReceiptStatus.INNKOMMENDE_LEVERT);
-        Audit.info(format("Message [id=%s, serviceIdentifier=%s] deleted from queue", messageId, message.getServiceIdentifier()),
+        Audit.info("Message [id=%s, serviceIdentifier=%s] deleted from queue".formatted(messageId, message.getServiceIdentifier()),
                 markerFrom(message));
 
         responseStatusSender.queue(message.getSbd(), message.getServiceIdentifier(), ReceiptStatus.LEVERT);
@@ -116,7 +115,7 @@ public class NextMoveMessageInService {
     public void handleCorruptMessage(String messageId) {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
-        String errorMsg = format("Can not retrieve file \"%s\" for message [messageId=%s, sender=%s], removing from queue.",
+        String errorMsg = "Can not retrieve file \"%s\" for message [messageId=%s, sender=%s], removing from queue.".formatted(
                 ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
         Audit.error(errorMsg, markerFrom(message));
         messageRepo.delete(message);

@@ -50,7 +50,7 @@ public class ParcelParser {
 
     private InternalDocument getDocument(Map<String, InternalDocument> documents, String filename) {
         return Optional.ofNullable(documents.get(filename))
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No file named '%s' in ASICe!", filename)));
+                .orElseThrow(() -> new IllegalArgumentException("No file named '%s' in ASICe!".formatted(filename)));
     }
 
     private Document getDocument(Map<String, InternalDocument> documents, SDPDokument sdpDokument) {

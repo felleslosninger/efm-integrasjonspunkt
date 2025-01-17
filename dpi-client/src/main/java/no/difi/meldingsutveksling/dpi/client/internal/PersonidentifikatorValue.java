@@ -20,6 +20,6 @@ class PersonidentifikatorValue {
             return new PersonidentifikatorValue(matcher.group(1), matcher.group(2));
         }
 
-        throw new IllegalArgumentException(String.format("Invalid Personidentifikator: %s. Exepected pattern is %s", value, PATTERN.pattern()));
+        throw new IllegalArgumentException("Invalid Personidentifikator: %s. Exepected pattern is %s".formatted(value, PATTERN.pattern()));
     }
 }

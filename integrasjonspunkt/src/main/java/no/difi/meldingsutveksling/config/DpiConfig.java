@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import java.time.Clock;
 
 @Configuration

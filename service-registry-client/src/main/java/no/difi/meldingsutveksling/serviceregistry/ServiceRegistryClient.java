@@ -39,7 +39,7 @@ public class ServiceRegistryClient {
             return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
         } catch (IOException e) {
             throw new ServiceRegistryLookupException(
-                    String.format("Parsing response as a IdentifierResource JSON object failed. Content is: %s", identifierResourceString)
+                    "Parsing response as a IdentifierResource JSON object failed. Content is: %s".formatted(identifierResourceString)
                     , e);
         }
     }
@@ -62,7 +62,7 @@ public class ServiceRegistryClient {
                         parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status: %s (%s)",
+                throw new ServiceRegistryLookupException("Caught exception when looking up service record with parameter %s, http status: %s (%s)".formatted(
                         parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {

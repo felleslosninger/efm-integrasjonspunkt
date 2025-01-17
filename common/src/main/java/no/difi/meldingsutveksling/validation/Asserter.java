@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.validation;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-import javax.validation.groups.Default;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import jakarta.validation.groups.Default;
 import java.util.Set;
 
 public class Asserter {
@@ -29,7 +29,7 @@ public class Asserter {
     public <T> void isValid(T object, Class<?>... groups) {
         Set<ConstraintViolation<T>> violations = validator.validate(object, groups);
         if (!violations.isEmpty()) {
-            String message = String.format("The following violations where found when validating '%s':%n %s", object, violations);
+            String message = "The following violations where found when validating '%s':%n %s".formatted(object, violations);
             throw new ConstraintViolationException(message, violations);
         }
     }

@@ -11,7 +11,46 @@
 
     <build>
         <plugins>
+            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin -->
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.persistence</groupId>
+                        <artifactId>org.eclipse.persistence.moxy</artifactId>
+                        <version>4.0.5</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>xsd</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <addGeneratedAnnotation>true</addGeneratedAnnotation>
+                            <!--
+                            <verbose>true</verbose>
+                            -->
+                            <!--
+                            no need to specify, these are default
+                            https://www.mojohaus.org/jaxb2-maven-plugin/Documentation/v3.1.0/example_xjc_basic.html
+                            <sources>
+                                <source>src/main/xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>src/main/xjb</xjbSource>
+                            </xjbSources>
+                            -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+<!--
+        <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
                 <executions>
@@ -66,6 +105,8 @@
                     </plugins>
                 </configuration>
             </plugin>
+            -->
+            <!--
             <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
@@ -83,6 +124,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
     </build>
 
@@ -129,8 +171,9 @@
         </dependency>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+           <groupId>org.glassfish.jaxb</groupId>
+           <artifactId>jaxb-runtime</artifactId>
+           <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -139,8 +182,8 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
 
         <dependency>

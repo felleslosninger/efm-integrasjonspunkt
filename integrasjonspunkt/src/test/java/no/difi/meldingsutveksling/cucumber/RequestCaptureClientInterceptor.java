@@ -43,8 +43,8 @@ public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter {
         webServicePayloadHolder.getOrCalculate(ArrayList::new)
                 .add(payload);
 
-        if (request instanceof SaajSoapMessage) {
-            handleSaajSoapMessage(payload, (SaajSoapMessage) request);
+        if (request instanceof SaajSoapMessage message) {
+            handleSaajSoapMessage(payload, message);
         }
 
         return true;

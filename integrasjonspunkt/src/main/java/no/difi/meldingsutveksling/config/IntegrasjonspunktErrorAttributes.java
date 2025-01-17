@@ -10,8 +10,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -34,13 +34,11 @@ public class IntegrasjonspunktErrorAttributes extends DefaultErrorAttributes {
 
         final Throwable error = super.getError(webRequest);
 
-        if (error instanceof ConstraintViolationException) {
-            final ConstraintViolationException cve = (ConstraintViolationException) error;
+        if (error instanceof ConstraintViolationException cve) {
             addErrorMessage(errorAttributes, cve);
         }
 
-        if (error instanceof ErrorDescriber) {
-            ErrorDescriber describer = (ErrorDescriber) error;
+        if (error instanceof ErrorDescriber describer) {
             errorAttributes.put("description", describer.getDescription());
         }
 

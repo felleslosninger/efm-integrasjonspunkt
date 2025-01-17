@@ -26,7 +26,7 @@ public class UrlPusher {
             ResponseEntity<String> responseEntity = restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(jsonPayload, headers), String.class);
             log.debug("Response was {} {}", responseEntity.getStatusCode().value(), responseEntity.getStatusCode().getReasonPhrase());
         } catch (ResourceAccessException e) {
-            log.warn(String.format("Webhook push failed for %s:", uri), e);
+            log.warn("Webhook push failed for %s:".formatted(uri), e);
         }
     }
 }
