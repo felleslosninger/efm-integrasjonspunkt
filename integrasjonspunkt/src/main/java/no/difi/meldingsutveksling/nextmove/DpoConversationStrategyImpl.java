@@ -56,12 +56,12 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
                 return null;
             }).await();
         } catch (Exception e) {
-            Audit.error(String.format("Error sending message with messageId=%s to Altinn", message.getMessageId()), markerFrom(message), e);
+            Audit.error("Error sending message with messageId=%s to Altinn".formatted(message.getMessageId()), markerFrom(message), e);
             throw e;
         }
 
-        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to altinn",
-                        message.getMessageId(), message.getServiceIdentifier()),
+        Audit.info("Message [id=%s, serviceIdentifier=%s] sent to altinn".formatted(
+                message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
         ifReceipt(message, mc -> messageChannelRepository.deleteByMessageId(mc.getMessageId()));
     }

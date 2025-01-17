@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -28,7 +28,7 @@ public class SvarInnConnectionCheck {
             properties.getFiks().getInn().getPaaVegneAv().keySet().forEach(orgnr -> {
                 List<Forsendelse> forsendelseList = svarInnClient.checkForNewMessages(orgnr);
                 if (forsendelseList == null) {
-                    throw new NextMoveRuntimeException(String.format("Couldn't check for new messages from SvarInn for orgnr %s.", orgnr));
+                    throw new NextMoveRuntimeException("Couldn't check for new messages from SvarInn for orgnr %s.".formatted(orgnr));
                 }
             });
         } catch (Exception e) {

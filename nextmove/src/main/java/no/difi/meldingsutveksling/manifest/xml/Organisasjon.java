@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.manifest.xml;
 
 import no.difi.meldingsutveksling.domain.Iso6523;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "organisasjon")

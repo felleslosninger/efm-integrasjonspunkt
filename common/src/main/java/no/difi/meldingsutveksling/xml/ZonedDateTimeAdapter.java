@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.ZonedDateTime;
 
 public class ZonedDateTimeAdapter extends XmlAdapter<String, ZonedDateTime> {

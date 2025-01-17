@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.util.unit.DataSize;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.util.Set;
 
 @Data

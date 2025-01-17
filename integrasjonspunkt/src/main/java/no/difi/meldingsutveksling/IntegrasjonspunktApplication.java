@@ -8,13 +8,12 @@ import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +21,7 @@ import java.util.TimeZone;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_TIME_ZONE;
 
-@SpringBootApplication(exclude = {SolrAutoConfiguration.class})
+@SpringBootApplication
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
@@ -72,14 +71,14 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             NTPClient client = new NTPClient(host);
             long offset = client.getOffset();
             if (Math.abs(offset) > 5000) {
-                String errorStr = String.format("Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.", host, offset);
+                String errorStr = "Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.".formatted(host, offset);
                 log.error(errorStr);
                 String stars = "\n**************************\n";
                 System.out.println(stars + errorStr + stars);
                 context.close();
             }
         } catch (IOException e) {
-            log.error(String.format("Error while syncing with NTP %s, continuing startup..", host), e);
+            log.error("Error while syncing with NTP %s, continuing startup..".formatted(host), e);
         }
     }
 

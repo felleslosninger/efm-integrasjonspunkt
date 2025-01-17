@@ -111,7 +111,7 @@ public class ShipmentFactory {
     private Optional<String> getPostal(PostAddress postAddress) {
         if (StringUtils.hasText(postAddress.getPostnummer())) {
             if (StringUtils.hasText(postAddress.getPoststed())) {
-                return Optional.ofNullable(String.format("%s %s", postAddress.getPostnummer(), postAddress.getPoststed()));
+                return Optional.ofNullable("%s %s".formatted(postAddress.getPostnummer(), postAddress.getPoststed()));
             }
 
             return Optional.of(postAddress.getPostnummer());

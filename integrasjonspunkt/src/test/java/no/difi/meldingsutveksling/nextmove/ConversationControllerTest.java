@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.status.ConversationRepository;
 import no.difi.meldingsutveksling.status.service.ConversationController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -44,7 +42,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(ConversationController.class)
 @AutoConfigureMoveRestDocs
@@ -89,7 +86,7 @@ public class ConversationControllerTest {
                                 parameterWithName("messageTitle").optional().description("Filter on message title"),
                                 parameterWithName("pollable").optional().description("Filter on pollable (true/false)"),
                                 parameterWithName("finished").optional().description("Filter on finished (true/false)"),
-                                parameterWithName("direction").optional().description(String.format("Filter on direction. Can be one of: %s", Arrays.stream(ConversationDirection.values())
+                                parameterWithName("direction").optional().description("Filter on direction. Can be one of: %s".formatted(Arrays.stream(ConversationDirection.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", "))))
                         ).and(getPagingParameterDescriptors()),

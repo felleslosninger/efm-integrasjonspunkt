@@ -14,8 +14,8 @@ import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.StringUtils;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Session;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Session;
 
 @Slf4j
 @Configuration

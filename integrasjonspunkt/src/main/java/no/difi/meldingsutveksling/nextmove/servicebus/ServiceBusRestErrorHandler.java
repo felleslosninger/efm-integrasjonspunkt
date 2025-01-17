@@ -27,7 +27,7 @@ public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
             log.debug("Got status {} from service bus, invalidating sas key", statusCode.toString());
             Optional.ofNullable(cacheManager.getCache(CACHE_GET_SAS_KEY))
                     .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(
-                            String.format("Couldn't get cache names %s", CACHE_GET_SAS_KEY)))
+                            "Couldn't get cache names %s".formatted(CACHE_GET_SAS_KEY)))
                     .clear();
         }
         super.handleError(response, statusCode);

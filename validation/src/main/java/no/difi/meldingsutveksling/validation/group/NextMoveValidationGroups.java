@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.validation.group;
 
-import javax.validation.groups.Default;
+import jakarta.validation.groups.Default;
 
 public interface NextMoveValidationGroups {
 

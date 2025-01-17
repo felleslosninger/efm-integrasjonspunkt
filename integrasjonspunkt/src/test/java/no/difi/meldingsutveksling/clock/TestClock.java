@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.clock;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.time.ZoneId;
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 public class TestClock extends Clock implements Serializable {
+    @Serial
     private static final long serialVersionUID = -8207373320104896738L;
     private Clock initial;
     private Clock active;
@@ -52,8 +54,7 @@ public class TestClock extends Clock implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TestClock) {
-            TestClock other = (TestClock) obj;
+        if (obj instanceof TestClock other) {
             return active.equals(other.active);
         }
         return false;

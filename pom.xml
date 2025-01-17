@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.16</version>
+        <version>3.2.12</version>
         <relativePath/>
     </parent>
 
@@ -69,7 +69,8 @@
 
     <properties>
         <activemq.version>5.16.7</activemq.version>
-        <spring.cloud.version>2021.0.8</spring.cloud.version>
+        <java.version>17</java.version>
+        <spring.cloud.version>2023.0.5</spring.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.io.version>2.15.0</commons.io.version>
         <commons.compress.version>1.27.1</commons.compress.version>
@@ -77,15 +78,15 @@
         <sikker-digital-post-klient.version>6.4.RC1</sikker-digital-post-klient.version>
         <junit.platform.version>1.9.2</junit.platform.version>
         <cucumber.version>7.11.0</cucumber.version>
-        <efm-common.version>1.20.0</efm-common.version>
+        <efm-common.version>2.0.0-SNAPSHOT</efm-common.version>
         <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
+        <wiremock.version>2.35.2</wiremock.version>
         <xmlsec.version>3.0.3</xmlsec.version>
         <dokka.skip>true</dokka.skip>
-
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
 
@@ -116,6 +117,16 @@
                 <version>${spring.cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>jakarta.mail</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jolokia</groupId>
+                <artifactId>jolokia-core</artifactId>
+                <version>1.7.2</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
@@ -275,42 +286,9 @@
                 <version>1.9</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.mail</groupId>
-                <artifactId>jakarta.mail</artifactId>
-                <version>1.6.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>3.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>3.0.2</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-core</artifactId>
-                <version>3.0.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.xml.ws</groupId>
-                <artifactId>jaxws-api</artifactId>
-                <version>2.3.1</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-rt</artifactId>
-                <version>2.3.6</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.messaging.saaj</groupId>
-                <artifactId>saaj-impl</artifactId>
-                <version>1.5.1</version>
+                <version>4.0.3</version>
             </dependency>
             <dependency>
                 <groupId>javax.jws</groupId>
@@ -320,17 +298,12 @@
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>2.7.4</version>
+                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
                 <version>3.9.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>2.7.0</version>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
@@ -383,11 +356,6 @@
                 <artifactId>dumbster</artifactId>
                 <version>${dumbster.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>webjars-locator</artifactId>
-                <version>0.40</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
@@ -445,11 +413,6 @@
                 <version>22.0.0</version>
             </dependency>
             <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>42.3.9</version>
-            </dependency>
-            <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>
                 <version>0.10.3</version>
@@ -488,45 +451,11 @@
                 <version>${cucumber.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-engine</artifactId>
-                <version>${junit.platform.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-launcher</artifactId>
-                <version>${junit.platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-suite</artifactId>
-                <version>${junit.platform.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-suite-api</artifactId>
-                <version>${junit.platform.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-suite-engine</artifactId>
-                <version>${junit.platform.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.mock-server</groupId>
                 <artifactId>mockserver-junit-jupiter</artifactId>
                 <version>5.14.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>4.0.0</version>
                 <scope>test</scope>
             </dependency>
 
@@ -560,11 +489,6 @@
                 <version>3.2</version>
             </dependency>
             <dependency>
-                <groupId>org.awaitility</groupId>
-                <artifactId>awaitility</artifactId>
-                <version>3.1.6</version>
-            </dependency>
-            <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>9.1</version>
@@ -580,16 +504,6 @@
                 <artifactId>wss4j-ws-security-common</artifactId>
                 <version>2.3.0</version>
             </dependency>
-            <dependency>
-                <groupId>org.jvnet.staxex</groupId>
-                <artifactId>stax-ex</artifactId>
-                <version>1.8.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.33</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -597,12 +511,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -612,6 +524,12 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
             <scope>test</scope>
+   <exclusions>
+    <exclusion>
+     <groupId>junit</groupId>
+     <artifactId>junit</artifactId>
+    </exclusion>
+   </exclusions>
         </dependency>
         <dependency>
             <groupId>io.mockk</groupId>
@@ -653,8 +571,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+      <release>${java.version}</release>
                     </configuration>
                     <executions>
                         <!-- Replacing default-compile as it is treated specially by maven -->
@@ -737,7 +654,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -780,7 +696,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
             <plugin>
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>

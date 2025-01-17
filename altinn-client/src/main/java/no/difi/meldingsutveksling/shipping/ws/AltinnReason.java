@@ -15,7 +15,7 @@ public class AltinnReason {
 
     @Override
     public String toString() {
-        return String.format("Reason: %s. LocalizedErrorMessage: %s. ErrorId: %d. UserId: %s", message, localized, id, userId);
+        return "Reason: %s. LocalizedErrorMessage: %s. ErrorId: %d. UserId: %s".formatted(message, localized, id, userId);
     }
 
 }

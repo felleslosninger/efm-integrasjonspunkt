@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.status.service.MessageStatusController;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.*;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -50,7 +48,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(MessageStatusController.class)
 @AutoConfigureMoveRestDocs
@@ -98,7 +95,7 @@ public class MessageStatusControllerTest {
                                 parameterWithName("id").optional().description("Filter on the numeric message status ID"),
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),
-                                parameterWithName("status").optional().description(String.format("Filter on status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
+                                parameterWithName("status").optional().description("Filter on status. Can be one of: %s".formatted(Arrays.stream(ReceiptStatus.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", "))))
                         ).and(getPagingParameterDescriptors()),

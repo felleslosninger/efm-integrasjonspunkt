@@ -46,7 +46,7 @@ public class SBDFactory {
                                                       String documentType,
                                                       Object any) {
         Optional<MessageType> type = MessageType.valueOfDocumentType(documentType);
-        if (!type.isPresent()) {
+        if (type.isEmpty()) {
             try {
                 ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrganizationIdentifier())
                         .process(process).conversationId(conversationId).build(), documentType);
@@ -54,7 +54,7 @@ public class SBDFactory {
                     type = Optional.of(MessageType.FIKSIO);
                 }
             } catch (ServiceRegistryLookupException e) {
-                throw new MeldingsUtvekslingRuntimeException(String.format("Error looking up service record for %s", mottaker), e);
+                throw new MeldingsUtvekslingRuntimeException("Error looking up service record for %s".formatted(mottaker), e);
             }
         }
         MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: " + documentType));

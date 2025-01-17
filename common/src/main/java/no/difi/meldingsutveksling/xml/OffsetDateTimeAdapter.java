@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.OffsetDateTime;
 
 public class OffsetDateTimeAdapter extends XmlAdapter<String, OffsetDateTime> {

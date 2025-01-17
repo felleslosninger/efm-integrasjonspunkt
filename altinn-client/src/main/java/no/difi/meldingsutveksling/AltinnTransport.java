@@ -44,7 +44,7 @@ public class AltinnTransport {
         try {
             client.send(request);
         } catch (Exception e) {
-            throw new NextMoveRuntimeException(String.format("Error sending message with messageId=%s to Altinn", sbd.getMessageId()), e);
+            throw new NextMoveRuntimeException("Error sending message with messageId=%s to Altinn".formatted(sbd.getMessageId()), e);
         }
     }
 
