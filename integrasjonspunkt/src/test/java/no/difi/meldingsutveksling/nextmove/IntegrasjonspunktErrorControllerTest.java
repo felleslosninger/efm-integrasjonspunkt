@@ -16,7 +16,6 @@ import no.difi.meldingsutveksling.web.IntegrasjonspunktErrorController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,14 +25,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import javax.servlet.RequestDispatcher;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import java.util.Set;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
@@ -52,7 +50,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @Import({
         FixedClockConfig.class,
         JacksonConfig.class,
@@ -92,14 +89,16 @@ public class IntegrasjonspunktErrorControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 204,\n" +
-                        "  \"error\" : \"No Content\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.NoContentException\",\n" +
-                        "  \"message\" : \"No content\",\n" +
-                        "  \"path\" : \"/api/statuses/peek\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 204,
+                          "error" : "No Content",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.NoContentException",
+                          "message" : "No content",
+                          "path" : "/api/statuses/peek"
+                        }\
+                        """))
                 .andDo(document("error/no-content",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -133,23 +132,25 @@ public class IntegrasjonspunktErrorControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 400,\n" +
-                        "  \"error\" : \"Bad Request\",\n" +
-                        "  \"exception\" : \"javax.validation.ConstraintViolationException\",\n" +
-                        "  \"message\" : \"standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type\",\n" +
-                        "  \"path\" : \"/api/messages/out\",\n" +
-                        "  \"errors\" : [ {\n" +
-                        "    \"codes\" : [ \"MessageType\" ],\n" +
-                        "    \"defaultMessage\" : \"Must be a NextMove message type\",\n" +
-                        "    \"objectName\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
-                        "    \"field\" : \"standardBusinessDocumentHeader.documentIdentification.type\",\n" +
-                        "    \"rejectedValue\" : \"strange\",\n" +
-                        "    \"bindingFailure\" : false,\n" +
-                        "    \"code\" : \"MessageType\"\n" +
-                        "  } ]\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 400,
+                          "error" : "Bad Request",
+                          "exception" : "javax.validation.ConstraintViolationException",
+                          "message" : "standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type",
+                          "path" : "/api/messages/out",
+                          "errors" : [ {
+                            "codes" : [ "MessageType" ],
+                            "defaultMessage" : "Must be a NextMove message type",
+                            "objectName" : "standardBusinessDocumentHeader.documentIdentification.type",
+                            "field" : "standardBusinessDocumentHeader.documentIdentification.type",
+                            "rejectedValue" : "strange",
+                            "bindingFailure" : false,
+                            "code" : "MessageType"
+                          } ]
+                        }\
+                        """))
                 .andDo(document("messages/out/create/constraint-violation",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -176,14 +177,16 @@ public class IntegrasjonspunktErrorControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 400,\n" +
-                        "  \"error\" : \"Bad Request\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException\",\n" +
-                        "  \"message\" : \"Service DPI is not enabled\",\n" +
-                        "  \"path\" : \"/api/messages/out\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 400,
+                          "error" : "Bad Request",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException",
+                          "message" : "Service DPI is not enabled",
+                          "path" : "/api/messages/out"
+                        }\
+                        """))
                 .andDo(document("messages/out/create/service-not-enabled",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -205,21 +208,23 @@ public class IntegrasjonspunktErrorControllerTest {
                 get("/error")
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/subscription/" + id)
-                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Subscription with id = %d was not found", id))
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, "Subscription with id = %d was not found".formatted(id))
                         .requestAttr(ERROR_ATTRIBUTE, new SubscriptionNotFoundException(id)
                         )
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 404,\n" +
-                        "  \"error\" : \"Not Found\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException\",\n" +
-                        "  \"message\" : \"Subscription with id = 84 was not found\",\n" +
-                        "  \"path\" : \"/api/subscription/84\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 404,
+                          "error" : "Not Found",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException",
+                          "message" : "Subscription with id = 84 was not found",
+                          "path" : "/api/subscription/84"
+                        }\
+                        """))
                 .andDo(document("subscriptions/get/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -251,23 +256,25 @@ public class IntegrasjonspunktErrorControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 400,\n" +
-                        "  \"error\" : \"Bad Request\",\n" +
-                        "  \"exception\" : \"javax.validation.ConstraintViolationException\",\n" +
-                        "  \"message\" : \"event: 'nonexistent' is not expected. Allowed values are: [all, status]\",\n" +
-                        "  \"path\" : \"/api/subscriptions\",\n" +
-                        "  \"errors\" : [ {\n" +
-                        "    \"codes\" : [ \"OneOf\" ],\n" +
-                        "    \"defaultMessage\" : \"'nonexistent' is not expected. Allowed values are: [all, status]\",\n" +
-                        "    \"objectName\" : \"event\",\n" +
-                        "    \"field\" : \"event\",\n" +
-                        "    \"rejectedValue\" : \"nonexistent\",\n" +
-                        "    \"bindingFailure\" : false,\n" +
-                        "    \"code\" : \"OneOf\"\n" +
-                        "  } ]\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 400,
+                          "error" : "Bad Request",
+                          "exception" : "javax.validation.ConstraintViolationException",
+                          "message" : "event: 'nonexistent' is not expected. Allowed values are: [all, status]",
+                          "path" : "/api/subscriptions",
+                          "errors" : [ {
+                            "codes" : [ "OneOf" ],
+                            "defaultMessage" : "'nonexistent' is not expected. Allowed values are: [all, status]",
+                            "objectName" : "event",
+                            "field" : "event",
+                            "rejectedValue" : "nonexistent",
+                            "bindingFailure" : false,
+                            "code" : "OneOf"
+                          } ]
+                        }\
+                        """))
                 .andDo(document("subscriptions/create/constraint-violation",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -289,21 +296,23 @@ public class IntegrasjonspunktErrorControllerTest {
                 get("/error")
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/conversations/" + id)
-                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with id = %d was not found", id))
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, "Conversation with id = %d was not found".formatted(id))
                         .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(id)
                         )
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 404,\n" +
-                        "  \"error\" : \"Not Found\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ConversationNotFoundException\",\n" +
-                        "  \"message\" : \"Conversation with id = 49 was not found\",\n" +
-                        "  \"path\" : \"/api/conversations/49\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 404,
+                          "error" : "Not Found",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.ConversationNotFoundException",
+                          "message" : "Conversation with id = 49 was not found",
+                          "path" : "/api/conversations/49"
+                        }\
+                        """))
                 .andDo(document("conversations/get/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -325,21 +334,23 @@ public class IntegrasjonspunktErrorControllerTest {
                 get("/error")
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/conversations/messageId/" + messageId)
-                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, String.format("Conversation with messageId = %s was not found", messageId))
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, "Conversation with messageId = %s was not found".formatted(messageId))
                         .requestAttr(ERROR_ATTRIBUTE, new ConversationNotFoundException(messageId)
                         )
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 404,\n" +
-                        "  \"error\" : \"Not Found\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.ConversationNotFoundException\",\n" +
-                        "  \"message\" : \"Conversation with messageId = df64afa1-83f4-497c-ae94-db22108801b9 was not found\",\n" +
-                        "  \"path\" : \"/api/conversations/messageId/df64afa1-83f4-497c-ae94-db22108801b9\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 404,
+                          "error" : "Not Found",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.ConversationNotFoundException",
+                          "message" : "Conversation with messageId = df64afa1-83f4-497c-ae94-db22108801b9 was not found",
+                          "path" : "/api/conversations/messageId/df64afa1-83f4-497c-ae94-db22108801b9"
+                        }\
+                        """))
                 .andDo(document("conversations/get-by-message-id/not-found",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -366,14 +377,16 @@ public class IntegrasjonspunktErrorControllerTest {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent())
-                .andExpect(content().json("{\n" +
-                        "  \"timestamp\" : \"2019-03-25T12:38:23+01:00\",\n" +
-                        "  \"status\" : 204,\n" +
-                        "  \"error\" : \"No Content\",\n" +
-                        "  \"exception\" : \"no.difi.meldingsutveksling.exceptions.NoContentException\",\n" +
-                        "  \"message\" : \"No content\",\n" +
-                        "  \"path\" : \"/api/messages/in/peek\"\n" +
-                        "}"))
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 204,
+                          "error" : "No Content",
+                          "exception" : "no.difi.meldingsutveksling.exceptions.NoContentException",
+                          "message" : "No content",
+                          "path" : "/api/messages/in/peek"
+                        }\
+                        """))
                 .andDo(document("messages/in/peek/no-content",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

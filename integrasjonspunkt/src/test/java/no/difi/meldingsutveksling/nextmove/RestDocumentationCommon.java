@@ -235,14 +235,14 @@ class RestDocumentationCommon {
                                 .description("Expiry timestamp"),
                         fieldWithPath(prefix + "direction")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("The direction. Can be one of: %s", Arrays.stream(ConversationDirection.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
+                                .description("The direction. Can be one of: %s".formatted(Arrays.stream(ConversationDirection.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", ")))),
                         fieldWithPath(prefix + "serviceIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("The service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
+                                .description("The service identifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", ")))),
                         fieldWithPath(prefix + "messageStatuses")
                                 .type(JsonFieldType.ARRAY)
                                 .description("An array of message statuses.")
@@ -275,23 +275,26 @@ class RestDocumentationCommon {
                                 .description("Header version. Expected value is 1.0"),
                         sbdhFields.withPath("sender")
                                 .type(JsonFieldType.ARRAY)
-                                .description("Logical party representing the\n" +
-                                        "organization that has created the standard business document."),
+                                .description("""
+                                        Logical party representing the
+                                        organization that has created the standard business document."""),
                         sbdhFields.withPath("receiver")
                                 .type(JsonFieldType.ARRAY)
-                                .description("Logical party representing the\n" +
-                                        "organization that receives the SBD."),
+                                .description("""
+                                        Logical party representing the
+                                        organization that receives the SBD."""),
                         sbdhFields.withPath("documentIdentification")
                                 .type(JsonFieldType.OBJECT)
                                 .description("Characteristics containing identification about the document."),
                         sbdhFields.withPath("businessScope")
                                 .type(JsonFieldType.OBJECT)
-                                .description("The business scope\n" +
-                                        "contains 1 to many [1..*] scopes. It is not mandatory to put all intermediary\n" +
-                                        "scopes in an SBDH. Only those scopes that the parties agree to are valid. The\n" +
-                                        "following examples are all valid: transaction; business process; collaboration. A\n" +
-                                        "Profile may be used to group well-formedness rules together. The business\n" +
-                                        "scope block consists of the Scope block.")
+                                .description("""
+                                        The business scope
+                                        contains 1 to many [1..*] scopes. It is not mandatory to put all intermediary
+                                        scopes in an SBDH. Only those scopes that the parties agree to are valid. The
+                                        following examples are all valid: transaction; business process; collaboration. A
+                                        Profile may be used to group well-formedness rules together. The business
+                                        scope block consists of the Scope block.""")
                 )
                 .fields(senderDescriptors(prefix + "sender[]."))
                 .fields(receiverDescriptors(prefix + "receiver[]."))
@@ -338,24 +341,27 @@ class RestDocumentationCommon {
         return new FieldDescriptor[]{
                 documentIdentificationFields.withPath("standard")
                         .type(JsonFieldType.STRING)
-                        .description("The\n" +
-                        "originator of the type of the Business Data standard, e.g. SWIFT, OAG,\n" +
-                        "EAN.UCC, EDIFACT, X12; references which Data Dictionary is being\n" +
-                        "used. Used for the task of verifying that the grammar of a message is\n" +
-                        "valid"),
+                        .description("""
+                        The
+                        originator of the type of the Business Data standard, e.g. SWIFT, OAG,
+                        EAN.UCC, EDIFACT, X12; references which Data Dictionary is being
+                        used. Used for the task of verifying that the grammar of a message is
+                        valid"""),
                 documentIdentificationFields.withPath("typeVersion")
                         .type(JsonFieldType.STRING)
-                        .description("Descriptor which contains versioning information or number of\n" +
-                        "the standard that defines the document which is specified in the ’Type’\n" +
-                        "data element, e.g. values could be ‘1.3’ or ‘D.96A’, etc. . This is the\n" +
-                        "version of the document itself and is different than the HeaderVersion."),
+                        .description("""
+                        Descriptor which contains versioning information or number of
+                        the standard that defines the document which is specified in the ’Type’
+                        data element, e.g. values could be ‘1.3’ or ‘D.96A’, etc. . This is the
+                        version of the document itself and is different than the HeaderVersion."""),
                 documentIdentificationFields.withPath("instanceIdentifier")
                         .type(JsonFieldType.STRING)
-                        .description("Descriptor which contains reference information which uniquely identifies\n" +
-                        "this instance of the SBD between the sender and the receiver. This\n" +
-                        "identifier identifies this document as distinct from others. There is only\n" +
-                        "one SBD instance per Standard Header. The Instance Identifier is \n" +
-                        "automatically generated as an UUID if not specified."),
+                        .description("""
+                        Descriptor which contains reference information which uniquely identifies
+                        this instance of the SBD between the sender and the receiver. This
+                        identifier identifies this document as distinct from others. There is only
+                        one SBD instance per Standard Header. The Instance Identifier is\s
+                        automatically generated as an UUID if not specified."""),
                 documentIdentificationFields.withPath("type")
                         .type(JsonFieldType.STRING)
                         .description("A logical indicator\n" +
@@ -372,11 +378,12 @@ class RestDocumentationCommon {
                 documentIdentificationFields.withPath("creationDateAndTime")
                         .type(JsonFieldType.STRING)
                         .optional()
-                        .description("Descriptor which contains date and time of SBDH/document\n" +
-                        "creation. In the SBDH the parser translator or service component assigns\n" +
-                        "the SBD a Date and Time stamp. The creation date and time expressed\n" +
-                        "here most likely will be different from the date and time stamped in the\n" +
-                        "transport envelope.")
+                        .description("""
+                        Descriptor which contains date and time of SBDH/document
+                        creation. In the SBDH the parser translator or service component assigns
+                        the SBD a Date and Time stamp. The creation date and time expressed
+                        here most likely will be different from the date and time stamped in the
+                        transport envelope.""")
         };
     }
 
@@ -387,11 +394,12 @@ class RestDocumentationCommon {
                 .fields(
                         businessScopeFields.withPath("scope")
                                 .type(JsonFieldType.ARRAY)
-                                .description("Indicates the type of scope,\n" +
-                                        "the identifiers for the scope, other supporting information and the scope\n" +
-                                        "content itself. The importance of the Scope is that it allows the SBDH to\n" +
-                                        "operate under auspices of an agreement; that parties agree that they only\n" +
-                                        "include reference agreements")
+                                .description("""
+                                        Indicates the type of scope,
+                                        the identifiers for the scope, other supporting information and the scope
+                                        content itself. The importance of the Scope is that it allows the SBDH to
+                                        operate under auspices of an agreement; that parties agree that they only
+                                        include reference agreements""")
                 ).fields(scopeDescriptors(prefix + "scope[]."))
                 .build();
     }
@@ -403,32 +411,36 @@ class RestDocumentationCommon {
                 .fields(
                         scopeFields.withPath("type")
                                 .type(JsonFieldType.STRING)
-                                .description("Indicates the kind of\n" +
-                                        "scope; an attribute describing the Scope. Example entries include: ConversationId, SenderRef, ReceiverRef"),
+                                .description("""
+                                        Indicates the kind of
+                                        scope; an attribute describing the Scope. Example entries include: ConversationId, SenderRef, ReceiverRef"""),
                         scopeFields.withPath("instanceIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description("A unique identifier that references the instance of the scope (e.g.\n" +
-                                        "process execution instance, document instance). For example, the\n" +
-                                        "Instance Identifier could be used to identify the specific instance of\n" +
-                                        "a Business Process. This identifier would be used to correlate all\n" +
-                                        "the way back to the business domain layer; it can be thought of as\n" +
-                                        "a session descriptor at the business domain application level."),
+                                .description("""
+                                        A unique identifier that references the instance of the scope (e.g.
+                                        process execution instance, document instance). For example, the
+                                        Instance Identifier could be used to identify the specific instance of
+                                        a Business Process. This identifier would be used to correlate all
+                                        the way back to the business domain layer; it can be thought of as
+                                        a session descriptor at the business domain application level."""),
                         scopeFields.withPath("identifier")
                                 .type(JsonFieldType.STRING)
-                                .description("An optional unique\n" +
-                                        "descriptor that identifies the \"contract\" or \"agreement\" that this\n" +
-                                        "instance relates to. It operates at the level of business domain, not\n" +
-                                        "at the transport or messaging level, by providing the information\n" +
-                                        "necessary and sufficient to configure the service at the other\n" +
-                                        "partner's end."),
+                                .description("""
+                                        An optional unique
+                                        descriptor that identifies the "contract" or "agreement" that this
+                                        instance relates to. It operates at the level of business domain, not
+                                        at the transport or messaging level, by providing the information
+                                        necessary and sufficient to configure the service at the other
+                                        partner's end."""),
                         scopeFields.withPath("scopeInformation")
                                 .type(JsonFieldType.ARRAY)
-                                .description("An optional unique\n" +
-                                        "descriptor that identifies the \"contract\" or \"agreement\" that this\n" +
-                                        "instance relates to. It operates at the level of business domain, not\n" +
-                                        "at the transport or messaging level, by providing the information\n" +
-                                        "necessary and sufficient to configure the service at the other\n" +
-                                        "partner's end.")
+                                .description("""
+                                        An optional unique
+                                        descriptor that identifies the "contract" or "agreement" that this
+                                        instance relates to. It operates at the level of business domain, not
+                                        at the transport or messaging level, by providing the information
+                                        necessary and sufficient to configure the service at the other
+                                        partner's end.""")
                 )
                 .fields(scopeInformationDescriptors(prefix + "scopeInformation[]."))
                 .build();
@@ -440,9 +452,10 @@ class RestDocumentationCommon {
         return new FieldDescriptor[]{
                 correlationInformationFields.withPath("expectedResponseDateTime")
                         .type(JsonFieldType.STRING)
-                        .description("Date and time when response is expected. This element could be\n" +
-                        "populated in an initial message of a correlation sequence, and should be\n" +
-                        "echoed back in a subsequent response. ")
+                        .description("""
+                        Date and time when response is expected. This element could be
+                        populated in an initial message of a correlation sequence, and should be
+                        echoed back in a subsequent response. """)
         };
     }
 
@@ -544,14 +557,14 @@ class RestDocumentationCommon {
                                 .description("Postal address of the recipient."),
                         messageFields.withPath("utskriftsfarge")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Used to specify type of print. Can be one of: %s", Arrays.stream(PrintColor.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
+                                .description("Used to specify type of print. Can be one of: %s".formatted(Arrays.stream(PrintColor.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", ")))),
                         messageFields.withPath("posttype")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Mail type. Can be one of: %s", Arrays.stream(Utskrift.Posttype.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
+                                .description("Mail type. Can be one of: %s".formatted(Arrays.stream(Utskrift.Posttype.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", ")))),
                         messageFields.withPath("retur")
                                 .type(JsonFieldType.OBJECT)
                                 .description("Return address to be placed on the back of the envelope."),
@@ -605,9 +618,9 @@ class RestDocumentationCommon {
                                 .description("Postal address of the sender."),
                         fields.withPath("returhaandtering")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("Used to specify type of return. Can be one of: %s", Arrays.stream(Retur.Returposthaandtering.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", "))))
+                                .description("Used to specify type of return. Can be one of: %s".formatted(Arrays.stream(Retur.Returposthaandtering.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", "))))
                 )
                 .fields(postAddressDescriptors(prefix + "mottaker."))
                 .build();
@@ -713,9 +726,9 @@ class RestDocumentationCommon {
                                 .description("Type of process."),
                         fieldWithPath(prefix + "serviceIdentifier")
                                 .type(JsonFieldType.STRING)
-                                .description(String.format("The service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", ")))),
+                                .description("The service identifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
+                                .map(Enum::name)
+                                .collect(Collectors.joining(", ")))),
                         fieldWithPath(prefix + "postAddress")
                                 .optional()
                                 .type(JsonFieldType.OBJECT)

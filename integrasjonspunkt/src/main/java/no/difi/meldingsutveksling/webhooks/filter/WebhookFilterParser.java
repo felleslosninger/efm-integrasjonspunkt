@@ -33,7 +33,7 @@ public class WebhookFilterParser {
 
         if (!matcher.matches()) {
             throw new IllegalArgumentException(
-                    String.format("The filter part \"%s\", do not match the expected regexp: %s",
+                    "The filter part \"%s\", do not match the expected regexp: %s".formatted(
                             part, PART_PATTERN.toString()));
         }
 
@@ -41,7 +41,7 @@ public class WebhookFilterParser {
         EventFilter eventFilter = eventFilterProvider.getEventFilter(name);
         EventFilterOperator operator = EventFilterOperator.fromString(matcher.group(2));
         if (!eventFilter.supports(operator)) {
-            throw new IllegalArgumentException(String.format("The %s filter do not support the %s operator!", name, operator));
+            throw new IllegalArgumentException("The %s filter do not support the %s operator!".formatted(name, operator));
         }
 
         String value = matcher.group(3);

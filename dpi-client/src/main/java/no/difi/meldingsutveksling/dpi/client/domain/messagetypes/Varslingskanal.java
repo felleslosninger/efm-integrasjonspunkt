@@ -20,6 +20,6 @@ public enum Varslingskanal {
     public static Varslingskanal fromValue(String value) {
         return Arrays.stream(Varslingskanal.values()).filter(p -> p.getValue().equals(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown varslingskanal = '%s'", value)));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown varslingskanal = '%s'".formatted(value)));
     }
 }

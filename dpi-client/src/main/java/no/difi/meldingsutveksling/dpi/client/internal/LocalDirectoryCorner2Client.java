@@ -53,7 +53,7 @@ public class LocalDirectoryCorner2Client implements Corner2Client {
     private Path getPath(String base, String postfix) {
         try {
             File targetFile = new File(new File(URI.create(properties.getUri()).toURL().getFile()),
-                    String.format("%s-%s.%s", base, properties.getAsice().getType(), postfix));
+                    "%s-%s.%s".formatted(base, properties.getAsice().getType(), postfix));
             return targetFile.toPath();
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Malformed URL", e);

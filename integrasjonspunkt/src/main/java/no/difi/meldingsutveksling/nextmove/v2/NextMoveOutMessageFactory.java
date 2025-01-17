@@ -77,7 +77,7 @@ public class NextMoveOutMessageFactory {
             documentIdentification.setCreationDateAndTime(OffsetDateTime.now(clock));
         }
 
-        if (!sbd.getExpectedResponseDateTime().isPresent()) {
+        if (sbd.getExpectedResponseDateTime().isEmpty()) {
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(getDefaultTtlHours(serviceIdentifier));
 
             Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)
@@ -95,7 +95,7 @@ public class NextMoveOutMessageFactory {
 
         if (serviceIdentifier == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
-            if (!mcScope.isPresent()) {
+            if (mcScope.isEmpty()) {
                 sbd.addScope(ScopeFactory.fromIdentifier(ScopeType.MESSAGE_CHANNEL, properties.getDpo().getMessageChannel()));
             }
             if (mcScope.isPresent() && isNullOrEmpty(mcScope.get().getIdentifier())) {

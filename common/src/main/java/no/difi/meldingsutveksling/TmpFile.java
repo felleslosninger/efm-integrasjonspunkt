@@ -50,7 +50,7 @@ public class TmpFile {
         try {
             FileUtils.forceDelete(getFile());
         } catch (IOException e) {
-            log.warn(String.format("Error deleting files in TmpFile.delete() tmp file %s - make sure streams are closed", getFullPath()), e);
+            log.warn("Error deleting files in TmpFile.delete() tmp file %s - make sure streams are closed".formatted(getFullPath()), e);
         }
     }
 

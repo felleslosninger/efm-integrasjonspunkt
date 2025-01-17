@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.OffsetDateTime;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @ActiveProfiles("test")

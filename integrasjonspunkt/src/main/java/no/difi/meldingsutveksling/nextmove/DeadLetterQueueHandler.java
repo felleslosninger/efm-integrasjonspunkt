@@ -53,7 +53,7 @@ public class DeadLetterQueueHandler {
         // Outgoing NextMove messages
         try {
             NextMoveOutMessage nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);
-            errorMsg = String.format("Request to receiver '%s' failed delivery over %s - Moved to DLQ",
+            errorMsg = "Request to receiver '%s' failed delivery over %s - Moved to DLQ".formatted(
                     nextMoveMessage.getReceiverIdentifier(), nextMoveMessage.getServiceIdentifier());
             messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));

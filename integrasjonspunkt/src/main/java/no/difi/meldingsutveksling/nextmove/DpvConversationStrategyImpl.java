@@ -38,7 +38,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) {
 
         if (SBDUtil.isReceipt(message.getSbd())) {
-            log.info(String.format("Message [%s] is a receipt - not supported by DPV. Discarding message.", message.getMessageId()));
+            log.info("Message [%s] is a receipt - not supported by DPV. Discarding message.".formatted(message.getMessageId()));
             conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT, LEST);
             return;
         }

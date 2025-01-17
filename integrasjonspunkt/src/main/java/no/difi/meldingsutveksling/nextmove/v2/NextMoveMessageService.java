@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -182,7 +182,7 @@ public class NextMoveMessageService {
         try {
             return optionalCryptoMessagePersister.read(msg.getMessageId(), f.getIdentifier());
         } catch (IOException e) {
-            throw new IllegalStateException(String.format("Could not read file messageId=%s, filename=%s", msg.getMessageId(), f.getIdentifier()), e);
+            throw new IllegalStateException("Could not read file messageId=%s, filename=%s".formatted(msg.getMessageId(), f.getIdentifier()), e);
         }
     }
 

@@ -3,12 +3,12 @@ package no.difi.meldingsutveksling.ptv;
 import lombok.SneakyThrows;
 import no.altinn.services._2009._10.Test;
 import no.altinn.services.serviceengine.correspondence._2009._10.CorrespondenceStatusHistoryResult;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.protocol.HTTP;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.protocol.HTTP;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
@@ -20,8 +20,8 @@ import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
+import jakarta.xml.soap.MessageFactory;
+import jakarta.xml.soap.SOAPConstants;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -107,9 +107,9 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
     private RequestConfig getRequestConfig() {
         return RequestConfig.custom()
-                .setSocketTimeout(10000)
-                .setConnectTimeout(10000)
-                .setConnectionRequestTimeout(10000)
+                .setResponseTimeout(10000, TimeUnit.MILLISECONDS)
+                .setConnectTimeout(10000, TimeUnit.MILLISECONDS)
+                .setConnectionRequestTimeout(10000, TimeUnit.MILLISECONDS)
                 .setCircularRedirectsAllowed(true)
                 .setRedirectsEnabled(true)
                 .setRelativeRedirectsAllowed(true)

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.stereotype.Component
 import java.util.*
-import javax.jms.TextMessage
+import jakarta.jms.TextMessage
 
 @Component
 open class StatusQueue(private val jmsTemplate: JmsTemplate,

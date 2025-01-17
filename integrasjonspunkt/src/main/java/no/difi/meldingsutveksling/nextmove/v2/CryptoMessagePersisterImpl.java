@@ -45,7 +45,7 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
                 delegate.write(messageId, filename, encrypted);
                 return null;
             } catch (IOException e) {
-                throw new NextMoveRuntimeException(String.format("Writing of file %s failed for messageId: %s", filename, messageId));
+                throw new NextMoveRuntimeException("Writing of file %s failed for messageId: %s".formatted(filename, messageId));
             }
         }).await();
     }

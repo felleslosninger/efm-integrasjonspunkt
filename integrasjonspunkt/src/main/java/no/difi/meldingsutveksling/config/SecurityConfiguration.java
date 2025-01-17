@@ -1,49 +1,43 @@
 package no.difi.meldingsutveksling.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
+    @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "false")
-    @Configuration
-    public static class NoAuthConfig extends WebSecurityConfigurerAdapter {
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and().cors().and().csrf().disable();
-            http.headers()
-                    .httpStrictTransportSecurity()
-                    .includeSubDomains(true);
-            http.authorizeRequests()
-                    .antMatchers("/").permitAll();
-        }
+    SecurityFilterChain noAuthConfigSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.sessionManagement(management -> management
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(withDefaults()).csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers
+                .httpStrictTransportSecurity(security -> security
+                        .includeSubDomains(true)));
+        http.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/").permitAll());
+        return http.build();
     }
-
+    @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
-    @Configuration
-    public static class AuthConfig extends WebSecurityConfigurerAdapter {
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and().cors().and().csrf().disable();
-            http.headers()
-                    .httpStrictTransportSecurity()
-                    .includeSubDomains(true);
-            http.authorizeRequests()
-                    .antMatchers("/manage/health", "/health").permitAll()
-                    .anyRequest().authenticated()
-                    .and().httpBasic();
+    SecurityFilterChain authConfigSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.sessionManagement(management -> management
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(withDefaults()).csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers
+                .httpStrictTransportSecurity(security -> security
+                        .includeSubDomains(true)));
+        http.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/manage/health", "/health").permitAll()
+                .anyRequest().authenticated()).httpBasic(withDefaults());
+        return http.build();
 
-        }
     }
 
 }
