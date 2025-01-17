@@ -230,6 +230,37 @@
                     <extension>true</extension>
                     <verbose>true</verbose>
                     <removeOldOutput>true</removeOldOutput>
+                    <args>
+                        <arg>-Xfluent-builder</arg>
+                        <arg>-Xannotate</arg>
+                        <!--
+                        <arg>-Xsimplify</arg>
+                        -->
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>net.codesup.util</groupId>
+                            <artifactId>jaxb-rich-contract-plugin</artifactId>
+                            <version>4.2.1.2</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb</groupId>
+                            <artifactId>jaxb-plugin-annotate</artifactId>
+                            <version>4.0.8</version>
+                        </plugin>
+                        <!--
+                        <plugin>
+                            <groupId>org.jvnet.jaxb</groupId>
+                            <artifactId>jaxb-plugins-runtime</artifactId>
+                            <version>4.0.8</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb</groupId>
+                            <artifactId>jaxb-plugins-tools</artifactId>
+                            <version>4.0.8</version>
+                        </plugin>
+                        -->
+                    </plugins>
                     <!--
                 <args>
                     <arg>-Xfluent-builder</arg>
