@@ -6,13 +6,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.metrics.web.client.DefaultRestTemplateExchangeTagsProvider;
-import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.ws.client.WebServiceClientException;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.context.MessageContext;
@@ -37,6 +33,11 @@ public class MetricsConfiguration {
         return new TimedAspect(meterRegistry);
     }
 
+/*
+
+    // FIXME denne må nok skrives om - depreceated siden SB3 og fjernet i SB3.2
+    // https://docs.spring.io/spring-boot/docs/3.1.1/api/org/springframework/boot/actuate/metrics/web/client/DefaultRestTemplateExchangeTagsProvider.html
+
     @Bean
     public RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
         return new DefaultRestTemplateExchangeTagsProvider() {
@@ -59,6 +60,8 @@ public class MetricsConfiguration {
             }
         };
     }
+
+*/
 
     @Bean
     public ClientInterceptor metricsEndpointInterceptor() {

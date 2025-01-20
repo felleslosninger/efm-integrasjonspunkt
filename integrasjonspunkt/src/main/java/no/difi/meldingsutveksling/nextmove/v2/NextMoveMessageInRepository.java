@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NextMoveMessageInRepository extends PagingAndSortingRepository<NextMoveInMessage, Long>,
+        CrudRepository<NextMoveInMessage, Long>,
         QuerydslPredicateExecutor<NextMoveInMessage>,
         QuerydslBinderCustomizer<QNextMoveInMessage>,
         PeekNextMoveMessageIn {
