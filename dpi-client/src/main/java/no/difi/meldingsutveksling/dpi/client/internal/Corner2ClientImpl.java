@@ -12,6 +12,7 @@ import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -47,7 +48,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(createMultipart.createMultipart(input)))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this.dpiClientErrorHandler)
+                .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
                 .toBodilessEntity()
                 .block();
     }
@@ -58,7 +59,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .uri("/messages/out/{messageId}/statuses", messageId)
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this.dpiClientErrorHandler)
+                .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
                 .bodyToFlux(MessageStatus.class);
     }
 
@@ -73,7 +74,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 })
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this.dpiClientErrorHandler)
+                .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
                 .bodyToFlux(Message.class);
     }
 
@@ -84,7 +85,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .uri(downloadurl)
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this.dpiClientErrorHandler)
+                .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
                 .bodyToFlux(DataBuffer.class);
 
         try (OutputStream outputStream = cms.getOutputStream()) {
@@ -107,7 +108,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
                 .onStatus(httpStatus -> httpStatus.is4xxClientError() && httpStatus != HttpStatus.NOT_FOUND, ClientResponse::createException)
-                .onStatus(HttpStatus::is5xxServerError, this.dpiClientErrorHandler)
+                .onStatus(HttpStatusCode::is5xxServerError, this.dpiClientErrorHandler)
                 .toBodilessEntity()
                 .onErrorResume(WebClientResponseException.NotFound.class, notFound -> Mono.empty())
                 .block();
