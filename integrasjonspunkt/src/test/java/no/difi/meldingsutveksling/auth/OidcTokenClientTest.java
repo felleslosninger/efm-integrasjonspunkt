@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -36,7 +37,7 @@ public class OidcTokenClientTest {
 
     private IntegrasjonspunktProperties props;
     private JwtTokenConfig config;
-    private MetricsRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
+    private ObservationRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
 
     private List<String> scopes = Arrays.asList(
             "move/dpo.read",
@@ -129,10 +130,10 @@ public class OidcTokenClientTest {
         System.out.println(response);
     }
 
-    public static class NoOpMetricsRestTemplateCustomizer extends MetricsRestTemplateCustomizer {
+    public static class NoOpMetricsRestTemplateCustomizer extends ObservationRestTemplateCustomizer {
 
         public NoOpMetricsRestTemplateCustomizer() {
-            super(null, null, null, null);
+            super(null, null);
         }
 
         @Override
