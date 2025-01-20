@@ -1,14 +1,17 @@
 package no.difi.meldingsutveksling.ptv;
 
+import jakarta.xml.soap.MessageFactory;
+import jakarta.xml.soap.SOAPConstants;
 import lombok.SneakyThrows;
 import no.altinn.services._2009._10.Test;
 import no.altinn.services.serviceengine.correspondence._2009._10.CorrespondenceStatusHistoryResult;
 import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.core5.http.protocol.HTTP;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.WebServiceTemplate;
@@ -18,10 +21,9 @@ import org.springframework.ws.soap.addressing.client.ActionCallback;
 import org.springframework.ws.soap.addressing.version.Addressing10;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
+import org.springframework.ws.transport.http.HttpComponents5MessageSender;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
-import jakarta.xml.soap.MessageFactory;
-import jakarta.xml.soap.SOAPConstants;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -79,17 +81,17 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
         return Collections.emptyList();
     }
 
-    private HttpComponentsMessageSender createMessageSender() {
-        final HttpComponentsMessageSender messageSender = new HttpComponentsMessageSender();
+    private HttpComponents5MessageSender createMessageSender() {
+        final HttpComponents5MessageSender messageSender = new HttpComponents5MessageSender();
         messageSender.setHttpClient(getHttpClient());
         return messageSender;
     }
 
     private HttpClient getHttpClient() {
         return HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
-                    if (httpRequest.containsHeader(HTTP.CONTENT_LEN)) {
-                        httpRequest.removeHeaders(HTTP.CONTENT_LEN);
+                .addRequestInterceptorFirst((httpRequest, httpDetails, httpContext) -> {
+                    if (httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
+                        httpRequest.removeHeaders(HttpHeaders.CONTENT_LENGTH);
                     }
                 })
                 .setConnectionManager(getConnectionManager())
@@ -99,7 +101,8 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
     }
 
     private PoolingHttpClientConnectionManager getConnectionManager() {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(3, TimeUnit.SECONDS);
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setDefaultConnectionConfig(ConnectionConfig.custom().setTimeToLive(Timeout.ofSeconds(3)).build());
         cm.setMaxTotal(18);
         cm.setDefaultMaxPerRoute(6);
         return cm;
@@ -112,7 +115,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
                 .setConnectionRequestTimeout(10000, TimeUnit.MILLISECONDS)
                 .setCircularRedirectsAllowed(true)
                 .setRedirectsEnabled(true)
-                .setRelativeRedirectsAllowed(true)
+//                .setRelativeRedirectsAllowed(true)
                 .build();
     }
 
