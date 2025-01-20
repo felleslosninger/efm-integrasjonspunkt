@@ -30,8 +30,8 @@ public class WebHookConfig {
                 .setReadTimeout(Duration.ofMillis(webHooks.getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler() {
                     @Override
-                    protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
-                        log.info("Webhook push failed with: {} {}", statusCode, response.getStatusText());
+                    public void handleError(ClientHttpResponse response) throws IOException {
+                        log.info("Webhook push failed with: {} {}", response.getStatusCode(), response.getStatusText());
                     }
                 })
                 .build());
