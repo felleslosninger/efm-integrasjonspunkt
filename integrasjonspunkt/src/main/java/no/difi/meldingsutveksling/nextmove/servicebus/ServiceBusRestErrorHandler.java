@@ -6,7 +6,6 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -24,15 +23,15 @@ public class ServiceBusRestErrorHandler extends DefaultResponseErrorHandler {
     private final CacheManager cacheManager;
 
     @Override
-    protected void handleError(@NotNull ClientHttpResponse response, @NotNull HttpStatusCode statusCode) throws IOException {
-        if (HttpStatus.UNAUTHORIZED.isSameCodeAs(statusCode)) {
-            log.debug("Got status {} from service bus, invalidating sas key", statusCode.toString());
+    public void handleError(@NotNull ClientHttpResponse response) throws IOException {
+        if (HttpStatus.UNAUTHORIZED.isSameCodeAs(response.getStatusCode())) {
+            log.debug("Got status {} from service bus, invalidating sas key", HttpStatus.valueOf(response.getStatusCode().value()).getReasonPhrase());
             Optional.ofNullable(cacheManager.getCache(CACHE_GET_SAS_KEY))
                     .orElseThrow(() -> new MeldingsUtvekslingRuntimeException(
                             "Couldn't get cache names %s".formatted(CACHE_GET_SAS_KEY)))
                     .clear();
         }
-        super.handleError(response, statusCode);
+        super.handleError(response);
     }
 
 }
