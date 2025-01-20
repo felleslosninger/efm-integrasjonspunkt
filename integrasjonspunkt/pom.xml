@@ -645,6 +645,12 @@
                     <groupId>no.difi.commons</groupId>
                     <artifactId>commons-certvalidator</artifactId>
                 </exclusion>
+                <!-- FIXME remove from no.difi.move-common
+                <exclusion>
+                    <groupId>org.springframework.security.oauth</groupId>
+                    <artifactId>spring-security-oauth2</artifactId>
+                </exclusion>
+                -->
             </exclusions>
         </dependency>
         <dependency>
