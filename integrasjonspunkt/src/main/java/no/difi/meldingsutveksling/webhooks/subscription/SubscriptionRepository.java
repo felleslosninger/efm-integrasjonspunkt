@@ -7,11 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.Optional;
 
 public interface SubscriptionRepository extends PagingAndSortingRepository<Subscription, Long>,
+        CrudRepository<Subscription, Long>,
         QuerydslPredicateExecutor<Subscription>,
         QuerydslBinderCustomizer<QSubscription> {
 
@@ -30,4 +32,5 @@ public interface SubscriptionRepository extends PagingAndSortingRepository<Subsc
     default void customize(QuerydslBindings bindings, QSubscription root) {
         // NOOP
     }
+
 }

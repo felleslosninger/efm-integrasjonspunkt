@@ -71,7 +71,7 @@ public class ServiceBusRestClient {
     }
 
     public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("%s/%s/messages/head", getBase(), serviceBusUtil.getLocalQueuePath());
+        String resourceUri = String.format("%s/%s/messages/head", getBase(), serviceBusUtil.getLocalQueuePath());
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
@@ -98,7 +98,7 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(Objects.requireNonNull(response.getBody()));
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
+                log.debug(String.format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
                         payload.getSbd().getMessageId()));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
@@ -142,7 +142,7 @@ public class ServiceBusRestClient {
     }
 
     public void deleteMessage(ServiceBusMessage message) {
-        String resourceUri = format("%s/%s/messages/%s/%s",
+        String resourceUri = String.format("%s/%s/messages/%s/%s",
                 getBase(),
                 serviceBusUtil.getLocalQueuePath(),
                 message.getMessageId(),
