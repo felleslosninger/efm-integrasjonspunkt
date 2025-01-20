@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.12</version>
+        <version>3.4.1</version>
         <relativePath/>
     </parent>
 
@@ -70,7 +70,6 @@
     <properties>
         <activemq.version>6.1.5</activemq.version>
         <java.version>21</java.version>
-        <spring.cloud.version>2023.0.5</spring.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.io.version>2.15.0</commons.io.version>
         <commons.compress.version>1.27.1</commons.compress.version>
@@ -83,7 +82,6 @@
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
-        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
         <wiremock.version>2.35.2</wiremock.version>
         <xmlsec.version>3.0.3</xmlsec.version>
         <dokka.skip>true</dokka.skip>
@@ -111,6 +109,8 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--
+            <spring.cloud.version>2023.0.5</spring.cloud.version>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -118,6 +118,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
             <dependency>
                 <groupId>com.sun.mail</groupId>
                 <artifactId>jakarta.mail</artifactId>
@@ -128,12 +129,30 @@
                 <artifactId>jolokia-core</artifactId>
                 <version>1.7.2</version>
             </dependency>
+            <!--
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>3.4.1</version>
+            </dependency>
+            -->
+
+            <!--
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-oauth2-client</artifactId>
+                <version>3.2.12</version>
+            </dependency>
+            -->
+            <!--
+            <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
                 <version>${spring-security-oauth2.version}</version>
                 <type>jar</type>
             </dependency>
+            -->
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>api</artifactId>
