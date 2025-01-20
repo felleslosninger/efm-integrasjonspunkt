@@ -48,7 +48,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             }
 
             ConfigurableApplicationContext context = new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
-                    .initializers(new SpringCloudProtocolResolver(), new VaultProtocolResolver())
+                    .initializers(new SpringCloudProtocolResolver(), new VaultProtocolResolver()) // FIXME skal ikke spring cloud bort?
                     .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                     .run(args);
             checkNtpSync(context);
@@ -95,6 +95,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
         log.error(MISSING_JCE_MESSAGE);
     }
 
+    // FIXME denne er ikke noe poeng i lenger, ingen crypto restriksjoner lenger
     private static boolean validateJCE() {
         try {
             int maxKeyLen = Cipher.getMaxAllowedKeyLength("AES");
@@ -103,4 +104,5 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             return false;
         }
     }
+
 }
