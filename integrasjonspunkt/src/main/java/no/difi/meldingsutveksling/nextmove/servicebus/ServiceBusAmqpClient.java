@@ -57,7 +57,7 @@ public class ServiceBusAmqpClient {
 
     private void processMessage(ServiceBusReceivedMessageContext context) {
         ServiceBusReceivedMessage m = context.getMessage();
-        log.debug(format("Received message on queue=%s with id=%s", serviceBusUtil.getLocalQueuePath(), m.getMessageId()));
+        log.debug(String.format("Received message on queue=%s with id=%s", serviceBusUtil.getLocalQueuePath(), m.getMessageId()));
         ServiceBusPayload payload;
         try {
             payload = payloadConverter.convert(m.getBody().toBytes());

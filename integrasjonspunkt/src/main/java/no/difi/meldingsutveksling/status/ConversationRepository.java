@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.Optional;
 
 @Profile("!test")
 public interface ConversationRepository extends PagingAndSortingRepository<Conversation, Long>,
+        CrudRepository<Conversation, Long>,
         QuerydslPredicateExecutor<Conversation>,
         QuerydslBinderCustomizer<QConversation> {
 
@@ -188,4 +190,5 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
         return builder;
     }
+
 }
