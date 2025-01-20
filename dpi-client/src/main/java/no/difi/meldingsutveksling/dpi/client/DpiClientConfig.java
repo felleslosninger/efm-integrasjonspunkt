@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -119,7 +120,7 @@ public class DpiClientConfig {
 
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            switch (clientResponse.statusCode().series()) {
+            switch (HttpStatus.Series.valueOf(clientResponse.statusCode().value())) {
                 case SUCCESSFUL:
                     log.debug(LOG_MESSAGE, clientResponse.logPrefix(), clientResponse.statusCode());
                     break;
@@ -131,7 +132,6 @@ public class DpiClientConfig {
                     log.warn(LOG_MESSAGE, clientResponse.logPrefix(), clientResponse.statusCode());
                     break;
             }
-
             return Mono.just(clientResponse);
         });
     }
