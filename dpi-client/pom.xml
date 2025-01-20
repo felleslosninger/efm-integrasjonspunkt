@@ -12,19 +12,19 @@
     <artifactId>dpi-client</artifactId>
 
     <dependencies>
-  <dependency>
-   <groupId>commons-codec</groupId>
-   <artifactId>commons-codec</artifactId>
-  </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>dokumentpakking</artifactId>
-   <exclusions>
-    <exclusion>
-     <groupId>junit</groupId>
-     <artifactId>junit</artifactId>
-    </exclusion>
-   </exclusions>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -38,11 +38,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
         </dependency>
-  <dependency>
-   <groupId>org.glassfish.jaxb</groupId>
-   <artifactId>jaxb-runtime</artifactId>
-   <scope>runtime</scope>
-  </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>security</artifactId>
@@ -119,32 +119,32 @@
 
     <build>
         <plugins>
-                <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>xsd</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <addGeneratedAnnotation>true</addGeneratedAnnotation>
-                            <sources>
-                                <source>${basedir}/src/main/resources/xsd/sdp-manifest.xsd</source>
-                            </sources>
-                            <xjbSources>
-                                <xjbSource>${basedir}/src/main/resources/xjb</xjbSource>
-                            </xjbSources>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
+            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+                <execution>
+                    <id>xsd</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                    <phase>generate-sources</phase>
+                    <configuration>
+                        <addGeneratedAnnotation>true</addGeneratedAnnotation>
+                        <sources>
+                            <source>${basedir}/src/main/resources/xsd/sdp-manifest.xsd</source>
+                        </sources>
+                        <xjbSources>
+                            <xjbSource>${basedir}/src/main/resources/xjb</xjbSource>
+                        </xjbSources>
+                        <verbose>true</verbose>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        -->
             <!--
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
