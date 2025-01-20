@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<jaxb:bindings  version="2.1"
-                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                 xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-                 xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                 schemaLocation="wsdl/CorrespondenceAgencyExternal.wsdl"
-                 xmlns:jaxws="http://java.sun.com/xml/ns/jaxws">
+<jaxb:bindings
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:annox="urn:jaxb.jvnet.org:annox"
+        schemaLocation="CorrespondenceAgencyExternal.wsdl"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
+        jaxb:extensionBindingPrefixes="xjc annox"
+        version="3.0">
+
 
     <jaxb:bindings node="/wsdl:definitions/wsdl:types/xsd:schema[@targetNamespace='http://schemas.altinn.no/services/ServiceEngine/Correspondence/2010/10']/xsd:complexType[@name='InsertCorrespondenceV2']">
         <jaxb:class name="MyInsertCorrespondenceV2"></jaxb:class>
