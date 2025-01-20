@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
@@ -49,63 +50,63 @@
                     </execution>
                 </executions>
             </plugin>
-<!--
-        <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>xsd-generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
-                    <schemaIncludes>
-                        <include>arkivmelding.xsd</include>
-                    </schemaIncludes>
-                    <bindingDirectory>${basedir}/src/main/resources/xsd</bindingDirectory>
-                    <bindingIncludes>
-                        <include>bindings.xml</include>
-                    </bindingIncludes>
-                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
-                    <strict>true</strict>
-                    <extension>true</extension>
-                    <verbose>true</verbose>
-                    <removeOldOutput>true</removeOldOutput>
-                    <args>
-                        <arg>-Xfluent-builder</arg>
-                        <arg>-Xannotate</arg>
-                        <arg>-Xsimplify</arg>
-                    </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                            <version>2.0.1</version>
+            <!--
+                    <plugin>
+                            <groupId>org.jvnet.jaxb2.maven2</groupId>
+                            <artifactId>maven-jaxb2-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>xsd-generate</id>
+                                    <phase>generate-sources</phase>
+                                    <goals>
+                                        <goal>generate</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+                                <schemaIncludes>
+                                    <include>arkivmelding.xsd</include>
+                                </schemaIncludes>
+                                <bindingDirectory>${basedir}/src/main/resources/xsd</bindingDirectory>
+                                <bindingIncludes>
+                                    <include>bindings.xml</include>
+                                </bindingIncludes>
+                                <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                                <strict>true</strict>
+                                <extension>true</extension>
+                                <verbose>true</verbose>
+                                <removeOldOutput>true</removeOldOutput>
+                                <args>
+                                    <arg>-Xfluent-builder</arg>
+                                    <arg>-Xannotate</arg>
+                                    <arg>-Xsimplify</arg>
+                                </args>
+                                <plugins>
+                                    <plugin>
+                                        <groupId>net.codesup.util</groupId>
+                                        <artifactId>jaxb2-rich-contract-plugin</artifactId>
+                                        <version>2.0.1</version>
+                                    </plugin>
+                                    <plugin>
+                                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                                        <artifactId>jaxb2-basics-annotate</artifactId>
+                                        <version>1.1.0</version>
+                                    </plugin>
+                                    <plugin>
+                                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                                        <artifactId>jaxb2-basics</artifactId>
+                                        <version>1.11.1</version>
+                                    </plugin>
+                                    <plugin>
+                                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                                        <artifactId>jaxb2-basics-tools</artifactId>
+                                        <version>1.11.1</version>
+                                    </plugin>
+                                </plugins>
+                            </configuration>
                         </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-annotate</artifactId>
-                            <version>1.1.0</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-tools</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-            -->
+                        -->
             <!--
             <plugin>
                 <groupId>com.mysema.maven</groupId>
@@ -157,23 +158,23 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.moxy</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.ws</groupId>-->
-<!--            <artifactId>spring-xml</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework</groupId>-->
-<!--            <artifactId>spring-oxm</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.ws</groupId>-->
+        <!--            <artifactId>spring-xml</artifactId>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework</groupId>-->
+        <!--            <artifactId>spring-oxm</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
 
         <dependency>
-           <groupId>org.glassfish.jaxb</groupId>
-           <artifactId>jaxb-runtime</artifactId>
-           <scope>runtime</scope>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
