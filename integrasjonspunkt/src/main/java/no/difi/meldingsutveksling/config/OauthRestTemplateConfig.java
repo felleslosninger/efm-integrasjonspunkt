@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.Oauth2JwtAccessTokenProvider;
-import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.actuate.metrics.web.client.ObservationRestClientCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -43,7 +44,7 @@ public class OauthRestTemplateConfig {
             "global/postadresse.read");
 
     private final IntegrasjonspunktProperties props;
-    private final MetricsRestTemplateCustomizer metricsRestTemplateCustomizer;
+    private final ObservationRestClientCustomizer metricsRestTemplateCustomizer;
 
     @SneakyThrows
     @Bean
@@ -67,7 +68,10 @@ public class OauthRestTemplateConfig {
         requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(5000);
         RestTemplate rt = new RestTemplate(requestFactory);
-        metricsRestTemplateCustomizer.customize(rt);
+        // FIXME client blir ikke returnert, kanskje metrics ikke fungerer lenger?
+        // sjekk : https://dzone.com/articles/spring-boot-32-replace-your-resttemplate-with-rest
+        var rc = RestClient.builder(rt);
+        metricsRestTemplateCustomizer.customize(rc);
         return rt;
     }
 
@@ -87,7 +91,12 @@ public class OauthRestTemplateConfig {
         rt.setRequestFactory(requestFactory);
         rt.setAccessTokenProvider(new Oauth2JwtAccessTokenProvider(jwtTokenClient));
         rt.setUriTemplateHandler(new DefaultUriBuilderFactory());
-        metricsRestTemplateCustomizer.customize(rt);
+
+        // FIXME client blir ikke returnert, kanskje metrics ikke fungerer lenger?
+        // sjekk : https://dzone.com/articles/spring-boot-32-replace-your-resttemplate-with-rest
+        var rc = RestClient.builder(rt);
+        metricsRestTemplateCustomizer.customize(rc);
+
         return rt;
     }
 
