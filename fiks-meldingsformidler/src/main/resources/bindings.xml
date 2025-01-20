@@ -1,9 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<jaxb:bindings version="2.1" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-               xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-               xmlns:annox="http://annox.dev.java.net"
-               jaxb:extensionBindingPrefixes="xjc annox">
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:annox="urn:jaxb.jvnet.org:annox"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
+        jaxb:extensionBindingPrefixes="xjc annox"
+        version="3.0">
 
 
   <!--  <jaxb:globalBindings>
@@ -13,31 +18,31 @@
 
   <jaxb:bindings schemaLocation="wsdl/ForsendelsesServiceV9.wsdl" node="/wsdl:definitions/wsdl:types/xs:schema">
     <jaxb:bindings node="xs:complexType[@name='sendForsendelse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='sendForsendelseMedId']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='sendForsendelseMedIdResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='sendForsendelseResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatus']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatuser']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retreiveForsendelseTyper']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatusResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
     <jaxb:bindings node="xs:complexType[@name='retrieveForsendelseStatuserResponse']">
-      <annox:annotateClass>@javax.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+      <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
   </jaxb:bindings>
   <!--
