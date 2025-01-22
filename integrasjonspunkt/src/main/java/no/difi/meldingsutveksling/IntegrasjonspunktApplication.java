@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling;
 
+import jakarta.annotation.PostConstruct;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.meldingsutveksling.config.VaultProtocolResolver;
 import no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor;
-import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,7 +13,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
-import jakarta.annotation.PostConstruct;
+
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -48,7 +48,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             }
 
             ConfigurableApplicationContext context = new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
-                    .initializers(new SpringCloudProtocolResolver(), new VaultProtocolResolver()) // FIXME skal ikke spring cloud bort?
+                    .initializers(new VaultProtocolResolver())
                     .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                     .run(args);
             checkNtpSync(context);
