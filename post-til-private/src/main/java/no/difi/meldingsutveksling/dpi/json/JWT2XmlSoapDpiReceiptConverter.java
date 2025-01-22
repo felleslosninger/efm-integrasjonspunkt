@@ -1,16 +1,16 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import com.nimbusds.jose.Payload;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
-import no.difi.begrep.sdp.schema_v10.*;
-import no.difi.meldingsutveksling.domain.sbdh.ObjectFactory;
+import no.difi.begrep.sdp.schema_v10.SDPFeil;
+import no.difi.begrep.sdp.schema_v10.SDPKvittering;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.*;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
 import javax.xml.stream.XMLOutputFactory;
 
 import static no.difi.meldingsutveksling.dpi.json.XmlSoapDpiReceiptHelper.*;
