@@ -5,7 +5,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.OauthRestTemplateConfig;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -114,8 +114,8 @@ public class OidcTokenClientTest {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
         RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
-        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
-        String response = restClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        String response = serviceRegistryRestClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
         System.out.println(response);
     }
 
@@ -125,8 +125,8 @@ public class OidcTokenClientTest {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
         OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
         RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
-        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
-        String response = restClient.getResource("sastoken");
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        String response = serviceRegistryRestClient.getResource("sastoken");
         System.out.println(response);
     }
 

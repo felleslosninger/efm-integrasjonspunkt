@@ -10,7 +10,7 @@ public interface BusinessMessageFileRepository extends JpaRepository<BusinessMes
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM BusinessMessageFile WHERE message_id = ?1")
+    @Query("DELETE FROM BusinessMessageFile b WHERE b.message.id = ?1") // FIXME tripe check that this actually deletes what it used to do, b.id vs b.message.id
     void deleteFilesByMessageId(Long messageId);
 
 }

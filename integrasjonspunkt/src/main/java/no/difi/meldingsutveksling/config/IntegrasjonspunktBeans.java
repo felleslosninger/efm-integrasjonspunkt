@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestClient;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -72,8 +72,8 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public RestClient restClient(IntegrasjonspunktProperties props, RestOperations restTemplate, JWTDecoder cmsUtil) throws MalformedURLException, URISyntaxException {
-        return new RestClient(props, restTemplate, cmsUtil, new URL(props.getServiceregistryEndpoint()).toURI());
+    public ServiceRegistryRestClient restClient(IntegrasjonspunktProperties props, RestClient restClient, JWTDecoder cmsUtil) throws MalformedURLException, URISyntaxException {
+        return new ServiceRegistryRestClient(props, restClient, cmsUtil, new URL(props.getServiceregistryEndpoint()).toURI());
     }
 
     @Bean

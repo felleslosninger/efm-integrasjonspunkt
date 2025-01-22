@@ -10,8 +10,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-@Configuration
-@EnableWebSecurity
+// FIXME - denne krever en WebSecurityConfiguration definisjon
+//@Configuration
+//@EnableWebSecurity
 public class SecurityConfiguration {
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "false")
