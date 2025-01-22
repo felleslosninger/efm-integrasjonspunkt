@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.serviceregistry.externalmodel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-//import sun.security.provider.X509Factory;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -61,13 +60,15 @@ public class ServiceRecord {
         return getService().getIdentifier();
     }
 
+    // Snipped from X509Factory.BEGIN_CERT X509Factory.END_CERT
+    private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    private static final String END_CERT = "-----END CERTIFICATE-----";
+
     public String getPemCertificate() {
-        // FIXME POST JAVA21 UPGRADE
-        throw new IllegalArgumentException("DENNE MÅ ENABLES IGJEN");
-//        if (!pemCertificate.contains(X509Factory.BEGIN_CERT)) {
-//            return "%s\n%s\n%s\n".formatted(X509Factory.BEGIN_CERT, pemCertificate, X509Factory.END_CERT);
-//        }
-//        return pemCertificate;
+        if (!pemCertificate.contains(BEGIN_CERT)) {
+            return "%s\n%s\n%s\n".formatted(BEGIN_CERT, pemCertificate, END_CERT);
+        }
+        return pemCertificate;
     }
 
 }
