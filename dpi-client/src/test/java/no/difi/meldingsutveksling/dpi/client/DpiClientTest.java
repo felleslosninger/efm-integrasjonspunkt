@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.dpi.client;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.Payload;
 import jakarta.mail.BodyPart;
@@ -45,11 +44,11 @@ import org.mockserver.model.RequestDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -88,7 +87,7 @@ import static org.mockserver.model.HttpResponse.response;
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
 
-    @MockBean private TransactionTemplate transactionTemplate;
+    @MockitoBean private TransactionTemplate transactionTemplate;
     @Mock private TransactionStatus transactionStatus;
 
     @Autowired
@@ -121,7 +120,7 @@ class DpiClientTest {
     @Autowired
     private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
-    @MockBean
+    @MockitoBean
     private UUIDGenerator uuidGenerator;
 
     @Value("classpath:/digital_ready_for_send-sbd.json")
