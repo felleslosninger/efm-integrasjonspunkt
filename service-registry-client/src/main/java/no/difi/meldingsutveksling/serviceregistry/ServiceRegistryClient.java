@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ServiceRegistryClient {
 
-    private final RestClient client;
+    private final ServiceRegistryRestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
     private final IntegrasjonspunktProperties props;
