@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.status.service.MessageStatusController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,9 +20,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,10 +59,10 @@ public class MessageStatusControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private MessageStatusRepository statusRepo;
 
-    @MockBean
+    @MockitoBean
     private StatusQueue statusQueue;
 
     @Test
@@ -91,7 +92,7 @@ public class MessageStatusControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("id").optional().description("Filter on the numeric message status ID"),
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),

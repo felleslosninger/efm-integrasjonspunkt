@@ -7,11 +7,11 @@ import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -40,7 +40,7 @@ public class CapabilitiesControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private CapabilitiesFactory capabilitiesFactory;
 
     @Test
@@ -62,7 +62,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -92,7 +92,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for - Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -122,7 +122,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for - Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -151,7 +151,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for. Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -181,7 +181,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -211,7 +211,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())
