@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -52,7 +52,7 @@ public class ConversationControllerTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private ConversationRepository conversationRepository;
+    @MockitoBean private ConversationRepository conversationRepository;
 
     @Test
     public void find() throws Exception {
@@ -74,7 +74,7 @@ public class ConversationControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),
                                 parameterWithName("receiver").optional().description("Filter on receiver (as ISO-6523)"),
@@ -242,7 +242,7 @@ public class ConversationControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(getPagingParameterDescriptors()),
+                        queryParameters(getPagingParameterDescriptors()),
                         responseFields()
                                 .and(conversationDescriptors("content[]."))
                                 .and(pageDescriptors())

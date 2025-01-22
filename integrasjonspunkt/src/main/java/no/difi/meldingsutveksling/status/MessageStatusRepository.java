@@ -9,10 +9,13 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+
 import java.util.Optional;
 
 public interface MessageStatusRepository extends PagingAndSortingRepository<MessageStatus, Long>,
+        CrudRepository<MessageStatus, Long>,
         QuerydslPredicateExecutor<MessageStatus>,
         QuerydslBinderCustomizer<QMessageStatus> {
 
@@ -63,4 +66,5 @@ public interface MessageStatusRepository extends PagingAndSortingRepository<Mess
 
         return builder;
     }
+
 }

@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.config;
 
+import jakarta.xml.bind.JAXBException;
 import no.difi.meldingsutveksling.DpiReceiptHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
-import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
-import jakarta.xml.bind.JAXBException;
 import java.time.Clock;
 
 @Configuration
@@ -99,18 +98,18 @@ public class DpiConfig {
             return jsonMeldingsformidlerClient;
         }
 
-        @Bean
-        public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
-                                                                       ShipmentFactory shipmentFactory,
-                                                                       JsonDpiReceiptMapper dpiReceiptMapper,
-                                                                       MessageStatusMapper messageStatusMapper,
-                                                                       ChannelNormalizer channelNormalizer,
-                                                                       DpiReceiptConverter dpiReceiptConverter,
-                                                                       DpiMessageStatusFilter dpiMessageStatusFilter) {
-            return new JsonMeldingsformidlerClient(dpiClient,
-                    shipmentFactory, dpiReceiptMapper, messageStatusMapper,
-                    channelNormalizer, dpiReceiptConverter, dpiMessageStatusFilter);
-        }
+//        @Bean
+//        public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
+//                                                                       ShipmentFactory shipmentFactory,
+//                                                                       JsonDpiReceiptMapper dpiReceiptMapper,
+//                                                                       MessageStatusMapper messageStatusMapper,
+//                                                                       ChannelNormalizer channelNormalizer,
+//                                                                       DpiReceiptConverter dpiReceiptConverter,
+//                                                                       DpiMessageStatusFilter dpiMessageStatusFilter) {
+//            return new JsonMeldingsformidlerClient(dpiClient,
+//                    shipmentFactory, dpiReceiptMapper, messageStatusMapper,
+//                    channelNormalizer, dpiReceiptConverter, dpiMessageStatusFilter);
+//        }
 
         @Bean
         public ShipmentFactory shipmentFactory(ChannelNormalizer channelNormalizer) {
