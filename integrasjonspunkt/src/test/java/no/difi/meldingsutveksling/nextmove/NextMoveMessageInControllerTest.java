@@ -5,7 +5,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.AsicPersistenceException;
 import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
@@ -18,7 +17,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -70,9 +69,9 @@ class NextMoveMessageInControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private NextMoveMessageInService messageService;
-    @MockBean
+    @MockitoBean
     private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @Mock
@@ -107,7 +106,7 @@ class NextMoveMessageInControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("Filter on messageId."),
                                         parameterWithName("conversationId").optional().description("Filter on conversationId."),
                                         parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
@@ -208,7 +207,7 @@ class NextMoveMessageInControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("Filter on messageId."),
                                         parameterWithName("conversationId").optional().description("Filter on conversationId."),
                                         parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
@@ -245,7 +244,7 @@ class NextMoveMessageInControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
                                                 .map(Enum::name)
                                                 .collect(Collectors.joining(", "))))
@@ -281,7 +280,7 @@ class NextMoveMessageInControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("Filter on messageId"),
                                         parameterWithName("conversationId").optional().description("Filter on conversationId")
                                 ),

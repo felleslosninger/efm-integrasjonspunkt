@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.glassfish.jaxb.runtime.marshaller.NamespacePrefixMapper;
 
 import java.util.HashMap;
 import java.util.Map;
