@@ -9,7 +9,7 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RequiredArgsConstructor
 public class MockServerRestSteps {
 
-    private final RestClient restClient;
+    private final ServiceRegistryRestClient serviceRegistryRestClient;
     private final ServiceBusRestTemplate serviceBusRestTemplate;
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
@@ -44,7 +44,7 @@ public class MockServerRestSteps {
     public void before() {
         mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
         mockServerRestTemplateCustomizer.setDetectRootUri(false);
-        mockServerRestTemplateCustomizer.customize((RestTemplate) restClient.getRestTemplate());
+        mockServerRestTemplateCustomizer.customize((RestTemplate) serviceRegistryRestClient.getRestClient());
         mockServerRestTemplateCustomizer.customize(serviceBusRestTemplate);
         mockServerRestTemplateCustomizer.customize(svarInnClient.getRestTemplate());
     }
@@ -68,7 +68,7 @@ public class MockServerRestSteps {
             return svarInnClient.getRestTemplate();
         }
 
-        return (RestTemplate) restClient.getRestTemplate();
+        return (RestTemplate) serviceRegistryRestClient.getRestClient();
     }
 
     @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"(\\d+)\" and the following \"([^\"]*)\"$")

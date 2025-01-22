@@ -5,12 +5,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.move.common.oauth.JWTDecoder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
 import java.util.Collections;
@@ -26,10 +22,10 @@ import java.util.Map;
  * and return the HTTP Response body as a String
  */
 @RequiredArgsConstructor
-public class RestClient {
+public class ServiceRegistryRestClient {
 
     private final IntegrasjonspunktProperties props;
-    @Getter private final RestOperations restTemplate;
+    @Getter private final RestClient restClient;
     private final JWTDecoder jwtDecoder;
     private final URI baseUrl;
 
@@ -44,23 +40,18 @@ public class RestClient {
     }
 
     public String getResource(String urlTemplate, Map<String, String> urlVariables) throws BadJWSException {
-        urlTemplate = baseUrl.toString().concat("/").concat(urlTemplate);
+        UriTemplate uriTemplate = new UriTemplate(baseUrl.toString().concat("/").concat(urlTemplate));
+        var uri = uriTemplate.expand(urlVariables);
         if (props.getSign().isEnable()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.put("Accept", Collections.singletonList("application/jose, application/json"));
-
-            HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(urlTemplate, HttpMethod.GET, httpEntity,
-                    String.class, urlVariables);
-            return jwtDecoder.getPayload(response.getBody(), props.getSign().getJwkUrl());
+            var body = restClient.get().uri(uri).header("Accept", "application/jose", "application/json").retrieve().toEntity(String.class).getBody();
+            return jwtDecoder.getPayload(body, props.getSign().getJwkUrl());
         }
-
-        return restTemplate.getForObject(urlTemplate, String.class, urlVariables);
+        return restClient.get().uri(uri).retrieve().toEntity(String.class).getBody();
     }
 
-    public void putResource(String resourcePath) {
-        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
-        restTemplate.put(uri, String.class);
-    }
+//    public void putResource(String resourcePath) {
+//        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
+//        restTemplate.put(uri, String.class);
+//    }
+
 }

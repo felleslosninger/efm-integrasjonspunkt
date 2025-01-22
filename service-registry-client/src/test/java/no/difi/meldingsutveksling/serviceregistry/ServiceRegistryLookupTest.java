@@ -6,7 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -75,7 +75,7 @@ public class ServiceRegistryLookupTest {
     private SasKeyRepository sasKeyRepoMock;
 
     @MockBean
-    private RestClient client;
+    private ServiceRegistryRestClient client;
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
 
