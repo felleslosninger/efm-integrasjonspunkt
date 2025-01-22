@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
@@ -23,8 +25,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import jakarta.activation.DataHandler;
-import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
