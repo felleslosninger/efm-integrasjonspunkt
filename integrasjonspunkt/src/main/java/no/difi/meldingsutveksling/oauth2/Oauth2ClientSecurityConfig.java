@@ -4,7 +4,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -27,6 +32,8 @@ public class Oauth2ClientSecurityConfig {
         // slå sammen med logikken i no.difi.meldingsutveksling.config.SecurityConfiguration
         // sørg for å fjerne "github" fra application.yaml (det skal være mulig å lage en client registration med kode, uten ekstern konfig
 
+        http.authorizeHttpRequests(requests -> requests.requestMatchers("/nowhere").permitAll());
+
         // denne gir 403 Forbidden
         //http.authorizeHttpRequests(requests -> requests.requestMatchers("/").permitAll());
 
@@ -34,6 +41,19 @@ public class Oauth2ClientSecurityConfig {
         //http.authorizeHttpRequests(requests -> requests.requestMatchers("/manage/health", "/health").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
 
         return http.build();
+    }
+
+    @Bean
+    public ClientRegistrationRepository dummyClientRegistrationRepository() {
+        // FIXME spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one
+        ClientRegistration client = ClientRegistration.withRegistrationId("dummy").clientId("dummy").clientSecret("secret").authorizationGrantType(AuthorizationGrantType.JWT_BEARER).build();
+        return new InMemoryClientRegistrationRepository(client);
+    }
+
+    @Bean
+    public WebSecurityCustomizer noWebSecurityCustomizer() {
+        // FIXME forsøk på å skru av sikkerhet på REST endepunktene
+        return web -> web.ignoring().anyRequest();
     }
 
 }
