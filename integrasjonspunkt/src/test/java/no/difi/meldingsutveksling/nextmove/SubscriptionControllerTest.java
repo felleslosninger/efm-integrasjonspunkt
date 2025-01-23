@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionController;
@@ -41,7 +42,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(SubscriptionController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, SubscriptionController.class})
 @AutoConfigureMoveRestDocs
 @TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")

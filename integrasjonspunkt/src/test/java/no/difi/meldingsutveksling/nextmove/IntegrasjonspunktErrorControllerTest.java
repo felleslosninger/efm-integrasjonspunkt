@@ -1,5 +1,9 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktHandlerExceptionResolver;
@@ -12,26 +16,23 @@ import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.web.IntegrasjonspunktErrorController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import java.util.Set;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
@@ -56,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         JacksonMockitoConfig.class,
         IntegrasjonspunktHandlerExceptionResolver.class,
         ValidationConfig.class})
-@WebMvcTest(IntegrasjonspunktErrorController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, IntegrasjonspunktErrorController.class})
 @AutoConfigureMoveRestDocs
 @TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
@@ -67,7 +68,7 @@ public class IntegrasjonspunktErrorControllerTest {
 
     @Autowired private MockMvc mvc;
     @Autowired private Validator validator;
-    @MockBean IntegrasjonspunktProperties properties;
+    @MockitoBean IntegrasjonspunktProperties properties;
 
     @BeforeEach
     public void before() {

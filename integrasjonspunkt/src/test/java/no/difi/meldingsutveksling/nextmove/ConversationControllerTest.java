@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.ConversationQueryInput;
 import no.difi.meldingsutveksling.status.ConversationRepository;
@@ -43,7 +44,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(ConversationController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, ConversationController.class})
 @AutoConfigureMoveRestDocs
 @TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")

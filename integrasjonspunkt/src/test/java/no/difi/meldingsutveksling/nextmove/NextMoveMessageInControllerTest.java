@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {
-        SecurityConfiguration.class,
+        Oauth2ClientSecurityConfig.class,
         FixedClockConfig.class,
         ValidationConfig.class,
         JacksonConfig.class,
