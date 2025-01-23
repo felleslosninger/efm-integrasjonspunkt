@@ -14,8 +14,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 //@Configuration
 //@EnableWebSecurity
 public class SecurityConfiguration {
-    @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "false")
+
+    //@Bean
+    //@ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "false")
     SecurityFilterChain noAuthConfigSecurityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(management -> management
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(withDefaults()).csrf(csrf -> csrf.disable());
@@ -26,8 +27,9 @@ public class SecurityConfiguration {
                 .requestMatchers("/").permitAll());
         return http.build();
     }
-    @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
+
+    //@Beanx
+    //@ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
     SecurityFilterChain authConfigSecurityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(management -> management
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(withDefaults()).csrf(csrf -> csrf.disable());
