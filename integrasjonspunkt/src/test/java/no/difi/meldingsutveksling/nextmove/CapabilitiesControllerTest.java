@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesController;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesFactory;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +32,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(CapabilitiesController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, CapabilitiesController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
 public class CapabilitiesControllerTest {
