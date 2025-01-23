@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bindings
         xmlns="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
         xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
         xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-        jaxb:extensionBindingPrefixes="xjc"
+        xmlns:annox="urn:jaxb.jvnet.org:annox"
+        jaxb:extensionBindingPrefixes="xjc annox"
         jaxb:version="3.0"
 >
-
-  <!--
 
   <jaxb:globalBindings generateMixedExtensions="false"/>
 
@@ -16,16 +16,5 @@
         <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
     </jaxb:bindings>
   </jaxb:bindings>
-
--->
-
-  <!--
-      <bindings schemaLocation="../xsd/asic-model-1.0.xsd">
-        <xjc:simple/>
-        <schemaBindings>
-            <package name="no.difi.commons.asic.jaxb.asic"/>
-        </schemaBindings>
-    </bindings>
-    -->
 
 </bindings>

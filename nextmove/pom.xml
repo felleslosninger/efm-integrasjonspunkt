@@ -12,7 +12,57 @@
 
     <build>
         <plugins>
-            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin -->
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>4.0.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaLanguage>AUTODETECT</schemaLanguage>
+                    <bindingDirectory>src/main/xjb</bindingDirectory>
+                    <bindingIncludes>
+                        <include>bindings.xml</include>
+                    </bindingIncludes>
+                    <schemaDirectory>src/main/xsd</schemaDirectory>
+                    <schemaIncludes>
+                        <include>arkivmelding.xsd</include>
+                    </schemaIncludes>
+                    <strict>true</strict>
+                    <verbose>true</verbose>
+                    <extension>true</extension>
+                    <removeOldOutput>true</removeOldOutput>
+                    <args>
+                        <arg>-Xfluent-builder</arg>
+                        <arg>-Xannotate</arg>
+                        <arg>-Xsimplify</arg>
+                    </args>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb</groupId>
+                            <artifactId>jaxb-plugins</artifactId>
+                            <version>4.0.8</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>net.codesup.util</groupId>
+                            <artifactId>jaxb-rich-contract-plugin</artifactId>
+                            <version>4.2.1.2</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb</groupId>
+                            <artifactId>jaxb-plugin-annotate</artifactId>
+                            <version>4.0.8</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
+            </plugin>
+
+            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
@@ -33,10 +83,10 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
-                            <!--
+                            #!-
                             <verbose>true</verbose>
-                            -->
-                            <!--
+                            -#
+                            #!-
                             no need to specify, these are default
                             https://www.mojohaus.org/jaxb2-maven-plugin/Documentation/v3.1.0/example_xjc_basic.html
                             <sources>
@@ -45,11 +95,12 @@
                             <xjbSources>
                                 <xjbSource>src/main/xjb</xjbSource>
                             </xjbSources>
-                            -->
+                            -#
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            -->
             <!--
                     <plugin>
                             <groupId>org.jvnet.jaxb2.maven2</groupId>
