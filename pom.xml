@@ -546,12 +546,12 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
             <scope>test</scope>
-   <exclusions>
-    <exclusion>
-     <groupId>junit</groupId>
-     <artifactId>junit</artifactId>
-    </exclusion>
-   </exclusions>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.mockk</groupId>
@@ -593,7 +593,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-      <release>${java.version}</release>
+                        <release>${java.version}</release>
                     </configuration>
                     <executions>
                         <!-- Replacing default-compile as it is treated specially by maven -->
