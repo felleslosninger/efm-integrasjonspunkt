@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(WebhookEventExampleController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, WebhookEventExampleController.class})
 @AutoConfigureRestDocs(uriHost = "your.pushendpoint.com", uriPort = 80)
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)

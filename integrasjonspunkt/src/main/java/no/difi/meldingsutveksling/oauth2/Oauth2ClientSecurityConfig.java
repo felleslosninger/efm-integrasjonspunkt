@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -28,11 +27,10 @@ public class Oauth2ClientSecurityConfig {
         http.cors(withDefaults()).csrf(csrf -> csrf.disable());
         http.headers(headers -> headers.httpStrictTransportSecurity(security -> security.includeSubDomains(true)));
 
-        // FIXME dette filter tar ikke hensyn til "difi.move.feature.enable-auth" flagget
+        // FIXME dette filter tar ikke hensyn til "difi.move.feature.enable-auth" flagget see SecurityConfiguration.java
         // slå sammen med logikken i no.difi.meldingsutveksling.config.SecurityConfiguration
-        // sørg for å fjerne "github" fra application.yaml (det skal være mulig å lage en client registration med kode, uten ekstern konfig
 
-        http.authorizeHttpRequests(requests -> requests.requestMatchers("/nowhere").permitAll());
+        http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 
         // denne gir 403 Forbidden
         //http.authorizeHttpRequests(requests -> requests.requestMatchers("/").permitAll());
@@ -50,10 +48,10 @@ public class Oauth2ClientSecurityConfig {
         return new InMemoryClientRegistrationRepository(client);
     }
 
-    @Bean
-    public WebSecurityCustomizer noWebSecurityCustomizer() {
-        // FIXME forsøk på å skru av sikkerhet på REST endepunktene
-        return web -> web.ignoring().anyRequest();
-    }
+//    @Bean
+//    public WebSecurityCustomizer noWebSecurityCustomizer() {
+//        // FIXME forsøk på å skru av sikkerhet på REST endepunktene
+//        return web -> web.ignoring().anyRequest();
+//    }
 
 }
