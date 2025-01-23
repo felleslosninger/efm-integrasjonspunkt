@@ -1,8 +1,0 @@
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: FIXME
-            client-secret: KreverEnRegistationForAStarteOppSåDetteErBareDummyVerdier
