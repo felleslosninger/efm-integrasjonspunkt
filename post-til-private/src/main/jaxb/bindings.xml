@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bindings
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb" xmlns="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:inheritance="urn:jaxb.jvnet.org:plugin:inheritance"
+        xmlns:wildcard="http://jaxb2-commons.dev.java.net/basic/wildcard"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
+        jaxb:extensionBindingPrefixes="xjc wildcard"
+        version="3.0">
+
+	<globalBindings>
+		<xjc:simple/>
+		<xjc:javaType adapter="no.digipost.xsd.jaxb.XSDateTimeAdapter" name="java.time.ZonedDateTime" xmlType="xs:dateTime"/>
+		<xjc:javaType adapter="no.digipost.xsd.jaxb.XSDateAdapter" name="java.time.LocalDate" xmlType="xs:date"/>
+	</globalBindings>
+
+	<bindings schemaLocation="../xsd/sdp.xsd" node="/xs:schema">
+		<schemaBindings>
+			<nameXmlTransform>
+				<typeName prefix="SDP" />
+				<anonymousTypeName prefix="SDP" />
+				<elementName prefix="SDP" />
+			</nameXmlTransform>
+		</schemaBindings>
+	</bindings>
+
+    <bindings schemaLocation="../xsd/utvidelser/lenke.xsd" node="/xs:schema">
+        <schemaBindings>
+            <nameXmlTransform>
+                <typeName prefix="SDP" />
+                <anonymousTypeName prefix="SDP" />
+                <elementName prefix="SDP" />
+            </nameXmlTransform>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/utvidelser/arrangement.xsd" node="/xs:schema">
+        <schemaBindings>
+            <nameXmlTransform>
+                <typeName prefix="SDP" />
+                <anonymousTypeName prefix="SDP" />
+                <elementName prefix="SDP" />
+            </nameXmlTransform>
+        </schemaBindings>
+    </bindings>
+
+   <bindings schemaLocation="../xsd/utvidelser/bevis.xsd" node="/xs:schema">
+        <schemaBindings>
+            <nameXmlTransform>
+                <typeName prefix="SDP" />
+                <anonymousTypeName prefix="SDP" />
+                <elementName prefix="SDP" />
+            </nameXmlTransform>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/sdp-manifest.xsd">
+        <bindings node="//xs:complexType[@name='Manifest']">
+            <inheritance:implements>no.digipost.xsd.types.HarHoveddokumentOgVedlegg&lt;no.difi.begrep.sdp.schema_v10.SDPDokument&gt;</inheritance:implements>
+        </bindings>
+        <bindings node="//xs:complexType[@name='Dokument']">
+            <inheritance:implements>no.digipost.xsd.types.DokumentpakkeFil</inheritance:implements>
+        </bindings>
+        <bindings node="//xs:complexType[@name='DokumentData']">
+            <inheritance:implements>no.digipost.xsd.types.DokumentpakkeFil</inheritance:implements>
+        </bindings>
+    </bindings>
+
+	<bindings schemaLocation="../xsd/sdp-melding.xsd">
+		<bindings node="//xs:complexType[@name='DigitalPost']">
+			<inheritance:implements>no.digipost.xsd.types.DigitalPostformidling</inheritance:implements>
+		</bindings>
+		<bindings node="//xs:complexType[@name='FlyttetDigitalPost']">
+			<inheritance:implements>no.digipost.xsd.types.DigitalPostformidling</inheritance:implements>
+		</bindings>
+		<bindings node="//xs:complexType[@name='EpostVarselTekst']">
+			<inheritance:implements>no.digipost.xsd.types.TekstMedSpraak</inheritance:implements>
+		</bindings>
+		<bindings node="//xs:complexType[@name='SmsVarselTekst']">
+			<inheritance:implements>no.digipost.xsd.types.TekstMedSpraak</inheritance:implements>
+		</bindings>
+        <bindings node="//xs:complexType[@name='DigitalPostInfo']">
+            <inheritance:implements>no.digipost.xsd.types.HarVarsler</inheritance:implements>
+        </bindings>
+		<bindings node="//xs:complexType[@name='EpostVarsel']">
+			<inheritance:implements>no.digipost.xsd.types.Varsel</inheritance:implements>
+		</bindings>
+		<bindings node="//xs:complexType[@name='SmsVarsel']">
+			<inheritance:implements>no.digipost.xsd.types.Varsel</inheritance:implements>
+		</bindings>
+		<bindings node="//xs:simpleType[@name='Sikkerhetsnivaa']/xs:restriction" multiple="true">
+			<bindings node="xs:enumeration[@value='3']">
+				<typesafeEnumMember name="NIVAA_3"/>
+			</bindings>
+			<bindings node="xs:enumeration[@value='4']">
+				<typesafeEnumMember name="NIVAA_4"/>
+			</bindings>
+		</bindings>
+	</bindings>
+
+	<bindings schemaLocation="../xsd/sdp-felles.xsd">
+		<bindings node="//xs:complexType[@name='Tittel']">
+			<inheritance:implements>no.digipost.xsd.types.TekstMedSpraak</inheritance:implements>
+		</bindings>
+	</bindings>
+
+    <bindings schemaLocation="../xsd/SBDH20040506-02/StandardBusinessDocumentHeader.xsd" node="/xs:schema">
+        <wildcard:lax/>
+        <schemaBindings>
+            <package name="no.digipost.org.unece.cefact.namespaces.standardbusinessdocumentheader"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/ebxml/ebms-header-3_0-200704.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/ebxml/ebms-header-3_0-200704.xsd" node="//xs:attribute[@ref='S12:mustUnderstand']">
+        <property name="mustUnderstand12"/>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/ebxml/ebbp-signals-2.0.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.oasis_open.docs.ebxml_bp.ebbp_signals_2"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/w3/xmldsig-core-schema.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.w3.xmldsig"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/w3/xlink.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.w3.xlink"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/w3/xenc-schema.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.w3.xenc"/>
+        </schemaBindings>
+    </bindings>
+
+    <bindings schemaLocation="../xsd/w3/soap-envelope.xsd">
+        <schemaBindings>
+            <package name="no.digipost.org.w3.soap"/>
+        </schemaBindings>
+    </bindings>
+
+</bindings>
