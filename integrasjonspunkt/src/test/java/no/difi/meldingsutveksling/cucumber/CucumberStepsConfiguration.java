@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.spring.CucumberContextConfiguration;
+import jakarta.annotation.PostConstruct;
+import jakarta.xml.bind.Marshaller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
@@ -44,8 +46,6 @@ import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.xml.bind.Marshaller;
 import java.io.File;
 import java.time.Clock;
 import java.util.Collections;
