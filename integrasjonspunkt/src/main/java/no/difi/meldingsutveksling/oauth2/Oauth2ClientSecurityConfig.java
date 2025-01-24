@@ -30,12 +30,11 @@ public class Oauth2ClientSecurityConfig {
         // FIXME dette filter tar ikke hensyn til "difi.move.feature.enable-auth" flagget see SecurityConfiguration.java
         // slå sammen med logikken i no.difi.meldingsutveksling.config.SecurityConfiguration
 
+        // FIXME sett opp basic auth mulighet, ref SecurityConfiguration.java
+
         http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 
-        // denne gir 403 Forbidden
-        //http.authorizeHttpRequests(requests -> requests.requestMatchers("/").permitAll());
-
-        // denne gir 401 Unauthorized
+        // FIXME enable metrics, see SecurityConfiguration.java
         //http.authorizeHttpRequests(requests -> requests.requestMatchers("/manage/health", "/health").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
 
         return http.build();
@@ -44,14 +43,9 @@ public class Oauth2ClientSecurityConfig {
     @Bean
     public ClientRegistrationRepository dummyClientRegistrationRepository() {
         // FIXME spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one
+        // Consider adding a RegisteredClientRepository that can be used when difi.move.feature.enable-auth=true
         ClientRegistration client = ClientRegistration.withRegistrationId("dummy").clientId("dummy").clientSecret("secret").authorizationGrantType(AuthorizationGrantType.JWT_BEARER).build();
         return new InMemoryClientRegistrationRepository(client);
     }
-
-//    @Bean
-//    public WebSecurityCustomizer noWebSecurityCustomizer() {
-//        // FIXME forsøk på å skru av sikkerhet på REST endepunktene
-//        return web -> web.ignoring().anyRequest();
-//    }
 
 }
