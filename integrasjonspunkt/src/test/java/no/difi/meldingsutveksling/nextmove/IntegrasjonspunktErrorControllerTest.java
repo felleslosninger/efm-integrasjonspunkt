@@ -138,7 +138,7 @@ public class IntegrasjonspunktErrorControllerTest {
                           "timestamp" : "2019-03-25T12:38:23+01:00",
                           "status" : 400,
                           "error" : "Bad Request",
-                          "exception" : "javax.validation.ConstraintViolationException",
+                          "exception" : "jakarta.validation.ConstraintViolationException",
                           "message" : "standardBusinessDocumentHeader.documentIdentification.type: Must be a NextMove message type",
                           "path" : "/api/messages/out",
                           "errors" : [ {
@@ -262,7 +262,7 @@ public class IntegrasjonspunktErrorControllerTest {
                           "timestamp" : "2019-03-25T12:38:23+01:00",
                           "status" : 400,
                           "error" : "Bad Request",
-                          "exception" : "javax.validation.ConstraintViolationException",
+                          "exception" : "jakarta.validation.ConstraintViolationException",
                           "message" : "event: 'nonexistent' is not expected. Allowed values are: [all, status]",
                           "path" : "/api/subscriptions",
                           "errors" : [ {

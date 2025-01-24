@@ -28,7 +28,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    //@Beanx
+    //@Bean
     //@ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
     SecurityFilterChain authConfigSecurityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(management -> management
