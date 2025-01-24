@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.web;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.*;
@@ -37,11 +38,17 @@ public class IntegrasjonspunktErrorController implements ErrorController {
             body.put("trace", lines);
         }
         HttpStatus status = getStatus(aRequest);
+
+        // adding these three to the resulting error response
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("path", aRequest.getAttribute(RequestDispatcher.ERROR_REQUEST_URI));
+
         return new ResponseEntity<>(body, status);
     }
 
     protected HttpStatus getStatus(HttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         if (statusCode == null) {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
@@ -67,4 +74,5 @@ public class IntegrasjonspunktErrorController implements ErrorController {
         }
         return this.errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.of(MESSAGE, EXCEPTION, BINDING_ERRORS));
     }
+
 }
