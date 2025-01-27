@@ -465,6 +465,11 @@
             <artifactId>xmlunit-matchers</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-placeholders</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>net.bytebuddy</groupId>
@@ -607,7 +612,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-engine</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
@@ -667,8 +671,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -29,6 +29,7 @@ import no.difi.move.common.cert.KeystoreHelper;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Answers;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.client.RestClient;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
@@ -231,5 +233,8 @@ public class CucumberStepsConfiguration {
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockBean
     public FiksIOKlient fiksIOKlient;
+
+    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+    public RestClient restClient;
 
 }
