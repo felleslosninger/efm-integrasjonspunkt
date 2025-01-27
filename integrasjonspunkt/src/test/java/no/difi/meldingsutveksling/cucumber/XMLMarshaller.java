@@ -14,7 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @Profile("cucumber")
 public class XMLMarshaller {
 
-    static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
+    static final String PREFIX_MAPPER = "org.glassfish.jaxb.namespacePrefixMapper";
 
     @SneakyThrows
     <T> String marshall(JAXBElement<T> t) {
