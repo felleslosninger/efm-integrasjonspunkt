@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileItem;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.lang.NonNull;
 
