@@ -9,7 +9,7 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
-import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
+import org.mockito.Mockito;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +20,13 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
 import org.springframework.test.web.client.UnorderedRequestExpectationManager;
 import org.springframework.test.web.client.response.DefaultResponseCreator;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.URI;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -30,10 +35,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RequiredArgsConstructor
 public class MockServerRestSteps {
 
-    private final ServiceRegistryRestClient serviceRegistryRestClient;
+    private final RestClient restClient;
     private final ServiceBusRestTemplate serviceBusRestTemplate;
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
+
+    // this is just a dummy RestTemplate, actual code uses RestClient which is mocked as MockBean + Mockito
+    private RestTemplate dummyServiceRegistryRestTemplate = new RestTemplate();
 
     private MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
     private DefaultResponseCreator responseCreator;
@@ -44,7 +52,7 @@ public class MockServerRestSteps {
     public void before() {
         mockServerRestTemplateCustomizer = new MockServerRestTemplateCustomizer(UnorderedRequestExpectationManager.class);
         mockServerRestTemplateCustomizer.setDetectRootUri(false);
-        mockServerRestTemplateCustomizer.customize((RestTemplate) serviceRegistryRestClient.getRestClient());
+        mockServerRestTemplateCustomizer.customize(dummyServiceRegistryRestTemplate);
         mockServerRestTemplateCustomizer.customize(serviceBusRestTemplate);
         mockServerRestTemplateCustomizer.customize(svarInnClient.getRestTemplate());
     }
@@ -54,6 +62,7 @@ public class MockServerRestSteps {
         mockServerRestTemplateCustomizer.getServers().values().forEach(MockRestServiceServer::reset);
         mockServerRestTemplateCustomizer = null;
         responseActions = null;
+        Mockito.reset(restClient);
     }
 
     private MockRestServiceServer getServer(String url) {
@@ -68,7 +77,7 @@ public class MockServerRestSteps {
             return svarInnClient.getRestTemplate();
         }
 
-        return (RestTemplate) serviceRegistryRestClient.getRestClient();
+        return dummyServiceRegistryRestTemplate;
     }
 
     @Given("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"(\\d+)\" and the following \"([^\"]*)\"$")
@@ -118,8 +127,8 @@ public class MockServerRestSteps {
                         .body(body));
     }
 
-    @And("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"([^\"]*)\" and the following \"([^\"]*)\" in \"([^\"]*)\"$")
-    public void aRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) {
+    @And("^a RestTemplate \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"([^\"]*)\" and the following \"([^\"]*)\" in \"([^\"]*)\"$")
+    public void aRestTemplateRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) {
         this.responseActions = getServer(url)
                 .expect(manyTimes(), requestTo(url))
                 .andExpect(method(HttpMethod.valueOf(method)));
@@ -129,4 +138,11 @@ public class MockServerRestSteps {
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(new ClassPathResource(path)));
     }
+
+    @And("^a \"([^\"]*)\" request to \"([^\"]*)\" will respond with status \"([^\"]*)\" and the following \"([^\"]*)\" in \"([^\"]*)\"$")
+    public void aRestClientRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) throws IOException {
+        var response = new String(new ClassPathResource(path).getInputStream().readAllBytes());
+        when(restClient.get().uri(URI.create(url)).retrieve().toEntity(String.class).getBody()).thenReturn(response);
+    }
+
 }
