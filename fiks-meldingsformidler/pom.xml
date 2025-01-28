@@ -144,53 +144,6 @@
 
     <build>
         <plugins>
-            <!--
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>xsd-generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaLanguage>WSDL</schemaLanguage>
-                    <schemaDirectory>${basedir}/src/main/resources/wsdl</schemaDirectory>
-                    <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
-                    <bindingIncludes>
-                        <include>bindings.xml</include>
-                    </bindingIncludes>
-                    <schemaIncludes>
-                        <include>*.wsdl</include>
-                    </schemaIncludes>
-                    <generatePackage>no.difi.meldingsutveksling.ks.svarut</generatePackage>
-                    <strict>true</strict>
-                    <verbose>true</verbose>
-                    <extension>true</extension>
-                    <removeOldOutput>true</removeOldOutput>
-                    <args>
-                        <arg>-Xfluent-builder</arg>
-                        <arg>-Xannotate</arg>
-                    </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                            <version>2.0.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-annotate</artifactId>
-                            <version>1.1.0</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
@@ -208,9 +161,6 @@
                     <schemaLanguage>WSDL</schemaLanguage>
                     <schemaDirectory>${basedir}/src/main/resources/wsdl</schemaDirectory>
                     <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
-                    <!--
-                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
-                    -->
                     <bindingIncludes>
                         <include>bindings.xml</include>
                     </bindingIncludes>
@@ -240,7 +190,6 @@
                     </plugins>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
