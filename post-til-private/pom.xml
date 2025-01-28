@@ -24,12 +24,6 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.mail</artifactId>
-                    <groupId>com.sun.mail</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
