@@ -6,6 +6,7 @@
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
     <packaging>pom</packaging>
+    <!-- FIXME we need to provide a real "v3" version here and continue with main branch on 999-SNAPSHOT or similar -->
     <version>2.29.0-SNAPSHOT</version>
     <name>Multiproject for meldingsutveksling</name>
 
