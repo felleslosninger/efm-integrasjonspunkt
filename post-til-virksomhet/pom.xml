@@ -99,7 +99,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>

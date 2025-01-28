@@ -6,8 +6,8 @@
         <groupId>no.difi.meldingsutveksling</groupId>
         <version>2.29.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>post-til-private</artifactId>
 
     <dependencies>
@@ -33,44 +33,19 @@
             <groupId>org.jhades</groupId>
             <artifactId>jhades</artifactId>
         </dependency>
-
-        <!--
-        <dependency>
-            <groupId>no.difi.sdp</groupId>
-            <artifactId>sikker-digital-post-klient-java</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>wss4j-ws-security-dom</artifactId>
-                    <groupId>org.apache.wss4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.woodstox</groupId>
-                    <artifactId>woodstox-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpkix-jdk15on</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        -->
-
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -79,7 +54,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -120,95 +94,6 @@
 
     <build>
         <plugins>
-            <!--
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>include-xsd</id>
-                        <goals>
-                            <goal>add-resource</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/xsd</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
-            <!--
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.15.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <specVersion>2.2</specVersion>
-                    <schemaDirectory>src/main/xsd</schemaDirectory>
-                    <enableIntrospection>true</enableIntrospection>
-                    <bindingDirectory>src/main/jaxb</bindingDirectory>
-                    <schemaIncludes>
-                        <include>**/*.xsd</include>
-                    </schemaIncludes>
-                    <schemaExcludes>
-                        <exclude>ubl/*.xsd</exclude>
-                        <exclude>oppslag/*.xsd</exclude>
-                    </schemaExcludes>
-                    <verbose>false</verbose>
-                    <extension>true</extension>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <args>
-                        <arg>-Xsetters</arg>
-                        <arg>-XtoString</arg>
-                        <arg>-Xequals</arg>
-                        <arg>-XhashCode</arg>
-                        <arg>-Xfluent-api</arg>
-                        <arg>-Xvalue-constructor</arg>
-                        <arg>-Xdefault-value</arg>
-                        <arg>-Xwildcard</arg>
-                        <arg>-Xinheritance</arg>
-                    </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>0.13.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>com.sun.xml.bind</groupId>
-                            <artifactId>jaxb-xjc</artifactId>
-                            <version>2.3.2</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-fluent-api</artifactId>
-                            <version>3.0</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-value-constructor</artifactId>
-                            <version>3.0</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-default-value</artifactId>
-                            <version>1.1</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
