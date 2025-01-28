@@ -15,7 +15,7 @@
  */
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import wiremock.com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.tomakehurst.wiremock.common.xml.Xml;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
