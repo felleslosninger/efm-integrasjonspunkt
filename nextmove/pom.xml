@@ -10,6 +10,65 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>nextmove</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
+            <artifactId>audit</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>json-smart</artifactId>
+                    <groupId>net.minidev</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.moxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>5.1.0</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>5.1.0</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -61,197 +120,7 @@
                     </plugins>
                 </configuration>
             </plugin>
-
-            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.persistence</groupId>
-                        <artifactId>org.eclipse.persistence.moxy</artifactId>
-                        <version>4.0.5</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>xsd</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <addGeneratedAnnotation>true</addGeneratedAnnotation>
-                            #!-
-                            <verbose>true</verbose>
-                            -#
-                            #!-
-                            no need to specify, these are default
-                            https://www.mojohaus.org/jaxb2-maven-plugin/Documentation/v3.1.0/example_xjc_basic.html
-                            <sources>
-                                <source>src/main/xsd</source>
-                            </sources>
-                            <xjbSources>
-                                <xjbSource>src/main/xjb</xjbSource>
-                            </xjbSources>
-                            -#
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
-            <!--
-                    <plugin>
-                            <groupId>org.jvnet.jaxb2.maven2</groupId>
-                            <artifactId>maven-jaxb2-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>xsd-generate</id>
-                                    <phase>generate-sources</phase>
-                                    <goals>
-                                        <goal>generate</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
-                                <schemaIncludes>
-                                    <include>arkivmelding.xsd</include>
-                                </schemaIncludes>
-                                <bindingDirectory>${basedir}/src/main/resources/xsd</bindingDirectory>
-                                <bindingIncludes>
-                                    <include>bindings.xml</include>
-                                </bindingIncludes>
-                                <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
-                                <strict>true</strict>
-                                <extension>true</extension>
-                                <verbose>true</verbose>
-                                <removeOldOutput>true</removeOldOutput>
-                                <args>
-                                    <arg>-Xfluent-builder</arg>
-                                    <arg>-Xannotate</arg>
-                                    <arg>-Xsimplify</arg>
-                                </args>
-                                <plugins>
-                                    <plugin>
-                                        <groupId>net.codesup.util</groupId>
-                                        <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                                        <version>2.0.1</version>
-                                    </plugin>
-                                    <plugin>
-                                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                                        <artifactId>jaxb2-basics-annotate</artifactId>
-                                        <version>1.1.0</version>
-                                    </plugin>
-                                    <plugin>
-                                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                                        <artifactId>jaxb2-basics</artifactId>
-                                        <version>1.11.1</version>
-                                    </plugin>
-                                    <plugin>
-                                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                                        <artifactId>jaxb2-basics-tools</artifactId>
-                                        <version>1.11.1</version>
-                                    </plugin>
-                                </plugins>
-                            </configuration>
-                        </plugin>
-                        -->
-            <!--
-            <plugin>
-                <groupId>com.mysema.maven</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-                <version>1.1.3</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                            <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>validation</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.difi.move-common</groupId>
-            <artifactId>domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.move-common</groupId>
-            <artifactId>audit</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>json-smart</artifactId>
-                    <groupId>net.minidev</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.ws</groupId>-->
-        <!--            <artifactId>spring-xml</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework</groupId>-->
-        <!--            <artifactId>spring-oxm</artifactId>-->
-        <!--        </dependency>-->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-jpa</artifactId>
-            <version>5.1.0</version>
-            <classifier>jakarta</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>5.1.0</version>
-            <classifier>jakarta</classifier>
-        </dependency>
-    </dependencies>
 
 </project>

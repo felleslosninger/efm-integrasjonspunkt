@@ -28,81 +28,11 @@
             <artifactId>jakarta.xml.ws-api</artifactId>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.jws</groupId>
-            <artifactId>jsr181-api</artifactId>
-        </dependency>
-        -->
-
-        <!--
-  <dependency>
-   <groupId>com.sun.xml.ws</groupId>
-   <artifactId>jaxws-rt</artifactId>
-   <scope>provided</scope>
-  </dependency>
-  -->
-
-        <!-- JAXB with Jakarta EE
-    mcs jakarta.xml.bind:jakarta.xml.bind-api
-    mcs jakarta.annotation:jakarta.annotation-api
-    -->
-
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <version>3.0.0</version>
         </dependency>
-
-        <!--
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.5</version>
-        </dependency>
-        -->
-
-        <!--
-
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        -->
-
-        <!--
-        <dependency>
-            <groupId>jakarta.xml.ws</groupId>
-            <artifactId>jakarta.xml.ws-api</artifactId>
-            <version>${jakarta.xml.ws-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <version>${jaxws-rt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-ri</artifactId>
-            <version>${jaxws-ri.version}</version>
-            <type>pom</type>
-        </dependency>
-        -->
 
     </dependencies>
 
@@ -201,39 +131,10 @@
                             <sources>
                                 <source>${basedir}/xsd</source>
                             </sources>
-                            <!--
-                            <verbose>true</verbose>
-                            -->
-                            <!--
-                            no need to specify, these are default
-                            https://www.mojohaus.org/jaxb2-maven-plugin/Documentation/v3.1.0/example_xjc_basic.html
-                            <sources>
-                                <source>src/main/xsd</source>
-                            </sources>
-                            <xjbSources>
-                                <xjbSource>src/main/xjb</xjbSource>
-                            </xjbSources>
-                            -->
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaDirectory>${basedir}/xsd</schemaDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
 </project>

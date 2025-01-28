@@ -7,8 +7,8 @@
         <groupId>no.difi.meldingsutveksling</groupId>
         <version>2.28.5</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>dpi-client</artifactId>
 
     <dependencies>
@@ -83,11 +83,14 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
         </dependency>
 
         <!-- TEST -->
@@ -95,10 +98,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
@@ -119,90 +118,6 @@
 
     <build>
         <plugins>
-            <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>jaxb2-maven-plugin</artifactId>
-            <version>3.2.0</version>
-            <executions>
-                <execution>
-                    <id>xsd</id>
-                    <goals>
-                        <goal>xjc</goal>
-                    </goals>
-                    <phase>generate-sources</phase>
-                    <configuration>
-                        <addGeneratedAnnotation>true</addGeneratedAnnotation>
-                        <sources>
-                            <source>${basedir}/src/main/resources/xsd/sdp-manifest.xsd</source>
-                        </sources>
-                        <xjbSources>
-                            <xjbSource>${basedir}/src/main/resources/xjb</xjbSource>
-                        </xjbSources>
-                        <verbose>true</verbose>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-        -->
-            <!--
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.15.3</version>
-                <executions>
-                    <execution>
-                        <id>xsd-generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
-                    <schemaIncludes>
-                        <include>**/*.xsd</include>
-                    </schemaIncludes>
-                    <bindingDirectory>${basedir}/src/main/resources/xjb</bindingDirectory>
-                    <bindingIncludes>
-                        <include>bindings.xjb</include>
-                    </bindingIncludes>
-                    <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
-                    <strict>true</strict>
-                    <extension>true</extension>
-                    <verbose>true</verbose>
-                    <removeOldOutput>true</removeOldOutput>
-                    <args>
-                        <arg>-Xfluent-builder</arg>
-                        <arg>-Xannotate</arg>
-                        <arg>-Xsimplify</arg>
-                    </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                            <version>2.0.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-annotate</artifactId>
-                            <version>1.1.0</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-tools</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                    </plugins>
-                </configuration>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
@@ -233,9 +148,6 @@
                     <args>
                         <arg>-Xfluent-builder</arg>
                         <arg>-Xannotate</arg>
-                        <!--
-                        <arg>-Xsimplify</arg>
-                        -->
                     </args>
                     <plugins>
                         <plugin>
@@ -248,53 +160,9 @@
                             <artifactId>jaxb-plugin-annotate</artifactId>
                             <version>4.0.8</version>
                         </plugin>
-                        <!--
-                        <plugin>
-                            <groupId>org.jvnet.jaxb</groupId>
-                            <artifactId>jaxb-plugins-runtime</artifactId>
-                            <version>4.0.8</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb</groupId>
-                            <artifactId>jaxb-plugins-tools</artifactId>
-                            <version>4.0.8</version>
-                        </plugin>
-                        -->
                     </plugins>
-                    <!--
-                <args>
-                    <arg>-Xfluent-builder</arg>
-                    <arg>-Xannotate</arg>
-                    <arg>-Xsimplify</arg>
-                </args>
-                    -->
-                    <!--
-                    <plugins>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb2-rich-contract-plugin</artifactId>
-                            <version>2.0.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-annotate</artifactId>
-                            <version>1.1.0</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb2_commons</groupId>
-                            <artifactId>jaxb2-basics-tools</artifactId>
-                            <version>1.11.1</version>
-                        </plugin>
-                    </plugins>
-                    -->
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.1.2</version>
@@ -304,4 +172,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
