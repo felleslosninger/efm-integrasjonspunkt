@@ -39,8 +39,7 @@ public class ServiceBusOutSteps {
     @Then("^a POST to the ServiceBus is initiated with:$")
     @SneakyThrows
     public void anUploadToTheServiceBusInitiatedWith(String body) {
-        ArgumentCaptor<HttpEntity<byte[]>> captor = ArgumentCaptor.forClass(new HttpEntity<byte[]>() {
-        }.getClass());
+        ArgumentCaptor<HttpEntity<byte[]>> captor = ArgumentCaptor.forClass(HttpEntity.class);
         verify(serviceBusRestTemplate).exchange(any(URI.class), eq(HttpMethod.POST), captor.capture(), eq(String.class));
 
         HttpEntity<byte[]> httpEntity = captor.getValue();
