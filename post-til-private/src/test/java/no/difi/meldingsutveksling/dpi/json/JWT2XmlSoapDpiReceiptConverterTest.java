@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.Identifikator;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Virksomhetmottaker;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +27,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-// FIXME this test should be enabled again before SB 3.4 and Java 21 upgrade is finished (waiting for SDP xsd fix)
-@Disabled
 @SpringJUnitConfig(classes = JWT2XmlSoapDpiReceiptConverter.class)
 class JWT2XmlSoapDpiReceiptConverterTest {
 
