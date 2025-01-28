@@ -5,7 +5,6 @@ import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.ValidationException;
 import net.jimblackler.jsonschemafriend.Validator;
 
-import java.lang.instrument.IllegalClassFormatException;
 import java.util.Map;
 import java.util.Optional;
 
