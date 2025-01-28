@@ -1,9 +1,11 @@
 package no.difi.meldingsutveksling.oauth2;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -17,6 +19,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class Oauth2ClientSecurityConfig {
 
     @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "false")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         // http client enable OAuth2
@@ -24,26 +27,39 @@ public class Oauth2ClientSecurityConfig {
 
         // stateless session, cors defaults and disable csrf
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.cors(withDefaults()).csrf(csrf -> csrf.disable());
+        http.cors(withDefaults()).csrf(AbstractHttpConfigurer::disable);
         http.headers(headers -> headers.httpStrictTransportSecurity(security -> security.includeSubDomains(true)));
 
-        // FIXME dette filter tar ikke hensyn til "difi.move.feature.enable-auth" flagget see SecurityConfiguration.java
-        // slå sammen med logikken i no.difi.meldingsutveksling.config.SecurityConfiguration
-
-        // FIXME sett opp basic auth mulighet, ref SecurityConfiguration.java
-
+        // uten auth er alt åpent
         http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 
-        // FIXME enable metrics, see SecurityConfiguration.java
-        //http.authorizeHttpRequests(requests -> requests.requestMatchers("/manage/health", "/health").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
+        return http.build();
+
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
+    public SecurityFilterChain filterChainWithBasicAuth(HttpSecurity http) throws Exception {
+
+        // http client enable OAuth2
+        http.oauth2Client(Customizer.withDefaults());
+
+        // stateless session, cors defaults and disable csrf
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.cors(withDefaults()).csrf(AbstractHttpConfigurer::disable);
+        http.headers(headers -> headers.httpStrictTransportSecurity(security -> security.includeSubDomains(true)));
+
+        // med security så er kun observability åpent, api'er og websider stengt ned
+        http.authorizeHttpRequests(requests ->
+                requests.requestMatchers("/manage/*").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
 
         return http.build();
+
     }
 
     @Bean
     public ClientRegistrationRepository dummyClientRegistrationRepository() {
-        // FIXME spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one, add a basic auth one instead
-        // Consider adding a RegisteredClientRepository that can be used when difi.move.feature.enable-auth=true
+        // spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one (consider refactoring)
         ClientRegistration client = ClientRegistration.withRegistrationId("dummy").clientId("dummy").clientSecret("secret").authorizationGrantType(AuthorizationGrantType.JWT_BEARER).build();
         return new InMemoryClientRegistrationRepository(client);
     }
