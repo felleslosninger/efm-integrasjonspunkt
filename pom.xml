@@ -78,7 +78,6 @@
         <junit.platform.version>1.9.2</junit.platform.version>
         <cucumber.version>7.20.1</cucumber.version>
         <efm-common.version>2.0.0-SNAPSHOT</efm-common.version>
-        <dumbster.version>1.7.1</dumbster.version>
         <modelmapper.version>0.7.3</modelmapper.version>
         <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
@@ -87,7 +86,6 @@
         <dokka.skip>true</dokka.skip>
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
-
 
     <modules>
         <module>api</module>
@@ -109,16 +107,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!--
-            <spring.cloud.version>2023.0.5</spring.cloud.version>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring.cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            -->
             <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
@@ -131,30 +119,6 @@
                 <artifactId>jolokia-core</artifactId>
                 <version>1.7.2</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-security</artifactId>
-                <version>3.4.1</version>
-            </dependency>
-            -->
-
-            <!--
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-oauth2-client</artifactId>
-                <version>3.2.12</version>
-            </dependency>
-            -->
-            <!--
-            <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
-            <dependency>
-                <groupId>org.springframework.security.oauth</groupId>
-                <artifactId>spring-security-oauth2</artifactId>
-                <version>${spring-security-oauth2.version}</version>
-                <type>jar</type>
-            </dependency>
-            -->
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>api</artifactId>
@@ -267,43 +231,21 @@
                 <artifactId>io</artifactId>
                 <version>${efm-common.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>no.difi.commons</groupId>
                 <artifactId>commons-asic</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
-
-            <!-- DPI
-            <dependency>
-                <groupId>no.difi.sdp</groupId>
-                <artifactId>sikker-digital-post-klient-java</artifactId>
-                <version>${sikker-digital-post-klient.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcprov-jdk15on</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            -->
-
             <dependency>
                 <groupId>org.apache.santuario</groupId>
                 <artifactId>xmlsec</artifactId>
                 <version>${xmlsec.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>no.digdir</groupId>
                 <artifactId>efm-dpi-client</artifactId>
                 <version>${efm-dpi-client.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.jvnet.jax-ws-commons.spring</groupId>
                 <artifactId>jaxws-spring</artifactId>
@@ -370,14 +312,6 @@
                 <artifactId>modelmapper</artifactId>
                 <version>${modelmapper.version}</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>com.github.kirviq</groupId>
-                <artifactId>dumbster</artifactId>
-                <version>${dumbster.version}</version>
-                <scope>test</scope>
-            </dependency>
-            -->
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>bootstrap</artifactId>
@@ -411,7 +345,7 @@
             <dependency>
                 <groupId>net.jimblackler.jsonschemafriend</groupId>
                 <artifactId>core</artifactId>
-                <version>0.11.2</version>
+                <version>0.12.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.graalvm.sdk</groupId>
@@ -457,34 +391,12 @@
                 <artifactId>joda-time</artifactId>
                 <version>2.10.8</version>
             </dependency>
-            <!-- TEST -->
-            <!-- resolved in bom
-            <dependency>
-                <groupId>io.cucumber</groupId>
-                <artifactId>cucumber-java</artifactId>
-                <version>${cucumber.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.cucumber</groupId>
-                <artifactId>cucumber-spring</artifactId>
-                <version>${cucumber.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.cucumber</groupId>
-                <artifactId>cucumber-junit-platform-engine</artifactId>
-                <version>${cucumber.version}</version>
-                <scope>test</scope>
-            </dependency>
-            -->
             <dependency>
                 <groupId>org.mock-server</groupId>
                 <artifactId>mockserver-junit-jupiter</artifactId>
                 <version>5.14.0</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.javacrumbs.json-unit</groupId>
                 <artifactId>json-unit-core</artifactId>
@@ -585,14 +497,12 @@
 
     <build>
         <pluginManagement>
-
             <plugins>
                 <plugin>
                     <groupId>org.jvnet.jaxb2.maven2</groupId>
                     <artifactId>maven-jaxb2-plugin</artifactId>
                     <version>0.15.3</version>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -626,7 +536,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
                 <plugin>
                     <groupId>org.jvnet.jax-ws-commons</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
@@ -745,7 +654,6 @@
                     <skipEmptyPackages>true</skipEmptyPackages>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -760,6 +668,7 @@
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <id>ossrh</id>
