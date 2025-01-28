@@ -42,7 +42,7 @@ public class Oauth2ClientSecurityConfig {
 
     @Bean
     public ClientRegistrationRepository dummyClientRegistrationRepository() {
-        // FIXME spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one
+        // FIXME spring boot needs a ClientRegistrationRepository to start, we just hacked together a dummy one, add a basic auth one instead
         // Consider adding a RegisteredClientRepository that can be used when difi.move.feature.enable-auth=true
         ClientRegistration client = ClientRegistration.withRegistrationId("dummy").clientId("dummy").clientSecret("secret").authorizationGrantType(AuthorizationGrantType.JWT_BEARER).build();
         return new InMemoryClientRegistrationRepository(client);
