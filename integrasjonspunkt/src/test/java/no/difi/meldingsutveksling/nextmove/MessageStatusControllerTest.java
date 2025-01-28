@@ -11,14 +11,11 @@ import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.status.service.MessageStatusController;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -41,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -173,7 +171,6 @@ public class MessageStatusControllerTest {
     }
 
     // FIXME temporarily disabled, error was "PageImpl cannot be returned by toString(), toString() should return String"
-    @Disabled
     @Test
     void testFindMessageStatusInDateRange() throws Exception {
         OffsetDateTime fromDateTime = OffsetDateTime.parse("2021-06-09T10:18:40.868+02:00");
@@ -185,7 +182,7 @@ public class MessageStatusControllerTest {
                 messageStatus3()
         );
 
-        Pageable pageable = Pageable.unpaged();
+        Pageable pageable = PageRequest.of(0, mockData.size(), Sort.unsorted());
         Page<MessageStatus> page = new PageImpl<>(mockData, pageable, mockData.size());
 
         when(statusRepo.find(

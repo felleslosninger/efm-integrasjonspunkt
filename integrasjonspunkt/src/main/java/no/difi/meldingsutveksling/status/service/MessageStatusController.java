@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -18,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
+
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
