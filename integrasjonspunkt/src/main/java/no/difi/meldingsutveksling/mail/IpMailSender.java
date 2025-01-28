@@ -1,25 +1,17 @@
 package no.difi.meldingsutveksling.mail;
 
-import com.sun.mail.smtp.SMTPTransport;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
-import org.apache.commons.io.output.CountingOutputStream;
-import org.springframework.stereotype.Component;
-
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import org.springframework.stereotype.Component;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,7 +36,7 @@ public class IpMailSender {
             mailProps.put("mail.smtp.ssl.trust", trust);
         }
 
-        Session session = Session.getDefaultInstance(mailProps,
+        Session session = Session.getInstance(mailProps,
                 new jakarta.mail.Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
