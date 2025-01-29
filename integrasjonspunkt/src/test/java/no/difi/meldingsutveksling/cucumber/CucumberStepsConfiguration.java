@@ -33,7 +33,6 @@ import org.mockito.Answers;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +42,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.RestClient;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.SoapVersion;
@@ -217,24 +217,15 @@ public class CucumberStepsConfiguration {
     @TempDir
     File temporaryFolder;
 
-    @MockBean
-    public UUIDGenerator uuidGenerator;
-    @MockBean
-    public InternalQueue internalQueue;
-    @MockBean
-    public ServiceBusRestTemplate serviceBusRestTemplate;
-    @MockBean
-    public SvarUtConnectionCheck svarUtConnectionCheck;
-    @MockBean
-    public SvarInnConnectionCheck svarInnConnectionCheck;
-    @MockBean
-    public AltinnConnectionCheck altinnConnectionCheck;
-    @MockBean
-    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
-    @MockBean
-    public FiksIOKlient fiksIOKlient;
+    @MockitoBean public UUIDGenerator uuidGenerator;
+    @MockitoBean public InternalQueue internalQueue;
+    @MockitoBean public ServiceBusRestTemplate serviceBusRestTemplate;
+    @MockitoBean public SvarUtConnectionCheck svarUtConnectionCheck;
+    @MockitoBean public SvarInnConnectionCheck svarInnConnectionCheck;
+    @MockitoBean public AltinnConnectionCheck altinnConnectionCheck;
+    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
+    @MockitoBean public FiksIOKlient fiksIOKlient;
 
-    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-    public RestClient restClient;
+    @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS) public RestClient restClient;
 
 }

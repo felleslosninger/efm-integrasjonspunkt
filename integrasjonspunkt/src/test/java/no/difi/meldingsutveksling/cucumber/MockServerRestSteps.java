@@ -40,7 +40,7 @@ public class MockServerRestSteps {
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
 
-    // this is just a dummy RestTemplate, actual code uses RestClient which is mocked as MockBean + Mockito
+    // this is just a dummy RestTemplate, actual code uses RestClient which is mocked as MockitoBean + Mockito
     private RestTemplate dummyServiceRegistryRestTemplate = new RestTemplate();
 
     private MockServerRestTemplateCustomizer mockServerRestTemplateCustomizer;
@@ -76,7 +76,7 @@ public class MockServerRestSteps {
         } else if (url.startsWith(svarInnClient.getRootUri())) {
             return svarInnClient.getRestTemplate();
         }
-
+        // FIXME denne skal ikke benyttes lenger, skal være erstattet med RestClient varianter
         return dummyServiceRegistryRestTemplate;
     }
 
