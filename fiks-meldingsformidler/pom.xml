@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>parent-pom</artifactId>
-        <groupId>no.difi.meldingsutveksling</groupId>
-        <version>2.29.0-SNAPSHOT</version>
-    </parent>
+
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>no.difi.meldingsutveksling</groupId>
+        <artifactId>parent-pom</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
 
     <artifactId>fiks-meldingsformidler</artifactId>
 
@@ -39,12 +41,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
         </dependency>
-
         <dependency>
             <groupId>no.ks.fiks</groupId>
             <artifactId>fiks-io-klient-java</artifactId>
@@ -93,12 +93,10 @@
             <artifactId>jetty-io</artifactId>
             <version>9.4.53.v20231009</version>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
