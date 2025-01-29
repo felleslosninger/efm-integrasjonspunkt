@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>domain</artifactId>
-    <packaging>jar</packaging>
-
     <parent>
-        <artifactId>parent-pom</artifactId>
         <groupId>no.difi.meldingsutveksling</groupId>
-        <version>2.29.0-SNAPSHOT</version>
+        <artifactId>parent-pom</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <artifactId>domain</artifactId>
 
     <dependencies>
         <dependency>
@@ -39,7 +35,6 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>service-registry-client</artifactId>
         </dependency>
-
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>domain</artifactId>
@@ -48,17 +43,14 @@
             <groupId>no.difi.move-common</groupId>
             <artifactId>validation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
-
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>
@@ -69,7 +61,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
