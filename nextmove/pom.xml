@@ -68,7 +68,6 @@
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
-                <version>4.0.8</version>
                 <executions>
                     <execution>
                         <goals>
@@ -95,23 +94,6 @@
                         <arg>-Xannotate</arg>
                         <arg>-Xsimplify</arg>
                     </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb</groupId>
-                            <artifactId>jaxb-plugins</artifactId>
-                            <version>4.0.8</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>net.codesup.util</groupId>
-                            <artifactId>jaxb-rich-contract-plugin</artifactId>
-                            <version>4.2.1.2</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb</groupId>
-                            <artifactId>jaxb-plugin-annotate</artifactId>
-                            <version>4.0.8</version>
-                        </plugin>
-                    </plugins>
                 </configuration>
             </plugin>
         </plugins>
