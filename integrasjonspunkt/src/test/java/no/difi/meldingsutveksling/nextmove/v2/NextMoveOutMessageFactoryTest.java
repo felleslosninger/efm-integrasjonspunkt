@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,14 +33,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class NextMoveOutMessageFactoryTest {
 
-    @MockBean
-    private IntegrasjonspunktProperties props;
-    @MockBean
-    private ServiceRecordProvider serviceRecordProvider;
-    @MockBean
-    private UUIDGenerator uuidGenerator;
-    @MockBean
-    private Clock clock;
+    @MockitoBean private IntegrasjonspunktProperties props;
+    @MockitoBean private ServiceRecordProvider serviceRecordProvider;
+    @MockitoBean private UUIDGenerator uuidGenerator;
+    @MockitoBean private Clock clock;
 
     private NextMoveOutMessageFactory factory;
 
