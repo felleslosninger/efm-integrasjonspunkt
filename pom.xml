@@ -69,18 +69,18 @@
     </repositories>
 
     <properties>
-        <activemq.version>6.1.5</activemq.version>
         <java.version>21</java.version>
+        <kotlin.version>2.1.10</kotlin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.io.version>2.15.0</commons.io.version>
         <commons.compress.version>1.27.1</commons.compress.version>
         <commons.text.version>1.10.0</commons.text.version>
         <sikker-digital-post-klient.version>6.4.RC1</sikker-digital-post-klient.version>
         <junit.platform.version>1.9.2</junit.platform.version>
+        <activemq.version>6.1.5</activemq.version>
         <cucumber.version>7.20.1</cucumber.version>
         <efm-common.version>2.0.0-SNAPSHOT</efm-common.version>
         <modelmapper.version>0.7.3</modelmapper.version>
-        <kotlin.version>1.8.0</kotlin.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <wiremock.version>3.10.0</wiremock.version>
         <xmlsec.version>3.0.3</xmlsec.version>
@@ -108,6 +108,14 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>io.cucumber</groupId>
@@ -267,8 +275,8 @@
             </dependency>
             <dependency>
                 <groupId>org.jolokia</groupId>
-                <artifactId>jolokia-core</artifactId>
-                <version>1.7.2</version>
+                <artifactId>jolokia-agent-jvm</artifactId>
+                <version>2.2.1</version>
             </dependency>
             <dependency>
                 <groupId>org.jvnet.jax-ws-commons.spring</groupId>
@@ -467,7 +475,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <artifactId>kotlin-stdlib</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -476,6 +484,17 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-reactor</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactive</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+            <version>1.10.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -514,13 +533,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.jvnet.jaxb2.maven2</groupId>
-                    <artifactId>maven-jaxb2-plugin</artifactId>
-                    <version>0.15.3</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
                     <configuration>
                         <release>${java.version}</release>
                     </configuration>
@@ -552,6 +567,11 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.jvnet.jaxb2.maven2</groupId>
+                    <artifactId>maven-jaxb2-plugin</artifactId>
+                    <version>0.15.3</version>
+                </plugin>
+                <plugin>
                     <groupId>org.jvnet.jax-ws-commons</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
                     <version>2.3</version>
@@ -561,8 +581,9 @@
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
+                <version>3.1.1</version>
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <releaseProfiles>release</releaseProfiles>
@@ -571,7 +592,7 @@
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
                         <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>1.9.5</version>
+                        <version>2.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -604,6 +625,10 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <!--
+                <extensions>true</extensions>
+                -->
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -633,7 +658,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>1.8</jvmTarget>
+                    <jvmTarget>${java.version}</jvmTarget>
                     <compilerPlugins>
                         <plugin>spring</plugin>
                     </compilerPlugins>
@@ -695,7 +720,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

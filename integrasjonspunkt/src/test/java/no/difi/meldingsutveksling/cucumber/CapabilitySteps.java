@@ -47,4 +47,5 @@ public class CapabilitySteps {
     public void theReturnedCapabilitiesAre(String expectedJson) throws JSONException {
         JSONAssert.assertEquals(expectedJson, response.getBody(), true);
     }
+
 }
