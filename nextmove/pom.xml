@@ -24,12 +24,6 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>json-smart</artifactId>
-                    <groupId>net.minidev</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
