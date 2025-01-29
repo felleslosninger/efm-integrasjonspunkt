@@ -108,6 +108,7 @@
 
     <dependencyManagement>
         <dependencies>
+
             <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
@@ -115,14 +116,27 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- moduler fra dette prosjektet -->
+
             <dependency>
-                <groupId>org.jolokia</groupId>
-                <artifactId>jolokia-core</artifactId>
-                <version>1.7.2</version>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>altinn-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>altinnexchange</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -134,11 +148,14 @@
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>dokumentpakking</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>common</artifactId>
-                <version>${project.version}</version>
+                <!--
+                <exclusions>
+                    <exclusion>
+                        <artifactId>json-smart</artifactId>
+                        <groupId>net.minidev</groupId>
+                    </exclusion>
+                </exclusions>
+                -->
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
@@ -147,12 +164,27 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinn-client</artifactId>
+                <artifactId>dpi-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>fiks-meldingsformidler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>nextmove</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>post-til-private</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>post-til-virksomhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -165,35 +197,21 @@
                 <artifactId>validation</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>dpi-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>post-til-private</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>fiks-meldingsformidler</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>post-til-virksomhet</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinnexchange</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+
+            <!-- eformidling eksterne fellesmoduler -->
+
             <dependency>
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>audit</artifactId>
                 <version>${efm-common.version}</version>
+                <!--
+                <exclusions>
+                    <exclusion>
+                        <artifactId>json-smart</artifactId>
+                        <groupId>net.minidev</groupId>
+                    </exclusion>
+                </exclusions>
+                -->
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
@@ -246,6 +264,11 @@
                 <groupId>no.digdir</groupId>
                 <artifactId>efm-dpi-client</artifactId>
                 <version>${efm-dpi-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jolokia</groupId>
+                <artifactId>jolokia-core</artifactId>
+                <version>1.7.2</version>
             </dependency>
             <dependency>
                 <groupId>org.jvnet.jax-ws-commons.spring</groupId>
@@ -428,11 +451,6 @@
                 <version>3.2</version>
             </dependency>
             <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>9.1</version>
-            </dependency>
-            <dependency>
                 <groupId>io.mockk</groupId>
                 <artifactId>mockk</artifactId>
                 <version>1.12.0</version>
@@ -460,6 +478,10 @@
             <artifactId>kotlinx-coroutines-reactor</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
             <scope>test</scope>
@@ -476,18 +498,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
-                <exclusion>
-                    <artifactId>asm</artifactId>
-                    <groupId>org.ow2.asm</groupId>
-                </exclusion>
                 <exclusion>
                     <artifactId>android-json</artifactId>
                     <groupId>com.vaadin.external.google</groupId>
