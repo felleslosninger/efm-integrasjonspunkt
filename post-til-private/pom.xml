@@ -99,7 +99,6 @@
             <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
-                <version>4.0.8</version>
                 <executions>
                     <execution>
                         <goals>
@@ -136,13 +135,6 @@
                         <arg>-Xwildcard</arg>
                         <arg>-Xinheritance</arg>
                     </args>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.jvnet.jaxb</groupId>
-                            <artifactId>jaxb-plugins</artifactId>
-                            <version>4.0.8</version>
-                        </plugin>
-                    </plugins>
                 </configuration>
             </plugin>
         </plugins>
