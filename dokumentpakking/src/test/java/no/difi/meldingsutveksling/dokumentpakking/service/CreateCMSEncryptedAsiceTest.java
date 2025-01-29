@@ -14,14 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.util.InMemoryResource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -95,7 +94,7 @@ class CreateCMSEncryptedAsiceTest {
     @Autowired
     private AsicParser asicParser;
 
-    @MockBean TransactionTemplate transactionTemplate;
+    @MockitoBean TransactionTemplate transactionTemplate;
     @Mock private TransactionStatus transactionStatus;
 
     @BeforeEach
@@ -165,4 +164,5 @@ class CreateCMSEncryptedAsiceTest {
                         tuple("test.txt", "This is a test")
                 );
     }
+
 }
