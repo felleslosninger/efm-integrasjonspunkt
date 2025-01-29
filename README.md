@@ -40,7 +40,7 @@ alt av konfig, men den virker ikke å være 100% oppdatert.
 | Innstilling | Standardverdi | Eksempel     | Beskrivelse                                             |
 |-------------|---------------|--------------|---------------------------------------------------------|
 | difi.move.feature.enable-auth | false         | true / false | om applikasjonen skal kreve basic auth på api'er og web |
-| difi.security.user.name    |               | ola          | hvilket brukernavn som har tilgang                      
+| difi.security.user.name    |               | ola          | hvilket brukernavn som har tilgang |                     
 | difi.security.user.password   |               | topsecret    | hvilket passord brukeren med tilgang har                |
-|    |       |              |  |
-| test.all    | false       |              | om alt skal testes eller ei |
+|    |               |              |  |
+| test.all    | false         |              | om alt skal testes eller ei |

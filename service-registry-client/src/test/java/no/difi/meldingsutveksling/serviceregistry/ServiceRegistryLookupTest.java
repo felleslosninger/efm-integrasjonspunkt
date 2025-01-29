@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -23,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -68,13 +68,13 @@ public class ServiceRegistryLookupTest {
     @Autowired
     private ServiceRegistryLookup service;
 
-    @MockBean
+    @MockitoBean
     private IntegrasjonspunktProperties properties;
 
-    @MockBean
+    @MockitoBean
     private SasKeyRepository sasKeyRepoMock;
 
-    @MockBean
+    @MockitoBean
     private ServiceRegistryRestClient client;
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
@@ -174,4 +174,5 @@ public class ServiceRegistryLookupTest {
             }
         }
     }
+
 }
