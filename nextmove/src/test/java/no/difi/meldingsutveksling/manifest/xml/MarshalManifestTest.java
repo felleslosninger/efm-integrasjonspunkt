@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.manifest.xml;
 
 import no.difi.meldingsutveksling.domain.Iso6523;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +8,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
