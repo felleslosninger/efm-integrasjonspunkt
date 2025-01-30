@@ -115,25 +115,21 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- mcs org.codehaus.mojo:jaxb2-maven-plugin -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>xsd</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
+                        <id>xsd-generate</id>
                         <phase>generate-sources</phase>
-                        <configuration>
-                            <addGeneratedAnnotation>true</addGeneratedAnnotation>
-                            <sources>
-                                <source>${basedir}/xsd</source>
-                            </sources>
-                        </configuration>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <schemaDirectory>${basedir}/xsd</schemaDirectory>
+                    <markGenerated>true</markGenerated>
+                </configuration>
             </plugin>
         </plugins>
     </build>
