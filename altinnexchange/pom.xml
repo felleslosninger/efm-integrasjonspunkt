@@ -12,14 +12,6 @@
 
     <artifactId>altinnexchange</artifactId>
 
-    <properties>
-        <service.package>com.company</service.package>
-        <jakarta.xml.ws-api.version>4.0.0</jakarta.xml.ws-api.version>
-        <jaxws-rt.version>4.0.0</jaxws-rt.version>
-        <jaxws-ri.version>4.0.0</jaxws-ri.version>
-        <jaxws-maven-plugin.version>4.0.3</jaxws-maven-plugin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>jakarta.xml.ws</groupId>
@@ -28,7 +20,6 @@
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>3.0.0</version>
         </dependency>
     </dependencies>
 
@@ -45,7 +36,7 @@
             <plugin>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
-                <version>${jaxws-maven-plugin.version}</version>
+                <version>4.0.3</version>
                 <executions>
                     <execution>
                         <id>normal-messages</id>
