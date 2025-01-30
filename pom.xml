@@ -362,6 +362,11 @@
                 <artifactId>vavr</artifactId>
                 <version>0.10.3</version>
             </dependency>
+            <dependency>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-plugins-runtime</artifactId>
+                <version>4.0.8</version>
+            </dependency>
 
             <!-- versjonsstyring av test dependencies -->
 
