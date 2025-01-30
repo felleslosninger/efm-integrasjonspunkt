@@ -164,14 +164,6 @@
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>dokumentpakking</artifactId>
                 <version>${project.version}</version>
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <artifactId>json-smart</artifactId>
-                        <groupId>net.minidev</groupId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
@@ -220,14 +212,6 @@
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>audit</artifactId>
                 <version>${efm-common.version}</version>
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <artifactId>json-smart</artifactId>
-                        <groupId>net.minidev</groupId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
@@ -292,9 +276,9 @@
                 <version>4.0.3</version>
             </dependency>
             <dependency>
-                <groupId>javax.jws</groupId>
-                <artifactId>jsr181-api</artifactId>
-                <version>1.0-MR1</version>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
@@ -341,11 +325,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
                 <version>${commons.text.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.modelmapper</groupId>
-                <artifactId>modelmapper</artifactId>
-                <version>${modelmapper.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
@@ -402,54 +381,29 @@
                 <version>1.16.1</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
-                <version>22.0.0</version>
-            </dependency>
-            <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>
                 <version>0.10.3</version>
             </dependency>
             <dependency>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-                <version>2.3.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apiguardian</groupId>
-                <artifactId>apiguardian-api</artifactId>
-                <version>1.1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>2.10.8</version>
-            </dependency>
-            <dependency>
                 <groupId>org.mock-server</groupId>
                 <artifactId>mockserver-junit-jupiter</artifactId>
-                <version>5.14.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.javacrumbs.json-unit</groupId>
-                <artifactId>json-unit-core</artifactId>
-                <version>2.28.0</version>
+                <version>5.15.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>net.javacrumbs.json-unit</groupId>
                 <artifactId>json-unit</artifactId>
-                <version>2.28.0</version>
+                <version>4.1.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>net.javacrumbs.json-unit</groupId>
                 <artifactId>json-unit-assertj</artifactId>
-                <version>2.28.0</version>
+                <version>4.1.0</version>
                 <scope>test</scope>
             </dependency>
+            <!--
             <dependency>
                 <groupId>com.github.java-json-tools</groupId>
                 <artifactId>jackson-coreutils</artifactId>
@@ -461,16 +415,12 @@
                 <artifactId>objenesis</artifactId>
                 <version>3.2</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>io.mockk</groupId>
                 <artifactId>mockk</artifactId>
                 <version>1.12.0</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.wss4j</groupId>
-                <artifactId>wss4j-ws-security-common</artifactId>
-                <version>2.3.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
