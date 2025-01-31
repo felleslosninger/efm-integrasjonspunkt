@@ -43,12 +43,13 @@
         -->
     </dependencies>
 
+    <!--
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <id>set-additional-system-properties</id>
@@ -73,5 +74,6 @@
             </plugin>
         </plugins>
     </build>
+    -->
 
 </project>
