@@ -32,15 +32,5 @@ Linker til observability
 
 
 ## Konfigurasjon av Integrasjonspunktet
-FIXME her beskriver vi alle mulige konfigurasjonsparameter og hva som er default.
-
-Det er en [sample.properties](integrasjonspunkt-local.sample.properties) fil som er ment å vise eksempler på
-alt av konfig, men den virker ikke å være 100% oppdatert.
-
-| Innstilling | Standardverdi | Eksempel     | Beskrivelse                                             |
-|-------------|---------------|--------------|---------------------------------------------------------|
-| difi.move.feature.enable-auth | false         | true / false | om applikasjonen skal kreve basic auth på api'er og web |
-| difi.security.user.name    |               | ola          | hvilket brukernavn som har tilgang |                     
-| difi.security.user.password   |               | topsecret    | hvilket passord brukeren med tilgang har                |
-|    |               |              |  |
-| test.all    | false         |              | om alt skal testes eller ei |
+Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på
+konfig, for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
