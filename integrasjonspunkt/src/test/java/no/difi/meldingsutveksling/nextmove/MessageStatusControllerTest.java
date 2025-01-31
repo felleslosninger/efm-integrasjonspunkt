@@ -171,7 +171,6 @@ public class MessageStatusControllerTest {
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
     }
 
-    // FIXME temporarily disabled, error was "PageImpl cannot be returned by toString(), toString() should return String"
     @Test
     void testFindMessageStatusInDateRange() throws Exception {
         OffsetDateTime fromDateTime = OffsetDateTime.parse("2021-06-09T10:18:40.868+02:00");
