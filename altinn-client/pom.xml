@@ -37,10 +37,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jzlib</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
