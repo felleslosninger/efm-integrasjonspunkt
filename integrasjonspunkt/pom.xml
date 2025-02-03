@@ -552,14 +552,6 @@
                                             ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}
                                         </project-version>
                                     </attributes>
-                                    <!-- FIXME not compatible anymore, disabled
-                                    <extensions>
-                                        <extension>
-                                            <className>com.bmuschko.asciidoctorj.tabbedcode.TabbedCodeBlockExtension
-                                            </className>
-                                        </extension>
-                                    </extensions>
-                                    -->
                                     <requires>
                                         <require>asciidoctor-diagram</require>
                                     </requires>
@@ -578,14 +570,6 @@
                                 <version>2.3.1</version>
                                 <scope>runtime</scope>
                             </dependency>
-                            <!-- FIXME not compatible anymore, disabled
-                            <dependency>
-                                <groupId>com.bmuschko</groupId>
-                                <artifactId>asciidoctorj-tabbed-code-extension</artifactId>
-                                <version>0.3</version>
-                                <scope>runtime</scope>
-                            </dependency>
-                            -->
                         </dependencies>
                     </plugin>
                 </plugins>
