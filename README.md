@@ -21,6 +21,18 @@ mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
+For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
+```bash
+mvn clean package -Prestdocs
+open integrasjonspunkt/target/generated-docs/restdocs.html
+```
+
+For å bygge, kjøre dokka og signere med gpg bruk profil `ossrh` :
+```bash
+mvn clean package -Possrh
+```
+
+
 ## Linker når man starter lokalt
 
 Dokumentasjon her : https://docs.digdir.no/docs/eFormidling/
