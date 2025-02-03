@@ -14,6 +14,12 @@ Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 - Merged removal of old DPI message service
 - Merged removal of eFormidling 1.0 (BEST/EDU)
 
+## Bygg og kjøre lokalt 
+
+```bash
+mvn clean package
+java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+```
 
 ## Linker når man starter lokalt
 
@@ -34,3 +40,4 @@ Linker til observability
 ## Konfigurasjon av Integrasjonspunktet
 Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på
 konfig, for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+
