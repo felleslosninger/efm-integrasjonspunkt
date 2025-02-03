@@ -36,7 +36,6 @@
             <plugin>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
-                <version>4.0.3</version>
                 <executions>
                     <execution>
                         <id>normal-messages</id>
@@ -111,13 +110,91 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <schemaDirectory>${basedir}/xsd</schemaDirectory>
+                            <markGenerated>true</markGenerated>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+            Det fungerer ikke å bare bruke JAXB plugin (datamodellene), siden AltInnClient også
+            trenger den genererte ws-client koden som jaxws-maven-plugin kan generere
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>${basedir}/xsd</schemaDirectory>
+                            <markGenerated>true</markGenerated>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>receipts</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaLanguage>WSDL</schemaLanguage>
+                            <schemaDirectory>${basedir}/wsdl</schemaDirectory>
+                            <schemaIncludes>
+                                <include>ReceiptExternalBasic.wsdl</include>
+                            </schemaIncludes>
+                            <strict>true</strict>
+                            <verbose>true</verbose>
+                            <extension>true</extension>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>big-messages-streaming</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaLanguage>WSDL</schemaLanguage>
+                            <schemaDirectory>${basedir}/wsdl</schemaDirectory>
+                            <schemaIncludes>
+                                <include>BrokerServiceExternalBasicStreamed.wsdl</include>
+                            </schemaIncludes>
+                            <generatePackage>no.difi.meldingsutveksling.altinn.mock.brokerstreamed</generatePackage>
+                            <strict>true</strict>
+                            <verbose>true</verbose>
+                            <extension>true</extension>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>big-messages</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaLanguage>WSDL</schemaLanguage>
+                            <schemaDirectory>${basedir}/wsdl</schemaDirectory>
+                            <schemaIncludes>
+                                <include>BrokerServiceExternalBasic.wsdl</include>
+                            </schemaIncludes>
+                            <generatePackage>no.difi.meldingsutveksling.altinn.mock.brokerbasic</generatePackage>
+                            <strict>true</strict>
+                            <verbose>true</verbose>
+                            <extension>true</extension>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <schemaDirectory>${basedir}/xsd</schemaDirectory>
-                    <markGenerated>true</markGenerated>
+                    <forceRegenerate>true</forceRegenerate>
+                    <removeOldOutput>false</removeOldOutput>
                 </configuration>
             </plugin>
+            -->
         </plugins>
     </build>
 
