@@ -2,19 +2,20 @@
 
 Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 
-- Java 21 upgrade (some code requires 17+)
-- Spring Boot 3.4.1 upgrade (lots of changes)
-- Jakarta EE migrering (from SB 2.x)
-- JUnit upgrade
+- Java 21+ oppgradering (some code require 17+)
+- Spring Boot 3.4 oppgradering ([lots of changes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes))
+- Jakarta EE migrering (from Java EE i SB 2.x)
 - All jaxb/jaxws usage migrated to jakarata
-- Removed Spring Cloud
+- JUnit upgrade (5.x)
+- Removed Spring Cloud and Eureka
 - Removed Sikker Digital Post Klient
 - Removed old / un-maintained "spring-security-oauth2" 2.5.2.RELEASE
-- Removed Kotlin (fremdeles noe som gjenstår, FIXME)
 - Merged removal of old DPI message service
 - Merged removal of eFormidling 1.0 (BEST/EDU)
+- Started to remove Kotlin (fremdeles endel som gjenstår og som må skrives om, FIXME)
 
 ## Bygg og kjøre lokalt 
+Testet og bygget med OpenJDK 21.0.5 og Maven 3.9.9.
 
 ```bash
 mvn clean package
@@ -32,9 +33,7 @@ For å bygge, kjøre dokka og signere med gpg bruk profil `ossrh` :
 mvn clean package -Possrh
 ```
 
-
 ## Linker når man starter lokalt
-
 Dokumentasjon her : https://docs.digdir.no/docs/eFormidling/
 
 Webside der man kan kikke på og slette konversasjoner
@@ -52,4 +51,3 @@ Linker til observability
 ## Konfigurasjon av Integrasjonspunktet
 Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på
 konfig, for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
-
