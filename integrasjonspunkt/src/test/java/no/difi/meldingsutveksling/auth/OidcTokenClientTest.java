@@ -4,8 +4,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.config.OauthRestTemplateConfig;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.oauth.JWTDecoder;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -14,9 +13,9 @@ import no.difi.move.common.oauth.JwtTokenResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
+import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class OidcTokenClientTest {
 
     private IntegrasjonspunktProperties props;
     private JwtTokenConfig config;
-    private MetricsRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
+    private ObservationRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
 
     private List<String> scopes = Arrays.asList(
             "move/dpo.read",
@@ -106,15 +105,16 @@ public class OidcTokenClientTest {
         System.out.println(response.getAccessToken());
     }
 
-
     @Test
     @Disabled("Manual test")
     public void testOathRestTemplate() throws URISyntaxException, MalformedURLException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
-        OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
-        RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
-        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
-        String response = restClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
+        //OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
+        //RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
+        // FIXME rewrite this test to use Oauth2RestTemplateConfig and get a proper RestClient with oauth2 token
+        RestClient restClient = null; // this will fail, rewrite
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        String response = serviceRegistryRestClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
         System.out.println(response);
     }
 
@@ -122,17 +122,19 @@ public class OidcTokenClientTest {
     @Disabled("Manual test")
     public void testSasTokenFetch() throws URISyntaxException, IOException, CertificateException, BadJWSException {
         JwtTokenClient oidcTokenClient = new JwtTokenClient(config);
-        OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
-        RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
-        RestClient restClient = new RestClient(props, ops, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
-        String response = restClient.getResource("sastoken");
+        //OauthRestTemplateConfig config = new OauthRestTemplateConfig(props, metricsRestTemplateCustomizer);
+        //RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
+        // FIXME rewrite this test to use Oauth2RestTemplateConfig and get a proper RestClient with oauth2 token
+        RestClient restClient = null; // this will fail, rewrite
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        String response = serviceRegistryRestClient.getResource("sastoken");
         System.out.println(response);
     }
 
-    public static class NoOpMetricsRestTemplateCustomizer extends MetricsRestTemplateCustomizer {
+    public static class NoOpMetricsRestTemplateCustomizer extends ObservationRestTemplateCustomizer {
 
         public NoOpMetricsRestTemplateCustomizer() {
-            super(null, null, null, null);
+            super(null, null);
         }
 
         @Override

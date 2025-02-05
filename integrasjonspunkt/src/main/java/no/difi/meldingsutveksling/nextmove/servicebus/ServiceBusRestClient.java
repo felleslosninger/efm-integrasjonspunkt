@@ -29,7 +29,6 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 
@@ -49,12 +48,12 @@ public class ServiceBusRestClient {
     private final ServiceBusRestTemplate restTemplate;
 
     public String getBase() {
-        return format("%s://%s", props.getNextmove().getServiceBus().isUseHttps() ? "https" : "http",
+        return "%s://%s".formatted(props.getNextmove().getServiceBus().isUseHttps() ? "https" : "http",
                 props.getNextmove().getServiceBus().getBaseUrl());
     }
 
     public void sendMessage(byte[] message, String queuePath) {
-        String resourceUri = format("%s/%s/messages",
+        String resourceUri = "%s/%s/messages".formatted(
                 getBase(),
                 queuePath);
         URI uri = convertToUri(resourceUri);
@@ -72,7 +71,7 @@ public class ServiceBusRestClient {
     }
 
     public Optional<ServiceBusMessage> receiveMessage() {
-        String resourceUri = format("%s/%s/messages/head", getBase(), serviceBusUtil.getLocalQueuePath());
+        String resourceUri = String.format("%s/%s/messages/head", getBase(), serviceBusUtil.getLocalQueuePath());
 
         String auth = createAuthorizationHeader(resourceUri);
         HttpHeaders headers = new HttpHeaders();
@@ -99,11 +98,11 @@ public class ServiceBusRestClient {
             try {
                 ServiceBusPayload payload = payloadConverter.convert(Objects.requireNonNull(response.getBody()));
                 sbmBuilder.payload(payload);
-                log.debug(format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
+                log.debug(String.format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
                         payload.getSbd().getMessageId()));
                 return Optional.of(sbmBuilder.build());
             } catch (IOException e) {
-                log.error(String.format("Error extracting ServiceBusPayload from message id=%s", messageId), e);
+                log.error("Error extracting ServiceBusPayload from message id=%s".formatted(messageId), e);
             }
         } catch (ResourceAccessException | IOException e) {
             log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());
@@ -120,7 +119,7 @@ public class ServiceBusRestClient {
             ArrayList<ServiceBusMessage> messages = new ArrayList<>();
             for (int i = 0; i < props.getNextmove().getServiceBus().getReadMaxMessages(); i++) {
                 Optional<ServiceBusMessage> msg = receiveMessage();
-                if (!msg.isPresent()) {
+                if (msg.isEmpty()) {
                     messagesInQueue = false;
                     break;
                 }
@@ -143,7 +142,7 @@ public class ServiceBusRestClient {
     }
 
     public void deleteMessage(ServiceBusMessage message) {
-        String resourceUri = format("%s/%s/messages/%s/%s",
+        String resourceUri = String.format("%s/%s/messages/%s/%s",
                 getBase(),
                 serviceBusUtil.getLocalQueuePath(),
                 message.getMessageId(),
@@ -167,7 +166,7 @@ public class ServiceBusRestClient {
         try {
             return new URI(uriString);
         } catch (URISyntaxException e) {
-            throw new MeldingsUtvekslingRuntimeException(format("Uri syntax error in: %s", uriString), e);
+            throw new MeldingsUtvekslingRuntimeException("Uri syntax error in: %s".formatted(uriString), e);
         }
     }
 
@@ -191,7 +190,7 @@ public class ServiceBusRestClient {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
 
-        return format("SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s",
+        return "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s".formatted(
                 urlEncoded,
                 signature,
                 expiry,

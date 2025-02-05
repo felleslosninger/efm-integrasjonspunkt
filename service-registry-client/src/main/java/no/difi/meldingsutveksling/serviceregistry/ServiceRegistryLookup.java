@@ -63,14 +63,14 @@ public class ServiceRegistryLookup {
                 .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPI)
                 .findFirst();
 
-        if (!serviceRecord.isPresent()) {
+        if (serviceRecord.isEmpty()) {
             String defaultProcess = properties.getArkivmelding().getDefaultProcess();
             serviceRecord = serviceRecords.stream()
                     .filter(r -> r.getProcess().equals(defaultProcess))
                     .findFirst();
         }
 
-        if (!serviceRecord.isPresent()) {
+        if (serviceRecord.isEmpty()) {
             serviceRecord = serviceRecords.stream()
                     .filter(r -> r.getService().getIdentifier() == ServiceIdentifier.DPE)
                     .findFirst();
@@ -109,10 +109,10 @@ public class ServiceRegistryLookup {
     }
 
     private String formatErrorMsg(SRParameter parameters) {
-        return String.format("Error looking up service record with parameters: %s", parameters);
+        return "Error looking up service record with parameters: %s".formatted(parameters);
     }
 
     private String formatErrorMsg(SRParameter parameters, String doctype) {
-        return String.format("Error looking up service record with document type '%s' and parameters: %s", doctype, parameters);
+        return "Error looking up service record with document type '%s' and parameters: %s".formatted(doctype, parameters);
     }
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings
+        xmlns="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+        xmlns:annox="urn:jaxb.jvnet.org:annox"
+        jaxb:extensionBindingPrefixes="xjc annox"
+        jaxb:version="3.0"
+>
+
+  <jaxb:globalBindings generateMixedExtensions="false"/>
+
+  <jaxb:bindings schemaLocation="../xsd/arkivmelding.xsd" node="/xs:schema">
+    <jaxb:bindings node="xs:complexType[@name='arkivmelding']">
+        <annox:annotateClass>@jakarta.xml.bind.annotation.XmlRootElement</annox:annotateClass>
+    </jaxb:bindings>
+  </jaxb:bindings>
+
+</bindings>

@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.ks.mapping;
 
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
@@ -23,8 +25,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
@@ -35,7 +35,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 @Slf4j
@@ -192,7 +191,7 @@ public class FiksMapper {
                 .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
                 .findAny()
                 .map(BusinessMessageFile::getIdentifier)
-                .orElseThrow(() -> new NextMoveException(format("No attachement \"%s\" found", ARKIVMELDING_FILE)));
+                .orElseThrow(() -> new NextMoveException("No attachement \"%s\" found".formatted(ARKIVMELDING_FILE)));
     }
 
     private List<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, List<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
@@ -216,7 +215,7 @@ public class FiksMapper {
                 .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
                 .findFirst()
                 .orElseThrow(() -> new NextMoveRuntimeException(
-                        String.format("File '%s' referenced in '%s' not found", referanseDokumentfil, message.getMessageId())));
+                "File '%s' referenced in '%s' not found".formatted(referanseDokumentfil, message.getMessageId())));
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
@@ -248,7 +247,7 @@ public class FiksMapper {
         try {
             return optionalCryptoMessagePersister.read(messageId, file.getIdentifier());
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Could not read file named '%s' for messageId='%s'", file.getIdentifier(), messageId), e);
+            throw new NextMoveRuntimeException("Could not read file named '%s' for messageId='%s'".formatted(file.getIdentifier(), messageId), e);
         }
     }
 

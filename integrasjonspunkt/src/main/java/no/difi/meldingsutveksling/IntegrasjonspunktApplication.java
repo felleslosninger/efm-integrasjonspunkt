@@ -1,20 +1,19 @@
 package no.difi.meldingsutveksling;
 
+import jakarta.annotation.PostConstruct;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.meldingsutveksling.config.VaultProtocolResolver;
 import no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor;
-import no.difi.move.common.config.SpringCloudProtocolResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.solr.SolrAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.Validator;
-import javax.annotation.PostConstruct;
+
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +21,7 @@ import java.util.TimeZone;
 
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_TIME_ZONE;
 
-@SpringBootApplication(exclude = {SolrAutoConfiguration.class})
+@SpringBootApplication
 public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrasjonspunktApplication.class);
@@ -49,7 +48,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             }
 
             ConfigurableApplicationContext context = new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
-                    .initializers(new SpringCloudProtocolResolver(), new VaultProtocolResolver())
+                    .initializers(new VaultProtocolResolver())
                     .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                     .run(args);
             checkNtpSync(context);
@@ -72,14 +71,14 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             NTPClient client = new NTPClient(host);
             long offset = client.getOffset();
             if (Math.abs(offset) > 5000) {
-                String errorStr = String.format("Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.", host, offset);
+                String errorStr = "Startup failed. Offset from NTP host %s was more than 5 seconds (%sms). Adjust local clock and try again.".formatted(host, offset);
                 log.error(errorStr);
                 String stars = "\n**************************\n";
                 System.out.println(stars + errorStr + stars);
                 context.close();
             }
         } catch (IOException e) {
-            log.error(String.format("Error while syncing with NTP %s, continuing startup..", host), e);
+            log.error("Error while syncing with NTP %s, continuing startup..".formatted(host), e);
         }
     }
 
@@ -96,6 +95,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
         log.error(MISSING_JCE_MESSAGE);
     }
 
+    // FIXME denne er ikke noe poeng i lenger, ingen crypto restriksjoner lenger
     private static boolean validateJCE() {
         try {
             int maxKeyLen = Cipher.getMaxAllowedKeyLength("AES");
@@ -104,4 +104,5 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
             return false;
         }
     }
+
 }

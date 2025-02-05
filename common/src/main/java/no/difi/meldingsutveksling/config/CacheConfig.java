@@ -73,22 +73,22 @@ public class CacheConfig extends CachingConfigurerSupport {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
-                log.error(String.format("Failed to get object(%s) from cache(%s)", key, cache.getName()), exception);
+                log.error("Failed to get object(%s) from cache(%s)".formatted(key, cache.getName()), exception);
             }
 
             @Override
             public void handleCachePutError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key, @Nullable Object value) {
-                log.error(String.format("Failed to put object(%s) into cache(%s)", key, cache.getName()), exception);
+                log.error("Failed to put object(%s) into cache(%s)".formatted(key, cache.getName()), exception);
             }
 
             @Override
             public void handleCacheEvictError(@NonNull RuntimeException exception, @NonNull Cache cache, @NonNull Object key) {
-                log.error(String.format("Failed to evict object(%s) from cache(%s)", key, cache.getName()), exception);
+                log.error("Failed to evict object(%s) from cache(%s)".formatted(key, cache.getName()), exception);
             }
 
             @Override
             public void handleCacheClearError(@NonNull RuntimeException exception, @NonNull Cache cache) {
-                log.error(String.format("Failed to clear cache(%s)", cache.getName()), exception);
+                log.error("Failed to clear cache(%s)".formatted(cache.getName()), exception);
             }
         };
     }

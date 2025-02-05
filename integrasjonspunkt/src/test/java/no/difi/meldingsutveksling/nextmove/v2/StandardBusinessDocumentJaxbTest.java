@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.xml.transform.StringResult;
 import org.xmlunit.matchers.CompareMatcher;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.time.OffsetDateTime;
 import java.util.Objects;

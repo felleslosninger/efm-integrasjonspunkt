@@ -31,7 +31,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
 
         if (SBDUtil.isReceipt(message.getSbd())) {
-            log.info(String.format("Message [%s] is a receipt - not supported by DPF. Discarding message.", message.getMessageId()));
+            log.info("Message [%s] is a receipt - not supported by DPF. Discarding message.".formatted(message.getMessageId()));
             conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT, LEST);
             return;
         }
@@ -41,7 +41,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
         // SvarUt garanterer leveranse etter ok mottak av melding
         conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT);
 
-        Audit.info(String.format("Message [id=%s, serviceIdentifier=%s] sent to SvarUt",
+        Audit.info("Message [id=%s, serviceIdentifier=%s] sent to SvarUt".formatted(
                 message.getMessageId(), message.getServiceIdentifier()),
                 markerFrom(message));
     }

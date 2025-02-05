@@ -39,7 +39,7 @@ public class DateTimeUtil {
         try {
             return DatatypeFactory.newInstance().newXMLGregorianCalendar(in);
         } catch (DatatypeConfigurationException e) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not convert '%s' to XMLGregorianCalendar", in), e);
+            throw new MeldingsUtvekslingRuntimeException("Could not convert '%s' to XMLGregorianCalendar".formatted(in), e);
         }
     }
 

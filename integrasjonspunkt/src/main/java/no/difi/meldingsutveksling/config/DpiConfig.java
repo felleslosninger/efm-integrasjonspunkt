@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
+import jakarta.xml.bind.JAXBException;
 import no.difi.meldingsutveksling.DpiReceiptHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
@@ -22,7 +23,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
-import javax.xml.bind.JAXBException;
 import java.time.Clock;
 
 @Configuration
@@ -94,10 +94,10 @@ public class DpiConfig {
     @Import(DpiClientConfig.class)
     public static class Json {
 
-        @Bean
-        public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient jsonMeldingsformidlerClient) {
-            return jsonMeldingsformidlerClient;
-        }
+//        @Bean
+//        public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient jsonMeldingsformidlerClient) {
+//            return jsonMeldingsformidlerClient;
+//        }
 
         @Bean
         public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,

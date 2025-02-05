@@ -11,20 +11,17 @@ import no.difi.move.common.io.WritableByteArrayResource;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.util.InMemoryResource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -38,8 +35,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CreateCMSEncryptedAsiceTest.Config.class, DokumentpakkingConfig.class})
+@SpringJUnitConfig(classes = {CreateCMSEncryptedAsiceTest.Config.class, DokumentpakkingConfig.class})
 class CreateCMSEncryptedAsiceTest {
 
     @Configuration
@@ -98,7 +94,7 @@ class CreateCMSEncryptedAsiceTest {
     @Autowired
     private AsicParser asicParser;
 
-    @MockBean TransactionTemplate transactionTemplate;
+    @MockitoBean TransactionTemplate transactionTemplate;
     @Mock private TransactionStatus transactionStatus;
 
     @BeforeEach
@@ -168,4 +164,5 @@ class CreateCMSEncryptedAsiceTest {
                         tuple("test.txt", "This is a test")
                 );
     }
+
 }

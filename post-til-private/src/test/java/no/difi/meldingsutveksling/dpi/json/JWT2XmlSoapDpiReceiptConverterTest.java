@@ -11,13 +11,11 @@ import no.difi.meldingsutveksling.dpi.client.domain.sbd.Virksomhetmottaker;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.xmlunit.builder.Input;
 import org.xmlunit.matchers.CompareMatcher;
 
@@ -29,8 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = JWT2XmlSoapDpiReceiptConverter.class)
+@SpringJUnitConfig(classes = JWT2XmlSoapDpiReceiptConverter.class)
 class JWT2XmlSoapDpiReceiptConverterTest {
 
     private static final String JWT = "eyJ4NWMiOlsiTUlJR";
@@ -38,8 +35,8 @@ class JWT2XmlSoapDpiReceiptConverterTest {
     private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
 
-    @MockBean private UnpackJWT unpackJWT;
-    @MockBean private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
+    @MockitoBean private UnpackJWT unpackJWT;
+    @MockitoBean private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
     @Autowired
     private JWT2XmlSoapDpiReceiptConverter target;
@@ -166,4 +163,5 @@ class JWT2XmlSoapDpiReceiptConverterTest {
                         .setValue(RECEIVER.getIdentifier())
                 ));
     }
+
 }

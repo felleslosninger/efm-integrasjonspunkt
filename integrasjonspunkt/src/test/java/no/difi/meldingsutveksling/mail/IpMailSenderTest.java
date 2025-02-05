@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.mail;
 
-import com.dumbster.smtp.SimpleSmtpServer;
-import com.dumbster.smtp.SmtpMessage;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetupTest;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,11 +26,11 @@ public class IpMailSenderTest {
 
     @InjectMocks private IpMailSender ipMailSender;
 
-    private static SimpleSmtpServer simpleSmtpServer;
+    private static GreenMail simpleSmtpServer;
 
     @BeforeAll
-    public static void beforeClass() throws IOException {
-        simpleSmtpServer = SimpleSmtpServer.start(SimpleSmtpServer.AUTO_SMTP_PORT);
+    public static void beforeClass() {
+        simpleSmtpServer = new GreenMail(ServerSetupTest.SMTP);
     }
 
     @AfterAll
@@ -38,14 +39,14 @@ public class IpMailSenderTest {
     }
 
     @BeforeEach
-    public void init() throws JAXBException {
+    public void init() {
         simpleSmtpServer.reset();
 
         IntegrasjonspunktProperties.Mail mail = new IntegrasjonspunktProperties.Mail();
         mail.setSmtpHost("localhost");
         mail.setSenderAddress("doofenshmirtz@evil.inc");
         mail.setReceiverAddress("stuntman@difi.no");
-        mail.setSmtpPort(String.valueOf(simpleSmtpServer.getPort()));
+        mail.setSmtpPort(String.valueOf(simpleSmtpServer.getSmtp().getPort()));
         mail.setEnableAuth("false");
         mail.setUsername("");
         mail.setPassword("");
@@ -56,17 +57,17 @@ public class IpMailSenderTest {
     }
 
     @Test
-    public void testSend() {
+    public void testSend() throws MessagingException, IOException {
         ipMailSender.send("foo", "foobody");
-        assertThat(simpleSmtpServer.getReceivedEmails()).hasSize(1);
+        assertThat(simpleSmtpServer.getReceivedMessages()).hasSize(1);
 
-        SmtpMessage smtpMessage = simpleSmtpServer.getReceivedEmails().get(0);
+        MimeMessage smtpMessage = simpleSmtpServer.getReceivedMessages()[0];
 
-        assertThat(smtpMessage.getHeaderValue("From")).isEqualTo("doofenshmirtz@evil.inc");
-        assertThat(smtpMessage.getHeaderValue("To")).isEqualTo("stuntman@difi.no");
-        assertThat(smtpMessage.getHeaderValue("Subject")).isEqualTo("foo");
+        assertThat(smtpMessage.getHeader("From")[0]).isEqualTo("doofenshmirtz@evil.inc");
+        assertThat(smtpMessage.getHeader("To")[0]).isEqualTo("stuntman@difi.no");
+        assertThat(smtpMessage.getHeader("Subject")[0]).isEqualTo("foo");
 
-        assertThat(smtpMessage.getBody()).isEqualTo("foobody");
+        assertThat(smtpMessage.getContent()).isEqualTo("foobody");
     }
 
 }

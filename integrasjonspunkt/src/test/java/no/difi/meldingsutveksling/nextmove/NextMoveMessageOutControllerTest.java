@@ -7,23 +7,21 @@ import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.config.MvcConfiguration;
-import no.difi.meldingsutveksling.config.SecurityConfiguration;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageOutController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveUploadedFile;
 import no.difi.meldingsutveksling.nextmove.v2.OnBehalfOfNormalizer;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +30,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -59,9 +57,8 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-        SecurityConfiguration.class,
+        Oauth2ClientSecurityConfig.class,
         FixedClockConfig.class,
         ValidationConfig.class,
         JacksonConfig.class,
@@ -79,13 +76,13 @@ class NextMoveMessageOutControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private NextMoveMessageService messageService;
 
-    @MockBean
+    @MockitoBean
     private OnBehalfOfNormalizer onBehalfOfNormalizer;
 
-    @MockBean
+    @MockitoBean
     private ArkivmeldingUtil arkivmeldingUtil;
 
     @Mock
@@ -124,9 +121,10 @@ class NextMoveMessageOutControllerTest {
                                                 .description("The Standard Business Document."),
                                         partWithName("Before The Law")
                                                 .optional()
-                                                .description("There can be zero or more attachments. The name of the part will be used as a title for the attachment.\n" +
-                                                        "The originalFilename will be used as the name of the file in the ASiC.\n" +
-                                                        "Please note that the Content-Type of the part must be set to the MIME-type of the attachment.")
+                                                .description("""
+                                                        There can be zero or more attachments. The name of the part will be used as a title for the attachment.
+                                                        The originalFilename will be used as the name of the file in the ASiC.
+                                                        Please note that the Content-Type of the part must be set to the MIME-type of the attachment.""")
                                 ),
                                 responseFields()
                                         .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
@@ -357,13 +355,13 @@ class NextMoveMessageOutControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("conversationId").optional().description("Filter on conversationId"),
                                         parameterWithName("messageId").optional().description("Filter on messageId"),
                                         parameterWithName("processIdentifier").optional().description("Filter on processIdentifier"),
                                         parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier"),
                                         parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier"),
-                                        parameterWithName("serviceIdentifier").optional().description(String.format("Filter on service identifier. Can be one of: %s", Arrays.stream(ServiceIdentifier.values())
+                                        parameterWithName("serviceIdentifier").optional().description("Filter on service identifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
                                                 .map(Enum::name)
                                                 .collect(Collectors.joining(", "))))
                                 ).and(getPagingParameterDescriptors()),
@@ -458,7 +456,7 @@ class NextMoveMessageOutControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("The messageId")
                                 ),
                                 responseFields()
@@ -487,7 +485,7 @@ class NextMoveMessageOutControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("The messageId")
                                 )
                         )
@@ -511,7 +509,7 @@ class NextMoveMessageOutControllerTest {
                                 requestHeaders(
                                         getDefaultHeaderDescriptors()
                                 ),
-                                requestParameters(
+                                queryParameters(
                                         parameterWithName("messageId").optional().description("The messageId")
                                 )
                         )
@@ -543,7 +541,7 @@ class NextMoveMessageOutControllerTest {
                                                 "The title can alternatively be specified using the name attribute of the Content-Disposition header. " +
                                                 "The filename is specified in the filename attribute of this header.")
                                 ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("messageId").optional().description("The messageId"),
                                 parameterWithName("title").optional().description("The attachment title can alternatively be specified in this request parameter. " +
                                         "If not specified here, then the title is extracted from the Content-Disposition HTTP header.")

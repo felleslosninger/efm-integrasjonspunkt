@@ -30,7 +30,7 @@ public class LoggedPropertyBindHandler extends AbstractBindHandler {
     @Override
     public void onFinish(ConfigurationPropertyName name, Bindable<?> target, BindContext context, Object result) throws Exception {
         if (target.getAnnotation(LoggedProperty.class) != null) {
-            log.info(String.format("Property set: %s = %s", name, om.writeValueAsString(result)));
+            log.info("Property set: %s = %s".formatted(name, om.writeValueAsString(result)));
         }
 
         super.onFinish(name, target, context, result);

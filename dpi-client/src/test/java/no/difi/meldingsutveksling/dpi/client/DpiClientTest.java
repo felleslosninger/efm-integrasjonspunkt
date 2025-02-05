@@ -1,8 +1,12 @@
 package no.difi.meldingsutveksling.dpi.client;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.Payload;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+import jakarta.mail.util.SharedByteArrayInputStream;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
 import no.difi.meldingsutveksling.UUIDGenerator;
@@ -30,10 +34,8 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.jupiter.MockServerExtension;
 import org.mockserver.junit.jupiter.MockServerSettings;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
@@ -42,22 +44,16 @@ import org.mockserver.model.RequestDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import reactor.test.StepVerifier;
 
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-import javax.mail.util.SharedByteArrayInputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -88,11 +84,10 @@ import static org.mockserver.model.HttpResponse.response;
         Plumber.class
 })
 @ActiveProfiles("test")
-@ExtendWith({SpringExtension.class, MockServerExtension.class})
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
 
-    @MockBean private TransactionTemplate transactionTemplate;
+    @MockitoBean private TransactionTemplate transactionTemplate;
     @Mock private TransactionStatus transactionStatus;
 
     @Autowired
@@ -125,7 +120,7 @@ class DpiClientTest {
     @Autowired
     private UnpackStandardBusinessDocument unpackStandardBusinessDocument;
 
-    @MockBean
+    @MockitoBean
     private UUIDGenerator uuidGenerator;
 
     @Value("classpath:/digital_ready_for_send-sbd.json")
@@ -253,7 +248,7 @@ class DpiClientTest {
 
         assertThatThrownBy(() -> send(client, input, httpResponse))
                 .isInstanceOf(DpiException.class)
-                .hasMessage(String.format("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}"));
+                .hasMessage("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}".formatted());
     }
 
     @Test
@@ -262,7 +257,7 @@ class DpiClientTest {
 
         client.when(request()
                         .withMethod("GET")
-                        .withPath(String.format("/dpi/messages/out/%s/statuses", uuid)))
+                        .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)))
                 .respond(response()
                         .withStatusCode(200)
                         .withContentType(MediaType.APPLICATION_JSON)
@@ -285,7 +280,7 @@ class DpiClientTest {
 
         client.verify(request()
                 .withMethod("GET")
-                .withPath(String.format("/dpi/messages/out/%s/statuses", uuid)));
+                .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)));
     }
 
     @Test
@@ -333,7 +328,7 @@ class DpiClientTest {
     @Test
     void testGetCmsEncryptedAsice(MockServerClient client) {
         UUID uuid = UUID.randomUUID();
-        String path = String.format("/dpi/downloadmessage/%s", uuid);
+        String path = "/dpi/downloadmessage/%s".formatted(uuid);
         byte[] bytes = new byte[1024 * 100];
         ThreadLocalRandom.current().nextBytes(bytes);
 
@@ -359,7 +354,7 @@ class DpiClientTest {
     @Test
     void testMarkAsRead(MockServerClient client) {
         UUID uuid = UUID.randomUUID();
-        String path = String.format("/dpi/messages/in/%s/read", uuid);
+        String path = "/dpi/messages/in/%s/read".formatted(uuid);
 
         client.when(request()
                         .withMethod("POST")
@@ -398,7 +393,7 @@ class DpiClientTest {
         String expected = IOUtils.toString(expectedSBD.getInputStream(), StandardCharsets.UTF_8);
 
         assertThatJson(payload.toString())
-                .when(paths(String.format("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue", standardBusinessDocument.getType())), then(Option.IGNORING_VALUES))
+                .when(paths("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue".formatted(standardBusinessDocument.getType())), then(Option.IGNORING_VALUES))
                 .isEqualTo(expected);
 
         return standardBusinessDocument;

@@ -39,7 +39,7 @@ public class NextMoveSender {
         } else {
             strategyFactory.getStrategy(msg.getServiceIdentifier())
                     .orElseThrow(() -> {
-                        String errorStr = String.format("Cannot send message - serviceIdentifier \"%s\" not supported",
+                        String errorStr = "Cannot send message - serviceIdentifier \"%s\" not supported".formatted(
                                 msg.getServiceIdentifier());
                         log.error(markerFrom(msg), errorStr);
                         return new NextMoveRuntimeException(errorStr);

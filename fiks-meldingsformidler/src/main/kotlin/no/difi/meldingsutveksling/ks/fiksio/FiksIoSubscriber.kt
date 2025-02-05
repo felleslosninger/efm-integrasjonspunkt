@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")

@@ -5,7 +5,6 @@ import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.ValidationException;
 import net.jimblackler.jsonschemafriend.Validator;
 
-import java.lang.instrument.IllegalClassFormatException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,7 +20,7 @@ public class JsonDigitalPostSchemaValidator {
 
     private Schema getSchema(String type) {
         return Optional.ofNullable(schemaMap.get(type))
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown standardBusinessDocument.standardBusinessDocumentHeader.documentIdentification.type = %s. Expecting one of %s", type, String.join(",", schemaMap.keySet()))));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown standardBusinessDocument.standardBusinessDocumentHeader.documentIdentification.type = %s. Expecting one of %s".formatted(type, String.join(",", schemaMap.keySet()))));
     }
 
     private void validate(Object document, Schema schema) {

@@ -6,8 +6,8 @@ import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryExcep
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 @Slf4j
 public class InServiceRegistryValidator implements ConstraintValidator<InServiceRegistry, String> {

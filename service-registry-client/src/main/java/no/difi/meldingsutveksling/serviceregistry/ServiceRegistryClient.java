@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ServiceRegistryClient {
 
-    private final RestClient client;
+    private final ServiceRegistryRestClient client;
     private final SasKeyRepository sasKeyRepository;
     private final ObjectMapper objectMapper;
     private final IntegrasjonspunktProperties props;
@@ -39,7 +39,7 @@ public class ServiceRegistryClient {
             return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
         } catch (IOException e) {
             throw new ServiceRegistryLookupException(
-                    String.format("Parsing response as a IdentifierResource JSON object failed. Content is: %s", identifierResourceString)
+                    "Parsing response as a IdentifierResource JSON object failed. Content is: %s".formatted(identifierResourceString)
                     , e);
         }
     }
@@ -62,7 +62,7 @@ public class ServiceRegistryClient {
                         parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {
                 log.warn("Could not parse error response from service registry");
-                throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status: %s (%s)",
+                throw new ServiceRegistryLookupException("Caught exception when looking up service record with parameter %s, http status: %s (%s)".formatted(
                         parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
         } catch (BadJWSException e) {

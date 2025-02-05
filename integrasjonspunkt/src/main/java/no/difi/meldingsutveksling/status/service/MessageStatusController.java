@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -18,11 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
+
 import java.time.OffsetDateTime;
 import java.util.Optional;
-
-import static java.lang.String.format;
 
 @RestController
 @Validated
@@ -38,8 +37,8 @@ public class MessageStatusController {
     @Transactional(readOnly = true)
     public Page<MessageStatus> find(
             @Valid MessageStatusQueryInput input,
-            @RequestParam(value = "fromDateTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromDateTime,
-            @RequestParam(value = "toDateTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDateTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fromDateTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime toDateTime,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
             return statusRepo.find(input, pageable);
@@ -49,7 +48,7 @@ public class MessageStatusController {
     @JsonView(Views.MessageStatus.class)
     @Transactional(readOnly = true)
     public Page<MessageStatus> findByMessageId(
-            @PathVariable("messageId") String messageId,
+            @PathVariable String messageId,
             @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
         return statusRepo.findByConversationMessageId(messageId, pageable);
@@ -61,7 +60,7 @@ public class MessageStatusController {
     public MessageStatus peekLatest() {
         Optional<Long> statusId = statusQueue.receiveStatus();
         return statusId.map(s -> statusRepo.findById(s)
-                    .orElseThrow(() -> new NextMoveRuntimeException(format("MessageStatus with id=%s not found in DB", s))))
+                    .orElseThrow(() -> new NextMoveRuntimeException("MessageStatus with id=%s not found in DB".formatted(s))))
                 .orElseThrow(NoContentException::new);
     }
 
