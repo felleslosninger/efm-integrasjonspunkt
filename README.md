@@ -14,6 +14,10 @@ Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 - Merged removal of eFormidling 1.0 (BEST/EDU)
 - Started to remove Kotlin (fremdeles endel som gjenstår og som må skrives om, FIXME)
 
+Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
+- Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
+- Swagger-UI (http://localhost:9093/swagger-ui/index.html)
+
 ## Bygg og kjøre lokalt 
 Testet og bygget med OpenJDK 21.0.5 og Maven 3.9.9.
 
@@ -34,23 +38,28 @@ mvn clean package -Possrh
 ```
 
 ## Linker når Integrasjonspunkt er starter lokalt
-Dokumentasjon her : https://docs.digdir.no/docs/eFormidling/
+Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
 
 Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
-- [http://localhost:9093/viewreceipts 🚨 ?? skal fjernes ?? 🚨](http://localhost:9093/viewreceipts)
+- http://localhost:9093/viewreceipts  🚨 Ikke i bruk / kan fjernes ? 🚨
 
 En API funksjon som er lett å teste i nettleser :
 - http://localhost:9093/api/statuses
 
-Linker til observability 
-- http://localhost:9093/manage/info
+Linker til observability :
+  http://localhost:9093/manage/info
 - http://localhost:9093/manage/health
 - http://localhost:9093/manage/health/liveness
 - http://localhost:9093/manage/health/readiness
 - http://localhost:9093/manage/metrics
 - http://localhost:9093/manage/prometheus
 
+Linker til logger, config og alt annet :
+- http://localhost:9093/manage/logfile
+- `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
+- `curl http://localhost:9093/manage/configprops | jq`
+- `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Konfigurasjon av Integrasjonspunktet
 Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på
