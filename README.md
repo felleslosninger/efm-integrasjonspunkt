@@ -33,13 +33,17 @@ For å bygge, kjøre dokka og signere med gpg bruk profil `ossrh` :
 mvn clean package -Possrh
 ```
 
-## Linker når man starter lokalt
+## Linker når Integrasjonspunkt er starter lokalt
 Dokumentasjon her : https://docs.digdir.no/docs/eFormidling/
 
-Webside der man kan kikke på og slette konversasjoner
+Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
+- [http://localhost:9093/viewreceipts 🚨 ?? skal fjernes ?? 🚨](http://localhost:9093/viewreceipts)
 
-Linker til observability
+En API funksjon som er lett å teste i nettleser :
+- http://localhost:9093/api/statuses
+
+Linker til observability 
 - http://localhost:9093/manage/info
 - http://localhost:9093/manage/health
 - http://localhost:9093/manage/health/liveness
