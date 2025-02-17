@@ -1,0 +1,18 @@
+# Filen inneholder oversikt over nyeste versjoner i hver miljø.
+# Benyttes av Kosmos for å vite hvilke versjon som skal lastes ned i de ulike miljø.
+# Miljøene som er definer i Kosmos er : dev|itest|staging|production
+
+integrasjonspunkt:
+  versions:
+    dev:
+      latest: 1.0.0
+      earlybird: 1.1.0-SNAPSHOT
+    itest:
+      latest: 2.0.0
+      earlybird: 2.1.0-SNAPSHOT
+    staging:
+      latest: 3.0.0
+      earlybird: 3.1.0-SNAPSHOT
+    production:
+      latest: 4.0.0
+      earlybird: 4.1.0-SNAPSHOT
