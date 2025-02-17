@@ -1,9 +1,10 @@
-# Filen inneholder oversikt over nyeste versjoner i hver miljø.
-# Benyttes av Kosmos for å vite hvilke versjon som skal lastes ned i de ulike miljø.
-# Miljøene som er definer i Kosmos er : dev|itest|staging|production
+# Liste siste "godkjente" versjon av Integrasjonspunktet for hvert type miljø.
+# Lastes ned av Kosmos ved oppstart for å kjøre automatiske oppdgraderinger.
+# Miljø-profil-navna er "hardkodet" i Kosmos og kun disse 4 er lov : dev|itest|staging|production
+# Konfigurasjon i Kosmos blir f.eks. "kosmos.integrasjonspunkt.profile=itest"
 
 integrasjonspunkt:
-  versions:
+  environments:
     dev:
       latest: 1.0.0
       earlybird: 1.1.0-SNAPSHOT
