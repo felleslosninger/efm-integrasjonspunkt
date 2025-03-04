@@ -14,7 +14,7 @@ public class MessageStatusMapper {
     public MessageStatus getMessageStatus(DpiMessageType dpiMessageType) {
         switch (dpiMessageType) {
             case LEVERINGSKVITTERING:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at fysisk post er klargjort for utskrift");
             case AAPNINGSKVITTERING:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra Innbygger for at digital post er åpnet");
             case VARSLINGFEILETKVITTERING:
