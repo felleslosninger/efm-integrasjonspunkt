@@ -1,7 +1,7 @@
 difi:
   move:
     oidc:
-      enable: 'false'
+      enable: false
     dpi:
       uri: http://localhost:8080/api/c2
       client-type: json
@@ -24,33 +24,33 @@ difi:
         endpointUrl: http://localhost:8001/dpf
         username: username
       inn:
-        username: '910075918'
-        mailOnError: 'false'
+        username: 910075918
+        mailOnError: false
         password: password
         baseUrl: http://localhost:8001/svarinn
-      pollingrate: '10000'
+      pollingrate: 10000
     org:
-      number: '910075918'
+      number: 910075918
       keystore:
         password: changeit
         path: cloud:mock.jks
-        alias: '910075918'
+        alias: 910075918
     sign:
-      enable: 'false'
+      enable: false
     feature:
-      enableDPE: 'true'
-      enableDPF: 'true'
-      enableDPI: 'true'
-      enableDPO: 'true'
-      enableDPV: 'true'
+      enableDPE: true
+      enableDPF: true
+      enableDPI: true
+      enableDPO: true
+      enableDPV: true
     serviceregistryEndpoint: http://localhost:8090
     nextmove:
       serviceBus:
         baseUrl: localhost:8001/dpe
-        useHttps: 'false'
+        useHttps: false
 app:
   logger:
-    enableLogstash: 'false'
+    enableLogstash: false
 eureka:
   client:
-    enabled: 'false'
+    enabled: false

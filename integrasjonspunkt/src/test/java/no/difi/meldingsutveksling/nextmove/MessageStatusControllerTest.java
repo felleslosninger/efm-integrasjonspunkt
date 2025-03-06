@@ -54,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(MessageStatusController.class)
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 public class MessageStatusControllerTest {
 

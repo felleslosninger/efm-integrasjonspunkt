@@ -9,7 +9,7 @@ difi:
       krr-print-url: https://kontaktregisteret.no/rest/v2/printSertifikat
     dpo:
       streamingserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
-      serviceEditionCode: '170101'
+      serviceEditionCode: 170101
       brokerserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
     oidc:
       keystore:
@@ -31,13 +31,13 @@ difi:
       inn:
         baseUrl: https://svarut.ks.no/tjenester/svarinn
     feature:
-      enableDPE: 'true'
-      enableDPF: 'false'
-      enableDPI: 'false'
-      enableDPO: 'false'
-      enableDPV: 'false'
+      enableDPE: true
+      enableDPF: false
+      enableDPI: false
+      enableDPO: false
+      enableDPV: false
     arkivmelding:
-      generate-receipts: 'false'
+      generate-receipts: false
     dpv:
       endpointUrl: https://www.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
 eureka:

@@ -4,6 +4,6 @@ app:
 spring:
   cloud:
     config:
-      enabled: 'true'
+      enabled: true
       uri: https://eformidling.dev/discovery/eureka/config
-      fail-fast: 'true'
+      fail-fast: true

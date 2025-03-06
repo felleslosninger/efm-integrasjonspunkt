@@ -46,7 +46,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest(SubscriptionController.class)
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class SubscriptionControllerTest {

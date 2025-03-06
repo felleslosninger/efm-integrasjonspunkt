@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 @ContextConfiguration(classes = JacksonTestConfig.class)
 class PeekNextMoveMessageInImplTest {

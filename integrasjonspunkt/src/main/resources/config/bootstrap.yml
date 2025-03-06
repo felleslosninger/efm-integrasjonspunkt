@@ -1,7 +1,7 @@
 app:
   logger:
     destination: stream-meldingsutveksling.difi.no:443
-    enableLogstash: 'true'
+    enableLogstash: true
 logging:
   file:
     name: integrasjonspunkt-logs/application.log
@@ -17,6 +17,6 @@ spring:
     name: integrasjonspunkt
   cloud:
     config:
-      enabled: 'false'
+      enabled: false
   profiles:
     active: production

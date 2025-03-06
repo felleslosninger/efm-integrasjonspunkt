@@ -15,7 +15,6 @@ import java.time.OffsetDateTime;
 import static org.junit.Assert.assertTrue;
 
 @DataJpaTest
-@TestPropertySource("classpath:/config/application-test.yml")
 @ActiveProfiles("test")
 class MessageStatusRepositoryTest {
 

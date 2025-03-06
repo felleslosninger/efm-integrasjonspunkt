@@ -6,11 +6,11 @@ eureka:
 difi:
   move:
     feature:
-      enableDPE: 'true'
-      enableDPF: 'false'
-      enableDPI: 'false'
-      enableDPO: 'false'
-      enableDPV: 'false'
+      enableDPE: true
+      enableDPF: false
+      enableDPI: false
+      enableDPO: false
+      enableDPV: false
     serviceregistryEndpoint: https://test.eformidling.no/adressetjeneste
     oidc:
       keystore:
@@ -23,7 +23,7 @@ difi:
       streamingserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
       brokerserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
     arkivmelding:
-      generate-receipts: 'false'
+      generate-receipts: false
     dpi:
       endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
       certificate:

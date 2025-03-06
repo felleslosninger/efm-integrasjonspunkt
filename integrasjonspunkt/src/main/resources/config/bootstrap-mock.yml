@@ -1,6 +1,6 @@
 spring:
   cloud:
     config:
-      enabled: 'true'
+      enabled: true
       uri: https://test.eformidling.no/discovery/config
-      fail-fast: 'true'
+      fail-fast: true
