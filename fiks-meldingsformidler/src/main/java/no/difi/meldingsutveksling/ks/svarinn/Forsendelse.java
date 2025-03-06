@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -47,6 +48,7 @@ public class Forsendelse {
         private String dokumentetsDato;
         private String tittel;
         private String saksBehandler;
+        private List<Map<String, String>> ekstraMetadata;
     }
 
     @Data
