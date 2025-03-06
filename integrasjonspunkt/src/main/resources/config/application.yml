@@ -74,9 +74,9 @@ difi:
         upload-size-limit: 2GB
         host: io.fiks.test.ks.no
       ut:
-        username:
+        username: ''
         default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
-        password:
+        password: ''
         endpointUrl: https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9
         upload-size-limit: 1GB
         kun-digital-levering: false
@@ -89,9 +89,9 @@ difi:
       inn:
         readTimeout: 30000
         process: urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
-        password:
+        password: ''
         enable: ${difi.move.feature.enableDPF}
-        username:
+        username: ''
         mailOnError: true
         connectTimeout: 10000
         document-type: urn:no:difi:arkivmelding:xsd::arkivmelding
@@ -109,11 +109,11 @@ difi:
       cryptoMessagePersister: true
       enableDPFIO: false
       enableReceipts: true
-      enableDPE: false
+      enableDPE: true
       enableDPF: false
       enableDPI: false
       enableQueue: true
-      enableDPO: true
+      enableDPO: false
       enableDPV: false
       retryOnDeadLock: true
     nextmove:
@@ -168,7 +168,7 @@ difi:
         scopes: digitalpostinnbygger:send
       c2-type: web
       initialBufferSize: 100000
-      language: NO
+      language: 'NO'
       krr-print-url: https://test.kontaktregisteret.no/rest/v2/printSertifikat
       printSettings:
         returnType: SHREDDING
@@ -203,16 +203,16 @@ difi:
         type: jks
     dpv:
       notifySms: true
-      upload-size-limit: "200MB"
+      upload-size-limit: 200MB
       default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
       enableDueDate: true
-      notification-text: "$reporteeName$: Du har mottatt en melding fra $reporterName$."
-      sensitive-notification-text: "$reporteeName$, har mottatt en taushetsbelagt melding
+      notification-text: '$reporteeName$: Du har mottatt en melding fra $reporterName$.'
+      sensitive-notification-text: $reporteeName$, har mottatt en taushetsbelagt melding
         fra $reporterName$. For å få tilgang til meldingen, er det nødvendig at noen
         i $reporteeName$ har fått tildelt rollen «Taushetsbelagt post fra det offentlige»
         i Altinn. Dersom dere er usikre på om noen har slik tilgang, anbefaler vi
         sterkt at dette sjekkes. Les mer om å gi tilgang til rollen «Taushetsbelagt
-        post» på Altinns nettsider."
+        post» på Altinns nettsider.
       endpointUrl: https://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
       sensitive-service-code: 5504
       daysToReply: 7
@@ -255,7 +255,7 @@ difi:
     sign:
       enable: true
       jwkUrl: ${difi.move.serviceregistryEndpoint}/jwk
-    serviceregistryEndpoint: https://eformidling.no/adressetjeneste
+    serviceregistryEndpoint: https://meldingsutveksling.difi.no/serviceregistry
     avtalt:
       receipt-process: urn:no:difi:profile:avtalt:response:ver1.0
     webhooks:
