@@ -24,15 +24,20 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
@@ -75,9 +80,9 @@ public class FiksMapper {
         }
         String forsendelsesid = senderRef.orElse(message.getMessageId());
         return SendForsendelseMedId.builder()
-                .withForsendelse(getForsendelse(message, certificate, reject))
-                .withForsendelsesid(forsendelsesid)
-                .build();
+            .withForsendelse(getForsendelse(message, certificate, reject))
+            .withForsendelsesid(forsendelsesid)
+            .build();
     }
 
     private Forsendelse getForsendelse(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
@@ -96,29 +101,29 @@ public class FiksMapper {
         }
 
         return Forsendelse.builder()
-                .withEksternref(message.getMessageId())
-                .withForsendelseType(getForsendelseType(message))
-                .withKunDigitalLevering(false)
-                .withSvarPaForsendelse(receiverRef.orElse(null))
-                .withTittel(journalpost.getOffentligTittel())
-                .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
-                .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())
-                .withKryptert(properties.getFiks().isKryptert())
-                .withAvgivendeSystem("")
-                .withPrintkonfigurasjon(getPrintkonfigurasjon())
-                .withMottaker(getMottaker(message))
-                .withSvarSendesTil(getSvarSendesTil(message, journalpost))
-                .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
-                .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
-                .withKunDigitalLevering(properties.getFiks().getUt().isKunDigitalLevering())
-                .build();
+            .withEksternref(message.getMessageId())
+            .withForsendelseType(getForsendelseType(message))
+            .withKunDigitalLevering(false)
+            .withSvarPaForsendelse(receiverRef.orElse(null))
+            .withTittel(journalpost.getOffentligTittel())
+            .withKrevNiva4Innlogging(kreverNiva4Innlogging(message))
+            .withKonteringskode(properties.getFiks().getUt().getKonteringsKode())
+            .withKryptert(properties.getFiks().isKryptert())
+            .withAvgivendeSystem("")
+            .withPrintkonfigurasjon(getPrintkonfigurasjon())
+            .withMottaker(getMottaker(message))
+            .withSvarSendesTil(getSvarSendesTil(message, journalpost))
+            .withMetadataFraAvleverendeSystem(metaDataFrom(saksmappe, journalpost))
+            .withDokumenter(mapArkivmeldingDokumenter(message, getDokumentbeskrivelser(journalpost), certificate, reject))
+            .withKunDigitalLevering(properties.getFiks().getUt().isKunDigitalLevering())
+            .build();
     }
 
     private String getForsendelseType(NextMoveOutMessage message) {
         return getDpfSettings(message)
-                .map(DpfSettings::getForsendelseType)
-                .filter(StringUtils::hasText)
-                .orElse(null);
+            .map(DpfSettings::getForsendelseType)
+            .filter(StringUtils::hasText)
+            .orElse(null);
     }
 
     private Optional<DpfSettings> getDpfSettings(NextMoveOutMessage message) {
@@ -131,13 +136,13 @@ public class FiksMapper {
 
     private Printkonfigurasjon getPrintkonfigurasjon() {
         return Printkonfigurasjon.builder()
-                .withTosidig(true)
-                .withFargePrint(false)
-                .withBrevtype(Brevtype.BPOST).build();
+            .withTosidig(true)
+            .withFargePrint(false)
+            .withBrevtype(Brevtype.BPOST).build();
     }
 
     private Adresse getSvarSendesTil(NextMoveOutMessage message, Journalpost journalpost) {
-        for (Korrespondansepart part : journalpost.getKorrespondansepart()){
+        for (Korrespondansepart part : journalpost.getKorrespondansepart()) {
             if (part.getKorrespondanseparttype() == null) {
                 log.warn("Invalid value for korrespondanseparttype element in Noark5 arkivmelding");
                 journalpost.getKorrespondansepart().clear();
@@ -145,10 +150,10 @@ public class FiksMapper {
             }
         }
         return journalpost.getKorrespondansepart().stream()
-                .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
-                .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
-                .findFirst()
-                .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
+            .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
+            .map(a -> mottakerFrom(a, message.getSenderIdentifier()))
+            .findFirst()
+            .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
     }
 
     private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
@@ -158,17 +163,17 @@ public class FiksMapper {
 
     private List<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
         return journalpost.getDokumentbeskrivelseAndDokumentobjekt().stream()
-                .filter(Dokumentbeskrivelse.class::isInstance)
-                .map(Dokumentbeskrivelse.class::cast)
-                .sorted((o1, o2) -> {
-                    if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
-                        return -1;
-                    } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
-                        return 1;
-                    }
-                    return 0;
-                })
-                .collect(Collectors.toList());
+            .filter(Dokumentbeskrivelse.class::isInstance)
+            .map(Dokumentbeskrivelse.class::cast)
+            .sorted((o1, o2) -> {
+                if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
+                    return -1;
+                } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
+                    return 1;
+                }
+                return 0;
+            })
+            .collect(Collectors.toList());
     }
 
     private Adresse getMottaker(NextMoveOutMessage message) {
@@ -188,48 +193,48 @@ public class FiksMapper {
 
     private String getArkivmeldingIdentifier(NextMoveOutMessage message) throws NextMoveException {
         return message.getFiles().stream()
-                .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
-                .findAny()
-                .map(BusinessMessageFile::getIdentifier)
-                .orElseThrow(() -> new NextMoveException("No attachement \"%s\" found".formatted(ARKIVMELDING_FILE)));
+            .filter(f -> ARKIVMELDING_FILE.equals(f.getFilename()))
+            .findAny()
+            .map(BusinessMessageFile::getIdentifier)
+            .orElseThrow(() -> new NextMoveException("No attachement \"%s\" found".formatted(ARKIVMELDING_FILE)));
     }
 
     private List<Dokument> mapArkivmeldingDokumenter(NextMoveOutMessage message, List<Dokumentbeskrivelse> docs, X509Certificate cert, Reject reject) {
         return docs.stream()
-                .sorted((o1, o2) -> {
-                    if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
-                        return -1;
-                    } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
-                        return 1;
-                    }
-                    return 0;
-                })
-                .flatMap(p -> p.getDokumentobjekt().stream())
-                .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
-                .map(file -> getDocument(message.getMessageId(), file, cert, reject))
-                .collect(Collectors.toList());
+            .sorted((o1, o2) -> {
+                if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o1.getTilknyttetRegistreringSom())) {
+                    return -1;
+                } else if (TilknyttetRegistreringSom.HOVEDDOKUMENT.equals(o2.getTilknyttetRegistreringSom())) {
+                    return 1;
+                }
+                return 0;
+            })
+            .flatMap(p -> p.getDokumentobjekt().stream())
+            .map(d -> getBusinessMessageFile(message, d.getReferanseDokumentfil()))
+            .map(file -> getDocument(message.getMessageId(), file, cert, reject))
+            .collect(Collectors.toList());
     }
 
     private BusinessMessageFile getBusinessMessageFile(NextMoveOutMessage message, String referanseDokumentfil) {
         return message.getFiles().stream()
-                .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
-                .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException(
+            .filter(bmf -> bmf.getFilename().equals(referanseDokumentfil))
+            .findFirst()
+            .orElseThrow(() -> new NextMoveRuntimeException(
                 "File '%s' referenced in '%s' not found".formatted(referanseDokumentfil, message.getMessageId())));
     }
 
     private Dokument getDocument(String messageId, BusinessMessageFile file, X509Certificate cert, Reject reject) {
         Resource document = readDocument(messageId, file);
         Resource encryptedDocument = createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
-                .resource(document)
-                .certificate(cert)
-                .keyEncryptionScheme(algorithmIdentifierSupplier.get())
-                .build(), reject);
+            .resource(document)
+            .certificate(cert)
+            .keyEncryptionScheme(algorithmIdentifierSupplier.get())
+            .build(), reject);
 
         Dokument.Builder<Void> builder = Dokument.builder()
-                .withData(new DataHandler(new ResourceDataSource(encryptedDocument)))
-                .withFilnavn(file.getFilename())
-                .withMimetype(file.getMimetype());
+            .withData(new DataHandler(new ResourceDataSource(encryptedDocument)))
+            .withFilnavn(file.getFilename())
+            .withMimetype(file.getMimetype());
 
         String ext = Stream.of(file.getFilename().split("\\.")).reduce((a, b) -> b).orElse("pdf");
         if (ext.equalsIgnoreCase("pdf")) {
@@ -253,25 +258,26 @@ public class FiksMapper {
 
     private NoarkMetadataFraAvleverendeSakssystem metaDataFrom(Saksmappe sm, Journalpost jp) {
         return NoarkMetadataFraAvleverendeSakssystem.builder()
-                .withSakssekvensnummer(toInt(sm.getSakssekvensnummer()))
-                .withSaksaar(toInt(sm.getSaksaar()))
-                .withJournalaar(toInt(jp.getJournalaar()))
-                .withJournalsekvensnummer(toInt(jp.getJournalsekvensnummer()))
-                .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
-                .withJournalposttype(JournalposttypeMapper.getNoarkType(jp.getJournalposttype()))
-                .withJournalstatus(JournalstatusMapper.getNoarkType(jp.getJournalstatus()))
-                .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
-                .withDokumentetsDato(DateTimeUtil.atStartOfDay(jp.getDokumentetsDato()))
-                .withTittel(jp.getOffentligTittel())
-                .withSaksbehandler(getSaksbehandler(jp).orElse(null))
-                .build();
+            .withSakssekvensnummer(toInt(sm.getSakssekvensnummer()))
+            .withSaksaar(toInt(sm.getSaksaar()))
+            .withJournalaar(toInt(jp.getJournalaar()))
+            .withJournalsekvensnummer(toInt(jp.getJournalsekvensnummer()))
+            .withJournalpostnummer(toInt(jp.getJournalpostnummer()))
+            .withJournalposttype(JournalposttypeMapper.getNoarkType(jp.getJournalposttype()))
+            .withJournalstatus(JournalstatusMapper.getNoarkType(jp.getJournalstatus()))
+            .withJournaldato(DateTimeUtil.atStartOfDay(jp.getJournaldato()))
+            .withDokumentetsDato(DateTimeUtil.atStartOfDay(jp.getDokumentetsDato()))
+            .withTittel(jp.getOffentligTittel())
+            .withSaksbehandler(getSaksbehandler(jp).orElse(null))
+            .withEkstraMetadata(getEntries(jp))
+            .build();
     }
 
     private Optional<String> getSaksbehandler(Journalpost jp) {
         return jp.getKorrespondansepart().stream()
-                .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
-                .findFirst()
-                .map(Korrespondansepart::getSaksbehandler);
+            .filter(k -> k.getKorrespondanseparttype().equals(Korrespondanseparttype.AVSENDER))
+            .findFirst()
+            .map(Korrespondansepart::getSaksbehandler);
     }
 
     private int toInt(BigInteger x) {
@@ -280,41 +286,66 @@ public class FiksMapper {
 
     private Adresse mottakerFrom(Korrespondansepart kp, String orgnr) {
         return Adresse.builder()
-                .withDigitalAdresse(OrganisasjonDigitalAdresse.builder().withOrgnr(orgnr).build())
-                .withPostAdresse(PostAdresse.builder()
-                        .withNavn(kp.getKorrespondansepartNavn())
-                        .withAdresse1(String.join(" ", kp.getPostadresse()))
-                        .withPostnr(kp.getPostnummer())
-                        .withPoststed(kp.getPoststed())
-                        .withLand(kp.getLand())
-                        .build())
-                .build();
+            .withDigitalAdresse(OrganisasjonDigitalAdresse.builder().withOrgnr(orgnr).build())
+            .withPostAdresse(PostAdresse.builder()
+                .withNavn(kp.getKorrespondansepartNavn())
+                .withAdresse1(String.join(" ", kp.getPostadresse()))
+                .withPostnr(kp.getPostnummer())
+                .withPoststed(kp.getPoststed())
+                .withLand(kp.getLand())
+                .build())
+            .build();
     }
 
     private Adresse mottakerFrom(InfoRecord infoRecord) {
         return Adresse.builder()
-                .withDigitalAdresse(OrganisasjonDigitalAdresse.builder()
-                        .withOrgnr(infoRecord.getIdentifier())
-                        .build())
-                .withPostAdresse(getPostAdresse(infoRecord))
-                .build();
+            .withDigitalAdresse(OrganisasjonDigitalAdresse.builder()
+                .withOrgnr(infoRecord.getIdentifier())
+                .build())
+            .withPostAdresse(getPostAdresse(infoRecord))
+            .build();
     }
 
     private PostAdresse getPostAdresse(InfoRecord infoRecord) {
         PostAdresse.Builder<Void> builder = PostAdresse.builder()
-                .withNavn(infoRecord.getOrganizationName());
+            .withNavn(infoRecord.getOrganizationName());
 
         if (infoRecord.getPostadresse() != null) {
             builder.withAdresse1(infoRecord.getPostadresse().getAdresse())
-                    .withPostnr(infoRecord.getPostadresse().getPostnummer())
-                    .withPoststed(infoRecord.getPostadresse().getPoststed())
-                    .withLand(infoRecord.getPostadresse().getLand());
+                .withPostnr(infoRecord.getPostadresse().getPostnummer())
+                .withPoststed(infoRecord.getPostadresse().getPoststed())
+                .withLand(infoRecord.getPostadresse().getLand());
         } else {
             builder.withPostnr("0192")
-                    .withPoststed("Oslo")
-                    .withLand("Norge");
+                .withPoststed("Oslo")
+                .withLand("Norge");
         }
 
         return builder.build();
+    }
+
+    private List<Entry> getEntries(Journalpost journalpost) {
+        Object virksomhetsspesifikkeMetadata = journalpost.getVirksomhetsspesifikkeMetadata();
+
+        if (virksomhetsspesifikkeMetadata instanceof Node node) {
+
+            NodeList nodeList = node.getChildNodes();
+
+            return IntStream.range(0, nodeList.getLength())
+                .filter(i -> nodeList.item(i) instanceof Element)
+                .filter(i -> validVirksomhetsspesifikkeMetadata(nodeList.item(i)))
+                .mapToObj(i -> Entry.builder().withKey((nodeList.item(i).getNodeName())).withValue(nodeList.item(i).getTextContent()).build())
+                .toList();
+        }
+
+        return new ArrayList<>();
+    }
+
+    private boolean validVirksomhetsspesifikkeMetadata(Node node) {
+        if(node.getChildNodes().getLength() != 1){
+            log.warn("Only simple sub elements of virksomhetsspesifikkeMetadata can be transferred to SvarUt");
+            return false;
+        }
+        return true;
     }
 }
