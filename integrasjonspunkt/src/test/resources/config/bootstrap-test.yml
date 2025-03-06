@@ -1,4 +1,4 @@
 app:
   local:
     properties:
-      enable: 'false'
+      enable: false

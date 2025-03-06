@@ -4,17 +4,17 @@ management:
       exposure:
         include: '*'
       base-path: /manage
-    enabled-by-default: 'true'
+    enabled-by-default: true
   endpoint:
     health:
       show-details: always
       probes:
-        enabled: 'true'
+        enabled: true
   health:
     readinessState:
-      enabled: 'true'
+      enabled: true
     livenessState:
-      enabled: 'true'
+      enabled: true
   info:
     git:
       mode: full
@@ -53,9 +53,9 @@ logging:
 eureka:
   client:
     healthcheck:
-      enabled: 'false'
-    fetch-registry: 'false'
-    enabled: 'true'
+      enabled: false
+    fetch-registry: false
+    enabled: true
   instance:
     metadataMap:
       pr: ${pullrequest}
@@ -74,12 +74,12 @@ difi:
         upload-size-limit: 2GB
         host: io.fiks.test.ks.no
       ut:
-        username: ''
+        username:
         default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
-        password: ''
+        password:
         endpointUrl: https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9
         upload-size-limit: 1GB
-        kun-digital-levering: 'false'
+        kun-digital-levering: false
       keystore:
         lockProvider: ${difi.move.org.keystore.lockProvider}
         password: ${difi.move.org.keystore.password}
@@ -87,65 +87,65 @@ difi:
         type: ${difi.move.org.keystore.type}
         path: ${difi.move.org.keystore.path}
       inn:
-        readTimeout: '30000'
+        readTimeout: 30000
         process: urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
-        password: ''
+        password:
         enable: ${difi.move.feature.enableDPF}
-        username: ''
-        mailOnError: 'true'
-        connectTimeout: '10000'
+        username:
+        mailOnError: true
+        connectTimeout: 10000
         document-type: urn:no:difi:arkivmelding:xsd::arkivmelding
-        fallback-sender-org-nr: '999999999'
+        fallback-sender-org-nr: 999999999
         baseUrl: https://svarut.ks.no/tjenester/svarinn
         orgnr: ${difi.move.org.number}
         mailSubject: Melding hentet fra SvarInn med utilstrekkelig metadata for levering
           via BestEdu
-      pollingrate: '900000'
+      pollingrate: 900000
     feature:
-      enableDsfPrintLookup: 'true'
-      mailErrorStatus: 'false'
+      enableDsfPrintLookup: true
+      mailErrorStatus: false
       enable-auth: ${difi.security.enable:false}
-      forwardReceivedAppReceipts: 'true'
-      cryptoMessagePersister: 'true'
-      enableDPFIO: 'false'
-      enableReceipts: 'true'
-      enableDPE: 'false'
-      enableDPF: 'false'
-      enableDPI: 'false'
-      enableQueue: 'true'
-      enableDPO: 'true'
-      enableDPV: 'false'
-      retryOnDeadLock: 'true'
+      forwardReceivedAppReceipts: true
+      cryptoMessagePersister: true
+      enableDPFIO: false
+      enableReceipts: true
+      enableDPE: false
+      enableDPF: false
+      enableDPI: false
+      enableQueue: true
+      enableDPO: true
+      enableDPV: false
+      retryOnDeadLock: true
     nextmove:
       status-document-type: urn:no:difi:eformidling:xsd::status
-      apply-zip-header-patch: 'false'
+      apply-zip-header-patch: false
       serviceBus:
-        pollingrate: '20000'
-        readMaxMessages: '50'
-        batchRead: 'false'
+        pollingrate: 20000
+        readMaxMessages: 50
+        batchRead: false
         mode: innsyn
         baseUrl: efm-dpe-qa.servicebus.windows.net
         sasKeyName: MoveDPE-pilotPolicy
         enable: ${difi.move.feature.enableDPE}
         default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
-        useHttps: 'true'
+        useHttps: true
         sasToken: <token>
-        connectTimeout: '15000'
-      default-ttl-hours: '24'
-      ttlPollingrate: '30000'
+        connectTimeout: 15000
+      default-ttl-hours: 24
+      ttlPollingrate: 30000
       status-services: DPO,DPE
       statusPollingCron: 0 * * * * *
       service-bus:
         upload-size-limit: 2MB
       filedir: messages
-      useDbPersistence: 'false'
-      lockTimeoutMinutes: '5'
-      statusPollingPageSize: '2000'
+      useDbPersistence: false
+      lockTimeoutMinutes: 5
+      statusPollingPageSize: 2000
     dpi:
       timeout:
-        read: '60000'
-        write: '60000'
-        connect: '5000'
+        read: 60000
+        write: 60000
+        connect: 5000
       uri: https://srest.qa.dataplatfor.ms/dpi
       keystore:
         password: ${difi.move.org.keystore.password}
@@ -153,7 +153,7 @@ difi:
         alias: ${difi.move.org.keystore.alias}
         lockProvider: ${difi.move.org.keystore.lockProvider}
         path: ${difi.move.org.keystore.path}
-      clientMaxConnectionPoolSize: '10'
+      clientMaxConnectionPoolSize: 10
       oidc:
         url: ${difi.move.oidc.url}
         keystore:
@@ -167,20 +167,20 @@ difi:
         audience: ${difi.move.oidc.audience}
         scopes: digitalpostinnbygger:send
       c2-type: web
-      initialBufferSize: '100000'
-      language: 'NO'
+      initialBufferSize: 100000
+      language: NO
       krr-print-url: https://test.kontaktregisteret.no/rest/v2/printSertifikat
       printSettings:
         returnType: SHREDDING
         inkType: BLACK_WHITE
         shippingType: ECONOMY
       client-type: json
-      pollingrate: '10000'
+      pollingrate: 10000
       mpcId: no_difi_move_integrasjonspunkt
       priority: NORMAL
-      mpcConcurrency: '1'
-      temporary-file-threshold: '1000000'
-      pollWithoutAvsenderidentifikator: 'true'
+      mpcConcurrency: 1
+      temporary-file-threshold: 1000000
+      pollWithoutAvsenderidentifikator: true
       certificate:
         recipe: classpath:/pki/recipe-dpi-move-difiSigned.xml
       default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
@@ -192,43 +192,43 @@ difi:
       default-innsynskrav-process: urn:no:difi:profile:einnsyn:innsynskrav:ver1.0
       default-journal-process: urn:no:difi:profile:einnsyn:journalpost:ver1.0
     queue:
-      maximum-retry-hours: '100'
-      concurrency: '10'
+      maximum-retry-hours: 100
+      concurrency: 10
       dlq-name: ActiveMQ.DLQ
       noark-name: noark
       nextmove-name: nextmove
     org:
       keystore:
-        lockProvider: 'false'
+        lockProvider: false
         type: jks
     dpv:
-      notifySms: 'true'
-      upload-size-limit: 200MB
+      notifySms: true
+      upload-size-limit: "200MB"
       default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
-      enableDueDate: 'true'
-      notification-text: '$reporteeName$: Du har mottatt en melding fra $reporterName$.'
-      sensitive-notification-text: $reporteeName$, har mottatt en taushetsbelagt melding
+      enableDueDate: true
+      notification-text: "$reporteeName$: Du har mottatt en melding fra $reporterName$."
+      sensitive-notification-text: ""$reporteeName$, har mottatt en taushetsbelagt melding
         fra $reporterName$. For å få tilgang til meldingen, er det nødvendig at noen
         i $reporteeName$ har fått tildelt rollen «Taushetsbelagt post fra det offentlige»
         i Altinn. Dersom dere er usikre på om noen har slik tilgang, anbefaler vi
         sterkt at dette sjekkes. Les mer om å gi tilgang til rollen «Taushetsbelagt
-        post» på Altinns nettsider.
+        post» på Altinns nettsider."
       endpointUrl: https://tt02.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
-      sensitive-service-code: '5504'
-      daysToReply: '7'
-      allow-forwarding: 'true'
-      notifyEmail: 'true'
+      sensitive-service-code: 5504
+      daysToReply: 7
+      allow-forwarding: true
+      notifyEmail: true
     dpo:
       brokerserviceUrl: https://tt02.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
-      requestTimeout: '30000'
+      requestTimeout: 30000
       streamingserviceUrl: https://tt02.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
       default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
-      serviceCode: '4192'
+      serviceCode: 4192
       upload-size-limit: 1GB
-      connectTimeout: '3000'
-      serviceEditionCode: '270815'
+      connectTimeout: 3000
+      serviceEditionCode: 270815
     arkivmelding:
-      generate-receipts: 'true'
+      generate-receipts: true
       dpv-default-process: ${difi.move.arkivmelding.default-process}
       default-document-type: urn:no:difi:arkivmelding:xsd::arkivmelding
       default-process: urn:no:difi:profile:arkivmelding:administrasjon:ver1.0
@@ -244,23 +244,23 @@ difi:
         path: ${difi.move.org.keystore.path}
         password: ${difi.move.org.keystore.password}
         alias: ${difi.move.org.keystore.alias}
-      enable: 'true'
+      enable: true
       clientId: ${difi.move.oidc.clientIdPrefix}${difi.move.org.number}
     deadlock:
-      retryCount: '5'
-      delay: '1000'
+      retryCount: 5
+      delay: 1000
     ntp:
       host: time.google.com
-      disable: 'false'
+      disable: false
     sign:
-      enable: 'true'
+      enable: true
       jwkUrl: ${difi.move.serviceregistryEndpoint}/jwk
     serviceregistryEndpoint: https://eformidling.no/adressetjeneste
     avtalt:
       receipt-process: urn:no:difi:profile:avtalt:response:ver1.0
     webhooks:
-      connectTimeout: '10000'
-      readTimeout: '10000'
+      connectTimeout: 10000
+      readTimeout: 10000
   activemq:
     broker-url: vm://localhost
   datasource:
@@ -272,18 +272,18 @@ server:
     key-store-type: ${difi.ssl.key-store-type:JKS}
     key-store-password: ${difi.ssl.key-store-password}
     enabled: ${difi.ssl.enabled:false}
-  port: '9093'
-  connection-timeout: '300000'
+  port: 9093
+  connection-timeout: 300000
 spring:
   datasource:
     url: ${difi.datasource.url}
     hikari:
-      autoCommit: 'false'
-      maximum-pool-size: '50'
+      autoCommit: false
+      maximum-pool-size: 50
     password: ${difi.datasource.password:}
     username: ${difi.datasource.username:sa}
   liquibase:
-    enabled: 'true'
+    enabled: true
   servlet:
     multipart:
       max-request-size: 500MB
@@ -304,7 +304,7 @@ spring:
         persistence:
           validation:
             mode: none
-    open-in-view: 'false'
+    open-in-view: false
   security:
     user:
       password: ${difi.security.user.password:#{null}}
