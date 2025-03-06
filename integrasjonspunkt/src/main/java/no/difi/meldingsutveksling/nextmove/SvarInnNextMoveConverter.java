@@ -32,9 +32,16 @@ import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.xml.bind.JAXBException;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.math.BigInteger;
 import java.time.Year;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 
@@ -56,34 +63,34 @@ public class SvarInnNextMoveConverter {
     @Transactional
     public SvarInnPackage convert(Forsendelse forsendelse, Reject reject) {
         StandardBusinessDocument sbd = createSBD.createNextMoveSBD(
-                Iso6523.of(ICD.NO_ORG, hasText(forsendelse.getSvarSendesTil().getOrgnr()) ?
-                        forsendelse.getSvarSendesTil().getOrgnr() :
-                        properties.getFiks().getInn().getFallbackSenderOrgNr()),
-                Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
-                forsendelse.getId(),
-                forsendelse.getId(),
-                properties.getFiks().getInn().getProcess(),
-                properties.getFiks().getInn().getDocumentType(),
-                new ArkivmeldingMessage());
+            Iso6523.of(ICD.NO_ORG, hasText(forsendelse.getSvarSendesTil().getOrgnr()) ?
+                forsendelse.getSvarSendesTil().getOrgnr() :
+                properties.getFiks().getInn().getFallbackSenderOrgNr()),
+            Iso6523.of(ICD.NO_ORG, forsendelse.getMottaker().getOrgnr()),
+            forsendelse.getId(),
+            forsendelse.getId(),
+            properties.getFiks().getInn().getProcess(),
+            properties.getFiks().getInn().getDocumentType(),
+            new ArkivmeldingMessage());
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }
 
         Resource asic = asicHandler.createCmsEncryptedAsice(
-                NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
-                getArkivmeldingFile(forsendelse),
-                svarInnService.getAttachments(forsendelse, reject),
-                keystoreHelper.getX509Certificate(), reject);
+            NextMoveOutMessage.of(sbd, ServiceIdentifier.DPF),
+            getArkivmeldingFile(forsendelse),
+            svarInnService.getAttachments(forsendelse, reject),
+            keystoreHelper.getX509Certificate(), reject);
 
         return new SvarInnPackage(sbd, asic);
     }
 
     private Document getArkivmeldingFile(Forsendelse forsendelse) {
         return Document.builder()
-                .filename(NextMoveConsts.ARKIVMELDING_FILE)
-                .mimeType(MediaType.APPLICATION_XML_VALUE)
-                .resource(getArkivmelding(forsendelse))
-                .build();
+            .filename(NextMoveConsts.ARKIVMELDING_FILE)
+            .mimeType(MediaType.APPLICATION_XML_VALUE)
+            .resource(getArkivmelding(forsendelse))
+            .build();
     }
 
     private ByteArrayResource getArkivmelding(Forsendelse forsendelse) {
@@ -97,6 +104,34 @@ public class SvarInnNextMoveConverter {
         }
 
         return new ByteArrayResource(arkivmeldingBytes);
+    }
+
+    private Element getVirksomhetsspesifikkeMetadata(Forsendelse.MetadataFraAvleverendeSystem metadata) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            org.w3c.dom.Document document = builder.newDocument();
+            Element root = document.createElement("virksomhetsspesifikkeMetadata");
+
+            List<Map<String, String>> ekstraMetadata = metadata.getEkstraMetadata();
+            if(ekstraMetadata == null || ekstraMetadata.isEmpty()) {return null;}
+
+            ekstraMetadata.forEach(
+                data ->
+                {
+                    Element el = document.createElement(data.get("key"));
+                    el.setTextContent(data.get("value"));
+                    root.appendChild(el);
+                });
+            document.appendChild(root);
+
+            return document.getDocumentElement();
+
+        } catch (ParserConfigurationException e) {
+            log.error("Error when creating instance of a DocumentBuilder", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private Arkivmelding toArkivmelding(Forsendelse forsendelse) {
@@ -124,22 +159,24 @@ public class SvarInnNextMoveConverter {
         saksmappe.setSaksansvarlig(metadata.getSaksBehandler());
 
         String currentYear = metadata.getJournalaar() != null
-                ? metadata.getJournalaar()
-                : Year.now().toString();
+            ? metadata.getJournalaar()
+            : Year.now().toString();
         journalpost.setJournalaar(BigInteger.valueOf(Long.parseLong(currentYear)));
 
         String journalsekvensnummer = metadata.getJournalsekvensnummer() != null
-                ? metadata.getJournalsekvensnummer()
-                : "0";
+            ? metadata.getJournalsekvensnummer()
+            : "0";
         journalpost.setJournalsekvensnummer(BigInteger.valueOf(Long.parseLong(journalsekvensnummer)));
 
         String journalpostnummer = metadata.getJournalpostnummer() != null
-                ? metadata.getJournalpostnummer()
-                : "0";
+            ? metadata.getJournalpostnummer()
+            : "0";
         journalpost.setJournalpostnummer(BigInteger.valueOf(Long.parseLong(journalpostnummer)));
 
         journalpost.setJournalposttype(JournalposttypeMapper.getArkivmeldingType(metadata.getJournalposttype()));
         journalpost.setJournalstatus(JournalstatusMapper.getArkivmeldingType(metadata.getJournalstatus()));
+
+        journalpost.setVirksomhetsspesifikkeMetadata(getVirksomhetsspesifikkeMetadata(metadata));
 
         if (!isNullOrEmpty(metadata.getJournaldato())) {
             journalpost.setJournaldato(DateTimeUtil.toXMLGregorianCalendar(Long.parseLong(metadata.getJournaldato())));
@@ -176,10 +213,10 @@ public class SvarInnNextMoveConverter {
         arkivmelding.setSystem("Integrasjonspunkt");
         arkivmelding.setMeldingId(forsendelse.getId());
         arkivmelding.setTidspunkt(Optional.ofNullable(metadata.getDokumentetsDato())
-                .map(Long::parseLong)
-                .map(DateTimeUtil::toXMLGregorianCalendar)
-                .map(DateTimeUtil::atStartOfDay)
-                .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
+            .map(Long::parseLong)
+            .map(DateTimeUtil::toXMLGregorianCalendar)
+            .map(DateTimeUtil::atStartOfDay)
+            .orElse(DateTimeUtil.toXMLGregorianCalendar(new GregorianCalendar(TimeZone.getDefault()))));
 
         return arkivmelding;
     }
