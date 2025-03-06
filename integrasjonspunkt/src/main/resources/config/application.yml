@@ -207,7 +207,7 @@ difi:
       default-ttl-hours: ${difi.move.nextmove.default-ttl-hours}
       enableDueDate: true
       notification-text: "$reporteeName$: Du har mottatt en melding fra $reporterName$."
-      sensitive-notification-text: ""$reporteeName$, har mottatt en taushetsbelagt melding
+      sensitive-notification-text: "$reporteeName$, har mottatt en taushetsbelagt melding
         fra $reporterName$. For å få tilgang til meldingen, er det nødvendig at noen
         i $reporteeName$ har fått tildelt rollen «Taushetsbelagt post fra det offentlige»
         i Altinn. Dersom dere er usikre på om noen har slik tilgang, anbefaler vi
