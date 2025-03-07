@@ -43,10 +43,10 @@ difi:
       enableDPI: true
       enableDPO: true
       enableDPV: true
-    serviceregistryEndpoint: http://localhost:8090
+    serviceregistryEndpoint: 'http://localhost:8090'
     nextmove:
       serviceBus:
-        baseUrl: localhost:8001/dpe
+        baseUrl: 'localhost:8001/dpe'
         useHttps: false
 app:
   logger:

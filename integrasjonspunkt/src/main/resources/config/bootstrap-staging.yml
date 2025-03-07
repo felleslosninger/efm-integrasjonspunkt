@@ -1,9 +1,9 @@
 app:
   logger:
-    destination: qa-stream-meldingsutveksling.difi.no:443
+    destination: 'qa-stream-meldingsutveksling.difi.no:443'
 spring:
   cloud:
     config:
       enabled: true
-      uri: https://test.eformidling.no/discovery/config
+      uri: 'https://test.eformidling.no/discovery/config'
       fail-fast: true

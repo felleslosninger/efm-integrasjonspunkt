@@ -3,20 +3,20 @@ difi:
     dpi:
       feature:
         enablePrint: true
-      endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
-      mpcId: no_difi_move_integrasjonspunkt-dev
-    serviceregistryEndpoint: https://test.eformidling.no/adressetjeneste/
+      endpoint: 'https://qaoffentlig.meldingsformidler.digipost.no/api/ebms'
+      mpcId: 'no_difi_move_integrasjonspunkt-dev'
+    serviceregistryEndpoint: 'https://test.eformidling.no/adressetjeneste/'
     oidc:
       keystore:
         alias: ${difi.move.org.keystore.alias}
         path: ${difi.move.org.keystore.path}
         password: ${difi.move.org.keystore.password}
-      url: https://yt2.maskinporten.no/token
-      audience: https://yt2.maskinporten.no/
+      url: 'https://yt2.maskinporten.no/token'
+      audience: 'https://yt2.maskinporten.no/'
     fiks:
       pollingrate: 15000
       inn:
-        baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+        baseUrl: 'https://test.svarut.ks.no/tjenester/svarinn'
     feature:
       enableDsfPrintLookup: false
     nextmove:

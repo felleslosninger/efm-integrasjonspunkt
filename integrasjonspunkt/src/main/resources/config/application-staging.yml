@@ -1,8 +1,8 @@
 eureka:
   client:
-    region: DIFI-MOVE-staging
+    region: 'DIFI-MOVE-staging'
     serviceUrl:
-      defaultZone: https://test.eformidling.no/discovery
+      defaultZone: 'https://test.eformidling.no/discovery'
 difi:
   move:
     feature:
@@ -11,27 +11,27 @@ difi:
       enableDPI: false
       enableDPO: false
       enableDPV: false
-    serviceregistryEndpoint: https://test.eformidling.no/adressetjeneste
+    serviceregistryEndpoint: 'https://test.eformidling.no/adressetjeneste'
     oidc:
       keystore:
         alias: ${difi.move.org.keystore.alias}
         path: ${difi.move.org.keystore.path}
         password: ${difi.move.org.keystore.password}
-      url: https://test.maskinporten.no/token
-      audience: https://test.maskinporten.no/
+      url: 'https://test.maskinporten.no/token'
+      audience: 'https://test.maskinporten.no/'
     dpo:
-      streamingserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
-      brokerserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+      streamingserviceUrl: 'https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl'
+      brokerserviceUrl: 'https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl'
     arkivmelding:
       generate-receipts: false
     dpi:
-      endpoint: https://qaoffentlig.meldingsformidler.digipost.no/api/ebms
+      endpoint: 'https://qaoffentlig.meldingsformidler.digipost.no/api/ebms'
       certificate:
         recipe: classpath:/pki/recipe-dpi-norway-test.xml
-      mpcId: no_difi_move_integrasjonspunkt-staging
+      mpcId: 'no_difi_move_integrasjonspunkt-staging'
     fiks:
       inn:
-        baseUrl: https://test.svarut.ks.no/tjenester/svarinn
+        baseUrl: 'https://test.svarut.ks.no/tjenester/svarinn'
 spring:
   config:
     import: optional:file:integrasjonspunkt-local.yml

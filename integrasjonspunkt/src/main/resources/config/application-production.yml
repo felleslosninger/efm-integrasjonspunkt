@@ -1,35 +1,35 @@
 difi:
   move:
     dpi:
-      uri: https://srest.dataplatfor.ms/dpi
-      mpcId: no.difi.move.integrasjonspunkt
-      endpoint: https://meldingsformidler.digipost.no/api/ebms
+      uri: 'https://srest.dataplatfor.ms/dpi'
+      mpcId: 'no.difi.move.integrasjonspunkt'
+      endpoint: 'https://meldingsformidler.digipost.no/api/ebms'
       certificate:
         recipe: classpath:/pki/recipe-dpi-norway-production.xml
-      krr-print-url: https://kontaktregisteret.no/rest/v2/printSertifikat
+      krr-print-url: 'https://kontaktregisteret.no/rest/v2/printSertifikat'
     dpo:
-      streamingserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl
+      streamingserviceUrl: 'https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl'
       serviceEditionCode: 170101
-      brokerserviceUrl: https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl
+      brokerserviceUrl: 'https://www.altinn.no/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl'
     oidc:
       keystore:
         path: ${difi.move.org.keystore.path}
         password: ${difi.move.org.keystore.password}
         alias: ${difi.move.org.keystore.alias}
-      url: https://maskinporten.no/token
-      audience: https://maskinporten.no/
+      url: 'https://maskinporten.no/token'
+      audience: 'https://maskinporten.no/'
     nextmove:
       service-bus:
-        sas-key-name: MoveDPE-prodPolicy
-        base-url: efm-dpe-prod.servicebus.windows.net
+        sas-key-name: 'MoveDPE-prodPolicy'
+        base-url: 'efm-dpe-prod.servicebus.windows.net'
     fiks:
       ut:
-        endpointUrl: https://svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9
+        endpointUrl: 'https://svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9'
       io:
-        api-host: api.fiks.ks.no
-        host: io.fiks.ks.no
+        api-host: 'api.fiks.ks.no'
+        host: 'io.fiks.ks.no'
       inn:
-        baseUrl: https://svarut.ks.no/tjenester/svarinn
+        baseUrl: 'https://svarut.ks.no/tjenester/svarinn'
     feature:
       enableDPE: true
       enableDPF: false
@@ -39,12 +39,12 @@ difi:
     arkivmelding:
       generate-receipts: false
     dpv:
-      endpointUrl: https://www.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc
+      endpointUrl: 'https://www.altinn.no/ServiceEngineExternal/CorrespondenceAgencyExternal.svc'
 eureka:
   client:
     serviceUrl:
-      defaultZone: https://eformidling.no/discovery
-    region: DIFI-MOVE-PROD
+      defaultZone: 'https://eformidling.no/discovery'
+    region: 'DIFI-MOVE-PROD'
 spring:
   config:
     import: optional:file:integrasjonspunkt-local.properties

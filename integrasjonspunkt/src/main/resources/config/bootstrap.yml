@@ -1,10 +1,10 @@
 app:
   logger:
-    destination: stream-meldingsutveksling.difi.no:443
+    destination: 'stream-meldingsutveksling.difi.no:443'
     enableLogstash: true
 logging:
   file:
-    name: integrasjonspunkt-logs/application.log
+    name: 'integrasjonspunkt-logs/application.log'
   level:
     ch:
       qos:
@@ -14,9 +14,9 @@ logging:
         logback: WARN
 spring:
   application:
-    name: integrasjonspunkt
+    name: 'integrasjonspunkt'
   cloud:
     config:
       enabled: false
   profiles:
-    active: production
+    active: 'production'
