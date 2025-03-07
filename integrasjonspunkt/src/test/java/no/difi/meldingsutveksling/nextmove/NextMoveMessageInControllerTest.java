@@ -68,7 +68,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         NextMoveMessageInController.class})
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 class NextMoveMessageInControllerTest {
 

@@ -4,7 +4,7 @@ server:
   port: 8090
 spring:
   application:
-    name: Monitor-UI-Localhost
+    name: 'Monitor-UI-Localhost'
   cloud:
     config:
       enabled: false
@@ -15,14 +15,14 @@ eureka:
       instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: 'http://localhost:8761/eureka/'
 
 ---
 
 spring:
     profiles: docker
     application:
-      name: Monitor-UI-Docker
+      name: 'Monitor-UI-Docker'
     cloud:
       config:
         enabled: false
@@ -35,6 +35,6 @@ eureka:
       instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     serviceUrl:
-      defaultZone: http://eurekaserver:8761/eureka/
+      defaultZone: 'http://eurekaserver:8761/eureka/'
 info:
   version: ${pom.version}

@@ -15,4 +15,6 @@ jobs:
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
     secrets: inherit
-    
+
+#    bygge image, laste opp image relevant plass
+#    deploye til DEV + evt TEST
