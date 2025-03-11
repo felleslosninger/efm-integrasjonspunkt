@@ -13,7 +13,6 @@ jobs:
     with:
       java-version: 8
       sbom-path: integrasjonspunkt/target
-      fetch-depth: 0
     secrets: inherit
 
 #    bygge image, laste opp image relevant plass
