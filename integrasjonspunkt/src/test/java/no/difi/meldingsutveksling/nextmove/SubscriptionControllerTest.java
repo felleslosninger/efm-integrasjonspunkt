@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -63,6 +64,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -94,6 +96,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "1")
                         .param("size", "1")
                         .accept(MediaType.APPLICATION_JSON)
@@ -112,6 +115,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -140,6 +144,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 post("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
@@ -171,6 +176,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 put("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
@@ -201,6 +207,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 delete("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -224,6 +231,7 @@ public class SubscriptionControllerTest {
     public void deleteAllSubscriptions() throws Exception {
         mvc.perform(
                 delete("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
