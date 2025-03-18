@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -49,6 +50,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -78,6 +80,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("securityLevel", "4")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -108,6 +111,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("process", "admin-process")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -138,6 +142,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -167,6 +172,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("securityLevel", "4")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -197,6 +203,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("process", "admin-process")
                         .accept(MediaType.APPLICATION_JSON)
         )
