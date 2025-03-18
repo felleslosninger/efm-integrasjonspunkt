@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -65,6 +66,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -111,6 +113,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("serviceIdentifier", ServiceIdentifier.DPO.name())
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -131,6 +134,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("sort", "lastUpdated,asc")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -152,6 +156,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "3")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON)
@@ -172,6 +177,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/{id}", conversation.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -202,6 +208,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/messageId/{messageId}", conversation.getMessageId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -233,6 +240,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/queue")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -258,6 +266,7 @@ public class ConversationControllerTest {
     public void deleteById() throws Exception {
         mvc.perform(
                 delete("/api/conversations/{id}", 42)
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -281,6 +290,7 @@ public class ConversationControllerTest {
         String messageId = UUID.randomUUID().toString();
         mvc.perform(
                 delete("/api/conversations/messageId/{messageId}", messageId)
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
