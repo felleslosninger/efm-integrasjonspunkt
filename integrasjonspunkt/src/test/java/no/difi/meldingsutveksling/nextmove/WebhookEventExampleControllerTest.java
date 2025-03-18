@@ -16,6 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+
 
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -36,10 +38,12 @@ public class WebhookEventExampleControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private MockMvc mvc;
 
+
     @Test
     public void ping() throws Exception {
         mvc.perform(
                 post("/push")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(WebhookEventExamples.ping())))
@@ -62,6 +66,7 @@ public class WebhookEventExampleControllerTest {
     public void messageStatus() throws Exception {
         mvc.perform(
                 post("/push")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(WebhookEventExamples.messageStatus()))
