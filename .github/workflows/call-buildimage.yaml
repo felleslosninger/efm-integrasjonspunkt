@@ -9,7 +9,7 @@ on:
 jobs:
   #also deploys to maven central/ossrh
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@MOVE-4273
+    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@main
     with:
       java-version: 8
       sbom-path: integrasjonspunkt/target
