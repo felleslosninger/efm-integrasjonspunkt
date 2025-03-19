@@ -1,0 +1,20 @@
+name: CI Workflow
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg...
+
+jobs:
+  #also deploys to maven central/ossrh
+  build-and-deploy-libs:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@main
+    with:
+      java-version: 8
+      sbom-path: integrasjonspunkt/target
+      fetch-depth: 0
+    secrets: inherit
+
+#    bygge image, laste opp image relevant plass
+#    deploye til DEV + evt TEST
