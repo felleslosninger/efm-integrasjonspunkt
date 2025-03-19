@@ -12,6 +12,7 @@ jobs:
     uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@main
     with:
       java-version: 8
+      profile: ossrh
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
     secrets: inherit
