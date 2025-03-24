@@ -7,19 +7,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.env.Environment;
+import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @RequiredArgsConstructor
+@SpringJUnitConfig
+@TestPropertySource("classpath:CucumberStepsConfiguration.properties")
 public class MessageStatusSteps {
 
     private final TestRestTemplate testRestTemplate;
     private ResponseEntity<String> response;
+
+    @Autowired
+    private Environment env;
 
     @BeforeEach
     public void before() {
@@ -33,10 +40,16 @@ public class MessageStatusSteps {
 
     @Given("^the message statuses for the conversation with id = \"([^\"]*)\" are:$")
     public void theMessageStatusesForTheConversationIdAre(String messageId, String expectedJson) throws JSONException {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+
         this.response = testRestTemplate.exchange(
                 "/api/statuses?messageId={messageId}",
                 HttpMethod.GET,
-                null,
+                new HttpEntity<>(headers),
                 String.class,
                 messageId);
 
