@@ -13,14 +13,18 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.ResourceUtils;
 import org.hamcrest.MatcherAssert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
+import org.springframework.core.env.Environment;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +37,8 @@ import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;
 
 @RequiredArgsConstructor
 @Slf4j
+@SpringJUnitConfig
+@TestPropertySource("classpath:CucumberStepsConfiguration.properties")
 public class NextMoveMessageInSteps {
 
     private final TestRestTemplate testRestTemplate;
@@ -42,6 +48,9 @@ public class NextMoveMessageInSteps {
     private final Holder<Message> messageReceivedHolder;
 
     private JacksonTester<StandardBusinessDocument> json;
+
+    @Autowired
+    private Environment env;
 
     @Before
     public void before() {
@@ -55,10 +64,15 @@ public class NextMoveMessageInSteps {
 
     @Given("^I peek and lock a message$")
     public void iPeekAndLockAMessage() {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
         ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
                 "/api/messages/in/peek",
                 HttpMethod.GET,
-                null,
+                new HttpEntity<>(headers),
                 StandardBusinessDocument.class);
 
         messageReceivedHolder.set(new Message()
@@ -90,10 +104,16 @@ public class NextMoveMessageInSteps {
 
     @And("^I remove the message$")
     public void iRemoveTheMessage() {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+
         ResponseEntity<StandardBusinessDocument> response = testRestTemplate.exchange(
                 "/api/messages/in/{messageId}",
                 HttpMethod.DELETE,
-                new HttpEntity<>(null),
+                new HttpEntity<>(headers),
                 StandardBusinessDocument.class,
                 Collections.singletonMap("messageId", messageReceivedHolder.get().getSbd().getMessageId())
         );
