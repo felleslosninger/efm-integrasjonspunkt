@@ -25,8 +25,8 @@ public class WebHookConfig {
         IntegrasjonspunktProperties.WebHooks webHooks = integrasjonspunktProperties.getWebhooks();
 
         return new UrlPusher(restTemplateBuilder
-                .setConnectTimeout(Duration.ofMillis(webHooks.getConnectTimeout()))
-                .setReadTimeout(Duration.ofMillis(webHooks.getReadTimeout()))
+                .connectTimeout(Duration.ofMillis(webHooks.getConnectTimeout()))
+                .readTimeout(Duration.ofMillis(webHooks.getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler() {
                     @Override
                     public void handleError(ClientHttpResponse response) throws IOException {
