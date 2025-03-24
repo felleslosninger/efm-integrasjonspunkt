@@ -12,7 +12,12 @@ Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 - Removed old / un-maintained "spring-security-oauth2" 2.5.2.RELEASE
 - Merged removal of old DPI message service
 - Merged removal of eFormidling 1.0 (BEST/EDU)
-- Started to remove Kotlin (fremdeles endel som gjenstår og som må skrives om, FIXME)
+
+Fixme & todo
+- [ ] Started to remove Kotlin (fremdeles endel som gjenstår, men dette må skrives om)
+- [ ] Search for StatisticsrepositoryNoOperations "usage" (non-existing service loader reference)
+- [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
+- [ ] Det er noen eldre `TODO` kommentarer som har vært med i flere år og som kanskje bare kan fjernes?
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
