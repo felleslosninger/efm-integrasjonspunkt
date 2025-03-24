@@ -10,9 +10,13 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -24,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @RequiredArgsConstructor
+@SpringJUnitConfig
+@TestPropertySource("classpath:CucumberStepsConfiguration.properties")
 public class NextMoveMessageOutSteps {
 
     private final TestRestTemplate testRestTemplate;
@@ -32,6 +38,9 @@ public class NextMoveMessageOutSteps {
 
     private MultiValueMap<String, HttpEntity<?>> multipart;
     private ResponseEntity<String> response;
+
+    @Autowired
+    private Environment env;
 
     @Before
     public void before() {
@@ -69,8 +78,12 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I post the multipart request$")
     public void iPostTheMultipartRequest() throws IOException {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/multipart",
@@ -88,8 +101,12 @@ public class NextMoveMessageOutSteps {
 
     @Then("^I post the multipart request and get a \"([^\"]+)\" response$")
     public void iPostTheMultipartRequestAndGetStatusResponse(String expectedStatusName) throws IOException {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/multipart",
@@ -104,8 +121,12 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I POST the following message:$")
     public void iPostTheFollowingMessage(String body) throws IOException {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
                 "/api/messages/out",
@@ -130,8 +151,12 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
     public void iUploadAFileToTheMessage(String filename, String mimetype, String title, String body) {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(mimetype));
+        headers.setBasicAuth(username, password);
         headers.set(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.builder()
                 .type("inline")
                 .name(title)
@@ -158,9 +183,15 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I send the message$")
     public void iSendTheMessage() {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity<>(null),
+                HttpMethod.POST, new HttpEntity<>(headers),
                 String.class,
                 messageOutHolder.get().getSbd().getMessageId());
         assertThat(response.getStatusCode())
@@ -170,9 +201,15 @@ public class NextMoveMessageOutSteps {
 
     @Given("^I send the message and get the following error response:$")
     public void iSendTheMessageAndGetTheFollowingErrorResponse(String body) {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+
         this.response = testRestTemplate.exchange(
                 "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity<>(null),
+                HttpMethod.POST, new HttpEntity<>(headers),
                 String.class,
                 messageOutHolder.get().getSbd().getMessageId());
 
@@ -184,5 +221,4 @@ public class NextMoveMessageOutSteps {
             throw e;
         }
     }
-
 }
