@@ -49,9 +49,4 @@ public class ServiceRegistryRestClient {
         return restClient.get().uri(uri).retrieve().toEntity(String.class).getBody();
     }
 
-//    public void putResource(String resourcePath) {
-//        URI uri = UriComponentsBuilder.fromUri(baseUrl).pathSegment(resourcePath).build().toUri();
-//        restTemplate.put(uri, String.class);
-//    }
-
 }
