@@ -79,7 +79,6 @@
     </properties>
 
     <modules>
-        <!-- FIXME er modulene faktisk i korrekt byggrekkefølge -->
         <module>api</module>
         <module>common</module>
         <module>common-spring</module>
