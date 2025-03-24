@@ -213,13 +213,6 @@
                 <groupId>no.difi.move-common</groupId>
                 <artifactId>security</artifactId>
                 <version>${efm-common.version}</version>
-                <exclusions>
-                    <!-- FIXME remove from no.difi.move-common, then get rid of this exclusion -->
-                    <exclusion>
-                        <groupId>org.springframework.security.oauth</groupId>
-                        <artifactId>spring-security-oauth2</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>no.difi.move-common</groupId>
