@@ -25,7 +25,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
@@ -34,19 +33,18 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class SvarInnClient {
 
     private final Plumber plumber;
-    @Getter
-    private final String rootUri;
     private final IntegrasjonspunktProperties props;
-    @Getter
-    private final RestTemplate restTemplate;
+
+    @Getter private final String rootUri;
+    @Getter private final RestTemplate restTemplate;
 
     public SvarInnClient(Plumber plumber, IntegrasjonspunktProperties props, RestTemplateBuilder restTemplateBuilder) {
         this.plumber = plumber;
         this.props = props;
         this.rootUri = props.getFiks().getInn().getBaseUrl();
         this.restTemplate = restTemplateBuilder
-                .setConnectTimeout(Duration.ofMillis(props.getFiks().getInn().getConnectTimeout()))
-                .setReadTimeout(Duration.ofMillis(props.getFiks().getInn().getReadTimeout()))
+                .connectTimeout(Duration.ofMillis(props.getFiks().getInn().getConnectTimeout()))
+                .readTimeout(Duration.ofMillis(props.getFiks().getInn().getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler())
                 .rootUri(props.getFiks().getInn().getBaseUrl())
                 .build();
@@ -117,4 +115,5 @@ public class SvarInnClient {
                 Void.class,
                 forsendelse.getId());
     }
+
 }
