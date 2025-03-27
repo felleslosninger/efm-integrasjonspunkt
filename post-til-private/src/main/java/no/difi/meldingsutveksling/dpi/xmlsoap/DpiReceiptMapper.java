@@ -32,7 +32,7 @@ public class DpiReceiptMapper {
 
         switch (clazz.getSimpleName()) {
             case "LeveringsKvittering":
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at fysisk post er klargjort for utskrift");
             case "AapningsKvittering":
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra Innbygger for at digital post er åpnet");
             case "VarslingFeiletKvittering":
