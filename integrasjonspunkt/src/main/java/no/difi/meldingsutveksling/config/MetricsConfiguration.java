@@ -33,36 +33,6 @@ public class MetricsConfiguration {
         return new TimedAspect(meterRegistry);
     }
 
-/*
-
-    // FIXME denne må nok skrives om - depreceated siden SB3 og fjernet i SB3.2
-    // https://docs.spring.io/spring-boot/docs/3.1.1/api/org/springframework/boot/actuate/metrics/web/client/DefaultRestTemplateExchangeTagsProvider.html
-
-    @Bean
-    public RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
-        return new DefaultRestTemplateExchangeTagsProvider() {
-
-            @Override
-            public Iterable<Tag> getTags(String urlTemplate, HttpRequest request, ClientHttpResponse response) {
-                String urlTemplateWithoutQueryString = stripQueryString(urlTemplate);
-                return super.getTags(urlTemplateWithoutQueryString, request, response);
-            }
-
-            private String stripQueryString(String url) {
-                if (url == null) {
-                    return null;
-                }
-                int i = url.indexOf("?");
-                if (i == -1) {
-                    return url;
-                }
-                return url.substring(0, i);
-            }
-        };
-    }
-
-*/
-
     @Bean
     public ClientInterceptor metricsEndpointInterceptor() {
         // Provides interceptor that when injected causes Prometheus metrics to be generated
@@ -124,4 +94,5 @@ public class MetricsConfiguration {
         };
 
     }
+
 }
