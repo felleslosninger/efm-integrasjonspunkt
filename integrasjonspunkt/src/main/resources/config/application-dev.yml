@@ -1,0 +1,25 @@
+difi:
+  move:
+    serviceregistryEndpoint: 'https://eformidling.dev/adressetjeneste'
+    oidc:
+      url: 'https://test.maskinporten.no/token'
+      audience: 'https://test.maskinporten.no/'
+      clientId: 'test_move'
+    dpi:
+      endpoint: 'https://qaoffentlig.meldingsformidler.digipost.no/api/ebms'
+      mpcId: 'no_difi_move_integrasjonspunkt-dev'
+    fiks:
+      pollingrate: 15000
+      inn:
+        baseUrl: 'https://test.svarut.ks.no/tjenester/svarinn'
+    nextmove:
+      serviceBus:
+        pollingrate: 5000
+spring:
+  config:
+    import: optional:file:integrasjonspunkt-local.yml
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: 'https://eformidling.dev/discovery/eureka'
