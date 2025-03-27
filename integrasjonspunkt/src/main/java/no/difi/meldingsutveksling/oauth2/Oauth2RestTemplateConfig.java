@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oauth2;
 
+import no.difi.meldingsutveksling.observability.MetricsRestClientInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +11,13 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class Oauth2RestTemplateConfig {
 
-    private final MaskinportenTokenInterceptor interceptor;
+    private final MetricsRestClientInterceptor metricsRestClientInterceptor;
+    private final MaskinportenTokenInterceptor maskinportenTokenInterceptor;
 
-    public Oauth2RestTemplateConfig(MaskinportenTokenInterceptor interceptor) {
-        this.interceptor = interceptor;
+    public Oauth2RestTemplateConfig(MetricsRestClientInterceptor metricsRestClientInterceptor,
+                                    MaskinportenTokenInterceptor maskinportenTokenInterceptor) {
+        this.metricsRestClientInterceptor = metricsRestClientInterceptor;
+        this.maskinportenTokenInterceptor = maskinportenTokenInterceptor;
     }
 
     @Bean
@@ -26,15 +30,13 @@ public class Oauth2RestTemplateConfig {
 
         RestTemplate rt = new RestTemplate(requestFactory);
 
-        var rc = RestClient.builder(rt).build();
-
-        // FIXME kanskje metrics ikke fungerer lenger, sjekk hvilke metrics som ble oppdatert tidligere
-        //import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
-        //import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
-        // sjekk : https://dzone.com/articles/spring-boot-32-replace-your-resttemplate-with-rest
-        //metricsRestTemplateCustomizer.customize(rc);
+        var rc = RestClient
+            .builder(rt)
+            .requestInterceptor(metricsRestClientInterceptor)
+            .build();
 
         return rc;
+
     }
 
     @Bean(name = "restTemplate")
@@ -47,15 +49,14 @@ public class Oauth2RestTemplateConfig {
 
         RestTemplate rt = new RestTemplate(requestFactory);
 
-        var rc = RestClient.builder(rt).requestInterceptor(interceptor).build();
-
-        // FIXME kanskje metrics ikke fungerer lenger, sjekk hvilke metrics som ble oppdatert tidligere
-        //import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
-        //import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
-        // sjekk : https://dzone.com/articles/spring-boot-32-replace-your-resttemplate-with-rest
-        //metricsRestTemplateCustomizer.customize(rc);
+        var rc = RestClient
+            .builder(rt)
+            .requestInterceptor(metricsRestClientInterceptor)
+            .requestInterceptor(maskinportenTokenInterceptor)
+            .build();
 
         return rc;
+
     }
 
 }
