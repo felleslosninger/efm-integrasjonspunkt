@@ -18,13 +18,15 @@ Fixme & todo
 - [ ] Search for StatisticsrepositoryNoOperations "usage" (non-existing service loader reference)
 - [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
 - [ ] Det er noen eldre `TODO` kommentarer som har vært med i flere år og som kanskje bare kan fjernes?
+- [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
+- [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach 
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
 - Swagger-UI (http://localhost:9093/swagger-ui/index.html)
 
 ## Bygg og kjøre lokalt 
-Testet og bygget med OpenJDK 21.0.5 og Maven 3.9.9.
+Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.
 
 ```bash
 mvn clean package
@@ -67,5 +69,5 @@ Linker til logger, config og alt annet :
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Konfigurasjon av Integrasjonspunktet
-Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på
-konfig, for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på konfig,
+for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
