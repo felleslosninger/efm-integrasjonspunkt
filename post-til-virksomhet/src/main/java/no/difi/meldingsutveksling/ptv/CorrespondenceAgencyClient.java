@@ -88,6 +88,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
     private HttpClient getHttpClient() {
         return HttpClients.custom()
+                .useSystemProperties()
                 .addRequestInterceptorFirst((httpRequest, httpDetails, httpContext) -> {
                     if (httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
                         httpRequest.removeHeaders(HttpHeaders.CONTENT_LENGTH);
