@@ -14,9 +14,10 @@ Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 - Merged removal of eFormidling 1.0 (BEST/EDU)
 
 Fixme & todo
+- [x] Enable `enableLogstash` as default for prod and staging again ([see v2 bootstrap config](https://github.com/felleslosninger/efm-integrasjonspunkt/blob/main/integrasjonspunkt/src/main/resources/config/bootstrap.yml))
+- [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
 - [ ] Started to remove Kotlin (fremdeles endel som gjenstår, men dette må skrives om)
 - [ ] Search for StatisticsrepositoryNoOperations "usage" (non-existing service loader reference)
-- [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
 - [ ] Det er noen eldre `TODO` kommentarer som har vært med i flere år og som kanskje bare kan fjernes?
 - [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach 
