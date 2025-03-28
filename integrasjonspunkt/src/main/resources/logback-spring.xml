@@ -61,16 +61,6 @@
                     </appender>
                 </then>
             </if>
-
-            <root level="INFO">
-                <appender-ref ref="stash"/>
-                <if condition='isDefined("destination2")'>
-                    <then>
-                        <appender-ref ref="stash2"/>
-                    </then>
-                </if>
-            </root>
-
         </then>
     </if>
 
@@ -98,6 +88,16 @@
     <root level="INFO">
         <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
         <appender-ref ref="FILE"/>
+        <if condition='property("enableLogstash").contains("true")'>
+            <then>
+                <appender-ref ref="stash"/>
+                <if condition='isDefined("destination2")'>
+                    <then>
+                        <appender-ref ref="stash2"/>
+                    </then>
+                </if>
+            </then>
+        </if>
     </root>
 
 </configuration>
