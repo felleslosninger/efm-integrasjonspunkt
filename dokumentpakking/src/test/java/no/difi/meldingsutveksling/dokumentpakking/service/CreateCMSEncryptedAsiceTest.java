@@ -62,7 +62,7 @@ class CreateCMSEncryptedAsiceTest {
             return new KeystoreHelper(new KeystoreProperties()
                     .setPath(c1)
                     .setAlias("c1")
-                    .setPassword("test")
+                    .setPassword("changeit")
             );
         }
 
@@ -71,7 +71,7 @@ class CreateCMSEncryptedAsiceTest {
             return new KeystoreHelper(new KeystoreProperties()
                     .setPath(c2)
                     .setAlias("c2")
-                    .setPassword("test")
+                    .setPassword("changeit")
             );
         }
     }
