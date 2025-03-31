@@ -91,6 +91,7 @@
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>**/*.jks*</exclude>
+                    <exclude>**/*.p12*</exclude>
                     <exclude>**/*.ttf*</exclude>
                     <exclude>**/*.woff*</exclude>
                     <exclude>**/*.woff2*</exclude>
@@ -101,6 +102,7 @@
                 <filtering>false</filtering>
                 <includes>
                     <include>**/*.jks*</include>
+                    <include>**/*.p12*</include>
                     <include>**/*.ttf*</include>
                     <include>**/*.woff*</include>
                     <include>**/*.woff2*</include>
