@@ -61,16 +61,6 @@
                     </appender>
                 </then>
             </if>
-
-            <root level="INFO">
-                <appender-ref ref="stash"/>
-                <if condition='isDefined("destination2")'>
-                    <then>
-                        <appender-ref ref="stash2"/>
-                    </then>
-                </if>
-            </root>
-
         </then>
     </if>
 
@@ -95,9 +85,33 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
-        <appender-ref ref="FILE"/>
-    </root>
+    <if condition='property("enableLogstash").contains("true")'>
+        <!-- <if> elements cannot be nested within an <appender>, <logger> or <root> element -->
+        <then>
+            <if condition='isDefined("destination2")'>
+                <then>
+                    <root level="INFO">
+                        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                        <appender-ref ref="FILE"/>
+                        <appender-ref ref="stash"/>
+                        <appender-ref ref="stash2"/>
+                    </root>
+                </then>
+                <else>
+                    <root level="INFO">
+                        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                        <appender-ref ref="FILE"/>
+                        <appender-ref ref="stash"/>
+                    </root>
+                </else>
+            </if>
+        </then>
+        <else>
+            <root level="INFO">
+                <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                <appender-ref ref="FILE"/>
+            </root>
+        </else>
+    </if>
 
 </configuration>

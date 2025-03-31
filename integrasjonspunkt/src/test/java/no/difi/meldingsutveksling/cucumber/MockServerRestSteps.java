@@ -76,7 +76,7 @@ public class MockServerRestSteps {
         } else if (url.startsWith(svarInnClient.getRootUri())) {
             return svarInnClient.getRestTemplate();
         }
-        // FIXME denne skal ikke benyttes lenger, skal være erstattet med RestClient varianter
+        // for other uses just return the "generic" dummy rest template
         return dummyServiceRegistryRestTemplate;
     }
 

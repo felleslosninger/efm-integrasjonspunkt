@@ -189,6 +189,30 @@ Feature: Sending a Next Move DPF message
             <kryptert>true</kryptert>
             <kunDigitalLevering>false</kunDigitalLevering>
             <metadataFraAvleverendeSystem>
+                <ekstraMetadata>
+                    <key>forvaltningsnummer</key>
+                    <value>20050</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>objektnavn</key>
+                    <value>Hauketo Skole</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>eiendom</key>
+                    <value>200501</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>bygning</key>
+                    <value>2005001</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>bestillingtype</key>
+                    <value>Materiell, elektro</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>rammeavtale</key>
+                    <value>K-123123-elektriker</value>
+                </ekstraMetadata>
                 <journalaar>0</journalaar>
                 <journaldato>2017-05-23T00:00:00</journaldato>
                 <journalpostnummer>0</journalpostnummer>

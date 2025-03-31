@@ -97,7 +97,7 @@ public class DpiClientConfig {
                         .baseUrl(properties.getUri())
                         .filter(logRequest())
                         .filter(logResponse())
-                        .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
+                        .clientConnector(new ReactorClientHttpConnector(HttpClient.create().proxyWithSystemProperties()
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getTimeout().getConnect())
                                 .doOnConnected(connection -> {
                                     connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout().getRead(), TimeUnit.MILLISECONDS));

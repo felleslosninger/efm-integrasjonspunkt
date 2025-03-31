@@ -22,7 +22,6 @@ import org.springframework.ws.soap.addressing.version.Addressing10;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.HttpComponents5MessageSender;
-import org.springframework.ws.transport.http.HttpComponentsMessageSender;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -89,6 +88,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
 
     private HttpClient getHttpClient() {
         return HttpClients.custom()
+                .useSystemProperties()
                 .addRequestInterceptorFirst((httpRequest, httpDetails, httpContext) -> {
                     if (httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
                         httpRequest.removeHeaders(HttpHeaders.CONTENT_LENGTH);
@@ -165,4 +165,5 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
         return new ActionCallback(new URI(action), new
                 Addressing10());
     }
+
 }
