@@ -3,6 +3,7 @@
 *.crt
 *.orig
 .run
+*.p12
 
 pom.xml.versionsBackup
 
