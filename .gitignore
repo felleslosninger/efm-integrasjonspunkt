@@ -156,7 +156,7 @@ integrasjonspunkt-logs/*.log
 
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.p12
-!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
+!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.p12
 
 ### STS ###
 .apt_generated
