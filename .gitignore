@@ -99,7 +99,7 @@ integrasjonspunkt-local-copy.properties
 integrasjonspunkt-local-*-only.properties
 
 # Overrides (files for tests)
-!/fiks-meldingsformidler/src/test/resources/somdalen.jks
+!/fiks-meldingsformidler/src/test/resources/somdalen.p12
 !/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
 
 ### STS ###
