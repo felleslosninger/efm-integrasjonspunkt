@@ -26,7 +26,7 @@ difi:
             keystore:
                 alias: c1
                 lockProvider: false
-                password: test
+                password: changeit
                 path: classpath:/c1.p12
                 type: pkcs12
             oidc:
@@ -52,7 +52,7 @@ difi:
                 keystore:
                     alias: c2
                     lockProvider: false
-                    password: test
+                    password: changeit
                     path: classpath:/c2.p12
                     type: pkcs12
             defaultTtlHours: 24
