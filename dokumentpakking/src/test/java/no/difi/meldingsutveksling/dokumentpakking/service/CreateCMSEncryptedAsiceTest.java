@@ -41,10 +41,10 @@ class CreateCMSEncryptedAsiceTest {
     @Configuration
     public static class Config {
 
-        @Value("classpath:/c1.jks")
+        @Value("classpath:/c1.p12")
         private Resource c1;
 
-        @Value("classpath:/c2.jks")
+        @Value("classpath:/c2.p12")
         private Resource c2;
 
         @Bean(destroyMethod = "shutdown")
