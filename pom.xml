@@ -85,6 +85,7 @@
         <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
         <xmlsec.version>3.0.3</xmlsec.version>
         <dokka.skip>true</dokka.skip>
+        <tomcat.version>9.0.99</tomcat.version>
 
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
