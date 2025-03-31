@@ -47,4 +47,6 @@ eureka:
     region: 'DIFI-MOVE-PROD'
 spring:
   config:
-    import: optional:file:integrasjonspunkt-local.properties
+    import:
+      - optional:file:integrasjonspunkt-local.yml
+      - optional:file:integrasjonspunkt-local.properties

@@ -17,7 +17,9 @@ difi:
         pollingrate: 5000
 spring:
   config:
-    import: optional:file:integrasjonspunkt-local.yml
+    import:
+      - optional:file:integrasjonspunkt-local.yml
+      - optional:file:integrasjonspunkt-local.properties
 
 eureka:
   client:
