@@ -83,8 +83,11 @@ public class NextMoveMessageInSteps {
 
     @And("^I pop the locked message$")
     public void iPopTheLockedMessage() {
-        RequestCallback requestCallback = request -> request.getHeaders()
-                .setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+        RequestCallback requestCallback = request -> {
+            request.getHeaders().setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL));
+        };
 
         ResponseExtractor<Void> responseExtractor = response -> {
             try (InputStream inputStream = response.getBody()) {
@@ -94,7 +97,7 @@ public class NextMoveMessageInSteps {
             }
         };
 
-        testRestTemplate.execute(
+        testRestTemplate.withBasicAuth(username,password).execute(
                 "/api/messages/in/pop/{messageId}",
                 HttpMethod.GET,
                 requestCallback, responseExtractor,
