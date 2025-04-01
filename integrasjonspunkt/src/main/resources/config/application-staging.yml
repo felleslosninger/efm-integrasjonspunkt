@@ -34,4 +34,6 @@ difi:
         baseUrl: 'https://test.svarut.ks.no/tjenester/svarinn'
 spring:
   config:
-    import: optional:file:integrasjonspunkt-local.yml
+    import:
+      - optional:file:integrasjonspunkt-local.yml
+      - optional:file:integrasjonspunkt-local.properties
