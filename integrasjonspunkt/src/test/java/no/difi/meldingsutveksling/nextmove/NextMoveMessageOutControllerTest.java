@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -107,6 +108,7 @@ class NextMoveMessageOutControllerTest {
                                 .file(new MockMultipartFile("sbd", null, MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT)))
                                 .file(new MockMultipartFile("Before The Law", "before_the_law.txt", MediaType.TEXT_PLAIN_VALUE, "Before the law sits a gatekeeper. To this gatekeeper comes a man from the country who asks to gain entry into the law...".getBytes(StandardCharsets.UTF_8)))
                                 .accept(MediaType.APPLICATION_JSON)
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                 )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -144,6 +146,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(ARKIVMELDING_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -177,6 +180,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(DPI_DIGITAL_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -210,6 +214,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(DIGITAL_DPV_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -243,6 +248,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(DPI_PRINT_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -276,6 +282,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(INNSYNSKRAV_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -309,6 +316,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(PUBLISERING_INPUT))
                                 .accept(MediaType.APPLICATION_JSON)
@@ -345,6 +353,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         get("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -389,6 +398,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         get("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("serviceIdentifier", "DPO")
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -409,6 +419,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         get("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("sort", "lastUpdated,asc")
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -429,6 +440,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         get("/api/messages/out")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("page", "3")
                                 .param("size", "10")
                                 .accept(MediaType.APPLICATION_JSON)
@@ -446,6 +458,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         get("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -475,6 +488,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         post("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -499,6 +513,7 @@ class NextMoveMessageOutControllerTest {
     void deleteMessage() throws Exception {
         mvc.perform(
                         delete("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -524,6 +539,7 @@ class NextMoveMessageOutControllerTest {
 
         mvc.perform(
                         put("/api/messages/out/{messageId}", ARKIVMELDING_MESSAGE_DATA.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .contentType(MediaType.TEXT_PLAIN)
                                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; name=Before The Law; filename=before_the_law.txt")
                                 .accept(MediaType.APPLICATION_JSON)

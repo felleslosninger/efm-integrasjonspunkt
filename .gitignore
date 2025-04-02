@@ -4,6 +4,7 @@
 *.orig
 *.class
 .run
+*.p12
 
 # Maven
 /**/target
@@ -99,8 +100,8 @@ integrasjonspunkt-local-copy.properties
 integrasjonspunkt-local-*-only.properties
 
 # Overrides (files for tests)
-!/fiks-meldingsformidler/src/test/resources/somdalen.jks
-!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
+!/fiks-meldingsformidler/src/test/resources/somdalen.p12
+!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.p12
 
 ### STS ###
 .apt_generated

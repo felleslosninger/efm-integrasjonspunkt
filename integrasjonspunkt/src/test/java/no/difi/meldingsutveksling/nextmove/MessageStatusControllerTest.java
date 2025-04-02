@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -74,6 +75,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -119,6 +121,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("messageId", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
                         .param("status", "MOTTATT")
                         .accept(MediaType.APPLICATION_JSON)
@@ -140,6 +143,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("sort", "lastUpdated,asc")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -160,6 +164,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "3")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON)
@@ -191,6 +196,7 @@ public class MessageStatusControllerTest {
         )).thenReturn(page);
 
         MvcResult mvcResult = mvc.perform(get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("fromDateTime", fromDateTime.toString())
                         .param("toDateTime", toDateTime.toString())
                         .accept(MediaType.APPLICATION_JSON))
@@ -216,6 +222,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/{messageId}", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -254,6 +261,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/peek")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())

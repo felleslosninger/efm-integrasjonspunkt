@@ -51,7 +51,7 @@ public class Oauth2ClientSecurityConfig {
 
         // med security så er kun observability åpent, api'er og websider stengt ned
         http.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/manage/*").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
+                requests.requestMatchers("/manage/*", "/error").permitAll().anyRequest().authenticated()).httpBasic(withDefaults());
 
         return http.build();
 
