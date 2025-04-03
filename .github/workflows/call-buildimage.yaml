@@ -18,6 +18,7 @@ jobs:
     secrets: inherit
 
   build-and-deploy-image:
+    needs: build-and-deploy-libs
     uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-public-image.yml@MOVE-4223-publish-image-to-public-CR
     with:
       slack-channel-id : C05NLQCFR41
