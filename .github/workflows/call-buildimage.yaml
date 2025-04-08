@@ -9,7 +9,7 @@ on:
 jobs:
   #also deploys to maven central/ossrh
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@MOVE-4223-publish-image-to-public-CR
+    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@MOVE-4223-publish-public-image
     with:
       java-version: 8
       profile: ossrh
@@ -19,11 +19,12 @@ jobs:
 
   build-and-deploy-image:
     needs: build-and-deploy-libs
-    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-public-image.yml@MOVE-4223-publish-image-to-public-CR
+    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-public-image.yml@MOVE-4223-publish-public-image
     with:
       slack-channel-id : C05NLQCFR41
       application-path: integrasjonspunkt/
       image-name: efm-integrasjonspunkt
       java-version: 8
       update-versions: "false"
+      fetch-depth: 0
     secrets: inherit
