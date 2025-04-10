@@ -4,22 +4,15 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg.
+    types: [ ] # Empty list ensures PRs are not triggered.
 
 jobs:
   #also deploys to maven central/ossrh
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@main
     with:
       java-version: 21
+      profile: ossrh
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
-    secrets: inherit
-
-  build-and-deploy-image:
-    needs: build-and-deploy-libs
-    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4223
-    with:
-      slack-channel-id : C05NLQCFR41
-      java-version: 21
     secrets: inherit
