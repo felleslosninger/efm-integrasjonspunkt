@@ -97,6 +97,8 @@ integrasjonspunkt-local.properties
 integrasjonspunkt-local.properties.bak
 integrasjonspunkt-local-copy.properties
 integrasjonspunkt-local-*-only.properties
+integrasjonspunkt/docker-compose-local.yml
+
 
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.jks
