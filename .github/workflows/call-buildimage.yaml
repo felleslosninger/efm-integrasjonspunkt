@@ -9,10 +9,18 @@ on:
 jobs:
   #also deploys to maven central/ossrh
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@efm-tilpasninger-3
+    uses: felleslosninger/github-workflows/.github/workflows/ci-efm-integrasjonspunkt-publish-ossrh.yml@MOVE-4223
     with:
-      java-version: 8
+      java-version: 21
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
     secrets: inherit
-    
+
+  build-and-deploy-image:
+    needs: build-and-deploy-libs
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4223
+    with:
+      slack-channel-id : C05NLQCFR41
+      java-version: 21
+      fetch-depth: 0
+    secrets: inherit
