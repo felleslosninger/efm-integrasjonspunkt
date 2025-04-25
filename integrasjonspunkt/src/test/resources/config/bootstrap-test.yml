@@ -1,0 +1,4 @@
+app:
+  local:
+    properties:
+      enable: false
