@@ -1,3 +1,19 @@
+FROM maven:3.9-eclipse-temurin-21 AS builder
+
+ARG GIT_PACKAGE_TOKEN
+ARG GIT_PACKAGE_USERNAME
+
+ENV GIT_PACKAGE_TOKEN=${GIT_PACKAGE_TOKEN}
+ENV GIT_PACKAGE_USERNAME=${GIT_PACKAGE_USERNAME}
+
+COPY /integrasjonspunkt/docker/settings.xml /root/.m2/settings.xml
+
+WORKDIR /home/app
+COPY pom.xml ./
+COPY  . ./
+
+RUN --mount=type=cache,target=/root/.m2/repository mvn -B package dependency:go-offline -Dmaven.gitcommitid.skip=true -Dmaven.test.skip=true
+
 FROM eclipse-temurin:21-jre-alpine
 
 # Create non-root user
@@ -9,7 +25,8 @@ ENV APP_DIR=/opt/integrasjonspunkt \
     HOST=tt02.altinn.no \
     PORT=443 \
     KEYSTOREFILE=${JAVA_HOME}/lib/security/cacerts \
-    KEYSTOREPASS=changeit
+    KEYSTOREPASS=changeit \
+    APPLICATION=integrasjonspunkt
 
 # Install tools and import external cert
 RUN apk update && apk add --no-cache \
@@ -26,7 +43,7 @@ RUN apk update && apk add --no-cache \
 
 # Set working directory and permissions
 WORKDIR ${APP_DIR}
-COPY target/integrasjonspunkt.jar ${APP_DIR}/app.jar
+COPY --from=builder /home/app/integrasjonspunkt/target/${APPLICATION}.jar ${APP_DIR}/app.jar
 RUN chown -R java:java ${APP_DIR} && chmod +x ${APP_DIR}/*
 
 # Drop to non-root user
