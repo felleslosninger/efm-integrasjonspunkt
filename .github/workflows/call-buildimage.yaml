@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg...
+    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg....
 
 jobs:
   #also deploys to maven central/ossrh
