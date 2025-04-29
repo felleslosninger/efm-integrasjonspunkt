@@ -141,6 +141,8 @@ integrasjonspunkt-local-steinar.properties
 integrasjonspunkt-local2.yml
 integrasjonspunkt-local.properties.bak
 integrasjonspunkt-local-copy.properties
+integrasjonspunkt-local*.properties
+integrasjonspunkt-local*.yml
 integrasjonspunkt-local-*-only.properties
 integrasjonspunkt/application.properties
 integrasjonspunkt-local.properties
