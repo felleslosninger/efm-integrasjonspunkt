@@ -63,6 +63,7 @@ $RECYCLE.BIN/
 
 ## Directory-based project format:
 .idea/
+.vscode/
 
 ## File-based project format:
 *.ipr
