@@ -238,7 +238,7 @@
             <dependency>
                 <groupId>no.difi.commons</groupId>
                 <artifactId>commons-asic</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1</version>
             </dependency>
 
             <!-- versjonsstyring av dependencies -->
