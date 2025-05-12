@@ -44,6 +44,7 @@ public class DefaultTemplateFactory implements WebServiceTemplateFactory {
                 })
                 .setConnectionManager(getConnectionManager())
                 .setDefaultRequestConfig(getRequestConfig())
+                .useSystemProperties()
                 .build();
     }
 

@@ -60,6 +60,7 @@ public class NtlmTemplateFactory implements WebServiceTemplateFactory {
                 .setConnectionManager(cm)
                 .setDefaultCredentialsProvider(credentialsProvider)
                 .setDefaultRequestConfig(requestConfig)
+                .useSystemProperties()
                 .build();
         messageSender.setHttpClient(client);
         return messageSender;
