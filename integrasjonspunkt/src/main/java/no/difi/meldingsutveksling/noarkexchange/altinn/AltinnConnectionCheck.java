@@ -29,7 +29,11 @@ public class AltinnConnectionCheck {
         } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
             throw new MeldingsUtvekslingRuntimeException("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
         }
-        //Verifying integrity of DPO delegation of the on-behalf-of-reportees
+
+        verifyIntegrityOfDPODelegationForOnBehalfOfReportees();
+    }
+
+    private void verifyIntegrityOfDPODelegationForOnBehalfOfReportees() {
         Set<String> reportees = props.getDpo().getReportees();
         if (reportees != null && !reportees.isEmpty()) {
             for (String reportee : reportees) {
@@ -37,7 +41,7 @@ public class AltinnConnectionCheck {
                     altinnWsClient.checkIfAvailableFiles(reportee);
                     log.info("Altinn DPO delegation verified for reportee: {}", reportee);
                 } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-                    log.warn("Failed to verify DPO delegation for reportee: {}", reportee, e);
+                    throw new RuntimeException("Failed to verify DPO delegation for reportee: {}" +  reportee + e);
                 }
             }
         } else {
