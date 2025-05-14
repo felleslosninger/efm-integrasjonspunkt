@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.dpi.client.Blame;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
+import no.digdir.certvalidator.api.CertificateValidationException;
 import org.springframework.util.Assert;
 
 import java.security.cert.X509Certificate;
@@ -48,7 +49,12 @@ public class UnpackJWT {
 
     private X509Certificate getValidatedSigningCertificate(JWSObject jwsObject) {
         X509Certificate certificate = getSigningCertificate(jwsObject);
-        businessCertificateValidator.validate(certificate);
+        try {
+            businessCertificateValidator.validate(certificate);
+        } catch (
+            CertificateValidationException e) {
+                throw new IllegalStateException("Validation of business certificate failed!", e);
+        }
         return certificate;
     }
 
