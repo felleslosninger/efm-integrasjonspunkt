@@ -148,6 +148,8 @@ integrasjonspunkt-local-*-only.properties
 integrasjonspunkt/application.properties
 integrasjonspunkt-local.properties
 integrasjonspunkt-local.yml
+integrasjonspunkt/docker-compose-local.yml
+
 
 
 
