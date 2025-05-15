@@ -41,7 +41,7 @@ public class AltinnConnectionCheck {
                     altinnWsClient.checkIfAvailableFiles(reportee);
                     log.info("Altinn DPO delegation verified for reportee: {}", reportee);
                 } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-                    throw new RuntimeException("Failed to verify DPO delegation for reportee: {}" +  reportee + e);
+                    throw new RuntimeException("Failed to verify DPO delegation for reportee " + reportee, e);
                 }
             }
         } else {
