@@ -41,21 +41,31 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>github</id>
+            <name>GitHub felleslosninger Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
         </repository>
     </distributionManagement>
 
     <repositories>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>github</id>
+            <name>GitHub felleslosninger Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/felleslosninger/*</url>
+            <releases>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>

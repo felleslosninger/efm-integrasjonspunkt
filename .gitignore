@@ -64,6 +64,7 @@ $RECYCLE.BIN/
 
 ## Directory-based project format:
 .idea/
+.vscode/
 
 ## File-based project format:
 *.ipr
@@ -97,7 +98,11 @@ com_crashlytics_export_strings.xml
 integrasjonspunkt-local.properties
 integrasjonspunkt-local.properties.bak
 integrasjonspunkt-local-copy.properties
+integrasjonspunkt-local*.properties
+integrasjonspunkt-local*.yml
 integrasjonspunkt-local-*-only.properties
+integrasjonspunkt/docker-compose-local.yml
+
 
 # Overrides (files for tests)
 !/fiks-meldingsformidler/src/test/resources/somdalen.p12
