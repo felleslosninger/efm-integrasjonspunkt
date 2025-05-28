@@ -12,9 +12,12 @@ Dette blir en ny versjon med Java 21+ og SpringBoot 3+
 - Removed old / un-maintained "spring-security-oauth2" 2.5.2.RELEASE
 - Merged removal of old DPI message service
 - Merged removal of eFormidling 1.0 (BEST/EDU)
+- Logstash default endepunkt endret til `*logs.eformidling.no:80`, ref [MOVE-1634](https://digdir.atlassian.net/browse/MOVE-1634)
 
 Fixme & todo
 - [x] Enable `enableLogstash` as default for prod and staging again ([see v2 bootstrap config](https://github.com/felleslosninger/efm-integrasjonspunkt/blob/main/integrasjonspunkt/src/main/resources/config/bootstrap.yml))
+- [x] Bytte usikret logstash fra `*stream-meldingsutveksling.difi.no:443` til `*logs.eformidling.no:80`
+- [ ] Støtte for secure logstash på `*logs.eformidling.no:443`
 - [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
 - [ ] Started to remove Kotlin (fremdeles endel som gjenstår, men dette må skrives om)
 - [ ] Search for StatisticsrepositoryNoOperations "usage" (non-existing service loader reference)

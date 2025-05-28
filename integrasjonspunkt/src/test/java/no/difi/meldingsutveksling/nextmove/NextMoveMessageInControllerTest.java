@@ -23,6 +23,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -98,6 +99,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -142,6 +144,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("serviceIdentifier", "DPO")
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -162,6 +165,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("sort", "lastUpdated,asc")
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -182,6 +186,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("page", "3")
                                 .param("size", "10")
                                 .accept(MediaType.APPLICATION_JSON)
@@ -199,6 +204,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in/peek")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -235,6 +241,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in/peek")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -270,6 +277,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in/peek")
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .param("messageId", message.getMessageId())
                                 .param("conversationId", message.getConversationId())
                                 .accept(MediaType.APPLICATION_JSON)
@@ -318,6 +326,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(AsicUtils.MIMETYPE_ASICE)
                 )
                 .andDo(MockMvcResultHandlers.print())
@@ -345,6 +354,7 @@ class NextMoveMessageInControllerTest {
         doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
 
         mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                 .accept(AsicUtils.MIMETYPE_ASICE))
                 .andExpect(status().is5xxServerError())
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof AsicReadException));
@@ -360,6 +370,7 @@ class NextMoveMessageInControllerTest {
         doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
 
         mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                 .accept(AsicUtils.MIMETYPE_ASICE))
                 .andExpect(status().is2xxSuccessful());
 
@@ -373,6 +384,7 @@ class NextMoveMessageInControllerTest {
 
         mvc.perform(
                         delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
