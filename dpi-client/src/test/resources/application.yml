@@ -26,9 +26,9 @@ difi:
             keystore:
                 alias: c1
                 lockProvider: false
-                password: test
-                path: classpath:/c1.jks
-                type: jks
+                password: changeit
+                path: classpath:/c1.p12
+                type: pkcs12
             oidc:
                 enable: true
                 audience: http://localhost:8900/
@@ -52,9 +52,9 @@ difi:
                 keystore:
                     alias: c2
                     lockProvider: false
-                    password: test
-                    path: classpath:/c2.jks
-                    type: jks
+                    password: changeit
+                    path: classpath:/c2.p12
+                    type: pkcs12
             defaultTtlHours: 24
         fiks:
             keystore:

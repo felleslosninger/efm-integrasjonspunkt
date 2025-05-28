@@ -15,8 +15,12 @@ import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.meldingsutveksling.webhooks.event.MessageStatusContent;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +32,8 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.doAnswer;
 
 @RequiredArgsConstructor
+@SpringJUnitConfig
+@TestPropertySource("classpath:CucumberStepsConfiguration.properties")
 public class WebhooksSteps {
 
     private final TestRestTemplate testRestTemplate;
@@ -36,6 +42,9 @@ public class WebhooksSteps {
     private final WireMockServer wireMockServer;
     private final WebhookPusher webhookPusher;
     private final AtomicBoolean pushed = new AtomicBoolean(false);
+
+    @Autowired
+    private Environment env;
 
     @Before
     public void before() {
@@ -60,8 +69,12 @@ public class WebhooksSteps {
 
     @Given("^I create the following webhook subscription:$")
     public void iCreateTheFollowingWebhookSubscription(String body) {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(username, password);
 
         ResponseEntity<String> response = testRestTemplate.exchange(
                 "/api/subscriptions",
