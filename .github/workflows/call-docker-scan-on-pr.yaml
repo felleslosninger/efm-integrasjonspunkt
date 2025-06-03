@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  call-workflow-maven-build:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@MOVE-4223
+    with:
+      java-version: 21
+      application-path: integrasjonspunkt/
+    secrets: inherit
+
+  call-container-scan:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-scan-integrasjonspunkt.yml@MOVE-4223
+    with:
+      java-version: 21
+      application-path: integrasjonspunkt/
+    secrets: inherit
