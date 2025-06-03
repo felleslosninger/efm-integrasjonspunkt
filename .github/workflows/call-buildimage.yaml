@@ -7,8 +7,9 @@ on:
     types: [ ] # Empty list ensures PRs are not triggered.
 
 jobs:
-  #also deploys to maven central/ossrh
+  #deploys libs to github packages
   build-and-deploy-libs:
+    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@MOVE-4223
     with:
       java-version: 21
@@ -18,6 +19,7 @@ jobs:
     secrets: inherit
 
   build-and-deploy-image:
+    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     needs: build-and-deploy-libs
     uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4223
     with:
