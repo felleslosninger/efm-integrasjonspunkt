@@ -9,7 +9,7 @@ on:
 jobs:
   #also deploys to maven central/ossrh
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@MOVE-4223
     with:
       java-version: 21
       sbom-path: integrasjonspunkt/target
