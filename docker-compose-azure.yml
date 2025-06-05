@@ -1,9 +1,0 @@
-version: '3.3'
-
-services:
-  integrasjonspunkt:
-    build: integrasjonspunkt
-    image: "digdir/integrasjonspunkt:${DHTAG}"
-  integrasjonspunkt_difitag:
-    build: integrasjonspunkt
-    image: "difi/integrasjonspunkt:${DHTAG}"
