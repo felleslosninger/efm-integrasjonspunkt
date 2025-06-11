@@ -12,6 +12,10 @@ WORKDIR /home/app
 COPY pom.xml ./
 COPY  . ./
 
+RUN echo /root/.m2/settings.xml && \
+    echo "GIT_PACKAGE_TOKEN: ${GIT_PACKAGE_TOKEN}" && \
+    echo "GIT_PACKAGE_USERNAME: ${GIT_PACKAGE_USERNAME}"
+
 RUN --mount=type=cache,target=/root/.m2/repository mvn -B package dependency:go-offline -Dmaven.gitcommitid.skip=true -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine
