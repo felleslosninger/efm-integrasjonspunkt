@@ -12,7 +12,8 @@ WORKDIR /home/app
 COPY pom.xml ./
 COPY  . ./
 
-RUN echo /root/.m2/settings.xml && \
+RUN echo "Contents of /root/.m2/settings.xml:" && \
+    cat /root/.m2/settings.xml && \
     echo "GIT_PACKAGE_TOKEN: ${GIT_PACKAGE_TOKEN}" && \
     echo "GIT_PACKAGE_USERNAME: ${GIT_PACKAGE_USERNAME}"
 
