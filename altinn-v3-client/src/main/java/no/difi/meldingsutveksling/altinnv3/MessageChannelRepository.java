@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dpo;
+package no.difi.meldingsutveksling.altinnv3;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -8,4 +8,5 @@ public interface MessageChannelRepository extends CrudRepository<MessageChannelE
 
     Optional<MessageChannelEntry> findByMessageId(String messageId);
     void deleteByMessageId(String messageId);
+
 }

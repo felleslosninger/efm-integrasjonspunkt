@@ -9,8 +9,8 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.dpo.MessageChannelEntry
-import no.difi.meldingsutveksling.dpo.MessageChannelRepository
+import no.difi.meldingsutveksling.altinnv3.MessageChannelEntry
+import no.difi.meldingsutveksling.altinnv3.MessageChannelRepository
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus

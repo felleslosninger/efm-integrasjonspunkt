@@ -91,9 +91,6 @@
         <module>api</module>
         <module>common</module>
         <module>common-spring</module>
-        <!--
-        <module>altinnexchange</module>
-        -->
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
         <module>validation</module>

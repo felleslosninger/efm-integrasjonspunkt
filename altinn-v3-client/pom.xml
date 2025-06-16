@@ -10,46 +10,13 @@
     </parent>
 
     <artifactId>altinn-v3-client</artifactId>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.1.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/altinn-correspondence-v1.json</inputSpec>
-                            <generatorName>java</generatorName>
-                            <configOptions>
-                                <annotationLibrary>none</annotationLibrary>
-                                <library>restclient</library>
-                            </configOptions>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                            <apiPackage>no.digdir.altinn3.rest.client.api</apiPackage>
-                            <modelPackage>no.digdir.altinn3.rest.model</modelPackage>
-                            <invokerPackage>no.digdir.altinn3.rest.client</invokerPackage>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp-bom</artifactId>
-                <version>4.12.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -89,14 +56,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -109,12 +69,127 @@
             <version>0.2.6</version>
             <scope>compile</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.swagger.core.v3</groupId>-->
-<!--            <artifactId>swagger-models-jakarta</artifactId>-->
-<!--            <version>2.2.28</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
+
+
+
+
+        <!-- test prosjektet til Steinar bruker dependencies under her -->
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.14</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>9.47</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.79</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.79</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>1.10.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <!--
+    https://github.com/OpenAPITools/openapi-generator/blob/master/modules/openapi-generator-maven-plugin/README.md
+    Config docs at : https://openapi-generator.tech/docs/generators/java
+    mcs org.openapitools:openapi-generator-maven-plugin
+    -->
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <id>add-source</id>
+                            <phase>generate-sources</phase>
+                            <goals><goal>add-source</goal></goals>
+                            <configuration>
+                                <sources>
+                                    <source>${project.build.directory}/generated-sources/altinnv3/src/main/java</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.13.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+
+                            <inputSpec>${project.basedir}/src/main/resources/altinn-correspondence-v1.json</inputSpec>
+                            <generatorName>java</generatorName>
+                            <output>${project.build.directory}/generated-sources/altinnv3</output>
+
+                            <apiPackage>no.digdir.altinn3.rest.client.api</apiPackage>
+                            <modelPackage>no.digdir.altinn3.rest.model</modelPackage>
+                            <invokerPackage>no.digdir.altinn3.rest.client</invokerPackage>
+
+                            <!-- kun model + api, ikke alt det andre rælet -->
+                            <globalProperties>
+                                <models>true</models>
+                                <apis>true</apis>
+                                <modelDocs>false</modelDocs>
+                                <modelTests>false</modelTests>
+                                <apiDocs>false</apiDocs>
+                                <apiTests>false</apiTests>
+                            </globalProperties>
+
+                            <configOptions>
+                                <library>restclient</library>
+                                <dateLibrary>java8</dateLibrary>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <!--
+                                <annotationLibrary>none</annotationLibrary>
+                                <generateClientAsBean>true</generateClientAsBean>
+                                <openApiNullable>false</openApiNullable>
+                                <useJakartaEe>true</useJakartaEe>
+                                <useRuntimeException>true</useRuntimeException>
+                                -->
+                            </configOptions>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

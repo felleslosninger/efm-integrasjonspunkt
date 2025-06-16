@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.dpo;
+package no.difi.meldingsutveksling.altinnv3;
 
 import lombok.*;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;

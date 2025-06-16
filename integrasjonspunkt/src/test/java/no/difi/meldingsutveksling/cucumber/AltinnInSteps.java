@@ -4,22 +4,20 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.soap.SOAPBody;
+import jakarta.xml.soap.SOAPException;
+import jakarta.xml.soap.SOAPMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.*;
 import no.difi.move.common.io.ResourceUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.ws.soap.saaj.SaajSoapMessage;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-import jakarta.xml.soap.SOAPBody;
-import jakarta.xml.soap.SOAPException;
-import jakarta.xml.soap.SOAPMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,14 +43,16 @@ public class AltinnInSteps {
         wireMockServer.givenThat(get(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withBody(IOUtils.toByteArray(no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory.class.getResourceAsStream("/BrokerServiceExternalBasic.wsdl")))
+                        .withBody("FIXME")
+                        //.withBody(IOUtils.toByteArray(no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory.class.getResourceAsStream("/BrokerServiceExternalBasic.wsdl")))
                 )
         );
 
         wireMockServer.givenThat(get(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasicStreamed.svc?wsdl"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withBody(IOUtils.toByteArray(no.difi.meldingsutveksling.altinn.mock.brokerstreamed.ObjectFactory.class.getResourceAsStream("/BrokerServiceExternalBasicStreamed.wsdl")))
+                        .withBody("FIXME")
+                        //.withBody(IOUtils.toByteArray(no.difi.meldingsutveksling.altinn.mock.brokerstreamed.ObjectFactory.class.getResourceAsStream("/BrokerServiceExternalBasicStreamed.wsdl")))
                 )
         );
 
@@ -121,36 +121,37 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
-        BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
-        BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
-        file.setFileReference("testMessage");
-        file.setSendersReference(new ObjectFactory().createBrokerServiceAvailableFileSendersReference(UUID.randomUUID().toString()));
-        file.setReceiptID(1);
-        filesBasic.getBrokerServiceAvailableFile().add(file);
 
-        CheckIfAvailableFilesBasicResponse checkResponse = new ObjectFactory().createCheckIfAvailableFilesBasicResponse();
-        checkResponse.setCheckIfAvailableFilesBasicResult(true);
-        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
-                .withHeader(SOAP_ACTION, containing("CheckIfAvailableFilesBasic"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_XML_VALUE)
-                        .withBody(serialize(new JAXBElement<>(_CheckIfAvailableFilesBasicResponse_QNAME, CheckIfAvailableFilesBasicResponse.class, checkResponse)))
-                )
-        );
-
-        GetAvailableFilesBasicResponse response = new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponse();
-        response.setGetAvailableFilesBasicResult(new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponseGetAvailableFilesBasicResult(filesBasic));
-        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
-                .withHeader(SOAP_ACTION, containing("GetAvailableFilesBasic"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_XML_VALUE)
-                        .withBody(serialize(new JAXBElement<>(_GetAvailableFilesBasicResponse_QNAME, GetAvailableFilesBasicResponse.class, response)))
-                )
-        );
+//        BrokerServiceAvailableFileList filesBasic = new BrokerServiceAvailableFileList();
+//        BrokerServiceAvailableFile file = new BrokerServiceAvailableFile();
+//        file.setFileReference("testMessage");
+//        file.setSendersReference(new ObjectFactory().createBrokerServiceAvailableFileSendersReference(UUID.randomUUID().toString()));
+//        file.setReceiptID(1);
+//        filesBasic.getBrokerServiceAvailableFile().add(file);
+//
+//        CheckIfAvailableFilesBasicResponse checkResponse = new ObjectFactory().createCheckIfAvailableFilesBasicResponse();
+//        checkResponse.setCheckIfAvailableFilesBasicResult(true);
+//        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
+//                .withHeader(SOAP_ACTION, containing("CheckIfAvailableFilesBasic"))
+//                .willReturn(aResponse()
+//                        .withStatus(200)
+//                        .withHeader(HttpHeaders.CONNECTION, "close")
+//                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_XML_VALUE)
+//                        .withBody(serialize(new JAXBElement<>(_CheckIfAvailableFilesBasicResponse_QNAME, CheckIfAvailableFilesBasicResponse.class, checkResponse)))
+//                )
+//        );
+//
+//        GetAvailableFilesBasicResponse response = new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponse();
+//        response.setGetAvailableFilesBasicResult(new no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory().createGetAvailableFilesBasicResponseGetAvailableFilesBasicResult(filesBasic));
+//        wireMockServer.givenThat(post(urlEqualTo("/ServiceEngineExternal/BrokerServiceExternalBasic.svc?wsdl"))
+//                .withHeader(SOAP_ACTION, containing("GetAvailableFilesBasic"))
+//                .willReturn(aResponse()
+//                        .withStatus(200)
+//                        .withHeader(HttpHeaders.CONNECTION, "close")
+//                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_XML_VALUE)
+//                        .withBody(serialize(new JAXBElement<>(_GetAvailableFilesBasicResponse_QNAME, GetAvailableFilesBasicResponse.class, response)))
+//                )
+//        );
 
         String boundary = UUID.randomUUID().toString();
 
@@ -169,6 +170,9 @@ public class AltinnInSteps {
                                         .withBody(getDownloadBody(boundary))
                         )
         );
+
+        throw new IOException("FIXME - dette testet egentlig SOAP, må skrives om til REST");
+
     }
 
     private byte[] getDownloadBody(String boundary) throws IOException {

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
-import no.difi.meldingsutveksling.dpo.AltinnRestClient;
+import no.difi.meldingsutveksling.altinnv3.AltinnRestClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;

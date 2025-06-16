@@ -2,26 +2,26 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Sets;
 import io.micrometer.core.annotation.Timed;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.*;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpo.AltinnRestClient;
+import no.difi.meldingsutveksling.altinnv3.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.AltinnRestClient;
+import no.difi.meldingsutveksling.altinnv3.DownloadRequest;
+import no.difi.meldingsutveksling.altinnv3.FileReference;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
-import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
-import no.difi.meldingsutveksling.dpo.FileReference;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -58,8 +58,8 @@ public class DefaultDpoPolling implements DpoPolling {
                     List<FileReference> fileReferences = altinnRestClient.availableFiles(o);
                     fileReferences.forEach(reference -> handleFileReference(altinnRestClient, reference, o));
                 }
-            } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-                log.error("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
+            } catch (Exception e) {
+                log.error("Could not check for available files from Altinn: " + e.getMessage(), e);
             }
         });
     }

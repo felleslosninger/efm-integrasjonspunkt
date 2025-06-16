@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.logging;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.dpo.FileReference;
+import no.difi.meldingsutveksling.altinnv3.FileReference;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;

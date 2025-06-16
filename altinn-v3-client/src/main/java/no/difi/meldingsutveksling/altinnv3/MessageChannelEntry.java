@@ -1,12 +1,11 @@
-package no.difi.meldingsutveksling.dpo;
-
-import lombok.*;
-import no.difi.meldingsutveksling.nextmove.AbstractEntity;
+package no.difi.meldingsutveksling.altinnv3;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import lombok.*;
+import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 
 @Getter
 @Setter
@@ -20,6 +19,8 @@ public class MessageChannelEntry extends AbstractEntity<Long> {
     @Column(unique = true)
     @NonNull
     private String messageId;
+
     @NonNull
     private String channel;
+
 }
