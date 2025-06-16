@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.AltinnWsClient;
 import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
 import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
+import no.difi.meldingsutveksling.dpo.AltinnRestClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -40,16 +41,8 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
-                                            AltinnWsConfigurationFactory altinnWsConfigurationFactory,
-                                            Plumber plumber,
-                                            PromiseMaker promiseMaker,
-                                            IntegrasjonspunktProperties properties) {
-        return new AltinnWsClient(altinnWsConfigurationFactory.create(),
-                applicationContextHolder.getApplicationContext(),
-                plumber,
-                promiseMaker,
-                properties);
+    public AltinnRestClient getAltinnRestClient(IntegrasjonspunktProperties properties) {
+        return new AltinnRestClient(properties);
     }
 
     @Bean

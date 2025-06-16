@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.2</version>
+        <version>3.5.0</version>
         <relativePath />
     </parent>
 
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Multiproject for meldingsutveksling</name>
 
@@ -91,13 +91,15 @@
         <module>api</module>
         <module>common</module>
         <module>common-spring</module>
+        <!--
         <module>altinnexchange</module>
+        -->
         <module>dokumentpakking</module>
         <module>integrasjonspunkt</module>
         <module>validation</module>
         <module>nextmove</module>
         <module>domain</module>
-        <module>altinn-client</module>
+        <module>altinn-v3-client</module>
         <module>post-til-virksomhet</module>
         <module>dpi-client</module>
         <module>post-til-private</module>
@@ -136,12 +138,7 @@
 
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinn-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinnexchange</artifactId>
+                <artifactId>altinn-v3-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
