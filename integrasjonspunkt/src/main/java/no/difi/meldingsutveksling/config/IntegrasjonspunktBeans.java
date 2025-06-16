@@ -1,8 +1,5 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
-import no.difi.meldingsutveksling.ApplicationContextHolder;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.dpo.AltinnRestClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;

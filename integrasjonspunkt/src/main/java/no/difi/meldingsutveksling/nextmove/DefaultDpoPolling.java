@@ -11,9 +11,11 @@ import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dpo.AltinnRestClient;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
 import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
+import no.difi.meldingsutveksling.dpo.FileReference;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -35,7 +37,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final AltinnWsClient altinnWsClient;
+    private final AltinnRestClient altinnRestClient;
 
     private Set<String> orgnrs;
 
@@ -51,10 +53,10 @@ public class DefaultDpoPolling implements DpoPolling {
         orgnrs.forEach(o -> {
             log.debug("Polling messages for " + o);
             try {
-                if (altinnWsClient.checkIfAvailableFiles(o)) {
+                if (altinnRestClient.checkIfAvailableFiles(o)) {
                     log.debug("New DPO message(s) detected for " + o);
-                    List<FileReference> fileReferences = altinnWsClient.availableFiles(o);
-                    fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference, o));
+                    List<FileReference> fileReferences = altinnRestClient.availableFiles(o);
+                    fileReferences.forEach(reference -> handleFileReference(altinnRestClient, reference, o));
                 }
             } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
                 log.error("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
@@ -63,7 +65,7 @@ public class DefaultDpoPolling implements DpoPolling {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void handleFileReference(AltinnWsClient client, FileReference reference, String orgnr) {
+    private void handleFileReference(AltinnRestClient client, FileReference reference, String orgnr) {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), orgnr);
             log.debug("Downloading message with altinnId=%s".formatted(reference.getValue()));
