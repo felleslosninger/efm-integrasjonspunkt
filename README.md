@@ -35,6 +35,9 @@ Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.
 ```bash
 mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+
+# med custom konfig - lag en application-local.properties fil i roten på prosjektet og start local 
+java -Dspring.profiles.active=local -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
 For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
