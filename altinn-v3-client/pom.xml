@@ -100,6 +100,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>4.0.5</version>
+            <scope>test</scope>
+        </dependency>
+        <!--
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.10.3</version>
@@ -111,6 +118,7 @@
             <version>1.10.0</version>
             <scope>test</scope>
         </dependency>
+        -->
 
     </dependencies>
 
@@ -162,7 +170,7 @@
                             <modelPackage>no.digdir.altinn3.rest.model</modelPackage>
                             <invokerPackage>no.digdir.altinn3.rest.client</invokerPackage>
 
-                            <!-- kun model + api, ikke alt det andre rælet -->
+                            <!-- kun model + api -->
                             <globalProperties>
                                 <models>true</models>
                                 <apis>true</apis>
