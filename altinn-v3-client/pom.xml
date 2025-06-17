@@ -118,8 +118,13 @@
             <version>1.10.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.12.2</version>
+            <scope>compile</scope>
+        </dependency>
         -->
-
     </dependencies>
 
     <!--
@@ -170,27 +175,27 @@
                             <modelPackage>no.digdir.altinn3.rest.model</modelPackage>
                             <invokerPackage>no.digdir.altinn3.rest.client</invokerPackage>
 
-                            <!-- kun model + api -->
-                            <globalProperties>
-                                <models>true</models>
-                                <apis>true</apis>
-                                <modelDocs>false</modelDocs>
-                                <modelTests>false</modelTests>
-                                <apiDocs>false</apiDocs>
-                                <apiTests>false</apiTests>
-                            </globalProperties>
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+
+                            <cleanupOutput>true</cleanupOutput>
 
                             <configOptions>
+
                                 <library>restclient</library>
                                 <dateLibrary>java8</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
-                                <!--
                                 <annotationLibrary>none</annotationLibrary>
                                 <generateClientAsBean>true</generateClientAsBean>
                                 <openApiNullable>false</openApiNullable>
                                 <useJakartaEe>true</useJakartaEe>
                                 <useRuntimeException>true</useRuntimeException>
-                                -->
                             </configOptions>
 
                         </configuration>
