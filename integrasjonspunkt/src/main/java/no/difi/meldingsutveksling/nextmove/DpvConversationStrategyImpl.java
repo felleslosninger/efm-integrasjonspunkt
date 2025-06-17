@@ -52,6 +52,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
         }
 
+        // Todo change to resource?
         String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
         String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
         conversationService.findConversation(message.getMessageId())

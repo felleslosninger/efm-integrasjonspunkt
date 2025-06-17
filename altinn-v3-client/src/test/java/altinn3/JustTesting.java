@@ -1,6 +1,6 @@
 package altinn3;
 
-import no.digdir.altinn3.rest.model.*;
+import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestClient;

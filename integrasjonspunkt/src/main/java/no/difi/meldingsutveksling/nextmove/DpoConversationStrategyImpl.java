@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.AltinnTransport;
+import no.difi.meldingsutveksling.altinnv3.AltinnBroker;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -31,7 +31,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @Order
 public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
-    private final AltinnTransport transport;
+    private final AltinnBroker altinnBroker;
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
     private final MessageChannelRepository messageChannelRepository;
@@ -45,14 +45,14 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
         SBDUtil.getPartIdentifier(message.getSbd()).ifPresent(o -> message.getSbd().setSenderIdentifier(o));
 
         if (message.getFiles() == null || message.getFiles().isEmpty()) {
-            transport.send(message.getSbd());
+            altinnBroker.send(message.getSbd());
             return;
         }
 
         try {
             promiseMaker.promise(reject -> {
                 Resource encryptedAsic = asicHandler.createCmsEncryptedAsice(message, reject);
-                transport.send(message.getSbd(), encryptedAsic);
+                altinnBroker.send(message.getSbd(), encryptedAsic);
                 return null;
             }).await();
         } catch (Exception e) {
