@@ -160,14 +160,21 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>7.13.0</version>
+
                 <executions>
                     <execution>
+
                         <goals>
                             <goal>generate</goal>
                         </goals>
+
                         <configuration>
 
-                            <inputSpec>${project.basedir}/src/main/resources/altinn-correspondence-v1.json</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/altinn-correspondence-v1.json</inputSpec>
+                            <!--
+                            <inputSpecRootDirectory>${project.basedir}/src/main/resources/openapi</inputSpecRootDirectory>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/altinn-broker-v1.json</inputSpec>
+                            -->
                             <generatorName>java</generatorName>
                             <output>${project.build.directory}/generated-sources/altinnv3</output>
 
@@ -185,6 +192,9 @@
                             <generateApiDocumentation>false</generateApiDocumentation>
 
                             <cleanupOutput>true</cleanupOutput>
+
+                            <!-- some issues in broker api openapi file -->
+                            <skipValidateSpec>true</skipValidateSpec>
 
                             <configOptions>
 
