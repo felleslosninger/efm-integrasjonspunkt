@@ -57,6 +57,7 @@ public class NextMoveMessageOutController {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+
         // Check for max size
         files.stream()
                 .filter(p -> p.getSize() > MAX_SIZE)
@@ -74,9 +75,16 @@ public class NextMoveMessageOutController {
                 .ifPresent(d -> {
                     throw new DuplicateFilenameException(d);
                 });
-        NextMoveOutMessage message = messageService.createMessage(sbd, files);
-        messageService.sendMessage(message.getId());
-        return message.getSbd();
+        if ( sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType() == "dialogmelding" ) {
+
+
+        }
+        else {
+            NextMoveOutMessage message = messageService.createMessage(sbd, files);
+            messageService.sendMessage(message.getId());
+            return message.getSbd();
+        }
+        return null;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

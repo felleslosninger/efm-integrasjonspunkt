@@ -13,6 +13,8 @@ public class Service {
     private String serviceCode;
     private String serviceEditionCode;
     private Integer securityLevel;
+    private String herdId1;
+    private String herId2;
 
     public Service(ServiceIdentifier identifier, String endpointUrl) {
         this.identifier = identifier;
