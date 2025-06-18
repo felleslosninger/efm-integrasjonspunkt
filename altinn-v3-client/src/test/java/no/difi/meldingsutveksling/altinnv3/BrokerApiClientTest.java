@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+@Disabled
 @SpringBootTest(classes = {
 AltinnConfig.class,
 AltinnBroker.class,

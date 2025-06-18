@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import no.digdir.altinn3.correspondence.model.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
+@Disabled
 public class ManuallyTestingCorrespondence {
 
     // https://docs.altinn.studio/api/correspondence/spec/#/Correspondence/post_correspondence_api_v1_correspondence

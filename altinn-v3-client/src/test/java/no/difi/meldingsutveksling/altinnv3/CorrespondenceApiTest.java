@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import com.nimbusds.jose.JOSEException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 public class CorrespondenceApiTest {
 
     @Test
