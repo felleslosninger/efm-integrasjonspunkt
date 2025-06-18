@@ -10,8 +10,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,10 +19,8 @@ import java.net.http.HttpResponse;
 import java.util.Date;
 import java.util.List;
 
-@Component
 public class TokenUtil {
 
-    @Cacheable("dpoClient.getAltinnToken")
     public String retrieveAccessToken(String scopes) throws IOException, InterruptedException, JOSEException {
         String pem1 = "-----BEGIN CERTIFICATE-----\n" +
             "MIIGWTCCBEGgAwIBAgILAZl75qx7xrySb8UwDQYJKoZIhvcNAQELBQAwbjELMAkG\n" +

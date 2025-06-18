@@ -2,16 +2,11 @@ package no.difi.meldingsutveksling.altinnv3;
 
 import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-
-@SpringBootTest
-public class JustTesting {
-
-
+public class ManuallyTestingCorrespondence {
 
     // https://docs.altinn.studio/api/correspondence/spec/#/Correspondence/post_correspondence_api_v1_correspondence
 
@@ -54,16 +49,11 @@ public class JustTesting {
 
     }
 
-
-
-        @Test
+    @Test
     void callUsingGeneratedModel() throws Exception {
-
         RestClient restClient = RestClient.create();
-
         var uri = "https://platform.tt02.altinn.no/correspondence/api/v1/correspondence?role=RecipientAndSender&resourceId=eformidling-meldingsteneste-test";
         String accessToken = ApiUtils.retrieveAccessToken("altinn:correspondence.write altinn:correspondence.read altinn:serviceowner");
-
         var result = restClient.get()
             .uri(uri)
             .header("Authorization", "Bearer " + accessToken)
@@ -71,9 +61,7 @@ public class JustTesting {
             .retrieve()
             .body(CorrespondencesExt.class)
             ;
-
-        System.out.println(result);
-    // 01977ced-6722-7e1e-a468-a31e70551639
+        System.out.println(result); // 01977ced-6722-7e1e-a468-a31e70551639
     }
 
     @Test

@@ -5,7 +5,6 @@ import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.digdir.altinn3.broker.model.*;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -17,17 +16,16 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class BrokerApiClient {
 
+    private final AltinnTokenUtil tokenUtil;
     private final RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getBrokerApiException).build();
-    //private final TokenUtil tokenUtil;
-    private final NewTokenUtil tokenUtil;
 
     public UUID initialize(FileTransferInitalizeExt request) throws IOException, InterruptedException, JOSEException {
 
-        String accessToken = tokenUtil.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         var result = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/")
@@ -42,7 +40,7 @@ public class BrokerApiClient {
     }
 
     public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) throws IOException, InterruptedException, JOSEException {
-        String accessToken = tokenUtil.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         FileTransferOverviewExt response = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/upload", fileTransferId)
@@ -58,7 +56,7 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() throws IOException, InterruptedException, JOSEException {
-        String accessToken = tokenUtil.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         UUID[] response = restClient.get()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
@@ -71,7 +69,7 @@ public class BrokerApiClient {
             .body(UUID[].class)
             ;
 
-        System.out.println(response.length);
+        //System.out.println(response.length);
 
         return response;
     }
@@ -92,7 +90,7 @@ public class BrokerApiClient {
     }
 
     public byte[] downloadFile(UUID fileTransferId) throws IOException, InterruptedException, JOSEException {
-        String accessToken = tokenUtil.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         byte[] response = restClient.get()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/download", fileTransferId)
@@ -105,7 +103,7 @@ public class BrokerApiClient {
     }
 
     public void confirmDownload(UUID fileTransferId) throws IOException, InterruptedException, JOSEException {
-        String accessToken = tokenUtil.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         var response = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)
@@ -147,4 +145,5 @@ public class BrokerApiClient {
             throw new BrokerApiException("Problem while getting broker api exception", e);
         }
     }
+
 }

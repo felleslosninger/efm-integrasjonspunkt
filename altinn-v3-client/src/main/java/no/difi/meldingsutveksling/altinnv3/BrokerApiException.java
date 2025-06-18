@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.altinnv3;
 
 public class BrokerApiException extends RuntimeException {
 
-
     public BrokerApiException() {
         super();
     }
@@ -14,4 +13,5 @@ public class BrokerApiException extends RuntimeException {
     public BrokerApiException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }

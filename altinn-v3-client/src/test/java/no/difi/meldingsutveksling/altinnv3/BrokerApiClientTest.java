@@ -1,30 +1,19 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import com.nimbusds.jose.JOSEException;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-@ContextConfiguration(classes = {AltinnConfig.class,
-    IntegrasjonspunktProperties.class, NewTokenUtil.class, BrokerApiClient.class}, initializers = {ConfigDataApplicationContextInitializer.class})
-@TestPropertySource(locations = "classpath:application.properties")
 @SpringBootTest
 public class BrokerApiClientTest {
 
-    @Autowired
     BrokerApiClient brokerApiClient;
-
-    //BrokerApiClient brokerApiClient = new BrokerApiClient();
 
     @Test
     void test() throws IOException, InterruptedException, JOSEException {
@@ -39,7 +28,6 @@ public class BrokerApiClientTest {
 
         UUID fileTransferId = brokerApiClient.initialize(fileTransferInitalizeExt);
         FileTransferOverviewExt response = brokerApiClient.upload(fileTransferId, "Hello world".getBytes());
-
 
     }
 
