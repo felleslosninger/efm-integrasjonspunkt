@@ -1,4 +1,4 @@
-package altinn3;
+package no.difi.meldingsutveksling.altinnv3;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;

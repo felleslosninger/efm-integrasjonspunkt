@@ -1,4 +1,4 @@
-package altinn3;
+package no.difi.meldingsutveksling.altinnv3;
 
 import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Test;

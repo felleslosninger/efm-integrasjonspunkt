@@ -10,6 +10,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,11 +21,11 @@ import java.net.http.HttpResponse;
 import java.util.Date;
 import java.util.List;
 
+@Component
 public class TokenUtil {
 
-
-    // levetid token cache stuff
-    public static String retrieveAccessToken(String scopes) throws IOException, InterruptedException, JOSEException {
+    @Cacheable("dpoClient.getAltinnToken")
+    public String retrieveAccessToken(String scopes) throws IOException, InterruptedException, JOSEException {
         String pem1 = "-----BEGIN CERTIFICATE-----\n" +
             "MIIGWTCCBEGgAwIBAgILAZl75qx7xrySb8UwDQYJKoZIhvcNAQELBQAwbjELMAkG\n" +
             "A1UEBhMCTk8xGDAWBgNVBGEMD05UUk5PLTk4MzE2MzMyNzETMBEGA1UECgwKQnV5\n" +
@@ -223,6 +225,8 @@ public class TokenUtil {
             .GET()
             .build();
         HttpResponse httpResponse2 = httpClient.send(httpRequest2, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(httpResponse2.statusCode());
 
         String accessToken2 = (String) httpResponse2.body();
         return accessToken2;
