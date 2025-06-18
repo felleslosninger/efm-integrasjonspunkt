@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import com.nimbusds.jose.JOSEException;
+import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.junit.jupiter.api.Test;
@@ -10,9 +12,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-@SpringBootTest
+@SpringBootTest(classes = {
+AltinnConfig.class,
+AltinnBroker.class,
+BrokerApiClient.class,
+AltinnTokenUtil.class,
+IntegrasjonspunktProperties .class
+})
 public class BrokerApiClientTest {
 
+    @Inject
     BrokerApiClient brokerApiClient;
 
     @Test
@@ -28,6 +37,7 @@ public class BrokerApiClientTest {
 
         UUID fileTransferId = brokerApiClient.initialize(fileTransferInitalizeExt);
         FileTransferOverviewExt response = brokerApiClient.upload(fileTransferId, "Hello world".getBytes());
+
 
     }
 

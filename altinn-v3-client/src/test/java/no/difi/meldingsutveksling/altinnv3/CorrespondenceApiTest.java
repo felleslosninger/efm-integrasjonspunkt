@@ -10,7 +10,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class CorrespondenceApiTest {
+
     @Test
     public void sendMessage() throws JOSEException, IOException, InterruptedException {
         String insertCorrespondenceString = "{\n" +
