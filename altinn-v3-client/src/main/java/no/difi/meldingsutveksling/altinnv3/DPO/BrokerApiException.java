@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.DPO;
 
 public class BrokerApiException extends RuntimeException {
 

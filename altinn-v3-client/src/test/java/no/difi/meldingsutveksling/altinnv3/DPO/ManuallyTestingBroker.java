@@ -1,6 +1,8 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.DPO;
 
 import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
+import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,9 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.DPO;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
 import no.digdir.altinn3.broker.model.*;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;

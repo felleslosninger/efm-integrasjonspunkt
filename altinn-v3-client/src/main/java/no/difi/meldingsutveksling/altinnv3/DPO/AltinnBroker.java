@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.DPO;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;

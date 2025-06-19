@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.DPO;
 
 import lombok.Value;
 
