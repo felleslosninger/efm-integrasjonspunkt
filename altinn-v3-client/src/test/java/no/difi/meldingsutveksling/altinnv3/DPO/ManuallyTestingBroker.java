@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Disabled
 @SpringBootTest(classes = {
     AltinnConfig.class,
-    AltinnBroker.class,
+    AltinnUploadService.class,
     BrokerApiClient.class,
     AltinnTokenUtil.class,
     IntegrasjonspunktProperties.class
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class ManuallyTestingBroker {
 
     @Inject
-    AltinnBroker broker;
+    AltinnUploadService broker;
 
     @Inject
     BrokerApiClient client;

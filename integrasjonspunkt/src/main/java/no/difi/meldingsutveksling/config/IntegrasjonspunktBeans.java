@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnRestClient;
+import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDownloadService;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -38,8 +38,8 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnRestClient getAltinnRestClient(IntegrasjonspunktProperties properties) {
-        return new AltinnRestClient(properties);
+    public AltinnDownloadService getAltinnRestClient(IntegrasjonspunktProperties properties) {
+        return new AltinnDownloadService(properties);
     }
 
     @Bean

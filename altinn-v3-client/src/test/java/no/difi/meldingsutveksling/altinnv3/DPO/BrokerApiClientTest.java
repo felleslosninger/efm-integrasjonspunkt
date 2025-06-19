@@ -16,7 +16,7 @@ import java.util.UUID;
 @Disabled
 @SpringBootTest(classes = {
 AltinnConfig.class,
-AltinnBroker.class,
+AltinnUploadService.class,
 BrokerApiClient.class,
 AltinnTokenUtil.class,
 IntegrasjonspunktProperties .class

@@ -68,6 +68,15 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+
         <!-- needed by the model generation -->
 
         <dependency>
@@ -180,6 +189,23 @@
                             <modelPackage>no.digdir.altinn3.broker.model</modelPackage>
                             <!-- 20250618 still neeeded skipValidateSpec because some issues in broker api openapi file -->
                             <skipValidateSpec>true</skipValidateSpec>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>xsd-generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>${project.basedir}/src/main/resources/altinn2/xsd</schemaDirectory>
+                            <markGenerated>true</markGenerated>
                         </configuration>
                     </execution>
                 </executions>

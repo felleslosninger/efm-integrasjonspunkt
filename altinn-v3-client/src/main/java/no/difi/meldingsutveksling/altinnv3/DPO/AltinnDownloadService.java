@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.altinnv3.DPO;
 
+import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.AltinnPackage;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 
 import java.util.List;
 
-public class AltinnRestClient {
+public class AltinnDownloadService {
 
-    public AltinnRestClient(IntegrasjonspunktProperties properties) {
+    public AltinnDownloadService(IntegrasjonspunktProperties properties) {
         //
     }
 

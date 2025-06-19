@@ -23,6 +23,13 @@ public class BrokerApiClient {
     private final AltinnTokenUtil tokenUtil;
     private final RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getBrokerApiException).build();
 
+    public FileTransferOverviewExt send(FileTransferInitalizeExt request, byte[] bytes){
+        UUID fileTransferId = initialize(request);
+        FileTransferOverviewExt response = upload(fileTransferId, bytes);
+
+        return response;
+    }
+
     public UUID initialize(FileTransferInitalizeExt request) {
 
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");

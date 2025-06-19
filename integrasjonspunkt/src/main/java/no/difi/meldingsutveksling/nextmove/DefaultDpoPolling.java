@@ -11,8 +11,8 @@ import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnPackage;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnRestClient;
+import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDownloadService;
 import no.difi.meldingsutveksling.altinnv3.DPO.DownloadRequest;
 import no.difi.meldingsutveksling.altinnv3.DPO.FileReference;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -37,7 +37,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final AltinnRestClient altinnRestClient;
+    private final AltinnDownloadService altinnRestClient;
 
     private Set<String> orgnrs;
 
@@ -65,7 +65,7 @@ public class DefaultDpoPolling implements DpoPolling {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void handleFileReference(AltinnRestClient client, FileReference reference, String orgnr) {
+    private void handleFileReference(AltinnDownloadService client, FileReference reference, String orgnr) {
         try {
             final DownloadRequest request = new DownloadRequest(reference.getValue(), orgnr);
             log.debug("Downloading message with altinnId=%s".formatted(reference.getValue()));
