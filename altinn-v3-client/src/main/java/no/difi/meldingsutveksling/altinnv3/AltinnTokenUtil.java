@@ -25,5 +25,6 @@ public class AltinnTokenUtil {
             .retrieve()
             .body(String.class);
     }
+
 }
 
