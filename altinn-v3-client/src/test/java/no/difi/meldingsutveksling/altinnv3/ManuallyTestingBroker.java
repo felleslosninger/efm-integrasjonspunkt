@@ -31,12 +31,6 @@ public class ManuallyTestingBroker {
     AltinnTokenUtil tokenUtil;
 
     @Test
-    void testMaskinportenToken() {
-        var maskinportenToken = tokenUtil.retrieveMaskinportenAccessToken("FIXME scopes not used yet");
-        assertNotNull(maskinportenToken, "MaskinportenToken is null");
-    }
-
-    @Test
     void testAltinnToken() {
         var altinnToken = tokenUtil.retrieveAltinnAccessToken("FIXMEt");
         assertNotNull(altinnToken, "AltinnToken is null");
