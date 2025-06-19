@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.digdir.altinn3.broker.model.*;
@@ -23,7 +22,7 @@ public class BrokerApiClient {
     private final AltinnTokenUtil tokenUtil;
     private final RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getBrokerApiException).build();
 
-    public UUID initialize(FileTransferInitalizeExt request) throws IOException, InterruptedException, JOSEException {
+    public UUID initialize(FileTransferInitalizeExt request) {
 
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
@@ -39,7 +38,7 @@ public class BrokerApiClient {
         return result.getFileTransferId();
     }
 
-    public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) throws IOException, InterruptedException, JOSEException {
+    public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) {
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         FileTransferOverviewExt response = restClient.post()
@@ -55,7 +54,7 @@ public class BrokerApiClient {
         return response;
     }
 
-    public UUID[] getAvailableFiles() throws IOException, InterruptedException, JOSEException {
+    public UUID[] getAvailableFiles() {
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         UUID[] response = restClient.get()
@@ -89,7 +88,7 @@ public class BrokerApiClient {
         } catch (Exception e) {}
     }
 
-    public byte[] downloadFile(UUID fileTransferId) throws IOException, InterruptedException, JOSEException {
+    public byte[] downloadFile(UUID fileTransferId) {
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         byte[] response = restClient.get()
@@ -102,7 +101,7 @@ public class BrokerApiClient {
         return response;
     }
 
-    public void confirmDownload(UUID fileTransferId) throws IOException, InterruptedException, JOSEException {
+    public void confirmDownload(UUID fileTransferId) {
         String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
         var response = restClient.post()

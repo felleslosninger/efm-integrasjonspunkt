@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3;
 
-import com.nimbusds.jose.JOSEException;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +25,7 @@ public class BrokerApiClientTest {
     BrokerApiClient brokerApiClient;
 
     @Test
-    void test() throws IOException, InterruptedException, JOSEException {
+    void test() {
 
         FileTransferInitalizeExt fileTransferInitalizeExt = new FileTransferInitalizeExt();
         fileTransferInitalizeExt.fileName("Hello.txt");
@@ -44,13 +42,13 @@ public class BrokerApiClientTest {
     }
 
     @Test
-    void getAvailableFiles() throws IOException, InterruptedException, JOSEException {
+    void getAvailableFiles() {
 
         UUID[] availableFiles = brokerApiClient.getAvailableFiles();
     }
 
     @Test
-    void downlaodFile() throws IOException, InterruptedException, JOSEException {
+    void downlaodFile() {
 
         byte[] result = brokerApiClient.downloadFile(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
 
@@ -59,7 +57,7 @@ public class BrokerApiClientTest {
     }
 
     @Test
-    void confirmDownloadFile() throws IOException, InterruptedException, JOSEException {
+    void confirmDownloadFile() {
 
         brokerApiClient.confirmDownload(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
     }
