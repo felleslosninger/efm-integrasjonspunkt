@@ -42,10 +42,6 @@ import java.util.zip.ZipOutputStream;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
-/**
- * Represents an Altinn package to be used with the formidlingstjeneste SFTP channel.
- * Has factory methods of writing/reading from to zip files via input/output streams.
- */
 @Slf4j
 public class AltinnPackage {
     private static final String CONTENT_XML = "content.xml";

@@ -8,6 +8,7 @@ import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.UUID;
 @Disabled
 @SpringBootTest(classes = {
 AltinnConfig.class,
-AltinnUploadService.class,
 BrokerApiClient.class,
 AltinnTokenUtil.class,
 IntegrasjonspunktProperties .class
 })
+@ConfigurationPropertiesScan
 public class BrokerApiClientTest {
 
     @Inject
