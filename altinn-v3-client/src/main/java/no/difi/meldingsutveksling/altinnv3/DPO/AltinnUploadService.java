@@ -45,7 +45,7 @@ public class AltinnUploadService {
 
         FileTransferInitalizeExt f = createFileTransferInitalizeExt(sbd);
 
-        UploadRequest request = new UploadRequest(getSendersReference(sbd), sbd);
+        UploadRequest request = new UploadRequest(getSendersReference(sbd), sbd, asic);
 
         try {
             promiseMaker.promise(reject -> {
@@ -66,11 +66,12 @@ public class AltinnUploadService {
 
     private FileTransferInitalizeExt createFileTransferInitalizeExt(final StandardBusinessDocument sbd){
         FileTransferInitalizeExt fileTransferInitalizeExt = new FileTransferInitalizeExt();
-        fileTransferInitalizeExt.setRecipients(List.of(sbd.getReceiverIdentifier().getPrimaryIdentifier()));
+        fileTransferInitalizeExt.setRecipients(List.of(sbd.getReceiverIdentifier().getIdentifier()));
         fileTransferInitalizeExt.setFileName(FILE_NAME);
         fileTransferInitalizeExt.setResourceId("eformidling-meldingsteneste-test"); // todo Skal denne vere i properties eller fra sr eller no?
-        fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getPrimaryIdentifier());
-        fileTransferInitalizeExt.setSendersFileTransferReference(sbd.getMessageId()); // todo verifiser at det er denne vi skal bruke
+        fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getIdentifier());
+        fileTransferInitalizeExt.getAdditionalProperties().put("test", "fixme");
+        fileTransferInitalizeExt.setSendersFileTransferReference(sbd.getMessageId()); // todo her må vi sikkert ha kanal
 
         return fileTransferInitalizeExt;
     }

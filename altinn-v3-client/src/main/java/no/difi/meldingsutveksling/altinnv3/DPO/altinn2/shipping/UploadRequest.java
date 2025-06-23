@@ -11,9 +11,9 @@ public class UploadRequest {
     private final StandardBusinessDocument sbd;
     private final Resource asic;
 
-    public UploadRequest(String senderReference, StandardBusinessDocument sbd) {
-        this(senderReference, sbd, null);
-    }
+//    public UploadRequest(String senderReference, StandardBusinessDocument sbd) {
+//        this(senderReference, sbd, null);
+//    }
 
     public UploadRequest(String senderReference, StandardBusinessDocument sbd, Resource asic) {
         this.senderReference = senderReference;

@@ -28,7 +28,7 @@ public class BrokerApiClientTest {
     BrokerApiClient brokerApiClient;
 
     @Test
-    void test() {
+    void testUpload() {
 
         FileTransferInitalizeExt fileTransferInitalizeExt = new FileTransferInitalizeExt();
         fileTransferInitalizeExt.fileName("Hello.txt");
@@ -51,7 +51,7 @@ public class BrokerApiClientTest {
     }
 
     @Test
-    void downlaodFile() {
+    void downloadFile() {
 
         byte[] result = brokerApiClient.downloadFile(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
 

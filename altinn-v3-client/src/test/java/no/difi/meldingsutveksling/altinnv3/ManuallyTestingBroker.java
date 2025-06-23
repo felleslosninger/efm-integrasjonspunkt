@@ -53,6 +53,25 @@ public class ManuallyTestingBroker {
     }
 
     @Test
+    void testFileDetails() throws Exception {
+        var details = client.getDetails("3c5c1d8e-3fda-4095-856c-da704bd9f9a5");
+        assertNotNull(details);
+        System.out.println(details);
+    }
+
+
+    @Test
+    void testListDetailsAllFiles() throws Exception {
+        var uuids = client.getAvailableFiles();
+        Arrays.stream(uuids).forEach(
+            it -> {
+                var details = client.getDetails(it.toString());
+                System.out.println(details);
+            }
+        );
+    }
+
+    @Test
     void upploadFile() throws Exception {
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");

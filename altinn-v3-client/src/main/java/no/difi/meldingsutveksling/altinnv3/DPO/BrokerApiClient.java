@@ -76,13 +76,13 @@ public class BrokerApiClient {
             .body(UUID[].class)
             ;
 
-        //System.out.println(response.length);
-
         return response;
     }
 
-    private void getDetails(String fileTransferId, String accessToken) {
+    public FileTransferStatusDetailsExt getDetails(String fileTransferId) {
         try {
+
+            String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
 
             FileTransferStatusDetailsExt response = restClient.get()
                 .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/details", fileTransferId)
@@ -93,7 +93,10 @@ public class BrokerApiClient {
                 ;
 
             System.out.println(response.toString());
+
+            return response;
         } catch (Exception e) {}
+        return null;
     }
 
     public byte[] downloadFile(UUID fileTransferId) {
