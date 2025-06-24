@@ -75,16 +75,10 @@ public class NextMoveMessageOutController {
                 .ifPresent(d -> {
                     throw new DuplicateFilenameException(d);
                 });
-        if ( sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType() == "dialogmelding" ) {
 
-
-        }
-        else {
             NextMoveOutMessage message = messageService.createMessage(sbd, files);
             messageService.sendMessage(message.getId());
             return message.getSbd();
-        }
-        return null;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

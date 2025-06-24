@@ -19,6 +19,7 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     FIKSIO("fiksio", FiksIoMessage.class),
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
+    DIALOGMELDING("dialogmelding",Dialogmelding.class),
     PRINT("print", DpiPrintMessage.class),
 
     INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),

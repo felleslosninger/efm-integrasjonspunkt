@@ -66,7 +66,7 @@ public class NhnInnsendingService {
 
 
 
-        serviceRegistryClient.loadIdentifierResource()
+       // serviceRegistryClient.loadIdentifierResource();
 
 
 

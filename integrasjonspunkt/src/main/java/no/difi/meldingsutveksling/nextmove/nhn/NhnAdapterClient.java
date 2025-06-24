@@ -9,6 +9,6 @@ public class NhnAdapterClient {
     RestClient restClient;
 
     public void sendIn(HttpServletRequest request) {
-        restClient.method(HttpMethod.POST).uri("myserviceUrl").body(request.getB)
+       // restClient.method(HttpMethod.POST).uri("myserviceUrl").body(request.getB)
     }
 }
