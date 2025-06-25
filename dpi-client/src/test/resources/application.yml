@@ -1,19 +1,19 @@
 difi:
     move:
-        serviceregistry-endpoint: http://localhost:9099
+        serviceregistry-endpoint: 'http://localhost:9099'
         feature:
             enableDPI: true
         dpi:
-            mpc-id: mpctest
-            language: NO
+            mpc-id: 'mpctest'
+            language: 'NO'
             mpc-concurrency: 1
-            schema: offline
-            upload-size-limit: 150MB
+            schema: 'offline'
+            upload-size-limit: '150MB'
             poll-without-avsenderidentifikator: true
             client-type: json
             c2-type: web
             priority: NORMAL
-            krr-print-url: https://krr-ver1.digdir.no/rest/v1/printSertifikat
+            krr-print-url: 'https://krr-ver1.digdir.no/rest/v1/printSertifikat'
             print-settings:
                 return-type: SHREDDING
                 ink-type: BLACK_WHITE
@@ -24,15 +24,15 @@ difi:
             certificate:
                 recipe: "classpath:/pki/recipe-dpi-self-signed.xml"
             keystore:
-                alias: c1
+                alias: 'c1'
                 lockProvider: false
                 password: changeit
                 path: classpath:/c1.p12
                 type: pkcs12
             oidc:
                 enable: true
-                audience: http://localhost:8900/
-                clientId: MOVE_IP_987654321
+                audience: 'http://localhost:8900/'
+                clientId: 'MOVE_IP_987654321'
                 keystore:
                     alias: ${difi.move.dpi.keystore.alias}
                     lockProvider: ${difi.move.dpi.keystore.lockProvider}
@@ -47,7 +47,7 @@ difi:
                 connect: 5000
                 read: 60000
                 write: 60000
-            uri: http://localhost:8900/dpi
+            uri: 'http://localhost:8900/dpi'
             server:
                 keystore:
                     alias: c2

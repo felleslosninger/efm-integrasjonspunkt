@@ -96,6 +96,7 @@ public class CorrespondenceAgencyClient extends WebServiceGatewaySupport {
                 })
                 .setConnectionManager(getConnectionManager())
                 .setDefaultRequestConfig(getRequestConfig())
+                .useSystemProperties()
                 .build();
     }
 
