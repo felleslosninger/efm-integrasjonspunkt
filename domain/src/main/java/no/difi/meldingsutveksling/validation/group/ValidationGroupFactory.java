@@ -16,6 +16,8 @@ public class ValidationGroupFactory {
                 return NextMoveValidationGroups.MessageType.ArkivmeldingKvittering.class;
             case AVTALT:
                 return NextMoveValidationGroups.MessageType.Avtalt.class;
+            case DIALOGMELDING:
+                return NextMoveValidationGroups.MessageType.Dialogmelding.class;
             case PRINT:
                 return NextMoveValidationGroups.MessageType.Print.class;
             case DIGITAL:
@@ -44,6 +46,8 @@ public class ValidationGroupFactory {
                 return NextMoveValidationGroups.ServiceIdentifier.DPI.class;
             case DPO:
                 return NextMoveValidationGroups.ServiceIdentifier.DPO.class;
+            case DPH:
+                return NextMoveValidationGroups.ServiceIdentifier.DPH.class;
             case DPV:
                 return NextMoveValidationGroups.ServiceIdentifier.DPV.class;
             case DPFIO:

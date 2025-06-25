@@ -323,6 +323,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableDPF;
         private boolean enableDPFIO;
         private boolean enableDPE;
+        private boolean enableDPH;
 
     }
 

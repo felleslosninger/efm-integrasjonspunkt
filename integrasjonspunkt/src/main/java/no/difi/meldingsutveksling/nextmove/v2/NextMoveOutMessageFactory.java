@@ -78,6 +78,7 @@ public class NextMoveOutMessageFactory {
         }
 
         if (sbd.getExpectedResponseDateTime().isEmpty()) {
+            //@TODO DPH melding har noe constraint fra NHN
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(getDefaultTtlHours(serviceIdentifier));
 
             Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)

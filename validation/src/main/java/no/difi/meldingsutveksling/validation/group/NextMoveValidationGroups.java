@@ -18,6 +18,10 @@ public interface NextMoveValidationGroups {
         interface Avtalt extends MessageType {
         }
 
+        interface Dialogmelding extends MessageType {
+
+        }
+
         interface Digital extends MessageType {
         }
 
@@ -49,6 +53,10 @@ public interface NextMoveValidationGroups {
         }
 
         interface DPO extends ServiceIdentifier {
+        }
+
+        interface DPH extends ServiceIdentifier{
+
         }
 
         interface DPV extends ServiceIdentifier {
