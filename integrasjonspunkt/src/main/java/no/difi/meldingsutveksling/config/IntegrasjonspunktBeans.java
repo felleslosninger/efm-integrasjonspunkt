@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDownloadService;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -35,12 +34,6 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 @Import({DpiConfig.class, Plumber.class, PromiseMaker.class})
 public class IntegrasjonspunktBeans {
-
-    @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnDownloadService getAltinnRestClient(IntegrasjonspunktProperties properties) {
-        return new AltinnDownloadService(properties);
-    }
 
     @Bean
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {

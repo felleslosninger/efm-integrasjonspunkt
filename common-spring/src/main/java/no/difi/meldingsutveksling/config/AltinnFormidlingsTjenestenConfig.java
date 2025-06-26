@@ -17,6 +17,7 @@ public class AltinnFormidlingsTjenestenConfig {
     private String brokerserviceUrl;
     private String serviceCode;
     private String serviceEditionCode;
+    private String altinnTokenExchangeUrl;
 
     private Integer connectTimeout;
     private Integer requestTimeout;

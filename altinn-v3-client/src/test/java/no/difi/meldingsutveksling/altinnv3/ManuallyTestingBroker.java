@@ -40,7 +40,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = tokenUtil.retrieveAltinnAccessToken("FIXME");
+        var altinnToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 

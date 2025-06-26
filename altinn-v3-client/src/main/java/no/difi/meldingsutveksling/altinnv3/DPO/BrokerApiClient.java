@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,6 +24,10 @@ public class BrokerApiClient {
     private final AltinnTokenUtil tokenUtil;
     private final RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getBrokerApiException).build();
 
+    private final String readScope = "altinn:broker.read";
+    private final String writeScope = "altinn:broker.write";
+    private final String serviceOwnerScope = "altinn:serviceowner";
+
     public FileTransferOverviewExt send(FileTransferInitalizeExt request, byte[] bytes){
         UUID fileTransferId = initialize(request);
         FileTransferOverviewExt response = upload(fileTransferId, bytes);
@@ -32,7 +37,7 @@ public class BrokerApiClient {
 
     public UUID initialize(FileTransferInitalizeExt request) {
 
-        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         var result = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/")
@@ -47,7 +52,7 @@ public class BrokerApiClient {
     }
 
     public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         FileTransferOverviewExt response = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/upload", fileTransferId)
@@ -63,7 +68,7 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
         UUID[] response = restClient.get()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
@@ -82,7 +87,7 @@ public class BrokerApiClient {
     public FileTransferStatusDetailsExt getDetails(String fileTransferId) {
         try {
 
-            String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+            String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
             FileTransferStatusDetailsExt response = restClient.get()
                 .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/details", fileTransferId)
@@ -92,7 +97,7 @@ public class BrokerApiClient {
                 .body(FileTransferStatusDetailsExt.class)
                 ;
 
-            System.out.println(response.toString());
+           // System.out.println(response.toString());
 
             return response;
         } catch (Exception e) {}
@@ -100,7 +105,7 @@ public class BrokerApiClient {
     }
 
     public byte[] downloadFile(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         byte[] response = restClient.get()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/download", fileTransferId)
@@ -113,7 +118,7 @@ public class BrokerApiClient {
     }
 
     public void confirmDownload(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         var response = restClient.post()
             .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)

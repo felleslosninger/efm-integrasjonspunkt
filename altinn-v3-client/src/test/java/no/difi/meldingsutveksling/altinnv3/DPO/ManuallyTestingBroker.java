@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,7 +35,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = tokenUtil.retrieveAltinnAccessToken("FIXMEt");
+        var altinnToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 

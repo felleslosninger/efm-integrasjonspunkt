@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,17 @@ public class BrokerApiClientTest {
     void getAvailableFiles() {
 
         UUID[] availableFiles = brokerApiClient.getAvailableFiles();
+        System.out.println(Arrays.toString(availableFiles));
+    }
+
+    @Test
+    @Disabled("Download and confirm all altinn files")
+    void clearFiles(){
+        UUID[] availableFiles = brokerApiClient.getAvailableFiles();
+        Arrays.stream(availableFiles).forEach(id -> {
+            brokerApiClient.downloadFile(id);
+            brokerApiClient.confirmDownload(id);
+        });
     }
 
     @Test

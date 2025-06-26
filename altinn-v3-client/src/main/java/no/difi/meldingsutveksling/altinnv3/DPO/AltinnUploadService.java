@@ -47,15 +47,17 @@ public class AltinnUploadService {
     public void send(final StandardBusinessDocument sbd, Resource asic) {
 
         var sendersReference = getSendersReference(sbd);
+
         UploadRequest request = new UploadRequest(sendersReference, sbd, asic);
-        FileTransferInitalizeExt f = createFileTransferInitalizeExt(sbd);
-        f.setSendersFileTransferReference(sendersReference);
+
+        FileTransferInitalizeExt fileTransferInitalizeExt = createFileTransferInitalizeExt(sbd);
+        fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
 
         try {
             promiseMaker.promise(reject -> {
                 InputStreamResource altinnZip = getAltinnZip(request, reject);
                 try {
-                    brokerApiClient.send(f, altinnZip.getInputStream().readAllBytes());
+                    brokerApiClient.send(fileTransferInitalizeExt, altinnZip.getInputStream().readAllBytes());
                 } catch (IOException e) {
                     throw new BrokerApiException("Send failed", e); // todo bedre exception
                 }

@@ -68,7 +68,7 @@ public class MessageMarkerFactory {
 
     public static LogstashMarker markerFrom(FileReference reference) {
         LogstashMarker receiptIdMarker = Markers.append(ALTINN_RECEIPT_ID, reference.getReceiptID());
-        LogstashMarker referenceValueMarker = Markers.append("altinn-reference-value", reference.getValue());
+        LogstashMarker referenceValueMarker = Markers.append("altinn-reference-value", reference.getFileReferenceId());
         return receiptIdMarker.and(referenceValueMarker);
     }
 

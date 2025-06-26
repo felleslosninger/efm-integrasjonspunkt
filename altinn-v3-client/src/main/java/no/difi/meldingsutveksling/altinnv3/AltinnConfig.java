@@ -7,7 +7,7 @@ import no.difi.move.common.oauth.JwtTokenConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @Configuration
 public class AltinnConfig {
@@ -18,12 +18,11 @@ public class AltinnConfig {
     @Bean
     public JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-            "a63cac91-3210-4c35-b961-5c7bf122345c",
-            "https://test.maskinporten.no/token",
-            "https://test.maskinporten.no/",
-            List.of("altinn:broker.write", "altinn:broker.read", "altinn:serviceowner"),
+            "a63cac91-3210-4c35-b961-5c7bf122345c", //todo eigen config eller skal det legges til på clientid som finnes fra før av?
+            integrasjonspunktProperties.getOidc().getUrl().toString(),
+            integrasjonspunktProperties.getOidc().getAudience(),
+            new ArrayList<>(),
             integrasjonspunktProperties.getOidc().getKeystore()
         ));
     }
-
 }
