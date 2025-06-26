@@ -52,7 +52,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest({Oauth2ClientSecurityConfig.class, MessageStatusController.class})
 @AutoConfigureMoveRestDocs
-@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 public class MessageStatusControllerTest {
 
