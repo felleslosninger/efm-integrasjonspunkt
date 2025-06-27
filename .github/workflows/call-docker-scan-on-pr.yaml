@@ -1,4 +1,4 @@
-name: Test
+name: Docker build and scan on PR
 
 on:
   pull_request:
