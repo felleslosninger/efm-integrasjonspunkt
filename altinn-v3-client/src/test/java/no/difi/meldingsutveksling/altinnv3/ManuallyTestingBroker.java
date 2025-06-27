@@ -45,7 +45,7 @@ public class ManuallyTestingBroker {
     }
 
     @Test
-    void testListFiles() throws Exception {
+    void testListFiles() {
         var uuids = client.getAvailableFiles();
         assertNotNull(uuids);
         assertNotEquals(0, uuids.length);
@@ -53,7 +53,7 @@ public class ManuallyTestingBroker {
     }
 
     @Test
-    void testFileDetails() throws Exception {
+    void testFileDetails() {
         var details = client.getDetails("3c5c1d8e-3fda-4095-856c-da704bd9f9a5");
         assertNotNull(details);
         System.out.println(details);
@@ -61,7 +61,7 @@ public class ManuallyTestingBroker {
 
 
     @Test
-    void testListDetailsAllFiles() throws Exception {
+    void testListDetailsAllFiles() {
         var uuids = client.getAvailableFiles();
         Arrays.stream(uuids).forEach(
             it -> {
@@ -72,14 +72,14 @@ public class ManuallyTestingBroker {
     }
 
     @Test
-    void upploadFile() throws Exception {
+    void upploadFile() {
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");
         fileTransfer.setResourceId("eformidling-meldingsteneste-test");
         fileTransfer.setSender("0192:991825827");
         fileTransfer.setRecipients(List.of("0192:991825827"));
         fileTransfer.setSendersFileTransferReference("string");
-        var uuid = client.initialize(fileTransfer);
+        var uuid = client.initialize(fileTransfer).getFileTransferId();
         var result = client.upload(uuid, "Just some text data from upploadFile() test".getBytes());
         assertNotNull(result);
         assertNotNull(result.getFileTransferId());

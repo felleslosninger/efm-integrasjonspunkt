@@ -39,7 +39,7 @@ public class BrokerApiClientTest {
         fileTransferInitalizeExt.setRecipients(List.of("0192:991825827"));
         fileTransferInitalizeExt.setSendersFileTransferReference(UUID.randomUUID().toString());
 
-        UUID fileTransferId = brokerApiClient.initialize(fileTransferInitalizeExt);
+        UUID fileTransferId = brokerApiClient.initialize(fileTransferInitalizeExt).getFileTransferId();
         FileTransferOverviewExt response = brokerApiClient.upload(fileTransferId, "Hello world".getBytes());
 
 

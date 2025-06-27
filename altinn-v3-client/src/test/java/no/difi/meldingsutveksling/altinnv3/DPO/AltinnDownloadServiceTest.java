@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.DPO;
 
+import jakarta.xml.bind.JAXBException;
+import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.ZipHelper;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +27,9 @@ public class AltinnDownloadServiceTest {
 
     @MockitoBean
     private IntegrasjonspunktProperties integrasjonspunktProperties;
+
+    @MockitoBean
+    private ZipHelper zipHelper;
 
     @Autowired
     private AltinnDownloadService altinnDownloadService;
@@ -78,15 +84,20 @@ public class AltinnDownloadServiceTest {
             .containsExactlyInAnyOrder(fileWithRandomMessageChannel);
     }
 
-//    @Test
-//    public void download(){
-//        UUID uuid = UUID.randomUUID();
-//        altinnDownloadService.download(new DownloadRequest(uuid, "123"));
-//        verify(brokerApiClient).downloadFile(uuid);
-//    }
+    @Test
+    public void download() throws JAXBException, IOException { //todo rename
+        UUID uuid = UUID.randomUUID();
+        byte[] bytes = "Hello world".getBytes();
+
+        Mockito.when(brokerApiClient.downloadFile(uuid)).thenReturn(bytes);
+        altinnDownloadService.download(new DownloadRequest(uuid, "123"));
+
+        verify(brokerApiClient).downloadFile(uuid);
+        verify(zipHelper).getAltinnPackage(bytes);
+    }
 
     @Test
-    public void confirmDownload(){
+    public void confirmDownload(){ // todo rename
         UUID uuid = UUID.randomUUID();
         altinnDownloadService.confirmDownload(new DownloadRequest(uuid, "123"));
         verify(brokerApiClient).confirmDownload(uuid);

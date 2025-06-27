@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -17,7 +19,7 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class BrokerApiClient {
 
@@ -27,35 +29,35 @@ public class BrokerApiClient {
     private final String readScope = "altinn:broker.read";
     private final String writeScope = "altinn:broker.write";
     private final String serviceOwnerScope = "altinn:serviceowner";
+    private final IntegrasjonspunktProperties props;
 
     public FileTransferOverviewExt send(FileTransferInitalizeExt request, byte[] bytes){
-        UUID fileTransferId = initialize(request);
-        FileTransferOverviewExt response = upload(fileTransferId, bytes);
+        FileTransferInitializeResponseExt initializeResponse = initialize(request);
 
-        return response;
+        if(initializeResponse == null) throw new BrokerApiException("Error while initializing file transfer. Result from initialize call to Altinn was null.");
+        if(initializeResponse.getFileTransferId() == null) throw new BrokerApiException("Error while initializing file transfer. Result from initialize call to Altinn did not have FileTransferId.");
+
+        return upload(initializeResponse.getFileTransferId(), bytes);
     }
 
-    public UUID initialize(FileTransferInitalizeExt request) {
+    public FileTransferInitializeResponseExt initialize(FileTransferInitalizeExt request) {
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
 
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
-
-        var result = restClient.post()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/")
+         return restClient.post()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .body(request)
             .retrieve()
             .body(FileTransferInitializeResponseExt.class)
             ;
-
-        return result.getFileTransferId();
     }
 
     public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
 
-        FileTransferOverviewExt response = restClient.post()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/upload", fileTransferId)
+        return restClient.post()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/upload", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .header("Content-Type", "application/octet-stream")
@@ -63,15 +65,13 @@ public class BrokerApiClient {
             .retrieve()
             .body(FileTransferOverviewExt.class)
             ;
-
-        return response;
     }
 
     public UUID[] getAvailableFiles() {
         String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
-        UUID[] response = restClient.get()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
+        return restClient.get()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
                 "eformidling-meldingsteneste-test",
                 FileTransferStatusExtNullable.PUBLISHED.getValue(),
                 RecipientFileTransferStatusExtNullable.INITIALIZED.getValue())
@@ -80,55 +80,41 @@ public class BrokerApiClient {
             .retrieve()
             .body(UUID[].class)
             ;
-
-        return response;
     }
 
     public FileTransferStatusDetailsExt getDetails(String fileTransferId) {
-        try {
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
-            String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
-
-            FileTransferStatusDetailsExt response = restClient.get()
-                .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/details", fileTransferId)
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Accept", "application/json")
-                .retrieve()
-                .body(FileTransferStatusDetailsExt.class)
-                ;
-
-           // System.out.println(response.toString());
-
-            return response;
-        } catch (Exception e) {}
-        return null;
+         return restClient.get()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/details", fileTransferId)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(FileTransferStatusDetailsExt.class)
+            ;
     }
 
     public byte[] downloadFile(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
-        byte[] response = restClient.get()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/download", fileTransferId)
+        return restClient.get()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/download", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .retrieve()
             .body(byte[].class)
             ;
-
-        return response;
     }
 
     public void confirmDownload(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
 
-        var response = restClient.post()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)
+        restClient.post()
+            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
             .toBodilessEntity()
             ;
-
-        System.out.println(response.getStatusCode());
     }
 
     private void getBrokerApiException(HttpRequest request, ClientHttpResponse response) {
@@ -136,11 +122,11 @@ public class BrokerApiClient {
             String prefix = "Broker api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
 
             ObjectMapper mapper = new ObjectMapper();
-            var body = response.getBody().readAllBytes();
+            byte[] body = response.getBody().readAllBytes();
 
             ProblemDetails problemDetails = mapper.readValue(body, ProblemDetails.class);
 
-            log.error(problemDetails.toString());
+            log.error(problemDetails.toString()); //todo change?
 
             if(problemDetails.getType() == null) {
                 throw new BrokerApiException("%s: %d: %s".formatted(
@@ -160,5 +146,4 @@ public class BrokerApiClient {
             throw new BrokerApiException("Problem while getting broker api exception", e);
         }
     }
-
 }

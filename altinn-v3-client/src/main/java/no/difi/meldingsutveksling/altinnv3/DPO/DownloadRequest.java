@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.altinnv3.DPO;
 import java.util.UUID;
 
 public class DownloadRequest {
-  //  final String fileReference;
     final UUID fileReference;
     final String reciever;
 
@@ -22,23 +21,6 @@ public class DownloadRequest {
     public UUID getFileReference() {
         return fileReference;
     }
-
-
-//    /**
-//     * @param fileReference the file reference as returned by available files Altinn service
-//     * @param reciever the message receiver party number
-//     */
-//    public DownloadRequest(String fileReference, String reciever) {
-//        this.fileReference = fileReference;
-//        this.reciever = reciever;
-//    }
-//
-//    /**
-//     * @return the file reference as returned by available files Altinn service
-//     */
-//    public String getFileReference() {
-//        return fileReference;
-//    }
 
     /**
      * @return the message receiver party number

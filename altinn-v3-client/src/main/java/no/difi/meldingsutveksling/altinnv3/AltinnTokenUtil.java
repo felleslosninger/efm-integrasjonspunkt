@@ -25,7 +25,7 @@ public class AltinnTokenUtil {
         String maskinportenToken = jwtTokenClient.fetchToken(new JwtTokenInput().setScopes(scopes)).getAccessToken();
 
         return restClient.get()
-            .uri(properties.getDpo().getAltinnTokenExchangeUrl()) //todo properties
+            .uri(properties.getDpo().getAltinnTokenExchangeUrl())
             .header("Authorization", "Bearer " + maskinportenToken)
             .retrieve()
             .body(String.class);

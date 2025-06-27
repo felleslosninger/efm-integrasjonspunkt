@@ -13,7 +13,6 @@ import java.util.Set;
 @ToString(exclude = "password")
 public class AltinnFormidlingsTjenestenConfig {
 
-    private String streamingserviceUrl;
     private String brokerserviceUrl;
     private String serviceCode;
     private String serviceEditionCode;

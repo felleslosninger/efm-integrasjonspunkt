@@ -1,44 +1,35 @@
 package no.difi.meldingsutveksling.altinnv3.DPO;
 
-import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.ZipHelper;
 import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.shipping.UploadRequest;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
-import no.difi.move.common.io.OutputStreamResource;
-import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
-import no.difi.move.common.io.pipe.Reject;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.WritableResource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@Service
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class AltinnUploadService {
 
-    @Inject
-    IntegrasjonspunktProperties integrasjonspunktProperties;
-
     private final BrokerApiClient brokerApiClient;
-    private static final String FILE_NAME = "sbd.zip";
     private final PromiseMaker promiseMaker;
-    private final Plumber plumber;
-    private final ApplicationContext context;
+    private final ZipHelper zipHelper;
     private final IntegrasjonspunktProperties props;
+    private static final String FILE_NAME = "sbd.zip";
 
     public void send(final StandardBusinessDocument sbd){
         send(sbd, null);
@@ -46,16 +37,14 @@ public class AltinnUploadService {
 
     public void send(final StandardBusinessDocument sbd, Resource asic) {
 
-        var sendersReference = getSendersReference(sbd);
+        String sendersReference = getSendersReference(sbd);
 
         UploadRequest request = new UploadRequest(sendersReference, sbd, asic);
-
-        FileTransferInitalizeExt fileTransferInitalizeExt = createFileTransferInitalizeExt(sbd);
-        fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
+        FileTransferInitalizeExt fileTransferInitalizeExt = createFileTransferInitalizeExt(sbd, sendersReference);
 
         try {
             promiseMaker.promise(reject -> {
-                InputStreamResource altinnZip = getAltinnZip(request, reject);
+                InputStreamResource altinnZip = zipHelper.getAltinnZip(request, reject);
                 try {
                     brokerApiClient.send(fileTransferInitalizeExt, altinnZip.getInputStream().readAllBytes());
                 } catch (IOException e) {
@@ -69,12 +58,15 @@ public class AltinnUploadService {
         }
     }
 
-    private FileTransferInitalizeExt createFileTransferInitalizeExt(final StandardBusinessDocument sbd){
+    private FileTransferInitalizeExt createFileTransferInitalizeExt(final StandardBusinessDocument sbd, String sendersReference) {
         FileTransferInitalizeExt fileTransferInitalizeExt = new FileTransferInitalizeExt();
+
         fileTransferInitalizeExt.setRecipients(List.of(sbd.getReceiverIdentifier().getIdentifier()));
         fileTransferInitalizeExt.setFileName(FILE_NAME);
         fileTransferInitalizeExt.setResourceId("eformidling-meldingsteneste-test"); // todo Skal denne vere i properties eller fra sr eller no?
         fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getIdentifier());
+        fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
+
         return fileTransferInitalizeExt;
     }
 
@@ -87,23 +79,6 @@ public class AltinnUploadService {
             return mcScope.get().getIdentifier();
         }
         return UUID.randomUUID().toString();
-    }
-
-    private InputStreamResource getAltinnZip(UploadRequest request, Reject reject) {
-        return new InputStreamResource(plumber.pipe("write Altinn zip",
-            inlet -> {
-                AltinnPackage altinnPackage = AltinnPackage.from(request);
-                writeAltinnZip(request, altinnPackage, new OutputStreamResource(inlet));
-            }, reject).outlet());
-    }
-
-    private void writeAltinnZip(UploadRequest request, AltinnPackage altinnPackage, WritableResource writableResource) {
-        try {
-            altinnPackage.write(writableResource, context);
-        } catch (IOException e) {
-            auditError(request, e);
-            throw new BrokerApiException("Failed to upload a message to Altinn broker service", e);
-        }
     }
 
     private void auditError(UploadRequest request, Exception e) {

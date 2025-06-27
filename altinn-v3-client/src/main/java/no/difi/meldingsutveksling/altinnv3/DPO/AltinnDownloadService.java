@@ -2,16 +2,13 @@ package no.difi.meldingsutveksling.altinnv3.DPO;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.ZipHelper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
-import org.apache.commons.io.FileUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -19,14 +16,14 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Component
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@Service
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class AltinnDownloadService {
 
     private final BrokerApiClient brokerApiClient;
     private final IntegrasjonspunktProperties properties;
-    private final ApplicationContext context;
+    private final ZipHelper zipHelper;
 
     public List<FileReference> getAvailableFiles() {
 
@@ -43,21 +40,11 @@ public class AltinnDownloadService {
     }
 
     public AltinnPackage download(DownloadRequest request) {
+        byte[] bytes = brokerApiClient.downloadFile(request.getFileReference());
+
         try {
-            byte[] bytes = brokerApiClient.downloadFile(request.getFileReference());
-
-            TmpFile tmpFile = TmpFile.create();
-
-            try {
-                File file = tmpFile.getFile();
-                try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
-                    FileUtils.copyInputStreamToFile(inputStream, file);
-                }
-                return AltinnPackage.from(file, context);
-            } finally {
-                tmpFile.delete();
-            }
-        } catch (IOException | JAXBException e){
+            return zipHelper.getAltinnPackage(bytes);
+        }catch (IOException | JAXBException e){
             throw new BrokerApiException("Error when downloading file with reference %s".formatted(request.getFileReference()), e);
         }
     }
