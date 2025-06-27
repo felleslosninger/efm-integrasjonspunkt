@@ -12,9 +12,7 @@ WORKDIR /home/app
 COPY pom.xml ./
 COPY  . ./
 
-RUN echo "Contents of /root/.m2/settings.xml:" && \
-    echo "GIT_PACKAGE_TOKEN: ${GIT_PACKAGE_TOKEN:0:4}****" && \
-    echo "GIT_PACKAGE_USERNAME: ${GIT_PACKAGE_USERNAME}"
+RUN sh -c '[ -n "$GIT_PACKAGE_TOKEN" ] && echo "Token is set" || echo "Token is missing"'
 
 RUN --mount=type=cache,target=/root/.m2/repository mvn -B package dependency:go-offline -Dmaven.gitcommitid.skip=true -Dmaven.test.skip=true
 
