@@ -12,8 +12,6 @@ WORKDIR /home/app
 COPY pom.xml ./
 COPY  . ./
 
-RUN sh -c '[ -n "$GIT_PACKAGE_TOKEN" ] && echo "Token is set" || echo "Token is missing"'
-
 RUN --mount=type=cache,target=/root/.m2/repository mvn -B package dependency:go-offline -Dmaven.gitcommitid.skip=true -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine
