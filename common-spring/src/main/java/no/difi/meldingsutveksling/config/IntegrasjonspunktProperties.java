@@ -56,6 +56,9 @@ public class IntegrasjonspunktProperties {
     private PostVirksomheter dpv;
 
     @Valid
+    private DphConfig dph;
+
+    @Valid
     @NestedConfigurationProperty
     private DigitalPostInnbyggerConfig dpi;
 
@@ -128,6 +131,11 @@ public class IntegrasjonspunktProperties {
         private String defaultInnsynskravDocumentType;
         private String receiptProcess;
 
+    }
+
+    @Data
+    public static class DphConfig {
+        private DataSize uploadSizeLimit;
     }
 
     @Data
