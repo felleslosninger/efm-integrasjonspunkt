@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Deprecated
 public class NhnInnsendingService {
 
     private final ServiceRegistryClient serviceRegistryClient;

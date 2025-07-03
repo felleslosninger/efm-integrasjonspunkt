@@ -136,6 +136,7 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class DphConfig {
         private DataSize uploadSizeLimit;
+        private String adapterUrl;
     }
 
     @Data
