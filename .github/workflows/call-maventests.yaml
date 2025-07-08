@@ -1,4 +1,4 @@
-name: Test
+name: Maven build and test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 jobs:
   call-workflow-maven-build:
     if: ${{ !contains(github.event.head_commit.message, '[run-ci]') }}
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@MOVE-4223
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
     with:
       java-version: 21
       application-path: integrasjonspunkt/

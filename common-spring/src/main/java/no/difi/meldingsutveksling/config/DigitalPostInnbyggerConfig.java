@@ -155,7 +155,7 @@ public class DigitalPostInnbyggerConfig {
     public static class Certificate {
 
         @NotNull
-        private Resource recipe;
+        private String mode;
     }
 
     @Data
