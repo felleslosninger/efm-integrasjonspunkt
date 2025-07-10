@@ -33,6 +33,9 @@ import static org.mockito.Mockito.when;
 })
 public class AltinnUploadServiceTest {
 
+    @Autowired
+    private AltinnUploadService altinnUploadService;
+
     @MockitoBean
     private BrokerApiClient brokerApiClient;
 
@@ -42,13 +45,11 @@ public class AltinnUploadServiceTest {
     @MockitoBean
     private ZipHelper zipHelper;
 
-    @MockitoBean private TransactionTemplate transactionTemplate;
+    @MockitoBean
+    private TransactionTemplate transactionTemplate;
 
     @MockitoBean
     private TransactionStatus transactionStatus;
-
-    @Autowired
-    private AltinnUploadService altinnUploadService;
 
     private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");

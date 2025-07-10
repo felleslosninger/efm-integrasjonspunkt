@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,5 +85,29 @@ public class ManuallyTestingBroker {
         assertNotNull(result);
         assertNotNull(result.getFileTransferId());
     }
+
+    @Test
+    void clearFiles(){
+        UUID[] availableFiles = client.getAvailableFiles();
+        Arrays.stream(availableFiles).forEach(id -> {
+            client.downloadFile(id);
+            client.confirmDownload(id);
+        });
+    }
+
+    @Test
+    void downloadFile() {
+
+        byte[] result = client.downloadFile(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
+
+        String message = new String(result);
+        System.out.println(message);
+    }
+
+    @Test
+    void confirmDownloadFile() {
+        client.confirmDownload(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
+    }
+
 
 }

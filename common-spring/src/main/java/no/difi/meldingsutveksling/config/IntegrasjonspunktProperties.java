@@ -184,7 +184,8 @@ public class IntegrasjonspunktProperties {
         private String password;
         private URL endpointUrl;
         @NotNull
-        private String sensitiveServiceCode;
+        private String sensitiveResource;
+//        private String sensitiveServiceCode;
         private boolean notifyEmail;
         private boolean notifySms;
         @NotNull
@@ -198,6 +199,7 @@ public class IntegrasjonspunktProperties {
         private DataSize uploadSizeLimit;
         @NotNull
         private Integer defaultTtlHours;
+        private String correspondenceServiceUrl;
 
 
     }

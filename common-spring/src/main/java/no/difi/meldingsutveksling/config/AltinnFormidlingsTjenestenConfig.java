@@ -14,9 +14,10 @@ import java.util.Set;
 public class AltinnFormidlingsTjenestenConfig {
 
     private String brokerserviceUrl;
-    private String serviceCode;
-    private String serviceEditionCode;
+//    private String serviceCode;
+//    private String serviceEditionCode;
     private String altinnTokenExchangeUrl;
+    private String resource;
 
     private Integer connectTimeout;
     private Integer requestTimeout;

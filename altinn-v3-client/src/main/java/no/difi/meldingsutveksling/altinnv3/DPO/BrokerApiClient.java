@@ -72,7 +72,7 @@ public class BrokerApiClient {
 
         return restClient.get()
             .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
-                "eformidling-meldingsteneste-test",
+                props.getDpo().getResource(),
                 FileTransferStatusExtNullable.PUBLISHED.getValue(),
                 RecipientFileTransferStatusExtNullable.INITIALIZED.getValue())
             .header("Authorization", "Bearer " + accessToken)

@@ -69,7 +69,7 @@ public class IntegrasjonspunktBeans {
         return new CorrespondenceAgencyConfiguration()
                 .setPassword(properties.getDpv().getPassword())
                 .setSystemUserCode(properties.getDpv().getUsername())
-                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
+//                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
                 .setNotifyEmail(properties.getDpv().isNotifyEmail())
                 .setNotifySms(properties.getDpv().isNotifySms())
                 .setNotificationText(properties.getDpv().getNotificationText())

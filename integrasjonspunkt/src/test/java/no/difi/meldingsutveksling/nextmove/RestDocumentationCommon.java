@@ -224,6 +224,9 @@ class RestDocumentationCommon {
                         fieldWithPath(prefix + "serviceEditionCode")
                                 .type(JsonFieldType.STRING)
                                 .description("Altinn service edition code."),
+                        fieldWithPath(prefix + "resource")
+                                .type(JsonFieldType.STRING)
+                                .description("Identifier for Altinn resource"),
                         fieldWithPath(prefix + "lastUpdate")
                                 .type(JsonFieldType.STRING)
                                 .description("Date and time of status."),

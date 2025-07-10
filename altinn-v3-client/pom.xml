@@ -30,10 +30,12 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>api</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>audit</artifactId>

@@ -61,6 +61,7 @@ public class Conversation extends AbstractEntity<Long> {
     private String messageTitle;
     private String serviceCode;
     private String serviceEditionCode;
+    private String resource;
     @UpdateTimestamp
     @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdate;
