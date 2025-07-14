@@ -14,18 +14,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
-public class AltinnDownloadService {
+public class AltinnDPODownloadService {
 
     private final BrokerApiClient brokerApiClient;
     private final IntegrasjonspunktProperties properties;
     private final ZipHelper zipHelper;
 
-    public List<FileReference> getAvailableFiles() {
+    public UUID[] getAvailableFiles() {
 
         UUID[] fileTransferIds = brokerApiClient.getAvailableFiles();
 
@@ -34,9 +33,7 @@ public class AltinnDownloadService {
 
         files = filterBasedUponSendersFileTransferReference(files);
 
-        return files.stream().map(file ->
-            new FileReference(file.getFileTransferId(), 9))
-            .collect(Collectors.toList());
+        return files.stream().map(FileTransferStatusDetailsExt::getFileTransferId).toArray(UUID[]::new);
     }
 
     public AltinnPackage download(DownloadRequest request) {

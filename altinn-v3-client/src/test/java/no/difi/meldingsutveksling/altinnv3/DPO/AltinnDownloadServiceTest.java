@@ -13,13 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDownloadService.class)
+@SpringBootTest(classes = AltinnDPODownloadService.class)
 public class AltinnDownloadServiceTest {
 
     @MockitoBean
@@ -32,7 +31,7 @@ public class AltinnDownloadServiceTest {
     private ZipHelper zipHelper;
 
     @Autowired
-    private AltinnDownloadService altinnDownloadService;
+    private AltinnDPODownloadService altinnDownloadService;
 
     private final UUID fileWithRandomMessageChannel = UUID.fromString("dc11ecad-dc5c-44a3-b566-b460485580f8");
     private final UUID fileWithMessageChannelAsMessageChannel = UUID.fromString("bbcc4621-d88f-4a94-ae2f-b38072bf5087");
@@ -64,10 +63,9 @@ public class AltinnDownloadServiceTest {
     public void getOnlyMessagesWithSameMessageChannelAsConfiguration(){
         Mockito.when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig().setMessageChannel("messageChannel"));
 
-        List<FileReference> result = altinnDownloadService.getAvailableFiles();
+        UUID[] result = altinnDownloadService.getAvailableFiles();
 
         assertThat(result)
-            .extracting(FileReference::getFileReferenceId)
             .as("Should only return messages with same message channel")
             .containsExactlyInAnyOrder(fileWithMessageChannelAsMessageChannel);
     }
@@ -76,16 +74,15 @@ public class AltinnDownloadServiceTest {
     public void getOnlyMessagesWithNoSpecifiedMessageChannel(){
         Mockito.when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig());
 
-        List<FileReference> result = altinnDownloadService.getAvailableFiles();
+        UUID[] result = altinnDownloadService.getAvailableFiles();
 
         assertThat(result)
-            .extracting(FileReference::getFileReferenceId)
             .as("Should only return messages without specified message channel")
             .containsExactlyInAnyOrder(fileWithRandomMessageChannel);
     }
 
     @Test
-    public void download() throws JAXBException, IOException { //todo rename
+    public void downloadShouldCallBrokerApiClientAndZipHelper() throws JAXBException, IOException {
         UUID uuid = UUID.randomUUID();
         byte[] bytes = "Hello world".getBytes();
 
@@ -97,9 +94,11 @@ public class AltinnDownloadServiceTest {
     }
 
     @Test
-    public void confirmDownload(){ // todo rename
+    public void confirmDownloadShouldCallBrokerApiClient(){
         UUID uuid = UUID.randomUUID();
+
         altinnDownloadService.confirmDownload(new DownloadRequest(uuid, "123"));
+
         verify(brokerApiClient).confirmDownload(uuid);
     }
 }

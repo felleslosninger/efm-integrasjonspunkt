@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -26,21 +27,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {
-    AltinnUploadService.class,
+    AltinnDPOUploadService.class,
     TaskExecutorConfig.class,
     PromiseMaker.class,
-    Plumber.class
+    Plumber.class,
+    IntegrasjonspunktProperties.class,
 })
+@ConfigurationPropertiesScan
 public class AltinnUploadServiceTest {
 
     @Autowired
-    private AltinnUploadService altinnUploadService;
+    private AltinnDPOUploadService altinnUploadService;
 
     @MockitoBean
     private BrokerApiClient brokerApiClient;
-
-    @MockitoBean
-    private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     @MockitoBean
     private ZipHelper zipHelper;

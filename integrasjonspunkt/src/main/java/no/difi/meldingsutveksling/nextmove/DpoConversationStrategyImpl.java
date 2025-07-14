@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnUploadService;
+import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDPOUploadService;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -31,7 +31,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @Order
 public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
-    private final AltinnUploadService altinnUploadService;
+    private final AltinnDPOUploadService altinnUploadService;
     private final AsicHandler asicHandler;
     private final PromiseMaker promiseMaker;
     private final MessageChannelRepository messageChannelRepository;

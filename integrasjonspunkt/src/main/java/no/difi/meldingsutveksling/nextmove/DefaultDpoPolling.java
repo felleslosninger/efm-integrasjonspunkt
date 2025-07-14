@@ -12,9 +12,8 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.altinnv3.DPO.altinn2.AltinnPackage;
-import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDownloadService;
+import no.difi.meldingsutveksling.altinnv3.DPO.AltinnDPODownloadService;
 import no.difi.meldingsutveksling.altinnv3.DPO.DownloadRequest;
-import no.difi.meldingsutveksling.altinnv3.DPO.FileReference;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
 import org.slf4j.MDC;
@@ -22,7 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,7 +36,7 @@ public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final AltinnDownloadService altinnDownloadService;
+    private final AltinnDPODownloadService altinnDownloadService;
 
     private Set<String> orgnrs;
 
@@ -50,13 +49,14 @@ public class DefaultDpoPolling implements DpoPolling {
     @Override
     @Timed
     public void poll() {
-        orgnrs.forEach(o -> { //todo reportees greia, korleis funka det? kva er det?
-            log.debug("Polling messages for " + o);
+        orgnrs.forEach(orgnr -> { //todo reportees greia, korleis funka det? kva er det?
+            log.debug("Polling messages for " + orgnr);
             try {
-                List<FileReference> fileReferences = altinnDownloadService.getAvailableFiles();
-                if (!fileReferences.isEmpty()) log.debug("New DPO message(s) detected for " + o);
-                fileReferences.forEach(reference -> handleFileReference(reference, o));
-
+                UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles();
+                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for " + orgnr);
+                Arrays.stream(fileTransferIds).forEach(fileTransferId -> {
+                    handleFileReference(fileTransferId, orgnr);
+                });
             } catch (Exception e) {
                 log.error("Could not check for available files from Altinn: " + e.getMessage(), e);
             }
@@ -64,10 +64,10 @@ public class DefaultDpoPolling implements DpoPolling {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void handleFileReference(FileReference reference, String orgnr) {
+    private void handleFileReference(UUID fileTransferId, String orgnr) {
         try {
-            final DownloadRequest request = new DownloadRequest(reference.getFileReferenceId(), orgnr);
-            log.debug("Downloading message with altinnId=%s".formatted(reference.getFileReferenceId()));
+            final DownloadRequest request = new DownloadRequest(fileTransferId, orgnr);
+            log.debug("Downloading message with altinnId=%s".formatted(fileTransferId));
             AltinnPackage altinnPackage = altinnDownloadService.download(request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
@@ -85,9 +85,9 @@ public class DefaultDpoPolling implements DpoPolling {
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
             altinnDownloadService.confirmDownload(request);
-            log.debug(markerFrom(reference).and(logstashMarkers), "Message confirmed downloaded");
+            log.debug(markerFrom("altinn-reference-value", fileTransferId).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
-            log.error("Error during Altinn message polling, message altinnId=%s".formatted(reference.getFileReferenceId()), e);
+            log.error("Error during Altinn message polling, message altinnId=%s".formatted(fileTransferId), e);
         }
     }
 }

@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
-public class AltinnUploadService {
+public class AltinnDPOUploadService {
 
     private final BrokerApiClient brokerApiClient;
     private final PromiseMaker promiseMaker;
@@ -63,7 +63,7 @@ public class AltinnUploadService {
 
         fileTransferInitalizeExt.setRecipients(List.of(sbd.getReceiverIdentifier().getIdentifier()));
         fileTransferInitalizeExt.setFileName(FILE_NAME);
-        fileTransferInitalizeExt.setResourceId("eformidling-meldingsteneste-test"); // todo Skal denne vere i properties eller fra sr eller no?
+        fileTransferInitalizeExt.setResourceId(props.getDpo().getResource());
         fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getIdentifier());
         fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
 

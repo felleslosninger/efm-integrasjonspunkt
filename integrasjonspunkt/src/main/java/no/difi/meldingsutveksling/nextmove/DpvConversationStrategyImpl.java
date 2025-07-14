@@ -3,22 +3,18 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
-import no.difi.meldingsutveksling.altinnv3.DPV.AltinnUploadService;
+import no.difi.meldingsutveksling.altinnv3.DPV.AltinnDPVUploadService;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
-import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @Component
@@ -31,7 +27,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
     private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
-    private final AltinnUploadService altinnUploadService;
+    private final AltinnDPVUploadService altinnUploadService;
 
     @Override
     @Transactional

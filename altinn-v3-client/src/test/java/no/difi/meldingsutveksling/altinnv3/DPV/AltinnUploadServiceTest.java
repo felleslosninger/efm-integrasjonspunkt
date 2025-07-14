@@ -10,8 +10,6 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
-import no.digdir.altinn3.correspondence.model.InitializedCorrespondencesExt;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +21,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnUploadService.class)
+@SpringBootTest(classes = AltinnDPVUploadService.class)
 public class AltinnUploadServiceTest {
 
     @Autowired
-    private AltinnUploadService altinnUploadService;
+    private AltinnDPVUploadService altinnUploadService;
 
     @MockitoBean
     private CorrespondenceApiClient correspondenceApiClient;

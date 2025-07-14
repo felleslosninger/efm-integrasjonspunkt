@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Service
 @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
 @RequiredArgsConstructor
-public class AltinnUploadService {
+public class AltinnDPVUploadService {
 
     private final CorrespondenceApiClient client;
     private final CorrespondenceFactory correspondenceFactory;
