@@ -157,7 +157,7 @@ public class CorrespondenceFactory {
         attachment.setDisplayName(title);
         attachment.setIsEncrypted(false);
         attachment.setSendersReference("AttachmentReference_as123452");
-//      attachment.setDataLocationType(InitializeAttachmentDataLocationTypeExt.NEW_CORRESPONDENCE_ATTACHMENT);
+        //attachment.setDataLocationType(InitializeAttachmentDataLocationTypeExt.NEW_CORRESPONDENCE_ATTACHMENT);
 
         return attachment;
     }

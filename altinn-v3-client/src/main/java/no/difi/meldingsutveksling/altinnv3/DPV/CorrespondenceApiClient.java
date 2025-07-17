@@ -105,7 +105,7 @@ public class CorrespondenceApiClient {
             ;
     }
 
-    public String getCorrespondenceDetails(UUID correspondenceId) {
+    public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
         String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
@@ -113,7 +113,7 @@ public class CorrespondenceApiClient {
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
-            .body(String.class)
+            .body(CorrespondenceDetailsExt.class)
             ;
     }
 
@@ -136,7 +136,7 @@ public class CorrespondenceApiClient {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         requestValues.forEach(builder::part);
         files.forEach(file -> builder
-            .part("attachments", file.getFile())
+            .part("attachments", file.getFile()) //todo sjekk med fleire filer
             .filename(file.getBusinessMessageFile().getFilename()));
 
         var body = builder.build();
@@ -162,6 +162,7 @@ public class CorrespondenceApiClient {
             body = response.getBody().readAllBytes();
             String jsonString = new String(body, StandardCharsets.UTF_8);
 
+            //TODO berre ignorer dei ukjente?
             ProblemDetails problemDetails = mapper.readValue(body, ProblemDetails.class); // todo response dos not match problemdetails. Error
 
             throw new CorrespondenceApiException("%s: %d %s, %s".formatted(

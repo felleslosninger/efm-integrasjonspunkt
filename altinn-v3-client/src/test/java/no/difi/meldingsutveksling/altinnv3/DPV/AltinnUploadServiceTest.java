@@ -10,6 +10,8 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
+import no.digdir.altinn3.correspondence.model.InitializedCorrespondencesExt;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +19,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPVUploadService.class)
+@SpringBootTest(classes = AltinnDPVService.class)
 public class AltinnUploadServiceTest {
 
     @Autowired
-    private AltinnDPVUploadService altinnUploadService;
+    private AltinnDPVService altinnUploadService;
 
     @MockitoBean
     private CorrespondenceApiClient correspondenceApiClient;
@@ -45,10 +48,15 @@ public class AltinnUploadServiceTest {
     @Test
     public void upload() {
         String resource = "test";
+        UUID correspondenceId = UUID.randomUUID();
         InitializeCorrespondencesExt initializeCorrespondencesExt = new InitializeCorrespondencesExt();
         BaseCorrespondenceExt baseCorrespondenceExt = new BaseCorrespondenceExt();
         baseCorrespondenceExt.setResourceId(resource);
         initializeCorrespondencesExt.setCorrespondence(baseCorrespondenceExt);
+        InitializedCorrespondencesExt response = new InitializedCorrespondencesExt();
+        response.setCorrespondenceId(correspondenceId);
+        InitializeCorrespondencesResponseExt response2 = new InitializeCorrespondencesResponseExt();
+        response2.setCorrespondences(List.of(response));
 
         NextMoveOutMessage message = new NextMoveOutMessage();
         StandardBusinessDocument sbd = new StandardBusinessDocument()
@@ -61,17 +69,15 @@ public class AltinnUploadServiceTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setService(new Service());
 
+
         Mockito.when(helper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
         Mockito.when(fileRetriever.getFiles(Mockito.any())).thenReturn(List.of(new FileUploadRequest(new BusinessMessageFile(), null)));
         Mockito.when(correspondenceFactory.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
+        Mockito.when(correspondenceApiClient.upload(Mockito.any(), Mockito.any())).thenReturn(response2);
 
-        String result = altinnUploadService.send(message);
+        var result = altinnUploadService.send(message);
 
+        assertEquals(correspondenceId, result, "The returned value needs to be the correspondence id of the correspondence");
         verify(correspondenceApiClient).upload(Mockito.any(), Mockito.any());
-        assertEquals(resource, result);
-
-//        verify(correspondenceApiClient).initializeCorrespondence(Mockito.any());
-//        verify(correspondenceApiClient).initializeAttachment(Mockito.any());
-//        verify(correspondenceApiClient).uploadAttachment(Mockito.any(), Mockito.any());
     }
 }

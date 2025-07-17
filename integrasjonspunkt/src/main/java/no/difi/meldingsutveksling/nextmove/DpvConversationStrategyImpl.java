@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.DPV.AltinnDPVUploadService;
+import no.difi.meldingsutveksling.altinnv3.DPV.AltinnDPVService;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -14,6 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
@@ -27,7 +29,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
     private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
     private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
-    private final AltinnDPVUploadService altinnUploadService;
+    private final AltinnDPVService altinnService;
 
     @Override
     @Transactional
@@ -40,7 +42,8 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             return;
         }
 
-        String resource =  altinnUploadService.send(message);
+        UUID correspondenceid = altinnService.send(message);
+
 
 //        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 //
@@ -53,13 +56,6 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
         conversationService.findConversation(message.getMessageId())
             .ifPresent(conversation -> conversationService.save(conversation
-                .setResource(resource)));
-
-//        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
-//        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
-//        conversationService.findConversation(message.getMessageId())
-//                .ifPresent(conversation -> conversationService.save(conversation
-//                        .setServiceCode(serviceCode)
-//                        .setServiceEditionCode(serviceEditionCode)));
+                .setExternalSystemReference(correspondenceid.toString())));
     }
 }
