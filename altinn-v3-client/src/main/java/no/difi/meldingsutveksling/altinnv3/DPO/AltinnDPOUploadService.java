@@ -48,7 +48,7 @@ public class AltinnDPOUploadService {
                 try {
                     brokerApiClient.send(fileTransferInitalizeExt, altinnZip.getInputStream().readAllBytes());
                 } catch (IOException e) {
-                    throw new BrokerApiException("Send failed", e); // todo bedre exception
+                    throw new BrokerApiException("Failed when trying to send DPO message with conversationId %s".formatted(sbd.getConversationId()), e);
                 }
                 return null;
             }).await();

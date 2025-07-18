@@ -18,7 +18,7 @@ public class AltinnConfig {
     @Bean
     public JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-            "a63cac91-3210-4c35-b961-5c7bf122345c", //todo eigen config eller skal det legges til på clientid som finnes fra før av?
+            integrasjonspunktProperties.getOidc().getClientId(),
             integrasjonspunktProperties.getOidc().getUrl().toString(),
             integrasjonspunktProperties.getOidc().getAudience(),
             new ArrayList<>(),

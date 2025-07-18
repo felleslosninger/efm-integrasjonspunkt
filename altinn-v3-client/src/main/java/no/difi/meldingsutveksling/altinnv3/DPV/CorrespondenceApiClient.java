@@ -136,7 +136,7 @@ public class CorrespondenceApiClient {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         requestValues.forEach(builder::part);
         files.forEach(file -> builder
-            .part("attachments", file.getFile()) //todo sjekk med fleire filer
+            .part("attachments", file.getFile())
             .filename(file.getBusinessMessageFile().getFilename()));
 
         var body = builder.build();

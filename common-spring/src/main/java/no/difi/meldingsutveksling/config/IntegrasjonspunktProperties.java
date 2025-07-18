@@ -185,7 +185,6 @@ public class IntegrasjonspunktProperties {
         private URL endpointUrl;
         @NotNull
         private String sensitiveResource;
-//        private String sensitiveServiceCode;
         private boolean notifyEmail;
         private boolean notifySms;
         @NotNull
