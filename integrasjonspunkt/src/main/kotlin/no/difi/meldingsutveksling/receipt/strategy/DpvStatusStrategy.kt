@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.receipt.strategy
 
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.ServiceIdentifier.DPV
-import no.difi.meldingsutveksling.altinnv3.DPV.AltinnDPVService
+import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.api.StatusStrategy

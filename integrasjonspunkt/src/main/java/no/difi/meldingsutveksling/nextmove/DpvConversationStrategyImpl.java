@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.DPV.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;

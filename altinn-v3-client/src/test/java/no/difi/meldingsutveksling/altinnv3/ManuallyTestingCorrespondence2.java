@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.altinnv3;
 
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.DPV.CorrespondenceApiClient;
-import no.difi.meldingsutveksling.altinnv3.DPV.DotNotationFlattener;
-import no.difi.meldingsutveksling.altinnv3.DPV.FileUploadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
+import no.difi.meldingsutveksling.altinnv3.dpv.DotNotationFlattener;
+import no.difi.meldingsutveksling.altinnv3.dpv.FileUploadRequest;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.digdir.altinn3.correspondence.model.*;

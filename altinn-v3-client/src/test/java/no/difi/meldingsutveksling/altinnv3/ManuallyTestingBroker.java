@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.DPO.BrokerApiClient;
+import no.difi.meldingsutveksling.altinnv3.dpo.BrokerApiClient;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;

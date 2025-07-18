@@ -18,7 +18,7 @@ public class AltinnConfig {
     @Bean
     public JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-            integrasjonspunktProperties.getOidc().getClientId(),
+            "a63cac91-3210-4c35-b961-5c7bf122345c", //todo own config for this
             integrasjonspunktProperties.getOidc().getUrl().toString(),
             integrasjonspunktProperties.getOidc().getAudience(),
             new ArrayList<>(),
