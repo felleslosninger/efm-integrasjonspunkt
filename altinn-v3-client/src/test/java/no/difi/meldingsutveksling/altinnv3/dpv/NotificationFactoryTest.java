@@ -68,7 +68,7 @@ public class NotificationFactoryTest {
     }
 
     @Test
-    public void requestedSendTime(){
+    public void getNotification_mapsRequestedSendTime() {
 
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
 
@@ -76,13 +76,13 @@ public class NotificationFactoryTest {
     }
 
     @Test
-    public void notificationTemplate(){
+    public void getNotification_mapsNotificationTemplate() {
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
         assertEquals(NotificationTemplateExt.CUSTOM_MESSAGE, notification.getNotificationTemplate(), "NotificationTemplate should be Custom Message");
     }
 
     @Test
-    public void emailContentType(){
+    public void getNotification_mapsEmailContentType() {
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
         assertEquals(EmailContentType.PLAIN, notification.getEmailContentType(), "EmailContentType should be Plain");
     }
@@ -92,7 +92,7 @@ public class NotificationFactoryTest {
         "not sensitive, Melding til $reporteeName$ fra ACME Corp.",
         "sensitive, Taushetsbelagt melding til $reporteeName$ fra ACME Corp."
     })
-    public void getNotificationText(String sensitive, String text){
+    public void getNotification_mapsNotificationText(String sensitive, String text){
         String resource = sensitive.equals("sensitive") ? SENSITIVE_RESOURCE : RESOURCE;
         when(helper.getServiceRecord(Mockito.any())).thenReturn(
             new ServiceRecord()
@@ -110,7 +110,7 @@ public class NotificationFactoryTest {
         "not sensitive, Melding fra ACME Corp.",
         "sensitive, Taushetsbelagt melding fra ACME Corp."
     })
-    public void getNotificationTextFromDpvSettings(String sensitive, String text){
+    public void getNotification_mapsNotificationTextFromDpvSettings(String sensitive, String text){
         String resource = sensitive.equals("sensitive") ? SENSITIVE_RESOURCE : RESOURCE;
 
         when(helper.getServiceRecord(Mockito.any())).thenReturn(new ServiceRecord().setService(
@@ -135,7 +135,7 @@ public class NotificationFactoryTest {
         "VARSEL_DPV_MED_REVARSEL, true, 'SendReminder should be true when setting is VARSEL_DPV_MED_REVARSEL'",
         ", true, 'Default value should be true'"
     })
-    public void sendReminderChangesBasedUponDpvSettings(DpvVarselType dpvVarsel, boolean sendReminder, String message) {
+    public void getNotification_mapsSendReminderBasedUponDpvSettings(DpvVarselType dpvVarsel, boolean sendReminder, String message) {
         Mockito.when(helper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(new DpvSettings().setVarselType(dpvVarsel)));
 
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
@@ -150,7 +150,7 @@ public class NotificationFactoryTest {
         "true, false, SMS",
         "false, true, EMAIL",
     })
-    public void notificationChannel(boolean notifySms, boolean notifyEmail, NotificationChannelExt notificationChannel) {
+    public void getNotification_mapsNotificationChannel(boolean notifySms, boolean notifyEmail, NotificationChannelExt notificationChannel) {
         dpv.setNotifySms(notifySms);
         dpv.setNotifyEmail(notifyEmail);
 
