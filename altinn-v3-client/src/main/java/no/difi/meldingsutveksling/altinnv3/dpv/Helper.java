@@ -59,6 +59,13 @@ public class Helper {
         }
     }
 
+    public boolean isConfidential(NextMoveOutMessage message) {
+        String resource = getServiceRecord(message).getService().getResource();
+        String sensitiveResource = props.getDpv().getSensitiveResource();
+
+        return sensitiveResource.equals(resource);
+    }
+
     public String getSenderName(NextMoveOutMessage msg) {
         String orgnr = SBDUtil.getPartIdentifier(msg.getSbd())
             .map(Iso6523::getOrganizationIdentifier)

@@ -93,11 +93,9 @@ public class NotificationFactoryTest {
         "sensitive, Taushetsbelagt melding til $reporteeName$ fra ACME Corp."
     })
     public void getNotification_mapsNotificationText(String sensitive, String text){
-        String resource = sensitive.equals("sensitive") ? SENSITIVE_RESOURCE : RESOURCE;
-        when(helper.getServiceRecord(Mockito.any())).thenReturn(
-            new ServiceRecord()
-                .setService(new Service()
-                    .setResource(resource)));
+        boolean isSensitive = sensitive.equals("sensitive");
+
+        when(helper.isConfidential(Mockito.any())).thenReturn(isSensitive);
 
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
 
@@ -111,11 +109,9 @@ public class NotificationFactoryTest {
         "sensitive, Taushetsbelagt melding fra ACME Corp."
     })
     public void getNotification_mapsNotificationTextFromDpvSettings(String sensitive, String text){
-        String resource = sensitive.equals("sensitive") ? SENSITIVE_RESOURCE : RESOURCE;
+        boolean isSensitive = sensitive.equals("sensitive");
 
-        when(helper.getServiceRecord(Mockito.any())).thenReturn(new ServiceRecord().setService(
-            new Service()
-                .setResource(resource)));
+        when(helper.isConfidential(Mockito.any())).thenReturn(isSensitive);
         Mockito.when(helper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(
             new DpvSettings()
                 .setVarselTekst("Melding fra $reporterName$")

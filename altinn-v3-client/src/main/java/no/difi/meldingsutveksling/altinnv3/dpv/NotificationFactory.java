@@ -41,8 +41,7 @@ public class NotificationFactory {
     }
 
     private String getNotificationText(NextMoveOutMessage message) {
-        ServiceRecord serviceRecord = helper.getServiceRecord(message);
-        if (props.getDpv().getSensitiveResource().equals(serviceRecord.getService().getResource())) {
+        if (helper.isConfidential(message)) {
             return helper.getDpvSettings(message).flatMap(s -> !isNullOrEmpty(s.getTaushetsbelagtVarselTekst()) ? Optional.of(s.getTaushetsbelagtVarselTekst()) : Optional.empty())
                 .orElse(props.getDpv().getSensitiveNotificationText())
                 .replace("$reporterName$", helper.getSenderName(message));

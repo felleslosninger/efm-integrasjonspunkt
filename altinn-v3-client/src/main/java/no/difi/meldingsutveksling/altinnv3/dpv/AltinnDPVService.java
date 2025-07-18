@@ -25,7 +25,10 @@ public class AltinnDPVService {
 
         List<FileUploadRequest> files = fileRetriever.getFiles(message);
 
-        InitializeCorrespondencesExt correspondence = correspondenceFactory.create(message, null, files.stream().map(FileUploadRequest::getBusinessMessageFile).collect(Collectors.toList()));
+        InitializeCorrespondencesExt correspondence = correspondenceFactory.create(
+            message,
+            null,
+            files.stream().map(FileUploadRequest::getBusinessMessageFile).collect(Collectors.toList()));
 
         var result = client.upload(correspondence, files);
 

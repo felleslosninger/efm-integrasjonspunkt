@@ -72,12 +72,12 @@ public class CorrespondenceFactory {
         );
     }
 
-    public InitializeCorrespondencesExt create(NextMoveOutMessage message,
-                                               String messageTitle,
-                                               String messageSummary,
-                                               String messageBody,
-                                               List<UUID> existingAttachments,
-                                               List<BusinessMessageFile> newAttachmentsMetaData) {
+    private InitializeCorrespondencesExt create(NextMoveOutMessage message,
+                                                String messageTitle,
+                                                String messageSummary,
+                                                String messageBody,
+                                                List<UUID> existingAttachments,
+                                                List<BusinessMessageFile> newAttachmentsMetaData) {
 
 
         InitializeCorrespondencesExt correspondencesExt = new InitializeCorrespondencesExt();
@@ -107,6 +107,7 @@ public class CorrespondenceFactory {
         correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setIsConfirmationNeeded(false);
         correspondence.setSendersReference(message.getMessageId());
+        correspondence.setIsConfidential(helper.isConfidential(message));
 
         return correspondence;
     }
