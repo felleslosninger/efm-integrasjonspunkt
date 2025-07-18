@@ -8,10 +8,14 @@ Beskrive svakheter med kanal begrep i altinn v3 https://docs.digdir.no/docs/eFor
 - så viktig at de som bruker kanal sørger for at alle kanaler faktisk tømmes
 - Få innsyn i korleis DPO tjenesten var konfigurert i altinn 2 og oppdatere ressursen i altinn 3 til å samsvare med konfigurasjonen.
 - få clientid for altinn 3 token inn i properties, kan man kombinere den med den eksisterende clientid?
+- undersøk hvordan varsling (notification) fungerte i altinn2, og sett opp notification i altinn 3 til å vere riktig basert på tidlegare funksjonalitet og ønska funksjonalitet.
 
 ## DPO
+
+Nyttar formidling API-et til Altinn: https://docs.altinn.studio/nb/broker/
 
 ManualResourceTest.java kan brukes for å konfigurere instillinger på ressursen til DPO.
 
 ## DPV
 
+Nyttar melding API-et til Altinn: https://docs.altinn.studio/nb/correspondence/
