@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 public class AltinnDPVService {
 
     private final CorrespondenceApiClient client;
-    private final CorrespondenceFactory correspondenceFactory;
+    private final CorrespondenceCreatorService correspondenceCreatorService;
     private final FileRetriever fileRetriever;
 
     public UUID send(final NextMoveOutMessage message){
 
         List<FileUploadRequest> files = fileRetriever.getFiles(message);
 
-        InitializeCorrespondencesExt correspondence = correspondenceFactory.create(
+        InitializeCorrespondencesExt correspondence = correspondenceCreatorService.create(
             message,
             null,
             files.stream().map(FileUploadRequest::getBusinessMessageFile).collect(Collectors.toList()));

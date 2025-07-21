@@ -34,7 +34,7 @@ public class AltinnUploadServiceTest {
     private CorrespondenceApiClient correspondenceApiClient;
 
     @MockitoBean
-    private CorrespondenceFactory correspondenceFactory;
+    private CorrespondenceCreatorService correspondenceCreatorService;
 
     @MockitoBean
     private FileRetriever fileRetriever;
@@ -72,7 +72,7 @@ public class AltinnUploadServiceTest {
 
         Mockito.when(helper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
         Mockito.when(fileRetriever.getFiles(Mockito.any())).thenReturn(List.of(new FileUploadRequest(new BusinessMessageFile(), null)));
-        Mockito.when(correspondenceFactory.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
+        Mockito.when(correspondenceCreatorService.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
         Mockito.when(correspondenceApiClient.upload(Mockito.any(), Mockito.any())).thenReturn(response2);
 
         var result = altinnUploadService.send(message);
