@@ -50,6 +50,7 @@ Linker til logger, config og alt annet :
 - http://localhost:9093/manage/logfile
 - `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
 - `curl http://localhost:9093/manage/configprops | jq`
+- `curl http://localhost:9093/manage/env | jq` (lister over alle properties og env settings)
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Konfigurasjon av Integrasjonspunktet

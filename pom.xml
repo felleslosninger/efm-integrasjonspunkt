@@ -88,22 +88,19 @@
     </properties>
 
     <modules>
-        <module>api</module>
         <module>common</module>
-        <module>common-spring</module>
-        <module>dokumentpakking</module>
-        <module>integrasjonspunkt</module>
         <module>validation</module>
+        <module>dokumentpakking</module>
         <module>nextmove</module>
-        <module>domain</module>
-        <module>altinn-v3-client</module>
-        <!--
-        <module>post-til-virksomhet</module>
-        -->
+        <module>common-spring</module>
+        <module>api</module>
         <module>dpi-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
+        <module>domain</module>
+        <module>altinn-v3-client</module>
         <module>fiks-meldingsformidler</module>
+        <module>integrasjonspunkt</module>
     </modules>
 
     <dependencyManagement>

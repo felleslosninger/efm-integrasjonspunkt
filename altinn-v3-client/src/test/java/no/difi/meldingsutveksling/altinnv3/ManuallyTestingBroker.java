@@ -60,7 +60,6 @@ public class ManuallyTestingBroker {
         System.out.println(details);
     }
 
-
     @Test
     void testListDetailsAllFiles() {
         var uuids = client.getAvailableFiles();
