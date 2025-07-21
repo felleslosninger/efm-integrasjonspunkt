@@ -17,22 +17,25 @@ public class CorrespondenceApiTest {
 
     @Test
     public void sendMessage() throws JOSEException, IOException, InterruptedException {
-        String insertCorrespondenceString = "{\n" +
-                "  \"correspondence\": {\n" +
-                "    \"resourceId\": \"eformidling-meldingsteneste-test\",\n" +
-                "    \"sender\": \"0192:991825827\",\n" +
-                "    \"sendersReference\": \"string\",\n" +
-                "    \"content\": {\n" +
-                "      \"language\": \"nb\",\n" +
-                "      \"messageTitle\": \"Testmelding fra Digdir\",\n" +
-                "      \"messageSummary\": \"Testmelding fra Digdir\",\n" +
-                "      \"messageBody\": \"Testmelding fra Digdir\"\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"recipients\": [\n" +
-                "    \"urn:altinn:organization:identifier-no:310654302\"\n" + // for personer brukes urn:altinn:person:identifier-no:<fnr>
-                "  ]\n" +
-                "}";
+
+        // for personer brukes urn:altinn:person:identifier-no:<fnr>
+        String insertCorrespondenceString = """
+            {
+              "correspondence": {
+                "resourceId": "eformidling-meldingsteneste-test",
+                "sender": "0192:991825827",
+                "sendersReference": "string",
+                "content": {
+                  "language": "nb",
+                  "messageTitle": "Testmelding fra Digdir",
+                  "messageSummary": "Testmelding fra Digdir",
+                  "messageBody": "Testmelding fra Digdir"
+                }
+              },
+              "recipients": [
+                "urn:altinn:organization:identifier-no:310654302"
+              ]
+            }""";
 
         // altinn:serviceowner kreves for å bruke tenesta som tenesteeigar, men ein kan bruke tenesta utan å være tenesteeigar
         String accessToken2 = ApiUtils.retrieveAccessToken("altinn:correspondence.write altinn:correspondence.read altinn:serviceowner");

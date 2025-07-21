@@ -154,8 +154,9 @@ public class CorrespondenceApiClient {
     }
 
     private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) {
-        String prefix = "Correspondence api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
+        var prefix = "Correspondence api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
+        log.error(details); //todo change?
         throw new CorrespondenceApiException(details);
     }
 

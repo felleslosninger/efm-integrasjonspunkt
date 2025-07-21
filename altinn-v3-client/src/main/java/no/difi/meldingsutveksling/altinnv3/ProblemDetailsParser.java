@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.digdir.altinn3.correspondence.model.ProblemDetails;
 import org.springframework.http.client.ClientHttpResponse;
@@ -12,19 +13,22 @@ public class ProblemDetailsParser {
     // https://datatracker.ietf.org/doc/html/rfc7807
 
     public static String parseClientHttpResponse(String prefix, ClientHttpResponse response) {
-        String jsonString = "Unknown Response";
+        var jsonAsString = "NoProblemDetails";
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            var body = response.getBody().readAllBytes();
-            jsonString = new String(body, StandardCharsets.UTF_8);
-            ProblemDetails problemDetails = mapper.readValue(body, ProblemDetails.class);
+            var objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            var bodyAsBytes = response.getBody().readAllBytes();
+            jsonAsString = new String(bodyAsBytes, StandardCharsets.UTF_8);
+            var problemDetails = objectMapper.readValue(jsonAsString, ProblemDetails.class);
+            if (problemDetails.getTitle() == null) problemDetails.setTitle("No title was given");
+            if (problemDetails.getDetail() == null) problemDetails.setDetail("Response was : " + jsonAsString);
             return "%s: %d %s, %s".formatted(
                 prefix,
                 problemDetails.getStatus(),
                 problemDetails.getTitle(),
-                problemDetails.getDetail());
+                problemDetails.getDetail()
+            );
         } catch (Exception e) {
-            return "Unable to parse as Altinn ProblemDetails: " + jsonString;
+            return "Unable to parse as Altinn ProblemDetails: " + e.getMessage() + "(" + jsonAsString + ")";
         }
     }
 
