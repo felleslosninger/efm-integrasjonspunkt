@@ -32,7 +32,7 @@ public class CorrespondenceCreatorServiceTest {
     private CorrespondenceFactory correspondenceFactory;
 
     @MockitoBean
-    private Helper helper;
+    private DpvHelper dpvHelper;
 
     @MockitoBean
     private ArkivmeldingUtil arkivmeldingUtil;
@@ -72,7 +72,7 @@ public class CorrespondenceCreatorServiceTest {
         message.setSbd(standardBusinessDocument);
         message.setFiles(new HashSet<>());
 
-        when(helper.getArkivmelding(Mockito.any(), Mockito.any())).thenReturn(arkivmelding);
+        when(dpvHelper.getArkivmelding(Mockito.any(), Mockito.any())).thenReturn(arkivmelding);
         when(arkivmeldingUtil.getJournalpost(arkivmelding)).thenReturn(journalpost);
 
 

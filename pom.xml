@@ -97,7 +97,9 @@
         <module>nextmove</module>
         <module>domain</module>
         <module>altinn-v3-client</module>
+        <!--
         <module>post-til-virksomhet</module>
+        -->
         <module>dpi-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>

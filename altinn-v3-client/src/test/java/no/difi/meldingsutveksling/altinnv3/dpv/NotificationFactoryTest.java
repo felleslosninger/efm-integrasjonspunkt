@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
 import no.difi.meldingsutveksling.nextmove.DpvVarselType;
@@ -32,6 +31,7 @@ import static org.mockito.Mockito.when;
     DpvTestConfig.class
 })
 public class NotificationFactoryTest {
+
     @Autowired
     private NotificationFactory notificationFactory;
 
@@ -42,7 +42,10 @@ public class NotificationFactoryTest {
     private Clock clock;
 
     @MockitoBean
-    private Helper helper;
+    private DpvHelper dpvHelper;
+
+    @MockitoBean
+    private ServiceRegistryHelper serviceRegistryHelper;
 
     private static final String SENDER_ORGNAME = "ACME Corp.";
     private static final String NOTIFICATION_TEXT = "Melding til $reporteeName$ fra $reporterName$";
@@ -60,11 +63,11 @@ public class NotificationFactoryTest {
         dpv.setSensitiveResource(SENSITIVE_RESOURCE);
 
         when(properties.getDpv()).thenReturn(dpv);
-        when(helper.getServiceRecord(Mockito.any())).thenReturn(
+        when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(
             new ServiceRecord()
                 .setService(new Service()
                     .setResource(RESOURCE)));
-        when(helper.getSenderName(Mockito.any())).thenReturn(SENDER_ORGNAME);
+        when(serviceRegistryHelper.getSenderName(Mockito.any())).thenReturn(SENDER_ORGNAME);
     }
 
     @Test
@@ -95,7 +98,7 @@ public class NotificationFactoryTest {
     public void getNotification_mapsNotificationText(String sensitive, String text){
         boolean isSensitive = sensitive.equals("sensitive");
 
-        when(helper.isConfidential(Mockito.any())).thenReturn(isSensitive);
+        when(dpvHelper.isConfidential(Mockito.any())).thenReturn(isSensitive);
 
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
 
@@ -111,8 +114,8 @@ public class NotificationFactoryTest {
     public void getNotification_mapsNotificationTextFromDpvSettings(String sensitive, String text){
         boolean isSensitive = sensitive.equals("sensitive");
 
-        when(helper.isConfidential(Mockito.any())).thenReturn(isSensitive);
-        Mockito.when(helper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(
+        when(dpvHelper.isConfidential(Mockito.any())).thenReturn(isSensitive);
+        Mockito.when(dpvHelper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(
             new DpvSettings()
                 .setVarselTekst("Melding fra $reporterName$")
                 .setTaushetsbelagtVarselTekst("Taushetsbelagt melding fra $reporterName$")));
@@ -132,7 +135,7 @@ public class NotificationFactoryTest {
         ", true, 'Default value should be true'"
     })
     public void getNotification_mapsSendReminderBasedUponDpvSettings(DpvVarselType dpvVarsel, boolean sendReminder, String message) {
-        Mockito.when(helper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(new DpvSettings().setVarselType(dpvVarsel)));
+        Mockito.when(dpvHelper.getDpvSettings(Mockito.any())).thenReturn(Optional.of(new DpvSettings().setVarselType(dpvVarsel)));
 
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
 
@@ -154,4 +157,5 @@ public class NotificationFactoryTest {
 
         assertEquals(notificationChannel, notification.getNotificationChannel());
     }
+
 }

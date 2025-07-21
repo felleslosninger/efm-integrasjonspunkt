@@ -50,7 +50,10 @@ public class CorrespondenceFactoryTest {
     private Clock clock;
 
     @MockitoBean
-    private Helper helper;
+    private DpvHelper dpvHelper;
+
+    @MockitoBean
+    private ServiceRegistryHelper serviceRegistryHelper;
 
     @MockitoBean
     private ArkivmeldingUtil arkivmeldingUtil;
@@ -69,7 +72,7 @@ public class CorrespondenceFactoryTest {
         serviceRecord.setService(new Service().setResource(ALTINN_RESOURCE_ID));
 
 
-        when(helper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
+        when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
         when(properties.getDpv()).thenReturn(new IntegrasjonspunktProperties.PostVirksomheter()
             .setSensitiveResource("sensitive resource id"));
 
@@ -158,7 +161,7 @@ public class CorrespondenceFactoryTest {
     @Test
     public void create_mapsMessageSender(){
         String senderName = "Sender name";
-        when(helper.getSenderName(message)).thenReturn(senderName);
+        when(serviceRegistryHelper.getSenderName(message)).thenReturn(senderName);
 
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
@@ -174,7 +177,7 @@ public class CorrespondenceFactoryTest {
 
     @Test
     public void create_mapsDueDateTimeFromDpvSettings(){
-        when(helper.getDpvSettings(message)).thenReturn(Optional.ofNullable(new DpvSettings().setDagerTilSvarfrist(15)));
+        when(dpvHelper.getDpvSettings(message)).thenReturn(Optional.ofNullable(new DpvSettings().setDagerTilSvarfrist(15)));
 
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
@@ -230,7 +233,7 @@ public class CorrespondenceFactoryTest {
     @ParameterizedTest(name = "When resource is confidential = {0}, then map isConfidential = {0} on correspondence")
     @ValueSource(booleans = {true, false})
     public void create_mapsIsConfidentialBasedUponResource(boolean confidential) {
-        when(helper.isConfidential(Mockito.any())).thenReturn(confidential);
+        when(dpvHelper.isConfidential(Mockito.any())).thenReturn(confidential);
 
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 

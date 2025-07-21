@@ -4,7 +4,6 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.EmailContentType;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
 import no.digdir.altinn3.correspondence.model.NotificationChannelExt;
@@ -19,9 +18,11 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class NotificationFactory {
+
     private final IntegrasjonspunktProperties props;
     private final Clock clock;
-    private final Helper helper;
+    private final DpvHelper dpvHelper;
+    private final ServiceRegistryHelper serviceRegistryHelper;
 
 
     public InitializeCorrespondenceNotificationExt getNotification(NextMoveOutMessage message) {
@@ -41,18 +42,18 @@ public class NotificationFactory {
     }
 
     private String getNotificationText(NextMoveOutMessage message) {
-        if (helper.isConfidential(message)) {
-            return helper.getDpvSettings(message).flatMap(s -> !isNullOrEmpty(s.getTaushetsbelagtVarselTekst()) ? Optional.of(s.getTaushetsbelagtVarselTekst()) : Optional.empty())
+        if (dpvHelper.isConfidential(message)) {
+            return dpvHelper.getDpvSettings(message).flatMap(s -> !isNullOrEmpty(s.getTaushetsbelagtVarselTekst()) ? Optional.of(s.getTaushetsbelagtVarselTekst()) : Optional.empty())
                 .orElse(props.getDpv().getSensitiveNotificationText())
-                .replace("$reporterName$", helper.getSenderName(message));
+                .replace("$reporterName$", serviceRegistryHelper.getSenderName(message));
         }
-        return helper.getDpvSettings(message).flatMap(s -> !isNullOrEmpty(s.getVarselTekst()) ? Optional.of(s.getVarselTekst()) : Optional.empty())
+        return dpvHelper.getDpvSettings(message).flatMap(s -> !isNullOrEmpty(s.getVarselTekst()) ? Optional.of(s.getVarselTekst()) : Optional.empty())
             .orElse(props.getDpv().getNotificationText())
-            .replace("$reporterName$", helper.getSenderName(message));
+            .replace("$reporterName$", serviceRegistryHelper.getSenderName(message));
     }
 
     private boolean getVarselType(NextMoveOutMessage message) {
-        DpvVarselType varselType = helper.getDpvSettings(message).flatMap(s -> s.getVarselType() != null ? Optional.of(s.getVarselType()) : Optional.empty())
+        DpvVarselType varselType = dpvHelper.getDpvSettings(message).flatMap(s -> s.getVarselType() != null ? Optional.of(s.getVarselType()) : Optional.empty())
             .orElse(DpvVarselType.VARSEL_DPV_MED_REVARSEL);
 
         return varselType == DpvVarselType.VARSEL_DPV_MED_REVARSEL;
@@ -64,7 +65,7 @@ public class NotificationFactory {
         transportMap.put(DpvVarselTransportType.SMS, NotificationChannelExt.SMS);
         transportMap.put(DpvVarselTransportType.EPOSTOGSMS, NotificationChannelExt.EMAIL_AND_SMS);
 
-        return helper.getDpvSettings(message)
+        return dpvHelper.getDpvSettings(message)
             .flatMap(s -> s.getVarselTransportType() != null ? Optional.of(s.getVarselTransportType()) : Optional.empty())
             .map(transportMap::get)
             .orElseGet(() -> {

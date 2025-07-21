@@ -21,7 +21,8 @@ public class CorrespondenceFactory {
 
     private final NotificationFactory notificationFactory;
     private final Clock clock;
-    private final Helper helper;
+    private final DpvHelper dpvHelper;
+    private final ServiceRegistryHelper serviceRegistryHelper;
     private final IntegrasjonspunktProperties props;
 
     public InitializeCorrespondencesExt create(NextMoveOutMessage message,
@@ -54,18 +55,18 @@ public class CorrespondenceFactory {
 //        correspondence.setAllowSystemDeleteAfter(getAllowSystemDeleteAfter());
         correspondence.setResourceId(getResourceId(message));
         correspondence.setRequestedPublishTime(OffsetDateTime.now(clock));
-        correspondence.setMessageSender(helper.getSenderName(message));
+        correspondence.setMessageSender(serviceRegistryHelper.getSenderName(message));
         correspondence.setDueDateTime(getDueDateTime(message));
         correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setIsConfirmationNeeded(false);
         correspondence.setSendersReference(message.getMessageId());
-        correspondence.setIsConfidential(helper.isConfidential(message));
+        correspondence.setIsConfidential(dpvHelper.isConfidential(message));
 
         return correspondence;
     }
 
     private OffsetDateTime getDueDateTime(NextMoveOutMessage message) {
-        Optional<Integer> daysToReply = helper.getDpvSettings(message)
+        Optional<Integer> daysToReply = dpvHelper.getDpvSettings(message)
             .flatMap(s -> s.getDagerTilSvarfrist() != null ? Optional.of(s.getDagerTilSvarfrist()) : Optional.empty());
 
 
@@ -116,7 +117,7 @@ public class CorrespondenceFactory {
     }
 
     private String getResourceId(NextMoveOutMessage message) {
-        ServiceRecord serviceRecord = helper.getServiceRecord(message);
+        ServiceRecord serviceRecord = serviceRegistryHelper.getServiceRecord(message);
 
         return serviceRecord.getService().getResource();
     }

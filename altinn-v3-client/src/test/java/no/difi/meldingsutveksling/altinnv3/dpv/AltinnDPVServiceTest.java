@@ -40,7 +40,7 @@ public class AltinnDPVServiceTest {
     private FileRetriever fileRetriever;
 
     @MockitoBean
-    private Helper helper;
+    private ServiceRegistryHelper serviceRegistryHelper;
 
     private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
@@ -69,8 +69,7 @@ public class AltinnDPVServiceTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setService(new Service());
 
-
-        Mockito.when(helper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
+        Mockito.when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
         Mockito.when(fileRetriever.getFiles(Mockito.any())).thenReturn(List.of(new FileUploadRequest(new BusinessMessageFile(), null)));
         Mockito.when(correspondenceCreatorService.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
         Mockito.when(correspondenceApiClient.upload(Mockito.any(), Mockito.any())).thenReturn(response2);
@@ -80,4 +79,5 @@ public class AltinnDPVServiceTest {
         assertEquals(correspondenceId, result, "The returned value needs to be the correspondence id of the correspondence");
         verify(correspondenceApiClient).upload(Mockito.any(), Mockito.any());
     }
+
 }

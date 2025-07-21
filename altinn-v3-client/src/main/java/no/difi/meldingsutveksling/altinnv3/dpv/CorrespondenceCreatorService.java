@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CorrespondenceCreatorService {
 
-    private final Helper helper;
+    private final DpvHelper dpvHelper;
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final CorrespondenceFactory correspondenceFactory;
 
@@ -53,7 +53,7 @@ public class CorrespondenceCreatorService {
         Map<String, BusinessMessageFile> fileMap = message.getFiles().stream()
             .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
-        Arkivmelding arkivmelding = helper.getArkivmelding(message, fileMap);
+        Arkivmelding arkivmelding = dpvHelper.getArkivmelding(message, fileMap);
         Journalpost jp = arkivmeldingUtil.getJournalpost(arkivmelding);
 
         return correspondenceFactory.create(message,

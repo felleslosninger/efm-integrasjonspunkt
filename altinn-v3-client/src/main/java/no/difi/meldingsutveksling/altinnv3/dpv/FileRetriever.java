@@ -20,7 +20,7 @@ public class FileRetriever {
 
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
     private final ArkivmeldingUtil arkivmeldingUtil;
-    private final Helper helper;
+    private final DpvHelper dpvHelper;
 
     public List<FileUploadRequest> getFiles(NextMoveOutMessage message) {
         if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
@@ -39,7 +39,7 @@ public class FileRetriever {
         Map<String, BusinessMessageFile> fileMap = message.getFiles().stream()
             .collect(Collectors.toMap(BusinessMessageFile::getFilename, p -> p));
 
-        Arkivmelding arkivmelding = helper.getArkivmelding(message, fileMap);
+        Arkivmelding arkivmelding = dpvHelper.getArkivmelding(message, fileMap);
 
         List<BusinessMessageFile> files = arkivmeldingUtil.getFilenames(arkivmelding)
             .stream()
