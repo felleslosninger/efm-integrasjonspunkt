@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping;
+package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;

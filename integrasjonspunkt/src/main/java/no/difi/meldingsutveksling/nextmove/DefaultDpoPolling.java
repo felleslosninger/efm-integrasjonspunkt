@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
 import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
 import no.difi.meldingsutveksling.logging.Audit;

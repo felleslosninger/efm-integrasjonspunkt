@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 
 import java.io.IOException;
 

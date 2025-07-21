@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.dpo.altinn2;
+package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,10 +9,7 @@ import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.UploadRequest;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.sftp.BrokerServiceManifestBuilder;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.sftp.ExternalServiceBuilder;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.sftp.RecipientBuilder;
+import no.difi.meldingsutveksling.altinnv3.dpo.UploadRequest;
 import no.difi.move.common.io.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;

@@ -5,9 +5,10 @@
 - DPO - fjernet brukernavn og passord fra konfigurasjon (det er nå maskinporten)
 - DPV - endret upload size limit til `difi.move.dpv.upload-size-limit=250MB`
 
-## FIXME i etterkant
+## FIXME og mulige forbedringer i etterkant
 - [ ] Rydde config filer, fjerne username/password fra DPO (se også test properties [application.properties](altinn-v3-client/src/test/resources/application.properties))
 - [ ] AltinnInSteps.java, Cucumber koden som testet SOAP er kommentert ut - må fikses for REST
+- [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 
 ## Bygg og kjøre lokalt 
 Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.

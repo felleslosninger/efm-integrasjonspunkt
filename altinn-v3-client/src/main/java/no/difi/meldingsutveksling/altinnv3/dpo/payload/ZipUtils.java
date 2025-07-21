@@ -1,10 +1,10 @@
-package no.difi.meldingsutveksling.altinnv3.dpo.altinn2;
+package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.altinnv3.dpo.BrokerApiException;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.UploadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpo.UploadRequest;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.move.common.io.OutputStreamResource;
 import no.difi.move.common.io.pipe.Plumber;

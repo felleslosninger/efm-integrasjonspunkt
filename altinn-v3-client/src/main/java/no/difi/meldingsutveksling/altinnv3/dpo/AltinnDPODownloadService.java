@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.AltinnPackage;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.ZipUtils;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

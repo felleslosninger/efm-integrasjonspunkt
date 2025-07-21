@@ -1,8 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.ZipUtils;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.UploadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;

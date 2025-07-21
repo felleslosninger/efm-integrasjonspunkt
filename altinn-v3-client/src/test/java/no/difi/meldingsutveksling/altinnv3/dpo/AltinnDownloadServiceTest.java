@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.xml.bind.JAXBException;
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.ZipUtils;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;

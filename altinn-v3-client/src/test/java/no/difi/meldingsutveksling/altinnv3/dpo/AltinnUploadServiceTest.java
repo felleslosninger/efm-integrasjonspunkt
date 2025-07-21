@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
-import no.difi.meldingsutveksling.altinnv3.dpo.altinn2.ZipUtils;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;

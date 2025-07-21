@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.dpo.altinn2.shipping.sftp;
+package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 
