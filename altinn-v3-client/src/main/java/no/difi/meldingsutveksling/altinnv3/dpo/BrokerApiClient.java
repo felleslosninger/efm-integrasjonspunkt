@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,7 +13,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -118,32 +117,10 @@ public class BrokerApiClient {
     }
 
     private void getBrokerApiException(HttpRequest request, ClientHttpResponse response) {
-        try {
-            String prefix = "Broker api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
-
-            ObjectMapper mapper = new ObjectMapper();
-            byte[] body = response.getBody().readAllBytes();
-
-            ProblemDetails problemDetails = mapper.readValue(body, ProblemDetails.class);
-
-            log.error(problemDetails.toString()); //todo change?
-
-            if(problemDetails.getType() == null) {
-                throw new BrokerApiException("%s: %d: %s".formatted(
-                    prefix,
-                    response.getStatusCode().value(),
-                    problemDetails.getAdditionalProperties().getOrDefault("message", "")
-                ));
-            }
-
-            throw new BrokerApiException("%s: %d %s, %s".formatted(
-                prefix,
-                problemDetails.getStatus(),
-                problemDetails.getTitle(),
-                problemDetails.getDetail()));
-
-        } catch (IOException e) {
-            throw new BrokerApiException("Problem while getting broker api exception", e);
-        }
+        String prefix = "Broker api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
+        var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
+        log.error(details); //todo change?
+        throw new BrokerApiException(details);
     }
+
 }

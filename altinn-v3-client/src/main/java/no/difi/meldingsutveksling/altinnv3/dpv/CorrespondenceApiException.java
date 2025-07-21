@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
 public class CorrespondenceApiException extends RuntimeException {
+
     public CorrespondenceApiException() {
         super();
     }
@@ -12,4 +13,5 @@ public class CorrespondenceApiException extends RuntimeException {
     public CorrespondenceApiException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }

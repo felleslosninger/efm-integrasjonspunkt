@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.correspondence.model.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,9 +20,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -153,26 +154,9 @@ public class CorrespondenceApiClient {
     }
 
     private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) {
-        byte[] body = new byte[0];
-        try {
-            String prefix = "Correspondence api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            body = response.getBody().readAllBytes();
-            String jsonString = new String(body, StandardCharsets.UTF_8);
-
-            //TODO berre ignorer dei ukjente?
-            ProblemDetails problemDetails = mapper.readValue(body, ProblemDetails.class); // todo response dos not match problemdetails. Error
-
-            throw new CorrespondenceApiException("%s: %d %s, %s".formatted(
-                prefix,
-                problemDetails.getStatus(),
-                problemDetails.getTitle(),
-                problemDetails.getDetail()));
-
-        } catch (IOException e) {
-            throw new CorrespondenceApiException("Problem while getting broker api exception: " + new String(body, StandardCharsets.UTF_8), e);
-        }
+        String prefix = "Correspondence api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
+        var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
+        throw new CorrespondenceApiException(details);
     }
+
 }
