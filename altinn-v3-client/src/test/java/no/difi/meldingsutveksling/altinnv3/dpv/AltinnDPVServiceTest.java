@@ -25,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = AltinnDPVService.class)
-public class AltinnUploadServiceTest {
+public class AltinnDPVServiceTest {
 
     @Autowired
-    private AltinnDPVService altinnUploadService;
+    private AltinnDPVService altinnDPVService;
 
     @MockitoBean
     private CorrespondenceApiClient correspondenceApiClient;
@@ -75,7 +75,7 @@ public class AltinnUploadServiceTest {
         Mockito.when(correspondenceCreatorService.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
         Mockito.when(correspondenceApiClient.upload(Mockito.any(), Mockito.any())).thenReturn(response2);
 
-        var result = altinnUploadService.send(message);
+        var result = altinnDPVService.send(message);
 
         assertEquals(correspondenceId, result, "The returned value needs to be the correspondence id of the correspondence");
         verify(correspondenceApiClient).upload(Mockito.any(), Mockito.any());
