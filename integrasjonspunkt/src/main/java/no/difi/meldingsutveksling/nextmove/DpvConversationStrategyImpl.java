@@ -7,8 +7,6 @@ import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -26,8 +24,6 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 @RequiredArgsConstructor
 public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
-    private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
-    private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
     private final AltinnDPVService altinnService;
 

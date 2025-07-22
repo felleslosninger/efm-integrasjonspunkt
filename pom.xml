@@ -184,11 +184,6 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>post-til-virksomhet</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>service-registry-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -464,6 +459,10 @@
                     <groupId>com.vaadin.external.google</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
 

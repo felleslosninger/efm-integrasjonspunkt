@@ -5,9 +5,6 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.pipe.Plumber;
@@ -65,21 +62,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
-        return new CorrespondenceAgencyConfiguration()
-                .setPassword(properties.getDpv().getPassword())
-                .setSystemUserCode(properties.getDpv().getUsername())
-//                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
-                .setNotifyEmail(properties.getDpv().isNotifyEmail())
-                .setNotifySms(properties.getDpv().isNotifySms())
-                .setNotificationText(properties.getDpv().getNotificationText())
-                .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
-                .setNextmoveFiledir(properties.getNextmove().getFiledir())
-                .setAllowForwarding(properties.getDpv().isAllowForwarding())
-                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
     @ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
     public SvarInnConnectionCheck svarInnConnectionCheck(SvarInnClient svarInnClient, IntegrasjonspunktProperties properties) {
         return new SvarInnConnectionCheck(svarInnClient, properties);
@@ -91,11 +73,11 @@ public class IntegrasjonspunktBeans {
         return new SvarUtConnectionCheck(svarUtService, properties);
     }
 
-    @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
-        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
-    }
+//    @Bean
+//    @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
+//    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
+//        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
+//    }
 
 }
 
