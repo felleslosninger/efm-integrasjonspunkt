@@ -1,18 +1,32 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
-import com.nimbusds.jose.JOSEException;
-import no.difi.meldingsutveksling.altinnv3.ApiUtils;
+import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
+import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
+import java.util.List;
 
 @Disabled
+@SpringBootTest(classes = {
+    AltinnTokenUtil.class,
+    AltinnConfig.class,
+    IntegrasjonspunktProperties.class,
+})
+@ConfigurationPropertiesScan
 public class ManualResourceTest {
+
+    @Inject
+    AltinnTokenUtil tokenUtil;
+
     @Test
-    public void getResource() throws IOException, InterruptedException, JOSEException {
-        String accessToken = ApiUtils.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+    public void getResource() {
+        var accessToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         RestClient restClient = RestClient.create();
         var result = restClient.get()
@@ -27,8 +41,8 @@ public class ManualResourceTest {
     }
 
     @Test
-    public void updateResource() throws IOException, InterruptedException, JOSEException {
-        String accessToken = ApiUtils.retrieveAccessToken("altinn:broker.write altinn:broker.read altinn:serviceowner");
+    public void updateResource() {
+        var accessToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         String body = """
             {

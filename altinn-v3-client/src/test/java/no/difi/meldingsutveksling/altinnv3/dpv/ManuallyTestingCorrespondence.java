@@ -1,10 +1,9 @@
-package no.difi.meldingsutveksling.altinnv3;
+package no.difi.meldingsutveksling.altinnv3.dpv;
 
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
-import no.difi.meldingsutveksling.altinnv3.dpv.DotNotationFlattener;
-import no.difi.meldingsutveksling.altinnv3.dpv.FileUploadRequest;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
+import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.digdir.altinn3.correspondence.model.*;
@@ -31,7 +30,7 @@ import java.util.UUID;
     DotNotationFlattener.class,
 })
 @ConfigurationPropertiesScan
-public class ManuallyTestingCorrespondence2 {
+public class ManuallyTestingCorrespondence {
 
     @Inject
     CorrespondenceApiClient client;
@@ -43,54 +42,7 @@ public class ManuallyTestingCorrespondence2 {
     }
 
     @Test
-    public void fileFirstThenCorrespondence() {
-        InitializeAttachmentExt request = new InitializeAttachmentExt();
-
-        var isEncrypted = false;
-        var fileName = "Testfile3.txt";
-        var senderReference = "string";
-        var displayname = "test";
-
-
-        request.isEncrypted(isEncrypted); //idk
-        request.setFileName(fileName);
-        request.sender("0192:991825827");
-        request.resourceId("eformidling-meldingsteneste-test");
-        request.setSendersReference(senderReference);
-        request.setDisplayName(displayname);
-
-        UUID attatchmentId = client.initializeAttachment(request);
-        var res = client.uploadAttachment(attatchmentId, "Just some test data: summertime".getBytes());
-
-
-        InitializeCorrespondencesExt request2 = new InitializeCorrespondencesExt();
-        BaseCorrespondenceExt correspondence = new BaseCorrespondenceExt();
-        correspondence.setResourceId("eformidling-meldingsteneste-test");
-        correspondence.setSender("0192:991825827");
-        correspondence.setSendersReference(senderReference);
-        correspondence.setIsConfirmationNeeded(false);
-        correspondence.setRequestedPublishTime(OffsetDateTime.now().plusMinutes(5));
-
-
-        InitializeCorrespondenceContentExt content = new InitializeCorrespondenceContentExt();
-        content.setLanguage("nb");
-        content.setMessageTitle("Testmelding fra Digdir");
-        content.setMessageBody("Testmelding fra Digdir");
-        content.setMessageSummary("Testmelding fra Digdir");
-
-        request2.setExistingAttachments(List.of(attatchmentId));
-
-        correspondence.setContent(content);
-
-        request2.setCorrespondence(correspondence);
-        request2.setRecipients(List.of("urn:altinn:organization:identifier-no:310654302"));
-
-
-        var res2 = client.initializeCorrespondence(request2);
-    }
-
-    @Test
-    public void uploadAllAtTheSameTime() throws IOException {
+    public void upload() throws IOException {
 
         var fileName = "Testfile3.txt";
         var senderReference = "string";
