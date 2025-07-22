@@ -119,7 +119,6 @@ public class BrokerApiClient {
     private void getBrokerApiException(HttpRequest request, ClientHttpResponse response) {
         var prefix = "Broker api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
-        log.error(details); //todo change?
         throw new BrokerApiException(details);
     }
 

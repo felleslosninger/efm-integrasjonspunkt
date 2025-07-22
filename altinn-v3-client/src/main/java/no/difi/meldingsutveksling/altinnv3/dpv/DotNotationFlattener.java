@@ -45,7 +45,7 @@ public class DotNotationFlattener {
             }
         }
         else {
-            if (!node.isNull()) values.put(prefix, node.asText()); // todo check and test if this is correct behaviour
+            if (!node.isNull()) values.put(prefix, node.asText());
         }
     }
 }
