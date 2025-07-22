@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.config;
 
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceAgencyConnectionCheck;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
@@ -73,11 +75,10 @@ public class IntegrasjonspunktBeans {
         return new SvarUtConnectionCheck(svarUtService, properties);
     }
 
-//    @Bean
-//    @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-//    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
-//        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
-//    }
-
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceApiClient correspondenceApiClient, IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConnectionCheck(correspondenceApiClient, properties);
+    }
 }
 

@@ -69,7 +69,7 @@ public class CorrespondenceApiClient {
     public AttachmentOverviewExt uploadAttachment(UUID attachmentId, byte[] bytes) {
         String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
 
-        var ost =  restClient.post()
+        return restClient.post()
             .uri(props.getDpv().getCorrespondenceServiceUrl() + "/attachment/{attachmentId}/upload", attachmentId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
@@ -78,7 +78,6 @@ public class CorrespondenceApiClient {
             .retrieve()
             .body(AttachmentOverviewExt.class)
             ;
-        return ost;
     }
 
     public InitializeCorrespondencesResponseExt initializeCorrespondence(InitializeCorrespondencesExt request){
@@ -91,6 +90,15 @@ public class CorrespondenceApiClient {
             .body(request)
             .retrieve()
             .body(InitializeCorrespondencesResponseExt.class)
+            ;
+    }
+
+    public void connectionTest() {
+        restClient.get()
+            .uri(props.getDpv().getHealthCheckUrl())
+            .header("Accept", "application/json")
+            .retrieve()
+            .toBodilessEntity()
             ;
     }
 
@@ -159,5 +167,4 @@ public class CorrespondenceApiClient {
         log.error(details); //todo change?
         throw new CorrespondenceApiException(details);
     }
-
 }

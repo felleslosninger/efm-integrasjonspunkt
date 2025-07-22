@@ -199,8 +199,7 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private Integer defaultTtlHours;
         private String correspondenceServiceUrl;
-
-
+        private String healthCheckUrl;
     }
 
     /**
