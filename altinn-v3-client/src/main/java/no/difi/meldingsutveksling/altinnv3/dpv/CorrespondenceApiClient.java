@@ -132,7 +132,7 @@ public class CorrespondenceApiClient {
     public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files){
         String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
 
-        Map<String, Object> requestValues = jsonFlatter.flatten(request);
+        Map<String, String> requestValues = jsonFlatter.flatten(request);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         requestValues.forEach(builder::part);

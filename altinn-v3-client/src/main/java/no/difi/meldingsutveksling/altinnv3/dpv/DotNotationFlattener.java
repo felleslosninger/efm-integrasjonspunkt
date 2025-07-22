@@ -16,21 +16,21 @@ public class DotNotationFlattener {
         .registerModule(new JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    public Map<String, Object> flatten(InitializeCorrespondencesExt request) {
+    public Map<String, String> flatten(InitializeCorrespondencesExt request) {
         JsonNode json = objectMapper.valueToTree(request);
 
         return flattenJson(json);
     }
 
-    private Map<String, Object> flattenJson(JsonNode json){
-        Map<String, Object> values = new LinkedHashMap<>();
+    private Map<String, String> flattenJson(JsonNode json){
+        Map<String, String> values = new LinkedHashMap<>();
 
         flattenRecursively("", json, values);
 
         return values;
     }
 
-    private static void flattenRecursively(String prefix, JsonNode node, Map<String, Object> values) {
+    private static void flattenRecursively(String prefix, JsonNode node, Map<String, String> values) {
         if (node.isObject()) {
             node.fieldNames().forEachRemaining(field -> {
                 String newPrefix = prefix.isEmpty() ? field : prefix + "." + field;
