@@ -37,7 +37,7 @@ Feature: Sending a Next Move Digital DPV message
      </InsertCorrespondenceV2Response>
     """
 
-  Scenario: As a user I want to send a DPI message
+  Scenario: As a user I want to send a DPV message
     Given I POST the following message:
     """
     {

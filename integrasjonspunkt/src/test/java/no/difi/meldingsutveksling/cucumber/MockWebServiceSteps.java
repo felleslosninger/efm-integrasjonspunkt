@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.test.client.MockWebServiceServer;
 import org.springframework.ws.test.client.RequestMatchers;
@@ -22,7 +21,7 @@ import static org.springframework.ws.test.client.ResponseCreators.withPayload;
 public class MockWebServiceSteps {
 
     private final MockWebServiceServerCustomizer mockWebServiceServerCustomizer;
-    private final CorrespondenceAgencyClient correspondenceAgencyClient;
+    //private final CorrespondenceAgencyClient correspondenceAgencyClient;
     private final SvarUtClientHolder svarUtClientHolder;
     private final Holder<List<String>> webServicePayloadHolder;
     private final IntegrasjonspunktProperties properties;
@@ -30,7 +29,7 @@ public class MockWebServiceSteps {
     @Before
     @SneakyThrows
     public void before() {
-        mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
+        //mockWebServiceServerCustomizer.customize(correspondenceAgencyClient.getWebServiceTemplate());
         mockWebServiceServerCustomizer.customize(svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate());
     }
 
@@ -46,7 +45,7 @@ public class MockWebServiceSteps {
 
     private WebServiceTemplate getWebServiceTemplate(String url) {
         if (url.startsWith("http://localhost:9876")) {
-            return correspondenceAgencyClient.getWebServiceTemplate();
+            throw new IllegalStateException("return correspondenceAgencyClient.getWebServiceTemplate();");
         }
 
         return svarUtClientHolder.getClient(properties.getOrg().getNumber()).getWebServiceTemplate();
