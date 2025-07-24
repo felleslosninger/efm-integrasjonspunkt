@@ -46,7 +46,7 @@ public class AltinnDPVServiceTest {
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
 
     @Test
-    public void upload() {
+    public void send() {
         String resource = "test";
         UUID correspondenceId = UUID.randomUUID();
         InitializeCorrespondencesExt initializeCorrespondencesExt = new InitializeCorrespondencesExt();
