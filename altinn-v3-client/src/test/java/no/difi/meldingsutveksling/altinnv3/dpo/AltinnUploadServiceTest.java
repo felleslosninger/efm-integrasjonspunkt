@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
-import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +30,10 @@ import static org.mockito.Mockito.when;
     AltinnDPOUploadService.class,
     TaskExecutorConfig.class,
     PromiseMaker.class,
-    Plumber.class,
     IntegrasjonspunktProperties.class,
     UUIDGenerator.class
+}, properties = {
+    "difi.move.feature.enableDPO=true"
 })
 @ConfigurationPropertiesScan
 public class AltinnUploadServiceTest {
@@ -85,4 +85,5 @@ public class AltinnUploadServiceTest {
 
         verify(brokerApiClient).send(Mockito.any(), Mockito.any());
     }
+
 }

@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class AltinnDPODownloadService {
 

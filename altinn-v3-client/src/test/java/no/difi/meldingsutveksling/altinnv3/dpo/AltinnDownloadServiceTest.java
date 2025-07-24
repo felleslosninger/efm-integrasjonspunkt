@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPODownloadService.class)
+@SpringBootTest(classes = AltinnDPODownloadService.class, properties = "difi.move.feature.enableDPO=true")
 public class AltinnDownloadServiceTest {
 
     @MockitoBean
@@ -111,4 +111,5 @@ public class AltinnDownloadServiceTest {
 
         verify(brokerApiClient).confirmDownload(uuid);
     }
+
 }

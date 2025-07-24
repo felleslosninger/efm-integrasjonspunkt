@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
 public class AltinnDPOUploadService {
 

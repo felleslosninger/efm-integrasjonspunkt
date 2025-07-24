@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusEventExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
 @RequiredArgsConstructor
 public class AltinnDPVService {
 

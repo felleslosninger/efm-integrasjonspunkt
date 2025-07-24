@@ -24,7 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPVService.class)
+@SpringBootTest(classes = AltinnDPVService.class, properties = "difi.move.feature.enableDPV=true")
 public class AltinnDPVServiceTest {
 
     @Autowired

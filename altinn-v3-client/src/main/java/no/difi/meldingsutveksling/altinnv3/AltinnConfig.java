@@ -18,11 +18,12 @@ public class AltinnConfig {
     @Bean
     public JwtTokenClient jwtTokenClient() {
         return new JwtTokenClient(new JwtTokenConfig(
-            "a63cac91-3210-4c35-b961-5c7bf122345c", //todo own config for this
+            "a63cac91-3210-4c35-b961-5c7bf122345c", // FIXME move this to own config and use integrasjonspunktProperties.getOidc().getClientId()
             integrasjonspunktProperties.getOidc().getUrl().toString(),
             integrasjonspunktProperties.getOidc().getAudience(),
             new ArrayList<>(),
             integrasjonspunktProperties.getOidc().getKeystore()
         ));
     }
+
 }
