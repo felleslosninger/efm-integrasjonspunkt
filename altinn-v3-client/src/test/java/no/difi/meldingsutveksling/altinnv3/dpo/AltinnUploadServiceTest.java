@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
     PromiseMaker.class,
     Plumber.class,
     IntegrasjonspunktProperties.class,
+    UUIDGenerator.class
 })
 @ConfigurationPropertiesScan
 public class AltinnUploadServiceTest {

@@ -40,7 +40,7 @@ public class AltinnInSteps {
 
         // en fil klar for nedlasting
         UUID fileTransferId  = UUID.randomUUID();
-        wireMockServer.givenThat(get(urlEqualTo("/broker/api/v1/filetransfer?resourceId=&status=Published&recipientStatus=Initialized"))
+        wireMockServer.givenThat(get(urlEqualTo("/broker/api/v1/filetransfer?resourceId=eformidling-meldingsteneste-test&status=Published&recipientStatus=Initialized"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

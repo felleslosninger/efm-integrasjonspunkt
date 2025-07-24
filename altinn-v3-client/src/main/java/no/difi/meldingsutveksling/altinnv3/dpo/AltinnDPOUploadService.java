@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -29,6 +30,7 @@ public class AltinnDPOUploadService {
     private final ZipUtils zipUtils;
     private final IntegrasjonspunktProperties props;
     private static final String FILE_NAME = "sbd.zip";
+    private final UUIDGenerator uuidGenerator;
 
     public void send(final StandardBusinessDocument sbd){
         send(sbd, null);
@@ -77,7 +79,7 @@ public class AltinnDPOUploadService {
                 !mcScope.get().getIdentifier().equals(props.getDpo().getMessageChannel()))) {
             return mcScope.get().getIdentifier();
         }
-        return UUID.randomUUID().toString();
+        return uuidGenerator.generate();
     }
 
     private void auditError(UploadRequest request, Exception e) {
