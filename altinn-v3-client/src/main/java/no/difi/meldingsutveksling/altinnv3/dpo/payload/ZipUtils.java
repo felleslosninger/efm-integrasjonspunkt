@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
@@ -28,7 +27,6 @@ public class ZipUtils {
 
     private final Plumber plumber;
     private final ApplicationContext context;
-
 
     public InputStreamResource getAltinnZip(UploadRequest request, Reject reject) {
         return new InputStreamResource(plumber.pipe("write Altinn zip",
@@ -64,4 +62,5 @@ public class ZipUtils {
     private void auditError(UploadRequest request, Exception e) {
         Audit.error("Message failed to upload to altinn", request.getMarkers(), e);
     }
+
 }

@@ -166,4 +166,5 @@ public class CorrespondenceApiClient {
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
         throw new CorrespondenceApiException(details);
     }
+
 }
