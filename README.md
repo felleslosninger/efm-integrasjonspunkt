@@ -18,14 +18,15 @@
 - [ ] Burde vi gå for Java 25 (Java 25, a long-term support (LTS) release, is scheduled for September 16, 2025 with two release candidates planned for August) ?
 
 ## Bygg og kjøre lokalt 
-Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.
+Testet og bygget med OpenJDK 21.0.7 og Maven 3.9.10.
 
 ```bash
 mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
-Når man starter med `dev | staging | yt | production` profil så vil den samtidig benytte konfig fra din lokale [application-local.properties](application-local.properties) fil.
+Når man starter med `dev | staging | yt | production` profil så vil den kunne overstyres med properteis fra
+en lokale [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
 
 Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
 [application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties), 
