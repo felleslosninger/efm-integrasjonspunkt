@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.xml.bind.JAXBException;
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -18,7 +19,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPODownloadService.class, properties = "difi.move.feature.enableDPO=true")
+@SpringBootTest(classes = AltinnDPODownloadService.class)
+@UseFullTestConfiguration
 public class AltinnDownloadServiceTest {
 
     @MockitoBean

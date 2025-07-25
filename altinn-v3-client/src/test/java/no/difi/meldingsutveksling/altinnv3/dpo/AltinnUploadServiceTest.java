@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,10 +32,8 @@ import static org.mockito.Mockito.when;
     PromiseMaker.class,
     IntegrasjonspunktProperties.class,
     UUIDGenerator.class
-}, properties = {
-    "difi.move.feature.enableDPO=true"
 })
-@ConfigurationPropertiesScan
+@UseFullTestConfiguration
 public class AltinnUploadServiceTest {
 
     @Autowired

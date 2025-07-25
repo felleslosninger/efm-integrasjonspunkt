@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -24,7 +25,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPVService.class, properties = "difi.move.feature.enableDPV=true")
+@SpringBootTest(classes = AltinnDPVService.class)
+@UseFullTestConfiguration
 public class AltinnDPVServiceTest {
 
     @Autowired
