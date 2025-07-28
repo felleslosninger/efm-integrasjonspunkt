@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -9,11 +10,13 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
 import org.mockito.Mockito;
 import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
 import org.springframework.test.web.client.UnorderedRequestExpectationManager;
@@ -24,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.mockito.ArgumentMatchers.any;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -38,6 +41,7 @@ public class MockServerRestSteps {
     private final ServiceBusRestTemplate serviceBusRestTemplate;
     private final ServiceBusRestClient serviceBusRestClient;
     private final SvarInnClient svarInnClient;
+    private final WireMockServer wireMockServer;
 
     // this is just a dummy RestTemplate, actual code uses RestClient which is mocked as MockitoBean + Mockito
     private RestTemplate dummyServiceRegistryRestTemplate = new RestTemplate();
@@ -144,20 +148,13 @@ public class MockServerRestSteps {
         when(restClient.get().uri(URI.create(url)).retrieve().toEntity(String.class).getBody()).thenReturn(response);
     }
 
-    @And("^a request to \"([^\"]*)\" will respond with the following payload:$")
+    @And("^a CorrespondenceClient request to \"([^\"]*)\" will respond with the following payload:$")
     public void aRestClientRequestToWillRespondWithStatusAndTheFollowingIn2(String url, String response) {
-
-    var test = new InitializeCorrespondencesResponseExt();
-        when(restClient
-            .post()
-            .uri(URI.create(url))
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(any())
-            .retrieve()
-            .toEntity(InitializeCorrespondencesResponseExt.class)
-            .getBody())
-            .thenReturn(test);
+        wireMockServer.stubFor(post(urlEqualTo(url))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody(response)
+                .withHeader("Content-Type", "application/json")));
     }
+
 }

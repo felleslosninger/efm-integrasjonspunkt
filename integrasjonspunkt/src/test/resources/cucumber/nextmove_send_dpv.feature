@@ -8,7 +8,7 @@ Feature: Sending a Next Move DPV message
     And a "GET" request to "http://localhost:9099/info/974720760" will respond with status "200" and the following "application/json" in "/restmocks/info/974720760.json"
     And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And a request to "http://localhost:9099/correspondence/api/v1/correspondence/upload" will respond with the following payload:
+    And a CorrespondenceClient request to "/correspondence/api/v1/correspondence/upload" will respond with the following payload:
     """
         {
           "correspondences" : [ {

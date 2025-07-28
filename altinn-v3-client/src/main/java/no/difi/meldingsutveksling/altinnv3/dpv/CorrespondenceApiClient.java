@@ -149,9 +149,10 @@ public class CorrespondenceApiClient {
             .filename(file.getBusinessMessageFile().getFilename()));
 
         var body = builder.build();
+        var url = props.getDpv().getCorrespondenceServiceUrl() + "/correspondence/upload";
 
         return restClient.post()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/correspondence/upload")
+            .uri(url)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -162,7 +163,7 @@ public class CorrespondenceApiClient {
     }
 
     private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) {
-        var prefix = "Correspondence api error: %s %s".formatted(request.getURI(), request.getURI().getPath());
+        var prefix = "Correspondence api error: %s [%s]".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
         throw new CorrespondenceApiException(details);
     }
