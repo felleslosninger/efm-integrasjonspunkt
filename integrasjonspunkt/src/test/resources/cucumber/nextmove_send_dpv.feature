@@ -161,59 +161,29 @@ Feature: Sending a Next Move DPV message
     Then the CorrespondenceAgencyClient is called with the following payload:
     """
     {
-      "correspondence" : {
-        "resourceId" : null,
-        "sender" : "0192:910077473",
-        "sendersReference" : "abc8849c-e281-4809-8555-7cd54952b926",
-        "messageSender" : "TEST - C4",
-        "content" : {
-          "language" : "nb",
-          "messageTitle" : "Nye lysrør",
-          "messageSummary" : "Nye lysrør",
-          "messageBody" : "Nye lysrør",
-          "attachments" : [ {
-            "fileName" : "test.txt",
-            "displayName" : "Test",
-            "isEncrypted" : false,
-            "checksum" : null,
-            "sendersReference" : "AttachmentReference_as123452",
-            "id" : null,
-            "dataLocationType" : null,
-            "expirationTime" : null
-          } ]
-        },
-        "requestedPublishTime" : "2019-03-25T12:38:23+01:00",
-        "allowSystemDeleteAfter" : null,
-        "dueDateTime" : "2019-04-01T12:38:23+01:00",
-        "externalReferences" : [ ],
-        "propertyList" : { },
-        "replyOptions" : [ ],
-        "notification" : {
-          "notificationTemplate" : "CustomMessage",
-          "emailSubject" : null,
-          "emailBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
-          "emailContentType" : "Plain",
-          "smsBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
-          "sendReminder" : true,
-          "reminderEmailSubject" : null,
-          "reminderEmailBody" : null,
-          "reminderEmailContentType" : null,
-          "reminderSmsBody" : null,
-          "notificationChannel" : "EmailAndSms",
-          "reminderNotificationChannel" : null,
-          "sendersReference" : null,
-          "requestedSendTime" : "2019-03-25T12:43:23+01:00",
-          "customRecipient" : null,
-          "customNotificationRecipients" : [ ]
-        },
-        "ignoreReservation" : null,
-        "published" : null,
-        "isConfirmationNeeded" : false,
-        "isConfidential" : false
-      },
-      "recipients" : [ "urn:altinn:organization:identifier-no:910075946" ],
-      "existingAttachments" : [ ],
-      "idempotentKey" : null
+      "correspondence.content.attachments[0].sendersReference" : "AttachmentReference_as123452",
+      "correspondence.notification.sendReminder" : "true",
+      "recipients[0]" : "urn:altinn:organization:identifier-no:910075946",
+      "correspondence.content.messageTitle" : "Nye lysrør",
+      "correspondence.notification.notificationChannel" : "EmailAndSms",
+      "correspondence.sendersReference" : "abc8849c-e281-4809-8555-7cd54952b926",
+      "correspondence.notification.smsBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
+      "correspondence.sender" : "0192:910077473",
+      "correspondence.requestedPublishTime" : "2019-03-25T12:38:23+01:00",
+      "correspondence.content.attachments[0].isEncrypted" : "false",
+      "correspondence.notification.requestedSendTime" : "2019-03-25T12:43:23+01:00",
+      "correspondence.isConfirmationNeeded" : "false",
+      "correspondence.isConfidential" : "false",
+      "correspondence.content.messageSummary" : "Nye lysrør",
+      "correspondence.content.attachments[0].fileName" : "test.txt",
+      "correspondence.content.language" : "nb",
+      "correspondence.notification.emailContentType" : "Plain",
+      "correspondence.content.messageBody" : "Nye lysrør",
+      "correspondence.content.attachments[0].displayName" : "Test",
+      "correspondence.notification.notificationTemplate" : "CustomMessage",
+      "correspondence.messageSender" : "TEST - C4",
+      "correspondence.notification.emailBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
+      "correspondence.dueDateTime" : "2019-04-01T12:38:23+01:00"
     }
     """
     And the sent message contains the following files:
