@@ -128,27 +128,6 @@ public class CucumberStepsConfiguration {
             return new WireMockMonitor(wireMockServer);
         }
 
-//        @Bean
-//        @Primary
-//        public CorrespondenceAgencyClient correspondenceAgencyClient(
-//                CorrespondenceAgencyConfiguration config,
-//                RequestCaptureClientInterceptor requestCaptureClientInterceptor) {
-//            return new CorrespondenceAgencyClient(config) {
-//
-//                @Override
-//                protected List<ClientInterceptor> getAdditionalInterceptors() {
-//                    return Collections.singletonList(requestCaptureClientInterceptor);
-//                }
-//
-//                protected Map<String, Object> getMarshallerProperties() {
-//                    Map<String, Object> properties = new HashMap<>();
-//                    properties.put(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-//                    properties.put(XMLMarshaller.PREFIX_MAPPER, new DefaultNamespacePrefixMapper());
-//                    return properties;
-//                }
-//            };
-//        }
-
         @Bean
         @Primary
         public TaskScheduler taskScheduler() {

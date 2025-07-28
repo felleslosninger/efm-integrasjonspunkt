@@ -34,18 +34,12 @@ import org.springframework.http.MediaType;
 @RequiredArgsConstructor
 @Slf4j
 public class AltinnOutSteps {
-
-    private static final String SOAP_ACTION = "SOAPAction";
-
     private final Holder<ZipContent> zipContentHolder;
     private final Holder<Message> messageSentHolder;
     private final WireMockServer wireMockServer;
     private final ZipParser zipParser;
     private final AltinnZipContentParser altinnZipContentParser;
     private final ObjectMapper objectMapper;
-
-    private JacksonTester<StandardBusinessDocument> json;
-
     private final UUID uploadId = UUID.randomUUID();
 
     @Before

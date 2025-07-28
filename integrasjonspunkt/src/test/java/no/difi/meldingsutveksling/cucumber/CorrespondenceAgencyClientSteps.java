@@ -10,7 +10,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CorrespondenceAgencyClientSteps {
 
-    private final XMLMarshaller xmlMarshaller;
     private final Holder<Message> messageSentHolder;
     private final Holder<List<String>> webServicePayloadHolder;
 
@@ -19,7 +18,7 @@ public class CorrespondenceAgencyClientSteps {
         List<String> payloads = webServicePayloadHolder.get();
         String actualPayload = payloads.get(0);
 //        InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
-//        assertThat(hideData(actualPayload), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace());
+//        assertThat(hideData(actualPayload), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace()); //todo
 //
 //
 //        List<Document> attachments = in.getCorrespondence()
