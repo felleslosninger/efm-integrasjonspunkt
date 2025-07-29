@@ -3,10 +3,8 @@ package no.difi.meldingsutveksling.cucumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.After;
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
-import no.digdir.altinn3.broker.model.FileTransferInitializeResponseExt;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -24,10 +22,6 @@ public class AltinnInSteps {
     private final Holder<Message> messageInHolder;
     private final WireMockServer wireMockServer;
 
-    @Before
-    public void before() throws IOException {
-    }
-
     @After
     public void after() {
         messageInHolder.reset();
@@ -35,11 +29,9 @@ public class AltinnInSteps {
 
     @And("^Altinn sends the message$")
     public void altinnSendsTheMessage() throws IOException {
-
-        // OpenAPI / Swagger : https://docs.altinn.studio/nb/api/broker/spec/
+        UUID fileTransferId  = UUID.randomUUID();
 
         // en fil klar for nedlasting
-        UUID fileTransferId  = UUID.randomUUID();
         wireMockServer.givenThat(get(urlEqualTo("/broker/api/v1/filetransfer?resourceId=eformidling-meldingsteneste-test&status=Published&recipientStatus=Initialized"))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -47,21 +39,6 @@ public class AltinnInSteps {
                     .withBody("""
                         ["%s"]""".formatted(fileTransferId))
             ));
-
-        wireMockServer.givenThat(get(urlEqualTo("/altinntoken"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody("{ \"access_token\" : \"DummyAltinnToken\" }")
-            ));
-
-        wireMockServer.givenThat(post(urlEqualTo("/token"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody("{ \"access_token\" : \"DummyMaskinportenToken\" }")
-            )
-        );
 
         // detaljer om filen FileTransferStatusDetailsExt (kunne vært FileTransferStatusExt)
         FileTransferStatusDetailsExt statusDetails = new FileTransferStatusDetailsExt();
@@ -86,26 +63,9 @@ public class AltinnInSteps {
                 .withBody(altinnZip.getByteArray())
             ));
 
+        // confirm that the file has been downloaded
         var confirmDownloadUrl = "/broker/api/v1/filetransfer/%s/confirmdownload".formatted(fileTransferId);
         wireMockServer.givenThat(post(urlEqualTo(confirmDownloadUrl))
-            .willReturn(aResponse()
-                .withStatus(200)
-            ));
-
-        FileTransferInitializeResponseExt initializeResponseExt = new FileTransferInitializeResponseExt();
-        var uploadId = UUID.randomUUID();
-        initializeResponseExt.setFileTransferId(uploadId);
-        var sendBody = om.writeValueAsString(initializeResponseExt);
-
-        wireMockServer.givenThat(post(urlEqualTo("/broker/api/v1/filetransfer/"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody(sendBody)
-            ));
-
-        var uploadString = "/broker/api/v1/filetransfer/%s/upload".formatted(uploadId);
-        wireMockServer.givenThat(post(urlEqualTo(uploadString))
             .willReturn(aResponse()
                 .withStatus(200)
             ));

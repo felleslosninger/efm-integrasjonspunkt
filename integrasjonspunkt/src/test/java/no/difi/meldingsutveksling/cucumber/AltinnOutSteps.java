@@ -14,7 +14,6 @@ import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.ResourceUtils;
 import no.digdir.altinn3.broker.model.FileTransferInitializeResponseExt;
-import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.core.io.InputStreamResource;
 
@@ -39,14 +38,11 @@ public class AltinnOutSteps {
     private final WireMockServer wireMockServer;
     private final ZipParser zipParser;
     private final AltinnZipContentParser altinnZipContentParser;
-    private final ObjectMapper objectMapper;
-    private final UUID uploadId = UUID.randomUUID();
+    private final UUID fileTransferId = UUID.randomUUID();
 
     @Before
     @SneakyThrows
     public void before() {
-        JacksonTester.initFields(this, objectMapper);
-
         wireMockServer.givenThat(get(urlEqualTo("/altinntoken"))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -62,19 +58,18 @@ public class AltinnOutSteps {
             )
         );
 
-        ObjectMapper om = new ObjectMapper();
         FileTransferInitializeResponseExt initializeResponseExt = new FileTransferInitializeResponseExt();
-        initializeResponseExt.setFileTransferId(uploadId);
-        var sendBody = om.writeValueAsString(initializeResponseExt);
+        initializeResponseExt.setFileTransferId(fileTransferId);
+        var body = new ObjectMapper().writeValueAsString(initializeResponseExt);
 
         wireMockServer.givenThat(post(urlEqualTo("/broker/api/v1/filetransfer/"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody(sendBody)
+                .withBody(body)
             ));
 
-        var uploadString = "/broker/api/v1/filetransfer/%s/upload".formatted(uploadId);
+        var uploadString = "/broker/api/v1/filetransfer/%s/upload".formatted(fileTransferId);
         wireMockServer.givenThat(post(urlEqualTo(uploadString))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -97,7 +92,7 @@ public class AltinnOutSteps {
             .withRequestBody(equalToJson(body))
         );
 
-        List<LoggedRequest> uploaded = wireMockServer.findAll(postRequestedFor(urlEqualTo("/broker/api/v1/filetransfer/%s/upload".formatted(uploadId))));
+        List<LoggedRequest> uploaded = wireMockServer.findAll(postRequestedFor(urlEqualTo("/broker/api/v1/filetransfer/%s/upload".formatted(fileTransferId))));
         LoggedRequest uploadedRequest = uploaded.get(0);
 
         byte[] raw = uploadedRequest.getBody();

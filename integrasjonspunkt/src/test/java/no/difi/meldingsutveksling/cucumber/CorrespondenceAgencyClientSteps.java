@@ -71,7 +71,7 @@ public class CorrespondenceAgencyClientSteps {
 
                 attachments.add(document);
             } else {
-                fail("Unexpected mime type: " + part.getContentType());
+                fail("Unexpected mime type in payload: " + part.getContentType());
             }
         }
     }
