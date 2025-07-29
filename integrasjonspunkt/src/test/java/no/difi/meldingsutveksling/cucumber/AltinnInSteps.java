@@ -110,5 +110,4 @@ public class AltinnInSteps {
                 .withStatus(200)
             ));
     }
-
 }

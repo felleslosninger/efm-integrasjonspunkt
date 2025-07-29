@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
@@ -27,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class CorrespondenceAgencyClientSteps {
 
     private final Holder<Message> messageSentHolder;
-//    private final Holder<List<String>> webServicePayloadHolder;
     private final WireMockServer wireMockServer;
 
     @Then("^the CorrespondenceAgencyClient is called with the following payload:$")
@@ -42,7 +40,18 @@ public class CorrespondenceAgencyClientSteps {
 
         MimeMultipart multipart = new MimeMultipart(new ByteArrayDataSource(request.getBody(), request.getHeader("Content-Type")));
 
-        for(int i = 0; i <multipart.getCount(); i++) {
+        getValuesAndAttachmentsFromMultipart(values, attachments, multipart);
+
+        var expected = new ObjectMapper().readValue(expectedPayload, HashMap.class);
+        assertEquals(expected, values);
+
+        messageSentHolder.set(new Message()
+                .setServiceIdentifier(ServiceIdentifier.DPV)
+                .attachments(attachments));
+    }
+
+    private void getValuesAndAttachmentsFromMultipart(Map<String, String> values, List<Document> attachments, MimeMultipart multipart) throws MessagingException, IOException {
+        for(int i = 0; i < multipart.getCount(); i++) {
             var part = multipart.getBodyPart(i);
 
             if (part.isMimeType("text/plain")) {
@@ -55,54 +64,15 @@ public class CorrespondenceAgencyClientSteps {
                 var filename = part.getFileName();
 
                 Document document = Document.builder()
-                        .resource(new ByteArrayResource(part.getInputStream().readAllBytes()))
-                        .filename(filename)
-                        .mimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(filename.split("\\.")).reduce((a, b) -> b).orElse("pdf")))
-                        .build();
+                    .resource(new ByteArrayResource(part.getInputStream().readAllBytes()))
+                    .filename(filename)
+                    .mimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(filename.split("\\.")).reduce((a, b) -> b).orElse("pdf")))
+                    .build();
 
                 attachments.add(document);
             } else {
                 fail("Unexpected mime type: " + part.getContentType());
             }
         }
-        var expected = new ObjectMapper().readValue(expectedPayload, HashMap.class);
-        assertEquals(values, expected);
-
-
-        String actualPayload = request.getBodyAsString();
-
-//        InsertCorrespondenceV2 in = xmlMarshaller.unmarshall(actualPayload, InsertCorrespondenceV2.class);
-//        assertThat(hideData(actualPayload), CompareMatcher.isIdenticalTo(expectedPayload).ignoreWhitespace()); //todo
-//
-//
-//        List<Document> attachments = in.getCorrespondence()
-//                .getContent().getValue()
-//                .getAttachments().getValue()
-//                .getBinaryAttachments().getValue()
-//                .getBinaryAttachmentV2()
-//                .stream()
-//                .map(p -> Document.builder()
-//                        .resource(getResource(p))
-//                        .filename(p.getFileName().getValue())
-//                        .mimeType(MimeTypeExtensionMapper.getMimetype(Stream.of(p.getFileName().getValue().split("\\.")).reduce((a, b) -> b).orElse("pdf")))
-//                        .build()
-//                ).collect(Collectors.toList());
-
-//        List<Document> attachments = List.of();
-        messageSentHolder.set(new Message()
-                .setServiceIdentifier(ServiceIdentifier.DPV)
-                .attachments(attachments));
     }
-
-    private String hideData(String s) {
-        return s.replaceAll("xmlns:.+?>", ">")
-                .replaceAll("<(?![/?]).+?:", "<")
-                .replaceAll("</.+?:", "</")
-                .replaceAll("<Data>[^<]*</Data>", "<Data></Data>");
-    }
-
-//    @SneakyThrows
-//    private ByteArrayResource getResource(BinaryAttachmentV2 p) {
-//        return new ByteArrayResource(StreamUtils.copyToByteArray(p.getData().getValue().getInputStream()));
-//    }
 }
