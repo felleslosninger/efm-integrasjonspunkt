@@ -149,7 +149,7 @@ public class MockServerRestSteps {
     }
 
     @And("^a CorrespondenceClient request to \"([^\"]*)\" will respond with the following payload:$")
-    public void aRestClientRequestToWillRespondWithStatusAndTheFollowingIn2(String url, String response) {
+    public void aCorrespondenceClientRequestToWillRespondWithStatusAndTheFollowingIn(String url, String response) {
         wireMockServer.stubFor(post(urlEqualTo(url))
             .willReturn(aResponse()
                 .withStatus(200)
