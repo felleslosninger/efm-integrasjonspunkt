@@ -8,7 +8,6 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - få clientid for altinn 3 token inn i properties, kan man kombinere den med den eksisterende clientid?
 - undersøk hvordan varsling (notification) fungerte i altinn2, og sett opp notification i altinn 3 til å vere riktig basert på tidlegare funksjonalitet og ønska funksjonalitet.
 - få statestikk fra altinn https://docs.altinn.studio/nb/broker/broker-transition/getting-started/#konfigurer-ressurs-til-bruk-i-overgangsløsningen for å vurdere overgangsløsningen i produksjon
-- cucumber testene
 - 
 
 ## DPO
