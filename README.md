@@ -16,6 +16,7 @@
 - [ ] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Burde vi gå for Java 25 (Java 25, a long-term support (LTS) release, is scheduled for September 16, 2025 with two release candidates planned for August) ?
+- [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging ellers
 
 ## Bygg og kjøre lokalt 
 Testet og bygget med OpenJDK 21.0.7 og Maven 3.9.10.
