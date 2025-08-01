@@ -1,12 +1,11 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
-import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestClient;
 
@@ -14,19 +13,19 @@ import java.util.List;
 
 @Disabled
 @SpringBootTest(classes = {
-    AltinnTokenUtil.class,
-    AltinnConfig.class,
+    DpoTokenFetcher.class,
     IntegrasjonspunktProperties.class,
+    AltinnConfiguration.class,
 })
-@ConfigurationPropertiesScan
+@UseFullTestConfiguration
 public class ManualResourceTest {
 
     @Inject
-    AltinnTokenUtil tokenUtil;
+    DpoTokenFetcher dpoTokenFetcher;
 
     @Test
     public void getResource() {
-        var accessToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         RestClient restClient = RestClient.create();
         var result = restClient.get()
@@ -42,7 +41,7 @@ public class ManualResourceTest {
 
     @Test
     public void updateResource() {
-        var accessToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         String body = """
             {

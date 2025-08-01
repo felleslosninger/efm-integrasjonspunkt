@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
 import no.difi.meldingsutveksling.nextmove.DpvVarselType;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -53,7 +54,7 @@ public class NotificationFactoryTest {
     private static final String RESOURCE = "Resourceid";
     private static final String SENSITIVE_RESOURCE = "Sensitive Resourceid";
     private static final NextMoveOutMessage nextMoveOutMessage = new NextMoveOutMessage();
-    private static final IntegrasjonspunktProperties.PostVirksomheter dpv = new IntegrasjonspunktProperties.PostVirksomheter();
+    private static final PostVirksomheter dpv = new PostVirksomheter();
 
 
     @BeforeEach

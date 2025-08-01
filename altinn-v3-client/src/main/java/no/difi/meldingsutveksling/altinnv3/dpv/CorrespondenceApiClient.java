@@ -3,9 +3,9 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.correspondence.model.*;
@@ -48,49 +48,15 @@ public class CorrespondenceApiClient {
     private final String readScope = "altinn:correspondence.read";
     private final String writeScope = "altinn:correspondence.write";
     private final String serviceOwnerScope = "altinn:serviceowner";
-    private final AltinnTokenUtil tokenUtil;
+    private final DpvTokenFetcher dpvTokenFetcher;
     private final DotNotationFlattener jsonFlatter;
 
     private final IntegrasjonspunktProperties props;
+    private String correspondenceServiceUrl;
 
-    public UUID initializeAttachment(InitializeAttachmentExt request){
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
-
-        return restClient.post()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/attachment")
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .body(request)
-            .retrieve()
-            .body(UUID.class)
-            ;
-    }
-
-    public AttachmentOverviewExt uploadAttachment(UUID attachmentId, byte[] bytes) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
-
-        return restClient.post()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/attachment/{attachmentId}/upload", attachmentId)
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/octet-stream")
-            .body(bytes)
-            .retrieve()
-            .body(AttachmentOverviewExt.class)
-            ;
-    }
-
-    public InitializeCorrespondencesResponseExt initializeCorrespondence(InitializeCorrespondencesExt request){
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
-
-        return restClient.post()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/correspondence")
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .body(request)
-            .retrieve()
-            .body(InitializeCorrespondencesResponseExt.class)
-            ;
+    @PostConstruct
+    public void init() {
+        correspondenceServiceUrl = props.getDpv().getCorrespondenceServiceUrl();
     }
 
     public void connectionTest() {
@@ -103,10 +69,10 @@ public class CorrespondenceApiClient {
     }
 
     public AttachmentDetailsExt getAttachmentDetails(UUID attachmentId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/attachment/{attachmentId}/details", attachmentId)
+            .uri(correspondenceServiceUrl + "/attachment/{attachmentId}/details", attachmentId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -115,10 +81,10 @@ public class CorrespondenceApiClient {
     }
 
     public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/correspondence/{correspondenceId}/details", correspondenceId)
+            .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/details", correspondenceId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -127,10 +93,10 @@ public class CorrespondenceApiClient {
     }
 
     public byte[] downloadAttachment(UUID correspondenceId, UUID attachmentId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
-            .uri(props.getDpv().getCorrespondenceServiceUrl() + "/correspondence/{correspondenceId}/attachment/{attachmentId}/download", correspondenceId, attachmentId)
+            .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/attachment/{attachmentId}/download", correspondenceId, attachmentId)
             .header("Authorization", "Bearer " + accessToken)
             .retrieve()
             .body(byte[].class)
@@ -138,7 +104,7 @@ public class CorrespondenceApiClient {
     }
 
     public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files){
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         Map<String, String> requestValues = jsonFlatter.flatten(request);
 
@@ -149,10 +115,9 @@ public class CorrespondenceApiClient {
             .filename(file.getBusinessMessageFile().getFilename()));
 
         var body = builder.build();
-        var url = props.getDpv().getCorrespondenceServiceUrl() + "/correspondence/upload";
 
         return restClient.post()
-            .uri(url)
+            .uri(correspondenceServiceUrl + "/correspondence/upload")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .contentType(MediaType.MULTIPART_FORM_DATA)

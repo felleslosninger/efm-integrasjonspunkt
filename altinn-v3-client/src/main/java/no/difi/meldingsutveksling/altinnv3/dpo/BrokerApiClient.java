@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.*;
@@ -22,13 +22,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BrokerApiClient {
 
-    private final AltinnTokenUtil tokenUtil;
+    private final DpoTokenFetcher dpoTokenFetcher;
     private final RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getBrokerApiException).build();
 
     private final String readScope = "altinn:broker.read";
     private final String writeScope = "altinn:broker.write";
     private final String serviceOwnerScope = "altinn:serviceowner";
     private final IntegrasjonspunktProperties props;
+    private String brokerServiceUrl;
+
+    @PostConstruct
+    public void init() {
+        brokerServiceUrl = props.getDpo().getBrokerserviceUrl();
+    }
 
     public FileTransferOverviewExt send(FileTransferInitalizeExt request, byte[] bytes){
         FileTransferInitializeResponseExt initializeResponse = initialize(request);
@@ -40,10 +46,10 @@ public class BrokerApiClient {
     }
 
     public FileTransferInitializeResponseExt initialize(FileTransferInitalizeExt request) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(writeScope, serviceOwnerScope));
 
          return restClient.post()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/")
+            .uri(brokerServiceUrl + "/filetransfer/")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .body(request)
@@ -53,10 +59,10 @@ public class BrokerApiClient {
     }
 
     public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(writeScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(writeScope, serviceOwnerScope));
 
         return restClient.post()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/upload", fileTransferId)
+            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/upload", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .header("Content-Type", "application/octet-stream")
@@ -67,10 +73,10 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(readScope, serviceOwnerScope));
 
         return restClient.get()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
+            .uri(brokerServiceUrl + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
                 props.getDpo().getResource(),
                 FileTransferStatusExtNullable.PUBLISHED.getValue(),
                 RecipientFileTransferStatusExtNullable.INITIALIZED.getValue())
@@ -82,10 +88,10 @@ public class BrokerApiClient {
     }
 
     public FileTransferStatusDetailsExt getDetails(String fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(readScope, serviceOwnerScope));
 
          return restClient.get()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/details", fileTransferId)
+            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/details", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -94,10 +100,10 @@ public class BrokerApiClient {
     }
 
     public byte[] downloadFile(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(readScope, serviceOwnerScope));
 
         return restClient.get()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/download", fileTransferId)
+            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/download", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .retrieve()
             .body(byte[].class)
@@ -105,10 +111,10 @@ public class BrokerApiClient {
     }
 
     public void confirmDownload(UUID fileTransferId) {
-        String accessToken = tokenUtil.retrieveAltinnAccessToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = dpoTokenFetcher.getToken(List.of(readScope, serviceOwnerScope));
 
         restClient.post()
-            .uri(props.getDpo().getBrokerserviceUrl() + "/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)
+            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -121,5 +127,4 @@ public class BrokerApiClient {
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
         throw new BrokerApiException(details);
     }
-
 }

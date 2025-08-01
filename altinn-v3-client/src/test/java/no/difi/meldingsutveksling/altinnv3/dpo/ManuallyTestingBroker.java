@@ -1,13 +1,12 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
-import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
@@ -18,19 +17,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
 @SpringBootTest(classes = {
-    AltinnConfig.class,
     BrokerApiClient.class,
-    AltinnTokenUtil.class,
+    DpoTokenFetcher.class,
+    AltinnConfiguration.class,
     IntegrasjonspunktProperties.class
 })
-@ConfigurationPropertiesScan
+@UseFullTestConfiguration
 public class ManuallyTestingBroker {
 
     @Inject
     BrokerApiClient client;
 
     @Inject
-    AltinnTokenUtil tokenUtil;
+    DpoTokenFetcher dpoTokenFetcher;
 
     @Inject
     IntegrasjonspunktProperties integrasjonspunktProperties;
@@ -42,7 +41,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = tokenUtil.retrieveAltinnAccessToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var altinnToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 

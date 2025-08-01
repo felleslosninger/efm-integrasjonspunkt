@@ -2,14 +2,13 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfig;
-import no.difi.meldingsutveksling.altinnv3.AltinnTokenUtil;
+import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -23,13 +22,13 @@ import java.util.UUID;
 
 @Disabled
 @SpringBootTest(classes = {
-    AltinnConfig.class,
     CorrespondenceApiClient.class,
-    AltinnTokenUtil.class,
+    AltinnConfiguration.class,
+    DpvTokenFetcher.class,
     IntegrasjonspunktProperties.class,
     DotNotationFlattener.class,
 })
-@ConfigurationPropertiesScan
+@UseFullTestConfiguration
 public class ManuallyTestingCorrespondence {
 
     @Inject

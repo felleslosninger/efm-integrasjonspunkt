@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -73,7 +74,7 @@ public class CorrespondenceFactoryTest {
 
 
         when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
-        when(properties.getDpv()).thenReturn(new IntegrasjonspunktProperties.PostVirksomheter()
+        when(properties.getDpv()).thenReturn(new PostVirksomheter()
             .setSensitiveResource("sensitive resource id"));
 
         StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
@@ -187,7 +188,7 @@ public class CorrespondenceFactoryTest {
     @Test
     public void create_mapsDefaultDueDateTimeWhenEnableDueDateIsTrue(){
         when(properties.getDpv()).thenReturn(
-            new IntegrasjonspunktProperties.PostVirksomheter()
+            new PostVirksomheter()
                 .setEnableDueDate(true));
 
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
@@ -198,7 +199,7 @@ public class CorrespondenceFactoryTest {
     @Test
     public void create_mapsDefaultDueDateTimeWhenEnableDueDateIsTrueAndDaysToReplyIsSet(){
         when(properties.getDpv()).thenReturn(
-            new IntegrasjonspunktProperties.PostVirksomheter()
+            new PostVirksomheter()
                 .setEnableDueDate(true)
                 .setDaysToReply(22L));
 

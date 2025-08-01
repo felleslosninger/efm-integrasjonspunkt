@@ -1,38 +1,36 @@
 package no.difi.meldingsutveksling.config;
 
-import com.google.common.collect.Sets;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import java.net.URL;
-import java.util.Set;
 
 @Data
-public class AltinnFormidlingsTjenestenConfig {
+public class PostVirksomheter {
 
-    private String brokerserviceUrl;
-    private String altinnTokenExchangeUrl;
-    private String resource;
-
-    private Integer connectTimeout;
-    private Integer requestTimeout;
-
+    private URL endpointUrl;
+    @NotNull
+    private String sensitiveResource;
+    private boolean notifyEmail;
+    private boolean notifySms;
+    @NotNull
+    private String notificationText;
+    @NotNull
+    private String sensitiveNotificationText;
+    private boolean allowForwarding;
+    private boolean enableDueDate;
+    private Long daysToReply;
     @NotNull
     private DataSize uploadSizeLimit;
-
-    @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
-    private String messageChannel;
-
-    private Set<String> reportees = Sets.newHashSet();
-
     @NotNull
     private Integer defaultTtlHours;
-
+    private String correspondenceServiceUrl;
+    private String healthCheckUrl;
+    private String altinnTokenExchangeUrl;
     @Valid
     private Oidc oidc;
 
