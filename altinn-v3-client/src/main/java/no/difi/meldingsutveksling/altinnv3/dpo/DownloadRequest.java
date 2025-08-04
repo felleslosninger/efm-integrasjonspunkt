@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.altinnv3.dpo;
 import java.util.UUID;
 
 public class DownloadRequest {
+
     final UUID fileReference;
     final String reciever;
 
@@ -28,4 +29,5 @@ public class DownloadRequest {
     public String getReciever() {
         return reciever;
     }
+
 }

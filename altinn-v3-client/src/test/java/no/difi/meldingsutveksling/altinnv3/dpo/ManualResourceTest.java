@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Disabled
 @SpringBootTest(classes = {
-    DpoTokenFetcher.class,
+    DpoTokenProducer.class,
     IntegrasjonspunktProperties.class,
     AltinnConfiguration.class,
 })
@@ -21,11 +22,11 @@ import java.util.List;
 public class ManualResourceTest {
 
     @Inject
-    DpoTokenFetcher dpoTokenFetcher;
+    DpoTokenProducer dpoTokenProducer;
 
     @Test
     public void getResource() {
-        var accessToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         RestClient restClient = RestClient.create();
         var result = restClient.get()
@@ -41,7 +42,7 @@ public class ManualResourceTest {
 
     @Test
     public void updateResource() {
-        var accessToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
 
         String body = """
             {
@@ -67,4 +68,5 @@ public class ManualResourceTest {
             .toBodilessEntity()
             ;
     }
+
 }

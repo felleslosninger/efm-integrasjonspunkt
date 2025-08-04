@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.DpvTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.digdir.altinn3.correspondence.model.*;
@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import java.nio.file.Files;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @SpringBootTest(classes = {
     CorrespondenceApiClient.class,
     AltinnConfiguration.class,
-    DpvTokenFetcher.class,
+    DpvTokenProducer.class,
     IntegrasjonspunktProperties.class,
     DotNotationFlattener.class,
 })
@@ -42,11 +42,9 @@ public class ManuallyTestingCorrespondence {
 
     @Test
     public void upload() throws IOException {
-
         var fileName = "Testfile3.txt";
         var senderReference = "string";
         var displayname = "test";
-
 
         var attachment = new InitializeCorrespondenceAttachmentExt();
         attachment.setIsEncrypted(false);
@@ -55,8 +53,7 @@ public class ManuallyTestingCorrespondence {
         attachment.setDisplayName(displayname);
         attachment.setDataLocationType(InitializeAttachmentDataLocationTypeExt.NEW_CORRESPONDENCE_ATTACHMENT);
 
-
-        InitializeCorrespondencesExt request2 = new InitializeCorrespondencesExt();
+        InitializeCorrespondencesExt request = new InitializeCorrespondencesExt();
         BaseCorrespondenceExt correspondence = new BaseCorrespondenceExt();
         correspondence.setResourceId("eformidling-meldingsteneste-test");
         correspondence.setSender("0192:991825827");
@@ -64,19 +61,16 @@ public class ManuallyTestingCorrespondence {
         correspondence.setIsConfirmationNeeded(false);
         correspondence.setRequestedPublishTime(OffsetDateTime.now().plusMinutes(5));
 
-
         InitializeCorrespondenceContentExt content = new InitializeCorrespondenceContentExt();
         content.setLanguage("nb");
         content.setMessageTitle("Testmelding fra Digdir");
         content.setMessageBody("Testmelding fra Digdir");
         content.setMessageSummary("Testmelding fra Digdir");
         content.setAttachments(List.of(attachment));
-
         correspondence.setContent(content);
 
-        request2.setCorrespondence(correspondence);
-        request2.setRecipients(List.of("urn:altinn:organization:identifier-no:314244370"));
-
+        request.setCorrespondence(correspondence);
+        request.setRecipients(List.of("urn:altinn:organization:identifier-no:314244370"));
 
         String filename = "Testfile3.txt";
         String tempDir = System.getProperty("java.io.tmpdir");
@@ -86,8 +80,8 @@ public class ManuallyTestingCorrespondence {
         Resource resource = new FileSystemResource(file);
 
         FileUploadRequest fileUploadRequest = new FileUploadRequest(new BusinessMessageFile().setFilename(filename), resource);
-
-        var res = client.upload(request2, List.of( fileUploadRequest ));
+        var res = client.upload(request, List.of(fileUploadRequest));
+        System.out.println(res);
 
     }
 
@@ -100,8 +94,8 @@ public class ManuallyTestingCorrespondence {
     @Test
     public void downloadAttachment(){
         var res = client.downloadAttachment(UUID.fromString("0197ef56-0519-7157-b819-bfa65777569a"), UUID.fromString("0197ef56-04de-7713-93b1-d5562e4e261b"));
-
         String message = new String(res);
         System.out.println(message);
     }
+
 }

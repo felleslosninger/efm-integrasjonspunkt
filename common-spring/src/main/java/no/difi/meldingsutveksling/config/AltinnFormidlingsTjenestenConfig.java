@@ -5,11 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import no.difi.move.common.config.KeystoreProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
-import java.net.URL;
 import java.util.Set;
 
 @Data
@@ -36,12 +33,4 @@ public class AltinnFormidlingsTjenestenConfig {
     @Valid
     private Oidc oidc;
 
-    @Data
-    public static class Oidc {
-        private URL url;
-        private String audience;
-        private String clientId;
-        @NestedConfigurationProperty
-        private KeystoreProperties keystore;
-    }
 }

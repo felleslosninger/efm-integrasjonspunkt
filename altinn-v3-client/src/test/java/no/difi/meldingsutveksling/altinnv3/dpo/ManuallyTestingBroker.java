@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.altinnv3.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled
 @SpringBootTest(classes = {
     BrokerApiClient.class,
-    DpoTokenFetcher.class,
+    DpoTokenProducer.class,
     AltinnConfiguration.class,
     IntegrasjonspunktProperties.class
 })
@@ -29,7 +30,7 @@ public class ManuallyTestingBroker {
     BrokerApiClient client;
 
     @Inject
-    DpoTokenFetcher dpoTokenFetcher;
+    DpoTokenProducer dpoTokenProducer;
 
     @Inject
     IntegrasjonspunktProperties integrasjonspunktProperties;
@@ -41,7 +42,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = dpoTokenFetcher.getToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var altinnToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 
@@ -96,9 +97,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void downloadFile() {
-
         byte[] result = client.downloadFile(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
-
         String message = new String(result);
         System.out.println(message);
     }
@@ -107,6 +106,5 @@ public class ManuallyTestingBroker {
     void confirmDownloadFile() {
         client.confirmDownload(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
     }
-
 
 }

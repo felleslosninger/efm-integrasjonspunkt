@@ -3,8 +3,6 @@ package no.difi.meldingsutveksling.config;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import no.difi.move.common.config.KeystoreProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import java.net.URL;
@@ -34,12 +32,4 @@ public class PostVirksomheter {
     @Valid
     private Oidc oidc;
 
-    @Data
-    public static class Oidc {
-        private URL url;
-        private String audience;
-        private String clientId;
-        @NestedConfigurationProperty
-        private KeystoreProperties keystore;
-    }
 }

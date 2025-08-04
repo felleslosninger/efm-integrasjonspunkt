@@ -11,10 +11,6 @@ public class UploadRequest {
     private final StandardBusinessDocument sbd;
     private final Resource asic;
 
-//    public UploadRequest(String senderReference, StandardBusinessDocument sbd) {
-//        this(senderReference, sbd, null);
-//    }
-
     public UploadRequest(String senderReference, StandardBusinessDocument sbd, Resource asic) {
         this.senderReference = senderReference;
         this.sbd = sbd;
@@ -46,8 +42,8 @@ public class UploadRequest {
      *
      * @return Logstash markers to identify a EduMessage
      */
-
     public Marker getMarkers() {
         return SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
     }
+
 }

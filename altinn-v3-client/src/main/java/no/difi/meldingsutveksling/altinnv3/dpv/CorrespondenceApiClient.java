@@ -7,8 +7,13 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
+import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.digdir.altinn3.correspondence.model.*;
+import no.digdir.altinn3.correspondence.model.AttachmentDetailsExt;
+import no.digdir.altinn3.correspondence.model.CorrespondenceDetailsExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
@@ -30,28 +35,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CorrespondenceApiClient {
 
-    private final ObjectMapper objectMapper = new ObjectMapper()
+    @Qualifier("DpvTokenProducer")
+    private final TokenProducer tokenProducer;
+    private final DotNotationFlattener jsonFlatter;
+    private final IntegrasjonspunktProperties props;
+
+    private ObjectMapper objectMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private final RestClient restClient = RestClient.builder()
+    private RestClient restClient = RestClient.builder()
         .defaultStatusHandler(HttpStatusCode::isError, this::getCorrespondenceApiException)
-        .messageConverters(converters -> {
-            for (HttpMessageConverter<?> converter : converters) {
-                if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
-                    jacksonConverter.setObjectMapper(objectMapper);
-                }
-            }
-        })
+        .messageConverters(this::addJacksonAsConverter)
         .build();
 
-    private final String readScope = "altinn:correspondence.read";
-    private final String writeScope = "altinn:correspondence.write";
-    private final String serviceOwnerScope = "altinn:serviceowner";
-    private final DpvTokenFetcher dpvTokenFetcher;
-    private final DotNotationFlattener jsonFlatter;
+    private static String readScope = "altinn:correspondence.read";
+    private static String writeScope = "altinn:correspondence.write";
+    private static String serviceOwnerScope = "altinn:serviceowner";
 
-    private final IntegrasjonspunktProperties props;
     private String correspondenceServiceUrl;
 
     @PostConstruct
@@ -69,7 +70,7 @@ public class CorrespondenceApiClient {
     }
 
     public AttachmentDetailsExt getAttachmentDetails(UUID attachmentId) {
-        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/attachment/{attachmentId}/details", attachmentId)
@@ -81,7 +82,7 @@ public class CorrespondenceApiClient {
     }
 
     public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
-        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/details", correspondenceId)
@@ -93,7 +94,7 @@ public class CorrespondenceApiClient {
     }
 
     public byte[] downloadAttachment(UUID correspondenceId, UUID attachmentId) {
-        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/attachment/{attachmentId}/download", correspondenceId, attachmentId)
@@ -104,7 +105,7 @@ public class CorrespondenceApiClient {
     }
 
     public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files){
-        String accessToken = dpvTokenFetcher.getToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope, writeScope, serviceOwnerScope));
 
         Map<String, String> requestValues = jsonFlatter.flatten(request);
 
@@ -131,6 +132,14 @@ public class CorrespondenceApiClient {
         var prefix = "Correspondence api error: %s [%s]".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
         throw new CorrespondenceApiException(details);
+    }
+
+    private void addJacksonAsConverter(List<HttpMessageConverter<?>> converters) {
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
+                jacksonConverter.setObjectMapper(objectMapper);
+            }
+        }
     }
 
 }
