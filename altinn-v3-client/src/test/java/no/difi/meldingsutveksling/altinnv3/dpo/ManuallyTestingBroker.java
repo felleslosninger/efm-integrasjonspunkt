@@ -50,13 +50,13 @@ public class ManuallyTestingBroker {
     void testListFiles() {
         var uuids = client.getAvailableFiles();
         assertNotNull(uuids);
-        assertNotEquals(0, uuids.length);
+        assertEquals(1, uuids.length);
         Arrays.stream(uuids).forEach(System.out::println);
     }
 
     @Test
     void testFileDetails() {
-        var details = client.getDetails("3c5c1d8e-3fda-4095-856c-da704bd9f9a5");
+        var details = client.getDetails("3c10e2ab-4106-425f-8942-a83548a96e47");
         assertNotNull(details);
         System.out.println(details);
     }
@@ -73,15 +73,15 @@ public class ManuallyTestingBroker {
     }
 
     @Test
-    void upploadFile() {
+    void uploadFile() {
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");
-        fileTransfer.setResourceId("eformidling-meldingsteneste-test");
+        fileTransfer.setResourceId("eformidling-meldingsteneste-test2");
         fileTransfer.setSender("0192:991825827");
         fileTransfer.setRecipients(List.of("0192:991825827"));
         fileTransfer.setSendersFileTransferReference("string");
         var uuid = client.initialize(fileTransfer).getFileTransferId();
-        var result = client.upload(uuid, "Just some text data from upploadFile() test".getBytes());
+        var result = client.upload(uuid, "Just some text data from uploadFile() test".getBytes());
         assertNotNull(result);
         assertNotNull(result.getFileTransferId());
     }
@@ -97,14 +97,14 @@ public class ManuallyTestingBroker {
 
     @Test
     void downloadFile() {
-        byte[] result = client.downloadFile(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
+        byte[] result = client.downloadFile(UUID.fromString("3c10e2ab-4106-425f-8942-a83548a96e47"));
         String message = new String(result);
-        System.out.println(message);
+        assertEquals("Just some text data from uploadFile() test", message);
     }
 
     @Test
     void confirmDownloadFile() {
-        client.confirmDownload(UUID.fromString("b4e9ae47-806f-46e6-ad1c-e1fddc0b4d0a"));
+        client.confirmDownload(UUID.fromString("28a1d3f7-53db-452f-aa1e-65fe34eb96e8"));
     }
 
 }
