@@ -50,7 +50,7 @@ public class ManuallyTestingBroker {
     void testListFiles() {
         var uuids = client.getAvailableFiles();
         assertNotNull(uuids);
-        assertEquals(1, uuids.length);
+        assertEquals(2, uuids.length);
         Arrays.stream(uuids).forEach(System.out::println);
     }
 
@@ -74,9 +74,10 @@ public class ManuallyTestingBroker {
 
     @Test
     void uploadFile() {
+        var resource_id = integrasjonspunktProperties.getDpo().getResource();
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");
-        fileTransfer.setResourceId("eformidling-meldingsteneste-test2");
+        fileTransfer.setResourceId(resource_id);
         fileTransfer.setSender("0192:991825827");
         fileTransfer.setRecipients(List.of("0192:991825827"));
         fileTransfer.setSendersFileTransferReference("string");
