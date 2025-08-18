@@ -51,7 +51,7 @@ public class CorrespondenceApiClient {
 
     private static String readScope = "altinn:correspondence.read";
     private static String writeScope = "altinn:correspondence.write";
-    private static String serviceOwnerScope = "altinn:serviceowner";
+    private static String serviceOwnerScope = "altinn:serviceowner"; // FIXME should not be needed, read/write should be enough
 
     private String correspondenceServiceUrl;
 

@@ -32,7 +32,7 @@ public class BrokerApiClient {
 
     private static String readScope = "altinn:broker.read";
     private static String writeScope = "altinn:broker.write";
-    private static String serviceOwnerScope = "altinn:serviceowner";
+    private static String serviceOwnerScope = "altinn:serviceowner"; // FIXME should not be needed, read/write should be enough
 
     private String brokerServiceUrl;
 
