@@ -24,9 +24,8 @@ public class ResourceApiClient {
 
     private RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getApiException).build();
 
-    private static String readScope = "altinn:resourceregistry/resource.read";
-    private static String writeScope = "altinn:resourceregistry/resource.write";
-    private static String serviceOwnerScope = "altinn:serviceowner";
+    private static List<String> accessToResourceScopes = List.of("altinn:resourceregistry/resource.read", "altinn:resourceregistry/resource.write");
+    private static List<String> accessToAccesslistScopes = List.of("altinn:resourceregistry/accesslist.read", "altinn:resourceregistry/accesslist.write");
 
     private String apiEndpoint;
 
@@ -36,7 +35,7 @@ public class ResourceApiClient {
     }
 
     public String resourceOwner() {
-        String accessToken = tokenProducer.produceToken(List.of(serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(accessToResourceScopes);
         return restClient.get()
             .uri(apiEndpoint + "/resource/orgs")
             .header("Authorization", "Bearer " + accessToken)
@@ -47,7 +46,7 @@ public class ResourceApiClient {
     }
 
     public String resourceList() {
-        String accessToken = tokenProducer.produceToken(List.of(serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(accessToResourceScopes);
         return restClient.get()
             .uri(apiEndpoint + "/resource/resourcelist")
             .header("Authorization", "Bearer " + accessToken)
@@ -58,7 +57,7 @@ public class ResourceApiClient {
     }
 
     public String accessLists() {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(accessToAccesslistScopes);
         return restClient.get()
             .uri(apiEndpoint + "/access-lists/{owner}", "digdir") //props.getDpo().getResource())
             .header("Authorization", "Bearer " + accessToken)
