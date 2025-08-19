@@ -59,7 +59,18 @@ public class ResourceApiClient {
     public String accessLists() {
         String accessToken = tokenProducer.produceToken(accessToAccesslistScopes);
         return restClient.get()
-            .uri(apiEndpoint + "/access-lists/{owner}", "digdir") //props.getDpo().getResource())
+            .uri(apiEndpoint + "/access-lists/{owner}", "digdir")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
+    public String showAccesslistMembers(String accessList) {
+        String accessToken = tokenProducer.produceToken(accessToAccesslistScopes);
+        return restClient.get()
+            .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
