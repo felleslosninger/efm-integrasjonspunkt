@@ -20,7 +20,7 @@ public class ResourceTokenProducer implements TokenProducer {
     private final TokenExchangeService tokenExchangeService;
 
     @Override
-    @Cacheable(cacheNames = {"altinn.getDpoToken"})
+    @Cacheable(cacheNames = {"altinn.getResourceToken"})
     public String produceToken(List<String> scopes) {
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
         String token = tokenService.fetchToken(config, scopes);

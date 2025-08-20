@@ -10,14 +10,15 @@
 - [x] OIDC for DPO må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
 - [x] OIDC for DPV må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
 - [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
-- [ ] Sett cache levetid for altinn access token (mulig den er forskjellig i de ulike miljøene)
+- [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
+- [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
+- [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
 - [ ] Vurdere å bytte til `/broker/api/v1/filetransfer/{fileTransferId}` som også inneholder sendersReference (fra `/broker/api/v1/filetransfer/{fileTransferId}/details` som inneholder ganske mye mer)  
 - [ ] Rydde config filer, fjerne username/password fra DPO (se også test properties [application.properties](altinn-v3-client/src/test/resources/application.properties))
-- [ ] Asciidoc mangler noen snippets (det har vært referert til kodesnippets som var SOAP basert mot antagelig Altinn v2)
+- [ ] Asciidoc mangler noen snippets (det har vært referert til kodesnippets som var SOAP basert mot gamle Altinn v2 koden)
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
-- [ ] Burde vi gå for Java 25 (Java 25, a long-term support (LTS) release, is scheduled for September 16, 2025 with two release candidates planned for August) ?
-- [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging ellers
+- [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging uten security i v4
 
 ## Bygg og kjøre lokalt 
 Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.10.
