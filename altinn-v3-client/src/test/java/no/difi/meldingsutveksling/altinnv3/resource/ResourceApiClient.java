@@ -24,8 +24,8 @@ public class ResourceApiClient {
 
     private RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getApiException).build();
 
-    private static List<String> accessToResourceScopes = List.of("altinn:resourceregistry/resource.read", "altinn:resourceregistry/resource.write");
-    private static List<String> accessToAccesslistScopes = List.of("altinn:resourceregistry/accesslist.read", "altinn:resourceregistry/accesslist.write");
+    private static List<String> SCOPES_FOR_RESOURCE = List.of("altinn:resourceregistry/resource.read", "altinn:resourceregistry/resource.write");
+    private static List<String> SCOPES_FOR_ACCESSLISTS = List.of("altinn:resourceregistry/accesslist.read", "altinn:resourceregistry/accesslist.write");
 
     private String apiEndpoint;
 
@@ -35,7 +35,7 @@ public class ResourceApiClient {
     }
 
     public String resourceOwner() {
-        String accessToken = tokenProducer.produceToken(accessToResourceScopes);
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
         return restClient.get()
             .uri(apiEndpoint + "/resource/orgs")
             .header("Authorization", "Bearer " + accessToken)
@@ -46,7 +46,7 @@ public class ResourceApiClient {
     }
 
     public String resourceList() {
-        String accessToken = tokenProducer.produceToken(accessToResourceScopes);
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
         return restClient.get()
             .uri(apiEndpoint + "/resource/resourcelist")
             .header("Authorization", "Bearer " + accessToken)
@@ -57,7 +57,7 @@ public class ResourceApiClient {
     }
 
     public String accessLists() {
-        String accessToken = tokenProducer.produceToken(accessToAccesslistScopes);
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
         return restClient.get()
             .uri(apiEndpoint + "/access-lists/{owner}", "digdir")
             .header("Authorization", "Bearer " + accessToken)
@@ -68,7 +68,7 @@ public class ResourceApiClient {
     }
 
     public String showAccesslistMembers(String accessList) {
-        String accessToken = tokenProducer.produceToken(accessToAccesslistScopes);
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
         return restClient.get()
             .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
             .header("Authorization", "Bearer " + accessToken)

@@ -22,6 +22,7 @@ public class ResourceTokenProducer implements TokenProducer {
     @Override
     @Cacheable(cacheNames = {"altinn.getResourceToken"})
     public String produceToken(List<String> scopes) {
+        // FIXME we "misuse" OIDC configuration intended for DPO to fetch the token
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
         String token = tokenService.fetchToken(config, scopes);
         return tokenExchangeService.exchangeToken(token, config.exchangeUrl());
