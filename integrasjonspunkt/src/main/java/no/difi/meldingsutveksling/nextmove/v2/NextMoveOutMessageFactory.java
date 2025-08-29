@@ -19,11 +19,11 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
 @Component
 @RequiredArgsConstructor
@@ -40,30 +40,30 @@ public class NextMoveOutMessageFactory {
         setDefaults(sbd, serviceIdentifier);
 
         return new NextMoveOutMessage(
-                sbd.getConversationId(),
-                sbd.getMessageId(),
-                sbd.getProcess(),
-                sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
-                sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
-                        sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
-                        sbd.getSenderIdentifier().getPrimaryIdentifier(),
-                serviceIdentifier,
-                sbd);
+            sbd.getConversationId(),
+            sbd.getMessageId(),
+            sbd.getProcess(),
+            sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
+            sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
+                sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
+            serviceIdentifier,
+            sbd);
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         sbd.getScopes()
-                .stream()
-                .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
-                .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
+            .stream()
+            .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
+            .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
         if (sbd.getSenderIdentifier() == null) {
             Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
-                    new Partner()
-                            .setIdentifier(new PartnerIdentification()
-                                    .setValue(org.getIdentifier())
-                                    .setAuthority(org.getAuthority()))
+                new Partner()
+                    .setIdentifier(new PartnerIdentification()
+                        .setValue(org.getIdentifier())
+                        .setAuthority(org.getAuthority()))
             );
         }
 
@@ -82,15 +82,15 @@ public class NextMoveOutMessageFactory {
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(getDefaultTtlHours(serviceIdentifier));
 
             Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)
-                    .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
+                .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
 
             if (scope.getScopeInformation().isEmpty()) {
                 CorrelationInformation ci = new CorrelationInformation().setExpectedResponseDateTime(ttl);
                 scope.getScopeInformation().add(ci);
             } else {
                 scope.getScopeInformation().stream()
-                        .findFirst()
-                        .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
+                    .findFirst()
+                    .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
             }
         }
 
@@ -106,6 +106,9 @@ public class NextMoveOutMessageFactory {
 
         if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);
+        }
+        if (serviceIdentifier == DPH) {
+            setDphRoutingElements(sbd);
         }
     }
 
@@ -128,9 +131,51 @@ public class NextMoveOutMessageFactory {
         }
     }
 
+    private Optional<Scope> getScope(StandardBusinessDocument sbd, String scopeType) {
+        return sbd.getScopes().stream().filter(t -> Objects.equals(t.getType(), scopeType)).findAny();
+    }
+
+    private void setDphRoutingElements(StandardBusinessDocument sbd) {
+        ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER);
+        ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.SENDER);
+
+        var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
+
+        if (!isMultitenantSetup) {
+            var fromConfigurationHerID = properties.getDph().getSenderHerId1();
+
+            if (!fromConfigurationHerID.equals(srSender.getHerIdLevel1()))
+                throw new NextMoveRuntimeException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1" + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
+            getScope(sbd, "SENDER_HERID1").ifPresentOrElse(t -> {
+                    if (!Objects.equals(t.getIdentifier(), srSender.getHerIdLevel1()))
+                        throw new NextMoveRuntimeException("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1" + properties.getDph().getSenderHerId1() + " and orgnum " + t);
+                    if (!Objects.equals(sbd.getSenderIdentifier().getPrimaryIdentifier(), srSender.getOrganisationNumber()))
+                        throw new NextMoveRuntimeException("Multitenancy is not supported. Sender organisation number is not registered in AR ");
+                },
+                () -> {
+                    sbd.getScopes().add(new Scope().setType("SENDER_HERID1").setIdentifier(srSender.getHerIdLevel1()));
+                });
+
+        } else {
+            if (!properties.getDph().getWhitelistOrgnum()
+                .contains(srSender.getOrganisationNumber())) {
+                throw new NextMoveRuntimeException("Sender not allowed");
+            }
+        }
+
+        if (getScope(sbd, "RECIEVER_HERID1").isPresent()) {
+            if (!getScope(sbd, "RECIEVER_HERID1").get().getIdentifier().equals(srReciever.getHerIdLevel1())) {
+                throw new NextMoveRuntimeException("Incoming HerID does not match expected HERID level 1!");
+            }
+        } else {
+            sbd.getScopes().add(new Scope().setType("RECIEVER_HERID1").setIdentifier(srReciever.getHerIdLevel1()));
+        }
+
+    }
+
     private void setDpiDefaults(StandardBusinessDocument sbd) {
         MessageType messageType = MessageType.valueOfType(sbd.getType())
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
+            .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
@@ -149,10 +194,10 @@ public class NextMoveOutMessageFactory {
                 }
                 if (dpiMessage.getRetur() == null) {
                     dpiMessage.setRetur(new MailReturn()
-                            .setMottaker(new PostAddress())
-                            .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
+                        .setMottaker(new PostAddress())
+                        .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
                 }
-                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd,PARTICIPANT.RECEIVER);
                 setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
                 setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
             }

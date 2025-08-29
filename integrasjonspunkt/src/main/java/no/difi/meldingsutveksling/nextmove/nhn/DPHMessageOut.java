@@ -13,14 +13,21 @@ public record DPHMessageOut (
     @JsonProperty("messageId")
     String messageId,
     @JsonProperty("conversationId")
-        String conversationId,
+    String conversationId,
+    @JsonProperty("onBehalfOfOrgNum")
+    String onBehalfOfOrgNum,
     @JsonProperty("sender")
      Sender  sender,
     @JsonProperty("reciever")
      Reciever  reciever,
     @JsonProperty("fagmelding")
-     String fagmelding
-){}
+     String fagmelding,
+    @JsonProperty("patient")
+    Patient patient
+
+){};
+
+
 
 
 

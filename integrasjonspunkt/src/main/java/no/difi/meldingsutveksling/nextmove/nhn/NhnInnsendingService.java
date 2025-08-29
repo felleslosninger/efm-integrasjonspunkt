@@ -45,8 +45,8 @@ public class NhnInnsendingService {
             ).findAny().orElse(null);
 
             assert sr != null;
-            String herIdNivo1 = sr.getService().getHerdId1();
-            String herIdNivo2 = sr.getService().getHerId2();
+            String herIdNivo1 = sr.getHerIdLevel1();
+            String herIdNivo2 = sr.getHerIdLevel2();
 
            // vi trenger å validere Avsender i tilleg til reciever
             Partner sendingPartnerNivo2 = sbd.getStandardBusinessDocumentHeader().getSenders().stream().filter(sender -> sender.getIdentifier().getAuthority() == "HERID").findAny().orElse(null);

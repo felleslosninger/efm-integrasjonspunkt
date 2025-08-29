@@ -9,14 +9,23 @@ import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
-import static no.difi.meldingsutveksling.ServiceIdentifier.UNKNOWN;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+
+
+enum PARTICIPANT {
+    SENDER,RECEIVER
+}
 
 @Component
 @RequiredArgsConstructor
@@ -24,15 +33,34 @@ public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
-    ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
+    ServiceRecord getServiceRecord(StandardBusinessDocument sbd,PARTICIPANT participant) {
         return sbd.getBusinessMessage(BusinessMessage.class)
-                .map(p -> getServiceRecord(sbd, p))
+                .map(p -> getServiceRecord(sbd,p,PARTICIPANT.RECEIVER))
                 .orElseThrow(MissingMessageTypeException::new);
     }
 
-    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
+
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,PARTICIPANT participant) {
         try {
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier().getPrimaryIdentifier())
+            String participanId = null;
+            if (participant == PARTICIPANT.RECEIVER) { participanId =  sbd.getReceiverIdentifier().getPrimaryIdentifier();
+            }
+
+            else if (participant == PARTICIPANT.SENDER) {
+                var herID2 = sbd.getScopes().stream().filter(t-> Objects.equals(t.getType(), "SENDER_HERID2")).findFirst();
+                if (herID2.isPresent()) {
+                    participanId = herID2.get().getIdentifier();
+                }
+                else {
+                    throw new UnsupportedOperationException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
+                }
+            }
+            else {
+                throw new UnsupportedOperationException("Unknown particiant type: " + participant);
+            }
+
+
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder( participanId )
                     .process(sbd.getProcess());
 
             if (!Strings.isNullOrEmpty(sbd.getConversationId())) {
@@ -62,6 +90,6 @@ public class ServiceRecordProvider {
             return UNKNOWN;
         }
 
-        return getServiceRecord(sbd).getServiceIdentifier();
+        return getServiceRecord(sbd,PARTICIPANT.RECEIVER).getServiceIdentifier();
     }
 }

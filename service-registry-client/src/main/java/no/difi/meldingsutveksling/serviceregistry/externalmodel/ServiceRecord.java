@@ -25,6 +25,9 @@ public class ServiceRecord {
     private String process;
     private List<String> documentTypes;
     private Service service;
+    private String herIdLevel1;
+    private String herIdLevel2;
+    private Patient patient;
 
     public ServiceRecord(ServiceIdentifier serviceIdentifier, String organisationNumber, String pemCertificate, String endPointURL) {
         this.organisationNumber = organisationNumber;
