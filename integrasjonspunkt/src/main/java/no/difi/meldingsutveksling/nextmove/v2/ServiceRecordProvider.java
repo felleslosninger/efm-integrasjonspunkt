@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
@@ -47,7 +48,7 @@ public class ServiceRecordProvider {
             }
 
             else if (participant == PARTICIPANT.SENDER) {
-                var herID2 = sbd.getScopes().stream().filter(t-> Objects.equals(t.getType(), "SENDER_HERID2")).findFirst();
+                var herID2 = sbd.getScope(ScopeType.SENDER_HERID2);
                 if (herID2.isPresent()) {
                     participanId = herID2.get().getIdentifier();
                 }

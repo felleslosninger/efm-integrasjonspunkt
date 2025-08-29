@@ -146,14 +146,14 @@ public class NextMoveOutMessageFactory {
 
             if (!fromConfigurationHerID.equals(srSender.getHerIdLevel1()))
                 throw new NextMoveRuntimeException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1" + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
-            getScope(sbd, "SENDER_HERID1").ifPresentOrElse(t -> {
+            sbd.getScope(ScopeType.SENDER_HERID1).ifPresentOrElse(t -> {
                     if (!Objects.equals(t.getIdentifier(), srSender.getHerIdLevel1()))
                         throw new NextMoveRuntimeException("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1" + properties.getDph().getSenderHerId1() + " and orgnum " + t);
                     if (!Objects.equals(sbd.getSenderIdentifier().getPrimaryIdentifier(), srSender.getOrganisationNumber()))
                         throw new NextMoveRuntimeException("Multitenancy is not supported. Sender organisation number is not registered in AR ");
                 },
                 () -> {
-                    sbd.getScopes().add(new Scope().setType("SENDER_HERID1").setIdentifier(srSender.getHerIdLevel1()));
+                    sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel1()));
                 });
 
         } else {
@@ -163,12 +163,12 @@ public class NextMoveOutMessageFactory {
             }
         }
 
-        if (getScope(sbd, "RECIEVER_HERID1").isPresent()) {
-            if (!getScope(sbd, "RECIEVER_HERID1").get().getIdentifier().equals(srReciever.getHerIdLevel1())) {
+        if ( sbd.getScope(ScopeType.RECEIVER_HERID1).isPresent()) {
+            if (!sbd.getScope(ScopeType.RECEIVER_HERID1).get().getIdentifier().equals(srReciever.getHerIdLevel1())) {
                 throw new NextMoveRuntimeException("Incoming HerID does not match expected HERID level 1!");
             }
         } else {
-            sbd.getScopes().add(new Scope().setType("RECIEVER_HERID1").setIdentifier(srReciever.getHerIdLevel1()));
+            sbd.getScopes().add(new Scope().setType( ScopeType.RECEIVER_HERID1.getFullname()).setIdentifier(srReciever.getHerIdLevel1()));
         }
 
     }
