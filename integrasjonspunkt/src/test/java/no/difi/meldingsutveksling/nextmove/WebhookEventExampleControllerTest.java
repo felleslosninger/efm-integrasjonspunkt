@@ -31,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest({Oauth2ClientSecurityConfig.class, WebhookEventExampleController.class})
 @AutoConfigureRestDocs(uriHost = "your.pushendpoint.com", uriPort = 80)
-@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
 public class WebhookEventExampleControllerTest {

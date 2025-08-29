@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered.
+    types: [ ] # Empty list ensures PRs are not triggered..
 
 jobs:
   #deploys libs to github packages
   build-and-deploy-libs:
     if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@MOVE-4223
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
     with:
       java-version: 21
       sbom-path: integrasjonspunkt/target
@@ -21,7 +21,7 @@ jobs:
   build-and-deploy-image:
     if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     needs: build-and-deploy-libs
-    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4223
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
     with:
       slack-channel-id: C05NLQCFR41
     secrets: inherit
