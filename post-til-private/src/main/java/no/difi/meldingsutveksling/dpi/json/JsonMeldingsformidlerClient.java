@@ -70,7 +70,6 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
                 .toStream();
     }
 
-
     @RequiredArgsConstructor
     public class JsonExternalReceipt implements ExternalReceipt {
 
@@ -98,4 +97,5 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
             return ms;
         }
     }
+
 }
