@@ -2,8 +2,8 @@ package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.status.MessageStatus;
 
 @RequiredArgsConstructor
@@ -21,4 +21,5 @@ public class JsonDpiReceiptMapper {
 
         return ms;
     }
+
 }
