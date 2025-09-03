@@ -36,7 +36,7 @@ public class ServiceRecordProvider {
 
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd,PARTICIPANT participant) {
         return sbd.getBusinessMessage(BusinessMessage.class)
-                .map(p -> getServiceRecord(sbd,p,PARTICIPANT.RECEIVER))
+                .map(p -> getServiceRecord(sbd,p,participant))
                 .orElseThrow(MissingMessageTypeException::new);
     }
 
@@ -50,7 +50,7 @@ public class ServiceRecordProvider {
             else if (participant == PARTICIPANT.SENDER) {
                 var herID2 = sbd.getScope(ScopeType.SENDER_HERID2);
                 if (herID2.isPresent()) {
-                    participanId = herID2.get().getIdentifier();
+                    participanId = herID2.get().getInstanceIdentifier();
                 }
                 else {
                     throw new UnsupportedOperationException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");

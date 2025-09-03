@@ -1,10 +1,14 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.nhn.*;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient;
@@ -31,27 +35,24 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
     }
 
 
-    private String getHerID(NextMoveOutMessage message, String scope, String errorMessage) {
-        return message.getSbd().getScopes().stream().filter(t ->
-            Objects.equals(t.getType(), scope)).findFirst().orElseThrow(() ->
-            new RuntimeException(errorMessage)
-        ).getIdentifier();
+    private String getHerID(NextMoveOutMessage message, ScopeType scopeType, String errorMessage) {
+        return message.getSbd().getScope(scopeType).orElseThrow(()->  new RuntimeException(errorMessage)).getInstanceIdentifier();
     }
 
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
         log.info("Attempt to send dialogmelding to nhn-adapter");
-        String senderHerId1 = getHerID(message, "SENDER_HERID1", "Sender HERID1 is not available");
-        String senderHerId2 = getHerID(message, "SENDER_HERID2", "Sender HERID2 is not available");
-        String recieverHerId1 = getHerID(message, "RECIEVER_HERID1", "Reciever HERID1 is not available");
-        String recieverHerId2 = getHerID(message, "RECIEVER_HERID2", "Reciever HERID2 is not available");
+        String senderHerId1 = getHerID(message, ScopeType.SENDER_HERID1, "Sender HERID1 is not available");
+        String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
+        String recieverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Reciever HERID1 is not available");
+        String recieverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Reciever HERID2 is not available");
         Patient patient = null;
         try {
             var serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
                 .conversationId(message.getSbd().getConversationId())
                 .process(message.getSbd().getProcess())
-                .build(), message.getSbd().getType());
+                .build(), message.getSbd().getDocumentType());
             patient = new Patient(serviceRecord.getPatient().fnr(), serviceRecord.getPatient().firstName(), serviceRecord.getPatient().middleName(), serviceRecord.getPatient().lastName(), "88888");
 
             System.out.println(serviceRecord.getService());
@@ -59,9 +60,16 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         } catch (Exception e) {
            log.error("Not able to get information about Patient " + e.getMessage(), e);
         }
+        String fagmelding = "";
+        try {
+            fagmelding = ObjectMapperHolder.get().writeValueAsString(new Fagmelding("testSubject","testbody",new HealthcareProfessional("345345345","Healthcare","","Peterson","234234234")));
+        } catch (JsonProcessingException e) {
+            throw new NextMoveException(e);
+        }
+
 
         DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSenderIdentifier(),
-            new Sender(senderHerId1, senderHerId2), new Reciever(recieverHerId1, recieverHerId2), "fagmelding", patient);
+            new Sender(senderHerId1, senderHerId2,"testname"), new Reciever(recieverHerId1, recieverHerId2), fagmelding, patient);
         adapterClient.messageOut(messageOut);
 
 

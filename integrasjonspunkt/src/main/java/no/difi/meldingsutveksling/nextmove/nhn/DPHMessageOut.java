@@ -18,7 +18,7 @@ public record DPHMessageOut (
     String onBehalfOfOrgNum,
     @JsonProperty("sender")
      Sender  sender,
-    @JsonProperty("reciever")
+    @JsonProperty("receiver")
      Reciever  reciever,
     @JsonProperty("fagmelding")
      String fagmelding,

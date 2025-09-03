@@ -55,7 +55,10 @@ public class ServiceRecord {
     }
 
     public static Predicate<ServiceRecord> hasDocumentType(String documentType) {
-        return s -> s != null && s.getDocumentTypes().contains(documentType);
+
+        return s -> {
+             return s != null && s.getDocumentTypes().contains(documentType);
+        };
     }
 
     @JsonIgnore

@@ -10,4 +10,4 @@ interface CommunicationParty{
 }
 
 @JsonTypeName("Sender")
-public record Sender(String herid1,String herid2) implements CommunicationParty{}
+public record Sender(String herid1,String herid2,String name) implements CommunicationParty{}
