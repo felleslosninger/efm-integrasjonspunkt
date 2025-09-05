@@ -11,6 +11,7 @@
 - [x] OIDC for DPV må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
 - [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
 - [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
+- [ ] Vi har støtte for lokal konfig i yml/yaml format i v3, skal vi videreføre dette (søk etter `spring.config.import=` i v3)
 - [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
