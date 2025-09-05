@@ -27,7 +27,7 @@ public class ManuallyTestingResourceRegistry {
     ResourceApiClient client;
 
     @Inject
-    ResourceTokenProducer resourceTokenProducer;
+    ResourceTokenProducer tokenProducer;
 
     @Inject
     IntegrasjonspunktProperties integrasjonspunktProperties;
@@ -39,7 +39,7 @@ public class ManuallyTestingResourceRegistry {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = resourceTokenProducer.produceToken(List.of("altinn:serviceowner"));
+        var altinnToken = tokenProducer.produceToken(List.of("altinn:serviceowner"));
         assertNotNull(altinnToken, "AltinnToken is null");
         var decodedToken = new String(Base64.getDecoder().decode(altinnToken.split("\\.")[1]));
         assertTrue(decodedToken.contains("\"urn:altinn:org\":\"digdir\""), "AltinnToken should contain digdir as the org claim");
