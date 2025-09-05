@@ -12,12 +12,39 @@
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
     <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
+    <springProperty name="secureLogstash" source="app.logger.secureLogstash"/>
 
     <if condition='property("enableLogstash").contains("true")'>
         <then>
             <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
                 <destination>${destination}</destination>
                 <droppedWarnFrequency>5</droppedWarnFrequency>
+
+                <!-- enable SSL/TLS for TCP appender -->
+                <if condition='property("secureLogstash").contains("true")'>
+                    <then>
+                        <ssl>
+
+                            <enabled>true</enabled>
+
+                            <!-- Path to client certificate and key in a PKCS#12 bundle -->
+                            <keyStore>
+                                <location>/logstash/client.p12</location>
+                                <password>changeit</password>
+                                <type>PKCS12</type>
+                            </keyStore>
+
+                            <!-- Truststore containing the CA certificate that signed the Logstash server cert -->
+                            <trustStore>
+                                <location>/logstash/truststore.jks</location>
+                                <password>changeit</password>
+                                <type>JKS</type>
+                            </trustStore>
+
+                        </ssl>
+                    </then>
+                </if>
+
                 <!-- encoder is required -->
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <customFields>{"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}</customFields>
