@@ -131,9 +131,6 @@ public class NextMoveOutMessageFactory {
         }
     }
 
-    private Optional<Scope> getScope(StandardBusinessDocument sbd, String scopeType) {
-        return sbd.getScopes().stream().filter(t -> Objects.equals(t.getType(), scopeType)).findAny();
-    }
 
     private void setDphRoutingElements(StandardBusinessDocument sbd) {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER);

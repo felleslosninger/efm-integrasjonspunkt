@@ -44,7 +44,7 @@ public class ServiceRecordProvider {
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,PARTICIPANT participant) {
         try {
             String participanId = null;
-            if (participant == PARTICIPANT.RECEIVER) { participanId =  sbd.getReceiverIdentifier().getPrimaryIdentifier();
+            if (participant == PARTICIPANT.RECEIVER) { participanId = MessageType.valueOfType(sbd.getType()).get() == MessageType.DIALOGMELDING ?  sbd.getReceiverIdentifier().getIdentifier() : sbd.getReceiverIdentifier().getPrimaryIdentifier();
             }
 
             else if (participant == PARTICIPANT.SENDER) {
