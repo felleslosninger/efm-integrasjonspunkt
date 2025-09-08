@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.cucumber.java.Before;
 import io.cucumber.spring.CucumberContextConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +19,6 @@ import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.KrrPrintResponse;
 import no.difi.meldingsutveksling.nextmove.PrintService;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClient;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClientFactory;
-import no.difi.meldingsutveksling.noarkexchange.NoarkClientSettings;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
@@ -63,8 +59,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {
@@ -165,28 +159,6 @@ public class CucumberStepsConfiguration {
         }
 
         @Bean
-        public CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory(
-                RequestCaptureClientInterceptor requestCaptureClientInterceptor
-        ) {
-            return new CachingWebServiceTemplateFactory(requestCaptureClientInterceptor);
-        }
-
-        @Primary
-        @Bean(name = "localNoark")
-        public NoarkClient localNoark(CachingWebServiceTemplateFactory cachingWebServiceTemplateFactory,
-                                      IntegrasjonspunktProperties properties) {
-            NoarkClientSettings clientSettings = spy(new NoarkClientSettings(
-                    properties.getNoarkSystem().getEndpointURL(),
-                    properties.getNoarkSystem().getUsername(),
-                    properties.getNoarkSystem().getPassword(),
-                    properties.getNoarkSystem().getDomain()));
-
-            given(clientSettings.createTemplateFactory()).willReturn(cachingWebServiceTemplateFactory);
-
-            return new NoarkClientFactory(clientSettings).from(properties);
-        }
-
-        @Bean
         @Primary
         public CorrespondenceAgencyClient correspondenceAgencyClient(
                 CorrespondenceAgencyConfiguration config,
@@ -264,9 +236,6 @@ public class CucumberStepsConfiguration {
         }
     }
 
-    @Autowired
-    private IntegrasjonspunktProperties integrasjonspunktProperties;
-
     @TempDir
     File temporaryFolder;
 
@@ -288,10 +257,5 @@ public class CucumberStepsConfiguration {
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockBean
     public FiksIOKlient fiksIOKlient;
-
-    @Before
-    public void before() {
-        willReturn(spy(integrasjonspunktProperties.getNoarkSystem())).given(integrasjonspunktProperties).getNoarkSystem();
-    }
 
 }
