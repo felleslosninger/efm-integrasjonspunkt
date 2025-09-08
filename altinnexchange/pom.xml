@@ -11,7 +11,6 @@
 
     <artifactId>altinnexchange</artifactId>
     <version>2.29.0-SNAPSHOT</version>
-
     <properties>
         <service.package>com.company</service.package>
 
@@ -20,6 +19,7 @@
         <jaxws-ri.version>4.0.0</jaxws-ri.version>
         <jaxws-maven-plugin.version>4.0.3</jaxws-maven-plugin.version>
     </properties>
+
 
     <dependencies>
 
