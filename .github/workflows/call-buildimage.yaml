@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered..
+    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg...
 
 jobs:
   #also deploys to maven central/ossrh
@@ -15,5 +15,4 @@ jobs:
       profile: ossrh
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
-      application-path: integrasjonspunkt/
     secrets: inherit

@@ -10,7 +10,7 @@ import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 
 @RequiredArgsConstructor
 @Slf4j

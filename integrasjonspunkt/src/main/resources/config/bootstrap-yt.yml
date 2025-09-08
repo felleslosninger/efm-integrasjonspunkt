@@ -1,3 +1,0 @@
-app:
-  logger:
-    destination: 'test-stream-meldingsutveksling.dificloud.net:443'

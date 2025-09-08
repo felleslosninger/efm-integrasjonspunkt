@@ -3,7 +3,6 @@
 *.crt
 *.orig
 .run
-*.p12
 
 pom.xml.versionsBackup
 
@@ -16,6 +15,7 @@ pom.xml.versionsBackup
 /**/generated-sources
 /**/generated-sources/jaxb
 /**/generated-sources/wsimport
+/noarkexchange/src/main/java/no/difi/meldingsutveksling/noarkexchange/schema/receive/receive_ReceivePortImpl.java
 /integrasjonspunkt-logs
 /integrasjonspunkt/integrasjonspunkt-logs/
 /integrasjonspunkt-logs/application.log
@@ -92,7 +92,7 @@ $RECYCLE.BIN/
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 
-*.iml
+/*.iml
 
 ## Directory-based project format:
 .idea/
@@ -141,15 +141,9 @@ com_crashlytics_export_strings.xml
 integrasjonspunkt-local-steinar.properties
 integrasjonspunkt-local2.yml
 integrasjonspunkt-local.properties.bak
-integrasjonspunkt-local-copy.properties
-integrasjonspunkt-local*.properties
-integrasjonspunkt-local*.yml
-integrasjonspunkt-local-*-only.properties
 integrasjonspunkt/application.properties
 integrasjonspunkt-local.properties
 integrasjonspunkt-local.yml
-integrasjonspunkt/docker-compose-local.yml
-
 
 
 
@@ -158,8 +152,8 @@ queue/*.queue
 integrasjonspunkt-logs/*.log
 
 # Overrides (files for tests)
-!/fiks-meldingsformidler/src/test/resources/somdalen.p12
-!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.p12
+!/fiks-meldingsformidler/src/test/resources/somdalen.jks
+!/integrasjonspunkt/src/test/resources/no/difi/meldingsutveksling/cucumber/cucumber.jks
 
 ### STS ###
 .apt_generated
