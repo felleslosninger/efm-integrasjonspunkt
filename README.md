@@ -1,6 +1,6 @@
 # Move Integrasjonspunkt v3
 
-Dette blir en ny versjon med Java 21+ og SpringBoot 3+
+Dette blir en versjon med Java 21+ og SpringBoot 3+
 
 - Java 21+ oppgradering (some code require 17+)
 - Spring Boot 3.4 oppgradering ([lots of changes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes))
