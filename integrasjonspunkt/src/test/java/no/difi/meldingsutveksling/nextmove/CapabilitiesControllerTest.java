@@ -4,16 +4,16 @@ import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesController;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesFactory;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -32,9 +32,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(CapabilitiesController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, CapabilitiesController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
 public class CapabilitiesControllerTest {
@@ -42,7 +41,7 @@ public class CapabilitiesControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private CapabilitiesFactory capabilitiesFactory;
 
     @Test
@@ -51,6 +50,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -64,7 +64,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -80,6 +80,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("securityLevel", "4")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -94,7 +95,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for - Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -110,6 +111,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "01017012345")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("process", "admin-process")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -124,7 +126,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for - Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -140,6 +142,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -153,7 +156,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for. Should not include ICD.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -169,6 +172,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("securityLevel", "4")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -183,7 +187,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("securityLevel").optional().description("An optional security level. Is an integer like 1, 2, 3 or 4.")
                         ),
                         responseFields(capabilitiesDescriptors())
@@ -199,6 +203,7 @@ public class CapabilitiesControllerTest {
 
         mvc.perform(
                 get("/api/capabilities/{receiverIdentifier}", "987654321")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("process", "admin-process")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -213,7 +218,7 @@ public class CapabilitiesControllerTest {
                         pathParameters(
                                 parameterWithName("receiverIdentifier").optional().description("The receiverIdentifier to get the capabilities for.")
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("process").optional().description("An optional parameter to retrieve a specific process.")
                         ),
                         responseFields(capabilitiesDescriptors())

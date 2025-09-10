@@ -9,15 +9,14 @@ import no.difi.meldingsutveksling.domain.ICD
 import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage
 import no.difi.meldingsutveksling.sbd.SBDFactory
-import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
 import no.ks.fiks.io.client.model.MottattMelding
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Component
-import java.io.InputStream
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Component
 @ConditionalOnProperty(name = ["difi.move.feature.enableDPFIO"], havingValue = "true")
@@ -28,7 +27,7 @@ class FiksIoSubscriber(
     private val nextMoveQueue: NextMoveQueue
 ) : DpfioPolling {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(FiksIoSubscriber::class.java)
 
     @PostConstruct
     fun registerSubscriber() {

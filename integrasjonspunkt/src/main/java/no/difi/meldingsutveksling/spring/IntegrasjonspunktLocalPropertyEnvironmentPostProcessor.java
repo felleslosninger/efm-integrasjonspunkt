@@ -46,8 +46,7 @@ public class IntegrasjonspunktLocalPropertyEnvironmentPostProcessor implements E
     @Override
     public void onApplicationEvent(ApplicationEvent e) {
         log.replayTo(IntegrasjonspunktLocalPropertyEnvironmentPostProcessor.class);
-        if (e instanceof ApplicationEnvironmentPreparedEvent) {
-            ApplicationEnvironmentPreparedEvent ee = (ApplicationEnvironmentPreparedEvent) e;
+        if (e instanceof ApplicationEnvironmentPreparedEvent ee) {
             this.postProcessEnvironment(ee.getEnvironment(), ee.getSpringApplication());
         }
     }

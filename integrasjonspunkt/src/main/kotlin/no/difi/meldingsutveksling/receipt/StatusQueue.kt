@@ -3,17 +3,17 @@ package no.difi.meldingsutveksling.receipt
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.MessageStatus
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.stereotype.Component
 import java.util.*
-import javax.jms.TextMessage
+import jakarta.jms.TextMessage
 
 @Component
 open class StatusQueue(private val jmsTemplate: JmsTemplate,
                        private val props: IntegrasjonspunktProperties) {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(StatusQueue::class.java)
     private val queueName: String = "STATUS"
 
     init {

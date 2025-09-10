@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Dokumentpakkefi
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import no.difi.move.common.cert.KeystoreHelper;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Component
 @Profile("cucumber")
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "difi.move.dpi.client-type", havingValue = "json")
 public class DpiClientRequestParser {
 
     private final MultipartParser multipartParser;
@@ -82,4 +80,5 @@ public class DpiClientRequestParser {
     private List<Document> getAttachments(Resource asic) {
         return asicParser.parse(asic);
     }
+
 }

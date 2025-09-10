@@ -10,7 +10,6 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
     And a "GET" request to "http://localhost:9099/info/910075924" will respond with status "200" and the following "application/json" in "/restmocks/info/910075924.json"
     And a "GET" request to "http://localhost:9099/info/910077473" will respond with status "200" and the following "application/json" in "/restmocks/info/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
-    And the Noark System is disabled
     And a SOAP request to "https://test.svarut.ks.no/tjenester/forsendelseservice/ForsendelsesServiceV9" will respond with the following payload:
     """
     <ser:sendForsendelseMedIdResponse xmlns:ser="http://www.ks.no/svarut/servicesV9">
@@ -182,6 +181,30 @@ Feature: Sending a Next Move DPF message with sender And receiver refs
             <kryptert>true</kryptert>
             <kunDigitalLevering>false</kunDigitalLevering>
             <metadataFraAvleverendeSystem>
+                <ekstraMetadata>
+                    <key>forvaltningsnummer</key>
+                    <value>20050</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>objektnavn</key>
+                    <value>Hauketo Skole</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>eiendom</key>
+                    <value>200501</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>bygning</key>
+                    <value>2005001</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>bestillingtype</key>
+                    <value>Materiell, elektro</value>
+                </ekstraMetadata>
+                <ekstraMetadata>
+                    <key>rammeavtale</key>
+                    <value>K-123123-elektriker</value>
+                </ekstraMetadata>
                 <journalaar>0</journalaar>
                 <journaldato>2017-05-23T00:00:00</journaldato>
                 <journalpostnummer>0</journalpostnummer>

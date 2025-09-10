@@ -7,14 +7,14 @@ import org.springframework.xml.transform.StringResult;
 import org.springframework.xml.transform.StringSource;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.*;
+import jakarta.xml.bind.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 @Component
 @Profile("cucumber")
 public class XMLMarshaller {
 
-    static final String PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
+    static final String PREFIX_MAPPER = "org.glassfish.jaxb.namespacePrefixMapper";
 
     @SneakyThrows
     <T> String marshall(JAXBElement<T> t) {

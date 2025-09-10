@@ -13,7 +13,7 @@ public class FileListBuilder {
         return this;
     }
 
-    public javax.xml.bind.JAXBElement<ArrayOfFile> build() {
+    public jakarta.xml.bind.JAXBElement<ArrayOfFile> build() {
         no.difi.meldingsutveksling.altinn.mock.brokerbasic.ObjectFactory objectFactory = new ObjectFactory();
         ArrayOfFile arrayOfFile = new ArrayOfFile();
         File file = new File();

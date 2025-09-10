@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 
 @RequiredArgsConstructor
 public class MessageStatusMapper {
@@ -46,4 +46,5 @@ public class MessageStatusMapper {
                 return getDefaultMessageStatus();
         }
     }
+
 }

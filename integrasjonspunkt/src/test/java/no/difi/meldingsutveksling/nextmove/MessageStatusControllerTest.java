@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.status.MessageStatus;
@@ -11,21 +12,19 @@ import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.status.service.MessageStatusController;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.*;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -50,9 +49,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(MessageStatusController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, MessageStatusController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
 public class MessageStatusControllerTest {
@@ -60,10 +58,10 @@ public class MessageStatusControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private MessageStatusRepository statusRepo;
 
-    @MockBean
+    @MockitoBean
     private StatusQueue statusQueue;
 
     @Test
@@ -76,6 +74,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -93,11 +92,11 @@ public class MessageStatusControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("id").optional().description("Filter on the numeric message status ID"),
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),
-                                parameterWithName("status").optional().description(String.format("Filter on status. Can be one of: %s", Arrays.stream(ReceiptStatus.values())
+                                parameterWithName("status").optional().description("Filter on status. Can be one of: %s".formatted(Arrays.stream(ReceiptStatus.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", "))))
                         ).and(getPagingParameterDescriptors()),
@@ -121,6 +120,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("messageId", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
                         .param("status", "MOTTATT")
                         .accept(MediaType.APPLICATION_JSON)
@@ -142,6 +142,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("sort", "lastUpdated,asc")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -162,6 +163,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "3")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON)
@@ -184,7 +186,7 @@ public class MessageStatusControllerTest {
                 messageStatus3()
         );
 
-        Pageable pageable = Pageable.unpaged();
+        Pageable pageable = PageRequest.of(0, mockData.size(), Sort.unsorted());
         Page<MessageStatus> page = new PageImpl<>(mockData, pageable, mockData.size());
 
         when(statusRepo.find(
@@ -193,6 +195,7 @@ public class MessageStatusControllerTest {
         )).thenReturn(page);
 
         MvcResult mvcResult = mvc.perform(get("/api/statuses")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("fromDateTime", fromDateTime.toString())
                         .param("toDateTime", toDateTime.toString())
                         .accept(MediaType.APPLICATION_JSON))
@@ -218,6 +221,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/{messageId}", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -256,6 +260,7 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/peek")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())

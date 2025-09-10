@@ -1,0 +1,20 @@
+name: Docker build and scan on PR
+
+on:
+  pull_request:
+
+jobs:
+  call-workflow-maven-build:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
+    with:
+      java-version: 21
+      application-path: integrasjonspunkt/
+    secrets: inherit
+
+  call-container-scan:
+    needs: call-workflow-maven-build
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-scan-integrasjonspunkt.yml@main
+    with:
+      java-version: 21
+      application-path: integrasjonspunkt/
+    secrets: inherit

@@ -12,13 +12,12 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 
 @Slf4j
@@ -35,7 +34,7 @@ public class ServiceBusAmqpClient {
 
     @PostConstruct
     public void init() {
-        String connectionString = String.format("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s",
+        String connectionString = "Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s".formatted(
                 properties.getNextmove().getServiceBus().getBaseUrl(),
                 properties.getNextmove().getServiceBus().getSasKeyName(),
                 serviceBusUtil.getSasKey());
@@ -58,12 +57,12 @@ public class ServiceBusAmqpClient {
 
     private void processMessage(ServiceBusReceivedMessageContext context) {
         ServiceBusReceivedMessage m = context.getMessage();
-        log.debug(format("Received message on queue=%s with id=%s", serviceBusUtil.getLocalQueuePath(), m.getMessageId()));
+        log.debug(String.format("Received message on queue=%s with id=%s", serviceBusUtil.getLocalQueuePath(), m.getMessageId()));
         ServiceBusPayload payload;
         try {
             payload = payloadConverter.convert(m.getBody().toBytes());
         } catch (IOException e) {
-            log.error(String.format("Failed to convert servicebus message with id = %s, abandoning", m.getMessageId()), e);
+            log.error("Failed to convert servicebus message with id = %s, abandoning".formatted(m.getMessageId()), e);
             context.deadLetter();
             return;
         }
@@ -99,7 +98,7 @@ public class ServiceBusAmqpClient {
                 log.error("Unable to sleep");
             }
         } else {
-            log.error(String.format("Error source %s, reason %s", context.getErrorSource(), reason), context.getException());
+            log.error("Error source %s, reason %s".formatted(context.getErrorSource(), reason), context.getException());
         }
     }
 

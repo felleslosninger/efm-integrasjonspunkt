@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.view.Views;
 
-import javax.persistence.*;
 import java.time.OffsetDateTime;
 
 /**
@@ -56,7 +56,7 @@ public class MessageStatus extends AbstractEntity<Long> {
     @JsonView(Views.MessageStatus.class)
     private String rawReceipt;
 
-    MessageStatus() {
+    public MessageStatus() {
     }
 
     @JsonView(Views.MessageStatus.class)

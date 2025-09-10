@@ -32,7 +32,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
@@ -67,7 +66,7 @@ public class DefaultConversationService implements ConversationService {
         if (c.isPresent()) {
             return Optional.of(registerStatus(c.get(), status));
         } else {
-            log.warn(format("Conversation with id=%s not found, cannot register receipt status=%s", messageId, status));
+            log.warn("Conversation with id=%s not found, cannot register receipt status=%s".formatted(messageId, status));
             return Optional.empty();
         }
     }
@@ -129,8 +128,8 @@ public class DefaultConversationService implements ConversationService {
                     .setPollable(false);
         }
 
-        log.debug(String.format("Added status '%s' to conversation[id=%s]", status.getStatus(),
-                        conversation.getMessageId()),
+        log.debug("Added status '%s' to conversation[id=%s]".formatted(status.getStatus(),
+                conversation.getMessageId()),
                 MessageStatusMarker.from(status));
         Conversation c = save(conversation);
         webhookPublisher.publish(c, status);
@@ -141,15 +140,15 @@ public class DefaultConversationService implements ConversationService {
 
     private void trySendMail(Conversation conversation) {
         try {
-            String title = format("Integrasjonspunkt: status %s registrert for forsendelse %s", FEIL.toString(), conversation.getMessageId());
-            title = (isNullOrEmpty(conversation.getMessageReference())) ? title : title + format(" / %s", conversation.getMessageReference());
+            String title = "Integrasjonspunkt: status %s registrert for forsendelse %s".formatted(FEIL.toString(), conversation.getMessageId());
+            title = (isNullOrEmpty(conversation.getMessageReference())) ? title : title + " / %s".formatted(conversation.getMessageReference());
             String direction = conversation.getDirection() == INCOMING ? "Innkommende" : "Utgående";
-            String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : format("og messageReference %s ", conversation.getMessageReference());
-            String body = format("%s forsendelse med conversationId %s (messageId %s) %shar registrert status '%s'. Se statusgrensesnitt for detaljer.",
+            String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : "og messageReference %s ".formatted(conversation.getMessageReference());
+            String body = "%s forsendelse med conversationId %s (messageId %s) %shar registrert status '%s'. Se statusgrensesnitt for detaljer.".formatted(
                     direction, conversation.getConversationId(), conversation.getMessageId(), messageRef, FEIL.toString());
             ipMailSender.send(title, body);
         } catch (Exception e) {
-            log.error(format("Error sending status mail for messageId %s", conversation.getMessageId()), e);
+            log.error("Error sending status mail for messageId %s".formatted(conversation.getMessageId()), e);
         }
     }
 
@@ -173,7 +172,7 @@ public class DefaultConversationService implements ConversationService {
     @Transactional
     public Conversation registerConversation(MessageInformable message, ReceiptStatus... statuses) {
         Conversation c = findConversation(message.getMessageId()).filter(p -> {
-            log.debug(format("Conversation with id=%s already exists, not recreating", message.getMessageId()));
+            log.debug("Conversation with id=%s already exists, not recreating".formatted(message.getMessageId()));
             return true;
         }).orElseGet(() -> createConversation(message));
         for (ReceiptStatus s : statuses) {

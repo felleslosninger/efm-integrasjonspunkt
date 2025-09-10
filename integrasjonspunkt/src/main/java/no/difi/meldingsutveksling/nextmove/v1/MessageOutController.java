@@ -65,7 +65,7 @@ public class MessageOutController {
     }
 
     @PostMapping("/{conversationId}")
-    public ResponseEntity send(@PathVariable("conversationId") String conversationId,
+    public ResponseEntity send(@PathVariable String conversationId,
                                MultipartRequest request) {
         NextMoveOutMessage outMessage = messageService.getMessage(conversationId);
         request.getFileMap().values().forEach(f -> messageService.addFile(outMessage, f));

@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.receipt.strategy
 
-import com.google.common.base.Strings
-import com.google.common.base.Strings.isNullOrEmpty
 import no.altinn.schemas.services.serviceengine.correspondence._2014._10.StatusV2
 import no.altinn.schemas.services.serviceentity._2014._10.CorrespondenceStatusTypeV2
 import no.difi.meldingsutveksling.ServiceIdentifier
@@ -19,7 +17,7 @@ import no.difi.meldingsutveksling.status.Conversation
 import no.difi.meldingsutveksling.status.ConversationMarker.markerFrom
 import no.difi.meldingsutveksling.status.MessageStatus
 import no.difi.meldingsutveksling.status.MessageStatusFactory
-import no.difi.meldingsutveksling.util.logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -31,7 +29,7 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
                         private val properties: IntegrasjonspunktProperties,
                         private val nextMoveQueue: NextMoveQueue) : StatusStrategy {
 
-    val log = logger()
+    val log = LoggerFactory.getLogger(DpvStatusStrategy::class.java)
 
     override fun checkStatus(conversations: MutableSet<Conversation>) {
         log.debug("Checking status for ${conversations.size} DPV messages..")
@@ -57,7 +55,6 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
             if (!c.hasStatus(ms)) {
                 if (mappedStatus == LEVERT &&
                     c.documentIdentifier == properties.arkivmelding.defaultDocumentType &&
-                    isNullOrEmpty(properties.noarkSystem.type) &&
                     properties.arkivmelding.isGenerateReceipts) {
                     nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPV)
                 }

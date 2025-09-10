@@ -12,12 +12,39 @@
     <springProperty name="profiles" source="spring.profiles.active"/>
     <springProperty name="orgnr" source="difi.move.org.number"/>
     <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
+    <springProperty name="secureLogstash" source="app.logger.secureLogstash"/>
 
     <if condition='property("enableLogstash").contains("true")'>
         <then>
             <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
                 <destination>${destination}</destination>
                 <droppedWarnFrequency>5</droppedWarnFrequency>
+
+                <!-- enable SSL/TLS for TCP appender -->
+                <if condition='property("secureLogstash").contains("true")'>
+                    <then>
+                        <ssl>
+
+                            <enabled>true</enabled>
+
+                            <!-- Path to client certificate and key in a PKCS#12 bundle -->
+                            <keyStore>
+                                <location>/logstash/client.p12</location>
+                                <password>changeit</password>
+                                <type>PKCS12</type>
+                            </keyStore>
+
+                            <!-- Truststore containing the CA certificate that signed the Logstash server cert -->
+                            <trustStore>
+                                <location>/logstash/truststore.jks</location>
+                                <password>changeit</password>
+                                <type>JKS</type>
+                            </trustStore>
+
+                        </ssl>
+                    </then>
+                </if>
+
                 <!-- encoder is required -->
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <customFields>{"appname":"@project.artifactId@","HOSTNAME":"${HOSTNAME}","buildinfo.version":"@project.version@","buildinfo.lastcommit":"@git.commit.id@","orgnr":"${orgnr}"}</customFields>
@@ -61,16 +88,6 @@
                     </appender>
                 </then>
             </if>
-
-            <root level="INFO">
-                <appender-ref ref="stash"/>
-                <if condition='isDefined("destination2")'>
-                    <then>
-                        <appender-ref ref="stash2"/>
-                    </then>
-                </if>
-            </root>
-
         </then>
     </if>
 
@@ -95,9 +112,33 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
-        <appender-ref ref="FILE"/>
-    </root>
+    <if condition='property("enableLogstash").contains("true")'>
+        <!-- <if> elements cannot be nested within an <appender>, <logger> or <root> element -->
+        <then>
+            <if condition='isDefined("destination2")'>
+                <then>
+                    <root level="INFO">
+                        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                        <appender-ref ref="FILE"/>
+                        <appender-ref ref="stash"/>
+                        <appender-ref ref="stash2"/>
+                    </root>
+                </then>
+                <else>
+                    <root level="INFO">
+                        <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                        <appender-ref ref="FILE"/>
+                        <appender-ref ref="stash"/>
+                    </root>
+                </else>
+            </if>
+        </then>
+        <else>
+            <root level="INFO">
+                <appender-ref ref="${stdoutAppender:-CONSOLE}"/>
+                <appender-ref ref="FILE"/>
+            </root>
+        </else>
+    </if>
 
 </configuration>

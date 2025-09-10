@@ -4,23 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.validation.group.ValidationGroups;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionController;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -42,9 +42,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(SubscriptionController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, SubscriptionController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
@@ -53,7 +52,7 @@ public class SubscriptionControllerTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private SubscriptionService subscriptionService;
+    @MockitoBean private SubscriptionService subscriptionService;
 
     @Test
     public void listSubscriptions() throws Exception {
@@ -65,6 +64,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -75,7 +75,7 @@ public class SubscriptionControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(getPagingParameterDescriptors()),
+                        queryParameters(getPagingParameterDescriptors()),
                         responseFields()
                                 .and(subscriptionDescriptors("content[].", null))
                                 .and(pageDescriptors())
@@ -96,6 +96,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "1")
                         .param("size", "1")
                         .accept(MediaType.APPLICATION_JSON)
@@ -114,6 +115,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 get("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -142,6 +144,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 post("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
@@ -173,6 +176,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 put("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input))
@@ -203,6 +207,7 @@ public class SubscriptionControllerTest {
 
         mvc.perform(
                 delete("/api/subscriptions/{id}", subscription.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -226,6 +231,7 @@ public class SubscriptionControllerTest {
     public void deleteAllSubscriptions() throws Exception {
         mvc.perform(
                 delete("/api/subscriptions")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())

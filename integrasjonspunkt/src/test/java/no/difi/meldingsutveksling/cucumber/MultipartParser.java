@@ -2,11 +2,11 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.SneakyThrows;
 import lombok.Value;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUpload;
-import org.apache.commons.fileupload.RequestContext;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.portlet.PortletFileUpload;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
+import org.apache.tomcat.util.http.fileupload.RequestContext;
+import org.apache.tomcat.util.http.fileupload.UploadContext;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +32,14 @@ public class MultipartParser {
 
     @NotNull
     private FileUpload getFileUpload() {
-        FileUpload fileUpload = new PortletFileUpload();
+        FileUpload fileUpload = new FileUpload();
         fileUpload.setFileItemFactory(new DiskFileItemFactory());
         fileUpload.setHeaderEncoding(UTF_8.displayName());
         return fileUpload;
     }
 
     @Value
-    private static class SimpleRequestContext implements RequestContext {
+    private static class SimpleRequestContext implements UploadContext {
         Charset charset;
         String contentType;
         byte[] content;
@@ -58,6 +58,11 @@ public class MultipartParser {
 
         public InputStream getInputStream() throws IOException {
             return new ByteArrayInputStream(content);
+        }
+
+        @Override
+        public long contentLength() {
+            return getContentLength();
         }
     }
 

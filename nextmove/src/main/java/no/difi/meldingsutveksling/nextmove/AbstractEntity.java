@@ -3,10 +3,10 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 @MappedSuperclass

@@ -15,11 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.ws.soap.saaj.SaajSoapMessage;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import jakarta.xml.soap.SOAPBody;
+import jakarta.xml.soap.SOAPException;
+import jakarta.xml.soap.SOAPMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -160,7 +160,7 @@ public class AltinnInSteps {
                                         .withStatus(200)
 //                        .withHeader(HttpHeaders.CONNECTION, "close")
                                         .withHeader(HttpHeaders.CACHE_CONTROL, "private")
-                                        .withHeader(HttpHeaders.CONTENT_TYPE, String.format("multipart/related; type=\"application/xop+xml\";start=\"<http://tempuri.org/0>\";boundary=\"%s\";start-info=\"text/xml\"", boundary))
+                                        .withHeader(HttpHeaders.CONTENT_TYPE, "multipart/related; type=\"application/xop+xml\";start=\"<http://tempuri.org/0>\";boundary=\"%s\";start-info=\"text/xml\"".formatted(boundary))
                                         .withHeader("MIME-Version", "1.0")
                                         .withHeader(HttpHeaders.SERVER, "Microsoft-IIS/8.5")
                                         .withHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")

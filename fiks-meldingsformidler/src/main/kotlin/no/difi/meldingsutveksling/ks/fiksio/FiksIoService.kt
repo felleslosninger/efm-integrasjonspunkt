@@ -3,17 +3,16 @@ package no.difi.meldingsutveksling.ks.fiksio
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
-import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
-import no.difi.meldingsutveksling.util.logger
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.model.KontoId
 import no.ks.fiks.io.client.model.MeldingRequest
 import no.ks.fiks.io.client.model.Payload
 import no.ks.fiks.io.client.model.StreamPayload
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.*
@@ -26,7 +25,7 @@ class FiksIoService(
     private val persister: OptionalCryptoMessagePersister,
     private val conversationService: ConversationService,
 ) {
-    val log = logger()
+    val log = LoggerFactory.getLogger(FiksIoService::class.java)
 
     fun sendMessage(msg: NextMoveMessage) {
         val payloads = msg.files.map {

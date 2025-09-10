@@ -1,26 +1,22 @@
 package no.difi.meldingsutveksling.validation;
 
+import jakarta.validation.Validator;
 import lombok.Value;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.validation.Validator;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
+@SpringJUnitConfig(classes = {
         ValidationConfig.class,
         FixedClockConfig.class
 })
@@ -29,8 +25,8 @@ public class InServiceRegistryValidatorTest {
     @Autowired
     private Validator validator;
 
-    @MockBean private ServiceRegistryLookup serviceRegistryLookup;
-    @MockBean private ServiceRecord serviceRecord;
+    @MockitoBean private ServiceRegistryLookup serviceRegistryLookup;
+    @MockitoBean private ServiceRecord serviceRecord;
 
     @Value
     private static class Foo {
@@ -67,5 +63,5 @@ public class InServiceRegistryValidatorTest {
 
         verify(serviceRegistryLookup).isInServiceRegistry("98765432");
     }
-}
 
+}

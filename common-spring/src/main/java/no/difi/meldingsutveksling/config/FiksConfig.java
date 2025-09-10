@@ -8,10 +8,10 @@ import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
@@ -77,8 +77,6 @@ public class FiksConfig {
         private String baseUrl;
         private String username;
         private String password;
-        private boolean mailOnError;
-        private String mailSubject;
         private String fallbackSenderOrgNr;
         @NotNull
         private String process;

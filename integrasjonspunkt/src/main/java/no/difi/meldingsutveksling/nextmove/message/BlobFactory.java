@@ -8,7 +8,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

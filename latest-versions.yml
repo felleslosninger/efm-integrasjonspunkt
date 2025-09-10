@@ -1,0 +1,19 @@
+# Liste siste "godkjente" versjon av Integrasjonspunktet for hvert type miljø.
+# Lastes ned av Kosmos ved oppstart for å kjøre automatiske oppdgraderinger.
+# Miljø-profil-navna er "hardkodet" i Kosmos og kun disse 4 er lov : dev|itest|staging|production
+# Konfigurasjon i Kosmos blir f.eks. "kosmos.integrasjonspunkt.profile=itest"
+
+integrasjonspunkt:
+  environments:
+    dev:
+      latest: 2.28.3
+      earlybird: 3.0.0-beta
+    itest:
+      latest: 2.28.3
+      earlybird: 3.0.0-beta
+    staging:
+      latest: 2.28.3
+      earlybird: 3.0.0-beta
+    production:
+      latest: 2.28.3
+      earlybird: 3.0.0-beta

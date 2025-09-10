@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 

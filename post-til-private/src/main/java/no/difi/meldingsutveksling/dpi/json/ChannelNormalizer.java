@@ -5,4 +5,5 @@ public class ChannelNormalizer {
     String normalize(String mpcId) {
         return mpcId != null ? mpcId.replace('.', '_') : null;
     }
+
 }

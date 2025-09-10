@@ -14,8 +14,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
@@ -86,9 +86,6 @@ public class DigitalPostInnbyggerConfig {
     @NotNull
     private String krrPrintUrl;
 
-    @NotNull
-    private String clientType;
-
     private String receiptType;
 
     @NotNull
@@ -158,7 +155,7 @@ public class DigitalPostInnbyggerConfig {
     public static class Certificate {
 
         @NotNull
-        private Resource recipe;
+        private String mode;
     }
 
     @Data

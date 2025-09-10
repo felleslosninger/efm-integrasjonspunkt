@@ -6,7 +6,7 @@ import com.nimbusds.jose.proc.BadJWSException;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.serviceregistry.client.RestClient;
+import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.EntityType;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.IdentifierResource;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -14,9 +14,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -24,8 +22,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
@@ -38,8 +36,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = ServiceRegistryLookupTest.Config.class)
+@SpringJUnitConfig(classes = ServiceRegistryLookupTest.Config.class)
 public class ServiceRegistryLookupTest {
 
     private static final String ORGNR = "12345678";
@@ -71,14 +68,14 @@ public class ServiceRegistryLookupTest {
     @Autowired
     private ServiceRegistryLookup service;
 
-    @MockBean
+    @MockitoBean
     private IntegrasjonspunktProperties properties;
 
-    @MockBean
+    @MockitoBean
     private SasKeyRepository sasKeyRepoMock;
 
-    @MockBean
-    private RestClient client;
+    @MockitoBean
+    private ServiceRegistryRestClient client;
 
     private ServiceRecord dpo = new ServiceRecord(DPO, "000", "certificate", "http://localhost:4567");
 
@@ -177,4 +174,5 @@ public class ServiceRegistryLookupTest {
             }
         }
     }
+
 }

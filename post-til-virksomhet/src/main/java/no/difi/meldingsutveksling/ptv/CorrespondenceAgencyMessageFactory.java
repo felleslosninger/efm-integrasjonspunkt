@@ -33,9 +33,9 @@ import no.difi.move.common.io.ResourceDataSource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -73,7 +73,7 @@ public class CorrespondenceAgencyMessageFactory {
             return handleDigitalDpvMessage(message);
         }
 
-        throw new NextMoveRuntimeException(String.format("StandardBusinessDocument.any not instance of %s or %s, aborting",
+        throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of %s or %s, aborting".formatted(
                 ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
@@ -115,7 +115,7 @@ public class CorrespondenceAgencyMessageFactory {
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message, Map<String, BusinessMessageFile> fileMap) {
         BusinessMessageFile arkivmeldingFile = Optional.ofNullable(fileMap.get(ARKIVMELDING_FILE))
-                .orElseThrow(() -> new NextMoveRuntimeException(String.format("%s not found for message %s", ARKIVMELDING_FILE, message.getMessageId())));
+                .orElseThrow(() -> new NextMoveRuntimeException("%s not found for message %s".formatted(ARKIVMELDING_FILE, message.getMessageId())));
 
         try {
             Resource resource = optionalCryptoMessagePersister.read(message.getMessageId(), arkivmeldingFile.getIdentifier());
@@ -149,7 +149,7 @@ public class CorrespondenceAgencyMessageFactory {
         try {
             return optionalCryptoMessagePersister.read(messageId, f.getIdentifier());
         } catch (IOException e) {
-            throw new NextMoveRuntimeException(String.format("Could read file named '%s' for messageId=%s",
+            throw new NextMoveRuntimeException("Could read file named '%s' for messageId=%s".formatted(
                     f.getIdentifier(), f.getFilename()), e);
         }
     }
@@ -240,7 +240,7 @@ public class CorrespondenceAgencyMessageFactory {
                             .build(),
                     message.getSbd().getDocumentType());
         } catch (ServiceRegistryLookupException e) {
-            throw new MeldingsUtvekslingRuntimeException(String.format("Could not get service record for receiver %s", message.getReceiverIdentifier()), e);
+            throw new MeldingsUtvekslingRuntimeException("Could not get service record for receiver %s".formatted(message.getReceiverIdentifier()), e);
         }
         return serviceRecord;
     }

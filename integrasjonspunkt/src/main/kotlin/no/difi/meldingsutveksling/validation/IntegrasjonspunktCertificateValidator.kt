@@ -9,7 +9,7 @@ import no.difi.move.common.cert.KeystoreHelper
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.security.cert.CertificateExpiredException
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Component
 @Profile("{!(test | cucumber)}")

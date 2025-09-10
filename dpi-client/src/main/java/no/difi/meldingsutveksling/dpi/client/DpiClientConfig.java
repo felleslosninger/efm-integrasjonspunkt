@@ -10,6 +10,7 @@ import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
+import no.difi.certvalidator.BusinessCertificateValidatorFactory;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
@@ -23,15 +24,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -96,8 +96,7 @@ public class DpiClientConfig {
                         .baseUrl(properties.getUri())
                         .filter(logRequest())
                         .filter(logResponse())
-                        .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-                                .proxyWithSystemProperties()
+                        .clientConnector(new ReactorClientHttpConnector(HttpClient.create().proxyWithSystemProperties()
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getTimeout().getConnect())
                                 .doOnConnected(connection -> {
                                     connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout().getRead(), TimeUnit.MILLISECONDS));
@@ -119,7 +118,7 @@ public class DpiClientConfig {
 
     private static ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            switch (clientResponse.statusCode().series()) {
+            switch (HttpStatus.Series.valueOf(clientResponse.statusCode().value())) {
                 case SUCCESSFUL:
                     log.debug(LOG_MESSAGE, clientResponse.logPrefix(), clientResponse.statusCode());
                     break;
@@ -131,7 +130,6 @@ public class DpiClientConfig {
                     log.warn(LOG_MESSAGE, clientResponse.logPrefix(), clientResponse.statusCode());
                     break;
             }
-
             return Mono.just(clientResponse);
         });
     }
@@ -178,13 +176,8 @@ public class DpiClientConfig {
     }
 
     @Bean
-    public BusinessCertificateValidator businessCertificateValidator() {
-        Resource resource = properties.getCertificate().getRecipe();
-        try (InputStream inputStream = resource.getInputStream()) {
-            return BusinessCertificateValidator.of(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException("Couldn't load recipe!", e);
-        }
+    public BusinessCertificateValidator businessCertificateValidator() throws Exception {
+        return new BusinessCertificateValidatorFactory().createValidator(properties.getCertificate().getMode());
     }
 
     @Bean

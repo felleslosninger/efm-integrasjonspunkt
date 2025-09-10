@@ -4,24 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.ConversationQueryInput;
 import no.difi.meldingsutveksling.status.ConversationRepository;
 import no.difi.meldingsutveksling.status.service.ConversationController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
@@ -44,9 +44,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
-@WebMvcTest(ConversationController.class)
+@WebMvcTest({Oauth2ClientSecurityConfig.class, ConversationController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
 @ComponentScan(basePackageClasses = WebhookFilterParser.class)
@@ -55,7 +54,7 @@ public class ConversationControllerTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private ConversationRepository conversationRepository;
+    @MockitoBean private ConversationRepository conversationRepository;
 
     @Test
     public void find() throws Exception {
@@ -67,6 +66,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -77,7 +77,7 @@ public class ConversationControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(
+                        queryParameters(
                                 parameterWithName("messageId").optional().description("Filter on messageId"),
                                 parameterWithName("conversationId").optional().description("Filter on conversationId"),
                                 parameterWithName("receiver").optional().description("Filter on receiver (as ISO-6523)"),
@@ -88,7 +88,7 @@ public class ConversationControllerTest {
                                 parameterWithName("messageTitle").optional().description("Filter on message title"),
                                 parameterWithName("pollable").optional().description("Filter on pollable (true/false)"),
                                 parameterWithName("finished").optional().description("Filter on finished (true/false)"),
-                                parameterWithName("direction").optional().description(String.format("Filter on direction. Can be one of: %s", Arrays.stream(ConversationDirection.values())
+                                parameterWithName("direction").optional().description("Filter on direction. Can be one of: %s".formatted(Arrays.stream(ConversationDirection.values())
                                         .map(Enum::name)
                                         .collect(Collectors.joining(", "))))
                         ).and(getPagingParameterDescriptors()),
@@ -113,6 +113,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("serviceIdentifier", ServiceIdentifier.DPO.name())
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -133,6 +134,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("sort", "lastUpdated,asc")
                         .accept(MediaType.APPLICATION_JSON)
         )
@@ -154,6 +156,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .param("page", "3")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON)
@@ -174,6 +177,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/{id}", conversation.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -204,6 +208,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/messageId/{messageId}", conversation.getMessageId())
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -235,6 +240,7 @@ public class ConversationControllerTest {
 
         mvc.perform(
                 get("/api/conversations/queue")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -245,7 +251,7 @@ public class ConversationControllerTest {
                         requestHeaders(
                                 getDefaultHeaderDescriptors()
                         ),
-                        requestParameters(getPagingParameterDescriptors()),
+                        queryParameters(getPagingParameterDescriptors()),
                         responseFields()
                                 .and(conversationDescriptors("content[]."))
                                 .and(pageDescriptors())
@@ -260,6 +266,7 @@ public class ConversationControllerTest {
     public void deleteById() throws Exception {
         mvc.perform(
                 delete("/api/conversations/{id}", 42)
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -283,6 +290,7 @@ public class ConversationControllerTest {
         String messageId = UUID.randomUUID().toString();
         mvc.perform(
                 delete("/api/conversations/messageId/{messageId}", messageId)
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andDo(MockMvcResultHandlers.print())
