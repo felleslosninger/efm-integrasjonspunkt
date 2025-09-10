@@ -25,20 +25,24 @@ Fixme & todo
 - [ ] Det er noen eldre `TODO` kommentarer som har vært med i flere år og som kanskje bare kan fjernes?
 - [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
-- [ ] Ikke alle websidene som er "inkludert" fungerer (fjernes)
+- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
 - Swagger-UI (http://localhost:9093/swagger-ui/index.html)
 
-## Bygg og kjøre lokalt 
+## Bygg og kjør lokalt 
 Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.
+
+Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
+(alternativt `integrasjonspunkt-local.yml` eller `integrasjonspunkt-local.yaml`).  Den vil bli inkludert
+automatisk når du starter en av de forhåndsdefinerte maven-profilene (som `staging`, `dev`, `prod`).
 
 ```bash
 mvn clean package
 
-# lag din egen application-local.properties fil i roten på prosjektet og start staging + din locale på toppen 
-java -Dspring.profiles.active=staging,local -jar integrasjonspunkt/target/integrasjonspunkt.jar
+# start med staging profil (som også leser fra din lokale konfigurasjonsfil) :
+java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
 For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
