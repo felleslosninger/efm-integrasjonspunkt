@@ -52,25 +52,4 @@ public class ManuallyTestingSystemregister {
         System.out.println(list);
     }
 
-    @Test
-    void testResourceList() {
-        String list = client.resourceList();
-        assertNotNull(list, "List should not be null");
-        System.out.println(list);
-    }
-
-    @Test
-    void testAccessLists() {
-        String list = client.accessLists();
-        assertNotNull(list, "List should not be null");
-        System.out.println(list);
-    }
-
-    @Test
-    void testAccessListMembers() {
-        String list = client.showAccesslistMembers("meldingsutveksling_dpo_tilgangsliste");
-        assertNotNull(list, "List should not be null");
-        System.out.println(list);
-    }
-
 }

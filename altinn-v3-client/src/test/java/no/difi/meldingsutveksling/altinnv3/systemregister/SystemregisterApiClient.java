@@ -45,39 +45,6 @@ public class SystemregisterApiClient {
             ;
     }
 
-    public String resourceList() {
-        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
-        return restClient.get()
-            .uri(apiEndpoint + "/resource/resourcelist")
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .retrieve()
-            .body(String.class)
-            ;
-    }
-
-    public String accessLists() {
-        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
-        return restClient.get()
-            .uri(apiEndpoint + "/access-lists/{owner}", "digdir")
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .retrieve()
-            .body(String.class)
-            ;
-    }
-
-    public String showAccesslistMembers(String accessList) {
-        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
-        return restClient.get()
-            .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Accept", "application/json")
-            .retrieve()
-            .body(String.class)
-            ;
-    }
-
     private void getApiException(HttpRequest request, ClientHttpResponse response) {
         var prefix = "Api error: %s".formatted(request.getURI());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
