@@ -352,7 +352,7 @@
             <dependency>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-plugins-runtime</artifactId>
-                <version>4.0.8</version>
+                <version>4.0.10</version>
             </dependency>
             <dependency>
                 <groupId>net.jimblackler.jsonschemafriend</groupId>
