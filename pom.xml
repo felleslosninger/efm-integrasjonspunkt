@@ -362,7 +362,7 @@
             <dependency>
                 <groupId>net.jimblackler.jsonschemafriend</groupId>
                 <artifactId>core</artifactId>
-                <version>0.12.3</version>
+                <version>0.12.5</version>
             </dependency>
             <dependency>
                 <groupId>io.vavr</groupId>
