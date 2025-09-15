@@ -624,8 +624,6 @@
                     <sourceDirectories>
                         <dir>${project.basedir}/src/main/java</dir>
                         <dir>${project.basedir}/src/main/kotlin</dir>
-                        <dir>${project.basedir}/target/generated-sources/wsimport</dir>
-                        <dir>${project.basedir}/target/generated-sources/xjc</dir>
                     </sourceDirectories>
                     <skipEmptyPackages>true</skipEmptyPackages>
                 </configuration>

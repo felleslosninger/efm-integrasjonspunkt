@@ -1,7 +1,7 @@
 # Move Integrasjonspunkt v4
 
 - Spring Boot 3.5.x og Java 21
-- Oppgradert til Altinn v3 REST (Fjernet altinnexchange / altinnclient soap)
+- Tar i bruk Altinn v3 REST API (fjernet altinnexchange / altinnclient som var SOAP basert)
 - DPO - fjernet brukernavn og passord fra konfigurasjon (det er nå maskinporten)
 - DPV - endret upload size limit til `difi.move.dpv.upload-size-limit=250MB`
 
@@ -11,8 +11,7 @@
 - [x] OIDC for DPV må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
 - [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
 - [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
-- [ ] Efm-common er oppdatert i v3 branch
-- [ ] Vi har støtte for lokal konfig i yml/yaml format i v3, skal vi videreføre dette (søk etter `spring.config.import=` i v3)
+- [x] Vi har støtte for lokal konfig i yml/yaml format i v3, dette videreføres (søk etter `spring.config.import=`)
 - [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
@@ -22,6 +21,7 @@
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging uten security i v4
 - [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
+- [ ] Er det noen som egentlig bruker Dokka plugin til noe?
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
 
@@ -41,23 +41,28 @@ java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjons
 ```
 
 Når man starter med `dev | staging | yt | production` profil så vil den kunne overstyres med properties fra
-en lokale [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
+en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
 
 Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
 [application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties), 
 [application-yt.properties](integrasjonspunkt/src/main/resources/config/application-yt.properties) og
 [application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
-inneholder en optional import av eksterne properties fra den file (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties`).
+inneholder en optional import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
-For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
+
+## Bygge REST API dokumentasjon
+For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `restdocs` :
 ```bash
 mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
 
-For å bygge, kjøre dokka og signere med gpg bruk profil `ossrh` :
+## Bygge Dokka dokumentasjon
+Det er rester av dokka i prosjekt, det er en plugin som egentlig lager dokumentasjon fra Kotlin kode,
+men den skal også kunne generere dokumentasjon fra Java kode.  Slik kan du teste denne funksjonaliteten :
 ```bash
-mvn clean package -Possrh
+mvn clean dokka:dokka -Ddokka.skip=false
+open integrasjonspunkt/target/dokka/index.html
 ```
 
 ## Linker når Integrasjonspunkt er starter lokalt
