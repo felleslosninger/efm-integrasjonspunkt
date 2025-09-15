@@ -5,6 +5,7 @@
 *.class
 .run
 *.p12
+*.gz
 
 # Maven
 /**/target
