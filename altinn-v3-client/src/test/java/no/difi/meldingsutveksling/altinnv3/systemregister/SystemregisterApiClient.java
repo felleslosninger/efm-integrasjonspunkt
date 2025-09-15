@@ -31,7 +31,57 @@ public class SystemregisterApiClient {
 
     @PostConstruct
     public void init() {
-        apiEndpoint = "https://platform.tt02.altinn.no/api/v1/systemregister";
+        apiEndpoint = "https://platform.tt02.altinn.no/authentication/api/v1/systemregister";
+    }
+
+    public String getAll() {
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
+
+        return restClient.get()
+            .uri(apiEndpoint)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
+    public String createSystem(){
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
+
+        String body = """
+            {
+              "id": "314240979_meldingsutveksling_dpo",
+              "vendor": {
+                "ID": "0192:314240979"
+              },
+              "name": {
+                "additionalProp1": "KUL SLITEN TIGER AS meldingsutveksling_dpo",
+                "additionalProp2": "KUL SLITEN TIGER AS meldingsutveksling_dpo",
+                "additionalProp3": "KUL SLITEN TIGER AS meldingsutveksling_dpo"
+              },
+              "description": {
+                "additionalProp1": "meldingsutveksling_dpo",
+                "additionalProp2": "meldingsutveksling_dpo",
+                "additionalProp3": "meldingsutveksling_dpo"
+              },
+              "isDeleted": true,
+              "clientId": [
+                "826acbbc-ee17-4946-af92-cf4885ebe951"
+              ],
+              "isVisible": true
+            }
+            """;
+
+         var res =  restClient.post()
+            .uri(apiEndpoint + "/vendor")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .body(body)
+            .retrieve()
+            .toBodilessEntity();
+
+         return res.getStatusCode().toString();
     }
 
     public String systemDetails() {

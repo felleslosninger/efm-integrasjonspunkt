@@ -52,4 +52,14 @@ public class ManuallyTestingSystemregister {
         System.out.println(list);
     }
 
+    @Test
+    void createSystem(){
+        client.createSystem();
+    }
+
+    @Test
+    void getAll(){
+        var res = client.getAll();
+        System.out.println(res);
+    }
 }
