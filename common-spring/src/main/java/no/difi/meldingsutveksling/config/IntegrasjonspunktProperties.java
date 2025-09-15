@@ -176,32 +176,6 @@ public class IntegrasjonspunktProperties {
         private KeystoreProperties keystore;
     }
 
-    @Data
-    @ToString(exclude = "password")
-    public static class PostVirksomheter {
-
-        private String username;
-        private String password;
-        private URL endpointUrl;
-        @NotNull
-        private String sensitiveServiceCode;
-        private boolean notifyEmail;
-        private boolean notifySms;
-        @NotNull
-        private String notificationText;
-        @NotNull
-        private String sensitiveNotificationText;
-        private boolean allowForwarding;
-        private boolean enableDueDate;
-        private Long daysToReply;
-        @NotNull
-        private DataSize uploadSizeLimit;
-        @NotNull
-        private Integer defaultTtlHours;
-
-
-    }
-
     /**
      * Idporten Oidc
      */

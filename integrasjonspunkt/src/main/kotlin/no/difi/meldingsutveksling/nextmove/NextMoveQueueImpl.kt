@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove
 
 import no.difi.meldingsutveksling.NextMoveConsts
 import no.difi.meldingsutveksling.ServiceIdentifier
+import no.difi.meldingsutveksling.altinnv3.dpo.MessageChannelEntry
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.MessagePersister
 import no.difi.meldingsutveksling.api.NextMoveQueue
@@ -9,8 +10,7 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.dpo.MessageChannelEntry
-import no.difi.meldingsutveksling.dpo.MessageChannelRepository
+import no.difi.meldingsutveksling.altinnv3.dpo.MessageChannelRepository
 import no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInRepository
 import no.difi.meldingsutveksling.receipt.ReceiptStatus

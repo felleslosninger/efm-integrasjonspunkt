@@ -12,7 +12,7 @@
 
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Multiproject for meldingsutveksling</name>
 
@@ -88,21 +88,19 @@
     </properties>
 
     <modules>
-        <module>api</module>
         <module>common</module>
-        <module>common-spring</module>
-        <module>altinnexchange</module>
-        <module>dokumentpakking</module>
-        <module>integrasjonspunkt</module>
         <module>validation</module>
+        <module>dokumentpakking</module>
         <module>nextmove</module>
-        <module>domain</module>
-        <module>altinn-client</module>
-        <module>post-til-virksomhet</module>
+        <module>common-spring</module>
+        <module>api</module>
         <module>dpi-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
+        <module>domain</module>
+        <module>altinn-v3-client</module>
         <module>fiks-meldingsformidler</module>
+        <module>integrasjonspunkt</module>
     </modules>
 
     <dependencyManagement>
@@ -136,12 +134,7 @@
 
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinn-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinnexchange</artifactId>
+                <artifactId>altinn-v3-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -187,11 +180,6 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>post-til-private</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>post-til-virksomhet</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -466,6 +454,10 @@
                     <groupId>com.vaadin.external.google</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
 

@@ -17,7 +17,6 @@ import org.xmlunit.matchers.CompareMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,7 +79,7 @@ public class MessageOutSteps {
         actualList.add(Arrays.asList("filename", "content type"));
         actualList.addAll(message.getAttachments().stream()
                 .map(p -> Arrays.asList(p.getFilename(), p.getMimeType() != null ? p.getMimeType().toString() : null))
-                .collect(Collectors.toList())
+                .toList()
         );
 
         DataTable actualTable = DataTable.create(actualList);
