@@ -45,8 +45,11 @@ public class ServiceRecordProvider {
         try {
             String participanId = null;
             if (participant == PARTICIPANT.RECEIVER) { participanId = MessageType.valueOfType(sbd.getType()).get() == MessageType.DIALOGMELDING ?  sbd.getReceiverIdentifier().getIdentifier() : sbd.getReceiverIdentifier().getPrimaryIdentifier();
+                var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
+                if (herID2.isPresent()) {
+                    participanId = herID2.get().getInstanceIdentifier();
+                }
             }
-
             else if (participant == PARTICIPANT.SENDER) {
                 var herID2 = sbd.getScope(ScopeType.SENDER_HERID2);
                 if (herID2.isPresent()) {

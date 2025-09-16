@@ -7,6 +7,9 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.OrganizationIdentifier;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
+import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.*;
@@ -131,12 +134,27 @@ public class NextMoveOutMessageFactory {
         }
     }
 
+    private boolean isOrgnummer(PartnerIdentifier identifier) {
+        return identifier instanceof OrganizationIdentifier;
+    }
+
+    private boolean isPersonIdentifier(PartnerIdentifier identifier) {
+        return identifier instanceof PersonIdentifier;
+    }
+
 
     private void setDphRoutingElements(StandardBusinessDocument sbd) {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.SENDER);
 
         var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
+        if (isOrgnummer( sbd.getReceiverIdentifier())) {
+            var recieverOrgnummer = sbd.getReceiverIdentifier().getIdentifier();
+            if (!Objects.equals(recieverOrgnummer, srReciever.getOrganisationNumber())) {
+                throw new NextMoveRuntimeException("Reciever organisation number does not match address register.");
+            }
+        }
+
 
         if (!isMultitenantSetup) {
             var fromConfigurationHerID = properties.getDph().getSenderHerId1();
