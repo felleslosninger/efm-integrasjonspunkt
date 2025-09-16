@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.altinnv3.systemregister;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.DpoJwtTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
     SystemregisterApiClient.class,
     ServiceregisterTokenProducer.class,
     AltinnConfiguration.class,
-    IntegrasjonspunktProperties.class
+    IntegrasjonspunktProperties.class,
+    DpoJwtTokenProducer.class
 })
 @UseFullTestConfiguration
 public class ManuallyTestingSystemregister {
@@ -46,6 +48,12 @@ public class ManuallyTestingSystemregister {
     }
 
     @Test
+    void testAltinnJwtToken() {
+        var res = client.getTokenTest();
+        System.out.println(res);
+    }
+
+    @Test
     void testSystemDetails() {
         String list = client.systemDetails();
         assertNotNull(list, "List should not be null");
@@ -60,6 +68,36 @@ public class ManuallyTestingSystemregister {
     @Test
     void getAll(){
         var res = client.getAll();
+        System.out.println(res);
+    }
+
+    @Test
+    void getSystem(){
+        var res = client.getSystem("314240979_integrasjonspunkt");
+        System.out.println(res);
+    }
+
+    @Test
+    void getSystemUsers(){
+        var res = client.getAllSystemUsers("314240979_integrasjonspunkt");
+        System.out.println(res);
+    }
+
+    @Test
+    void updatePackagesForSystem(){
+        var res = client.updateAccessPackage();
+        System.out.println(res);
+    }
+
+    @Test
+    void createAgentSystemUser(){
+        var res = client.createAgentSystemUser();
+        System.out.println(res);
+    }
+
+    @Test
+    void createStandardSystemUser(){
+        var res = client.createStandardSystemUser();
         System.out.println(res);
     }
 }

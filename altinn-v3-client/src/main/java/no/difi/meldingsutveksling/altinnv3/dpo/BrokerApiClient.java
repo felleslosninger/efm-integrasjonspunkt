@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BrokerApiClient {
 
-    @Qualifier("DpoTokenProducer")
+    @Qualifier("SystemUserTokenProducer")
     private final TokenProducer tokenProducer;
     private final IntegrasjonspunktProperties props;
 
@@ -76,7 +76,7 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",

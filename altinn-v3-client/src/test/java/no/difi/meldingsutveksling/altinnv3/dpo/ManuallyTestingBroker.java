@@ -2,13 +2,16 @@ package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
-import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
-import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
+import no.difi.meldingsutveksling.altinnv3.token.*;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = {
     BrokerApiClient.class,
     DpoTokenProducer.class,
+    DpoJwtTokenProducer.class,
+    SystemUserTokenProducer.class,
     AltinnConfiguration.class,
     IntegrasjonspunktProperties.class
 })
