@@ -92,7 +92,7 @@ public class TestMaskinportenTokenUsingJwk {
 
         // generer RSA-nøkkel (2048-bit)
         RSAKey rsaJWK = new RSAKeyGenerator(2048)
-            .keyID("my-key-id")     // ‘kid’-verdien må være unik blant alle Maskinportens kunder (!!!)
+            .keyID(UUID.randomUUID().toString())     // ‘kid’-verdien må være unik blant alle Maskinportens kunder (!!!)
             .keyUse(KeyUse.SIGNATURE)   // mulig denne ikke trengs ?
             .algorithm(JWSAlgorithm.RS256)
             .generate();
