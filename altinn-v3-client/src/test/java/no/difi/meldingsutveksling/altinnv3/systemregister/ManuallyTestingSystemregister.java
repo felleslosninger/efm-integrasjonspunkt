@@ -67,14 +67,15 @@ public class ManuallyTestingSystemregister {
 
     @Test
     void testSystemDetails() {
-        String list = client.systemDetails();
-        assertNotNull(list, "List should not be null");
-        System.out.println(list);
+        var res = client.systemDetails();
+        assertNotNull(res, "System details should not be null");
+        System.out.println(res);
     }
 
     @Test
     void createSystem(){
-        client.createSystem();
+        var res = client.createSystem();
+        System.out.println(res);
     }
 
     @Test

@@ -80,8 +80,8 @@ public class ManuallyTestingBroker {
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");
         fileTransfer.setResourceId(resource_id);
-        fileTransfer.setSender("0192:991825827");
-        fileTransfer.setRecipients(List.of("0192:991825827"));
+        fileTransfer.setSender("0192:314240979");
+        fileTransfer.setRecipients(List.of("0192:314240979"));
         fileTransfer.setSendersFileTransferReference("string");
         var uuid = client.initialize(fileTransfer).getFileTransferId();
         var result = client.upload(uuid, "Just some text data from uploadFile() test".getBytes());

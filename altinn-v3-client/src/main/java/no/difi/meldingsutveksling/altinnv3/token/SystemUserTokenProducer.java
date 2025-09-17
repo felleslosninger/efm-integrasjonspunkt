@@ -48,7 +48,7 @@ public class SystemUserTokenProducer implements TokenProducer {
         Map<String, Object> authDetail = new HashMap<>();
         authDetail.put("systemuser_org", systemuserOrg);
         authDetail.put("type", "urn:altinn:systemuser");
-        authDetail.put("externalRef", "314240979_integrasjonspunkt_systembruker_test");
+        authDetail.put("externalRef", "314240979_integrasjonspunkt_systembruker_test2");
 
         List<Map<String, Object>> authDetailsList = new ArrayList<>();
         authDetailsList.add(authDetail);

@@ -49,7 +49,7 @@ public class BrokerApiClient {
     }
 
     public FileTransferInitializeResponseExt initialize(FileTransferInitalizeExt request) {
-        String accessToken = tokenProducer.produceToken(List.of(writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(writeScope));
 
          return restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/")
@@ -62,7 +62,7 @@ public class BrokerApiClient {
     }
 
     public FileTransferOverviewExt upload(UUID fileTransferId, byte[] bytes) {
-        String accessToken = tokenProducer.produceToken(List.of(writeScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(writeScope));
 
         return restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/upload", fileTransferId)

@@ -48,8 +48,9 @@ Tenor : KUL SLITEN TIGER AS (314240979)
 Daglig leder : KOGNITIV TANGENT (03888398847)
 Maskinporten : eformidling-tenor-test-klient-01 (826acbbc-ee17-4946-af92-cf4885ebe951)
 Nøkkelpar : 314240979-kul-sliten-tiger-as.jwk (kid: RyResLhzSS5p2qUq6tNla_mOkG9vU8oiYNmDEYJ9OGg)
-System :
-Systembruker :
+System : 314240979_integrasjonspunkt
+Systembruker (standard) : 314240979_integrasjonspunkt_systembruker_test2 (10982a4d-4f9c-424a-b1bc-376dcef7316c)
+Systembruker (agent) : 314240979_integrasjonspunkt_systembruker_test (5b205bec-aad7-4e3f-a504-3e84b8a778fd)
 ```
 
 ## STERK ULYDIG HUND DA (311780735)
@@ -58,8 +59,8 @@ Tenor : STERK ULYDIG HUND DA (311780735)
 Daglig leder : ULYDIG LEVEREGEL (28923148371)
 Maskinporten : eformidling-tenor-test-klient-02 (b590f149-d0ba-4fca-b367-bccd9e444a00)
 Nøkkelpar : 311780735-sterk-ulydig-hund-da.jwk (kid: 8333ede6-60cd-450c-84b1-4c12dfb80cb6)
-System :
-Systembruker :
+System : 
+Systembruker : 
 ```
 
 ## Begrensninger
