@@ -11,16 +11,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service("ServiceregisterTokenProducer")
+@Service("SystemregisterTokenProducer")
 @RequiredArgsConstructor
-public class ServiceregisterTokenProducer implements TokenProducer {
+public class SystemregisterTokenProducer implements TokenProducer {
 
     private final IntegrasjonspunktProperties properties;
     private final TokenService tokenService;
     private final TokenExchangeService tokenExchangeService;
 
     @Override
-    @Cacheable(cacheNames = {"altinn.getResourceToken"})
+    @Cacheable(cacheNames = {"altinn.getSystemToken"})
     public String produceToken(List<String> scopes) {
         // FIXME we "misuse" OIDC configuration intended for DPO to fetch the token
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());

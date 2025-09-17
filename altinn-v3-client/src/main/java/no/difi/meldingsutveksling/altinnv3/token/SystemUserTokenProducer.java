@@ -18,10 +18,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-
 @Service("SystemUserTokenProducer")
 @RequiredArgsConstructor
 public class SystemUserTokenProducer implements TokenProducer {
+
     public static final ZoneId DEFAULT_ZONE_ID = TimeZone.getTimeZone("Europe/Oslo").toZoneId();
 
     @Override
@@ -32,7 +32,6 @@ public class SystemUserTokenProducer implements TokenProducer {
             throw new RuntimeException(e);
         }
     }
-
 
     private String fetchMaskinportenToken(List<String> scopes) throws Exception {
 
@@ -106,4 +105,5 @@ public class SystemUserTokenProducer implements TokenProducer {
 
         return token.access_token;
     }
+
 }

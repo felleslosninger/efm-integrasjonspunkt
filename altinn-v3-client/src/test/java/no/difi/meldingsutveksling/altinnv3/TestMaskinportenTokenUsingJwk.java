@@ -28,11 +28,9 @@ public class TestMaskinportenTokenUsingJwk {
 
     @Disabled
     @Test
-    public void getMaskinportenToken() throws Exception{
-
+    public void getMaskinportenToken() throws Exception {
         var bearer = fetchMaskinportenToken();
         System.out.println("Bearer: " + bearer);
-
     }
 
     @Disabled

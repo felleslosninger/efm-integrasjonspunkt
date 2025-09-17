@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SystemregisterApiClient {
 
-//    @Qualifier("ServiceregisterTokenProducer")
-    @Qualifier("DpoJwtTokenProducer")
+//    @Qualifier("SystemregisterTokenProducer")
+    @Qualifier("SystemuserTokenProducer")
     private final TokenProducer tokenProducer;
 
     private final SystemUserTokenProducer systemUserTokenProducer = new SystemUserTokenProducer();
@@ -29,8 +29,6 @@ public class SystemregisterApiClient {
     private RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getApiException).build();
 
     private static List<String> SCOPES_FOR_SYSTEMREGISTER = List.of("altinn:authentication/systemregister.write");
-    private static List<String> SCOPES_FOR_RESOURCE = List.of("altinn:resourceregistry/resource.read", "altinn:resourceregistry/resource.write");
-    private static List<String> SCOPES_FOR_ACCESSLISTS = List.of("altinn:resourceregistry/accesslist.read", "altinn:resourceregistry/accesslist.write");
     private static List<String> SCOPES_FOR_SYSTEMUSER = List.of("altinn:authentication/systemuser.request.write", "altinn:authentication/systemuser.request.read");
 
     private String apiEndpoint;
@@ -207,7 +205,7 @@ public class SystemregisterApiClient {
     }
 
     public String systemDetails() {
-        String accessToken = tokenProducer.produceToken(SCOPES_FOR_RESOURCE);
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
         return restClient.get()
             .uri(apiEndpoint + "/vendor/991825827_meldingsutveksling_dpo")
             .header("Authorization", "Bearer " + accessToken)
