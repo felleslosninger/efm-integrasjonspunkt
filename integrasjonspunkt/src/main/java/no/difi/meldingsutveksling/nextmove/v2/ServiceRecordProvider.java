@@ -73,7 +73,7 @@ public class ServiceRecordProvider {
             }
 
 
-            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder( participanId )
+            SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder( participantId )
                     .process(sbd.getProcess());
 
             if (!Strings.isNullOrEmpty(sbd.getConversationId())) {
