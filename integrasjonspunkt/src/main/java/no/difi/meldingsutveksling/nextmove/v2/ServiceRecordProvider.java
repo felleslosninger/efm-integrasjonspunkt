@@ -43,17 +43,26 @@ public class ServiceRecordProvider {
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,PARTICIPANT participant) {
         try {
-            String participanId = null;
-            if (participant == PARTICIPANT.RECEIVER) { participanId = MessageType.valueOfType(sbd.getType()).get() == MessageType.DIALOGMELDING ?  sbd.getReceiverIdentifier().getIdentifier() : sbd.getReceiverIdentifier().getPrimaryIdentifier();
-                var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
-                if (herID2.isPresent()) {
-                    participanId = herID2.get().getInstanceIdentifier();
+            String participantId = null;
+            if (participant == PARTICIPANT.RECEIVER) {
+                MessageType messageType = MessageType.valueOfType(sbd.getType())
+                    .orElseThrow(() -> new NextMoveRuntimeException("Unknown message type: " + sbd.getType()));
+
+                if (messageType == MessageType.DIALOGMELDING) {
+                    var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
+                    if (herID2.isPresent()) {
+                        participantId = herID2.get().getInstanceIdentifier();
+                    } else {
+                        throw new NextMoveRuntimeException("Missing HerID2 definition for DIALOGMELDING");
+                    }
+                } else {
+                    participantId = sbd.getReceiverIdentifier().getPrimaryIdentifier();
                 }
             }
             else if (participant == PARTICIPANT.SENDER) {
                 var herID2 = sbd.getScope(ScopeType.SENDER_HERID2);
                 if (herID2.isPresent()) {
-                    participanId = herID2.get().getInstanceIdentifier();
+                    participantId = herID2.get().getInstanceIdentifier();
                 }
                 else {
                     throw new UnsupportedOperationException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
