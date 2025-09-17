@@ -91,7 +91,7 @@ public class BrokerApiClient {
     }
 
     public FileTransferStatusDetailsExt getDetails(String fileTransferId) {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope));
 
          return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/details", fileTransferId)
@@ -103,7 +103,7 @@ public class BrokerApiClient {
     }
 
     public byte[] downloadFile(UUID fileTransferId) {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/download", fileTransferId)
@@ -114,7 +114,7 @@ public class BrokerApiClient {
     }
 
     public void confirmDownload(UUID fileTransferId) {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope));
 
         restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)

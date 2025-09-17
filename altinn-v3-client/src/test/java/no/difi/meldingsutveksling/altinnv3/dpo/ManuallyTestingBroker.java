@@ -44,7 +44,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testAltinnToken() {
-        var altinnToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var altinnToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 
@@ -52,13 +52,13 @@ public class ManuallyTestingBroker {
     void testListFiles() {
         var uuids = client.getAvailableFiles();
         assertNotNull(uuids);
-        assertEquals(2, uuids.length);
         Arrays.stream(uuids).forEach(System.out::println);
+        assertEquals(2, uuids.length);
     }
 
     @Test
     void testFileDetails() {
-        var details = client.getDetails("3c10e2ab-4106-425f-8942-a83548a96e47");
+        var details = client.getDetails("e06aa73f-fe4d-40eb-90c1-58a431e38f1c");
         assertNotNull(details);
         System.out.println(details);
     }
@@ -92,7 +92,7 @@ public class ManuallyTestingBroker {
     @Test
     void clearFiles(){
         UUID[] availableFiles = client.getAvailableFiles();
-        Arrays.stream(availableFiles).forEach(id -> {
+        Arrays.stream(availableFiles).peek(p -> System.out.println(p)).forEach(id -> {
             client.downloadFile(id);
             client.confirmDownload(id);
         });
@@ -100,14 +100,14 @@ public class ManuallyTestingBroker {
 
     @Test
     void downloadFile() {
-        byte[] result = client.downloadFile(UUID.fromString("3c10e2ab-4106-425f-8942-a83548a96e47"));
+        byte[] result = client.downloadFile(UUID.fromString("e06aa73f-fe4d-40eb-90c1-58a431e38f1c"));
         String message = new String(result);
         assertEquals("Just some text data from uploadFile() test", message);
     }
 
     @Test
     void confirmDownloadFile() {
-        client.confirmDownload(UUID.fromString("28a1d3f7-53db-452f-aa1e-65fe34eb96e8"));
+        client.confirmDownload(UUID.fromString("e06aa73f-fe4d-40eb-90c1-58a431e38f1c"));
     }
 
 }
