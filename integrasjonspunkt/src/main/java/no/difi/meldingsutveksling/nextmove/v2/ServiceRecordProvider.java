@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
@@ -50,7 +51,11 @@ public class ServiceRecordProvider {
 
                 if (messageType == MessageType.DIALOGMELDING) {
                     var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
-                    if (herID2.isPresent()) {
+                    var reciever = (NhnIdentifier) sbd.getReceiverIdentifier();
+                    if (reciever.isFastlegeIdentifier()) {
+                        participantId = reciever.getIdentifier();
+                    }
+                    else if (herID2.isPresent()) {
                         participantId = herID2.get().getInstanceIdentifier();
                     } else {
                         throw new NextMoveRuntimeException("Missing HerID2 definition for DIALOGMELDING");
