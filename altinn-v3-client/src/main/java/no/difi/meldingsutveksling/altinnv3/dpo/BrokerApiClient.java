@@ -25,6 +25,7 @@ import java.util.UUID;
 public class BrokerApiClient {
 
     @Qualifier("SystemUserTokenProducer")
+    //@Qualifier("DpoTokenProducer")
     private final TokenProducer tokenProducer;
     private final IntegrasjonspunktProperties props;
 

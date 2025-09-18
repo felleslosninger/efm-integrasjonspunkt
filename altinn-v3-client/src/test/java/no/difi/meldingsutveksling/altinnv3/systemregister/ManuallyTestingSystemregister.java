@@ -50,11 +50,11 @@ public class ManuallyTestingSystemregister {
     }
 
     @Test
-    void testSystemuserToken() {
-        var token = systemuserTokenProducer.produceToken(List.of("altinn:authentication/systemregister.write"));
+    void testJwkToken() {
+        var token = systemuserTokenProducer.produceToken(List.of("altinn:authentication/systemregister"));
         assertNotNull(token, "AltinnToken is null");
         var decodedToken = new String(Base64.getDecoder().decode(token.split("\\.")[1]));
-        assertTrue(decodedToken.contains("\"client_id\":\"826acbbc-ee17-4946-af92-cf4885ebe951\""), "Systemuser token should contain correct client id");
+        assertTrue(decodedToken.contains("\"client_id\":\"b590f149-d0ba-4fca-b367-bccd9e444a00\""), "Systemuser token should contain correct client id");
     }
 
     @Test
@@ -73,44 +73,45 @@ public class ManuallyTestingSystemregister {
     }
 
     @Test
-    void createSystem(){
-        var res = client.createSystem();
+    void createSystem() {
+        var res = client.createSystem("311780735", "STERK ULYDIG HUND DA", "b590f149-d0ba-4fca-b367-bccd9e444a00");
         System.out.println(res);
     }
 
     @Test
-    void getAll(){
+    void getAllSystems() {
         var res = client.getAll();
         System.out.println(res);
     }
 
     @Test
-    void getSystem(){
-        var res = client.getSystem("314240979_integrasjonspunkt");
+    void getSystem() {
+        var res = client.getSystem("311780735_integrasjonspunkt");
         System.out.println(res);
     }
 
     @Test
-    void getSystemUsers(){
-        var res = client.getAllSystemUsers("314240979_integrasjonspunkt");
+    void updatePackagesForSystem() {
+        var res = client.updateAccessPackage("311780735_integrasjonspunkt", "urn:altinn:accesspackage:maskinlesbare-hendelser");
         System.out.println(res);
     }
 
     @Test
-    void updatePackagesForSystem(){
-        var res = client.updateAccessPackage();
+    void createStandardSystemUser() {
+        // det fulle navn på blir "<orgno>_integrasjonspunkt_systembruker_<name>"
+        var res = client.createStandardSystemUser("311780735", "311780735_integrasjonspunkt", "test", "urn:altinn:accesspackage:maskinlesbare-hendelser");
         System.out.println(res);
     }
 
     @Test
-    void createAgentSystemUser(){
+    void getAllSystemUsers() {
+        var res = client.getAllSystemUsers("311780735_integrasjonspunkt");
+        System.out.println(res);
+    }
+
+    @Test
+    void createAgentSystemUser() {
         var res = client.createAgentSystemUser();
-        System.out.println(res);
-    }
-
-    @Test
-    void createStandardSystemUser(){
-        var res = client.createStandardSystemUser();
         System.out.println(res);
     }
 

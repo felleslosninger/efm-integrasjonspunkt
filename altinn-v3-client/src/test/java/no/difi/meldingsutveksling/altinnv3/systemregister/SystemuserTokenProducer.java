@@ -43,7 +43,7 @@ public class SystemuserTokenProducer implements TokenProducer {
     private String fetchMaskinportenToken(List<String> scopes) throws Exception {
 
         // read the JWK private-public-key-bundle from test classpath
-        RSAKey rsaJWK = RSAKey.parse(new String(this.getClass().getResourceAsStream("/314240979-kul-sliten-tiger-as.jwk").readAllBytes()));
+        RSAKey rsaJWK = RSAKey.parse(new String(this.getClass().getResourceAsStream("/311780735-sterk-ulydig-hund-da.jwk").readAllBytes()));
 
         JWSSigner signer = new RSASSASigner(rsaJWK);
         signer.supportedJWSAlgorithms().forEach(System.out::println);
@@ -51,7 +51,7 @@ public class SystemuserTokenProducer implements TokenProducer {
         // https://docs.digdir.no/docs/Maskinporten/maskinporten_protocol_jwtgrant
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
             .audience("https://test.maskinporten.no/")
-            .issuer("826acbbc-ee17-4946-af92-cf4885ebe951") // "eformidling-tenor-test-klient-01" for KUL SLITEN TIGER AS (314240979)
+            .issuer("b590f149-d0ba-4fca-b367-bccd9e444a00") // "eformidling-tenor-test-klient-02"
             .claim("scope", String.join(" ", scopes))
             .jwtID(UUID.randomUUID().toString())
             .issueTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant()))

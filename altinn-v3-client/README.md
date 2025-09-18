@@ -33,21 +33,23 @@ For å teste har vi registrert klienter i maskinporten for hver sine syntetiske 
 Fremgangsmåten for å gjøre dette er da :
 
 - Bruk [Tenor](https://testdata.skatteetaten.no/web/testnorge/) for å finne organiasjon og daglig leder.
-- Bruk [xxx](xxxx) for å aktivere BankID med "otp" for daglig leder
+- Bruk [BankID RA PREPROD](https://ra-preprod.bankidnorge.no/#!/search/endUser) for å aktivere BankID med "otp" for daglig leder og passord "qwer1234"
 - Bruk [Forvaltningsadmin](https://forvaltningsadmin.apps.kt.digdir.cosng.net) for å opprette klientene med scopes `altinn:broker.write` og `altinn:broker.read`
 - Snakk med Daniel for å få lagt til scopes som klientene trenger for å opprette system og systembruker
 - - Legg til scopes `altinn:authentication/systemregister.write`, `altinn:authentication/systemuser.request.write` og `altinn:authentication/systemuser.request.read`
-- - Opprett system for integrasjonspunktet for organisasjon (navnestandard `<orgnr>_integrasjonspunkt`) og tilgangspakke `xxxx`
-- - Opprett `standard systembruker` i system `<orgnr>_integrasjonspunkt` med tilgangspakke `xxxx`
-- - Bruk approval url fra responsen for å logge inn i Altinn som daglig leder slik at du kan godkjenne systembrukeren
+- - Opprett system for integrasjonspunktet for organisasjon (navnestandard `<orgnr>_integrasjonspunkt`)
+- - Legg til tilgangspakke `urn:altinn:accesspackage:maskinlesbare-hendelser` (NB denne er midlertidig, ikke avklart at vi skal benytte denne) på systemet (sånn at systembrukeren kan benytte det)
+- - Opprett `standard systembruker` i system `<orgnr>_integrasjonspunkt` med tilgangspakken som ble definert på systemet
+- - Bruk approval url fra responsen for å logge inn i Altinn som daglig leder og godkjenne at systembrukeren får tilgangspakken
 - - Verifiser at systembrukeren kan få token fra maskinporten
+
     
 ## KUL SLITEN TIGER AS (314240979)
 ```
 Tenor : KUL SLITEN TIGER AS (314240979)
 Daglig leder : KOGNITIV TANGENT (03888398847)
 Maskinporten : eformidling-tenor-test-klient-01 (826acbbc-ee17-4946-af92-cf4885ebe951)
-Nøkkelpar : 314240979-kul-sliten-tiger-as.jwk (kid: RyResLhzSS5p2qUq6tNla_mOkG9vU8oiYNmDEYJ9OGg)
+Nøkkelpar : 314240979-kul-sliten-tiger-as.jwk (kid: RyResLhzSS5p2qUq6tNla_mOkG9vU8oiYNmDEYJ9OGg, utløper 09.09.2026)
 System : 314240979_integrasjonspunkt
 Systembruker (standard) : 314240979_integrasjonspunkt_systembruker_test2 (10982a4d-4f9c-424a-b1bc-376dcef7316c)
 Systembruker (agent) : 314240979_integrasjonspunkt_systembruker_test (5b205bec-aad7-4e3f-a504-3e84b8a778fd)
@@ -58,10 +60,17 @@ Systembruker (agent) : 314240979_integrasjonspunkt_systembruker_test (5b205bec-a
 Tenor : STERK ULYDIG HUND DA (311780735)
 Daglig leder : ULYDIG LEVEREGEL (28923148371)
 Maskinporten : eformidling-tenor-test-klient-02 (b590f149-d0ba-4fca-b367-bccd9e444a00)
-Nøkkelpar : 311780735-sterk-ulydig-hund-da.jwk (kid: 8333ede6-60cd-450c-84b1-4c12dfb80cb6)
-System : 
-Systembruker : 
+Nøkkelpar : 311780735-sterk-ulydig-hund-da.jwk (kid: 8333ede6-60cd-450c-84b1-4c12dfb80cb6, utløper 16.09.2026)
+System : 311780735_integrasjonspunkt
+Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test (19bed6de-092d-4f4e-9a8c-7b95efaa400c)
 ```
+
+## DIGDIR (991825827)
+```
+Dette er en ekte org.
+eformidling-meldingsteneste-test (a63cac91-3210-4c35-b961-5c7bf122345c)
+```
+
 
 ## Begrensninger
 

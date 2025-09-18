@@ -38,11 +38,11 @@ public class SystemregisterApiClient {
         apiEndpoint = "https://platform.tt02.altinn.no/authentication/api/v1/systemregister";
     }
 
-    public String getTokenTest(){
+    public String getTokenTest() {
         return systemUserTokenProducer.produceToken(List.of("altinn:broker.read", "altinn:broker.write"));
     }
 
-    public String getAllSystemUsers(String systemId){
+    public String getAllSystemUsers(String systemId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 
         return restClient.get()
@@ -54,24 +54,19 @@ public class SystemregisterApiClient {
             ;
     }
 
-    public String createStandardSystemUser(){
+    public String createStandardSystemUser(String orgNo, String systemId, String name, String accessPackage) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
 
         var body = """
             {
-              "externalRef": "314240979_integrasjonspunkt_systembruker_test2",
-              "systemId": "314240979_integrasjonspunkt",
-              "partyOrgNo": "314240979",
-              "rights": [
-                  ],
-              "accesspackages": [
-                  {
-                    "urn": "urn:altinn:accesspackage:maskinlesbare-hendelser"
-                  }
-                ],
+              "externalRef": "%s_systembruker_%s",
+              "systemId": "%s",
+              "partyOrgNo": "%s",
+              "rights": [ ],
+              "accesspackages": [ {"urn": "%s"} ],
               "redirectUrl": ""
             }
-            """;
+            """.formatted(systemId, name, systemId, orgNo, accessPackage);
 
         var res =  restClient.post()
             .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/request/vendor")
@@ -79,13 +74,13 @@ public class SystemregisterApiClient {
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .body(body)
-            .retrieve();
+            .retrieve()
+            ;
 
-        System.out.println(res.toEntity(String.class));
-        return "";
+        return res.body(String.class);
     }
 
-    public String createAgentSystemUser(){
+    public String createAgentSystemUser() {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
 
         var body = """
@@ -139,22 +134,19 @@ public class SystemregisterApiClient {
             ;
     }
 
-    public String updateAccessPackage(){
+    public String updateAccessPackage(String systemId, String accessPackage) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 
         String body = """
             [
                 {
-                    "urn": "urn:altinn:accesspackage:maskinlesbare-hendelser"
+                    "urn": "%s"
                 }
             ]
-            """;
-
-        //PUT authentication/api/v1/systemregister/vendor/{systemid}/accesspackages
-
+            """.formatted(accessPackage);
 
         var res =  restClient.put()
-            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemregister/vendor/" + "314240979_integrasjonspunkt" +"/accesspackages")
+            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemregister/vendor/%s/accesspackages".formatted(systemId))
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
@@ -165,20 +157,20 @@ public class SystemregisterApiClient {
         return res.getStatusCode().toString();
     }
 
-    public String createSystem(){
+    public String createSystem(String orgno, String name, String clientId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 
         String body = """
             {
-              "id": "314240979_integrasjonspunkt",
+              "id": "%s_integrasjonspunkt",
               "vendor": {
                 "authority": "iso6523-actorid-upis",
-                "ID": "0192:314240979"
+                "ID": "0192:%s"
               },
               "name": {
-                "nb": "KUL SLITEN TIGER AS integrasjonspunkt",
-                "nn": "KUL SLITEN TIGER AS integrasjonspunkt",
-                "en": "KUL SLITEN TIGER AS integrasjonspunkt"
+                "nb": "%s integrasjonspunkt",
+                "nn": "%s integrasjonspunkt",
+                "en": "%s integrasjonspunkt"
               },
               "description": {
                 "nb": "integrasjonspunkt",
@@ -186,11 +178,11 @@ public class SystemregisterApiClient {
                 "en": "integrasjonspunkt"
               },
               "clientId": [
-                "826acbbc-ee17-4946-af92-cf4885ebe951"
+                "%s"
               ],
               "isVisible": true
             }
-            """;
+            """.formatted(orgno, orgno, name, name, name, clientId);
 
          var res =  restClient.post()
             .uri(apiEndpoint + "/vendor")
