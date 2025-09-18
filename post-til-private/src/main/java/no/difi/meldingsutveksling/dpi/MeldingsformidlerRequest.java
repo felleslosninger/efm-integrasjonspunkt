@@ -76,4 +76,5 @@ public class MeldingsformidlerRequest {
     PrintColor printColor;
     PostalCategory postalCategory;
     ReturnHandling returnHandling;
+
 }

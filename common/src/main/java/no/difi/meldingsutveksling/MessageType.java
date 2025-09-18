@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 @Getter
 public enum MessageType {
 
-
     STATUS("status"),
     FEIL("feil"),
 
@@ -75,4 +74,5 @@ public enum MessageType {
     public static Stream<MessageType> stream() {
         return Arrays.stream(MessageType.values());
     }
+
 }
