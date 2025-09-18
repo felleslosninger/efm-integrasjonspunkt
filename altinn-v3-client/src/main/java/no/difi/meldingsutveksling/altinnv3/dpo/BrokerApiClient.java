@@ -24,8 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BrokerApiClient {
 
-    @Qualifier("SystemUserTokenProducer")
-    //@Qualifier("DpoTokenProducer")
+    @Qualifier("DpoTokenProducer")
     private final TokenProducer tokenProducer;
     private final IntegrasjonspunktProperties props;
 
@@ -33,7 +32,7 @@ public class BrokerApiClient {
 
     private static String readScope = "altinn:broker.read";
     private static String writeScope = "altinn:broker.write";
-    private static String serviceOwnerScope = "altinn:serviceowner"; // FIXME should not be needed, read/write should be enough
+    private static String serviceOwnerScope = "altinn:serviceowner"; // FIXME should be removed, read/write should be enough
 
     private String brokerServiceUrl;
 
@@ -77,7 +76,7 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() {
-        String accessToken = tokenProducer.produceToken(List.of(readScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",

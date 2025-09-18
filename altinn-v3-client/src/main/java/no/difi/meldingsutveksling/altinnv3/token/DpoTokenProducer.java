@@ -19,7 +19,7 @@ public class DpoTokenProducer implements TokenProducer {
     @Cacheable(cacheNames = {"altinn.getDpoToken"})
     public String produceToken(List<String> scopes) {
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
-        String token = tokenService.fetchToken(config, scopes);
+        String token = tokenService.fetchToken(config, scopes, new AdditionalClaims());
         return tokenExchangeService.exchangeToken(token, config.exchangeUrl());
     }
 

@@ -19,7 +19,7 @@ public class DpvTokenProducer implements TokenProducer {
     @Cacheable(cacheNames = {"altinn.getDpvToken"})
     public String produceToken(List<String> scopes) {
         var config = new TokenConfig(properties.getDpv().getOidc(), properties.getDpv().getAltinnTokenExchangeUrl());
-        String token = tokenService.fetchToken(config, scopes);
+        String token = tokenService.fetchToken(config, scopes, null);
         return tokenExchangeService.exchangeToken(token, config.exchangeUrl());
     }
 

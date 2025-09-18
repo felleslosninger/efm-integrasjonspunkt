@@ -49,7 +49,7 @@ class TokenProducerTest {
     void setUp() {
         when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig());
         when(integrasjonspunktProperties.getDpv()).thenReturn(new PostVirksomheter());
-        when(tokenService.fetchToken(any(), any())).thenReturn("maskinportentoken");
+        when(tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");
         when(tokenExchangeService.exchangeToken(any(), any())).thenReturn("altinntoken");
     }
 
@@ -62,7 +62,7 @@ class TokenProducerTest {
         dpoTokenProducer.produceToken(scopes);
         dpoTokenProducer.produceToken(scopes);
         assertEquals("altinntoken", token);
-        verify(tokenService, times(3)).fetchToken(any(), any());
+        verify(tokenService, times(3)).fetchToken(any(), any(), any());
         verify(tokenExchangeService, times(3)).exchangeToken(any(), any());
     }
 
@@ -75,7 +75,7 @@ class TokenProducerTest {
         dpvTokenProducer.produceToken(scopes);
         dpvTokenProducer.produceToken(scopes);
         assertEquals("altinntoken", token);
-        verify(tokenService, times(3)).fetchToken(any(), any());
+        verify(tokenService, times(3)).fetchToken(any(), any(), any());
         verify(tokenExchangeService, times(3)).exchangeToken(any(), any());
     }
 

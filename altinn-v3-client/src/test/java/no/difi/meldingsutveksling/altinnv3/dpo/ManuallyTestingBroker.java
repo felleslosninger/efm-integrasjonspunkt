@@ -3,7 +3,9 @@ package no.difi.meldingsutveksling.altinnv3.dpo;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemuserTokenProducer;
-import no.difi.meldingsutveksling.altinnv3.token.*;
+import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
+import no.difi.meldingsutveksling.altinnv3.token.SystemUserTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;
@@ -14,7 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Disabled
 @SpringBootTest(classes = {
@@ -45,6 +48,7 @@ public class ManuallyTestingBroker {
     @Test
     void testAltinnToken() {
         var altinnToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read"));
+        System.out.println(altinnToken);
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 
@@ -58,7 +62,7 @@ public class ManuallyTestingBroker {
 
     @Test
     void testFileDetails() {
-        var details = client.getDetails("e06aa73f-fe4d-40eb-90c1-58a431e38f1c");
+        var details = client.getDetails("5d59e5ef-6723-45d4-9f9f-2cb4664230a1");
         assertNotNull(details);
         System.out.println(details);
     }
@@ -80,7 +84,7 @@ public class ManuallyTestingBroker {
         var fileTransfer = new FileTransferInitalizeExt();
         fileTransfer.fileName("test.txt");
         fileTransfer.setResourceId(resource_id);
-        fileTransfer.setSender("0192:314240979");
+        fileTransfer.setSender("0192:991825827");
         fileTransfer.setRecipients(List.of("0192:314240979"));
         fileTransfer.setSendersFileTransferReference("string");
         var uuid = client.initialize(fileTransfer).getFileTransferId();

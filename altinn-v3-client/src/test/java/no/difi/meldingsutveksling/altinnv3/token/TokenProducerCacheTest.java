@@ -66,7 +66,7 @@ class TokenProducerCacheTest {
 
     @BeforeEach
     void setUp() {
-        when(TestConfig.tokenService.fetchToken(any(), any())).thenReturn("maskinportentoken");
+        when(TestConfig.tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");
         when(TestConfig.tokenExchangeService.exchangeToken(any(), any())).thenReturn("altinntoken");
     }
 
@@ -79,7 +79,7 @@ class TokenProducerCacheTest {
         dpoTokenProducer.produceToken(scopes);
         dpoTokenProducer.produceToken(scopes);
         assertEquals("altinntoken", token);
-        verify(TestConfig.tokenService, times(1)).fetchToken(any(), any());
+        verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
         verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());
     }
 
@@ -92,7 +92,7 @@ class TokenProducerCacheTest {
         dpvTokenProducer.produceToken(scopes);
         dpvTokenProducer.produceToken(scopes);
         assertEquals("altinntoken", token);
-        verify(TestConfig.tokenService, times(1)).fetchToken(any(), any());
+        verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
         verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());
     }
 

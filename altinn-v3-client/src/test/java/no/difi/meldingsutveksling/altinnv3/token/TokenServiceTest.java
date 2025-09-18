@@ -103,7 +103,7 @@ class TokenServiceTest {
             }
             """.formatted(wireMockServer.baseUrl(), alias, password, path, wireMockServer.baseUrl()), TokenConfig.class);
 
-        var token = tokenService.fetchToken(tc, List.of("altinn:broker.read","altinn:broker.write","altinn:serviceowner"));
+        var token = tokenService.fetchToken(tc, List.of("altinn:broker.read","altinn:broker.write","altinn:serviceowner"), null);
         assertEquals("test-access-token", token, "Token should match the mocked access token");
 
         var exchangedToken = tokenExchangeService.exchangeToken(token, tc.exchangeUrl());
