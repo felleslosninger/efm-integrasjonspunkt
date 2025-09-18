@@ -5,6 +5,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
+import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
@@ -16,6 +17,7 @@ import no.difi.meldingsutveksling.nextmove.nhn.Reciever;
 import no.difi.meldingsutveksling.nextmove.nhn.Sender;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.stereotype.Component;
 
@@ -48,12 +50,21 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         String recieverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Reciever HERID1 is not available");
         String recieverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Reciever HERID2 is not available");
         Patient patient = null;
+        ServiceRecord serviceRecord = null;
         try {
-            var serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
-                .conversationId(message.getSbd().getConversationId())
-                .process(message.getSbd().getProcess())
-                .build(), message.getSbd().getDocumentType());
-            patient = new Patient(serviceRecord.getPatient().fnr(), serviceRecord.getPatient().firstName(), serviceRecord.getPatient().middleName(), serviceRecord.getPatient().lastName(), "88888");
+            var reciever = (NhnIdentifier) message.getReceiver();
+            if (reciever.isFastlegeIdentifier()) {
+                serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
+                    .conversationId(message.getSbd().getConversationId())
+                    .process(message.getSbd().getProcess())
+                    .build(), message.getSbd().getDocumentType());
+                patient = new Patient(serviceRecord.getPatient().fnr(), serviceRecord.getPatient().firstName(), serviceRecord.getPatient().middleName(), serviceRecord.getPatient().lastName(), "88888");
+
+            }
+            else {
+                //@TODO vi initialiserer midlertidig patient til vi finner ut hvordan vi gjør det for nhn partner
+                patient = new Patient("777777777","Pasient","NHN partner","NHN","2343432434");
+            }
 
             System.out.println(serviceRecord.getService());
             //@TODO skal vi sende dialogmeldingen til og med at vi har ikke hentet patient detaliene ? Fortsatt vi har patient fødselsnummer kanskje det er nok ?

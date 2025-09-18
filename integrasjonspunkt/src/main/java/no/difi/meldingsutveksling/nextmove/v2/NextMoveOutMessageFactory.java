@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.OrganizationIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.PersonIdentifier;
@@ -146,10 +147,10 @@ public class NextMoveOutMessageFactory {
     private void setDphRoutingElements(StandardBusinessDocument sbd) {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.SENDER);
-
+        var recieverIdentifier = (NhnIdentifier) sbd.getReceiverIdentifier();
         var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
-        if (isOrgnummer( sbd.getReceiverIdentifier())) {
-            var recieverOrgnummer = sbd.getReceiverIdentifier().getIdentifier();
+        if (recieverIdentifier.isNhnPartnerIdentifier()) {
+            var recieverOrgnummer = recieverIdentifier.getIdentifier();
             if (!Objects.equals(recieverOrgnummer, srReciever.getOrganisationNumber())) {
                 throw new NextMoveRuntimeException("Reciever organisation number does not match address register.");
             }
@@ -180,7 +181,9 @@ public class NextMoveOutMessageFactory {
         if (sbd.getScope(ScopeType.SENDER_HERID2).isEmpty()) {
             sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID2.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel2()));
         }
-        sbd.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier(srReciever.getHerIdLevel2()));
+        if (sbd.getScope(ScopeType.RECEIVER_HERID2).isEmpty()) {
+            sbd.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier(srReciever.getHerIdLevel2()));
+        }
         if ( sbd.getScope(ScopeType.RECEIVER_HERID1).isPresent()) {
             if (!sbd.getScope(ScopeType.RECEIVER_HERID1).get().getInstanceIdentifier().equals(srReciever.getHerIdLevel1())) {
                 throw new NextMoveRuntimeException("Incoming HerID does not match expected HERID level 1!");
