@@ -32,7 +32,6 @@ public class BrokerApiClient {
 
     private static String readScope = "altinn:broker.read";
     private static String writeScope = "altinn:broker.write";
-    private static String serviceOwnerScope = "altinn:serviceowner"; // FIXME should be removed, read/write should be enough
 
     private String brokerServiceUrl;
 
@@ -76,7 +75,7 @@ public class BrokerApiClient {
     }
 
     public UUID[] getAvailableFiles() {
-        String accessToken = tokenProducer.produceToken(List.of(readScope, serviceOwnerScope));
+        String accessToken = tokenProducer.produceToken(List.of(readScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",

@@ -9,7 +9,7 @@ import java.util.List;
 public class MaskinportenTokenService implements TokenService {
 
     @Override
-    public String fetchToken(TokenConfig tokenConfig, List<String> scopes, AdditionalClaims additionalClaims) {
+    public String fetchToken(TokenConfig tokenConfig, List<String> scopes, AuthorizationClaims authorizationClaims) {
         var jwtTokenConfig = new JwtTokenConfig(
             tokenConfig.oidc().getClientId(),
             tokenConfig.oidc().getUrl().toString(),
@@ -19,7 +19,7 @@ public class MaskinportenTokenService implements TokenService {
         );
         var jtc = new ExtendedJwtTokenClient(jwtTokenConfig);
         var jti = new JwtTokenInput().setClientId(tokenConfig.oidc().getClientId()).setScopes(scopes);
-        return jtc.fetchToken(jti, additionalClaims).getAccessToken();
+        return jtc.fetchToken(jti, authorizationClaims).getAccessToken();
     }
 
 }

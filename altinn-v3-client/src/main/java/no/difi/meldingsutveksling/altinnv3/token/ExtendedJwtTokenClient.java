@@ -82,12 +82,12 @@ public class ExtendedJwtTokenClient {
             multiplier = (double) 3.0F
         )
     )
-    public JwtTokenResponse fetchToken(JwtTokenInput input, AdditionalClaims additionalClaims) {
+    public JwtTokenResponse fetchToken(JwtTokenInput input, AuthorizationClaims authorizationClaims) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OidcErrorHandler());
         LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
         attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-        attrMap.add("assertion", this.generateJWT(input, additionalClaims));
+        attrMap.add("assertion", this.generateJWT(input, authorizationClaims));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity(attrMap, headers);
@@ -97,7 +97,7 @@ public class ExtendedJwtTokenClient {
         return (JwtTokenResponse) response.getBody();
     }
 
-    public String generateJWT(JwtTokenInput input, AdditionalClaims additionalClaims) {
+    public String generateJWT(JwtTokenInput input, AuthorizationClaims authorizationClaims) {
         JWTClaimsSet.Builder builder = (new JWTClaimsSet.Builder())
             .audience((String) Optional.ofNullable(input.getAudience()).orElse(this.config.getAudience()))
             .issuer((String) Optional.ofNullable(input.getClientId()).orElse(this.config.getClientId()))
@@ -107,12 +107,10 @@ public class ExtendedJwtTokenClient {
             );
         Optional.ofNullable(input.getConsumerOrg()).ifPresent((consumerOrg) -> builder.claim("consumer_org", consumerOrg));
 
-        if (additionalClaims != null) {
-            additionalClaims.getClaims().forEach(builder::claim);
+        if (authorizationClaims != null) {
+            authorizationClaims.getClaims().forEach(builder::claim);
         }
 
-
-        // FIXME for JWK så må vi huske ekstra header med kid (fra jwk)
         JWTClaimsSet claims = builder.build();
         SignedJWT signedJWT = new SignedJWT(this.jwsHeader, claims);
 
@@ -132,7 +130,7 @@ public class ExtendedJwtTokenClient {
     }
 
     private String getScopeString(JwtTokenInput input) {
-        List<String> scopes = (List) Optional.ofNullable(input.getScopes()).orElse(this.config.getScopes());
+        List<String> scopes = Optional.ofNullable(input.getScopes()).orElse(this.config.getScopes());
         return scopes.stream().reduce((a, b) -> a + " " + b).orElse("");
     }
 
