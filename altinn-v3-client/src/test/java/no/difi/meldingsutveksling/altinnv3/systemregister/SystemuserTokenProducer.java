@@ -30,6 +30,7 @@ public class SystemuserTokenProducer implements TokenProducer {
     public String produceToken(List<String> scopes) {
         try {
             var maskinportenToken = fetchMaskinportenToken(scopes);
+//            Ikke nødvendig med Altinn tokens egentlig, fungerer med vanlig MP token
 //            System.out.println("MaskinportenToken: " + maskinportenToken);
 //            var altinnToken = exchangeAltinnToken(maskinportenToken);
 //            System.out.println("AltinnToken: " + altinnToken);

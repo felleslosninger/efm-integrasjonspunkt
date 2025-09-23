@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO : Denne kan nok flyttes til common når alt virker
+// TODO : Kanskje refaktorere / generalisere som "additional claims" og flyttes til move-common når alt virker?
 public class AuthorizationClaims {
 
     public static final String ISO_6523_ACTORID_UPIS = "iso6523-actorid-upis";
@@ -21,6 +21,7 @@ public class AuthorizationClaims {
     public Map<String, Object> getClaims() {
 
         var claims = new HashMap<String, Object>();
+
         Map<String, Object> systemuserOrg = new HashMap<>();
         systemuserOrg.put("authority", ISO_6523_ACTORID_UPIS);
         systemuserOrg.put("ID", authorizationDetails.getSystemuserOrgId());
@@ -31,7 +32,6 @@ public class AuthorizationClaims {
         authDetail.put("externalRef", authorizationDetails.getExternalRef());
 
         claims.put("authorization_details", List.of(authDetail));
-
         return claims;
 
     }

@@ -7,13 +7,12 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import no.difi.move.common.oauth.JwtTokenInput;
 import no.difi.move.common.oauth.JwtTokenResponse;
 import no.difi.move.common.oauth.OidcErrorHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.retry.annotation.Backoff;
@@ -22,31 +21,23 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.cert.CertificateEncodingException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+@Slf4j
 public class ExtendedJwtTokenClient {
 
-    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("Europe/Oslo");
-    public static final ZoneId DEFAULT_ZONE_ID;
-    private static final Logger log = LoggerFactory.getLogger(no.difi.move.common.oauth.JwtTokenClient.class);
-
-    static {
-        DEFAULT_ZONE_ID = DEFAULT_TIME_ZONE.toZoneId();
-    }
+    public static final ZoneId DEFAULT_ZONE_ID = TimeZone.getTimeZone("Europe/Oslo").toZoneId();
 
     private final JwtTokenConfig config;
-    private final WebClient wc;
     private final JWSHeader jwsHeader;
     private final RSASSASigner signer;
 
     public ExtendedJwtTokenClient(JwtTokenConfig config) {
         this.config = config;
-        this.wc = WebClient.create(config.getTokenUri());
         KeystoreHelper keystoreHelper = new KeystoreHelper(config.getKeystore());
         this.jwsHeader = this.getJwsHeader(keystoreHelper);
         this.signer = this.getSigner(keystoreHelper);
@@ -73,6 +64,8 @@ public class ExtendedJwtTokenClient {
         return s;
     }
 
+    // FIXME retryable vil bare fungere når den kalles via en spring bean proxy,
+    // går greit å droppe retry/cache på dette nivå, da det er caching av token på nivået over i TokenProducer's ?
     @Retryable(
         value = {HttpClientErrorException.class},
         maxAttempts = Integer.MAX_VALUE,

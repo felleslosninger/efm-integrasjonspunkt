@@ -38,14 +38,22 @@ public class DpoTokenProducer implements TokenProducer {
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
         var authorizationClaims = new AuthorizationClaims(properties.getDpo().getAuthorizationDetails());
 
-        String token = null;
+        String maskinportenToken = null;
         boolean useJwk = AuthenticationType.JWK.equals(properties.getDpo().getOidc().getAuthenticationType());
         if (useJwk) {
-            token = fetchMaskinportenTokenUsingJwk(config, scopes, authorizationClaims);
+            maskinportenToken = fetchMaskinportenTokenUsingJwk(config, scopes, authorizationClaims);
         } else {
-            token = tokenService.fetchToken(config, scopes, authorizationClaims);
+            maskinportenToken = tokenService.fetchToken(config, scopes, authorizationClaims);
         }
-        return tokenExchangeService.exchangeToken(token, config.exchangeUrl());
+
+        // TODO : dette fungerer både med maskinporten token og altinn token, men levetiden er ulik
+        // det kan være en fordel å benytte altinn token da dette har mye lenger levetid enn maskinporten token
+        // maskinporten token har levetid på 120 sekunder (2 min)
+        // altinn token har levetid på 1800 sekunder (30 min)
+
+        var altinnToken = tokenExchangeService.exchangeToken(maskinportenToken, config.exchangeUrl());
+        return altinnToken;
+
     }
 
 

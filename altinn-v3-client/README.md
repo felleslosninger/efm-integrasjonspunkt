@@ -14,6 +14,7 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 
 - Nyttar formidling API-et til Altinn: https://docs.altinn.studio/nb/broker/
 - Grov plan for implementasjon https://github.com/Altinn/altinn-authentication/issues/1394
+- Sekvens diagram som viser [onboarding og bruk](altinn_dpo.md)
 
 [ManuallyTestingBroker.java](src/test/java/no/difi/meldingsutveksling/altinnv3/dpo/ManuallyTestingBroker.java) kan brukast for å teste DPO funksjonalitet manuelt.
 
@@ -26,6 +27,9 @@ curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep
 
 # KUL SLITEN TIGER AS (314240979)
 curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep 314240979 | grep systemId | cat
+
+# STERK ULYDIG HUND DA (311780735)
+curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep 311780735 | grep systemId | cat
 ```
 
 # Test organisasjoner og maskinporten klienter
@@ -38,7 +42,7 @@ Fremgangsmåten for å gjøre dette er da :
 - Snakk med Daniel for å få lagt til scopes som klientene trenger for å opprette system og systembruker
 - - Legg til scopes `altinn:authentication/systemregister.write`, `altinn:authentication/systemuser.request.write` og `altinn:authentication/systemuser.request.read`
 - - Opprett system for integrasjonspunktet for organisasjon (navnestandard `<orgnr>_integrasjonspunkt`)
-- - Legg til tilgangspakke `urn:altinn:accesspackage:maskinlesbare-hendelser` (NB denne er midlertidig, ikke avklart at vi skal benytte denne) på systemet (sånn at systembrukeren kan benytte det)
+- - Legg til tilgangspakke `urn:altinn:accesspackage:maskinlesbare-hendelser` (NB denne er midlertidig, ikke avklart at vi skal benytte denne, `urn:altinn:accesspackage:programmeringsgrensesnitt` eller opprette vår egen tilgangspakke) på systemet (sånn at systembrukeren kan benytte det)
 - - Opprett `standard systembruker` i system `<orgnr>_integrasjonspunkt` med tilgangspakken som ble definert på systemet
 - - Bruk approval url fra responsen for å logge inn i Altinn som daglig leder og godkjenne at systembrukeren får tilgangspakken
 - - Verifiser at systembrukeren kan få token fra maskinporten

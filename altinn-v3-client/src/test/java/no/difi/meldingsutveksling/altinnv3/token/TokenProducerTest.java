@@ -1,9 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.config.PostVirksomheter;
+import no.difi.meldingsutveksling.config.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -47,7 +45,11 @@ class TokenProducerTest {
 
     @BeforeEach
     void setUp() {
-        when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig());
+        var dpo = new AltinnFormidlingsTjenestenConfig();
+        var oidc = new Oidc();
+        oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
+        dpo.setOidc(oidc);
+        when(integrasjonspunktProperties.getDpo()).thenReturn(dpo);
         when(integrasjonspunktProperties.getDpv()).thenReturn(new PostVirksomheter());
         when(tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");
         when(tokenExchangeService.exchangeToken(any(), any())).thenReturn("altinntoken");
