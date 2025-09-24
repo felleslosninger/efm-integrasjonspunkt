@@ -89,5 +89,6 @@ Dei 100 filene som blir henta uavhengig av kanalen på meldingen.
 
 - Nyttar melding API-et til Altinn: https://docs.altinn.studio/nb/correspondence/
 - Grov plan for implementasjon https://github.com/Altinn/altinn-authentication/issues/1395
+- Sekvens diagram som viser [onboarding og bruk](altinn_dpv.md)
 
 [ManuallyTestingCorrespondence.java](src/test/java/no/difi/meldingsutveksling/altinnv3/dpv/ManuallyTestingCorrespondence.java) kan brukast for å teste DPV funksjonalitet manuelt.

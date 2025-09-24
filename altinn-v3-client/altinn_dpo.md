@@ -10,7 +10,7 @@ sende og motta filer via Altinn Broker API.
 ```mermaid
 sequenceDiagram
     actor K as Kunde
-    actor D as Daniel
+    actor D as Digdir
     participant S as Samarbeidsportalen<br><webapp>
     participant M as Maskinporten<br><token endpoint>
     participant AS as Altinn SystemRegister<br><rest api>
@@ -18,7 +18,7 @@ sequenceDiagram
     
     K->>S: Opprett maskinporten client (selvbetjent)
     note over S : Tildeler scopes for : broker read + write
-    D->>S: Daniel tildeler scopes (de som ikke er åpne for kunde) 
+    D->>S: Tildeler scopes (de som ikke er åpne for kunde) 
     note over S : Tildeler scopes for : system + systembruker
     
     K->>M: Hent token for client
@@ -65,4 +65,5 @@ IP-->>AT: Gjør token exchange hos Altinn (ikke påkrevet, men anbefalt)
     note over AT : Altinn token har lang levetid på (30 min)
     IP-->>AB: Sende filer med systemuser token
     IP-->>AB: Hente filer med systemuser token
+    IP-->>AB: Markere filer som lest med systemuser token
 ```
