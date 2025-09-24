@@ -18,7 +18,7 @@ sequenceDiagram
     
     K->>S: Opprett maskinporten client (selvbetjent)
     note over S : Tildeler scopes for : broker read + write
-    D->>S: Daniel tildeler scopes med restriksjoner 
+    D->>S: Daniel tildeler scopes (de som ikke er åpne for kunde) 
     note over S : Tildeler scopes for : system + systembruker
     
     K->>M: Hent token for client

@@ -7,8 +7,8 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [ ] Få innsyn i korleis DPV tjenestene var konfigurert i altinn 2 og opprett ressurser i altinn 3
 - [ ] Få clientid for altinn 3 token inn i properties, kan man kombinere den med den eksisterende clientid?
 - [ ] Indersøk hvordan varsling (notification) fungerte i altinn2, og sett opp notification i altinn 3 til å vere riktig basert på tidlegare funksjonalitet og ønska funksjonalitet.
-- [ ] Få statestikk fra altinn https://docs.altinn.studio/nb/broker/broker-transition/getting-started/#konfigurer-ressurs-til-bruk-i-overgangsløsningen for å vurdere overgangsløsningen i produksjon
-- [ ] Benyttes denne til noe?  https://platform.tt02.altinn.no/authentication/api/v1/openid/.well-known/openid-configuration
+- [ ] Få statestikk fra altinn for å vurdere [overgangsløsningen i produksjon](https://docs.altinn.studio/nb/broker/broker-transition/getting-started/#konfigurer-ressurs-til-bruk-i-overgangsløsningen)
+- [ ] Benyttes dette [oidc endepunktet](https://platform.tt02.altinn.no/authentication/api/v1/openid/.well-known/openid-configuration) til noe i Altinn?
 
 # DPO
 
@@ -20,19 +20,22 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 
 [ManualResourceTest.java](src/test/java/no/difi/meldingsutveksling/altinnv3/dpo/ManualResourceTest.java) kan brukes for å konfigurere instillinger på ressursen til DPO.
 
-Slik kan vi se hvilke systemer som er registrert i Altinn for en organisasjon :
+Slik kan vi se hvilke systemer som er registrert i Altinn for ulike organisasjoner (åpen tjeneste) :
 ```
 # Digdir (991825827)
-curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep 991825827 | grep systemId | cat
+curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | \
+grep 991825827 | grep systemId | cat
 
 # KUL SLITEN TIGER AS (314240979)
-curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep 314240979 | grep systemId | cat
+curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | \
+grep 314240979 | grep systemId | cat
 
 # STERK ULYDIG HUND DA (311780735)
-curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | grep 311780735 | grep systemId | cat
+curl https://platform.tt02.altinn.no/authentication/api/v1/systemregister | \
+grep 311780735 | grep systemId | cat
 ```
 
-# Test organisasjoner og maskinporten klienter
+# Test-organisasjoner og maskinporten-klienter
 For å teste har vi registrert klienter i maskinporten for hver sine syntetiske organiasjon.
 Fremgangsmåten for å gjøre dette er da :
 

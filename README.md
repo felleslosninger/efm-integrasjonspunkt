@@ -27,7 +27,7 @@
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
-- 
+
 ## Bygg og kjør lokalt 
 Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.10.
 
@@ -93,3 +93,22 @@ Linker til logger, config og alt annet :
 ## Konfigurasjon av Integrasjonspunktet
 Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på konfig,
 for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+
+
+## Release
+Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
+
+> **⚠️**  Main branch er protected, så release plugin får ikke pushet, så release må gjøres i en separat branch og så en PR tilbake til main.
+
+```bash
+# lokalt repo må være i sync med origin/GitHub
+git push
+
+mvn release:prepare
+# svar på tre spørsmål (sett tag lik release-versjon) 
+# What is the release version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0: : 1.0.0
+# What is SCM release tag or label for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.0: :
+# What is the new development version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.1-SNAPSHOT: :
+
+mvn release:perform
+```
