@@ -36,7 +36,6 @@ mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
 
-
 ## Grensesnitt
 
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
