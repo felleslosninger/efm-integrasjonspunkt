@@ -12,7 +12,7 @@
 
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
     <name>Multiproject for meldingsutveksling</name>
 
@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</developerConnection>
         <url>https://github.com/felleslosninger/efm-integrasjonspunkt</url>
-        <tag>v3.0.0-beta</tag>
+        <tag>v3.0.0</tag>
     </scm>
 
     <licenses>
