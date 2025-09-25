@@ -99,6 +99,7 @@
         <module>service-registry-client</module>
         <module>domain</module>
         <module>altinn-v3-client</module>
+        <module>altinn-v3-proxy</module>
         <module>fiks-meldingsformidler</module>
         <module>integrasjonspunkt</module>
     </modules>

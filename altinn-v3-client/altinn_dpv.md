@@ -31,7 +31,7 @@ sequenceDiagram
     participant IP as IntegrasjonsPunkt<br><applikasjon>
     participant M as Maskinporten<br><token endpoint>
     participant AT as Altinn Token Exchange<br><token endpoint>
-    participant IB as Integrasjonspunkt Backend API<br><rest api>
+    participant IB as Integrasjonspunkt Altinn v3 Proxy<br><rest api>
     participant AR as Altinn ResourceRegistry<br><rest api>
     participant AC as Altinn Correspondence API<br><rest api>
     

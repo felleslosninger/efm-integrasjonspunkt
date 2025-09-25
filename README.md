@@ -99,7 +99,7 @@ for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/i
 ## Release
 Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
 
-> **⚠️**  Main branch er protected, så release plugin får ikke pushet, så release må gjøres i en separat branch og så en PR tilbake til main.
+> **⚠️**  Main branch er protected, release må gjøres i en egen branch med PR tilbake til main.  Dette kan forenkles ved å benytte `mvn release:branch` goal.  
 
 ```bash
 # lokalt repo må være i sync med origin/GitHub
