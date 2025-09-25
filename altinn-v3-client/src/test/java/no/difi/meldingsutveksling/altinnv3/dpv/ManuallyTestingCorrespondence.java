@@ -34,11 +34,8 @@ public class ManuallyTestingCorrespondence {
     @Inject
     CorrespondenceApiClient client;
 
-    @Test
-    public void getAttachmentDetails(){
-        var res = client.getAttachmentDetails(UUID.fromString("0197c4ef-9f81-7a05-bf84-9333c169fd28"));
-        System.out.println(res);
-    }
+    String correspondenceId = "019980e6-e382-7eab-8c9d-60b9c7ccd116";
+    String attachmentId = "019980e6-e33a-7c11-9a04-22b864f31921";
 
     @Test
     public void upload() throws IOException {
@@ -87,13 +84,19 @@ public class ManuallyTestingCorrespondence {
 
     @Test
     public void getCorrespondenceDetails() {
-        var res = client.getCorrespondenceDetails(UUID.fromString("0197ef56-0519-7157-b819-bfa65777569a"));
+        var res = client.getCorrespondenceDetails(UUID.fromString(correspondenceId));
+        System.out.println(res);
+    }
+
+    @Test
+    public void getAttachmentDetails(){
+        var res = client.getAttachmentDetails(UUID.fromString(attachmentId));
         System.out.println(res);
     }
 
     @Test
     public void downloadAttachment(){
-        var res = client.downloadAttachment(UUID.fromString("0197ef56-0519-7157-b819-bfa65777569a"), UUID.fromString("0197ef56-04de-7713-93b1-d5562e4e261b"));
+        var res = client.downloadAttachment(UUID.fromString(correspondenceId), UUID.fromString(attachmentId));
         String message = new String(res);
         System.out.println(message);
     }

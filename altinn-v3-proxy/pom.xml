@@ -3,10 +3,18 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- hvis vi skal benytte noe felles kode, så bytter vi til denne parenten
     <parent>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>parent-pom</artifactId>
         <version>4.0.0-SNAPSHOT</version>
+    </parent>
+    -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.5</version>
     </parent>
 
     <artifactId>altinn-v3-proxy</artifactId>
@@ -43,15 +51,17 @@
 
 	</dependencies>
 
-    <!--
 	<build>
 		<plugins>
+            <!-- for å lage kjørbar jar fil -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
-	-->
 
 </project>

@@ -10,3 +10,8 @@ Avklaringer for videre utvikling :
 - [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet
 
+## Bygges og kjøres
+```bash
+mvn clean package
+java -jar altinn-v3-proxy/target/altinn-v3-proxy.jar
+```
