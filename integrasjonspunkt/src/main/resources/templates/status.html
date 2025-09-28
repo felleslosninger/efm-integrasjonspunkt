@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Status</title>
+    <style>
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+        transition: 0.3s;
+        border-radius: 5px;
+    }
+
+    /* On mouse-over, add a deeper shadow */
+    .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.6);
+    }
+
+    /* Add some padding inside the card container */
+    .container {
+        padding: 2px 16px;
+    }
+    </style>
+</head>
+<body>
+
+<h1>Status (just prototyping, random information below)</h1>
+
+<div class="card">
+    <h2 th:unless="${status.dpi()}">DPI er disabled 🤦‍♂️</h2>
+    <div th:if="${status.dpi()}" class="container">
+        <h2>DPI</h2>
+        <p>Vis masse mer informasjon om DPI og hvordan den er konfigurert</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2 th:unless="${status.dpo()}">DPO er disabled 🤦‍♂️</h2>
+    <div th:if="${status.dpo()}" class="container">
+        <h2>DPO</h2>
+        <p>Vis masse mer informasjon om DPO og hvordan den er konfigurert</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2 th:unless="${status.dpv()}">DPV er disabled 🤦‍♂️</h2>
+    <div th:if="${status.dpv()}" class="container">
+        <h2>DPV</h2>
+        <p>Vis masse mer informasjon om DPV og hvordan den er konfigurert</p>
+    </div>
+</div>
+
+</body>
+</html>

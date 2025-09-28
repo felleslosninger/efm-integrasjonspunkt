@@ -69,6 +69,9 @@ open integrasjonspunkt/target/dokka/index.html
 ## Linker når Integrasjonspunkt er starter lokalt
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
 
+Hovedsiden med masse informasjon om Integrasjonspunktet :
+- http://localhost:9093/
+
 Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
 - http://localhost:9093/viewreceipts  🚨 Ikke i bruk / kan fjernes ? 🚨
