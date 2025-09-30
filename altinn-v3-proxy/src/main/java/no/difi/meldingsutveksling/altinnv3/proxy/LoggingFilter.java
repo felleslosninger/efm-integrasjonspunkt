@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.altinnv3.proxy;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -11,13 +12,20 @@ public class LoggingFilter implements GatewayFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        System.out.println(exchange.getRequest().getURI());
+        dumpHeaders(exchange.getRequest());
         return chain.filter(exchange).then(
             Mono.fromRunnable( () -> {
                 URI routedUrl = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRequestUrl");
-                System.out.println(routedUrl);
+                System.out.println("Destination URL : " + routedUrl);
             } )
         );
+    }
+
+    void dumpHeaders(ServerHttpRequest request) {
+        System.out.println("Request URI : " + request.getURI());
+        request.getHeaders().forEach((name, values) -> {
+            System.out.println("Header : " + name + " = " + values);
+        });
     }
 
 }
