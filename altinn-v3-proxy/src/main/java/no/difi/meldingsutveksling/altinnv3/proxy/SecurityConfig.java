@@ -12,20 +12,22 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(new GlobalSpringSecurityErrorHandler())
-                .accessDeniedHandler(new GlobalSpringSecurityErrorHandler())
-            )
+// FIXME disabled for now
+//            .exceptionHandling(exceptionHandling -> exceptionHandling
+//                .authenticationEntryPoint(new GlobalSpringSecurityErrorHandler())
+//                .accessDeniedHandler(new GlobalSpringSecurityErrorHandler())
+//            )
             .authorizeExchange(exchanges -> exchanges
 
-                // allow actuator endpoints, health, metrics / prometheus etc
+                // allow actuator endpoints
                 .pathMatchers("/actuator/**").permitAll()
 
-                // allow access for clients with correct scope
-                .anyExchange().hasAnyAuthority("SCOPE_altinn:broker.read")
+                // allow access to correspondence for clients with correct scope
+                .pathMatchers("/correspondence/api/**").hasAnyAuthority("SCOPE_altinn:broker.read")
 
-                // just require a valid token
-                //.anyExchange().authenticated()
+                // deny all other url's
+                .anyExchange().denyAll()
+
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt())  // enable JWT validation
             .build();

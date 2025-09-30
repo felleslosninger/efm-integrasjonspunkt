@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-@Component
-@Order(-2)  // must be lower than DefaultErrorWebExceptionHandler
+// FIXME DISABLED FOR NOW
+//@Component
+//@Order(-2)  // must be lower than DefaultErrorWebExceptionHandler
 public class GlobalGatewayErrorHandler implements ErrorWebExceptionHandler {
 
     @Override

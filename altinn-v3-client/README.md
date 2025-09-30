@@ -50,6 +50,8 @@ Fremgangsmåten for å gjøre dette er da :
 - - Bruk approval url fra responsen for å logge inn i Altinn som daglig leder og godkjenne at systembrukeren får tilgangspakken
 - - Verifiser at systembrukeren kan få token fra maskinporten
 
+Daglig leder for organisasjoner kan logge inn i [Altinn TT02](https://tt02.altinn.no/) for å lese meldinger.
+
     
 ## KUL SLITEN TIGER AS (314240979)
 ```
@@ -70,6 +72,13 @@ Maskinporten : eformidling-tenor-test-klient-02 (b590f149-d0ba-4fca-b367-bccd9e4
 Nøkkelpar : 311780735-sterk-ulydig-hund-da.jwk (kid: 8333ede6-60cd-450c-84b1-4c12dfb80cb6, utløper 16.09.2026)
 System : 311780735_integrasjonspunkt
 Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test (19bed6de-092d-4f4e-9a8c-7b95efaa400c)
+```
+
+## FRISK VOKSENDE TIGER AS (314244370)
+```
+Tenor : FRISK VOKSENDE TIGER AS (314244370)
+Daglig leder : RØDFOTSULE KONTROLLERT (30848299746)
+Kun brukt som mottaker av meldinger i Altinn, ingen tilgang til maskinporten
 ```
 
 ## DIGDIR (991825827)
