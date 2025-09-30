@@ -32,7 +32,7 @@ public class ProxyApplication {
             .route("altinn-service", r -> r.path("/correspondence/api/**")
                 .filters(f -> f
                     .filter(new LoggingFilter())
-                    .filter(new TokenFilter())
+                    .filter(new TokenFilter(oidc))
                 ).uri(correspondenceApiUrl)
             )
             .build();

@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .pathMatchers("/actuator/**").permitAll()
 
                 // allow access for clients with correct scope
-                .anyExchange().hasAnyAuthority("SCOPE_altinn:serviceowner")
+                .anyExchange().hasAnyAuthority("SCOPE_altinn:broker.read")
 
                 // just require a valid token
                 //.anyExchange().authenticated()

@@ -57,7 +57,6 @@ public class CorrespondenceFactory {
         correspondence.setRequestedPublishTime(OffsetDateTime.now(clock));
         correspondence.setMessageSender(serviceRegistryHelper.getSenderName(message));
         correspondence.setDueDateTime(getDueDateTime(message));
-        correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setIsConfirmationNeeded(false);
         correspondence.setSendersReference(message.getMessageId());
         correspondence.setIsConfidential(dpvHelper.isConfidential(message));
