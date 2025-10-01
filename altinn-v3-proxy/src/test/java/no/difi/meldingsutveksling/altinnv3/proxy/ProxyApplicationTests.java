@@ -1,21 +1,53 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 class ProxyApplicationTests {
 
+    static String ACTUATOR_INFO_PATH = "/actuator/info";
     static String ACTUATOR_HEALTH_PATH = "/actuator/health";
+    static String ACTUATOR_METRICS_PATH = "/actuator/metrics";
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
 
-    @Autowired
+    @Inject
     private WebTestClient webTestClient;
+
+    @MockitoBean
+    private AltinnFunctions altinnFunctions;
+
+    @BeforeEach
+    void setupMock() {
+        Mockito.when(altinnFunctions.getAccessListToken()).thenReturn(Mono.just("mp-token"));
+        Mockito.when(altinnFunctions.getAccessList(any())).thenReturn(Mono.just(List.of("token")));
+        Mockito.when(altinnFunctions.checkAccessList(any(), any())).thenReturn(Mono.empty());
+        Mockito.when(altinnFunctions.getCorrespondenceToken()).thenReturn(Mono.just("token"));
+        Mockito.when(altinnFunctions.exchangeToken(any())).thenReturn(Mono.just("altinn-token"));
+        Mockito.when(altinnFunctions.sendToAltinnWithDigdirToken(any(),any(),any())).thenReturn(Mono.empty());
+    }
+
+    @Test
+    void shouldRouteToInfoEndpoint() {
+        webTestClient.get()
+            .uri(ACTUATOR_INFO_PATH)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class).isEqualTo("{}");
+    }
 
     @Test
     void shouldRouteToHealthEndpoint() {
@@ -24,6 +56,24 @@ class ProxyApplicationTests {
             .exchange()
             .expectStatus().isOk()
             .expectBody(String.class).isEqualTo("{\"status\":\"UP\"}");
+    }
+
+    @Test
+    void shouldRouteToMetricsEndpoint() {
+        webTestClient.get()
+            .uri(ACTUATOR_METRICS_PATH)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class).consumeWith(s -> {
+                s.getResponseBody().startsWith("{\"names\":[");
+            });
+    }
+
+    @Test
+    void whenUnknownPath_thenUnauthorized() {
+        webTestClient.get().uri("/no/such/api/path")
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
@@ -54,7 +104,7 @@ class ProxyApplicationTests {
         webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
-            .expectStatus().is5xxServerError(); // FIXME this is NOT we would expect, but at least we get past the security layer
+            .expectStatus().isOk();
     }
 
 }
