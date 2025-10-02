@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.config;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import no.difi.move.common.config.KeystoreProperties;
+import no.difi.move.common.config.JwkProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.net.URL;
@@ -21,10 +22,16 @@ public class Oidc {
     @NotNull
     private AuthenticationType authenticationType = AuthenticationType.CERTIFICATE;
 
+    /**
+     * Properties for Certificate
+     */
     @NestedConfigurationProperty
     private KeystoreProperties keystore;
 
+    /**
+     * Properties for JWK
+     */
     @NestedConfigurationProperty
-    private Jwk jwk;
+    private JwkProperties jwk;
 
 }

@@ -1,25 +1,18 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
 import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
+import no.difi.move.common.oauth.JwtTokenAdditionalClaims;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO : Kanskje refaktorere / generalisere som "additional claims" og flyttes til move-common når alt virker?
-public class AuthorizationClaims {
+public class ClaimsFactory {
 
     public static final String ISO_6523_ACTORID_UPIS = "iso6523-actorid-upis";
     public static final String URN_ALTINN_SYSTEMUSER = "urn:altinn:systemuser";
 
-    private AltinnAuthorizationDetails authorizationDetails;
-
-    public AuthorizationClaims(AltinnAuthorizationDetails authorizationDetails) {
-        this.authorizationDetails = authorizationDetails;
-    }
-
-    public Map<String, Object> getClaims() {
-
+    public static JwtTokenAdditionalClaims getAuthorizationClaims(AltinnAuthorizationDetails authorizationDetails) {
         var claims = new HashMap<String, Object>();
 
         Map<String, Object> systemuserOrg = new HashMap<>();
@@ -32,8 +25,9 @@ public class AuthorizationClaims {
         authDetail.put("externalRef", authorizationDetails.getExternalRef());
 
         claims.put("authorization_details", List.of(authDetail));
-        return claims;
 
+        var result = new JwtTokenAdditionalClaims();
+        result.setClaims(claims);
+        return result;
     }
-
 }
