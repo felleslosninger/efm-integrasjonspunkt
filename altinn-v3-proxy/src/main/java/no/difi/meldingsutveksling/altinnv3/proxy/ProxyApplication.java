@@ -1,10 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
 import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.altinnv3.proxy.debug.LoggingFilter;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,14 +19,11 @@ public class ProxyApplication {
 		SpringApplication.run(ProxyApplication.class, args);
 	}
 
-//    @Value("${difi.move.altinnv3.proxy.correspondenceApiUrl}")
-//    private String correspondenceApiUrl;
-
-    @Autowired
+    @Inject
     private AltinnProperties altinnProperties;
 
     @Inject
-    AltinnFunctions altinnFunctions;
+    private AltinnFunctions altinnFunctions;
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {

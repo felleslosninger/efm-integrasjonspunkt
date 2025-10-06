@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -30,6 +31,9 @@ class ProxyApplicationTests {
     @MockitoBean
     private AltinnFunctions altinnFunctions;
 
+    @MockitoBean
+    ReactiveJwtDecoder jwtDecoder;
+
     @BeforeEach
     void setupMock() {
         Mockito.when(altinnFunctions.getAccessListToken()).thenReturn(Mono.just("mp-token"));
@@ -38,6 +42,10 @@ class ProxyApplicationTests {
         Mockito.when(altinnFunctions.getCorrespondenceToken()).thenReturn(Mono.just("token"));
         Mockito.when(altinnFunctions.exchangeToAltinnToken(any())).thenReturn(Mono.just("altinn-token"));
         Mockito.when(altinnFunctions.setDigdirTokenInHeaders(any(),any(),any())).thenReturn(Mono.empty());
+    }
+
+    @Test
+    void shouldJustStart() {
     }
 
     @Test

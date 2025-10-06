@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
 import no.difi.move.common.oauth.JwtTokenClient;
@@ -21,20 +20,23 @@ import java.util.Base64;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class AltinnFunctions {
 
-//    private final WebClient webClient = WebClient.builder().build();
+    private final static ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final static List<String> ACCESSLIST_SCOPE = List.of("altinn:resourceregistry/accesslist.read");
+    private final static List<String> CORRESPONDENCE_SCOPES = List.of("altinn:correspondence.read", "altinn:correspondence.write", "altinn:serviceowner");
+
     private final WebClient webClient;
-    private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    private final List<String> ACCESSLIST_SCOPE = List.of("altinn:resourceregistry/accesslist.read");
-    private final List<String> CORRESPONDENCE_SCOPES = List.of("altinn:correspondence.read", "altinn:correspondence.write", "altinn:serviceowner");
 
     @Inject
     private Oidc oidc;
 
     @Inject
     private AltinnProperties altinn;
+
+    public AltinnFunctions(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     public Mono<ServerWebExchange> setDigdirTokenInHeaders(ServerWebExchange exchange, GatewayFilterChain chain, String altinntoken) {
         var request = exchange.getRequest().mutate()
@@ -132,4 +134,5 @@ public class AltinnFunctions {
     record TokenPayload(Consumer consumer ){
         record Consumer (String ID){}
     }
+
 }

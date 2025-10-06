@@ -28,13 +28,7 @@
         <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>security</artifactId>
-            <version>2.0.5-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-web</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>2.0.6-SNAPSHOT</version>
         </dependency>
 
 		<dependency>

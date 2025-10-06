@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.proxy;
+package no.difi.meldingsutveksling.altinnv3.proxy.errorhandling;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

@@ -1,23 +1,21 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerWebExchange;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-public class Tests {
+public class AltinnFunctionsTests {
 
     @MockitoBean
     private WebClient webclient;
@@ -65,4 +63,5 @@ public class Tests {
 
         altinnFunctions.isOrgOnAccessList(exchange, List.of("311780735"));
     }
+
 }

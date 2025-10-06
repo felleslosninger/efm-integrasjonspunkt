@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.proxy;
+package no.difi.meldingsutveksling.altinnv3.proxy.debug;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
