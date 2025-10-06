@@ -22,6 +22,6 @@ public class TokenFilter implements GatewayFilter {
             .then(functions.getCorrespondenceToken())
             .flatMap(functions::exchangeToAltinnToken)
             .flatMap(altinntoken -> functions.setDigdirTokenInHeaders(exchange, chain, altinntoken))
-            .then(chain.filter(exchange));
+            .flatMap(chain::filter);
     }
 }
