@@ -25,6 +25,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +42,8 @@ public class CorrespondenceApiClient {
     private final IntegrasjonspunktProperties props;
 
     private ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
+        .registerModule(new JavaTimeModule()
+            .addDeserializer(OffsetDateTime.class, new AltinnOffsetDateTimeDeserializer()))
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private RestClient restClient = RestClient.builder()
@@ -64,7 +66,7 @@ public class CorrespondenceApiClient {
             .header("Accept", "application/json")
             .retrieve()
             .toBodilessEntity()
-            ;
+        ;
     }
 
     public AttachmentDetailsExt getAttachmentDetails(UUID attachmentId) {
@@ -102,7 +104,7 @@ public class CorrespondenceApiClient {
             ;
     }
 
-    public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files){
+    public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files) {
         String accessToken = tokenProducer.produceToken(scopes);
 
         Map<String, String> requestValues = jsonFlatter.flatten(request);
