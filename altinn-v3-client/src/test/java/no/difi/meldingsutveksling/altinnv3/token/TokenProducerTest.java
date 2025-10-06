@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,10 +47,14 @@ class TokenProducerTest {
 
     @BeforeEach
     void setUp() {
+
+        var now = LocalDateTime.parse("2025-10-06T08:02:52.259628");
+
         var dpo = new AltinnFormidlingsTjenestenConfig();
         var oidc = new Oidc();
         oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
         dpo.setOidc(oidc);
+        dpo.setAuthorizationDetails(new AltinnAuthorizationDetails());
         when(integrasjonspunktProperties.getDpo()).thenReturn(dpo);
         when(integrasjonspunktProperties.getDpv()).thenReturn(new PostVirksomheter());
         when(tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");

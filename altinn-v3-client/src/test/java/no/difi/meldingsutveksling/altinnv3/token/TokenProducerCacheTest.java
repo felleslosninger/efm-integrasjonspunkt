@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
+import com.nimbusds.jose.crypto.impl.AAD;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.*;
-import org.ietf.jgss.Oid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * This test enables caching and when calling produceToken() three times with the same
- * parameters it expects the cache to kick in and verifies that both the TokenService
+ * parameters. It expects the cache to kick in and verifies that both the TokenService
  * and TokenExchangeService have only been called once each.
  */
 @SpringBootTest
@@ -44,8 +44,10 @@ class TokenProducerCacheTest {
         public DpoTokenProducer dpoTokenProducer() {
             var dpo = new AltinnFormidlingsTjenestenConfig();
             var oidc = new Oidc();
+            var aad = new AltinnAuthorizationDetails();
             oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
             dpo.setOidc(oidc);
+            dpo.setAuthorizationDetails(aad);
             var props = mock(IntegrasjonspunktProperties.class);
             when(props.getDpo()).thenReturn(dpo);
             return new DpoTokenProducer(props, tokenService, tokenExchangeService);

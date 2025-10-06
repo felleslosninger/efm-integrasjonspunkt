@@ -12,6 +12,7 @@
 - [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
 - [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
 - [x] Vi har støtte for lokal konfig i yml/yaml format i v3, dette videreføres (søk etter `spring.config.import=`)
+- [ ] Sjekk `correspondencesExt.setRecipients` for DPI over DPV (formatet er `urn:altinn:person:identifier-no:06068800461` og `urn:altinn:organization:identifier-no:810074582`)
 - [ ] Rydde bort alle Trivy issues, [.trivyignore](.trivyignore) bør være "tømt"
 - [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?

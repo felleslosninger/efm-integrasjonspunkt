@@ -2,9 +2,13 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.digdir.altinn3.correspondence.model.*;
+import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceAttachmentExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceContentExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -58,6 +62,7 @@ public class CorrespondenceFactory {
         correspondence.setMessageSender(serviceRegistryHelper.getSenderName(message));
         correspondence.setDueDateTime(getDueDateTime(message));
         correspondence.setIsConfirmationNeeded(false);
+        correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setSendersReference(message.getMessageId());
         correspondence.setIsConfidential(dpvHelper.isConfidential(message));
 
