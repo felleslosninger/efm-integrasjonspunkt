@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
 import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
+import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +12,7 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 
-@EnableConfigurationProperties(Oidc.class)
+@EnableConfigurationProperties({Oidc.class, AltinnProperties.class})
 @SpringBootApplication
 public class ProxyApplication {
 
@@ -17,8 +20,11 @@ public class ProxyApplication {
 		SpringApplication.run(ProxyApplication.class, args);
 	}
 
-    @Value("${difi.move.altinnv3.proxy.correspondenceApiUrl}")
-    private String correspondenceApiUrl;
+//    @Value("${difi.move.altinnv3.proxy.correspondenceApiUrl}")
+//    private String correspondenceApiUrl;
+
+    @Autowired
+    private AltinnProperties altinnProperties;
 
     @Inject
     AltinnFunctions altinnFunctions;
@@ -31,7 +37,7 @@ public class ProxyApplication {
                 .filters(f -> f
                     .filter(new LoggingFilter())
                     .filter(new TokenFilter(altinnFunctions))
-                ).uri(correspondenceApiUrl)
+                ).uri(altinnProperties.baseUrl() + "/correspondence/api/")
             )
             .build();
     }

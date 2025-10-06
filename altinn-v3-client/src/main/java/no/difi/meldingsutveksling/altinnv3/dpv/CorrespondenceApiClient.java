@@ -49,7 +49,7 @@ public class CorrespondenceApiClient {
         .messageConverters(this::addJacksonAsConverter)
         .build();
 
-    private static String scope = "altinn:broker.read";
+    private static List<String> scopes = List.of("altinn:broker.read");
 
     private String correspondenceServiceUrl;
 
@@ -68,7 +68,7 @@ public class CorrespondenceApiClient {
     }
 
     public AttachmentDetailsExt getAttachmentDetails(UUID attachmentId) {
-        String accessToken = tokenProducer.produceToken(List.of(scope));
+        String accessToken = tokenProducer.produceToken(scopes);
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/attachment/{attachmentId}/details", attachmentId)
@@ -80,7 +80,7 @@ public class CorrespondenceApiClient {
     }
 
     public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
-        String accessToken = tokenProducer.produceToken(List.of(scope));
+        String accessToken = tokenProducer.produceToken(scopes);
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/details", correspondenceId)
@@ -92,7 +92,7 @@ public class CorrespondenceApiClient {
     }
 
     public byte[] downloadAttachment(UUID correspondenceId, UUID attachmentId) {
-        String accessToken = tokenProducer.produceToken(List.of(scope));
+        String accessToken = tokenProducer.produceToken(scopes);
 
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/attachment/{attachmentId}/download", correspondenceId, attachmentId)
@@ -103,7 +103,7 @@ public class CorrespondenceApiClient {
     }
 
     public InitializeCorrespondencesResponseExt upload(InitializeCorrespondencesExt request, List<FileUploadRequest> files){
-        String accessToken = tokenProducer.produceToken(List.of(scope));
+        String accessToken = tokenProducer.produceToken(scopes);
 
         Map<String, String> requestValues = jsonFlatter.flatten(request);
 
