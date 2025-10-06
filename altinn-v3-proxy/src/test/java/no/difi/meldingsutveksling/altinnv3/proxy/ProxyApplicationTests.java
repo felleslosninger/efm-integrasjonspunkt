@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -31,9 +31,6 @@ class ProxyApplicationTests {
     @MockitoBean
     private AltinnFunctions altinnFunctions;
 
-    @MockitoBean
-    ReactiveJwtDecoder jwtDecoder;
-
     @BeforeEach
     void setupMock() {
         Mockito.when(altinnFunctions.getAccessListToken()).thenReturn(Mono.just("mp-token"));
@@ -45,16 +42,15 @@ class ProxyApplicationTests {
     }
 
     @Test
-    void shouldJustStart() {
-    }
-
-    @Test
     void shouldRouteToInfoEndpoint() {
         webTestClient.get()
             .uri(ACTUATOR_INFO_PATH)
             .exchange()
             .expectStatus().isOk()
-            .expectBody(String.class).isEqualTo("{}");
+            .expectHeader().contentType("application/vnd.spring-boot.actuator.v3+json")
+            .expectBody(String.class).consumeWith(s -> {
+                s.getResponseBody().startsWith("{");
+            });
     }
 
     @Test
