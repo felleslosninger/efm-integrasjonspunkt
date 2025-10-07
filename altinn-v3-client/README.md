@@ -3,12 +3,23 @@
 Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldinger.
 
 # TODO
-- [ ] Få innsyn i korleis DPO tjenesten var konfigurert i altinn 2 og oppdatere ressursen i altinn 3 til å samsvare med konfigurasjonen.
-- [ ] Få innsyn i korleis DPV tjenestene var konfigurert i altinn 2 og opprett ressurser i altinn 3
-- [ ] Få clientid for altinn 3 token inn i properties, kan man kombinere den med den eksisterende clientid?
-- [ ] Indersøk hvordan varsling (notification) fungerte i altinn2, og sett opp notification i altinn 3 til å vere riktig basert på tidlegare funksjonalitet og ønska funksjonalitet.
-- [ ] Få statestikk fra altinn for å vurdere [overgangsløsningen i produksjon](https://docs.altinn.studio/nb/broker/broker-transition/getting-started/#konfigurer-ressurs-til-bruk-i-overgangsløsningen)
-- [ ] Benyttes dette [oidc endepunktet](https://platform.tt02.altinn.no/authentication/api/v1/openid/.well-known/openid-configuration) til noe i Altinn?
+
+- [ ] Oppdatere notification med subject og sånt
+
+- [ ] Proxy client ut i test og eige repo
+- [ ] Avklart med Daniel om ressursoppsett på DPV
+- [ ] Taushetsbelagt DPV
+- [ ] scope mot proxy ( ikkje bruk broker:read ....) move:dpv.read????? move.dpv??
+  https://digdir.atlassian.net/browse/SP-602 kanskje arbeidet her påverker kva scope vi skal ha?
+- [ ] tester? skal vi ha noen nye cucumber tester?
+- [ ] Problemdetails
+- [ ] Klar til publisering -> "Annet" status på dpv.
+- [ ] Onboarding støtte i kode?
+
+Dokumentasjon:
+- [ ] Onboarding for nye kunder
+- [ ] Digdir docs
+- [ ] Confluence
 
 # DPO
 
@@ -40,7 +51,7 @@ For å teste har vi registrert klienter i maskinporten for hver sine syntetiske 
 Fremgangsmåten for å gjøre dette er da :
 
 - Bruk [Tenor](https://testdata.skatteetaten.no/web/testnorge/) for å finne organiasjon og daglig leder.
-- Bruk [BankID RA PREPROD](https://ra-preprod.bankidnorge.no/#!/search/endUser) for å aktivere BankID med "otp" for daglig leder og passord "qwer1234"
+- Bruk [BankID RA PREPROD](https://ra-preprod.bankidnorge.no/#!/search/endUser) for å aktivere BankID for daglig leder, onetimepassword: "otp"  passord: "qwer1234"
 - Bruk [Forvaltningsadmin](https://forvaltningsadmin.apps.kt.digdir.cosng.net) for å opprette klientene med scopes `altinn:broker.write` og `altinn:broker.read`
 - Snakk med Daniel for å få lagt til scopes som klientene trenger for å opprette system og systembruker
 - - Legg til scopes `altinn:authentication/systemregister.write`, `altinn:authentication/systemuser.request.write` og `altinn:authentication/systemuser.request.read`
