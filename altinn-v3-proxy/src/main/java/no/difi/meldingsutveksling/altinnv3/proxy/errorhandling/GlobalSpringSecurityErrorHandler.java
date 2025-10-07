@@ -9,6 +9,8 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static no.difi.meldingsutveksling.altinnv3.proxy.errorhandling.ProblemDetails.createProblemDetailsAsByteArray;
+
 public class GlobalSpringSecurityErrorHandler implements ServerAccessDeniedHandler, ServerAuthenticationEntryPoint {
 
     @Override
@@ -22,19 +24,10 @@ public class GlobalSpringSecurityErrorHandler implements ServerAccessDeniedHandl
     }
 
     private Mono<Void> writeProblemDetails(ServerWebExchange exchange, HttpStatus status, String detail) {
-        var problemDetails = """
-        {
-            "type":"https://tools.ietf.org/html/rfc7807",
-            "title":"%s",
-            "status":%d,
-            "detail":"%s"
-        }
-        """.formatted(status.name(), status.value(), detail);
-        System.out.println(problemDetails);
         exchange.getResponse().setStatusCode(status);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
         return exchange.getResponse().writeWith(
-            Mono.just(exchange.getResponse().bufferFactory().wrap(problemDetails.getBytes()))
+            Mono.just(exchange.getResponse().bufferFactory().wrap(createProblemDetailsAsByteArray(status.name(), status.value(), detail)))
         );
     }
 

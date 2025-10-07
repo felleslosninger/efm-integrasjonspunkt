@@ -15,9 +15,15 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 
+/**
+ * Tester for error håndtering fra TokenFilter proxy chain.
+ * </br>
+ * Dette er feil som skjer internt i selve proxy chain filteret, det gir
+ * 5xx type responser som returneres til klient,
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-class ProxyApplicationErrorHandlingTests {
+class ProxyChainErrorHandlingTests {
 
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
 
@@ -34,52 +40,18 @@ class ProxyApplicationErrorHandlingTests {
         Mockito.when(altinnFunctions.isOrgOnAccessList(any(), any())).thenReturn(Mono.empty());
         Mockito.when(altinnFunctions.getCorrespondenceToken()).thenReturn(Mono.just("token"));
         Mockito.when(altinnFunctions.exchangeToAltinnToken(any())).thenReturn(Mono.just("altinn-token"));
-        Mockito.when(altinnFunctions.setDigdirTokenInHeaders(any(),any(),any())).thenReturn(Mono.empty());
+        Mockito.when(altinnFunctions.setDigdirTokenInHeaders(any(),any(),any())).thenReturn(Mono.error(new RuntimeException("Mocked Error in the TokenFilter Proxy Chain")));
     }
 
     @Test
-    void whenUnknownPath_thenUnauthorized() {
-        webTestClient.get().uri("/no/such/api/path")
-            .exchange()
-            .expectStatus().isUnauthorized()
-            .expectHeader().contentType("application/json")
-            .expectBody()
-            .jsonPath("$.detail").isEqualTo("Proxy AuthN error : Not Authenticated")
-        ;
-    }
-
-    @Test
-    void whenNoToken_thenUnauthorized() {
-        webTestClient.get().uri(CORRESPONDENCE_API_PATH)
-            .exchange()
-            .expectStatus().isUnauthorized()
-            .expectHeader().contentType("application/json")
-            .expectBody()
-            .jsonPath("$.detail").isEqualTo("Proxy AuthN error : Not Authenticated")
-        ;
-    }
-
-    @Test
-    void whenUserWithoutScope_thenForbidden() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt())
+    void whenChainThrowsException_thenExpectProblemDetails() {
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
-            .expectStatus().isForbidden()
+            .expectStatus().is5xxServerError()
             .expectHeader().contentType("application/json")
             .expectBody()
-            .jsonPath("$.detail").isEqualTo("Proxy AuthZ error : Access Denied")
-        ;
-    }
-
-    @Test
-    void whenUserWithWrongScope_thenForbidden() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:illegal.scope")))
-            .get().uri(CORRESPONDENCE_API_PATH)
-            .exchange()
-            .expectStatus().isForbidden()
-            .expectHeader().contentType("application/json")
-            .expectBody()
-            .jsonPath("$.detail").isEqualTo("Proxy AuthZ error : Access Denied")
+            .jsonPath("$.detail").isEqualTo("Proxy Gateway Error : Mocked Error in the TokenFilter Proxy Chain")
         ;
     }
 
