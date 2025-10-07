@@ -123,7 +123,15 @@ public class CorrespondenceFactoryTest {
     public void create_mapsRecipients(){
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
-        assertEquals("urn:altinn:organization:identifier-no:222222222", result.getRecipients().getFirst());
+        assertEquals("urn:altinn:organization:identifier-no:222222222", result.getRecipients().getFirst(), "Should have prefix urn:altinn:organization:identifier-no: if receiver identifier is not 11 digits");
+    }
+
+    @Test
+    public void create_mapsPrivateRecipients(){
+        message.setReceiverIdentifier("12345678911");
+        var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+
+        assertEquals("urn:altinn:person:identifier-no:12345678911", result.getRecipients().getFirst(), "Should have prefix urn:altinn:person:identifier-no: if receiver identifier is 11 digits");
     }
 
     @Test

@@ -40,10 +40,16 @@ public class CorrespondenceFactory {
         InitializeCorrespondencesExt correspondencesExt = new InitializeCorrespondencesExt();
 
         correspondencesExt.setCorrespondence(getBaseCorrespondence(message, messageTitle, messageSummary, messageBody, newAttachmentsMetaData));
-        correspondencesExt.setRecipients(List.of("urn:altinn:organization:identifier-no:" + message.getReceiverIdentifier()));
+        correspondencesExt.setRecipients(getRecipient(message.getReceiverIdentifier()));
+
         if(existingAttachments != null && !existingAttachments.isEmpty()) correspondencesExt.setExistingAttachments(existingAttachments);
 
         return correspondencesExt;
+    }
+
+    private List<String> getRecipient(String receiverIdentifier){
+        if(receiverIdentifier.length() == 11) return List.of("urn:altinn:person:identifier-no:" + receiverIdentifier);
+        else return List.of("urn:altinn:organization:identifier-no:" + receiverIdentifier);
     }
 
     private BaseCorrespondenceExt getBaseCorrespondence(NextMoveOutMessage message,
