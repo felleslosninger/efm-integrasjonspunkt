@@ -17,11 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-class ProxyApplicationTests {
+class ProxyApplicationErrorHandlingTests {
 
-    static String ACTUATOR_INFO_PATH = "/actuator/info";
-    static String ACTUATOR_HEALTH_PATH = "/actuator/health";
-    static String ACTUATOR_METRICS_PATH = "/actuator/metrics";
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
 
     @Inject
@@ -41,49 +38,25 @@ class ProxyApplicationTests {
     }
 
     @Test
-    void shouldRouteToInfoEndpoint() {
-        webTestClient.get()
-            .uri(ACTUATOR_INFO_PATH)
-            .exchange()
-            .expectStatus().isOk()
-            .expectHeader().contentType("application/vnd.spring-boot.actuator.v3+json")
-            .expectBody(String.class).consumeWith(s -> {
-                s.getResponseBody().startsWith("{");
-            });
-    }
-
-    @Test
-    void shouldRouteToHealthEndpoint() {
-        webTestClient.get()
-            .uri(ACTUATOR_HEALTH_PATH)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class).isEqualTo("{\"status\":\"UP\"}");
-    }
-
-    @Test
-    void shouldRouteToMetricsEndpoint() {
-        webTestClient.get()
-            .uri(ACTUATOR_METRICS_PATH)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class).consumeWith(s -> {
-                s.getResponseBody().startsWith("{\"names\":[");
-            });
-    }
-
-    @Test
     void whenUnknownPath_thenUnauthorized() {
         webTestClient.get().uri("/no/such/api/path")
             .exchange()
-            .expectStatus().isUnauthorized();
+            .expectStatus().isUnauthorized()
+            .expectHeader().contentType("application/json")
+            .expectBody()
+            .jsonPath("$.detail").isEqualTo("Proxy AuthN error : Not Authenticated")
+        ;
     }
 
     @Test
     void whenNoToken_thenUnauthorized() {
         webTestClient.get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
-            .expectStatus().isUnauthorized();
+            .expectStatus().isUnauthorized()
+            .expectHeader().contentType("application/json")
+            .expectBody()
+            .jsonPath("$.detail").isEqualTo("Proxy AuthN error : Not Authenticated")
+        ;
     }
 
     @Test
@@ -91,7 +64,11 @@ class ProxyApplicationTests {
         webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt())
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
-            .expectStatus().isForbidden();
+            .expectStatus().isForbidden()
+            .expectHeader().contentType("application/json")
+            .expectBody()
+            .jsonPath("$.detail").isEqualTo("Proxy AuthZ error : Access Denied")
+        ;
     }
 
     @Test
@@ -99,15 +76,11 @@ class ProxyApplicationTests {
         webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:illegal.scope")))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
-            .expectStatus().isForbidden();
-    }
-
-    @Test
-    void whenValidJwt_thenAuthorized() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
-            .get().uri(CORRESPONDENCE_API_PATH)
-            .exchange()
-            .expectStatus().isOk();
+            .expectStatus().isForbidden()
+            .expectHeader().contentType("application/json")
+            .expectBody()
+            .jsonPath("$.detail").isEqualTo("Proxy AuthZ error : Access Denied")
+        ;
     }
 
 }

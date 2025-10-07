@@ -22,7 +22,7 @@ class ProblemDetailsParserTest {
 
         when(clientHttpResponse.getBody()).thenReturn(new ByteArrayInputStream("""
                 {
-                    "type":"https://tools.ietf.org/html/rfc9110#section-15.5.2",
+                    "type":"https://datatracker.ietf.org/doc/html/rfc7807",
                     "title":"Unauthorized",
                     "status":401,
                     "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"

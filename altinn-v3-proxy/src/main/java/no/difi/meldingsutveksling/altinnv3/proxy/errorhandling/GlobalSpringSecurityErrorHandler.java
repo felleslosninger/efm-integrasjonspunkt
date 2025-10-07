@@ -9,23 +9,22 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-// FIXME DISABLED FOR NOW
 public class GlobalSpringSecurityErrorHandler implements ServerAccessDeniedHandler, ServerAuthenticationEntryPoint {
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, AccessDeniedException ex) {
-        return this.writeProblemDetails(exchange, HttpStatus.FORBIDDEN, "Forbidden: " + ex.getMessage());
+        return this.writeProblemDetails(exchange, HttpStatus.FORBIDDEN, "Proxy AuthZ error : " + ex.getMessage());
     }
 
     @Override
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex) {
-        return this.writeProblemDetails(exchange, HttpStatus.UNAUTHORIZED, "Unauthorized: " + ex.getMessage());
+        return this.writeProblemDetails(exchange, HttpStatus.UNAUTHORIZED, "Proxy AuthN error : " + ex.getMessage());
     }
 
     private Mono<Void> writeProblemDetails(ServerWebExchange exchange, HttpStatus status, String detail) {
         var problemDetails = """
         {
-            "type":"https://tools.ietf.org/html/rfc9110",
+            "type":"https://tools.ietf.org/html/rfc7807",
             "title":"%s",
             "status":%d,
             "detail":"%s"

@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -73,6 +74,26 @@ public class ResourceApiClient {
             .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
+    public String addAccesslistMember(String accessList) {
+        var newMember = """
+            {
+              "data": [
+                "urn:altinn:organization:identifier-no:314240979"
+              ]
+            }
+        """;
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
+        return restClient.post()
+            .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(newMember)
             .retrieve()
             .body(String.class)
             ;

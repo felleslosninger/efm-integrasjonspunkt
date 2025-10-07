@@ -68,7 +68,14 @@ public class ManuallyTestingResourceRegistry {
 
     @Test
     void testAccessListMembers() {
-        String list = client.showAccesslistMembers("meldingsutveksling_dpo_tilgangsliste");
+        String list = client.showAccesslistMembers("eformidling-meldingsteneste-test-tilgangsliste");
+        assertNotNull(list, "List should not be null");
+        System.out.println(list);
+    }
+
+    @Test
+    void testAddAccessListMember() {
+        String list = client.addAccesslistMember("eformidling-meldingsteneste-test-tilgangsliste");
         assertNotNull(list, "List should not be null");
         System.out.println(list);
     }

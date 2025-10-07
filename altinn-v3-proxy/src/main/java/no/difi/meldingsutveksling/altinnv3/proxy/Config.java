@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
+import no.difi.meldingsutveksling.altinnv3.proxy.errorhandling.GlobalSpringSecurityErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -17,12 +18,11 @@ public class Config {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(new GlobalSpringSecurityErrorHandler())
+                .accessDeniedHandler(new GlobalSpringSecurityErrorHandler())
+            )
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
-// FIXME disabled for now
-//            .exceptionHandling(exceptionHandling -> exceptionHandling
-//                .authenticationEntryPoint(new GlobalSpringSecurityErrorHandler())
-//                .accessDeniedHandler(new GlobalSpringSecurityErrorHandler())
-//            )
             .authorizeExchange(exchanges -> exchanges
 
                 // allow actuator endpoints

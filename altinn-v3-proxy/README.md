@@ -6,14 +6,36 @@ Proxyen har følgende formål :
 - [ ] Autorisere client requests ved å verifisere scope på token og sjekke tilgangslisten på ressursen i Altinn 3
 - [ ] Påføre vårt eget access token for å kunne utføre requests på vegne av kunden
 
+## High level oversikt
+```mermaid
+graph LR
+
+    subgraph Kunde
+        IP[integrasjonspunkt]
+    end
+
+    subgraph eFormidling
+        AP[altinn proxy]
+    end
+
+    subgraph Altinn v3
+        CA[correspondence api]
+    end
+
+    IP-- dpv med mp token\n'move/dpv.read' -->AP
+    AP-- altinn melding's api\nmed altinn token -->CA
+
+```
+
+## Hva gjør integrasjonspunktet?
 ```mermaid
 graph LR
   
-  subgraph Digitaliseringsdirektoratet
-    MP[maskinporten]
-    AT[altinn token exchange]
-    AC[altinn correspondence]
-  end
+%%  subgraph Digitaliseringsdirektoratet
+%%    MP[maskinporten]
+%%    AT[altinn token exchange]
+%%    AC[altinn correspondence]
+%%  end
   
   subgraph Integrasjonspunktet
       SD[sende dpv melding]
@@ -32,8 +54,8 @@ graph LR
   DPV-- altinn token -->PS
   DPV-- oppdater -->DB
   
-Kunde-- sender melding ---SD
-Kunde-- sjekker status ---SS
+  Kunde-- sender melding ---SD
+  Kunde-- sjekker status ---SS
 ```
 
 ## TODO videre utvikling :

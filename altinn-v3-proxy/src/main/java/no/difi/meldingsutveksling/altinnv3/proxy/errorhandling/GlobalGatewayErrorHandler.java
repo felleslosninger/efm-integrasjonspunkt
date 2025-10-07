@@ -1,14 +1,15 @@
 package no.difi.meldingsutveksling.altinnv3.proxy.errorhandling;
 
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-// FIXME DISABLED FOR NOW
-//@Component
-//@Order(-2)  // must be lower than DefaultErrorWebExceptionHandler
+@Component
+@Order(-2)  // must be lower than DefaultErrorWebExceptionHandler
 public class GlobalGatewayErrorHandler implements ErrorWebExceptionHandler {
 
     @Override
@@ -19,10 +20,10 @@ public class GlobalGatewayErrorHandler implements ErrorWebExceptionHandler {
 
         var problemDetails = """
         {
-            "type":"https://tools.ietf.org/html/rfc9110",
+            "type":"https://tools.ietf.org/html/rfc7807",
             "title":"%s",
             "status":%d,
-            "detail":"%s"
+            "detail":"Proxy Gateway Error : %s"
         }
         """.formatted(status.name(), status.value(), "GlobalGatewayErrorHandler : " + ex.getMessage());
         System.out.println(problemDetails);
