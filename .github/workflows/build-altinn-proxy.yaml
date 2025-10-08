@@ -1,0 +1,16 @@
+name: Build and publish container for altinn-v3-proxy
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  call-workflow-image-build-publish:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@main
+    with:
+      application-path: altinn-v3-proxy/
+      image-name: efm-integrasjonspunkt-dpv-proxy
+      java-version: 21
+      # slack-channel-id: ???
+      update-versions: "false"
+    secrets: inherit
