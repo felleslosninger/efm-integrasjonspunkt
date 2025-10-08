@@ -69,7 +69,24 @@ mvn clean package
 java -jar altinn-v3-proxy/target/altinn-v3-proxy-3.5.5.jar
 ```
 
-## Lage image med buildpacks (fra root av repo)
+
+## Trigge og teste nytt docker image fra en branch
+Det er mulig å trigge nytt docker image fra en branch ved å angi teksten `[docker]` i git commit meldingen.
+
+```bash
+# tom commit for å trigge nytt docker image build
+git commit --allow-empty -m "Trigger [docker] bygg igjen"
+git push
+
+# log inn til azure container registry (om du ikke allerede er innlogget)
+az login
+az acr login --name creiddev
+
+# når build-dpv-proxy.yaml har bygget og pushet docker image kan det kjøres
+docker run creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-08-1216-7d8d61fe
+```
+
+## Lage image med buildpacks (manuelt fra root av repo)
 ```bash
 mvn clean package -Dmaven.test.skip=true -pl altinn-v3-proxy -am spring-boot:build-image -Dspring-boot.build-image.imageName=my-local-registery/altinn-v3-proxy:2025-09-06-1501-14a43cb6 -Dspring-boot.build-image.builder=paketobuildpacks/builder-jammy-tiny
 
