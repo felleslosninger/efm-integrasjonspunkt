@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>altinn-v3-proxy</artifactId>
+    <version>1.0.0</version>
 
     <dependencyManagement>
         <dependencies>
@@ -23,7 +24,18 @@
         </dependencies>
     </dependencyManagement>
 
-	<dependencies>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
+        </snapshotRepository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
 
         <dependency>
             <groupId>no.difi.move-common</groupId>
