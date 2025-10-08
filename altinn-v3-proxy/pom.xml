@@ -24,16 +24,27 @@
         </dependencies>
     </dependencyManagement>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
-        </snapshotRepository>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
+            <name>GitHub felleslosninger Repository</name>
+            <url>https://maven.pkg.github.com/felleslosninger/*</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
-    </distributionManagement>
+    </repositories>
 
     <dependencies>
 
