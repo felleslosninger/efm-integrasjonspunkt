@@ -1,6 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.proxy.debug.LoggingFilter;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
@@ -11,6 +13,7 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 
+@Slf4j
 @EnableConfigurationProperties({Oidc.class, AltinnProperties.class})
 @SpringBootApplication
 public class ProxyApplication {
@@ -24,6 +27,11 @@ public class ProxyApplication {
 
     @Inject
     private AltinnFunctions altinnFunctions;
+
+    @PostConstruct
+    public void init() {
+        log.info(altinnProperties.toString());
+    }
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {

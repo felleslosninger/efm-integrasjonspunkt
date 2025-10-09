@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.List;
 
 @Service("DpvTokenProducer")
 @RequiredArgsConstructor
@@ -20,8 +21,8 @@ public class DpvTokenProducer implements TokenProducer {
         var config = new TokenConfig(properties.getDpv().getOidc(), properties.getDpv().getAltinnTokenExchangeUrl());
 
         var token = tokenService.fetchToken(config, scopes, null);
-        var altinnToken = tokenExchangeService.exchangeToken(token, config.exchangeUrl());
+        //var altinnToken = tokenExchangeService.exchangeToken(token, config.exchangeUrl());
 
-        return altinnToken;
+        return token;
     }
 }

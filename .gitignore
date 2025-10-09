@@ -117,3 +117,7 @@ integrasjonspunkt/docker-compose-local.yml
 .settings
 .springBeans
 .sts4-cache
+
+# Local and personal env variables
+.env
+*.env
