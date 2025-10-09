@@ -5,11 +5,11 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-public class TokenFilter implements GatewayFilter {
+public class ProxyAuthFilter implements GatewayFilter {
 
     private final AltinnFunctions functions;
 
-    public TokenFilter(AltinnFunctions functions) {
+    public ProxyAuthFilter(AltinnFunctions functions) {
         this.functions = functions;
     }
 
@@ -20,7 +20,6 @@ public class TokenFilter implements GatewayFilter {
             .flatMap(functions::getAccessList)
             .flatMap(accessListMembers -> functions.isOrgOnAccessList(exchange, accessListMembers))
             .then(functions.getCorrespondenceToken())
-            .flatMap(functions::exchangeToAltinnToken)
             .flatMap(altinntoken -> functions.setDigdirTokenInHeaders(exchange, chain, altinntoken))
             .flatMap(chain::filter);
     }

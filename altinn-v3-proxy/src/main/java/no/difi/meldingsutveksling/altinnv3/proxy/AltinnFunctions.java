@@ -4,38 +4,48 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
-import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
-import no.difi.move.common.oauth.JwtTokenClient;
-import no.difi.move.common.oauth.JwtTokenConfig;
+import no.difi.meldingsutveksling.altinnv3.proxy.token.TokenProducer;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 
-@Component
+@Service
 public class AltinnFunctions {
 
     private final static ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    private final static List<String> ACCESSLIST_SCOPE = List.of("altinn:resourceregistry/accesslist.read");
+    private final static List<String> ACCESSLIST_SCOPES = List.of("altinn:resourceregistry/accesslist.read");
     private final static List<String> CORRESPONDENCE_SCOPES = List.of("altinn:correspondence.read", "altinn:correspondence.write", "altinn:serviceowner");
 
     private final WebClient webClient;
-
-    @Inject
-    private Oidc oidc;
+    private final Cache<String, String> tokenCache;
 
     @Inject
     private AltinnProperties altinn;
 
+    @Inject
+    private TokenProducer tokenProducer;
+
+    public void invalidateCache() {
+        tokenCache.invalidateAll();
+    }
+
     public AltinnFunctions(WebClient webClient) {
         this.webClient = webClient;
+        this.tokenCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(25))
+            .maximumSize(1000)
+            .build();
     }
 
     public Mono<ServerWebExchange> setDigdirTokenInHeaders(ServerWebExchange exchange, GatewayFilterChain chain, String altinntoken) {
@@ -91,48 +101,36 @@ public class AltinnFunctions {
         }
     }
 
-    public Mono<String> exchangeToAltinnToken(String maskinportenToken) {
-        return webClient.get()
-                .uri(altinn.baseUrl() + "/authentication/api/v1/exchange/maskinporten")
-                .header("Authorization", "Bearer " + maskinportenToken)
-                .retrieve()
-                .bodyToMono(String.class);
+    public Mono<String> getAccessListToken() {
+        var scopes = ACCESSLIST_SCOPES;
+        var scopesAsASingleString = scopes.stream().collect(java.util.stream.Collectors.joining(" "));
+        var token = tokenCache.getIfPresent(scopesAsASingleString);
+        if (token != null) return Mono.just(token);
+        return tokenProducer.fetchMaskinportenToken(scopes)
+            .flatMap(maskinporten -> tokenProducer.exchangeToAltinnToken(maskinporten))
+            .doOnNext(altinn -> tokenCache.put(scopesAsASingleString, altinn));
     }
 
-    public Mono<String> getCorrespondenceToken(){
-        return getMaskinportenToken(CORRESPONDENCE_SCOPES);
+    public Mono<String> getCorrespondenceToken() {
+        var scopes = CORRESPONDENCE_SCOPES;
+        var scopesAsASingleString = scopes.stream().collect(java.util.stream.Collectors.joining(" "));
+        var token = tokenCache.getIfPresent(scopesAsASingleString);
+        if (token != null) return Mono.just(token);
+        return tokenProducer.fetchMaskinportenToken(scopes)
+            .flatMap(maskinporten -> tokenProducer.exchangeToAltinnToken(maskinporten))
+            .doOnNext(altinn -> tokenCache.put(scopesAsASingleString, altinn));
     }
 
-    public Mono<String> getAccessListToken(){
-        return getMaskinportenToken(ACCESSLIST_SCOPE);
-    }
-
-    private Mono<String> getMaskinportenToken(List<String> scopes){
-
-        var jwtTokenConfig = new JwtTokenConfig(
-            oidc.clientId(),
-            oidc.url(),
-            oidc.audience(),
-            scopes,
-            oidc.keystore()
-        );
-
-        var jtc = new JwtTokenClient(jwtTokenConfig);
-
-        return jtc.fetchTokenMono().flatMap(tr -> Mono.just(tr.getAccessToken()));
-    }
-
-    record AccessListMembers(List<Data> data){
-        record Data (
-            Identifiers identifiers){
-            record Identifiers (
+    record AccessListMembers(List<Data> data) {
+        record Data(Identifiers identifiers) {
+            record Identifiers(
                 @JsonProperty("urn:altinn:organization:identifier-no")
-                String orgnr){}
+                String orgnr) {}
         }
     }
 
-    record TokenPayload(Consumer consumer ){
-        record Consumer (String ID){}
+    record TokenPayload(Consumer consumer) {
+        record Consumer(String ID) {}
     }
 
 }

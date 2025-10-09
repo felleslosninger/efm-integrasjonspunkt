@@ -39,7 +39,6 @@ class ProxyChainErrorHandlingTests {
         Mockito.when(altinnFunctions.getAccessList(any())).thenReturn(Mono.just(List.of("token")));
         Mockito.when(altinnFunctions.isOrgOnAccessList(any(), any())).thenReturn(Mono.empty());
         Mockito.when(altinnFunctions.getCorrespondenceToken()).thenReturn(Mono.just("token"));
-        Mockito.when(altinnFunctions.exchangeToAltinnToken(any())).thenReturn(Mono.just("altinn-token"));
         Mockito.when(altinnFunctions.setDigdirTokenInHeaders(any(),any(),any())).thenReturn(Mono.error(new RuntimeException("Mocked Error in the TokenFilter Proxy Chain")));
     }
 

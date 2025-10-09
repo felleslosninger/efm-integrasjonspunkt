@@ -21,8 +21,8 @@ public class DpvTokenProducer implements TokenProducer {
         var config = new TokenConfig(properties.getDpv().getOidc(), properties.getDpv().getAltinnTokenExchangeUrl());
 
         var token = tokenService.fetchToken(config, scopes, null);
-        //var altinnToken = tokenExchangeService.exchangeToken(token, config.exchangeUrl());
+        var altinnToken = tokenExchangeService.exchangeToken(token, config.exchangeUrl());
 
-        return token;
+        return altinnToken;
     }
 }

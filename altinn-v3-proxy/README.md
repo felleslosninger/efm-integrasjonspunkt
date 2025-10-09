@@ -22,21 +22,27 @@ graph LR
         CA[correspondence api]
     end
 
-    IP-- dpv med mp token\n'move/dpv.read' -->AP
+    IP-- dpv med altinn (bytte til mp?) token\nscope = move:dpv -->AP
     AP-- altinn melding's api\nmed altinn token -->CA
 ```
 
-## TODO videre utvikling :
+## FIXME og TODO for videre utvikling :
 - [x] Flere tester som tester selve filteret (nå er hele kjeden mocket)
+- [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med noe mer fornuftig
-- [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å ha det?)
+- [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
+- [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
 - [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
 
 ## Bygges og kjøres (fra root av repo)
 ```bash
 mvn clean package
-java -jar altinn-v3-proxy/target/altinn-v3-proxy-3.5.5.jar
+java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar
+
+# for å starte med din egen properties fil
+java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar --spring.config.additional-location=./altinn-v3-proxy/application-thjo.properties
+java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar --debug --spring.config.additional-location=./altinn-v3-proxy/application-thjo.properties
 ```
 
 ## Trigge og teste nytt docker image fra en branch
