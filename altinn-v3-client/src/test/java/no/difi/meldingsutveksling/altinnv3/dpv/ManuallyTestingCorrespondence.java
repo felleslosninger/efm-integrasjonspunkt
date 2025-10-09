@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Disabled
 @SpringBootTest(classes = {
@@ -86,6 +87,14 @@ public class ManuallyTestingCorrespondence {
     public void getCorrespondenceDetails() {
         var res = client.getCorrespondenceDetails(UUID.fromString(correspondenceId));
         System.out.println(res);
+    }
+
+    @Test
+    public void getCorrespondenceDetailsManyTimes() {
+        IntStream.range(0, 10).forEach(i -> {
+            var res = client.getCorrespondenceDetails(UUID.fromString(correspondenceId));
+            System.out.printf("%d = %s", i, res.getCorrespondenceId());
+        });
     }
 
     @Test

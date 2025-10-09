@@ -57,8 +57,18 @@ git push
 az login
 az acr login --name creiddev
 
-# når build-dpv-proxy.yaml har bygget og pushet docker image kan det kjøres
-docker run -p 8080:8080 --name dpv-proxy creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-08-1216-7d8d61fe
+# når build-dpv-proxy.yaml har bygget og pushet kan du starte noe slikt :
+export KEYSTORE_FILE=/Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks
+docker run -p 8080:8080 --name dpv-proxy --rm -v $KEYSTORE_FILE:$KEYSTORE_FILE \
+-e OIDC_KEYSTORE_PATH=file:$KEYSTORE_FILE -e OIDC_KEYSTORE_PASSWORD=PasswordToKeystore \
+creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-09-1242-4a2113f0 --debug
+
+# alternativt med alle properties i en lokal fil som du mounter inn slik :
+export KEYSTORE_FILE=/Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks
+export CONFIG_FILE=/Users/thorej/src/efm-integrasjonspunkt/altinn-v3-proxy/application-thjo.properties
+docker run -p 8080:8080 --name dpv-proxy --rm -v $KEYSTORE_FILE:$KEYSTORE_FILE -v $CONFIG_FILE:$CONFIG_FILE \
+creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-09-1242-4a2113f0 \
+--spring.config.additional-location=$CONFIG_FILE --debug
 ```
 
 ## Lage image med buildpacks (manuelt fra root av repo)
