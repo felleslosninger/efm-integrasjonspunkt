@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.proxy.debug.LoggingFilter;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
+import no.difi.move.common.cert.KeystoreResourceLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,7 +20,9 @@ import org.springframework.context.annotation.Bean;
 public class ProxyApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ProxyApplication.class, args);
+        SpringApplication app = new SpringApplication(ProxyApplication.class);
+        app.setResourceLoader(new KeystoreResourceLoader()); // add support for base64: resource loading
+        app.run(args);
 	}
 
     @Inject
