@@ -38,14 +38,18 @@ graph LR
 ## Bygges og kjøres (fra root av repo)
 ```bash
 mvn clean package
+
+# for å starte med virksomhets sertifikat liggende i ENV variabler :
+export OIDC_KEYSTORE_PATH=base64:$(base64 -i /Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks)
+export OIDC_KEYSTORE_PASSWORD='TopSecretPasswordHere'
 java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar
 
-# for å starte med din egen properties fil
+# for å starte med lokal properties fil :
 java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar --spring.config.additional-location=./altinn-v3-proxy/application-thjo.properties
 java -jar altinn-v3-proxy/target/altinn-v3-proxy-1.0.0.jar --debug --spring.config.additional-location=./altinn-v3-proxy/application-thjo.properties
 ```
 
-## Trigge og teste nytt docker image fra en branch
+## Trigge bygging og testing nytt docker image fra en branch
 Det er mulig å trigge nytt docker image fra en branch ved å angi teksten `[docker]` i git commit meldingen.
 
 ```bash
@@ -58,16 +62,23 @@ az login
 az acr login --name creiddev
 
 # når build-dpv-proxy.yaml har bygget og pushet kan du starte noe slikt :
+
+export OIDC_KEYSTORE_PATH=base64:$(base64 -i /Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks)
+export OIDC_KEYSTORE_PASSWORD='TopSecretPasswordHere'
+docker run -p 8080:8080 --name dpv-proxy --rm \
+-e OIDC_KEYSTORE_PATH=$OIDC_KEYSTORE_PATH -e OIDC_KEYSTORE_PASSWORD=$OIDC_KEYSTORE_PASSWORD \
+creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-10-1431-109c8575 --debug
+
 export KEYSTORE_FILE=/Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks
 docker run -p 8080:8080 --name dpv-proxy --rm -v $KEYSTORE_FILE:$KEYSTORE_FILE \
 -e OIDC_KEYSTORE_PATH=file:$KEYSTORE_FILE -e OIDC_KEYSTORE_PASSWORD=PasswordToKeystore \
-creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-09-1242-4a2113f0 --debug
+creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-10-1431-109c8575 --debug
 
 # alternativt med alle properties i en lokal fil som du mounter inn slik :
 export KEYSTORE_FILE=/Users/thorej/src/2023-cert-test-virks/eformidling-test-auth.jks
 export CONFIG_FILE=/Users/thorej/src/efm-integrasjonspunkt/altinn-v3-proxy/application-thjo.properties
 docker run -p 8080:8080 --name dpv-proxy --rm -v $KEYSTORE_FILE:$KEYSTORE_FILE -v $CONFIG_FILE:$CONFIG_FILE \
-creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-09-1242-4a2113f0 \
+creiddev.azurecr.io/efm-integrasjonspunkt-dpv-proxy:2025-10-10-1431-109c8575 \
 --spring.config.additional-location=$CONFIG_FILE --debug
 ```
 
