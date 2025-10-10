@@ -520,7 +520,7 @@
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
                                 <artifactId>jaxb-plugin-annotate</artifactId>
-                                <version>4.0.8</version>
+                                <version>4.0.11</version>
                             </plugin>
                             <plugin>
                                 <groupId>net.codesup.util</groupId>
