@@ -35,6 +35,7 @@ graph LR
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
 - [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
+- [ ] Actuator paths er åpne på både web og mgmt port (bør splittes i 2 security filter, en for hver port)
 
 ## Bygges og kjøres (fra root av repo)
 ```bash
