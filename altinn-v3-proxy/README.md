@@ -29,6 +29,7 @@ graph LR
 ## FIXME og TODO for videre utvikling :
 - [x] Flere tester som tester selve filteret (nå er hele kjeden mocket)
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
+- [x] Flytte actuator til / på 8090
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med noe mer fornuftig
 - [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
@@ -60,6 +61,10 @@ git push
 # log inn til azure container registry (om du ikke allerede er innlogget)
 az login
 az acr login --name creiddev
+
+# list which images are available
+az acr repository show-manifests --name creiddev --repository efm-integrasjonspunkt-dpv-proxy --output table
+az acr repository show-manifests --name creiddev --repository efm-integrasjonspunkt-dpv-proxy --output json
 
 # når build-dpv-proxy.yaml har bygget og pushet kan du starte noe slikt :
 

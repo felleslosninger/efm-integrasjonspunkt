@@ -1,9 +1,11 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
@@ -19,16 +21,31 @@ import static org.mockito.ArgumentMatchers.any;
 @AutoConfigureWebTestClient
 class ProxyApplicationTests {
 
-    static String ACTUATOR_INFO_PATH = "/actuator/info";
-    static String ACTUATOR_HEALTH_PATH = "/actuator/health";
-    static String ACTUATOR_METRICS_PATH = "/actuator/metrics";
+    static String ACTUATOR_INFO_PATH = "/info";
+    static String ACTUATOR_HEALTH_PATH = "/health";
+    static String ACTUATOR_LIVENESS_PATH = "/health/liveness";
+    static String ACTUATOR_READINESS_PATH = "/health/readiness";
+    static String ACTUATOR_METRICS_PATH = "/metrics";
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
+
+    @Value("${local.management.port}")
+    int managementPort;
 
     @Inject
     private WebTestClient webTestClient;
 
+    private WebTestClient mgmtTestClient;
+
     @MockitoBean
     private AltinnFunctions altinnFunctions;
+
+    @PostConstruct
+    public void initManagementTestWebClient() {
+        mgmtTestClient = WebTestClient
+            .bindToServer()
+            .baseUrl("http://localhost:" + managementPort)
+            .build();
+    }
 
     @BeforeEach
     void setupMock() {
@@ -41,7 +58,7 @@ class ProxyApplicationTests {
 
     @Test
     void shouldRouteToInfoEndpoint() {
-        webTestClient.get()
+        mgmtTestClient.get()
             .uri(ACTUATOR_INFO_PATH)
             .exchange()
             .expectStatus().isOk()
@@ -53,16 +70,37 @@ class ProxyApplicationTests {
 
     @Test
     void shouldRouteToHealthEndpoint() {
-        webTestClient.get()
+        mgmtTestClient.get()
             .uri(ACTUATOR_HEALTH_PATH)
             .exchange()
             .expectStatus().isOk()
-            .expectBody(String.class).isEqualTo("{\"status\":\"UP\"}");
+            .expectBody()
+            .jsonPath("$.status").isEqualTo("UP");
+    }
+
+    @Test
+    void shouldRouteToLivenessEndpoint() {
+        mgmtTestClient.get()
+            .uri(ACTUATOR_LIVENESS_PATH)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.status").isEqualTo("UP");
+    }
+
+    @Test
+    void shouldRouteToReadinessEndpoint() {
+        mgmtTestClient.get()
+            .uri(ACTUATOR_READINESS_PATH)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.status").isEqualTo("UP");
     }
 
     @Test
     void shouldRouteToMetricsEndpoint() {
-        webTestClient.get()
+        mgmtTestClient.get()
             .uri(ACTUATOR_METRICS_PATH)
             .exchange()
             .expectStatus().isOk()

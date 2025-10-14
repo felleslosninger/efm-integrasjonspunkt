@@ -25,11 +25,15 @@ public class Config {
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
 
-                // allow actuator endpoints
-                .pathMatchers("/actuator/**").permitAll()
-
                 // allow access to correspondence for clients with correct scope
                 .pathMatchers("/correspondence/api/**").hasAnyAuthority("SCOPE_altinn:broker.read")
+
+                // allow actuator endpoints on /
+                .pathMatchers("/health").permitAll()
+                .pathMatchers("/health/liveness").permitAll()
+                .pathMatchers("/health/readiness").permitAll()
+                .pathMatchers("/info").permitAll()
+                .pathMatchers("/metrics").permitAll()
 
                 // deny all other url's
                 .anyExchange().denyAll()
