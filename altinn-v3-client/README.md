@@ -12,7 +12,7 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [ ] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
 - [ ] Burde vi ha noen nye cucumber tester?
 - [ ] Klar til publisering -> "Annet" status på dpv.
-- [ ] Onboarding støtte i kode? https://digdir.atlassian.net/browse/MOVE-4618
+- [ ] Onboarding støtte i kode?
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
 - [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
 
