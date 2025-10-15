@@ -49,8 +49,8 @@ public class NotificationFactoryTest {
     private ServiceRegistryHelper serviceRegistryHelper;
 
     private static final String SENDER_ORGNAME = "ACME Corp.";
-    private static final String NOTIFICATION_TEXT = "Melding til $reporteeName$ fra $reporterName$";
-    private static final String NOTIFICATION_TEXT_SENSITIVE = "Taushetsbelagt melding til $reporteeName$ fra $reporterName$";
+    private static final String NOTIFICATION_TEXT = "Melding til $correspondenceRecipientName$ fra $reporterName$";
+    private static final String NOTIFICATION_TEXT_SENSITIVE = "Taushetsbelagt melding til $correspondenceRecipientName$ fra $reporterName$";
     private static final String RESOURCE = "Resourceid";
     private static final String SENSITIVE_RESOURCE = "Sensitive Resourceid";
     private static final NextMoveOutMessage nextMoveOutMessage = new NextMoveOutMessage();
@@ -89,12 +89,13 @@ public class NotificationFactoryTest {
     public void getNotification_mapsEmailContentType() {
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
         assertEquals(EmailContentType.PLAIN, notification.getEmailContentType(), "EmailContentType should be Plain");
+        assertEquals(EmailContentType.PLAIN, notification.getReminderEmailContentType(), "EmailContentType should be Plain");
     }
 
     @ParameterizedTest(name = "When message is {0} then the notification text should be {1}")
     @CsvSource({
-        "not sensitive, Melding til $reporteeName$ fra ACME Corp.",
-        "sensitive, Taushetsbelagt melding til $reporteeName$ fra ACME Corp."
+        "not sensitive, Melding til $correspondenceRecipientName$ fra ACME Corp.",
+        "sensitive, Taushetsbelagt melding til $correspondenceRecipientName$ fra ACME Corp."
     })
     public void getNotification_mapsNotificationText(String sensitive, String text){
         boolean isSensitive = sensitive.equals("sensitive");
@@ -105,6 +106,14 @@ public class NotificationFactoryTest {
 
         assertEquals(text, notification.getEmailBody());
         assertEquals(text, notification.getSmsBody());
+    }
+
+    @Test
+    public void getNotification_mapsReminderNotificationText(){
+        InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
+
+        assertEquals("Melding til $correspondenceRecipientName$ fra ACME Corp.", notification.getReminderEmailBody());
+        assertEquals("Melding til $correspondenceRecipientName$ fra ACME Corp.", notification.getReminderSmsBody());
     }
 
     @ParameterizedTest(name = "When message is {0}, and text is set in DpvSettings, then the notification text should be {1}")
@@ -157,6 +166,13 @@ public class NotificationFactoryTest {
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
 
         assertEquals(notificationChannel, notification.getNotificationChannel());
+        assertEquals(notificationChannel, notification.getReminderNotificationChannel());
     }
 
+    @Test
+    public void getNotification_mapsSubject(){
+        InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
+        assertEquals("Melding mottatt i Altinn", notification.getEmailSubject());
+        assertEquals("Melding mottatt i Altinn", notification.getReminderEmailSubject());
+    }
 }

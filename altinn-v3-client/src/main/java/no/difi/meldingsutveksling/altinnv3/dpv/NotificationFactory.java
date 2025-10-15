@@ -4,10 +4,7 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.*;
-import no.digdir.altinn3.correspondence.model.EmailContentType;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
-import no.digdir.altinn3.correspondence.model.NotificationChannelExt;
-import no.digdir.altinn3.correspondence.model.NotificationTemplateExt;
+import no.digdir.altinn3.correspondence.model.*;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -28,17 +25,30 @@ public class NotificationFactory {
     public InitializeCorrespondenceNotificationExt getNotification(NextMoveOutMessage message) {
         InitializeCorrespondenceNotificationExt notification = new InitializeCorrespondenceNotificationExt();
 
-        notification.sendReminder(getVarselType(message));
         notification.setNotificationChannel(getChannel(message));
         notification.setRequestedSendTime(OffsetDateTime.now(clock).plusMinutes(5));
         notification.setNotificationTemplate(NotificationTemplateExt.CUSTOM_MESSAGE);
         notification.setEmailBody(getNotificationText(message));
         notification.setSmsBody(getNotificationText(message));
         notification.setEmailContentType(EmailContentType.PLAIN);
-        // notification.setReminderEmailBody(); // todo undersøk
-        // notification.setReminderSmsBody(); // todo undersøk
+        notification.setEmailSubject(getEmailSubject());
+
+        if (shouldSendReminder(message)) {
+            notification.sendReminder(true);
+            notification.setReminderEmailContentType(EmailContentType.PLAIN);
+            notification.setReminderEmailSubject(getEmailSubject());
+            notification.setReminderNotificationChannel(getChannel(message));
+            notification.setReminderEmailBody(getNotificationText(message));
+            notification.setReminderSmsBody(getNotificationText(message));
+        } else {
+            notification.sendReminder(false);
+        }
 
         return notification;
+    }
+
+    private String getEmailSubject(){
+        return props.getDpv().getEmailSubject();
     }
 
     private String getNotificationText(NextMoveOutMessage message) {
@@ -52,7 +62,7 @@ public class NotificationFactory {
             .replace("$reporterName$", serviceRegistryHelper.getSenderName(message));
     }
 
-    private boolean getVarselType(NextMoveOutMessage message) {
+    private boolean shouldSendReminder(NextMoveOutMessage message) {
         DpvVarselType varselType = dpvHelper.getDpvSettings(message).flatMap(s -> s.getVarselType() != null ? Optional.of(s.getVarselType()) : Optional.empty())
             .orElse(DpvVarselType.VARSEL_DPV_MED_REVARSEL);
 
@@ -81,5 +91,7 @@ public class NotificationFactory {
             });
     }
 
-    private boolean isNullOrEmpty(String s) { return s == null || s.isEmpty(); }
+    private boolean isNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
 }

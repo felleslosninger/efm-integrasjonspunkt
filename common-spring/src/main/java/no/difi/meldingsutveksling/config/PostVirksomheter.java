@@ -19,6 +19,8 @@ public class PostVirksomheter {
     private String notificationText;
     @NotNull
     private String sensitiveNotificationText;
+    @NotNull
+    private String emailSubject;
     private boolean allowForwarding;
     private boolean enableDueDate;
     private Long daysToReply;

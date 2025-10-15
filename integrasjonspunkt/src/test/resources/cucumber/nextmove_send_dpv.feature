@@ -167,7 +167,7 @@ Feature: Sending a Next Move DPV message
       "correspondence.content.messageTitle" : "Nye lysrør",
       "correspondence.notification.notificationChannel" : "EmailAndSms",
       "correspondence.sendersReference" : "abc8849c-e281-4809-8555-7cd54952b926",
-      "correspondence.notification.smsBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
+      "correspondence.notification.smsBody" : "$correspondenceRecipientName$: Du har mottatt en melding fra TEST - C4.",
       "correspondence.sender" : "0192:910077473",
       "correspondence.requestedPublishTime" : "2019-03-25T12:38:23+01:00",
       "correspondence.content.attachments[0].isEncrypted" : "false",
@@ -182,7 +182,7 @@ Feature: Sending a Next Move DPV message
       "correspondence.content.attachments[0].displayName" : "Test",
       "correspondence.notification.notificationTemplate" : "CustomMessage",
       "correspondence.messageSender" : "TEST - C4",
-      "correspondence.notification.emailBody" : "$reporteeName$: Du har mottatt en melding fra TEST - C4.",
+      "correspondence.notification.emailBody" : "$correspondenceRecipientName$: Du har mottatt en melding fra TEST - C4.",
       "correspondence.dueDateTime" : "2019-04-01T12:38:23+01:00"
     }
     """
