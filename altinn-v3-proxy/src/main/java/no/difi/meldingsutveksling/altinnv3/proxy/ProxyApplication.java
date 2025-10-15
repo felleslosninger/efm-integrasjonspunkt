@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.proxy;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,9 @@ public class ProxyApplication {
     @Inject
     private AltinnFunctions altinnFunctions;
 
+    @Inject
+    private MeterRegistry meterRegistry;
+
     @PostConstruct
     public void init() {
         log.info(altinnProperties.toString());
@@ -42,7 +46,7 @@ public class ProxyApplication {
         return builder.routes()
             .route("altinn-service", r -> r.path("/correspondence/api/**")
                 .filters(f -> f
-                    .filter(new LoggingFilter())
+                    .filter(new LoggingFilter(meterRegistry))
                     .filter(new ProxyAuthFilter(altinnFunctions))
                 ).uri(altinnProperties.baseUrl() + "/correspondence/api/")
             )

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
@@ -15,17 +16,19 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
+@AutoConfigureObservability
 class ProxyApplicationTests {
 
     static String ACTUATOR_INFO_PATH = "/info";
     static String ACTUATOR_HEALTH_PATH = "/health";
     static String ACTUATOR_LIVENESS_PATH = "/health/liveness";
     static String ACTUATOR_READINESS_PATH = "/health/readiness";
-    static String ACTUATOR_METRICS_PATH = "/metrics";
+    static String ACTUATOR_METRICS_PATH = "/prometheus";
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
 
     @Value("${local.management.port}")
@@ -64,7 +67,7 @@ class ProxyApplicationTests {
             .expectStatus().isOk()
             .expectHeader().contentType("application/vnd.spring-boot.actuator.v3+json")
             .expectBody(String.class).consumeWith(s -> {
-                s.getResponseBody().startsWith("{");
+                assertTrue(s.getResponseBody().startsWith("{"));
             });
     }
 
@@ -105,7 +108,7 @@ class ProxyApplicationTests {
             .exchange()
             .expectStatus().isOk()
             .expectBody(String.class).consumeWith(s -> {
-                s.getResponseBody().startsWith("{\"names\":[");
+                assertTrue(s.getResponseBody().startsWith("# HELP "));
             });
     }
 

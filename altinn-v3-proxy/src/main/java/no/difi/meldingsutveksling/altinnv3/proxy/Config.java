@@ -33,7 +33,8 @@ public class Config {
                 .pathMatchers("/health/liveness").permitAll()
                 .pathMatchers("/health/readiness").permitAll()
                 .pathMatchers("/info").permitAll()
-                .pathMatchers("/metrics").permitAll()
+                .pathMatchers("/version").permitAll()
+                .pathMatchers("/prometheus").permitAll()
 
                 // deny all other url's
                 .anyExchange().denyAll()

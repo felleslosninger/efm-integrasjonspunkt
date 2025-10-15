@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.proxy.debug;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -10,7 +12,10 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 @Slf4j
+@RequiredArgsConstructor
 public class LoggingFilter implements GatewayFilter {
+
+    private final MeterRegistry meterRegistry;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -18,7 +23,9 @@ public class LoggingFilter implements GatewayFilter {
         return chain.filter(exchange).then(
             Mono.fromRunnable( () -> {
                 URI routedUrl = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRequestUrl");
-                log.debug("Destination URL : {}", routedUrl);
+                log.info("Request path : {}", exchange.getRequest().getPath().value());
+                log.info("Destination URL : {}", routedUrl);
+                meterRegistry.counter("orders.processed.total", "method", exchange.getRequest().getMethod().name()).increment();
             } )
         );
     }

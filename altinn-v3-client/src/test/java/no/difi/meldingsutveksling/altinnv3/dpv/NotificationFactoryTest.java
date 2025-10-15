@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
+import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -33,14 +33,14 @@ import static org.mockito.Mockito.when;
 })
 public class NotificationFactoryTest {
 
-    @Autowired
+    @Inject
     private NotificationFactory notificationFactory;
+
+    @Inject
+    private Clock clock;
 
     @MockitoBean
     private IntegrasjonspunktProperties properties;
-
-    @Autowired
-    private Clock clock;
 
     @MockitoBean
     private DpvHelper dpvHelper;
@@ -53,6 +53,7 @@ public class NotificationFactoryTest {
     private static final String NOTIFICATION_TEXT_SENSITIVE = "Taushetsbelagt melding til $correspondenceRecipientName$ fra $reporterName$";
     private static final String RESOURCE = "Resourceid";
     private static final String SENSITIVE_RESOURCE = "Sensitive Resourceid";
+    private static final String EMAIL_SUBJECT = "Melding mottatt i Altinn";
     private static final NextMoveOutMessage nextMoveOutMessage = new NextMoveOutMessage();
     private static final PostVirksomheter dpv = new PostVirksomheter();
 
@@ -62,6 +63,7 @@ public class NotificationFactoryTest {
         dpv.setNotificationText(NOTIFICATION_TEXT);
         dpv.setSensitiveNotificationText(NOTIFICATION_TEXT_SENSITIVE);
         dpv.setSensitiveResource(SENSITIVE_RESOURCE);
+        dpv.setEmailSubject(EMAIL_SUBJECT);
 
         when(properties.getDpv()).thenReturn(dpv);
         when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(
@@ -175,4 +177,5 @@ public class NotificationFactoryTest {
         assertEquals("Melding mottatt i Altinn", notification.getEmailSubject());
         assertEquals("Melding mottatt i Altinn", notification.getReminderEmailSubject());
     }
+
 }

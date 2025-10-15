@@ -1,8 +1,6 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-
-import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
-import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
+import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
@@ -10,22 +8,18 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.HashSet;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = {
     DpvHelper.class,
     IntegrasjonspunktProperties.class,
 })
 public class DpvHelperTest {
-    @Autowired
+
+    @Inject
     private DpvHelper dpvHelper;
 
     @MockitoBean
@@ -85,4 +79,5 @@ public class DpvHelperTest {
     public void isConfidential(){
 
     }
+
 }

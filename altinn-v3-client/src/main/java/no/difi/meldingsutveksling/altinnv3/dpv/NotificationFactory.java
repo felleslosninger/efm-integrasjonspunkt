@@ -3,8 +3,13 @@ package no.difi.meldingsutveksling.altinnv3.dpv;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.*;
-import no.digdir.altinn3.correspondence.model.*;
+import no.difi.meldingsutveksling.nextmove.DpvVarselTransportType;
+import no.difi.meldingsutveksling.nextmove.DpvVarselType;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.digdir.altinn3.correspondence.model.EmailContentType;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
+import no.digdir.altinn3.correspondence.model.NotificationChannelExt;
+import no.digdir.altinn3.correspondence.model.NotificationTemplateExt;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -20,7 +25,6 @@ public class NotificationFactory {
     private final Clock clock;
     private final DpvHelper dpvHelper;
     private final ServiceRegistryHelper serviceRegistryHelper;
-
 
     public InitializeCorrespondenceNotificationExt getNotification(NextMoveOutMessage message) {
         InitializeCorrespondenceNotificationExt notification = new InitializeCorrespondenceNotificationExt();
