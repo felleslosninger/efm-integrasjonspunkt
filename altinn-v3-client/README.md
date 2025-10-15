@@ -6,7 +6,7 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 
 - [x] Daniel : DPV ressurser skal hete `eformidling-dpv-administrasjon` (og `eformidling-dpv-taushetsbelagt` dersom vi trenger egen for taushetsbelagt)
 - [x] Proxy koden bygges og deployes i systest
-- [ ] Oppdatere notification med subject og sånt
+- [x] Oppdatere notification med subject og sånt
 - [ ] Daniel : scope mot proxy `efm:dpv` (eller `efm:dpv.read`) (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
 - [ ] Daniel : DPO ressurser bør tilsvarende hete `eformidling-dpo` ?
 - [ ] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt?
