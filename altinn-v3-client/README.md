@@ -4,16 +4,17 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 
 # TODO (marker de som er fikset)
 
-- [x] Daniel : DPV ressurser skal hete `eformidling-dpv-administrasjon` (og `eformidling-dpv-taushetsbelagt` dersom vi trenger egen for taushetsbelagt)
+- [x] Daniel : DPV ressurser skal hete `eformidling-dpv-administrasjon` (og `eformidling-dpv-taushetsbelagt` dersom vi trenger egen for taushetsbelagt) https://digdir.atlassian.net/browse/MOVE-4615
 - [x] Proxy koden bygges og deployes i systest
 - [x] Oppdatere notification med subject og sånt
 - [ ] Daniel : scope mot proxy `efm:dpv` (eller `efm:dpv.read`) (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
 - [ ] Daniel : DPO ressurser bør tilsvarende hete `eformidling-dpo` ?
-- [ ] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt?
+- [ ] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
 - [ ] Burde vi ha noen nye cucumber tester?
 - [ ] Klar til publisering -> "Annet" status på dpv.
-- [ ] Onboarding støtte i kode?
+- [ ] Onboarding støtte i kode? https://digdir.atlassian.net/browse/MOVE-4618
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
+- [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
 
 
 Dokumentasjon:
