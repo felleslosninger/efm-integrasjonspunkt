@@ -17,10 +17,9 @@ sequenceDiagram
     participant A as Altinn<br><webapp>
     
     K->>S: Opprett maskinporten client (selvbetjent)
-    note over S : Tildeler scopes for : broker read + write
+    note over S : Tildeler scopes for : altinn:broker.write, altinn:broker.read
     D->>S: Tildeler scopes (de som ikke er åpne for kunde) 
-    note over S : Tildeler scopes for : system + systembruker
-    
+    note over S : Tildeler scopes for: <br> altinn:authentication/systemregister.write<br> altinn:authentication/systemuser.request.write<br> altinn:authentication/systemuser.request.read
     K->>M: Hent token for client
     note over M : scopes : [altinn:authentication/systemregister.write]
     K->>AS : Opprett system (/systemregister/vendor)

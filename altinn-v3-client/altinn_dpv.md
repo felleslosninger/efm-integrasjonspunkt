@@ -7,7 +7,7 @@ Kunden må lage en maskinporten client (med nødvendige scopes),
 deretter må Digdir legge til virksomheten i tilgangslisten
 på correspondence ressursen i Altinn.
 
-Forutsetter at nytt scope `altinn:eformidling.write` er opprette og tilgjengelig for kunden. 
+Forutsetter at nytt scope `eformidling:dpv` er opprette og tilgjengelig for kunden. 
 
 ```mermaid
 sequenceDiagram
@@ -17,7 +17,7 @@ sequenceDiagram
     participant AR as Altinn ResourceRegistry<br><rest api>
     
     K->>S: Opprett maskinporten client (selvbetjent)
-    note over S : Tildeler scope : altinn:eformidling.write 
+    note over S : Tildeler scope : eformidling:dpv 
     D->>AR: Legg virksomhet inn i tilgangslisten (/access-lists/{owner}/{identifier}/members) 
 ```
 
