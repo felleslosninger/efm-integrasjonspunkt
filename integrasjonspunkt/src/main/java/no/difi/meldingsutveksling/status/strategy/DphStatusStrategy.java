@@ -40,37 +40,41 @@ public class DphStatusStrategy implements StatusStrategy {
 
     @Override
     public void checkStatus(Set<Conversation> conversations) {
-        Conversation conversation = conversations.stream().findFirst().get();
-        NhnIdentifier sender = getNhnIdentifier(conversation::getSender, conversation::getSenderIdentifier);
-        NhnIdentifier reciever = getNhnIdentifier(conversation::getReceiver, conversation::getReceiverIdentifier);
-        DPHMessageStatus status = nhnAdapterClient.messageStatus(UUID.fromString(conversation.getMessageReference()),sender.getIdentifier());
 
-        Optional<MessageStatus> mottat = conversation.getMessageStatuses().stream().filter(t-> Objects.equals(t.getStatus(), ReceiptStatus.MOTTATT.name())).findAny();
-        if (!mottat.isPresent() && status.transportStatus() == TransportStatus.ACKNOWLEDGED) {
-            conversationService.registerStatus(conversation,MessageStatus.of(ReceiptStatus.MOTTATT,OffsetDateTime.now(),"Transport reciept is recieved"));
-        }
+            conversations.forEach((conversation)-> {
+                try {
+                NhnIdentifier sender = getNhnIdentifier(conversation::getSender, conversation::getSenderIdentifier);
+                NhnIdentifier reciever = getNhnIdentifier(conversation::getReceiver, conversation::getReceiverIdentifier);
+                DPHMessageStatus status = nhnAdapterClient.messageStatus(UUID.fromString(conversation.getMessageReference()), sender.getIdentifier());
 
-        Optional<MessageStatus> levert = conversation.getMessageStatuses().stream().filter(t-> Objects.equals(t.getStatus(), ReceiptStatus.LEVERT.name())).findAny();
+                Optional<MessageStatus> mottat = conversation.getMessageStatuses().stream().filter(t -> Objects.equals(t.getStatus(), ReceiptStatus.MOTTATT.name())).findAny();
 
-        if(!levert.isPresent() && status.apprecStatus() != null) {
-            if (status.apprecStatus() == ApprecStatus.OK) {
-                conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.LEST,OffsetDateTime.now(),"Application reciept has been recieved."));
-            } else if (status.apprecStatus() == ApprecStatus.REJECTED) {
-                conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL,OffsetDateTime.now(),"Message has been rejected by the application"));
-            } else if (status.apprecStatus() == ApprecStatus.OK_ERROR_IN_MESSAGE_PART) {
-                conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL,OffsetDateTime.now(),"Error in business message."));
+                if (!mottat.isPresent() && status.transportStatus() == TransportStatus.REJECTED) {
+                    conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Message rejected in transport"));
+
+                }
+                if (!mottat.isPresent() && status.transportStatus() == TransportStatus.ACKNOWLEDGED) {
+                    conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.MOTTATT, OffsetDateTime.now(), "Transport reciept is recieved"));
+                }
+
+                Optional<MessageStatus> levert = conversation.getMessageStatuses().stream().filter(t -> Objects.equals(t.getStatus(), ReceiptStatus.LEVERT.name())).findAny();
+
+                if (!levert.isPresent() && status.apprecStatus() != null) {
+                    if (status.apprecStatus() == ApprecStatus.OK) {
+                        conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.LEST, OffsetDateTime.now(), "Application reciept has been recieved."));
+                    } else if (status.apprecStatus() == ApprecStatus.REJECTED) {
+                        conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Message has been rejected by the application"));
+                    } else if (status.apprecStatus() == ApprecStatus.OK_ERROR_IN_MESSAGE_PART) {
+                        conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Error in business message."));
+                    } else {
+                        throw new NextMoveRuntimeException("Apprec status is not known to the application" + status.apprecStatus());
+                    }
+                }
+            } catch(Exception e) {
+                log.error("Error during status check moving to next message:" + e.getMessage(), e);
             }
-            else {
-                throw new NextMoveRuntimeException("Apprec status is not known to the application" + status.apprecStatus());
-            }
-        }
+        });
 
-
-
-
-        if (status.transportStatus() == TransportStatus.ACKNOWLEDGED) {
-            MessageStatus.of(ReceiptStatus.MOTTATT, OffsetDateTime.now(),"Transport reciept is recieved");
-        }
 
     }
 
@@ -86,8 +90,7 @@ public class DphStatusStrategy implements StatusStrategy {
 
     @Override
     public boolean isStopPolling(MessageStatus status) {
-        return ReceiptStatus.MOTTATT.toString().equals(status.getStatus())
-            || ReceiptStatus.LEVERT.toString().equals(status.getStatus());
+        return ReceiptStatus.FEIL.toString().equals(status.getStatus()) || ReceiptStatus.LEVERT.toString().equals(status.getStatus());
     }
 
 

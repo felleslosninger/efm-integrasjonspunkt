@@ -16,7 +16,7 @@ public class DPHMessageOutTest {
             "testConversationId",
             "234234234",
             new Sender("testHerid1","testHerid2","name"),
-            new Reciever("testHerid1","testHerid2"),
+            new Reciever("testHerid1","testHerid2","7687676"),
             "testfagmelding",
             new Patient("234123421341234","Peter","","Peterson","45345345435")
         );

@@ -19,6 +19,7 @@ import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.idporten.validators.identifier.PersonIdentifierValidator;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -66,7 +67,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
                 patient = new Patient("777777777","Pasient","NHN partner","NHN","2343432434");
             }
 
-            System.out.println(serviceRecord.getService());
+
             //@TODO skal vi sende dialogmeldingen til og med at vi har ikke hentet patient detaliene ? Fortsatt vi har patient fødselsnummer kanskje det er nok ?
         } catch (Exception e) {
             log.error("Not able to get information about Patient " + e.getMessage(), e);
@@ -80,8 +81,10 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
 
         Conversation conversation = conversationService.findConversation(message.getMessageId()).orElseThrow(() -> new NextMoveRuntimeException("Conversation not found for message " + message.getMessageId()));
 
+        NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
+
         DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-            new Sender(senderHerId1, senderHerId2, "testname"), new Reciever(recieverHerId1, recieverHerId2), fagmelding, patient);
+            new Sender(senderHerId1, senderHerId2, "testname"), new Reciever(recieverHerId1, recieverHerId2 , nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, patient);
         var messageReference = adapterClient.messageOut(messageOut);
         conversation.setMessageReference(messageReference);
         conversationService.save(conversation);

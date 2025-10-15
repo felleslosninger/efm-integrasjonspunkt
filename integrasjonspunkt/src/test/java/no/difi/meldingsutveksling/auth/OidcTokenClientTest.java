@@ -65,7 +65,6 @@ public class OidcTokenClientTest {
         props.getOidc().getKeystore().setAlias("client_alias");
         props.getOidc().getKeystore().setPassword("changeit");
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
-
         props.setSign(new IntegrasjonspunktProperties.Sign());
         props.getSign().setEnable(true);
         props.getSign().setJwkUrl(new URL(props.getServiceregistryEndpoint()+ "/jwk"));

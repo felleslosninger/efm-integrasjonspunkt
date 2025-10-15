@@ -6,12 +6,14 @@ import kotlin.uuid.Uuid;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -41,5 +43,11 @@ public class NhnAdapterClient {
 
     public DPHMessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
         return dphClient.method(HttpMethod.GET).uri(uri + "/status/" + messageReference + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(DPHMessageStatus.class).getBody();
+    }
+
+    public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
+
+       return dphClient.method(HttpMethod.GET).uri(uri + "/in/" + messageReference.toString() +"/receipt" + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(new ParameterizedTypeReference<List<IncomingReceipt>>() {
+       }).getBody();
     }
 }

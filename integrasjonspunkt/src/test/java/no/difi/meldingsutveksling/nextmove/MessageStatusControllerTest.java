@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -63,6 +64,9 @@ public class MessageStatusControllerTest {
 
     @MockitoBean
     private StatusQueue statusQueue;
+
+    @MockitoBean
+    private NhnAdapterClient nhnAdapterClient;
 
     @Test
     public void find() throws Exception {
