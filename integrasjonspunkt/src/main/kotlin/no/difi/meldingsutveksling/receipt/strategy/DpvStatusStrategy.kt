@@ -55,7 +55,7 @@ class DpvStatusStrategy(private val correspondencyAgencyMessageFactory: Correspo
             if (!c.hasStatus(ms)) {
                 if (mappedStatus == LEVERT &&
                     c.documentIdentifier == properties.arkivmelding.defaultDocumentType &&
-                    properties.arkivmelding.isGenerateReceipts) {
+                    properties.arkivmelding.isGenerateArkivmeldingReceipts) {
                     nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPV)
                 }
                 conversationService.registerStatus(c, ms)
