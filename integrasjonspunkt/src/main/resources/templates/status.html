@@ -26,29 +26,18 @@
 
 <h1>Status (just prototyping, random information below)</h1>
 
-<div class="card">
-    <h2 th:unless="${status.dpi()}">DPI er disabled 🤦‍♂️</h2>
-    <div th:if="${status.dpi()}" class="container">
-        <h2>DPI</h2>
-        <p>Vis masse mer informasjon om DPI og hvordan den er konfigurert</p>
+<th:block th:each="s : ${status}">
+    <div class="card">
+        <!--
+        <h2 th:unless="${s.service()}">DPO er disabled 🤦‍♂️</h2>
+        <div th:if="${s.dpo()}" class="container">
+        -->
+        <div class="container">
+            <h2 th:text="${s.service()}">unknown</h2>
+            <p>[[${s.config()}]] has [[${s.errors()}]] errors</p>
+        </div>
     </div>
-</div>
-
-<div class="card">
-    <h2 th:unless="${status.dpo()}">DPO er disabled 🤦‍♂️</h2>
-    <div th:if="${status.dpo()}" class="container">
-        <h2>DPO</h2>
-        <p>Vis masse mer informasjon om DPO og hvordan den er konfigurert</p>
-    </div>
-</div>
-
-<div class="card">
-    <h2 th:unless="${status.dpv()}">DPV er disabled 🤦‍♂️</h2>
-    <div th:if="${status.dpv()}" class="container">
-        <h2>DPV</h2>
-        <p>Vis masse mer informasjon om DPV og hvordan den er konfigurert</p>
-    </div>
-</div>
+</th:block>
 
 </body>
 </html>

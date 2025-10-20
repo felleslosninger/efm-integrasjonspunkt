@@ -37,7 +37,23 @@ graph LR
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
 - [ ] Actuator paths er åpne på både web og mgmt port (bør splittes i 2 security filter, en for hver port)
 
-## Bygges og kjøres (fra root av repo)
+## Deployment
+
+| Miljø                                                                                                                     | URL som skal benyttes i Integrasjonspunktet                                  | Forklaring                                  |
+|---------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------|
+| [PROD](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/prod/efm-integrasjonspunkt-dpv-proxy  |                                                                              | Produksjon går mot Altinn produksjon     |
+| [TEST](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/test/efm-integrasjonspunkt-dpv-proxy) | https://dpvproxy.apps.kt.digdir.cosng.net/altinn-proxy/correspondence/api/v1 | Kundetest er konfigurert mot Altinn v3 TT02 |
+| [DEV](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/dev/efm-integrasjonspunkt-dpv-proxy)   | https://eformidling.dev/altinn-proxy/correspondence/api/v1                   | Systest er konfigurert mot Altinn v3 TT02   |
+
+## Observability
+
+- Logging er JSON til stdout (logback format), leses inn i Eleastic og kan søkes i Kibana.
+- Metrics er PROMETHEUS, leses inn i Prometheus og visualiseres i Grafana.
+
+Proxy har noen custom metrics som starter med `eformidling.dpv.*`, disse er :
+- `eformidling.dpv.proxy.total` (tagget med http methode)
+
+## Bygges og kjøres lokalt (fra root av repo)
 ```bash
 mvn clean package
 
