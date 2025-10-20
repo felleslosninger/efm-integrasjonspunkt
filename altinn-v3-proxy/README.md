@@ -30,12 +30,13 @@ graph LR
 - [x] Flere tester som tester selve filteret (nå er hele kjeden mocket)
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [x] Flytte actuator til / på 8090
-- [ ] Bytte ut `SCOPE_altinn:broker.read` med noe mer fornuftig
+- [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
+- [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
 - [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
 - [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
-- [ ] Actuator paths er åpne på både web og mgmt port (bør splittes i 2 security filter, en for hver port)
+- [ ] Actuator paths er åpne på både web og mgmt port (kan dette splittes i 2 security filter, en for hver port)
 
 ## Deployment
 
