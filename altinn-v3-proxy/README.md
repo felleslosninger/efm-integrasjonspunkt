@@ -41,7 +41,7 @@ graph LR
 
 | Miljø                                                                                                                     | URL som skal benyttes i Integrasjonspunktet                                  | Forklaring                                  |
 |---------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------|
-| [PROD](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/prod/efm-integrasjonspunkt-dpv-proxy  |                                                                              | Produksjon går mot Altinn produksjon     |
+| [PROD](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/prod/efm-integrasjonspunkt-dpv-proxy) |                                                                              | Produksjon går mot Altinn produksjon     |
 | [TEST](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/test/efm-integrasjonspunkt-dpv-proxy) | https://dpvproxy.apps.kt.digdir.cosng.net/altinn-proxy/correspondence/api/v1 | Kundetest er konfigurert mot Altinn v3 TT02 |
 | [DEV](https://github.com/felleslosninger/eformidling-cd/tree/main/apps/eformidling/dev/efm-integrasjonspunkt-dpv-proxy)   | https://eformidling.dev/altinn-proxy/correspondence/api/v1                   | Systest er konfigurert mot Altinn v3 TT02   |
 
