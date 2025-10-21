@@ -63,19 +63,28 @@ Linker til logger, config og alt annet :
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Release
+
+
+
 Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
 
 ```bash
 # lokalt repo må være i sync med origin/GitHub
+git status 
+
+git tag -a vX.Y.Z -m "Tag release vX.Y.Z"
+
+git push origin vX.Y.Z
+
+#Pipeline vil da plukke opp taggen og kjøre workflow 
+
+#Bumpe versjon i pom.xml:
+
+mvn versions:set -DnewVersion=X.Y.Z-SNAPSHOT
+mvn versions:commit
+git add ALL_THE_RELEVANT_POMS.xml
+git commit -m "Bump versjon til X.Y.Z-SNAPSHOT"
 git push
-
-mvn release:prepare
-# svar på tre spørsmål (sett tag lik release-versjon) 
-# What is the release version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0: : 1.0.0
-# What is SCM release tag or label for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.0: :
-# What is the new development version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.1-SNAPSHOT: :
-
-mvn release:perform
 ```
 
 
