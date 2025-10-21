@@ -9,13 +9,14 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [x] Oppdatere notification med subject og sånt
 - [ ] Daniel : scope mot proxy `efm:dpv` (eller `efm:dpv.read`) (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
 - [ ] Daniel : DPO ressurser bør tilsvarende hete `eformidling-dpo` ?
-- [ ] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
+- [X] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
 - [ ] Burde vi ha noen nye cucumber tester?
 - [ ] Klar til publisering -> "Annet" status på dpv.
 - [ ] Onboarding støtte i kode?
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
 - [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
-
+- [ ] Endre standard taushetsbelagt post teksten til enkelttjeneste om man skal ha det istedenfor rolle
+- [ ] Om man skal deligere enkeltjtestenes, kva skal stå i delegerbarteksten i altinn
 
 Dokumentasjon:
 - [ ] Onboarding for nye kunder
@@ -90,6 +91,7 @@ Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test (19bed6d
 ```
 Tenor : FRISK VOKSENDE TIGER AS (314244370)
 Daglig leder : RØDFOTSULE KONTROLLERT (30848299746)
+Person som kan lese taushetsbelagt post: HATT INTRIKAT (24914899369)
 Kun brukt som mottaker av meldinger i Altinn, ingen tilgang til maskinporten
 ```
 
