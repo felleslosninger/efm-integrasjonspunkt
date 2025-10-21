@@ -15,8 +15,8 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [ ] Onboarding støtte i kode?
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
 - [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
-- [ ] Endre standard taushetsbelagt post teksten til enkelttjeneste om man skal ha det istedenfor rolle
-- [ ] Om man skal deligere enkeltjtestenes, kva skal stå i delegerbarteksten i altinn
+- [ ] Endre standard taushetsbelagt epost teksten til enkelttjeneste om man skal ha det istedenfor rolle
+- [ ] Om man skal deligere enkelttjeneste, kva skal stå i delegerbarteksten i altinn?
 
 Dokumentasjon:
 - [ ] Onboarding for nye kunder
