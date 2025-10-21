@@ -64,13 +64,9 @@ Linker til logger, config og alt annet :
 
 ## Release
 
-
-
-Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
-
 ```bash
 # lokalt repo må være i sync med origin/GitHub
-git status 
+git pull 
 
 git tag -a vX.Y.Z -m "Tag release vX.Y.Z"
 
