@@ -80,7 +80,7 @@ public class NextMoveMessageInController {
                 response.setStatus(HttpStatus.NO_CONTENT.value());
                 return;
             }
-            if (!asic.exists()) {
+            if (asic.isFile() && !asic.exists()) {
                 response.setStatus(HttpStatus.NO_CONTENT.value());
                 return;
             }
