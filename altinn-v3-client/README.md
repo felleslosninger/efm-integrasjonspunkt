@@ -7,20 +7,21 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [x] Daniel : DPV ressurser skal hete `eformidling-dpv-administrasjon` (og `eformidling-dpv-taushetsbelagt` dersom vi trenger egen for taushetsbelagt) https://digdir.atlassian.net/browse/MOVE-4615
 - [x] Proxy koden bygges og deployes i systest
 - [x] Oppdatere notification med subject og sånt
+- [X] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
+- [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
+- [ ] Klar til publisering -> "Annet" status på dpv (Johannes har ikke rukket å tenke på det, så foreløpig nei til ny status)
+- [ ] Varslingstekstene for DPV må inneholder info om hvilken ressures/enkelttjenste som må delegeres for å kunne se den taushetsbelagte meldingen.
+    - [ ] Endre standard taushetsbelagt epost teksten til enkelttjeneste om man skal ha det istedenfor rolle
+    - [ ] Om man skal deligere enkelttjeneste, kva skal stå i delegerbarteksten i altinn?
 - [ ] Daniel : scope mot proxy `efm:dpv` (eller `efm:dpv.read`) (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
 - [ ] Daniel : DPO ressurser bør tilsvarende hete `eformidling-dpo` ?
-- [X] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
+- [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
 - [ ] Burde vi ha noen nye cucumber tester?
-- [ ] Klar til publisering -> "Annet" status på dpv.
-- [ ] Onboarding støtte i kode?
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
-- [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
-- [ ] Endre standard taushetsbelagt epost teksten til enkelttjeneste om man skal ha det istedenfor rolle
-- [ ] Om man skal deligere enkelttjeneste, kva skal stå i delegerbarteksten i altinn?
 
 Dokumentasjon:
-- [ ] Onboarding for nye kunder
 - [ ] Digdir docs
+- [ ] Onboarding for nye kunder
 - [ ] Confluence
 
 # DPO
