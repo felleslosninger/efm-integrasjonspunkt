@@ -360,6 +360,8 @@ class NextMoveMessageInControllerTest {
     void popMessage_EmptyAsic_ShouldReturnNoContent() throws Exception {
         Resource asicResource = mock(Resource.class);
         when(asicResource.exists()).thenReturn(false);
+        when(asicResource.isFile()).thenReturn(true);
+
         given(messageService.popMessage(anyString())).willReturn(asicResource);
         doThrow(new AsicReadException("test")).when(messageService).handleCorruptMessage(anyString());
 
