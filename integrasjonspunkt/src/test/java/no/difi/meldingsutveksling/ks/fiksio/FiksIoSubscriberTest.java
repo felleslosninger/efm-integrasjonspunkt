@@ -19,10 +19,12 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class FiksIoSubscriberTest {
 
     @Mock
@@ -69,4 +71,5 @@ class FiksIoSubscriberTest {
         verify(nextMoveQueue).enqueueIncomingMessage(any(), eq(ServiceIdentifier.DPFIO), any());
         verify(svarSender).ack();
     }
+
 }

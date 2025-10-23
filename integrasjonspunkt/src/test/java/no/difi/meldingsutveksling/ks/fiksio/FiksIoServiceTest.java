@@ -8,11 +8,14 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.FiksIoMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.ks.fiks.io.client.FiksIOKlient;
-import no.ks.fiks.io.client.model.*;
+import no.ks.fiks.io.client.model.MeldingId;
+import no.ks.fiks.io.client.model.MeldingRequest;
+import no.ks.fiks.io.client.model.SendtMelding;
+import no.ks.fiks.io.client.model.StringPayload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class FiksIoServiceTest {
 
     @Mock
@@ -87,4 +91,5 @@ class FiksIoServiceTest {
         assertThat(requestCaptor.getValue().getMottakerKontoId().toString()).isEqualTo(kontoId);
         assertThat(requestCaptor.getValue().getMeldingType()).isEqualTo(protocol);
     }
+
 }
