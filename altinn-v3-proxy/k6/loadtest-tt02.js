@@ -118,7 +118,7 @@ function sendNewCorrespondence(data) {
     console.log(res.status_text);
 
     check(res, {
-        'sucessfully POSTed a new message': (r) => r.status === 200,
+        'successfully POSTed a new message': (r) => r.status === 200,
     });
 
 }
