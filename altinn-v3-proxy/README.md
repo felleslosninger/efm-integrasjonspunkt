@@ -134,10 +134,12 @@ For å simulere litt last vil endepunktet vente angitt tid og returnere spesifis
 
 ```bash
 # To run with locally installed K6
+export TOKEN=xxxxx
 k6 run loadtest-tt02.js
 
 # To run using Docker use K6 container image
-docker run --rm -i -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
+export TOKEN=xxxxx
+docker run --rm -i -e "TOKEN=$TOKEN" -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
 ```
 
 ## Når benytter integrasjonspunktet proxy'en? 

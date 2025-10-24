@@ -3,15 +3,21 @@ import {check} from 'k6';
 import {FormData} from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 
 // To run with locally installed K6 try this :
+// > export TOKEN=xxxxx
 // > k6 run loadtest-tt02.js
 //
-// To run using Docker do something like this :
-// > docker run --rm -i -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
+// To run with Docker do something like this :
+// > export TOKEN=xxxxx
+// > docker run --rm -i -e "TOKEN=$TOKEN" -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
+
+// read maskinporten token to use from ENV variable
+const TOKEN = (__ENV.TOKEN) ? __ENV.TOKEN : 'NoTokenWasSet';
 
 // Options for running the test
 export const options = {
     duration: '1s',
     vus: 1,
+    TOKEN: TOKEN,
     thresholds: {
         http_req_failed: ['rate<0.01'],     // http errors should be less than 1%
         http_req_duration: ['p(99)<500'],   // 95 percent of response times must be below 500ms
@@ -22,11 +28,10 @@ export const options = {
 export function setup() {
 
     let proxy = 'https://dpvproxy.apps.kt.digdir.cosng.net';
-    let token = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjcxOUFGOTRFNDQ1MzE0Q0RDMjk1Rjk1MjUzODU4MDU0RjhCQ0FDODYiLCJ4NXQiOiJjWnI1VGtSVEZNM0NsZmxTVTRXQVZQaThySVkiLCJ0eXAiOiJKV1QifQ.eyJzY29wZSI6ImFsdGlubjpicm9rZXIucmVhZCIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJleHAiOjE3NjEzMTk2MzgsImlhdCI6MTc2MTMxNzgzOCwiY2xpZW50X2lkIjoiYjU5MGYxNDktZDBiYS00ZmNhLWIzNjctYmNjZDllNDQ0YTAwIiwiY29uc3VtZXIiOnsiYXV0aG9yaXR5IjoiaXNvNjUyMy1hY3RvcmlkLXVwaXMiLCJJRCI6IjAxOTI6MzExNzgwNzM1In0sInVybjphbHRpbm46b3JnTnVtYmVyIjoiMzExNzgwNzM1IiwidXJuOmFsdGlubjphdXRoZW50aWNhdGVtZXRob2QiOiJtYXNraW5wb3J0ZW4iLCJ1cm46YWx0aW5uOmF1dGhsZXZlbCI6MywiaXNzIjoiaHR0cHM6Ly9wbGF0Zm9ybS50dDAyLmFsdGlubi5uby9hdXRoZW50aWNhdGlvbi9hcGkvdjEvb3BlbmlkLyIsImp0aSI6IjNjZDFiOGY4LTc2NDgtNDYwNi1hNTk5LTYwMTdiYTBiYTFiYSIsIm5iZiI6MTc2MTMxNzgzOH0.tu-MxzSWwm40ZOpcD2BUOMNycZeC690Ydhcrjwj_G3wlAgXaUV_54nkoqhSXydj9iJAGF0dgg5_VkF57dAGqQsMmfjjpvHWE3bpRF8BgCbQTN4mjRwhC-VflwTUg5k6QWmyG_qsKQsyLEt46VvRKA0qg6JfwZPEwOOpBs3PnZz9cZQYEvsk_bsaSBiMoDvIpcHTCiE4W2yzI4VLRhJSRTHL2smddGPiLs2MmClU8uYYKbUXYfNyUecBkoSDsrmSGLvAO-Tnuf4WrVtrbPONqJx7_ZR-LtmN5xb4IxZyjP3_G2Mi76L1jYiIMMHHjwd0qwlqmtvBPBHpFRqtL1_oZzQ';
 
     return {
         dpvProxyUrl: proxy,
-        maskinportenToken: token,
+        maskinportenToken: options.TOKEN,
     }
 
 }
@@ -35,7 +40,7 @@ export function setup() {
 export default function (data) {
     pingLoadTest(data);
     //fetchCorrespondenceDetails(data);
-    // sendNewCorrespondence(data);
+    //sendNewCorrespondence(data);
 }
 
 // Use the "ping" function in the proxy for performance testing
