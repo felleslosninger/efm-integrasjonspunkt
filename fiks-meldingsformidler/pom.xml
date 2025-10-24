@@ -36,16 +36,6 @@
             <groupId>no.ks.fiks</groupId>
             <artifactId>fiks-io-klient-java</artifactId>
             <version>3.4.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-common</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
