@@ -4,6 +4,7 @@
 - Tar i bruk Altinn v3 REST API (fjernet altinnexchange / altinnclient som var SOAP basert)
 - DPO - fjernet brukernavn og passord fra konfigurasjon (det er nå maskinporten)
 - DPV - endret upload size limit til `difi.move.dpv.upload-size-limit=250MB`
+- Kotlin er konvertert til Java (kode, bygg, dependendies, test)
 
 ## FIXME og mulige forbedringer i etterkant
 - [x] AltinnInSteps.java, Cucumber koden som testet SOAP er kommentert ut - må fikses for REST
