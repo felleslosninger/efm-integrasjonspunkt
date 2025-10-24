@@ -132,6 +132,11 @@ Slike K6 tester kan kjøres lokalt eller i CI/CD pipeline.
 Proxy'en har ett dedikert endepunkt for ytelsestesting, det krever maskinporten token på samme måte som correcpondence api, men videreformidler ikke request til Altinn.
 For å simulere litt last vil endepunktet vente angitt tid og returnere spesifisert mengde data, dermed har vi mulighet til å teste paralellitet og ytelse.
 
+Før man kan kjøre loadtest må man ha ett Maskinporten token med rett scope. Tokenet må være lagret i en miljøvariabel som heter TOKEN.
+
+I testene for [altinn-v3-client](../altinn-v3-client) finnes det noen manuelle tester som kan benyttes for å hente ut et token.
+Alternativt kan man bruke [jwt-grant-generator](https://github.com/felleslosninger/jwt-grant-generator). 
+
 ```bash
 # To run with locally installed K6
 export TOKEN=xxxxx
