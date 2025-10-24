@@ -46,7 +46,7 @@ export default function (data) {
 // Use the "ping" function in the proxy for performance testing
 function pingLoadTest(data) {
 
-    const url = data.dpvProxyUrl + '/ping?wait=500&size=2048'; // wait 500 ms before returning 2 MiB of data
+    const url = data.dpvProxyUrl + '/ping?wait=500&size=2048'; // wait 500 ms before returning 2 KB of data
 
     console.log(url)
 
