@@ -79,7 +79,9 @@
 
     <properties>
         <java.version>21</java.version>
+        <!--
         <kotlin.version>2.2.10</kotlin.version>
+        -->
         <efm-common.version>2.0.6-SNAPSHOT</efm-common.version>
         <bouncycastle.version>1.81</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -107,6 +109,7 @@
     <dependencyManagement>
         <dependencies>
 
+            <!--
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-bom</artifactId>
@@ -122,6 +125,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
 
             <dependency>
                 <groupId>io.cucumber</groupId>
@@ -405,6 +409,7 @@
     </dependencyManagement>
 
     <dependencies>
+        <!--
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
@@ -445,6 +450,7 @@
             <artifactId>mockk-jvm</artifactId>
             <scope>test</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -472,13 +478,14 @@
                     <configuration>
                         <release>${java.version}</release>
                     </configuration>
+                    <!--
                     <executions>
-                        <!-- Replacing maven default-compile, kotlin plugin will do this -->
+                        <! - - Replacing maven default-compile, kotlin plugin will do this - - >
                         <execution>
                             <id>default-compile</id>
                             <phase>none</phase>
                         </execution>
-                        <!-- Replacing maven default-testCompile, kotlin plugin will do this -->
+                        <! - - Replacing maven default-testCompile, kotlin plugin will do this - - >
                         <execution>
                             <id>default-testCompile</id>
                             <phase>none</phase>
@@ -498,6 +505,7 @@
                             </goals>
                         </execution>
                     </executions>
+                    -->
                 </plugin>
                 <plugin>
                     <groupId>org.jvnet.jaxb</groupId>
@@ -562,6 +570,7 @@
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                 </configuration>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -608,6 +617,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            -->
             <plugin>
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>
@@ -624,7 +634,9 @@
                     <skip>${dokka.skip}</skip>
                     <sourceDirectories>
                         <dir>${project.basedir}/src/main/java</dir>
+                        <!--
                         <dir>${project.basedir}/src/main/kotlin</dir>
+                        -->
                     </sourceDirectories>
                     <skipEmptyPackages>true</skipEmptyPackages>
                 </configuration>
