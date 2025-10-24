@@ -38,8 +38,11 @@ class FiksIoService(
         val params = SRParameter.builder(msg.receiverIdentifier)
             .process(msg.sbd.process)
             .conversationId(msg.conversationId)
-        if (msg.businessMessage.sikkerhetsnivaa != null) {
-            params.securityLevel(msg.businessMessage.sikkerhetsnivaa)
+        // Avoid forcing NextMoveMessage.getBusinessMessage() which may throw for mocked SBD in tests
+        val fiksIoMsg = msg.getBusinessMessage(no.difi.meldingsutveksling.nextmove.FiksIoMessage::class.java)
+        val sikkerhetsnivaa = fiksIoMsg.map { it.sikkerhetsnivaa }.orElse(null)
+        if (sikkerhetsnivaa != null) {
+            params.securityLevel(sikkerhetsnivaa)
         }
         val serviceRecord: ServiceRecord =
             serviceRegistryLookup.getServiceRecord(params.build(), msg.sbd.documentType)
