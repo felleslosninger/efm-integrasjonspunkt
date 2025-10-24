@@ -30,6 +30,7 @@ graph LR
 - [x] Flere tester som tester selve filteret (nå er hele kjeden mocket)
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [x] Flytte actuator til / på 8090
+- [x] Lage et opplegg for ytelsestesting av proxyen MOVE-4639
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
 - [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
@@ -119,6 +120,24 @@ curl -i -H "Authorization: Bearer <token med rett scope>" \
 http://localhost:8080/resourceregistry/api/v1/resource/resourcelist
 
 http http://localhost:8080/resourceregistry/api/v1/resource/resourcelist
+```
+
+## Ytelsestesting av proxy'en
+
+Vi har laget et [K6 loadtest opplegg](k6/loadtest-tt02.js) for yteslestesting av proxy'en basert på [K6](https://k6.io).
+Slike K6 tester kan kjøres lokalt eller i CI/CD pipeline.
+- Lokalt benyttes K6 cli eller K6 container image (slipper å grise ned egen maskin med installasjon av K6).
+- For å kjøre i CI/CD pipeline kjører man K6 fra github actions.
+
+Proxy'en har ett dedikert endepunkt for ytelsestesting, det krever maskinporten token på samme måte som correcpondence api, men videreformidler ikke request til Altinn.
+For å simulere litt last vil endepunktet vente angitt tid og returnere spesifisert mengde data, dermed har vi mulighet til å teste paralellitet og ytelse.
+
+```bash
+# To run with locally installed K6
+k6 run loadtest-tt02.js
+
+# To run using Docker use K6 container image
+docker run --rm -i -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
 ```
 
 ## Når benytter integrasjonspunktet proxy'en? 
