@@ -124,7 +124,7 @@ http http://localhost:8080/resourceregistry/api/v1/resource/resourcelist
 
 ## Ytelsestesting av proxy'en
 
-Vi har laget et [K6 loadtest opplegg](k6/loadtest-tt02.js) for yteslestesting av proxy'en basert på [K6](https://k6.io).
+Vi har laget et [K6 loadtest opplegg](k6/loadtest-tt02.js) for ytelsestesting av proxy'en basert på [K6](https://k6.io).
 Slike K6 tester kan kjøres lokalt eller i CI/CD pipeline.
 - Lokalt benyttes K6 cli eller K6 container image (slipper å grise ned egen maskin med installasjon av K6).
 - For å kjøre i CI/CD pipeline kjører man K6 fra github actions.
