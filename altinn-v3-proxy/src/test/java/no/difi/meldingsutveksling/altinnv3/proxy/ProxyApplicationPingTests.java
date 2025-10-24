@@ -129,7 +129,7 @@ class ProxyApplicationPingTests {
             .expectBody(String.class)
             .consumeWith(response -> {
                 String message = JsonPath.read(response.getResponseBody(), "$.message");
-                assertEquals(EXPECTED_SIZE, message.length()); // Using AssertJ for assertion
+                assertEquals(EXPECTED_SIZE, message.length());
             });
     }
 
