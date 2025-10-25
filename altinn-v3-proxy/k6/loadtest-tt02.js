@@ -85,7 +85,7 @@ function fetchCorrespondenceDetails(data) {
     console.log(res.status_text);
 
     check(res, {
-        'sucessfully fetching corresponence details': (r) => r.status === 200,
+        'successfully fetching correspondence details': (r) => r.status === 200,
     });
 
 }
