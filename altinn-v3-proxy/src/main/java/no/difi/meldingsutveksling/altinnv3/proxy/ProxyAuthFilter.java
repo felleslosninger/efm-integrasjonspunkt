@@ -23,4 +23,5 @@ public class ProxyAuthFilter implements GatewayFilter {
             .flatMap(altinntoken -> functions.setDigdirTokenInHeaders(exchange, chain, altinntoken))
             .flatMap(chain::filter);
     }
+
 }

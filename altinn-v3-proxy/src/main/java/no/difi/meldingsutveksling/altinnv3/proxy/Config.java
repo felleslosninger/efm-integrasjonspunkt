@@ -28,7 +28,10 @@ public class Config {
                 // allow access to correspondence for clients with correct scope
                 .pathMatchers("/correspondence/api/**").hasAnyAuthority("SCOPE_altinn:broker.read")
 
-                // allow actuator endpoints on /
+                // ping endpoint (also used for simple load testing)
+                .pathMatchers("/ping").hasAnyAuthority("SCOPE_altinn:broker.read")
+
+                // allow all access to actuator endpoints on /
                 .pathMatchers("/health").permitAll()
                 .pathMatchers("/health/liveness").permitAll()
                 .pathMatchers("/health/readiness").permitAll()
