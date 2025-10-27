@@ -31,7 +31,8 @@ graph LR
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [x] Flytte actuator til / på 8090
 - [x] Lage et opplegg for ytelsestesting av proxyen MOVE-4639
-- [ ] Legge til metrics for token cache (cache miss, cache hit, cache size) (eformidling.dpv.proxy.cache/token)
+- [x] Legge til metrics for token cache (cache type) (`eformidling.dpv.proxy.token`)
+- [x] Legge til metrics for forward/ping requests (`eformidling.dpv.proxy.request`)
 - [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
