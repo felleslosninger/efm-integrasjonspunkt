@@ -30,11 +30,15 @@ graph LR
 - [x] Flere tester som tester selve filteret (nå er hele kjeden mocket)
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [x] Flytte actuator til / på 8090
+- [x] Lage et opplegg for ytelsestesting av proxyen MOVE-4639
+- [x] Legge til metrics for token cache (cache type) (`eformidling.dpv.proxy.token`)
+- [x] Legge til metrics for forward/ping requests (`eformidling.dpv.proxy.request`)
+- [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
 - [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
-- [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
+- [ ] [MOVE-4641](https://digdir.atlassian.net/browse/MOVE-4641) : Flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
 - [ ] Actuator paths er åpne på både web og mgmt port (kan dette splittes i 2 security filter, en for hver port)
 
@@ -51,8 +55,10 @@ graph LR
 - Logging er JSON til stdout (logback format), leses inn i Eleastic og kan søkes i Kibana.
 - Metrics er PROMETHEUS, leses inn i Prometheus og visualiseres i Grafana.
 
-Proxy har noen custom metrics som starter med `eformidling.dpv.*`, disse er :
-- `eformidling.dpv.proxy.total` (tagget med http methode)
+Proxy har noen custom metrics som starter med `eformidling.dpv.proxy.*`, disse er :
+- `eformidling.dpv.proxy.request { type=forward, method=GET|POST } ` (teller proxy requests, tagget med http methode)
+- `eformidling.dpv.proxy.request { type=ping,    method=GET|POST } ` (teller ping requests, tagget med http methode)
+- `eformidling.dpv.proxy.token { type= maskinporten | altinn }` (teller antall tokens generert, tagget med type) 
 
 ## Bygges og kjøres lokalt (fra root av repo)
 ```bash
@@ -119,6 +125,41 @@ curl -i -H "Authorization: Bearer <token med rett scope>" \
 http://localhost:8080/resourceregistry/api/v1/resource/resourcelist
 
 http http://localhost:8080/resourceregistry/api/v1/resource/resourcelist
+```
+
+## Ytelsestesting av proxy'en
+
+Vi har laget et [K6 loadtest opplegg](k6/loadtest-tt02.js) for ytelsestesting av proxy'en basert på [K6](https://k6.io).
+Slike K6 tester kan kjøres lokalt eller i CI/CD pipeline.
+- Lokalt benyttes K6 cli eller K6 container image (slipper å grise ned egen maskin med installasjon av K6).
+- For å kjøre i CI/CD pipeline kjører man K6 fra github actions.
+
+Proxy'en har ett dedikert `ping` endepunkt for ytelsestesting, det krever maskinporten token på samme måte som correcpondence api, men videreformidler ikke request til Altinn.
+For å simulere litt last vil endepunktet vente angitt tid og returnere spesifisert mengde data, dermed har vi mulighet til å teste paralellitet og ytelse.
+
+
+| Endepunkt (eksempel)   | Beskrivelse                                           |
+|------------------------|-------------------------------------------------------|
+| /ping                  | Returnerer json med meldingen "pong" umiddelbart      |
+| /ping?wait=1000        | Venter 1000ms og returnerer json med meldingen "pong" |
+| /ping?size=32768       | Returnerer json med 32768 random bokstaver i meldingen |
+| /ping?wait=1000&size=32768 | Venter 1000ms før den returnerer json med 32768 random bokstaver i meldingen |
+
+Ping endepunktet benyttes i [loadtest-tt02.js](k6/loadtest-tt02.js) og angir en kort wait og en ikke så altfor stor size.
+
+Før man kan kjøre loadtest må man ha ett Maskinporten token med rett scope. Tokenet må være lagret i en miljøvariabel som heter TOKEN.
+
+I testene for [altinn-v3-client](../altinn-v3-client) finnes det noen manuelle tester som kan benyttes for å hente ut et token.
+Alternativt kan man bruke [jwt-grant-generator](https://github.com/felleslosninger/jwt-grant-generator). 
+
+```bash
+# To run with locally installed K6
+export TOKEN=xxxxx
+k6 run loadtest-tt02.js
+
+# To run using Docker use K6 container image
+export TOKEN=xxxxx
+docker run --rm -i -e "TOKEN=$TOKEN" -v "$(pwd)/altinn-v3-proxy/k6/loadtest-tt02.js:/loadtest-tt02.js:ro" grafana/k6 run /loadtest-tt02.js
 ```
 
 ## Når benytter integrasjonspunktet proxy'en? 

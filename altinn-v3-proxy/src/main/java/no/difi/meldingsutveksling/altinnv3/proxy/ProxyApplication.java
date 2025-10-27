@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.proxy.debug.LoggingFilter;
+import no.difi.meldingsutveksling.altinnv3.proxy.debug.PingFilter;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.AltinnProperties;
 import no.difi.meldingsutveksling.altinnv3.proxy.properties.Oidc;
 import no.difi.move.common.cert.KeystoreResourceLoader;
@@ -49,6 +50,11 @@ public class ProxyApplication {
                     .filter(new LoggingFilter(meterRegistry))
                     .filter(new ProxyAuthFilter(altinnFunctions))
                 ).uri(altinnProperties.baseUrl() + "/correspondence/api/")
+            )
+            .route("ping-service", r -> r.path("/ping")
+                .filters(f -> f
+                    .filter(new PingFilter(meterRegistry))
+                ).uri("no://op") // will never be called, the delay filter will short circuit the route and return status
             )
             .build();
     }
