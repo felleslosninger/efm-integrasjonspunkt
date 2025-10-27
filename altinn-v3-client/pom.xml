@@ -22,10 +22,12 @@
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>domain</artifactId>
         </dependency>
+
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>common</artifactId>
