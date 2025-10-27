@@ -134,8 +134,18 @@ Slike K6 tester kan kjøres lokalt eller i CI/CD pipeline.
 - Lokalt benyttes K6 cli eller K6 container image (slipper å grise ned egen maskin med installasjon av K6).
 - For å kjøre i CI/CD pipeline kjører man K6 fra github actions.
 
-Proxy'en har ett dedikert endepunkt for ytelsestesting, det krever maskinporten token på samme måte som correcpondence api, men videreformidler ikke request til Altinn.
+Proxy'en har ett dedikert `ping` endepunkt for ytelsestesting, det krever maskinporten token på samme måte som correcpondence api, men videreformidler ikke request til Altinn.
 For å simulere litt last vil endepunktet vente angitt tid og returnere spesifisert mengde data, dermed har vi mulighet til å teste paralellitet og ytelse.
+
+
+| Endepunkt (eksempel)   | Beskrivelse                                           |
+|------------------------|-------------------------------------------------------|
+| /ping                  | Returnerer json med meldingen "pong" umiddelbart      |
+| /ping?wait=1000        | Venter 1000ms og returnerer json med meldingen "pong" |
+| /ping?size=32768       | Returnerer json med 32768 random bokstaver i meldingen |
+| /ping?wait=1000&size=32768 | Venter 1000ms før den returnerer json med 32768 random bokstaver i meldingen |
+
+Ping endepunktet benyttes i [loadtest-tt02.js](k6/loadtest-tt02.js) og angir en kort wait og en ikke så altfor stor size.
 
 Før man kan kjøre loadtest må man ha ett Maskinporten token med rett scope. Tokenet må være lagret i en miljøvariabel som heter TOKEN.
 

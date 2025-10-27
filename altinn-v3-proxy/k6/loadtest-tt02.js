@@ -70,7 +70,7 @@ function fetchCorrespondenceDetails(data) {
 
     // https://docs.altinn.studio/en/api/correspondence/spec/#/Correspondence/get_correspondence_api_v1_correspondence__correspondenceId__details
 
-    const correspondenceId = '019980e6-e382-7eab-8c9d-60b9c7ccd116';
+    const correspondenceId = '<kjent-correspondence-id>;';
     const url = data.dpvProxyUrl + '/altinn-proxy/correspondence/api/v1/correspondence/' + correspondenceId + '/details';
 
     console.log(url)
