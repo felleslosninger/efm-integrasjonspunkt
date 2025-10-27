@@ -4,6 +4,7 @@
 - Tar i bruk Altinn v3 REST API (fjernet altinnexchange / altinnclient som var SOAP basert)
 - DPO - fjernet brukernavn og passord fra konfigurasjon (det er nå maskinporten)
 - DPV - endret upload size limit til `difi.move.dpv.upload-size-limit=250MB`
+- Kotlin er konvertert til Java (kode, bygg, dependendies, test)
 
 ## FIXME og mulige forbedringer i etterkant
 - [x] AltinnInSteps.java, Cucumber koden som testet SOAP er kommentert ut - må fikses for REST
@@ -23,6 +24,8 @@
 - [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging uten security i v4
 - [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
 - [ ] Er det noen som egentlig bruker Dokka plugin til noe?
+- [ ] Endel tester har unødvendig stubbing (søk opp og se om `org.mockito.quality.Strictness.LENIENT` kan fjernes)
+- [ ] Det er flere `@SuppressWarnings("squid:S106")` varianter i koden, nødvendig?
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
 
