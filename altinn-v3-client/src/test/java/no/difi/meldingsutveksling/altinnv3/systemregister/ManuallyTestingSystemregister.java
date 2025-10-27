@@ -92,14 +92,14 @@ public class ManuallyTestingSystemregister {
 
     @Test
     void updatePackagesForSystem() {
-        var res = client.updateAccessPackage("311780735_integrasjonspunkt", "urn:altinn:accesspackage:maskinlesbare-hendelser");
+        var res = client.updateAccessPackage("311780735_integrasjonspunkt", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
         System.out.println(res);
     }
 
     @Test
     void createStandardSystemUser() {
         // det fulle navn på blir "<orgno>_integrasjonspunkt_systembruker_<name>"
-        var res = client.createStandardSystemUser("311780735", "311780735_integrasjonspunkt", "test", "urn:altinn:accesspackage:maskinlesbare-hendelser");
+        var res = client.createStandardSystemUser("311780735", "311780735_integrasjonspunkt", "test3", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
         System.out.println(res);
     }
 

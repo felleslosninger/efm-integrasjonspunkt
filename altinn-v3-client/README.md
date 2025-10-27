@@ -8,13 +8,8 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [x] Proxy koden bygges og deployes i systest
 - [x] Oppdatere notification med subject og sånt
 - [X] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
-- [ ] Finne ut kva tilgangspakke vi skal ha på DPO https://digdir.atlassian.net/browse/MOVE-4614
 - [ ] Klar til publisering -> "Annet" status på dpv (Johannes har ikke rukket å tenke på det, så foreløpig nei til ny status)
-- [ ] Varslingstekstene for DPV må inneholder info om hvilken ressures/enkelttjenste som må delegeres for å kunne se den taushetsbelagte meldingen.
-    - [ ] Endre standard taushetsbelagt epost teksten til enkelttjeneste om man skal ha det istedenfor rolle
-    - [ ] Om man skal deligere enkelttjeneste, kva skal stå i delegerbarteksten i altinn?
 - [ ] Daniel : scope mot proxy `efm:dpv` (eller `efm:dpv.read`) (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
-- [ ] Daniel : DPO ressurser bør tilsvarende hete `eformidling-dpo` ?
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
 - [ ] Burde vi ha noen nye cucumber tester?
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
@@ -74,8 +69,7 @@ Daglig leder : KOGNITIV TANGENT (03888398847)
 Maskinporten : eformidling-tenor-test-klient-01 (826acbbc-ee17-4946-af92-cf4885ebe951)
 Nøkkelpar : 314240979-kul-sliten-tiger-as.jwk (kid: RyResLhzSS5p2qUq6tNla_mOkG9vU8oiYNmDEYJ9OGg, utløper 09.09.2026)
 System : 314240979_integrasjonspunkt
-Systembruker (standard) : 314240979_integrasjonspunkt_systembruker_test2 (10982a4d-4f9c-424a-b1bc-376dcef7316c)
-Systembruker (agent) : 314240979_integrasjonspunkt_systembruker_test (5b205bec-aad7-4e3f-a504-3e84b8a778fd)
+Systembruker (standard) : 314240979_integrasjonspunkt_systembruker_test3 (7feabbec-eb12-42bd-9377-e0c02a1ab65b)
 ```
 
 ## STERK ULYDIG HUND DA (311780735)
@@ -85,7 +79,7 @@ Daglig leder : ULYDIG LEVEREGEL (28923148371)
 Maskinporten : eformidling-tenor-test-klient-02 (b590f149-d0ba-4fca-b367-bccd9e444a00)
 Nøkkelpar : 311780735-sterk-ulydig-hund-da.jwk (kid: 8333ede6-60cd-450c-84b1-4c12dfb80cb6, utløper 16.09.2026)
 System : 311780735_integrasjonspunkt
-Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test (19bed6de-092d-4f4e-9a8c-7b95efaa400c)
+Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test3 (df5337bb-95e0-4300-a64d-fbe84317cd39)
 ```
 
 ## FRISK VOKSENDE TIGER AS (314244370)
