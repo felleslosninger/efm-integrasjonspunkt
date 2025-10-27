@@ -140,10 +140,10 @@ For å simulere litt last vil endepunktet vente angitt tid og returnere spesifis
 
 | Endepunkt (eksempel)   | Beskrivelse                                           |
 |------------------------|-------------------------------------------------------|
-| /ping                  | Returnerer json med meldingen "pong" umiddelbart      |
-| /ping?wait=1000        | Venter 1000ms og returnerer json med meldingen "pong" |
-| /ping?size=32768       | Returnerer json med 32768 random bokstaver i meldingen |
-| /ping?wait=1000&size=32768 | Venter 1000ms før den returnerer json med 32768 random bokstaver i meldingen |
+| /altinn-proxy/ping                  | Returnerer json med meldingen "pong" umiddelbart      |
+| /altinn-proxy/ping?wait=1000        | Venter 1000ms og returnerer json med meldingen "pong" |
+| /altinn-proxy/ping?size=32768       | Returnerer json med 32768 random bokstaver i meldingen |
+| /altinn-proxy/ping?wait=1000&size=32768 | Venter 1000ms før den returnerer json med 32768 random bokstaver i meldingen |
 
 Ping endepunktet benyttes i [loadtest-tt02.js](k6/loadtest-tt02.js) og angir en kort wait og en ikke så altfor stor size.
 

@@ -153,7 +153,7 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/altinn-broker-v1.json</inputSpec>
                             <output>${project.build.directory}/generated-sources/altinnv3/broker</output>
                             <modelPackage>no.digdir.altinn3.broker.model</modelPackage>
-                            <!-- 20250618 still neeeded skipValidateSpec because some issues in broker api openapi file -->
+                            <!-- 20250618 still needs skipValidateSpec because some issues in broker api openapi file -->
                             <skipValidateSpec>true</skipValidateSpec>
                         </configuration>
                     </execution>

@@ -24,7 +24,7 @@ public class LoggingFilter implements GatewayFilter {
             Mono.fromRunnable( () -> {
                 URI routedUrl = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRequestUrl");
                 log.debug("Request path : {}", exchange.getRequest().getPath().value());
-                log.debug("Destination URL : {}", routedUrl);
+                log.info("Destination URL : {}", routedUrl);
                 meterRegistry.counter("eformidling.dpv.proxy.request", "type", "forward", "method", exchange.getRequest().getMethod().name()).increment();
             } )
         );

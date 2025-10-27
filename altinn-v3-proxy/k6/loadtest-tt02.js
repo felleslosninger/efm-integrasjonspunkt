@@ -13,21 +13,23 @@ import {FormData} from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 // read maskinporten token to use from ENV variable
 const TOKEN = (__ENV.TOKEN) ? __ENV.TOKEN : 'NoTokenWasSet';
 
-// Options for running the test
+// Options for running the test (if test has wait time 500ms, each VU will maximum be able to do 2 per second)
 export const options = {
-    duration: '1s',
-    vus: 1,
+    duration: '30s',
+    vus: 8,
     TOKEN: TOKEN,
     thresholds: {
         http_req_failed: ['rate<0.01'],     // http errors should be less than 1%
-        http_req_duration: ['p(99)<500'],   // 95 percent of response times must be below 500ms
+        http_req_duration: ['p(99)<700'],   // 99 percent of response times must be below 700ms
     },
 };
 
 // Set up global data used by the testing
 export function setup() {
 
-    let proxy = 'https://dpvproxy.apps.kt.digdir.cosng.net';
+    //let proxy = 'http://host.docker.internal:8080';
+    //let proxy = 'https://eformidling.dev/altinn-proxy';
+    let proxy = 'https://dpvproxy.apps.kt.digdir.cosng.net/altinn-proxy';
 
     return {
         dpvProxyUrl: proxy,
@@ -48,7 +50,7 @@ function pingLoadTest(data) {
 
     const url = data.dpvProxyUrl + '/ping?wait=500&size=2048'; // wait 500 ms before returning 2 KiB of data
 
-    console.log(url)
+    //console.log(url)
 
     const res = http.get(url, {
         headers: {
@@ -57,7 +59,7 @@ function pingLoadTest(data) {
         },
     });
 
-    console.log(res.status_text);
+    //console.log(res.status_text);
 
     check(res, {
         'sucessfully pinging': (r) => r.status === 200,

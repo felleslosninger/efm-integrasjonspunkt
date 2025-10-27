@@ -72,6 +72,7 @@ public class PingFilter implements GatewayFilter {
                         """.formatted(message, LocalDateTime.now(), durationInMilliseconds)).getBytes());
 
                 meterRegistry.counter("eformidling.dpv.proxy.request", "type", "ping", "method", exchange.getRequest().getMethod().name()).increment();
+                log.info("Performance test URL : ping?wait={}&size={}", durationInMilliseconds, message.length());
                 return response.writeWith(Mono.just(buffer));
             }
         ));
