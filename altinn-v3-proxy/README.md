@@ -31,11 +31,13 @@ graph LR
 - [x] Caching av access token satt til 25 minutter (Altinn tokens har 30 minutters levetid)
 - [x] Flytte actuator til / på 8090
 - [x] Lage et opplegg for ytelsestesting av proxyen MOVE-4639
+- [ ] Legge til metrics for token cache (cache miss, cache hit, cache size) (eformidling.dpv.proxy.cache/token)
+- [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
 - [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
 - [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
-- [ ] Kan flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
+- [ ] [MOVE-4641](https://digdir.atlassian.net/browse/MOVE-4641) : Flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
 - [ ] Actuator paths er åpne på både web og mgmt port (kan dette splittes i 2 security filter, en for hver port)
 
@@ -52,8 +54,10 @@ graph LR
 - Logging er JSON til stdout (logback format), leses inn i Eleastic og kan søkes i Kibana.
 - Metrics er PROMETHEUS, leses inn i Prometheus og visualiseres i Grafana.
 
-Proxy har noen custom metrics som starter med `eformidling.dpv.*`, disse er :
-- `eformidling.dpv.proxy.total` (tagget med http methode)
+Proxy har noen custom metrics som starter med `eformidling.dpv.proxy.*`, disse er :
+- `eformidling.dpv.proxy.request { type=forward, method=GET|POST } ` (teller proxy requests, tagget med http methode)
+- `eformidling.dpv.proxy.request { type=ping,    method=GET|POST } ` (teller ping requests, tagget med http methode)
+- `eformidling.dpv.proxy.token { type= maskinporten | altinn }` (teller antall tokens generert, tagget med type) 
 
 ## Bygges og kjøres lokalt (fra root av repo)
 ```bash

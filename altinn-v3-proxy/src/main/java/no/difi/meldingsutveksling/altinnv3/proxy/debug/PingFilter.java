@@ -52,7 +52,6 @@ public class PingFilter implements GatewayFilter {
             } catch (Exception e) { /* ignore, we have a default value */ }
         }
 
-
         final long durationInMilliseconds = waitInMilliseconds;
         final String message = payload;
 
@@ -72,7 +71,7 @@ public class PingFilter implements GatewayFilter {
                         }
                         """.formatted(message, LocalDateTime.now(), durationInMilliseconds)).getBytes());
 
-                meterRegistry.counter("eformidling.dpv.proxy.ping", "method", exchange.getRequest().getMethod().name()).increment();
+                meterRegistry.counter("eformidling.dpv.proxy.request", "type", "ping", "method", exchange.getRequest().getMethod().name()).increment();
                 return response.writeWith(Mono.just(buffer));
             }
         ));
