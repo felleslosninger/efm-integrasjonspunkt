@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.fiksio;
 
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
+import no.difi.meldingsutveksling.nextmove.FiksIoMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -66,8 +67,8 @@ public class FiksIoService {
             .process(msg.getSbd().getProcess())
             .conversationId(msg.getConversationId());
 
-        Optional<no.difi.meldingsutveksling.nextmove.FiksIoMessage> fiksIoMsg = msg.getBusinessMessage(no.difi.meldingsutveksling.nextmove.FiksIoMessage.class);
-        Integer sikkerhetsnivaa = fiksIoMsg.map(no.difi.meldingsutveksling.nextmove.FiksIoMessage::getSikkerhetsnivaa).orElse(null);
+        Optional<FiksIoMessage> fiksIoMsg = msg.getBusinessMessage(FiksIoMessage.class);
+        Integer sikkerhetsnivaa = fiksIoMsg.map(FiksIoMessage::getSikkerhetsnivaa).orElse(null);
         if (sikkerhetsnivaa != null) {
             params.securityLevel(sikkerhetsnivaa);
         }

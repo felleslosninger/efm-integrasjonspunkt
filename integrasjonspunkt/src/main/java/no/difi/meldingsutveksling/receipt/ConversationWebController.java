@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.receipt;
 
 import no.difi.meldingsutveksling.status.ConversationRepository;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -49,8 +50,8 @@ public class ConversationWebController {
         Map<String, String> lastStatusMap = new HashMap<>();
         findAll.getContent().forEach(it -> {
             var st = it.getMessageStatuses().stream()
-                    .max(Comparator.comparing(no.difi.meldingsutveksling.status.MessageStatus::getLastUpdate))
-                    .map(no.difi.meldingsutveksling.status.MessageStatus::getStatus)
+                    .max(Comparator.comparing(MessageStatus::getLastUpdate))
+                    .map(MessageStatus::getStatus)
                     .orElse("none");
             lastStatusMap.put(it.getMessageId(), st);
         });

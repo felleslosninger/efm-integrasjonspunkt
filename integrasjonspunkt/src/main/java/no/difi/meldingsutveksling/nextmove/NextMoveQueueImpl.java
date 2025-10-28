@@ -81,7 +81,7 @@ public class NextMoveQueueImpl implements NextMoveQueue {
             }
         }
 
-        if (!messageRepo.findByMessageId(sbd.getMessageId()).isPresent()) {
+        if (messageRepo.findByMessageId(sbd.getMessageId()).isEmpty()) {
             NextMoveInMessage message = messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier));
 
             SBDUtil.getOptionalMessageChannel(sbd).ifPresent(mc ->

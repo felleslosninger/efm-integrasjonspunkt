@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.svarinn;
 
 import java.util.Objects;
 
+// FIXME record? lombok? fjerne? bruken av denne klassen er minimal
 class ErrorResponse {
 
     private String feilmelding;
