@@ -65,6 +65,7 @@ public class NextMoveMessageOutController {
                 .ifPresent(p -> {
                     throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
                 });
+
         // Check for duplicate filenames
         List<String> filenames = files.stream()
                 .map(MultipartFile::getOriginalFilename)
