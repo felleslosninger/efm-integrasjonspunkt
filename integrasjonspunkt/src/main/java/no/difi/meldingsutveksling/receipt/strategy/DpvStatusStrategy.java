@@ -74,25 +74,32 @@ public class DpvStatusStrategy implements StatusStrategy {
 
         for (CorrespondenceStatusEventExt event : status) {
             ReceiptStatus mappedStatus;
-            if (event.getStatus() == CorrespondenceStatusExt.PUBLISHED) {
+            if (CorrespondenceStatusExt.PUBLISHED.equals(event.getStatus())) {
                 mappedStatus = LEVERT;
-            } else if (event.getStatus() == CorrespondenceStatusExt.READ) {
+            } else if (CorrespondenceStatusExt.READ.equals(event.getStatus())) {
                 mappedStatus = LEST;
+            } else if (CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(event.getStatus())) {
+                log.debug(ConversationMarker.markerFrom(c),
+                    "Message [id={}, conversationId={}] ignoring status READY_FOR_PUBLISH",
+                    c.getMessageId(), c.getConversationId());
+                mappedStatus = null; // do not map this, just ignore it
             } else {
                 mappedStatus = ANNET;
             }
 
-            MessageStatus ms = messageStatusFactory.getMessageStatus(mappedStatus);
-            if (!c.hasStatus(ms)) {
-                if (mappedStatus == LEVERT
-                        && properties.getArkivmelding() != null
-                        && c.getDocumentIdentifier() != null
-                        && c.getDocumentIdentifier().equals(properties.getArkivmelding().getDefaultDocumentType())
-                        && properties.getArkivmelding().isGenerateReceipts()) {
-                    nextMoveQueue.enqueueIncomingMessage(
-                            sbdFactory.createArkivmeldingReceiptFrom(c, ArkivmeldingKvitteringType.OK), DPV);
+            if (mappedStatus != null) {
+                MessageStatus ms = messageStatusFactory.getMessageStatus(mappedStatus);
+                if (!c.hasStatus(ms)) {
+                    if (mappedStatus == LEVERT
+                            && properties.getArkivmelding() != null
+                            && c.getDocumentIdentifier() != null
+                            && c.getDocumentIdentifier().equals(properties.getArkivmelding().getDefaultDocumentType())
+                            && properties.getArkivmelding().isGenerateReceipts()) {
+                        nextMoveQueue.enqueueIncomingMessage(
+                                sbdFactory.createArkivmeldingReceiptFrom(c, ArkivmeldingKvitteringType.OK), DPV);
+                    }
+                    conversationService.registerStatus(c, ms);
                 }
-                conversationService.registerStatus(c, ms);
             }
         }
     }

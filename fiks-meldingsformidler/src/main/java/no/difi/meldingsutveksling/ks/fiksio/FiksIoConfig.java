@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.ks.fiksio;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.ks.fiks.io.client.FiksIOKlient;
@@ -14,16 +15,12 @@ import java.security.KeyStore;
 import java.util.UUID;
 
 @Configuration
+@RequiredArgsConstructor
 @ConditionalOnProperty(name = {"difi.move.feature.enableDPFIO"}, havingValue = "true")
 public class FiksIoConfig {
 
     private final IntegrasjonspunktProperties props;
     private final KeystoreHelper keystoreHelper;
-
-    public FiksIoConfig(IntegrasjonspunktProperties props, KeystoreHelper keystoreHelper) {
-        this.props = props;
-        this.keystoreHelper = keystoreHelper;
-    }
 
     @Bean
     public FiksIOKlient fiksIoKlient() {

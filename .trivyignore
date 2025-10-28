@@ -1,4 +1,4 @@
-# her er det ryddig - ingen kjente sårbarheter
+# hold denne filen ryddig - legg til EN linje med kommentar før hver entry med dato. serverity og evt annen info
 
 # 20250905 : io.netty:netty-codec-http (app.jar)                         │ CVE-2025-58056 │ HIGH     │ fixed  │ 4.1.124.Final     │ 4.1.125.Final, 4.2.5.Final
 CVE-2025-58056

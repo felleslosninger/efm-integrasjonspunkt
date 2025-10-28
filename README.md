@@ -5,6 +5,7 @@
 - [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
 - [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
 - [x] Vi har støtte for lokal konfig i yml/yaml format i v3, dette videreføres (søk etter `spring.config.import=`)
+- [x] Ignorerer DPV status `READY_FOR_PUBLISH` (den skal ikke rapporteres som `ANNET`, men vi debug logger den)  
 - [ ] Rydde bort alle Trivy issues, [.trivyignore](.trivyignore) bør være "tømt"
 - [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?

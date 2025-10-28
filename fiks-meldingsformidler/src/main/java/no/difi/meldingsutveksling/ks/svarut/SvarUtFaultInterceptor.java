@@ -29,7 +29,7 @@ public class SvarUtFaultInterceptor implements ClientInterceptor {
             .and(Markers.append("soap_fault", soapFault));
         log.error(markers, "Failed to send message");
         isUnrecoverable(soapFault);
-        return true; // Unreachable in practice since isUnrecoverable always throws
+        return true; // FIXME refactor this? : Unreachable in practice since isUnrecoverable always throws
     }
 
     private void isUnrecoverable(String soapFault) {

@@ -1,13 +1,13 @@
 package no.difi.meldingsutveksling.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
@@ -18,15 +18,15 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class VaultProtocolResolver implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
-    private final Logger log = LoggerFactory.getLogger(VaultProtocolResolver.class);
     private final Map<String, ByteArrayResource> vaultResources = new HashMap<>();
 
     @Override
     public void initialize(ConfigurableApplicationContext c) {
         final String prefix = "vault:";
-        c.addProtocolResolver((String location, org.springframework.core.io.ResourceLoader rl) -> {
+        c.addProtocolResolver((String location, ResourceLoader rl) -> {
             if (location.startsWith(prefix)) {
                 if (vaultResources.isEmpty()) {
                     Environment props = c.getBean(Environment.class);
@@ -37,11 +37,10 @@ public class VaultProtocolResolver implements ApplicationContextInitializer<Conf
                     KeyValueDelegate del = new KeyValueDelegate(vt);
                     String path = props.getProperty("vault.resource-path", "");
                     del.isVersioned(path);
-                    Object secret = del.getSecret(path);
+                    var secret = del.getSecret(path);
                     if (secret != null) {
                         try {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> data = (Map<String, Object>) secret.getClass().getMethod("getData").invoke(secret);
+                            var data = secret.getData();
                             if (data != null) {
                                 for (Map.Entry<String, Object> it : data.entrySet()) {
                                     log.info("Loaded resource with key '{}' from vault", it.getKey());
