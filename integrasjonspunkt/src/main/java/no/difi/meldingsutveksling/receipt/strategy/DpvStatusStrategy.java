@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusEventExt;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusExt;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -73,21 +74,14 @@ public class DpvStatusStrategy implements StatusStrategy {
                 c.getMessageId(), c.getConversationId());
 
         for (CorrespondenceStatusEventExt event : status) {
-            ReceiptStatus mappedStatus;
-            if (CorrespondenceStatusExt.PUBLISHED.equals(event.getStatus())) {
-                mappedStatus = LEVERT;
-            } else if (CorrespondenceStatusExt.READ.equals(event.getStatus())) {
-                mappedStatus = LEST;
-            } else if (CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(event.getStatus())) {
+            ReceiptStatus mappedStatus = mapCorrespondenceStatusToReceiptStatus(event.getStatus());
+            if (mappedStatus == null) {
+                // status was not mapped, we log it as ignored
+                var statusName = (event.getStatus() != null) ? event.getStatus().name() : "<null>";
                 log.debug(ConversationMarker.markerFrom(c),
-                    "Message [id={}, conversationId={}] ignoring status READY_FOR_PUBLISH",
-                    c.getMessageId(), c.getConversationId());
-                mappedStatus = null; // do not map this, just ignore it
+                    "Message [id={}, conversationId={}] ignoring status {}",
+                    c.getMessageId(), c.getConversationId(), statusName);
             } else {
-                mappedStatus = ANNET;
-            }
-
-            if (mappedStatus != null) {
                 MessageStatus ms = messageStatusFactory.getMessageStatus(mappedStatus);
                 if (!c.hasStatus(ms)) {
                     if (mappedStatus == LEVERT
@@ -102,6 +96,21 @@ public class DpvStatusStrategy implements StatusStrategy {
                 }
             }
         }
+    }
+
+    @Nullable
+    static ReceiptStatus mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt status) {
+        ReceiptStatus mappedStatus;
+        if (CorrespondenceStatusExt.PUBLISHED.equals(status)) {
+            mappedStatus = LEVERT;
+        } else if (CorrespondenceStatusExt.READ.equals(status)) {
+            mappedStatus = LEST;
+        } else if (CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status)) {
+            mappedStatus = null; // do not map this, just ignore it
+        } else {
+            mappedStatus = ANNET;
+        }
+        return mappedStatus;
     }
 
     @Override
