@@ -25,14 +25,14 @@ sequenceDiagram
     K->>AS : Opprett system (/systemregister/vendor)
     note over AS: systemId = <orgno>_integrasjonspunkt
     K->>AS : Registrer tilgangspakke på system (/systemregister/vendor/{id}/accesspackages)
-    note over AS: tilgangspakke = urn:altinn:accesspackage:???
+    note over AS: tilgangspakke = urn:altinn:accesspackage:informasjon-og-kommunikasjon
     
     K->>M: Hent token for client
     note over M : scopes : [systemuser.request.write,<br>systemuser.request.read]
 
     K->>AS: Opprett "standard" systemuser forespørsel (/systemuser/request/vendor)
     note over AS : externalRef = <systemId>_systembruker_<name>
-    note over AS : tilgangspakke = urn:altinn:accesspackage:???
+    note over AS : tilgangspakke = urn:altinn:accesspackage:informasjon-og-kommunikasjon
     AS-->>K: Retur av URL for å godkjenne opprettelse av systembruker på vegne av virksomheten
     note over K : URL kan presenteres kunde for rask godkjenning,<br>varsel blir sendt til daglig leder i Altinn
     
@@ -42,7 +42,7 @@ sequenceDiagram
 ## Bruk av systemuser for å sende og motta filer via broker tjenesten
 Broker tjenesten kan sende og motta filer.  For å benytte den må man ha en systemuser
 med korrekt tilgangspakke.  Det er en policy på Digdir's broker ressurs som begrenser
-bruken til systemusers med rett tilganspakke.
+bruken til systemusers med tilgangspakke `urn:altinn:accesspackage:informasjon-og-kommunikasjon`.
 
 Henting av filer er basert på polling, det er ikke støtte for webhook/notification
 i denne versjonen (selv om det finnes Altinn API'er for dette).

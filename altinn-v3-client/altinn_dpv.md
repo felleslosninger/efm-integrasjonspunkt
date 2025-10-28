@@ -17,7 +17,7 @@ sequenceDiagram
     participant AR as Altinn ResourceRegistry<br><rest api>
     
     K->>S: Opprett maskinporten client (selvbetjent)
-    note over S : Tildeler scope : eformidling:dpv 
+    note over S : Tildele scope : move:dpv 
     D->>AR: Legg virksomhet inn i tilgangslisten (/access-lists/{owner}/{identifier}/members) 
 ```
 
@@ -39,9 +39,9 @@ sequenceDiagram
     
     K->>IP: Send melding
     IP->>M: Hent access token for client
-    note over M : scopes : [altinn:eformidling.write]
+    note over M : scopes : [move:dpv]
     note over M : Vi støtter client autentisering med cert eller jwk
-    IP-->>AT: Gjør token exchange hos Altinn (ikke påkrevet, men anbefalt)
+    IP-->>AT: Gjør token exchange hos Altinn (anbefalt, strengt tatt ikke påkrevet)
     note over AT : Altinn token har lang levetid på (30 min)
 
     IP->>IB: Send melding (med kundens token)
