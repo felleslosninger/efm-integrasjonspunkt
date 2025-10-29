@@ -15,6 +15,7 @@ import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -38,6 +39,7 @@ public class NextMoveOutMessageFactory {
     private final ServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final HealthcareRoutingService healthcareRoutingService;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
@@ -113,7 +115,7 @@ public class NextMoveOutMessageFactory {
             setDpiDefaults(sbd);
         }
         if (serviceIdentifier == DPH) {
-            setDphRoutingElements(sbd);
+            healthcareRoutingService.validateAndApply(sbd);
         }
     }
 
@@ -134,71 +136,6 @@ public class NextMoveOutMessageFactory {
             default:
                 return properties.getNextmove().getDefaultTtlHours();
         }
-    }
-
-    private boolean isOrgnummer(PartnerIdentifier identifier) {
-        return identifier instanceof OrganizationIdentifier;
-    }
-
-    private boolean isPersonIdentifier(PartnerIdentifier identifier) {
-        return identifier instanceof PersonIdentifier;
-    }
-
-
-    private void setDphRoutingElements(StandardBusinessDocument sbd) {
-        ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER);
-        ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.SENDER);
-        if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier)) {
-            throw new HealthcareValidationException("Not able to construct identifier for document type: " + sbd.getDocumentType());
-        }
-        var recieverIdentifier = (NhnIdentifier) sbd.getReceiverIdentifier();
-        var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
-        if (recieverIdentifier.isNhnPartnerIdentifier()) {
-            var recieverOrgnummer = recieverIdentifier.getIdentifier();
-            if (!Objects.equals(recieverOrgnummer, srReciever.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Receiver organisation number does not match address register.");
-            }
-        }
-
-
-        if (!isMultitenantSetup) {
-            var fromConfigurationHerID = properties.getDph().getSenderHerId1();
-
-            if (!fromConfigurationHerID.equals(srSender.getHerIdLevel1()))
-                throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1" + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
-            sbd.getScope(ScopeType.SENDER_HERID1).ifPresent(t -> {
-                    if (!Objects.equals(t.getIdentifier(), srSender.getHerIdLevel1()))
-                        throw new NextMoveRuntimeException("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1" + properties.getDph().getSenderHerId1() + " and orgnum " + t);
-                    if (!Objects.equals(sbd.getSenderIdentifier().getPrimaryIdentifier(), srSender.getOrganisationNumber()))
-                        throw new NextMoveRuntimeException("Multitenancy is not supported. Sender organisation number is not registered in AR ");
-                });
-
-        } else {
-            if (!properties.getDph().getWhitelistOrgnum()
-                .contains(srSender.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Sender not allowed");
-            }
-            if (!sbd.getSenderIdentifier().getIdentifier().equals(srSender.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Sender information does not match Adressregister information.");
-            }
-        }
-        if (sbd.getScope(ScopeType.SENDER_HERID1).isEmpty()) {
-            sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel1()));
-        }
-        if (sbd.getScope(ScopeType.SENDER_HERID2).isEmpty()) {
-            sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID2.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel2()));
-        }
-        if (sbd.getScope(ScopeType.RECEIVER_HERID2).isEmpty()) {
-            sbd.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier(srReciever.getHerIdLevel2()));
-        }
-        if ( sbd.getScope(ScopeType.RECEIVER_HERID1).isPresent()) {
-            if (!sbd.getScope(ScopeType.RECEIVER_HERID1).get().getInstanceIdentifier().equals(srReciever.getHerIdLevel1())) {
-                throw new HealthcareValidationException("Incoming HerID does not match expected HERID level 1!");
-            }
-        } else {
-            sbd.getScopes().add(new Scope().setType( ScopeType.RECEIVER_HERID1.getFullname()).setInstanceIdentifier(srReciever.getHerIdLevel1()));
-        }
-
     }
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
@@ -225,7 +162,7 @@ public class NextMoveOutMessageFactory {
                         .setMottaker(new PostAddress())
                         .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
                 }
-                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd,PARTICIPANT.RECEIVER);
+                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd,Participant.RECEIVER);
                 setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
                 setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
             }

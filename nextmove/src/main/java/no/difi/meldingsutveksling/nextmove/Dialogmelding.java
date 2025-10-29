@@ -10,6 +10,6 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@XmlRootElement(name = "dialogmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
+@XmlRootElement(name = "dialogmelding", namespace = "urn:no:difi:digitalpost:json:schema::dialogmelding")
 public class Dialogmelding extends BusinessMessage<Dialogmelding> {
 }

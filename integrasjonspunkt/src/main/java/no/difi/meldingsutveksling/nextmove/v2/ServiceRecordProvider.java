@@ -23,24 +23,19 @@ import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.*;
 
-
-enum PARTICIPANT {
-    SENDER,RECEIVER
-}
-
 @Component
 @RequiredArgsConstructor
 public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
-    ServiceRecord getServiceRecord(StandardBusinessDocument sbd,PARTICIPANT participant) {
+    public ServiceRecord getServiceRecord(StandardBusinessDocument sbd,Participant participant) {
         return sbd.getBusinessMessage(BusinessMessage.class)
                 .map(p -> getServiceRecord(sbd,p,participant))
                 .orElseThrow(MissingMessageTypeException::new);
     }
 
-    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,PARTICIPANT participant) {
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,Participant participant) {
         try {
             String participantId;
             MessageType messageType = MessageType.valueOfType(sbd.getType())
@@ -48,7 +43,7 @@ public class ServiceRecordProvider {
 
             if (messageType == MessageType.DIALOGMELDING) {
 
-                if (participant == PARTICIPANT.RECEIVER) {
+                if (participant == Participant.RECEIVER) {
                     var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
                     var reciever = (NhnIdentifier) sbd.getReceiverIdentifier();
                     if (reciever.isFastlegeIdentifier()) {
@@ -76,7 +71,7 @@ public class ServiceRecordProvider {
             }
             else {
                 try {
-                    if (participant == PARTICIPANT.SENDER)
+                    if (participant == Participant.SENDER)
                         throw new UnsupportedOperationException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
                     participantId = sbd.getReceiverIdentifier().getPrimaryIdentifier();
                     return getServiceRecord(sbd, businessMessage, participantId);
@@ -122,6 +117,6 @@ public class ServiceRecordProvider {
             return UNKNOWN;
         }
 
-        return getServiceRecord(sbd,PARTICIPANT.RECEIVER).getServiceIdentifier();
+        return getServiceRecord(sbd,Participant.RECEIVER).getServiceIdentifier();
     }
 }

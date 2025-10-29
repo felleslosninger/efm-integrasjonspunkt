@@ -122,7 +122,7 @@ class NextMoveValidatorTest {
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.empty()
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { serviceRecordProvider.getServiceRecord(sbd, PARTICIPANT.RECEIVER) } returns serviceRecord
+        every { serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER) } returns serviceRecord
         every { serviceRecordProvider.getServiceIdentifier(sbd) } returns ServiceIdentifier.DPO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { asserter.isValid(any<ArkivmeldingMessage>(), any()) } just Runs
