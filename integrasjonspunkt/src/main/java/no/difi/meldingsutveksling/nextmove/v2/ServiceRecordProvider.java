@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessExcepti
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.UnsupportedOperationStatusException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -21,7 +20,8 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.UNKNOWN;
 
 @Component
 @RequiredArgsConstructor
@@ -72,7 +72,7 @@ public class ServiceRecordProvider {
             else {
                 try {
                     if (participant == Participant.SENDER)
-                        throw new UnsupportedOperationException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
+                        throw new UnsupportedOperationStatusException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
                     participantId = sbd.getReceiverIdentifier().getPrimaryIdentifier();
                     return getServiceRecord(sbd, businessMessage, participantId);
                 } catch (ServiceRegistryLookupException e) {

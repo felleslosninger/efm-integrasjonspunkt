@@ -33,10 +33,13 @@ public class HealthcareRoutingService {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER);
 
+        if (!(sbd.getSenderIdentifier() instanceof NhnIdentifier)) {
+            throw new HealthcareValidationException("Not able to construct sender identifier for document type: " + sbd.getDocumentType());
+        }
+
         if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier recieverIdentifier)) {
             throw new HealthcareValidationException("Not able to construct identifier for document type: " + sbd.getDocumentType());
         }
-
 
         if (recieverIdentifier.isNhnPartnerIdentifier()) {
             var recieverOrgnummer = recieverIdentifier.getIdentifier();
@@ -50,7 +53,7 @@ public class HealthcareRoutingService {
             var fromConfigurationHerID = properties.getDph().getSenderHerId1();
 
             if (!fromConfigurationHerID.equals(srSender.getHerIdLevel1()))
-                throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1" + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
+                throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1 " + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
             sbd.getScope(ScopeType.SENDER_HERID1).ifPresent(t -> {
                 if (!Objects.equals(t.getInstanceIdentifier(), srSender.getHerIdLevel1()))
                     throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1 " + t.getInstanceIdentifier() + " and orgnum " + sbd.getSenderIdentifier().getIdentifier());

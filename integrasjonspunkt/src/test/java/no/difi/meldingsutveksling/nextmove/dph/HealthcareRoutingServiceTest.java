@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.dph;
 
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -47,9 +46,9 @@ public class HealthcareRoutingServiceTest {
 
 
   @Test
-  public void whenIdentifierIsNotNHN_ThrowsValidationException() {
+  public void whenSenderHerId2NotPresent_ThrowIllegalArgumentException() {
         StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
-        sbd.getScopes().remove(sbd.getScopes().stream().filter(t -> Objects.equals(t.getType(), ScopeType.RECEIVER_HERID2.getFullname())).findFirst().orElse(null));
+        sbd.getScopes().remove(sbd.getScopes().stream().filter(t -> Objects.equals(t.getType(), ScopeType.SENDER_HERID2.getFullname())).findFirst().orElse(null));
         assertThrows(
             IllegalArgumentException.class,
             () -> healthcareRoutingService.validateAndApply(sbd),
@@ -95,29 +94,35 @@ public class HealthcareRoutingServiceTest {
 
 
     @Test
-    public void whenMultitenancyIsFalse_SenderHerdIsVerified() {
-
+    public void whenMultitenancyIsFalse_SenderHerID1IsVerified() {
+        String MISSMATCHING_HERID1_FROM_CONFIGURATION = "4443333";
+        String SENDER_HERID1_FROM_BUSINESS_DOCUMENT = "8767123123";
         StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
-        sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier("8767123123"));
+        sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(SENDER_HERID1_FROM_BUSINESS_DOCUMENT));
 
         ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
         ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
 
-        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setSenderHerId1("4443333"));
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setSenderHerId1(MISSMATCHING_HERID1_FROM_CONFIGURATION));
 
         ServiceRecord spyRecord = Mockito.spy(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
 
         HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
-        Assertions.assertEquals("Multitenancy not supported: Routing information in message does not match Adressregister information for herID14443333 and orgnum 920640818", e.getArgs()[0]);
+        Assertions.assertEquals("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1 " + MISSMATCHING_HERID1_FROM_CONFIGURATION +" and orgnum 920640818", e.getArgs()[0]);
 
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.SENDER);
         Mockito.verify(spyRecord, Mockito.times(1)).getOrganisationNumber();
 
         Mockito.clearInvocations(serviceRecordProvider,spyRecord);
-        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setSenderHerId1(HealthcareTestData.Identifier.validNhnSenderIdentifier.getHerId1()));
+        Mockito.lenient()
+            .when(integrasjonspunktProperties.getDph())
+            .thenReturn(new IntegrasjonspunktProperties.DphConfig()
+                .setAllowMultitenancy(false)
+                .setSenderHerId1(Identifier.validNhnSenderIdentifier.getHerId1()));
+
         e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
         Assertions.assertEquals("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1 8767123123 and orgnum 920640818", e.getArgs()[0]);
 
@@ -132,7 +137,6 @@ public class HealthcareRoutingServiceTest {
     public void whenMultitenancyIsFalse_SenderOrgnumberIsVerified() {
 
         StandardBusinessDocument sbd = HealthcareTestData.dialgmelding().setSenderIdentifier(HealthcareTestData.Identifier.validNhnSenderIdentifier.withIdentifier("invalidIdentifier"));
-        sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(HealthcareTestData.Identifier.validNhnSenderIdentifier.getHerId1()));
 
         ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
         ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
