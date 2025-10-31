@@ -33,7 +33,6 @@ public class AltinnFormidlingsTjenestenConfig {
     @Valid
     private Oidc oidc;
 
-    @NotNull
     private AltinnAuthorizationDetails authorizationDetails;
 
 }

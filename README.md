@@ -17,6 +17,7 @@
 - [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging uten security i v4
 - [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
 - [ ] Er det noen som egentlig bruker Dokka plugin til noe?
+- [ ] Noe poeng å bruke `com.google.common` lenger? (Ekse `Sets.newHashSet()` kunne jo like godt vært `new HashSet<>()`)
 - [ ] Endel tester har unødvendig stubbing (søk opp og se om `org.mockito.quality.Strictness.LENIENT` kan fjernes)
 - [ ] Det er flere `@SuppressWarnings("squid:S106")` varianter i koden, nødvendig?
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
