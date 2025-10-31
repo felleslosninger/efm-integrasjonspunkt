@@ -13,6 +13,7 @@ Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldin
 - [ ] Innføre scope mot proxy `move:dpv` (ikkje bruk `altinn:broker.read`), se også [SP-602](https://digdir.atlassian.net/browse/SP-602)
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
 - [ ] Burde vi ha noen nye cucumber tester?
+- [ ] DPO mottakere må registreres i ELMA (med formatene arkivmelding og avtalt), skal det være sånn?
 - [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes? 
 - [ ] Flytte proxy koden ut i eget repo (pro / cons)
 
