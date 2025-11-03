@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.7</version>
         <relativePath />
     </parent>
 
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>DEV_SNAPSHOT</version>
+    <version>DEV-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Multiproject for meldingsutveksling</name>
 
