@@ -1,15 +1,12 @@
 name: CI Workflow
 
 on:
-  workflow_dispatch:
-  push:
-  pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered..
+  release:
+    types: [created]
 
 jobs:
-  #deploys libs to github packages
+  #builds and deploys libs to github packages
   build-and-deploy-libs:
-    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
     with:
       java-version: 21
@@ -19,7 +16,7 @@ jobs:
     secrets: inherit
 
   build-and-deploy-image:
-    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
+    #builds and deploys docker image to Github Packages Container Registry
     needs: build-and-deploy-libs
     uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
     with:
