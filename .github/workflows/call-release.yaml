@@ -6,20 +6,18 @@ on:
 
 jobs:
   #builds and deploys libs to github packages
-  build-and-deploy-libs:
+  call-workflow-maven-install-deploy:
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
     with:
       package-version: ${{ github.event.release.tag_name }}
       deployment-repository: ${{ github.repository }}
       java-version: 21
       sbom-path: ./
-      fetch-depth: 0
-      application-path: integrasjonspunkt/
     secrets: inherit
 
   build-and-deploy-image:
     #builds and deploys docker image to Github Packages Container Registry
-    needs: build-and-deploy-libs
+    needs: call-workflow-maven-install-deploy
     uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4623_release_via_GUI
     with:
       package-version: ${{ github.event.release.tag_name }}
