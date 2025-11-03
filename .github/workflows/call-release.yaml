@@ -13,6 +13,7 @@ jobs:
       deployment-repository: ${{ github.repository }}
       java-version: 21
       sbom-path: ./
+      application-path: integrasjonspunkt/
     secrets: inherit
 
   build-and-deploy-image:
