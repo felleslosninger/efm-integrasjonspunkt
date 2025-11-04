@@ -15,6 +15,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -22,6 +24,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.ByteArrayInputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +39,16 @@ import static org.mockito.Mockito.when;
 })
 @UseFullTestConfiguration
 public class AltinnUploadServiceTest {
+
+    @DynamicPropertySource
+    static void overrideProps(DynamicPropertyRegistry registry) {
+        // systemowner
+        registry.add("difi.move.dpo.authorizationDetails.systemuserOrgId", () -> "0192:111111111");
+        registry.add("difi.move.dpo.authorizationDetails.externalRef", () -> "111111111_integrasjonspunkt_systembruker_test");
+        // reportees, på vegne av konfigurasjon
+        registry.add("difi.move.dpo.reportees[0].systemuserOrgId", () -> "0192:222222222");
+        registry.add("difi.move.dpo.reportees[0].externalRef", () -> "222222222_integrasjonspunkt_systembruker_test");
+    }
 
     @Autowired
     private AltinnDPOUploadService altinnUploadService;
@@ -51,9 +65,14 @@ public class AltinnUploadServiceTest {
     @MockitoBean
     private TransactionStatus transactionStatus;
 
-    private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "311780735");
-    private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
-    private StandardBusinessDocument sbd;
+    private static final Iso6523 SENDER_IS_SYSTEOWNER = Iso6523.of(ICD.NO_ORG, "111111111");
+    private static final Iso6523 SENDER_IS_REPORTEE = Iso6523.of(ICD.NO_ORG, "222222222");
+    private static final Iso6523 SENDER_IS_UNKNOWN = Iso6523.of(ICD.NO_ORG, "333333333");
+    private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "000000000");
+
+    private StandardBusinessDocument sbdFraSystemOwner; //
+    private StandardBusinessDocument sbdFraReportee;
+    private StandardBusinessDocument sbdFraUkjentAvsender;
 
     @BeforeEach
     public void beforeEach() {
@@ -63,25 +82,50 @@ public class AltinnUploadServiceTest {
         when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
 
-        sbd = new StandardBusinessDocument()
+        sbdFraSystemOwner = new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
-                .setSenderIdentifier(SENDER)
+                .setSenderIdentifier(SENDER_IS_SYSTEOWNER)
                 .setReceiverIdentifier(RECEIVER)
             );
+
+        sbdFraReportee = new StandardBusinessDocument()
+            .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                .setSenderIdentifier(SENDER_IS_REPORTEE)
+                .setReceiverIdentifier(RECEIVER)
+            );
+
+        sbdFraUkjentAvsender = new StandardBusinessDocument()
+            .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                .setSenderIdentifier(SENDER_IS_UNKNOWN)
+                .setReceiverIdentifier(RECEIVER)
+            );
+
     }
 
     @Test
     public void shouldCallZipUtils() {
-        altinnUploadService.send(sbd);
-
+        altinnUploadService.send(sbdFraSystemOwner);
         verify(zipUtils).getAltinnZip(Mockito.any(), Mockito.any());
     }
 
     @Test
-    public void shouldCallBrokerApiClient() {
-        altinnUploadService.send(sbd);
-
+    public void shouldCallBrokerApiClient_asSystemOwner() {
+        altinnUploadService.send(sbdFraSystemOwner);
         verify(brokerApiClient).send(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void shoulCallBrokerApiClient_asReportee() {
+        altinnUploadService.send(sbdFraReportee);
+        verify(brokerApiClient).send(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void shoulCallBrokerApiClient_asUnknown() {
+        var exception = assertThrows(BrokerApiException.class, () ->
+            altinnUploadService.send(sbdFraUkjentAvsender)
+        );
+        assertEquals("Sender 0192:333333333 fra SBD matcher ikke konfigurerte systembrukere", exception.getMessage());
     }
 
 }
