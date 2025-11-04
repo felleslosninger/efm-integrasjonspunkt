@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
-import com.nimbusds.jose.crypto.impl.AAD;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,10 +27,12 @@ import static org.mockito.Mockito.*;
 class TokenProducerCacheTest {
 
     @Inject
-    TokenProducer dpoTokenProducer;
+    DpoTokenProducer dpoTokenProducer;
 
     @Inject
     TokenProducer dpvTokenProducer;
+
+    final static AltinnAuthorizationDetails aad = new AltinnAuthorizationDetails();
 
     @EnableCaching
     @Configuration
@@ -44,7 +45,6 @@ class TokenProducerCacheTest {
         public DpoTokenProducer dpoTokenProducer() {
             var dpo = new AltinnFormidlingsTjenestenConfig();
             var oidc = new Oidc();
-            var aad = new AltinnAuthorizationDetails();
             oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
             dpo.setOidc(oidc);
             dpo.setAuthorizationDetails(aad);
@@ -79,9 +79,9 @@ class TokenProducerCacheTest {
         Mockito.clearInvocations(TestConfig.tokenService);
         Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
-        var token = dpoTokenProducer.produceToken(scopes);
-        dpoTokenProducer.produceToken(scopes);
-        dpoTokenProducer.produceToken(scopes);
+        var token = dpoTokenProducer.produceToken(aad, scopes);
+        dpoTokenProducer.produceToken(aad, scopes);
+        dpoTokenProducer.produceToken(aad, scopes);
         assertEquals("altinntoken", token);
         verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
         verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());

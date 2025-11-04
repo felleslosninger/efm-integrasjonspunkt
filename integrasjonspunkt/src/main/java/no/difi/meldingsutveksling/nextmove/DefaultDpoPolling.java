@@ -7,13 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
+import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.api.DpoPolling;
+import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
-import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
-import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
 import org.slf4j.MDC;
@@ -38,24 +39,24 @@ public class DefaultDpoPolling implements DpoPolling {
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
     private final AltinnDPODownloadService altinnDownloadService;
 
-    private Set<String> orgnrs;
+    private Set<AltinnAuthorizationDetails> systemUsers;
 
     @PostConstruct
     public void init() {
-        orgnrs = Sets.newHashSet(properties.getOrg().getNumber());
-        orgnrs.addAll(properties.getDpo().getReportees());
+        systemUsers = Sets.newHashSet(properties.getDpo().getAuthorizationDetails());
+        systemUsers.addAll(properties.getDpo().getReportees());
     }
 
     @Override
     @Timed
     public void poll() {
-        orgnrs.forEach(orgnr -> { //todo reportees greia, korleis funka det? kva er det?
-            log.debug("Polling messages for " + orgnr);
+        systemUsers.forEach(system -> {
+            log.debug("Polling messages for " + system.getSystemuserOrgId());
             try {
-                UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles();
-                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for " + orgnr);
+                UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles(system);
+                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for {}", system.getSystemuserOrgId());
                 Arrays.stream(fileTransferIds).forEach(fileTransferId -> {
-                    handleFileReference(fileTransferId, orgnr);
+                    handleFileReference(system, fileTransferId);
                 });
             } catch (Exception e) {
                 log.error("Could not check for available files from Altinn: " + e.getMessage(), e);
@@ -63,12 +64,12 @@ public class DefaultDpoPolling implements DpoPolling {
         });
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void handleFileReference(UUID fileTransferId, String orgnr) {
+    private void handleFileReference(AltinnAuthorizationDetails system, UUID fileTransferId) {
         try {
-            final DownloadRequest request = new DownloadRequest(fileTransferId, orgnr);
-            log.debug("Downloading message with altinnId=%s".formatted(fileTransferId));
-            AltinnPackage altinnPackage = altinnDownloadService.download(request);
+            String orgNumber = system.getSystemuserOrgId().substring(5);
+            final DownloadRequest request = new DownloadRequest(fileTransferId, orgNumber);
+            log.debug("Downloading message with altinnId={}", fileTransferId);
+            AltinnPackage altinnPackage = altinnDownloadService.download(system, request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
@@ -79,12 +80,12 @@ public class DefaultDpoPolling implements DpoPolling {
                 UUID.fromString(sbd.getConversationId());
             } catch (IllegalArgumentException e) {
                 log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
-                altinnDownloadService.confirmDownload(request);
+                altinnDownloadService.confirmDownload(system, request);
                 return;
             }
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
-            altinnDownloadService.confirmDownload(request);
+            altinnDownloadService.confirmDownload(system, request);
             log.debug(markerFrom("altinn-reference-value", fileTransferId).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
             log.error("Error during Altinn message polling, message altinnId=%s".formatted(fileTransferId), e);

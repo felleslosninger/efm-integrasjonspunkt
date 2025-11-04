@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     IntegrasjonspunktProperties.class,
 })
 @UseFullTestConfiguration
-@TestPropertySource(properties = {
+//@TestPropertySource(properties = {
 //    "difi.move.dpo.oidc.authenticationType=JWK",
 //    "difi.move.dpo.oidc.clientId=b590f149-d0ba-4fca-b367-bccd9e444a00",
 //    "difi.move.dpo.authorizationDetails.systemuserOrgId=0192:311780735",
@@ -35,16 +35,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 //    "difi.move.org.keystore.path=",
 //    "difi.move.org.keystore.alias=",
 //    "difi.move.org.keystore.password",
-})
+//})
 public class DpoTokenFetcherTest {
 
     @Inject
     DpoTokenProducer dpoTokenProducer;
 
+    @Inject
+    IntegrasjonspunktProperties properties;
+
     @Test
     @Disabled("Manual test")
     void testAltinnToken() {
-        var altinnToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write", "altinn:broker.read"));
+        var altinnToken = dpoTokenProducer.produceToken(
+            properties.getDpo().getAuthorizationDetails(),
+            List.of("altinn:broker.write", "altinn:broker.read")
+        );
         assertNotNull(altinnToken, "AltinnToken is null");
     }
+
 }

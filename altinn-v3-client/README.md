@@ -85,6 +85,14 @@ System : 311780735_integrasjonspunkt
 Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test3 (df5337bb-95e0-4300-a64d-fbe84317cd39)
 ```
 
+## STERK ULYDIG HUND på vegne av FILOSOFISK BEGEISTRET APE
+Opprettet systembruker for FILOSOFISK BEGEISTRET APE på STERK ULYDIG HUND's system 311780735_integrasjonspunkt
+```
+Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_ape
+Tenor : FILOSOFISK BEGEISTRET APE (313711218)
+Daglig Leder : PESSIMISTISK NATTKREM (26835895385)
+```
+
 ## FRISK VOKSENDE TIGER AS (314244370)
 ```
 Tenor : FRISK VOKSENDE TIGER AS (314244370)

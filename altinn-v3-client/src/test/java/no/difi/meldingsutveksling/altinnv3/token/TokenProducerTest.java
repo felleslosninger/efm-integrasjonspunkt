@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,8 +27,7 @@ import static org.mockito.Mockito.*;
 class TokenProducerTest {
 
     @Inject
-    @Qualifier("DpoTokenProducer")
-    TokenProducer dpoTokenProducer;
+    DpoTokenProducer dpoTokenProducer;
 
     @Inject
     @Qualifier("DpvTokenProducer")
@@ -47,9 +44,6 @@ class TokenProducerTest {
 
     @BeforeEach
     void setUp() {
-
-        var now = LocalDateTime.parse("2025-10-06T08:02:52.259628");
-
         var dpo = new AltinnFormidlingsTjenestenConfig();
         var oidc = new Oidc();
         oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
@@ -66,9 +60,9 @@ class TokenProducerTest {
         Mockito.clearInvocations(tokenService);
         Mockito.clearInvocations(tokenExchangeService);
         var scopes = List.of("scopes");
-        var token = dpoTokenProducer.produceToken(scopes);
-        dpoTokenProducer.produceToken(scopes);
-        dpoTokenProducer.produceToken(scopes);
+        var token = dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
+        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
+        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
         assertEquals("altinntoken", token);
         verify(tokenService, times(3)).fetchToken(any(), any(), any());
         verify(tokenExchangeService, times(3)).exchangeToken(any(), any());

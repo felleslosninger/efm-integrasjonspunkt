@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
 import java.util.Set;
@@ -25,14 +26,18 @@ public class AltinnFormidlingsTjenestenConfig {
     @Pattern(regexp = "^[a-zA-Z0-9-_]{0,25}$")
     private String messageChannel;
 
-    private Set<String> reportees = Sets.newHashSet();
-
     @NotNull
     private Integer defaultTtlHours;
 
     @Valid
+    @NestedConfigurationProperty
     private Oidc oidc;
 
+    // this is the service owner's systemuser
+    @NestedConfigurationProperty
     private AltinnAuthorizationDetails authorizationDetails;
+
+    // FIXME if used, we will send and receive on behalf of these only
+    private Set<AltinnAuthorizationDetails> reportees = Sets.newHashSet();
 
 }

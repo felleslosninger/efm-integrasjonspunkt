@@ -51,7 +51,7 @@ public class AltinnUploadServiceTest {
     @MockitoBean
     private TransactionStatus transactionStatus;
 
-    private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
+    private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "311780735");
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
     private StandardBusinessDocument sbd;
 
@@ -81,7 +81,7 @@ public class AltinnUploadServiceTest {
     public void shouldCallBrokerApiClient() {
         altinnUploadService.send(sbd);
 
-        verify(brokerApiClient).send(Mockito.any(), Mockito.any());
+        verify(brokerApiClient).send(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 }

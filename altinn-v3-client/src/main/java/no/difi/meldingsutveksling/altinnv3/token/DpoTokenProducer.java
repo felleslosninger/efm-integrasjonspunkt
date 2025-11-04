@@ -1,25 +1,26 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import java.util.*;
 
-@Service("DpoTokenProducer")
+import java.util.List;
+
+@Service
 @RequiredArgsConstructor
-public class DpoTokenProducer implements TokenProducer {
+public class DpoTokenProducer {
 
     private final IntegrasjonspunktProperties properties;
     private final TokenService tokenService;
     private final TokenExchangeService tokenExchangeService;
 
-    @Override
     @Cacheable(cacheNames = {"altinn.getDpoToken"})
-    public String produceToken(List<String> scopes) {
+    public String produceToken(AltinnAuthorizationDetails authorizationDetails, List<String> scopes) {
 
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
-        var authorizationClaims = ClaimsFactory.getAuthorizationClaims(properties.getDpo().getAuthorizationDetails());
+        var authorizationClaims = ClaimsFactory.getAuthorizationClaims(authorizationDetails);
 
         String maskinportenToken = tokenService.fetchToken(config, scopes, authorizationClaims);
 
@@ -32,4 +33,5 @@ public class DpoTokenProducer implements TokenProducer {
         var altinnToken = tokenExchangeService.exchangeToken(maskinportenToken, config.exchangeUrl());
         return altinnToken;
     }
+
 }

@@ -53,6 +53,7 @@ public class IntegrasjonspunktProperties {
     private Einnsyn einnsyn;
 
     @Valid
+    @NestedConfigurationProperty
     private PostVirksomheter dpv;
 
     @Valid
@@ -86,7 +87,6 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private DeadLock deadlock;
-
 
     @Data
     public static class Vault {

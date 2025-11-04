@@ -4,6 +4,7 @@ import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
+import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,20 +25,20 @@ public class AltinnDPODownloadService {
     private final IntegrasjonspunktProperties properties;
     private final ZipUtils zipUtils;
 
-    public UUID[] getAvailableFiles() {
+    public UUID[] getAvailableFiles(AltinnAuthorizationDetails authorizationDetails) {
 
-        UUID[] fileTransferIds = brokerApiClient.getAvailableFiles();
+        UUID[] fileTransferIds = brokerApiClient.getAvailableFiles(authorizationDetails);
 
         List<FileTransferStatusDetailsExt> files = Arrays.stream(fileTransferIds)
-                .map(fileTransferId -> brokerApiClient.getDetails((fileTransferId.toString()))).toList();
+                .map(fileTransferId -> brokerApiClient.getDetails(authorizationDetails, fileTransferId.toString())).toList();
 
         files = filterBasedUponSendersFileTransferReference(files);
 
         return files.stream().map(FileTransferStatusDetailsExt::getFileTransferId).toArray(UUID[]::new);
     }
 
-    public AltinnPackage download(DownloadRequest request) {
-        byte[] bytes = brokerApiClient.downloadFile(request.getFileReference());
+    public AltinnPackage download(AltinnAuthorizationDetails authorizationDetails, DownloadRequest request) {
+        byte[] bytes = brokerApiClient.downloadFile(authorizationDetails, request.getFileReference());
 
         try {
             return zipUtils.getAltinnPackage(bytes);
@@ -46,8 +47,8 @@ public class AltinnDPODownloadService {
         }
     }
 
-    public void confirmDownload(DownloadRequest request) {
-        brokerApiClient.confirmDownload(request.getFileReference());
+    public void confirmDownload(AltinnAuthorizationDetails authorizationDetails, DownloadRequest request) {
+        brokerApiClient.confirmDownload(authorizationDetails, request.getFileReference());
     }
 
     private List<FileTransferStatusDetailsExt> filterBasedUponSendersFileTransferReference(List<FileTransferStatusDetailsExt> files){

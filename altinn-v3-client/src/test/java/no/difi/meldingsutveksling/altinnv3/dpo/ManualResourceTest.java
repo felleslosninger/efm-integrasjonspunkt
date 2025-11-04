@@ -24,9 +24,15 @@ public class ManualResourceTest {
     @Inject
     DpoTokenProducer dpoTokenProducer;
 
+    @Inject
+    IntegrasjonspunktProperties properties;
+
     @Test
     public void getResource() {
-        var accessToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenProducer.produceToken(
+            properties.getDpo().getAuthorizationDetails(),
+            List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
+        );
 
         RestClient restClient = RestClient.create();
         var result = restClient.get()
@@ -42,7 +48,9 @@ public class ManualResourceTest {
 
     @Test
     public void updateResource() {
-        var accessToken = dpoTokenProducer.produceToken(List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner"));
+        var accessToken = dpoTokenProducer.produceToken(properties.getDpo().getAuthorizationDetails(),
+            List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
+        );
 
         String body = """
             {
