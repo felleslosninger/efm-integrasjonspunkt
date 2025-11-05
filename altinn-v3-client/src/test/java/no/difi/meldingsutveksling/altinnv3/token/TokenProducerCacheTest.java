@@ -1,8 +1,12 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
 import jakarta.inject.Inject;
-import no.difi.meldingsutveksling.config.*;
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.PostVirksomheter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +36,8 @@ class TokenProducerCacheTest {
     @Inject
     TokenProducer dpvTokenProducer;
 
-    final static AltinnSystemUser systemUser = new AltinnSystemUser();
+    final static AltinnSystemUser systemUserA = new AltinnSystemUser("0192:1234567890", "system-user-a");
+    final static AltinnSystemUser systemUserB = new AltinnSystemUser("0192:2345678901", "system-user-b");
 
     @EnableCaching
     @Configuration
@@ -44,10 +49,6 @@ class TokenProducerCacheTest {
         @Bean
         public DpoTokenProducer dpoTokenProducer() {
             var dpo = new AltinnFormidlingsTjenestenConfig();
-            var oidc = new Oidc();
-            oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
-            dpo.setOidc(oidc);
-            dpo.setSystemUser(systemUser);
             var props = mock(IntegrasjonspunktProperties.class);
             when(props.getDpo()).thenReturn(dpo);
             return new DpoTokenProducer(props, tokenService, tokenExchangeService);
@@ -74,19 +75,7 @@ class TokenProducerCacheTest {
         when(TestConfig.tokenExchangeService.exchangeToken(any(), any())).thenReturn("altinntoken");
     }
 
-    @Test
-    void produceDpoToken() {
-        Mockito.clearInvocations(TestConfig.tokenService);
-        Mockito.clearInvocations(TestConfig.tokenExchangeService);
-        var scopes = List.of("scopes");
-        var token = dpoTokenProducer.produceToken(systemUser, scopes);
-        dpoTokenProducer.produceToken(systemUser, scopes);
-        dpoTokenProducer.produceToken(systemUser, scopes);
-        assertEquals("altinntoken", token);
-        verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
-        verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());
-    }
-
+    @Order(1)
     @Test
     void produceDpvToken() {
         Mockito.clearInvocations(TestConfig.tokenService);
@@ -98,6 +87,52 @@ class TokenProducerCacheTest {
         assertEquals("altinntoken", token);
         verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
         verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());
+    }
+
+    @Order(2)
+    @Test
+    void produceDpoToken() {
+        // expect just 2 calls, one token produced for each system user
+        Mockito.clearInvocations(TestConfig.tokenService);
+        Mockito.clearInvocations(TestConfig.tokenExchangeService);
+        var scopes = List.of("scopes");
+        var token = dpoTokenProducer.produceToken(systemUserA, scopes);
+        dpoTokenProducer.produceToken(systemUserA, scopes);
+        dpoTokenProducer.produceToken(systemUserB, scopes);
+        dpoTokenProducer.produceToken(systemUserB, scopes);
+        assertEquals("altinntoken", token);
+        verify(TestConfig.tokenService, times(2)).fetchToken(any(), any(), any());
+        verify(TestConfig.tokenExchangeService, times(2)).exchangeToken(any(), any());
+    }
+
+    @Order(3)
+    @Test
+    void produceDpoToken_forSystemUserA() {
+        // expect 0 more interactions (already cached in first DPO test)
+        Mockito.clearInvocations(TestConfig.tokenService);
+        Mockito.clearInvocations(TestConfig.tokenExchangeService);
+        var scopes = List.of("scopes");
+        var token = dpoTokenProducer.produceToken(systemUserA, scopes);
+        dpoTokenProducer.produceToken(systemUserA, scopes);
+        dpoTokenProducer.produceToken(systemUserA, scopes);
+        assertEquals("altinntoken", token);
+        verify(TestConfig.tokenService, times(0)).fetchToken(any(), any(), any());
+        verify(TestConfig.tokenExchangeService, times(0)).exchangeToken(any(), any());
+    }
+
+    @Order(4)
+    @Test
+    void produceDpoToken_forSystemUserB() {
+        // expect 0 more interactions (already cached in first DPO test)
+        Mockito.clearInvocations(TestConfig.tokenService);
+        Mockito.clearInvocations(TestConfig.tokenExchangeService);
+        var scopes = List.of("scopes");
+        var token = dpoTokenProducer.produceToken(systemUserB, scopes);
+        dpoTokenProducer.produceToken(systemUserB, scopes);
+        dpoTokenProducer.produceToken(systemUserB, scopes);
+        assertEquals("altinntoken", token);
+        verify(TestConfig.tokenService, times(0)).fetchToken(any(), any(), any());
+        verify(TestConfig.tokenExchangeService, times(0)).exchangeToken(any(), any());
     }
 
 }
