@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
 import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.api.DpoPolling;
-import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -39,11 +39,11 @@ public class DefaultDpoPolling implements DpoPolling {
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
     private final AltinnDPODownloadService altinnDownloadService;
 
-    private Set<AltinnAuthorizationDetails> systemUsers;
+    private Set<AltinnSystemUser> systemUsers;
 
     @PostConstruct
     public void init() {
-        systemUsers = Sets.newHashSet(properties.getDpo().getAuthorizationDetails());
+        systemUsers = Sets.newHashSet(properties.getDpo().getSystemUser());
         systemUsers.addAll(properties.getDpo().getReportees());
     }
 
@@ -51,10 +51,10 @@ public class DefaultDpoPolling implements DpoPolling {
     @Timed
     public void poll() {
         systemUsers.forEach(system -> {
-            log.debug("Polling messages for " + system.getSystemuserOrgId());
+            log.debug("Polling messages for " + system.getOrgId());
             try {
                 UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles(system);
-                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for {}", system.getSystemuserOrgId());
+                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for {}", system.getOrgId());
                 Arrays.stream(fileTransferIds).forEach(fileTransferId -> {
                     handleFileReference(system, fileTransferId);
                 });
@@ -64,12 +64,12 @@ public class DefaultDpoPolling implements DpoPolling {
         });
     }
 
-    private void handleFileReference(AltinnAuthorizationDetails system, UUID fileTransferId) {
+    private void handleFileReference(AltinnSystemUser systemUser, UUID fileTransferId) {
         try {
-            String orgNumber = system.getSystemuserOrgId().substring(5);
+            String orgNumber = systemUser.getOrgId().substring(5);
             final DownloadRequest request = new DownloadRequest(fileTransferId, orgNumber);
             log.debug("Downloading message with altinnId={}", fileTransferId);
-            AltinnPackage altinnPackage = altinnDownloadService.download(system, request);
+            AltinnPackage altinnPackage = altinnDownloadService.download(systemUser, request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
@@ -80,12 +80,12 @@ public class DefaultDpoPolling implements DpoPolling {
                 UUID.fromString(sbd.getConversationId());
             } catch (IllegalArgumentException e) {
                 log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
-                altinnDownloadService.confirmDownload(system, request);
+                altinnDownloadService.confirmDownload(systemUser, request);
                 return;
             }
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
-            altinnDownloadService.confirmDownload(system, request);
+            altinnDownloadService.confirmDownload(systemUser, request);
             log.debug(markerFrom("altinn-reference-value", fileTransferId).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
             log.error("Error during Altinn message polling, message altinnId=%s".formatted(fileTransferId), e);

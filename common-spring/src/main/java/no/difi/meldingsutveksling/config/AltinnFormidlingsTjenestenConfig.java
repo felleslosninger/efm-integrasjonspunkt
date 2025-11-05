@@ -33,11 +33,12 @@ public class AltinnFormidlingsTjenestenConfig {
     @NestedConfigurationProperty
     private Oidc oidc;
 
-    // this is the service owner's systemuser
+    /**
+     * Altinn systembruker
+     */
     @NestedConfigurationProperty
-    private AltinnAuthorizationDetails authorizationDetails;
+    private AltinnSystemUser systemUser;
 
-    // FIXME if used, we will send and receive on behalf of these only
-    private Set<AltinnAuthorizationDetails> reportees = Sets.newHashSet();
+    private Set<AltinnSystemUser> reportees = Sets.newHashSet();
 
 }

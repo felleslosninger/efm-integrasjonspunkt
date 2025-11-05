@@ -69,7 +69,7 @@ public class AltinnDownloadServiceTest {
     public void getOnlyMessagesWithSameMessageChannelAsConfiguration(){
         Mockito.when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig().setMessageChannel("messageChannel"));
 
-        UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getAuthorizationDetails());
+        UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
 
         assertThat(result)
             .as("Should only return messages with same message channel")
@@ -78,7 +78,7 @@ public class AltinnDownloadServiceTest {
 
     @Test
     public void getOnlyMessagesWithNoSpecifiedMessageChannel(){
-        UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getAuthorizationDetails());
+        UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
 
         assertThat(result)
             .as("Should only return messages without specified message channel")
@@ -91,7 +91,7 @@ public class AltinnDownloadServiceTest {
         byte[] bytes = "Hello world".getBytes();
 
         Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(bytes);
-        altinnDownloadService.download(integrasjonspunktProperties.getDpo().getAuthorizationDetails()
+        altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser()
             , new DownloadRequest(uuid, "123")
         );
 
@@ -104,7 +104,7 @@ public class AltinnDownloadServiceTest {
         byte[] bytes = "Hello world".getBytes();
 
         Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(bytes);
-        altinnDownloadService.download(integrasjonspunktProperties.getDpo().getAuthorizationDetails(),
+        altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser(),
             new DownloadRequest(uuid, "123")
         );
 
@@ -115,7 +115,7 @@ public class AltinnDownloadServiceTest {
     public void confirmDownloadShouldCallBrokerApiClient(){
         UUID uuid = UUID.randomUUID();
 
-        altinnDownloadService.confirmDownload(integrasjonspunktProperties.getDpo().getAuthorizationDetails(),
+        altinnDownloadService.confirmDownload(integrasjonspunktProperties.getDpo().getSystemUser(),
             new DownloadRequest(uuid, "123")
         );
 

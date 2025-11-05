@@ -48,7 +48,7 @@ class TokenProducerTest {
         var oidc = new Oidc();
         oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
         dpo.setOidc(oidc);
-        dpo.setAuthorizationDetails(new AltinnAuthorizationDetails());
+        dpo.setSystemUser(new AltinnSystemUser());
         when(integrasjonspunktProperties.getDpo()).thenReturn(dpo);
         when(integrasjonspunktProperties.getDpv()).thenReturn(new PostVirksomheter());
         when(tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");
@@ -60,9 +60,9 @@ class TokenProducerTest {
         Mockito.clearInvocations(tokenService);
         Mockito.clearInvocations(tokenExchangeService);
         var scopes = List.of("scopes");
-        var token = dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
-        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
-        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getAuthorizationDetails(), scopes);
+        var token = dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getSystemUser(), scopes);
+        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getSystemUser(), scopes);
+        dpoTokenProducer.produceToken(integrasjonspunktProperties.getDpo().getSystemUser(), scopes);
         assertEquals("altinntoken", token);
         verify(tokenService, times(3)).fetchToken(any(), any(), any());
         verify(tokenExchangeService, times(3)).exchangeToken(any(), any());

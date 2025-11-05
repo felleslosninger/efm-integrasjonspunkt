@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
-import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -39,15 +39,15 @@ public class BrokerApiClient {
         brokerServiceUrl = props.getDpo().getBrokerserviceUrl();
     }
 
-    public FileTransferOverviewExt send(AltinnAuthorizationDetails aad, FileTransferInitalizeExt request, byte[] bytes){
-        FileTransferInitializeResponseExt initializeResponse = initialize(aad, request);
+    public FileTransferOverviewExt send(AltinnSystemUser systemUser, FileTransferInitalizeExt request, byte[] bytes){
+        FileTransferInitializeResponseExt initializeResponse = initialize(systemUser, request);
         if (initializeResponse == null) throw new BrokerApiException("Error while initializing file transfer. Result from initialize call to Altinn was null.");
         if (initializeResponse.getFileTransferId() == null) throw new BrokerApiException("Error while initializing file transfer. Result from initialize call to Altinn did not have FileTransferId.");
-        return upload(aad, initializeResponse.getFileTransferId(), bytes);
+        return upload(systemUser, initializeResponse.getFileTransferId(), bytes);
     }
 
-    public FileTransferInitializeResponseExt initialize(AltinnAuthorizationDetails aad, FileTransferInitalizeExt request) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(writeScope));
+    public FileTransferInitializeResponseExt initialize(AltinnSystemUser systemUser, FileTransferInitalizeExt request) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(writeScope));
 
          return restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/")
@@ -59,8 +59,8 @@ public class BrokerApiClient {
             ;
     }
 
-    public FileTransferOverviewExt upload(AltinnAuthorizationDetails aad, UUID fileTransferId, byte[] bytes) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(writeScope));
+    public FileTransferOverviewExt upload(AltinnSystemUser systemUser, UUID fileTransferId, byte[] bytes) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(writeScope));
 
         return restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/upload", fileTransferId)
@@ -73,8 +73,8 @@ public class BrokerApiClient {
             ;
     }
 
-    public UUID[] getAvailableFiles(AltinnAuthorizationDetails aad) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(readScope));
+    public UUID[] getAvailableFiles(AltinnSystemUser systemUser) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(readScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer?resourceId={resourceId}&status={status}&recipientStatus={recipientStatus}",
@@ -88,8 +88,8 @@ public class BrokerApiClient {
             ;
     }
 
-    public FileTransferStatusDetailsExt getDetails(AltinnAuthorizationDetails aad, String fileTransferId) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(readScope));
+    public FileTransferStatusDetailsExt getDetails(AltinnSystemUser systemUser, String fileTransferId) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(readScope));
 
          return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/details", fileTransferId)
@@ -100,8 +100,8 @@ public class BrokerApiClient {
             ;
     }
 
-    public byte[] downloadFile(AltinnAuthorizationDetails aad, UUID fileTransferId) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(readScope));
+    public byte[] downloadFile(AltinnSystemUser systemUser, UUID fileTransferId) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(readScope));
 
         return restClient.get()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/download", fileTransferId)
@@ -111,8 +111,8 @@ public class BrokerApiClient {
             ;
     }
 
-    public void confirmDownload(AltinnAuthorizationDetails aad, UUID fileTransferId) {
-        String accessToken = tokenProducer.produceToken(aad, List.of(readScope));
+    public void confirmDownload(AltinnSystemUser systemUser, UUID fileTransferId) {
+        String accessToken = tokenProducer.produceToken(systemUser, List.of(readScope));
 
         restClient.post()
             .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/confirmdownload", fileTransferId)

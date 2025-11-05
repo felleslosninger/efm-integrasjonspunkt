@@ -22,7 +22,7 @@ graph LR
         CA[correspondence api]
     end
 
-    IP-- dpv med altinn (bytte til mp?) token\nscope = move:dpv -->AP
+    IP-- dpv med altinn token\nscope = move:dpv -->AP
     AP-- altinn melding's api\nmed altinn token -->CA
 ```
 
@@ -33,14 +33,15 @@ graph LR
 - [x] Lage et opplegg for ytelsestesting av proxyen MOVE-4639
 - [x] Legge til metrics for token cache (cache type) (`eformidling.dpv.proxy.token`)
 - [x] Legge til metrics for forward/ping requests (`eformidling.dpv.proxy.request`)
-- [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
+- [x] Proxy requests autentiseres med altinn token (lang levetid, Roar mente altinn token var tingen)
+- [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549) og [MOVE-4588](https://digdir.atlassian.net/browse/MOVE-4588)
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
-- [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549)
-- [ ] Skal proxy requests autentiseres med altinn token (lang levetid) eller kun maskinporten token (kort levetid) (Roar mente altinn token var tingen)
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
-- [ ] [MOVE-4641](https://digdir.atlassian.net/browse/MOVE-4641) : Flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
-- [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (Java 25?)
+- [ ] Vurdere en ekstra custom metric for `eformidling.dpv.proxy.errors`
+- [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
 - [ ] Actuator paths er åpne på både web og mgmt port (kan dette splittes i 2 security filter, en for hver port)
+- [ ] [MOVE-4641](https://digdir.atlassian.net/browse/MOVE-4641) : Flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
+- [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (oppgradere til Java 25)
 
 ## Deployment
 

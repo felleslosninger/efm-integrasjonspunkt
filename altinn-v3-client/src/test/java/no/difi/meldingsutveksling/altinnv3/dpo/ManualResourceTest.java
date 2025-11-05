@@ -30,7 +30,7 @@ public class ManualResourceTest {
     @Test
     public void getResource() {
         var accessToken = dpoTokenProducer.produceToken(
-            properties.getDpo().getAuthorizationDetails(),
+            properties.getDpo().getSystemUser(),
             List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
         );
 
@@ -48,7 +48,7 @@ public class ManualResourceTest {
 
     @Test
     public void updateResource() {
-        var accessToken = dpoTokenProducer.produceToken(properties.getDpo().getAuthorizationDetails(),
+        var accessToken = dpoTokenProducer.produceToken(properties.getDpo().getSystemUser(),
             List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
         );
 

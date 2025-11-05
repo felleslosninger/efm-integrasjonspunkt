@@ -43,11 +43,11 @@ public class AltinnUploadServiceTest {
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
         // systemowner
-        registry.add("difi.move.dpo.authorizationDetails.systemuserOrgId", () -> "0192:111111111");
-        registry.add("difi.move.dpo.authorizationDetails.externalRef", () -> "111111111_integrasjonspunkt_systembruker_test");
+        registry.add("difi.move.dpo.systemUser.orgId", () -> "0192:111111111");
+        registry.add("difi.move.dpo.systemUser.name", () -> "111111111_integrasjonspunkt_systembruker_test");
         // reportees, på vegne av konfigurasjon
-        registry.add("difi.move.dpo.reportees[0].systemuserOrgId", () -> "0192:222222222");
-        registry.add("difi.move.dpo.reportees[0].externalRef", () -> "222222222_integrasjonspunkt_systembruker_test");
+        registry.add("difi.move.dpo.reportees[0].orgId", () -> "0192:222222222");
+        registry.add("difi.move.dpo.reportees[0].name", () -> "222222222_integrasjonspunkt_systembruker_test");
     }
 
     @Autowired

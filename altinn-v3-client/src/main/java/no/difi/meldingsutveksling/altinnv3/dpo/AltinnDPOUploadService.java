@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.altinnv3.dpo;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
-import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -43,13 +43,13 @@ public class AltinnDPOUploadService {
         UploadRequest request = new UploadRequest(sendersReference, sbd, asic);
         FileTransferInitalizeExt fileTransferInitalizeExt = createFileTransferInitalizeExt(sbd, sendersReference);
 
-        AltinnAuthorizationDetails authorizationDetails = getAuthorizationDetailsFromSenderOrgId(sbd.getSenderIdentifier().getIdentifier());
+        AltinnSystemUser systemUser = getAltinnSystemUserFromSenderOrgId(sbd.getSenderIdentifier().getIdentifier());
 
         try {
             promiseMaker.promise(reject -> {
                 InputStreamResource altinnZip = zipUtils.getAltinnZip(request, reject);
                 try {
-                    brokerApiClient.send(authorizationDetails, fileTransferInitalizeExt, altinnZip.getInputStream().readAllBytes());
+                    brokerApiClient.send(systemUser, fileTransferInitalizeExt, altinnZip.getInputStream().readAllBytes());
                 } catch (IOException e) {
                     throw new BrokerApiException("Failed when trying to send DPO message with conversationId %s".formatted(sbd.getConversationId()), e);
                 }
@@ -59,23 +59,26 @@ public class AltinnDPOUploadService {
             auditError(request, e);
             throw e;
         }
+
     }
 
-    private AltinnAuthorizationDetails getAuthorizationDetailsFromSenderOrgId(String senderOrgId) {
-        // default er å sende på vegne av seg selv
-        AltinnAuthorizationDetails authorizationDetails = props.getDpo().getAuthorizationDetails();
+    private AltinnSystemUser getAltinnSystemUserFromSenderOrgId(String senderOrgId) {
 
-        // hvis avsender ikke er deg selv, let gjennom reportees etter korrekt authorizationDetails
-        if (!authorizationDetails.getSystemuserOrgId().equals(senderOrgId)) {
+        // default er å sende på vegne av seg selv
+        AltinnSystemUser systemUser = props.getDpo().getSystemUser();
+
+        // hvis avsender ikke er deg selv, let gjennom reportees etter korrekt systemUser
+        if (!systemUser.getOrgId().equals(senderOrgId)) {
             if (props.getDpo().getReportees() == null) {
                 throw new BrokerApiException("Sender %s fra SBD matcher ikke systembruker og det mangler reportees i konfigurasjonen".formatted(senderOrgId));
             } else {
-                authorizationDetails = props.getDpo().getReportees().stream()
-                    .filter(s -> s.getSystemuserOrgId().equals(senderOrgId))
+                systemUser = props.getDpo().getReportees().stream()
+                    .filter(s -> s.getOrgId().equals(senderOrgId))
                     .findFirst().orElseThrow(() -> new BrokerApiException("Sender %s fra SBD matcher ikke konfigurerte systembrukere".formatted(senderOrgId)));
             }
         }
-        return authorizationDetails;
+
+        return systemUser;
     }
 
     private FileTransferInitalizeExt createFileTransferInitalizeExt(final StandardBusinessDocument sbd, String sendersReference) {

@@ -32,7 +32,7 @@ class TokenProducerCacheTest {
     @Inject
     TokenProducer dpvTokenProducer;
 
-    final static AltinnAuthorizationDetails aad = new AltinnAuthorizationDetails();
+    final static AltinnSystemUser systemUser = new AltinnSystemUser();
 
     @EnableCaching
     @Configuration
@@ -47,7 +47,7 @@ class TokenProducerCacheTest {
             var oidc = new Oidc();
             oidc.setAuthenticationType(AuthenticationType.CERTIFICATE);
             dpo.setOidc(oidc);
-            dpo.setAuthorizationDetails(aad);
+            dpo.setSystemUser(systemUser);
             var props = mock(IntegrasjonspunktProperties.class);
             when(props.getDpo()).thenReturn(dpo);
             return new DpoTokenProducer(props, tokenService, tokenExchangeService);
@@ -79,9 +79,9 @@ class TokenProducerCacheTest {
         Mockito.clearInvocations(TestConfig.tokenService);
         Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
-        var token = dpoTokenProducer.produceToken(aad, scopes);
-        dpoTokenProducer.produceToken(aad, scopes);
-        dpoTokenProducer.produceToken(aad, scopes);
+        var token = dpoTokenProducer.produceToken(systemUser, scopes);
+        dpoTokenProducer.produceToken(systemUser, scopes);
+        dpoTokenProducer.produceToken(systemUser, scopes);
         assertEquals("altinntoken", token);
         verify(TestConfig.tokenService, times(1)).fetchToken(any(), any(), any());
         verify(TestConfig.tokenExchangeService, times(1)).exchangeToken(any(), any());

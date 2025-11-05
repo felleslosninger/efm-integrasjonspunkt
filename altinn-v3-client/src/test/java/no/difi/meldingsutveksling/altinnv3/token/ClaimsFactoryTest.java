@@ -2,10 +2,11 @@ package no.difi.meldingsutveksling.altinnv3.token;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.difi.meldingsutveksling.config.AltinnAuthorizationDetails;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.move.common.oauth.JwtTokenAdditionalClaims;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ClaimsFactoryTest {
@@ -26,11 +27,12 @@ public class ClaimsFactoryTest {
             } ]
           }
         }""";
-        AltinnAuthorizationDetails details = new AltinnAuthorizationDetails();
-        details.setSystemuserOrgId("0192:311780735");
-        details.setExternalRef("externalref");
 
-        var result = ClaimsFactory.getAuthorizationClaims(details);
+        var systemUser = new AltinnSystemUser();
+        systemUser.setOrgId("0192:311780735");
+        systemUser.setName("externalref");
+
+        var result = ClaimsFactory.getAuthorizationClaims(systemUser);
 
         assertNotNull(result, "Should get authorization claims");
         assertInstanceOf(JwtTokenAdditionalClaims.class, result, "Generated claims should be JwtTokenAdditionalClaims");
@@ -40,4 +42,5 @@ public class ClaimsFactoryTest {
 
         assertEquals(expectedResultInJsonFormat, json, "Generated claims should be the same as expected result");
     }
+
 }
