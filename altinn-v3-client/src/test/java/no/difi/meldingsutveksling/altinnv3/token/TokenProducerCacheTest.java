@@ -5,9 +5,7 @@ import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
@@ -27,6 +25,7 @@ import static org.mockito.Mockito.*;
  * parameters. It expects the cache to kick in and verifies that both the TokenService
  * and TokenExchangeService have only been called once each.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 class TokenProducerCacheTest {
 
