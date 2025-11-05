@@ -72,13 +72,13 @@ class TokenProducerCacheTest {
     void setUp() {
         when(TestConfig.tokenService.fetchToken(any(), any(), any())).thenReturn("maskinportentoken");
         when(TestConfig.tokenExchangeService.exchangeToken(any(), any())).thenReturn("altinntoken");
+        Mockito.clearInvocations(TestConfig.tokenService);
+        Mockito.clearInvocations(TestConfig.tokenExchangeService);
     }
 
     @Order(1)
     @Test
     void produceDpvToken() {
-        Mockito.clearInvocations(TestConfig.tokenService);
-        Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
         var token = dpvTokenProducer.produceToken(scopes);
         dpvTokenProducer.produceToken(scopes);
@@ -92,8 +92,6 @@ class TokenProducerCacheTest {
     @Test
     void produceDpoToken() {
         // expect just 2 calls, one token produced for each system user
-        Mockito.clearInvocations(TestConfig.tokenService);
-        Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
         var token = dpoTokenProducer.produceToken(systemUserA, scopes);
         dpoTokenProducer.produceToken(systemUserA, scopes);
@@ -108,8 +106,6 @@ class TokenProducerCacheTest {
     @Test
     void produceDpoToken_forSystemUserA() {
         // expect 0 more interactions (already cached in first DPO test)
-        Mockito.clearInvocations(TestConfig.tokenService);
-        Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
         var token = dpoTokenProducer.produceToken(systemUserA, scopes);
         dpoTokenProducer.produceToken(systemUserA, scopes);
@@ -123,8 +119,6 @@ class TokenProducerCacheTest {
     @Test
     void produceDpoToken_forSystemUserB() {
         // expect 0 more interactions (already cached in first DPO test)
-        Mockito.clearInvocations(TestConfig.tokenService);
-        Mockito.clearInvocations(TestConfig.tokenExchangeService);
         var scopes = List.of("scopes");
         var token = dpoTokenProducer.produceToken(systemUserB, scopes);
         dpoTokenProducer.produceToken(systemUserB, scopes);
