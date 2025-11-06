@@ -199,7 +199,7 @@ public class SystemregisterApiClient {
     public String systemDetails() {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
         return restClient.get()
-            .uri(apiEndpoint + "/vendor/314240979_integrasjonspunkt")
+            .uri(apiEndpoint + "/vendor/311780735_integrasjonspunkt")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()

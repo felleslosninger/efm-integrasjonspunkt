@@ -61,7 +61,7 @@ public class ManuallyTestingSystemregister {
     void testKnownClientToken() {
         var token = client.getTokenTest();
         var decodedToken = new String(Base64.getDecoder().decode(token.split("\\.")[1]));
-        assertTrue(decodedToken.contains("\"systemuser_id\":[\"5b205bec-aad7-4e3f-a504-3e84b8a778fd\"]"), "Systemuser token should contain correct systemuser id");
+        assertTrue(decodedToken.contains("\"systemuser_id\":[\"19bed6de-092d-4f4e-9a8c-7b95efaa400c\"]"), "Systemuser token should contain correct systemuser id");
         System.out.println(token);
     }
 

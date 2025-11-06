@@ -25,4 +25,5 @@ public class DpvTokenProducer implements TokenProducer {
 
         return altinnToken;
     }
+
 }

@@ -29,14 +29,13 @@ public class ManualResourceTest {
 
     @Test
     public void getResource() {
-        var accessToken = dpoTokenProducer.produceToken(
-            properties.getDpo().getSystemUser(),
+        var accessToken = dpoTokenProducer.produceToken(null, // need regular token, not system-user-token
             List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
         );
 
         RestClient restClient = RestClient.create();
         var result = restClient.get()
-            .uri("https://platform.tt02.altinn.no/broker/api/v1/resource/meldingsutveksling_dpo")
+            .uri("https://platform.tt02.altinn.no/broker/api/v1/resource/eformidling-dpo-meldingsutveksling")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -48,7 +47,7 @@ public class ManualResourceTest {
 
     @Test
     public void updateResource() {
-        var accessToken = dpoTokenProducer.produceToken(properties.getDpo().getSystemUser(),
+        var accessToken = dpoTokenProducer.produceToken(null, // need regular token, not system-user-token
             List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
         );
 
