@@ -13,6 +13,7 @@ DPV
 - Correspondence Api returnerer ny status "Klar for publisering" som ikkje er tatt i bruk i IP.
 - Nytt Notification
 - Nytt oppsett for onboarding av kunder.
+- "allowForwarding" på varsel er fjernet i Altinn 3
 
 DPO
 

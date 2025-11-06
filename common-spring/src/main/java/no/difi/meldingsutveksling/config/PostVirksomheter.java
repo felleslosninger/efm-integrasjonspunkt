@@ -28,8 +28,6 @@ public class PostVirksomheter {
     @NotNull
     private String emailSubject;
 
-    private boolean allowForwarding;
-
     private boolean enableDueDate;
     private Long daysToReply;
 
