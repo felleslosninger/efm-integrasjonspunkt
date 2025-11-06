@@ -40,7 +40,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
         UUID correspondenceid = altinnService.send(message);
 
-
+// FIXME back-add this logstash marker thing?
 //        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
 //
 //        Object response = withLogstashMarker(markerFrom(message))
@@ -53,5 +53,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
         conversationService.findConversation(message.getMessageId())
             .ifPresent(conversation -> conversationService.save(conversation
                 .setExternalSystemReference(correspondenceid.toString())));
+
     }
+
 }

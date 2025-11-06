@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.DpvVarselTransportType;
@@ -67,10 +66,10 @@ public class NotificationFactory {
     }
 
     private boolean shouldSendReminder(NextMoveOutMessage message) {
-        DpvVarselType varselType = dpvHelper.getDpvSettings(message).flatMap(s -> s.getVarselType() != null ? Optional.of(s.getVarselType()) : Optional.empty())
-            .orElse(DpvVarselType.VARSEL_DPV_MED_REVARSEL);
-
-        return varselType == DpvVarselType.VARSEL_DPV_MED_REVARSEL;
+        // default behavior is to send a reminder when not specified (explict VARSEL_DPV_UTEN_REVARSEL for no reminder)
+        return dpvHelper.getDpvSettings(message)
+            .map(s -> s.getVarselType() == null || s.getVarselType() == DpvVarselType.VARSEL_DPV_MED_REVARSEL)
+            .orElse(true);
     }
 
     private NotificationChannelExt getChannel(NextMoveOutMessage message) {
@@ -98,4 +97,5 @@ public class NotificationFactory {
     private boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
+
 }

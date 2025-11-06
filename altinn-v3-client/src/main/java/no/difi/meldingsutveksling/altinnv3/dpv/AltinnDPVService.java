@@ -21,7 +21,7 @@ public class AltinnDPVService {
     private final CorrespondenceCreatorService correspondenceCreatorService;
     private final FileRetriever fileRetriever;
 
-    public UUID send(final NextMoveOutMessage message){
+    public UUID send(final NextMoveOutMessage message) {
 
         List<FileUploadRequest> files = fileRetriever.getFiles(message);
 
@@ -32,7 +32,7 @@ public class AltinnDPVService {
 
         var result = client.upload(correspondence, files);
 
-        if(result == null || result.getCorrespondences() == null){ throw new CorrespondenceApiException("Error when sending message to Altinn, response was null");}
+        if (result == null || result.getCorrespondences() == null) { throw new CorrespondenceApiException("Error when sending message to Altinn, response was null");}
         return result.getCorrespondences().getFirst().getCorrespondenceId();
     }
 

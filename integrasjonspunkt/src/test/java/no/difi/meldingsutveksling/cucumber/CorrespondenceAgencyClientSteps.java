@@ -33,7 +33,7 @@ public class CorrespondenceAgencyClientSteps {
         RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlEqualTo("/correspondence/api/v1/correspondence/upload"));
 
         var requests = wireMockServer.findAll(requestPatternBuilder);
-        LoggedRequest request = requests.get(0);
+        LoggedRequest request = requests.getFirst();
 
         Map<String, String> values = new HashMap<>();
         List<Document> attachments = new ArrayList<>();
