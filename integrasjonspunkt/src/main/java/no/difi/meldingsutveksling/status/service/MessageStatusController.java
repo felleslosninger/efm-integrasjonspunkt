@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -26,7 +26,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -36,19 +41,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/statuses")
 public class MessageStatusController {
 
-    private static String FASTLEGE_PROCESS = "urn:no:difi:profile:digitalpost:fastlege:ver1.0";
-    private static String NHN_PROCESS = "urn:no:difi:profile:digitalpost:helse:ver1.0";
+    public static String FASTLEGE_PROCESS = "urn:no:difi:profile:digitalpost:fastlege:ver1.0";
+    public static String NHN_PROCESS = "urn:no:difi:profile:digitalpost:helse:ver1.0";
 
     private final MessageStatusRepository statusRepo;
     private final StatusQueue statusQueue;
     private final NhnAdapterClient nhnAdapterClient;
-    private final ObjectMapperHolder objectMapperHolder;
 
     @GetMapping
     @JsonView(Views.MessageStatus.class)
@@ -117,20 +122,21 @@ public class MessageStatusController {
     }
 
     private void decorateWithApprecInfo(MessageStatus t) {
-        String rawReceipt = "";
+        String rawReceipt;
         IncomingReceipt receiptIn = nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
 
         try {
             HashMap<String, Object> reciept = new HashMap<>();
             reciept.put("status", receiptIn.status());
-            reciept.put("error", receiptIn.errors());
+            reciept.put("errors", receiptIn.errors());
             rawReceipt = ObjectMapperHolder.get().writeValueAsString(reciept);
         } catch (Exception e) {
             try {
-                rawReceipt= ObjectMapperHolder.get().writeValueAsString(Map.of("error",List.of(new ApplicationReceiptError(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL_FORMAT,"Unable to format apprec information"),
+                log.error("Unable to format apprec information",e);
+                rawReceipt = ObjectMapperHolder.get().writeValueAsString(Map.of("error",List.of(new ApplicationReceiptError(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL_FORMAT,"Unable to format apprec information"),
                     "status",receiptIn.status())));
             } catch (JsonProcessingException ex) {
-                throw new RuntimeException(ex);
+                throw new IllegalStateException("Unable to process apprec information");
             }
         }
         t.setRawReceipt(rawReceipt);

@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
-import com.azure.core.http.rest.Response;
-import jakarta.servlet.http.HttpServletRequest;
-import kotlin.uuid.Uuid;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
+import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveClientInputException;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +11,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -31,7 +30,7 @@ public class NhnAdapterClient {
         this.dphClient = dphClient;
         this.uri = uri;
     }
-    // bare internal bruk
+    // bare internal brukx
     public String messageOut(DPHMessageOut messageOut) {
         return dphClient.method(HttpMethod.POST)
             .uri(uri + "/out")
@@ -42,6 +41,7 @@ public class NhnAdapterClient {
                     throw new NextMoveClientInputException(resp.getStatusText());
                 })
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
+
                 throw new NextMoveClientInputException(resp.getStatusText());
             })
             .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
@@ -57,7 +57,17 @@ public class NhnAdapterClient {
     //extern bruk
     public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
 
-        return dphClient.method(HttpMethod.GET).uri(uri + "/in/" + messageReference.toString() + "/receipt" + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(new ParameterizedTypeReference<List<IncomingReceipt>>() {
+        return dphClient.method(HttpMethod.GET)
+            .uri(uri + "/in/" + messageReference.toString() + "/receipt" + "?onBehalfOf=" + onBehalfOf)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError,(request, resp) -> {
+                JsonNode errorBody = ObjectMapperHolder.get().readTree(resp.getBody());
+                String error = errorBody.get("error").asText();
+                String stackTrace = errorBody.get("stackTrace").asText();
+                log.error("error while retriving receipt stacktrace:{}", stackTrace);
+                throw new CanNotRetrieveHealthcareStatusException(HttpStatus.BAD_REQUEST, error);
+            })
+            .toEntity(new ParameterizedTypeReference<List<IncomingReceipt>>() {
         }).getBody();
     }
 }
