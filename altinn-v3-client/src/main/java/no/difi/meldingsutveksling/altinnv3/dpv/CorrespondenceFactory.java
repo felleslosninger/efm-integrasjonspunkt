@@ -62,7 +62,6 @@ public class CorrespondenceFactory {
 
         correspondence.setContent(getContent(messageTitle, messageSummary, messageBody, newAttachmentsMetaData));
         correspondence.setNotification(notificationFactory.getNotification(message));
-//        correspondence.setAllowSystemDeleteAfter(getAllowSystemDeleteAfter());
         correspondence.setResourceId(getResourceId(message));
         correspondence.setRequestedPublishTime(OffsetDateTime.now(clock));
         correspondence.setMessageSender(serviceRegistryHelper.getSenderName(message));
