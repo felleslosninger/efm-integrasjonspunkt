@@ -34,7 +34,7 @@ graph LR
 - [x] Legge til metrics for token cache (cache type) (`eformidling.dpv.proxy.token`)
 - [x] Legge til metrics for forward/ping requests (`eformidling.dpv.proxy.request`)
 - [x] Proxy requests autentiseres med altinn token (lang levetid, Roar mente altinn token var tingen)
-- [ ] Bytte ut `SCOPE_altinn:broker.read` med `SCOPE_eformidling:dpv` se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549) og [MOVE-4588](https://digdir.atlassian.net/browse/MOVE-4588)
+- [x] Bytte til `SCOPE_eformidling:dpv`, se [MOVE-4549](https://digdir.atlassian.net/browse/MOVE-4549) og [MOVE-4588](https://digdir.atlassian.net/browse/MOVE-4588)
 - [ ] Må vi legge inn sperrer sånn at proxy ikke kan benyttes til å hente ut vedlegg / metadata fra correspondence api?
 - [ ] Se på policy på ressuren igjen (kan vi kvitte oss med `altinn:serviceowner`, eller er det sikkerhetsmessig fornuftig å beholde dette?)
 - [ ] Vurdere en ekstra custom metric for `eformidling.dpv.proxy.errors`

@@ -19,6 +19,7 @@ class ProxyApplicationPingTests {
     private WebTestClient webTestClient;
 
     static String PING_PATH = "/ping";
+    static String SCOPE_DPV = "eformidling:dpv";
 
     @Test
     void whenUnknownPath_thenUnauthorized() {
@@ -56,7 +57,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwtButPathOverload_thenForbidden() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "/unexpected")
             .exchange()
             .expectStatus().isForbidden()
@@ -65,7 +66,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorized() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH)
             .exchange()
             .expectStatus().isOk()
@@ -79,7 +80,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorizedWithSizeTooLow() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?size=0")
             .exchange()
             .expectStatus().isOk()
@@ -93,7 +94,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorizedWithSizeWayTooLow() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?size=-100")
             .exchange()
             .expectStatus().isOk()
@@ -107,7 +108,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorizedWithSizeTooHigh() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?size=987654321")
             .exchange()
             .expectStatus().isOk()
@@ -122,7 +123,7 @@ class ProxyApplicationPingTests {
     @Test
     void whenValidJwt_thenAuthorizedWithSizeCorrect() {
         int EXPECTED_SIZE = 131072;
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?size=" + EXPECTED_SIZE)
             .exchange()
             .expectStatus().isOk()
@@ -135,7 +136,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorizedAWithWaitTooLow() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?wait=-100")
             .exchange()
             .expectStatus().isOk()
@@ -149,7 +150,7 @@ class ProxyApplicationPingTests {
 
     @Test
     void whenValidJwt_thenAuthorizedAWithWaitTooHigh() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?wait=60000")
             .exchange()
             .expectStatus().isOk()
@@ -164,7 +165,7 @@ class ProxyApplicationPingTests {
     @Test
     void whenValidJwt_thenAuthorizedWithWaitForThreeSeconds() {
         long start = System.currentTimeMillis();
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH + "?wait=3000")
             .exchange()
             .expectStatus().isOk()

@@ -26,10 +26,10 @@ public class Config {
             .authorizeExchange(exchanges -> exchanges
 
                 // allow access to correspondence for clients with correct scope
-                .pathMatchers("/correspondence/api/**").hasAnyAuthority("SCOPE_altinn:broker.read")
+                .pathMatchers("/correspondence/api/**").hasAnyAuthority("SCOPE_eformidling:dpv")
 
                 // ping endpoint (also used for simple load testing)
-                .pathMatchers("/ping").hasAnyAuthority("SCOPE_altinn:broker.read")
+                .pathMatchers("/ping").hasAnyAuthority("SCOPE_eformidling:dpv")
 
                 // allow all access to actuator endpoints on /
                 .pathMatchers("/health").permitAll()

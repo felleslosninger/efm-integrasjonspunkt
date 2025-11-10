@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 class ProxyChainErrorHandlingTests {
 
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
+    static String SCOPE_DPV = "eformidling:dpv";
 
     @Inject
     private WebTestClient webTestClient;
@@ -44,7 +45,7 @@ class ProxyChainErrorHandlingTests {
 
     @Test
     void whenChainThrowsException_thenExpectProblemDetails() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
             .expectStatus().is5xxServerError()

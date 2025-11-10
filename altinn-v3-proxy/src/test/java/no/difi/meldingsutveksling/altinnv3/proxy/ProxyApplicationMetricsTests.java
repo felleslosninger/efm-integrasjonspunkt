@@ -21,6 +21,7 @@ class ProxyApplicationMetricsTests {
     static String ACTUATOR_METRICS_PATH = "/prometheus";
     static String CORRESPONDENCE_API_PATH = "/correspondence/api/v1";
     static String PING_PATH = "/ping";
+    static String SCOPE_DPV = "eformidling:dpv";
 
     @Value("${local.management.port}")
     int managementPort;
@@ -53,7 +54,7 @@ class ProxyApplicationMetricsTests {
     @Test
     @Order(2)
     void oneCallToGeneratePingMetric() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(PING_PATH)
             .exchange()
             .expectStatus().isOk()
@@ -69,7 +70,7 @@ class ProxyApplicationMetricsTests {
     @Test
     @Order(3)
     void oneCallToGeneratForwardMetric() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
             .expectStatus().isOk();
@@ -79,7 +80,7 @@ class ProxyApplicationMetricsTests {
     @Test
     @Order(4)
     void oneCallToGeneratForwardMetricButTokenShouldBeCached() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", SCOPE_DPV)))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
             .expectStatus().isOk();

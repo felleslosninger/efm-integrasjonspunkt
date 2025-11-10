@@ -44,7 +44,7 @@ public class DpvTokenFetcherTest {
     @Test
     @Disabled("Manual test")
     void testAltinnToken() {
-        var altinnToken = dpvTokenProducer.produceToken(List.of("altinn:broker.read"));
+        var altinnToken = dpvTokenProducer.produceToken(List.of("eformidling:dpv"));
         assertNotNull(altinnToken, "AltinnToken is null");
     }
 

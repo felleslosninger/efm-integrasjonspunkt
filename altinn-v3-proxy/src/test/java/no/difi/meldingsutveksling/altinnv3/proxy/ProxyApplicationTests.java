@@ -144,7 +144,7 @@ class ProxyApplicationTests {
 
     @Test
     void whenValidJwt_thenAuthorized() {
-        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "altinn:broker.read")))
+        webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().jwt(jwt -> jwt.claim("scope", "eformidling:dpv")))
             .get().uri(CORRESPONDENCE_API_PATH)
             .exchange()
             .expectStatus().isOk();

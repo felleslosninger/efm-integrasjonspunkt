@@ -51,7 +51,7 @@ public class CorrespondenceApiClient {
         .messageConverters(this::addJacksonAsConverter)
         .build();
 
-    private static List<String> scopes = List.of("altinn:broker.read");
+    private static List<String> scopes = List.of("eformidling:dpv");
 
     private String correspondenceServiceUrl;
 
