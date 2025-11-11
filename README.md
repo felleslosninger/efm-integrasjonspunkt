@@ -14,7 +14,7 @@
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
 
-## Bygg og kjør lokalt 
+## Bygg og kjør lokalt
 Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.11.
 
 Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
@@ -30,13 +30,14 @@ Når man starter med `dev | staging | yt | production` profil så vil den kunne 
 en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
 
 Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
-[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties), 
+[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties),
 [application-yt.properties](integrasjonspunkt/src/main/resources/config/application-yt.properties) og
 [application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
 inneholder en optional import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
 
 ## Bygge REST API dokumentasjon
+Tests must run for this to work (generated-snippets will be missing if you skip running tests).
 For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `restdocs` :
 ```bash
 mvn clean package -Prestdocs
@@ -65,7 +66,7 @@ En API funksjon som er lett å teste i nettleser :
 - http://localhost:9093/api/statuses
 
 Linker til observability :
-  http://localhost:9093/manage/info
+- http://localhost:9093/manage/info
 - http://localhost:9093/manage/health
 - http://localhost:9093/manage/health/liveness
 - http://localhost:9093/manage/health/readiness
@@ -87,7 +88,7 @@ for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/i
 ## Release
 Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
 
-> **⚠️**  Main branch er protected, release må gjøres i en egen branch med PR tilbake til main.  Dette kan forenkles ved å benytte `mvn release:branch` goal.  
+> **⚠️**  Main branch er protected, release må gjøres i en egen branch med PR tilbake til main.  Dette kan forenkles ved å benytte `mvn release:branch` goal.
 
 ```bash
 # lokalt repo må være i sync med origin/GitHub

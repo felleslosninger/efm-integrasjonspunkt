@@ -502,6 +502,14 @@
     <profiles>
         <profile>
             <id>restdocs</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.restdocs</groupId>
+                    <artifactId>spring-restdocs-mockmvc</artifactId>
+                    <version>3.0.5</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -538,7 +546,7 @@
                             <dependency>
                                 <groupId>org.asciidoctor</groupId>
                                 <artifactId>asciidoctorj-diagram</artifactId>
-                                <version>2.3.1</version>
+                                <version>3.0.1</version>
                                 <scope>runtime</scope>
                             </dependency>
                         </dependencies>
