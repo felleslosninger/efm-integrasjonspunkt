@@ -11,8 +11,6 @@ import java.net.URL;
 @Data
 public class PostVirksomheter {
 
-    private URL endpointUrl;
-
     @NotNull
     private String sensitiveResource;
 
