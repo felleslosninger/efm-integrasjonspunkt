@@ -4,7 +4,6 @@
 - [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes?
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
-- [ ] Vurdere å bytte til `/broker/api/v1/filetransfer/{fileTransferId}` som også inneholder sendersReference (fra `/broker/api/v1/filetransfer/{fileTransferId}/details` som inneholder ganske mye mer)  
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Er det noen som egentlig bruker Dokka plugin til noe?
 - [ ] Endel tester har unødvendig stubbing (søk opp og se om `org.mockito.quality.Strictness.LENIENT` kan fjernes)

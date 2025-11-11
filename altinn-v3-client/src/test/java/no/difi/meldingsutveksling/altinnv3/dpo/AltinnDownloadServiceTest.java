@@ -5,7 +5,7 @@ import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
+import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -43,15 +43,15 @@ public class AltinnDownloadServiceTest {
 
     @BeforeEach
     public void beforeAll() {
-        FileTransferStatusDetailsExt file1 = new FileTransferStatusDetailsExt();
+        FileTransferOverviewExt file1 = new FileTransferOverviewExt();
         file1.setSendersFileTransferReference(UUID.randomUUID().toString());
         file1.setFileTransferId(fileWithRandomMessageChannel);
 
-        FileTransferStatusDetailsExt file2 = new FileTransferStatusDetailsExt();
+        FileTransferOverviewExt file2 = new FileTransferOverviewExt();
         file2.setSendersFileTransferReference("messageChannel");
         file2.setFileTransferId(fileWithMessageChannelAsMessageChannel);
 
-        FileTransferStatusDetailsExt file3 = new FileTransferStatusDetailsExt();
+        FileTransferOverviewExt file3 = new FileTransferOverviewExt();
         file3.setSendersFileTransferReference("somethingElse");
         file3.setFileTransferId(fileWithMessageChannelAsSomethingElse);
 

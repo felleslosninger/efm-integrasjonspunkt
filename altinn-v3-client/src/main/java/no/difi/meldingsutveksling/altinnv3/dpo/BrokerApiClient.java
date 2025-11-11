@@ -88,15 +88,15 @@ public class BrokerApiClient {
             ;
     }
 
-    public FileTransferStatusDetailsExt getDetails(AltinnSystemUser systemUser, String fileTransferId) {
+    public FileTransferOverviewExt getDetails(AltinnSystemUser systemUser, String fileTransferId) {
         String accessToken = tokenProducer.produceToken(systemUser, List.of(readScope));
 
          return restClient.get()
-            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}/details", fileTransferId)
+            .uri(brokerServiceUrl + "/filetransfer/{fileTransferId}", fileTransferId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
-            .body(FileTransferStatusDetailsExt.class)
+            .body(FileTransferOverviewExt.class)
             ;
     }
 

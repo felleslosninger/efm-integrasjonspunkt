@@ -6,7 +6,7 @@ import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.digdir.altinn3.broker.model.FileTransferStatusDetailsExt;
+import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +29,12 @@ public class AltinnDPODownloadService {
 
         UUID[] fileTransferIds = brokerApiClient.getAvailableFiles(systemUser);
 
-        List<FileTransferStatusDetailsExt> files = Arrays.stream(fileTransferIds)
+        List<FileTransferOverviewExt> files = Arrays.stream(fileTransferIds)
                 .map(fileTransferId -> brokerApiClient.getDetails(systemUser, fileTransferId.toString())).toList();
 
         files = filterBasedUponSendersFileTransferReference(files);
 
-        return files.stream().map(FileTransferStatusDetailsExt::getFileTransferId).toArray(UUID[]::new);
+        return files.stream().map(FileTransferOverviewExt::getFileTransferId).toArray(UUID[]::new);
     }
 
     public AltinnPackage download(AltinnSystemUser systemUser, DownloadRequest request) {
@@ -51,7 +51,7 @@ public class AltinnDPODownloadService {
         brokerApiClient.confirmDownload(systemUser, request.getFileReference());
     }
 
-    private List<FileTransferStatusDetailsExt> filterBasedUponSendersFileTransferReference(List<FileTransferStatusDetailsExt> files){
+    private List<FileTransferOverviewExt> filterBasedUponSendersFileTransferReference(List<FileTransferOverviewExt> files){
         if (!isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             return files.stream().filter(this::isMessageMatchingConfiguredMessageChannel).toList();
         } else {
@@ -61,14 +61,14 @@ public class AltinnDPODownloadService {
         }
     }
 
-    private boolean isMessageMatchingMessageChannelPattern(FileTransferStatusDetailsExt details){
+    private boolean isMessageMatchingMessageChannelPattern(FileTransferOverviewExt details){
         Pattern pattern = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
 
         return details.getSendersFileTransferReference() == null ||
             !pattern.matcher(details.getSendersFileTransferReference()).matches();
     }
 
-    private boolean isMessageMatchingConfiguredMessageChannel(FileTransferStatusDetailsExt details) {
+    private boolean isMessageMatchingConfiguredMessageChannel(FileTransferOverviewExt details) {
         return details.getSendersFileTransferReference() != null &&
             details.getSendersFileTransferReference().equals(properties.getDpo().getMessageChannel());
     }
