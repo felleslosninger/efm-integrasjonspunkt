@@ -40,7 +40,6 @@ graph LR
 - [ ] Vurdere en ekstra custom metric for `eformidling.dpv.proxy.errors`
 - [ ] Lage et grafana dashboard for proxy hvor vi kan følge med på bruken
 - [ ] Actuator paths er åpne på både web og mgmt port (kan dette splittes i 2 security filter, en for hver port)
-- [ ] [MOVE-4641](https://digdir.atlassian.net/browse/MOVE-4641) : Flyttes ut i et selvstendig repo (enklere deployment og separat release takt)
 - [ ] Har ikke behov for å kjøre på samme versjon av Java / Spring Boot som Integrasjonspunktet (oppgradere til Java 25)
 
 ## Deployment

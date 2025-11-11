@@ -3,6 +3,7 @@
 ## Move Integrasjonspunkt v4
 
 - Kotlin er konvertert til Java (kode, bygg, dependendies, test)
+- For produksjon er loggene sikret med klient sertifikat
 
 ### Altinn 3
 

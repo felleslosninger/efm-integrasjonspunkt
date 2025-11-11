@@ -65,11 +65,11 @@ public class CacheConfig extends CachingConfigurerSupport {
                                 .build()),
                 new CaffeineCache("altinn.getDpoToken",
                         Caffeine.newBuilder()
-                            .expireAfterWrite(90, TimeUnit.SECONDS)
+                            .expireAfterWrite(25, TimeUnit.MINUTES)
                             .build()),
                 new CaffeineCache("altinn.getDpvToken",
                     Caffeine.newBuilder()
-                        .expireAfterWrite(90, TimeUnit.SECONDS)
+                        .expireAfterWrite(25, TimeUnit.MINUTES)
                         .build())
         ));
         return cacheManager;

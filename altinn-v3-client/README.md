@@ -2,26 +2,6 @@
 
 Altinn 3 client er ein modul for å kommunisere med Altinn for DPV og DPO meldinger.
 
-# TODO (marker de som er fikset)
-
-- [x] Daniel : DPV ressurser skal hete `eformidling-dpv-administrasjon` (og `eformidling-dpv-taushetsbelagt` dersom vi trenger egen for taushetsbelagt) https://digdir.atlassian.net/browse/MOVE-4615
-- [x] Proxy koden bygges og deployes i systest
-- [x] Oppdatere notification med subject og sånt
-- [X] Taushetsbelagt DPV, må vi ha dedikert ressurs eller kan vi benytte den samme for taushetsbelagt og ikke taushetsbelagt? https://digdir.atlassian.net/browse/MOVE-4615
-- [x] Ny status "Klar til publisering" skal ikke ha "ANNET" status på dpv (Daniel har bestemt at vi ignorere den nye statusen)
-- [x] Innføre scope mot proxy `eformidling:dpv`, se [SP-602](https://digdir.atlassian.net/browse/SP-602)
-- [ ] Property validering ved oppstart for DPO og DPV
-- [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
-- [ ] Burde vi ha noen nye cucumber tester?
-- [ ] DPO mottakere må registreres i ELMA (med formatene arkivmelding og avtalt), skal det være sånn?
-- [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes? 
-- [ ] Flytte proxy koden ut i eget repo (pro / cons)
-
-Dokumentasjon:
-- [ ] Digdir docs
-- [ ] Onboarding for nye kunder
-- [ ] Confluence
-
 # DPO
 
 - Nyttar formidling API-et til Altinn: https://docs.altinn.studio/nb/broker/

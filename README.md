@@ -1,27 +1,15 @@
 ## FIXME og mulige forbedringer i etterkant
-- [x] AltinnInSteps.java, Cucumber koden som testet SOAP er kommentert ut - må fikses for REST
-- [x] OIDC for DPO må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
-- [x] OIDC for DPV må kunne angis separat (default kan være at den kopierer oidc settings fra "rot")
-- [x] OIDC settings for maskinporten (scope, clientid mm) må kunne overstyres for hver av tjenestene DPI, DPO og DPV
-- [x] Burde vi gå for Java 25 LTS (vi gjør ikke dette nå - det er allerede kommunisert ut at IPv3/v4 vil bruke Java 21 LTS)
-- [x] Vi har støtte for lokal konfig i yml/yaml format i v3, dette videreføres (søk etter `spring.config.import=`)
-- [x] Ignorerer DPV status `READY_FOR_PUBLISH` (den skal ikke rapporteres som `ANNET`, men vi debug logger den)
-- [ ] Oppgradere til nyeste Spring Boot og Cucumber
-- [ ] Rydde bort alle Trivy issues, [.trivyignore](.trivyignore) bør være "tømt"
-- [ ] Sett cache levetid for altinn access token (mulig den er forskjellig levetid i de ulike miljøene)
+- [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
+- [ ] DPO mottakere må registreres i ELMA (med formatene arkivmelding og avtalt), oppdatere onboarding figuren
+- [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes?
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
 - [ ] Vurdere å bytte til `/broker/api/v1/filetransfer/{fileTransferId}` som også inneholder sendersReference (fra `/broker/api/v1/filetransfer/{fileTransferId}/details` som inneholder ganske mye mer)  
-- [ ] Rydde config filer, fjerne username/password fra DPO (se også test properties [application.properties](altinn-v3-client/src/test/resources/application.properties))
-- [ ] Asciidoc mangler noen snippets (det har vært referert til kodesnippets som var SOAP basert mot gamle Altinn v2 koden)
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
-- [ ] Sette log endepunkter til secure 443 som default for QA og PROD, ingen elastic logging uten security i v4
-- [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
 - [ ] Er det noen som egentlig bruker Dokka plugin til noe?
-- [ ] Noe poeng å bruke `com.google.common` lenger? (Ekse `Sets.newHashSet()` kunne jo like godt vært `new HashSet<>()`)
 - [ ] Endel tester har unødvendig stubbing (søk opp og se om `org.mockito.quality.Strictness.LENIENT` kan fjernes)
-- [ ] Det er flere `@SuppressWarnings("squid:S106")` varianter i koden, nødvendig?
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
+- [ ] Asciidoc mangler noen snippets (det har vært referert til kodesnippets som var SOAP basert mot gamle Altinn v2 koden, eller kvitte oss med asciidoc)
 - [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
