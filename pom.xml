@@ -98,7 +98,6 @@
         <module>service-registry-client</module>
         <module>domain</module>
         <module>altinn-v3-client</module>
-        <module>altinn-v3-proxy</module>
         <module>fiks-meldingsformidler</module>
         <module>integrasjonspunkt</module>
     </modules>
@@ -473,7 +472,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>12.0.1</version>
+                <version>12.1.9</version>
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
@@ -482,7 +481,7 @@
             <plugin>
                 <groupId>org.jetbrains.dokka</groupId>
                 <artifactId>dokka-maven-plugin</artifactId>
-                <version>2.0.0</version>
+                <version>2.1.0</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>

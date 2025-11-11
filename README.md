@@ -16,7 +16,7 @@ Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i en
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
 
 ## Bygg og kjør lokalt 
-Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.10.
+Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.11.
 
 Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
 (alternativt `integrasjonspunkt-local.yml` eller `integrasjonspunkt-local.yaml`).  Den vil bli inkludert
