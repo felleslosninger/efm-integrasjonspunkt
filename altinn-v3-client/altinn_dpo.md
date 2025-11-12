@@ -3,10 +3,26 @@ Bakgrunn og overordnet er beskrevet av Altinn i JIRA saken :
 https://github.com/Altinn/altinn-authentication/issues/1394
 
 ## Onboarding av virksomhet til DPO med Integrasjonspunktet
+
+Kunden må onboardes i eformidling miljøet
+
+```mermaid
+sequenceDiagram
+    actor D as Digdir
+    participant M as MoveAdmin
+    participant V as Virksert
+    participant E as Elma
+
+    D->>M: Oppretter kunde i Move Admin<br>og laster opp virksomhetssertifikat
+    M->>V: Laster opp sertifikat
+    M->>E: Lager kunde i Elma
+```
+
 Kunden må lage en maskinporten client (med nødvendige scopes),
 registrere ett system for sitt integrasjonspunkt og opprette
 en systemuser som kan benyttes av integrasjonspunktet for å
 sende og motta filer via Altinn Broker API.
+
 ```mermaid
 sequenceDiagram
     actor K as Kunde

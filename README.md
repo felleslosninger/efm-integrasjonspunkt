@@ -1,6 +1,5 @@
 ## FIXME og mulige forbedringer i etterkant
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
-- [ ] DPO mottakere må registreres i ELMA (med formatene arkivmelding og avtalt), oppdatere onboarding figuren
 - [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes?
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
