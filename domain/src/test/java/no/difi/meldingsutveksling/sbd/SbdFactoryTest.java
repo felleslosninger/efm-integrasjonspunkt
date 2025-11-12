@@ -7,15 +7,12 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -30,7 +27,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class SbdFactoryTest {
 
     @Mock
@@ -71,22 +67,6 @@ class SbdFactoryTest {
     @BeforeEach
     void before() {
         sbdFactory = new SBDFactory(serviceRegistryLookup, clock, props, uuidGenerator);
-
-        when(props.getArkivmelding()).thenReturn(arkivmeldingProps);
-        when(arkivmeldingProps.getReceiptProcess()).thenReturn(arkivmeldingResponseProcess);
-
-        when(props.getEinnsyn()).thenReturn(einnsynProps);
-        when(einnsynProps.getReceiptProcess()).thenReturn(einnsynResponseProcess);
-
-        when(props.getNextmove()).thenReturn(nextMoveProps);
-        when(nextMoveProps.getStatusDocumentType()).thenReturn(statusDocType);
-        when(nextMoveProps.getDefaultTtlHours()).thenReturn(24);
-
-        when(sbd.getReceiverIdentifier()).thenReturn(receiver);
-        when(sbd.getSenderIdentifier()).thenReturn(sender);
-        when(sbd.getConversationId()).thenReturn(convId);
-        when(sbd.getMessageId()).thenReturn(msgId);
-
         sbdUtilMock = mockStatic(SBDUtil.class);
         sbdUtilMock.when(() -> SBDUtil.getOptionalMessageChannel(sbd)).thenReturn(Optional.empty());
     }
@@ -101,6 +81,16 @@ class SbdFactoryTest {
     @Test
     void test_status_creation_from_arkivmelding_message() {
         sbdUtilMock.when(() -> SBDUtil.isArkivmelding(sbd)).thenReturn(true);
+        when(props.getArkivmelding()).thenReturn(arkivmeldingProps);
+        when(arkivmeldingProps.getReceiptProcess()).thenReturn(arkivmeldingResponseProcess);
+        when(props.getNextmove()).thenReturn(nextMoveProps);
+        when(nextMoveProps.getStatusDocumentType()).thenReturn(statusDocType);
+        when(nextMoveProps.getDefaultTtlHours()).thenReturn(24);
+        when(sbd.getReceiverIdentifier()).thenReturn(receiver);
+        when(sbd.getSenderIdentifier()).thenReturn(sender);
+        when(sbd.getConversationId()).thenReturn(convId);
+        when(sbd.getMessageId()).thenReturn(msgId);
+
 
         var statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT);
 
@@ -115,7 +105,19 @@ class SbdFactoryTest {
     void test_status_creation_from_einnsyn_message() {
         sbdUtilMock.when(() -> SBDUtil.isArkivmelding(sbd)).thenReturn(false);
         sbdUtilMock.when(() -> SBDUtil.isEinnsyn(sbd)).thenReturn(true);
-        when(sbd.getScope(ScopeType.MESSAGE_CHANNEL)).thenReturn(Optional.empty());
+        when(props.getEinnsyn()).thenReturn(einnsynProps);
+        when(nextMoveProps.getStatusDocumentType()).thenReturn(statusDocType);
+        when(einnsynProps.getReceiptProcess()).thenReturn(einnsynResponseProcess);
+
+        when(props.getNextmove()).thenReturn(nextMoveProps);
+        when(nextMoveProps.getStatusDocumentType()).thenReturn(statusDocType);
+        when(nextMoveProps.getDefaultTtlHours()).thenReturn(24);
+
+        when(sbd.getReceiverIdentifier()).thenReturn(receiver);
+        when(sbd.getSenderIdentifier()).thenReturn(sender);
+        when(sbd.getConversationId()).thenReturn(convId);
+        when(sbd.getMessageId()).thenReturn(msgId);
+
 
         var statusSbd = sbdFactory.createStatusFrom(sbd, ReceiptStatus.LEVERT);
         assertEquals(einnsynResponseProcess, statusSbd.getProcess());
@@ -125,7 +127,6 @@ class SbdFactoryTest {
     void test_message_type_validation() {
         var serviceRecord = mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.class);
         when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        when(serviceRecord.getDocumentTypes()).thenReturn(java.util.List.of("foo::bar"));
         try {
             doReturn(serviceRecord).when(serviceRegistryLookup).getServiceRecord(any(), any());
         } catch (no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException e) {
@@ -148,7 +149,9 @@ class SbdFactoryTest {
     void unknown_document_type_allowed_for_fiksio_message_type() {
         var serviceRecord = mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.class);
         when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPFIO);
-        when(serviceRecord.getDocumentTypes()).thenReturn(java.util.List.of("foo::bar"));
+        when(props.getNextmove()).thenReturn(nextMoveProps);
+        when(nextMoveProps.getDefaultTtlHours()).thenReturn(24);
+
         try {
             doReturn(serviceRecord).when(serviceRegistryLookup).getServiceRecord(any(), any());
         } catch (no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException e) {

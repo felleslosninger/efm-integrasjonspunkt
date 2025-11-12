@@ -6,9 +6,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.FiksIoMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.ks.fiks.io.client.FiksIOKlient;
@@ -24,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +29,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class FiksIoServiceTest {
 
     @Mock
@@ -66,10 +62,7 @@ class FiksIoServiceTest {
         sr.setDocumentTypes(List.of(protocol));
         when(serviceRegistryLookup.getServiceRecord(any(), any())).thenReturn(sr);
 
-        when(conversationService.registerStatus(anyString(), any(ReceiptStatus.class))).thenReturn(Optional.empty());
-
         StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
-        when(sbd.getAny()).thenReturn(new FiksIoMessage().setSikkerhetsnivaa(3));
         when(sbd.getMessageId()).thenReturn(messageId);
         when(sbd.getProcess()).thenReturn(protocol);
         when(sbd.getReceiverIdentifier()).thenReturn(iso6523);

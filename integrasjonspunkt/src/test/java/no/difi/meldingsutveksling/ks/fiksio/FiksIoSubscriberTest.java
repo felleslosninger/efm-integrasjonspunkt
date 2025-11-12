@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class FiksIoSubscriberTest {
 
     @Mock
@@ -40,7 +39,6 @@ class FiksIoSubscriberTest {
 
     @BeforeEach
     void before() {
-        doNothing().when(fiksIOKlient).newSubscription(any());
         IntegrasjonspunktProperties.Organization org = new IntegrasjonspunktProperties.Organization().setNumber("123123123");
         when(props.getOrg()).thenReturn(org);
         no.difi.meldingsutveksling.config.FiksConfig fiks = mock(no.difi.meldingsutveksling.config.FiksConfig.class);

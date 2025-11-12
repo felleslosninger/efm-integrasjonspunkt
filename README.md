@@ -6,7 +6,6 @@
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Er det noen som egentlig bruker Dokka plugin til noe?
-- [ ] Endel tester har unødvendig stubbing (søk opp og se om `org.mockito.quality.Strictness.LENIENT` kan fjernes)
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Asciidoc mangler noen snippets (det har vært referert til kodesnippets som var SOAP basert mot gamle Altinn v2 koden, eller kvitte oss med asciidoc)
 - [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
