@@ -606,7 +606,7 @@
         }
       }
     },
-    "/broker/api/v1/filetransfer/{fileTransferId}": {
+    "/broker/api/v1/filetransfer/{fileTransferId}/details": {
       "get": {
         "tags": [
           "FileTransfer"

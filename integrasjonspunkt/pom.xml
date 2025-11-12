@@ -502,14 +502,6 @@
     <profiles>
         <profile>
             <id>restdocs</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.restdocs</groupId>
-                    <artifactId>spring-restdocs-mockmvc</artifactId>
-                    <version>3.0.5</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
