@@ -10,7 +10,7 @@
       "url": "https://platform.tt02.altinn.no",
       "description": "TT02"
     }
-  ],  
+  ],
   "webhooks": {
     "no.altinn.broker.filetransferinitialized": {
       "post": {
@@ -606,7 +606,7 @@
         }
       }
     },
-    "/broker/api/v1/filetransfer/{fileTransferId}/details": {
+    "/broker/api/v1/filetransfer/{fileTransferId}": {
       "get": {
         "tags": [
           "FileTransfer"

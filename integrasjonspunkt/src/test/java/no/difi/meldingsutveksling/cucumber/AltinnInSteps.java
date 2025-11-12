@@ -32,7 +32,7 @@ public class AltinnInSteps {
         UUID fileTransferId  = UUID.randomUUID();
 
         // en fil klar for nedlasting
-        wireMockServer.givenThat(get(urlEqualTo("/broker/api/v1/filetransfer?resourceId=eformidling-meldingsteneste-test&status=Published&recipientStatus=Initialized"))
+        wireMockServer.givenThat(get(urlEqualTo("/broker/api/v1/filetransfer?resourceId=eformidling-dpo-meldingsutveksling&status=Published&recipientStatus=Initialized"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -46,7 +46,7 @@ public class AltinnInSteps {
         statusDetails.setSendersFileTransferReference(UUID.randomUUID().toString());
         ObjectMapper om = new ObjectMapper();
         var response = om.writeValueAsString(statusDetails);
-        var detailsUrl = "/broker/api/v1/filetransfer/%s/details".formatted(fileTransferId);
+        var detailsUrl = "/broker/api/v1/filetransfer/%s".formatted(fileTransferId);
         wireMockServer.givenThat(get(urlEqualTo(detailsUrl))
             .willReturn(aResponse()
                 .withStatus(200)

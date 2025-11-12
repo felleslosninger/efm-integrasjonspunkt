@@ -147,7 +147,7 @@ Feature: Sending a Next Move DPO multipart/form message
     """
     {
       "fileName" : "sbd.zip",
-      "resourceId" : "eformidling-meldingsteneste-test",
+      "resourceId" : "eformidling-dpo-meldingsutveksling",
       "sendersFileTransferReference" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
       "sender" : "0192:910077473",
       "recipients" : [ "0192:910075918" ],
