@@ -63,19 +63,10 @@ Linker til logger, config og alt annet :
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Release
-Sjå dokumentasjon for [maven-release-plugin](https://maven.apache.org/maven-release/maven-release-plugin/) og [guide for maven-release-plugin](https://maven.apache.org/guides/mini/guide-releasing.html).
 
-```bash
-# lokalt repo må være i sync med origin/GitHub
-git push
-
-mvn release:prepare
-# svar på tre spørsmål (sett tag lik release-versjon) 
-# What is the release version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0: : 1.0.0
-# What is SCM release tag or label for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.0: :
-# What is the new development version for "efm-virksert"? (no.difi.meldingsutveksling:efm-virksert) 1.0.1-SNAPSHOT: :
-
-mvn release:perform
-```
-
-
+Release av ny versjon gjerast via GitHub GUI
+- Gå til "Releases" i GitHub repo
+- Klikk på "Draft a new release"
+- Velg tag (ny eller eksisterande)
+- Fyll inn tittel og beskrivelse
+- Klikk på "Publish release"
