@@ -7,7 +7,7 @@ on:
 jobs:
   #builds and deploys libs to github packages
   call-workflow-maven-install-deploy:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@MOVE-4623_release_via_GUI
     with:
       package-version: ${{ github.event.release.tag_name }}
       deployment-repository: ${{ github.repository }}

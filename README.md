@@ -65,5 +65,8 @@ Linker til logger, config og alt annet :
 ## Release
 
 Release av ny versjon gjerast via GitHub GUI
-
-
+- Gå til "Releases" i GitHub repo
+- Klikk på "Draft a new release"
+- Velg tag (ny eller eksisterande)
+- Fyll inn tittel og beskrivelse
+- Klikk på "Publish release"
