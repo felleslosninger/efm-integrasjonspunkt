@@ -6,7 +6,7 @@
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
-- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
+- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med 
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
@@ -50,7 +50,6 @@ Hovedsiden med masse informasjon om Integrasjonspunktet :
 
 Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
-- http://localhost:9093/viewreceipts  🚨 Ikke i bruk / kan fjernes ? 🚨
 
 En API funksjon som er lett å teste i nettleser :
 - http://localhost:9093/api/statuses
