@@ -4,7 +4,6 @@
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
-- [ ] Er det noen som egentlig bruker Dokka plugin til noe?
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
 - [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med (`viewreceipts` ser f.eks. ikke ut til å ha noen funksjon)
@@ -42,13 +41,6 @@ mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
 
-## Bygge Dokka dokumentasjon
-Det er rester av dokka i prosjekt, det er en plugin som egentlig lager dokumentasjon fra Kotlin kode,
-men den skal også kunne generere dokumentasjon fra Java kode.  Slik kan du teste denne funksjonaliteten :
-```bash
-mvn clean dokka:dokka -Ddokka.skip=false
-open integrasjonspunkt/target/dokka/index.html
-```
 
 ## Linker når Integrasjonspunkt er starter lokalt
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
@@ -70,6 +62,9 @@ Linker til observability :
 - http://localhost:9093/manage/health/readiness
 - http://localhost:9093/manage/metrics
 - http://localhost:9093/manage/prometheus
+
+Work in progress (kan dette ta over for REST API dokumentasjon, `restdoc`) :
+- http://localhost:9093/swagger-ui/index.html
 
 Linker til logger, config og alt annet :
 - http://localhost:9093/manage/logfile

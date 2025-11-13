@@ -83,7 +83,6 @@
         <bouncycastle.version>1.81</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dokka.skip>true</dokka.skip>
     </properties>
 
     <modules>
@@ -476,26 +475,6 @@
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jetbrains.dokka</groupId>
-                <artifactId>dokka-maven-plugin</artifactId>
-                <version>2.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>javadocJar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${dokka.skip}</skip>
-                    <sourceDirectories>
-                        <dir>${project.basedir}/src/main/java</dir>
-                    </sourceDirectories>
-                    <skipEmptyPackages>true</skipEmptyPackages>
                 </configuration>
             </plugin>
             <plugin>
