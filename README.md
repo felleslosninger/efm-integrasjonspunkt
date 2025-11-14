@@ -27,8 +27,7 @@ Når man starter med `dev | staging | yt | production` profil så vil den kunne 
 en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
 
 Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
-[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties),
-[application-yt.properties](integrasjonspunkt/src/main/resources/config/application-yt.properties) og
+[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties) og
 [application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
 inneholder en optional import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
