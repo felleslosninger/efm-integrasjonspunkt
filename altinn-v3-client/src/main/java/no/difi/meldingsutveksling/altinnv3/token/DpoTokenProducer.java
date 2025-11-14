@@ -17,11 +17,6 @@ public class DpoTokenProducer {
     private final TokenService tokenService;
     private final TokenExchangeService tokenExchangeService;
 
-    // FIXME : should we refactor this back so it implements TokenProducer like the other token producers?
-    //  step 1 - rename "produceToken" method to "produceSystemUserToken"
-    //  step 2 - implements TokenProducer and add produceToken that just produce regular Altinn token
-    //  step 3 - a system user null check should throw execption "produceSystemUserToken"
-
     @Cacheable(cacheNames = {"altinn.getDpoToken"})
     public String produceToken(AltinnSystemUser systemUser, List<String> scopes) {
 

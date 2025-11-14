@@ -46,9 +46,6 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 //        Object response = withLogstashMarker(markerFrom(message))
 //                .execute(() -> client.sendCorrespondence(correspondence));
 
-//        if (response == null) {
-//            throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
-//        }
 
         conversationService.findConversation(message.getMessageId())
             .ifPresent(conversation -> conversationService.save(conversation

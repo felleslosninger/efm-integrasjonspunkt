@@ -15,12 +15,6 @@ public class ProblemDetailsParser {
     public static String parseClientHttpResponse(String prefix, ClientHttpResponse response) {
         var jsonAsString = "NoProblemDetails";
         try {
-            // FIXME this is only while debugging manually, should be removed later
-            var responseStatus = response.getStatusCode();
-            var responseStatusCode = response.getStatusText();
-            System.out.printf("%s: %d %s%n", prefix, responseStatus.value(), responseStatusCode);
-        } catch (Exception e) { /* ignore */ }
-        try {
             var objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             var bodyAsBytes = response.getBody().readAllBytes();
             jsonAsString = new String(bodyAsBytes, StandardCharsets.UTF_8);
