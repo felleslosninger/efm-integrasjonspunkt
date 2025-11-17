@@ -23,6 +23,8 @@ registrere ett system for sitt integrasjonspunkt og opprette
 en systemuser som kan benyttes av integrasjonspunktet for å
 sende og motta filer via Altinn Broker API.
 
+Sekvensen er beskrevet nedenfor, stegne kan gjøres via Altinn v3 API'er med det utvikles også et [GUI for dette](https://am.ui.tt02.altinn.no/accessmanagement/ui/systemuser/overview). 
+
 ```mermaid
 sequenceDiagram
     actor K as Kunde
@@ -76,7 +78,7 @@ sequenceDiagram
     note over M : Claim 'authorization_details' kreves (beskriver systembrukeren) 
     note over M : Scopes : [altinn:broker.write, altinn:broker.read]
 
-IP-->>AT: Gjør token exchange hos Altinn (ikke påkrevet, men anbefalt)
+    IP-->>AT: Gjør token exchange hos Altinn (ikke påkrevet, men anbefalt)
     note over AT : Altinn token har lang levetid på (30 min)
     IP-->>AB: Sende filer med systemuser token
     IP-->>AB: Hente filer med systemuser token
