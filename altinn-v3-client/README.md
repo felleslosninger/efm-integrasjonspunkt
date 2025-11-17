@@ -65,7 +65,7 @@ System : 311780735_integrasjonspunkt
 Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_test3 (df5337bb-95e0-4300-a64d-fbe84317cd39)
 ```
 
-## STERK ULYDIG HUND på vegne av FILOSOFISK BEGEISTRET APE
+## STERK ULYDIG HUND på vegne av FILOSOFISK BEGEISTRET APE (313711218)
 Opprettet systembruker for FILOSOFISK BEGEISTRET APE på STERK ULYDIG HUND's system 311780735_integrasjonspunkt
 ```
 Systembruker (standard) : 311780735_integrasjonspunkt_systembruker_ape
@@ -85,6 +85,16 @@ Kun brukt som mottaker av meldinger i Altinn, ingen tilgang til maskinporten
 ```
 Dette er en ekte org.
 eformidling-meldingsteneste-test (a63cac91-3210-4c35-b961-5c7bf122345c)
+System : 991825827_integrasjonspunkt
+Systembruker (standard) : 991825827_integrasjonspunkt_systembruker_test (ca73c480-3a77-476e-9e94-2af6ee741586)
+```
+
+## DIGDIR (991825827) på vegne av RIKTIG FORSTÅELSESFULL SKILPADDE (312797062)
+```
+Tenor : RIKTIG FORSTÅELSESFULL SKILPADDE (312797062)
+Daglig Leder : TØRST FOTKREM (16865396345)
+System : 991825827_integrasjonspunkt
+Systembruker (standard) : 991825827_integrasjonspunkt_systembruker_skilpadde (42d647ae-b335-4e85-9866-a5f01dbd5266)
 ```
 
 

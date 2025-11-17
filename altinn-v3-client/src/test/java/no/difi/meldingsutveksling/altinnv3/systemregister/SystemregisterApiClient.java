@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SystemregisterApiClient {
 
-//    @Qualifier("SystemregisterTokenProducer")
-    @Qualifier("SystemuserTokenProducer")
+    @Qualifier("SystemregisterTokenProducer")
+    //@Qualifier("SystemuserTokenProducer")
     private final TokenProducer tokenProducer;
 
     private final SystemUserTokenProducer systemUserTokenProducer = new SystemUserTokenProducer();
@@ -98,7 +98,6 @@ public class SystemregisterApiClient {
             """;
 
         var res =  restClient.post()
-//            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/request/vendor")
             .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/request/vendor/agent")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
@@ -196,10 +195,10 @@ public class SystemregisterApiClient {
          return res.getStatusCode().toString();
     }
 
-    public String systemDetails() {
+    public String systemDetails(String systemId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
         return restClient.get()
-            .uri(apiEndpoint + "/vendor/311780735_integrasjonspunkt")
+            .uri(apiEndpoint + "/vendor/" + systemId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()

@@ -67,14 +67,14 @@ public class ManuallyTestingSystemregister {
 
     @Test
     void testSystemDetails() {
-        var res = client.systemDetails();
+        var res = client.systemDetails("991825827_integrasjonspunkt");
         assertNotNull(res, "System details should not be null");
         System.out.println(res);
     }
 
     @Test
     void createSystem() {
-        var res = client.createSystem("311780735", "STERK ULYDIG HUND DA", "b590f149-d0ba-4fca-b367-bccd9e444a00");
+        var res = client.createSystem("991825827", "DIGDIR", "a63cac91-3210-4c35-b961-5c7bf122345c");
         System.out.println(res);
     }
 
@@ -86,26 +86,26 @@ public class ManuallyTestingSystemregister {
 
     @Test
     void getSystem() {
-        var res = client.getSystem("311780735_integrasjonspunkt");
+        var res = client.getSystem("991825827_integrasjonspunkt");
         System.out.println(res);
     }
 
     @Test
     void updatePackagesForSystem() {
-        var res = client.updateAccessPackage("311780735_integrasjonspunkt", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+        var res = client.updateAccessPackage("991825827_integrasjonspunkt", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
         System.out.println(res);
     }
 
     @Test
     void createStandardSystemUser() {
         // det fulle navn på blir "<orgno>_integrasjonspunkt_systembruker_<name>"
-        var res = client.createStandardSystemUser("311780735", "311780735_integrasjonspunkt", "test3", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+        var res = client.createStandardSystemUser("312797062", "991825827_integrasjonspunkt", "skilpadde", "urn:altinn:accesspackage:informasjon-og-kommunikasjon");
         System.out.println(res);
     }
 
     @Test
     void getAllSystemUsers() {
-        var res = client.getAllSystemUsers("311780735_integrasjonspunkt");
+        var res = client.getAllSystemUsers("991825827_integrasjonspunkt");
         System.out.println(res);
     }
 
