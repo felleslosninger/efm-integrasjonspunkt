@@ -73,8 +73,8 @@ sequenceDiagram
     K->>IP: Sende fil
     IP->>M: Hent access token for systemuser<br>(client + authorization_details claim)
     note over M : Vi støtter client autentisering med cert eller jwk<br>Maskinporten token har kort levetid (2 min)
-    note over M : Scope 'authorization_details' kreves, beskriver systembruker 
-    note over M : scopes : [altinn:broker.write, altinn:broker.read]
+    note over M : Claim 'authorization_details' kreves (beskriver systembrukeren) 
+    note over M : Scopes : [altinn:broker.write, altinn:broker.read]
 
 IP-->>AT: Gjør token exchange hos Altinn (ikke påkrevet, men anbefalt)
     note over AT : Altinn token har lang levetid på (30 min)
