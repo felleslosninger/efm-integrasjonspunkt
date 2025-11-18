@@ -2,10 +2,6 @@ package no.difi.meldingsutveksling.nextmove.nhn;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 
 public record DPHMessageOut (
@@ -17,13 +13,11 @@ public record DPHMessageOut (
     @JsonProperty("onBehalfOfOrgNum")
     String onBehalfOfOrgNum,
     @JsonProperty("sender")
-     Sender  sender,
+    Sender  sender,
     @JsonProperty("receiver")
-     Reciever  reciever,
+    Reciever  reciever,
     @JsonProperty("fagmelding")
-     String fagmelding,
-    @JsonProperty("patient")
-    Patient patient
+    String fagmelding
 
 ){};
 

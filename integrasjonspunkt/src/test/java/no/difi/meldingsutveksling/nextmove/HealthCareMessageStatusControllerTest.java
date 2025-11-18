@@ -126,7 +126,7 @@ public class HealthCareMessageStatusControllerTest {
 
     @Test
     public void whenHealthcareStatusFAILED_apprecIsRetrieved() {
-        List<MessageStatus> failedMessages = List.of(healthCareStatus(ReceiptStatus.FEIL,"Failed during transport",MessageStatusController.FASTLEGE_PROCESS),healthCareStatus(ReceiptStatus.FEIL,"Patient not found",MessageStatusController.NHN_PROCESS));
+        List<MessageStatus> failedMessages = List.of(healthCareStatus(ReceiptStatus.FEIL,"Failed during transport",MessageStatusController.FASTLEGE_PROCESS),healthCareStatus(ReceiptStatus.FEIL,"Person not found",MessageStatusController.NHN_PROCESS));
         List<MessageStatus> okMessage = List.of(messageStatus1());
         List<MessageStatus> allMessages = Stream.concat(failedMessages.stream(),okMessage.stream()).collect(Collectors.toList());
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
@@ -143,8 +143,7 @@ public class HealthCareMessageStatusControllerTest {
             .jsonPath("$.content[2].status").isEqualTo(ReceiptStatus.MOTTATT)
             .jsonPath("$.content[0].rawReceipt").value(this::validateReceipt)
                 .jsonPath("$.content[1].rawReceipt").value(this::validateReceipt
-
-        ).jsonPath("$.content[2].rawReceipt").doesNotExist();
+            ).jsonPath("$.content[2].rawReceipt").doesNotExist();
 
         verify(nhnAdapterClient, times(2)).messageReceipt(any(),any());
 

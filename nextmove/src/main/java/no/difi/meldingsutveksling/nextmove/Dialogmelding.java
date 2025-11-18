@@ -12,4 +12,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @XmlRootElement(name = "dialogmelding", namespace = "urn:no:difi:digitalpost:json:schema::dialogmelding")
 public class Dialogmelding extends BusinessMessage<Dialogmelding> {
+
+    Notat notat;
+    String patientFnr;
+    Person patient;
+    String healthcareProfessionalId;
+    String vedleggBeskrivelse;
+
 }

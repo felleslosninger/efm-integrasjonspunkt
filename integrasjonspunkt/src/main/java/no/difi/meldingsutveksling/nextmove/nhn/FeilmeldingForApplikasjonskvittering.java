@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 interface KodeverkVerdi {
     String getVerdi();
     String getNavn();
@@ -49,5 +52,20 @@ public enum FeilmeldingForApplikasjonskvittering implements KodeverkVerdi {
     @Override
     public String getKodeverk() {
         return kodeverk;
+    }
+
+    @JsonValue
+    public String toValue() {
+        return verdi;
+    }
+
+    @JsonCreator
+    public static FeilmeldingForApplikasjonskvittering fromValue(String value) {
+        for (FeilmeldingForApplikasjonskvittering e : values()) {
+            if (e.getVerdi().equals(value)) {
+                return e;
+            }
+        }
+        return UKJENT; // or throw, depending on your vibe
     }
 }

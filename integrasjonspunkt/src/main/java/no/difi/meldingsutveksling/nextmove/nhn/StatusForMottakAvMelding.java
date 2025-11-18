@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum StatusForMottakAvMelding implements KodeverkVerdi {
     OK("1", "OK"),
     AVVIST("2", "Avvist"),
@@ -27,5 +30,20 @@ public enum StatusForMottakAvMelding implements KodeverkVerdi {
     @Override
     public String getKodeverk() {
         return kodeverk;
+    }
+
+    @JsonValue
+    public String toValue() {
+        return verdi;
+    }
+
+    @JsonCreator
+    public static StatusForMottakAvMelding fromValue(String value) {
+        for (StatusForMottakAvMelding e : values()) {
+            if (e.getVerdi().equals(value)) {
+                return e;
+            }
+        }
+        throw new RuntimeException("Unknown Status for mottak av melding");
     }
 }

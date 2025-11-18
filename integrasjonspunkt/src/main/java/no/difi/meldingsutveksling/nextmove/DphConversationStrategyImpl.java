@@ -9,17 +9,14 @@ import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
-import no.difi.meldingsutveksling.nextmove.nhn.Fagmelding;
-import no.difi.meldingsutveksling.nextmove.nhn.HealthcareProfessional;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.Patient;
 import no.difi.meldingsutveksling.nextmove.nhn.Reciever;
 import no.difi.meldingsutveksling.nextmove.nhn.Sender;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.idporten.validators.identifier.PersonIdentifierValidator;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -50,41 +47,48 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
         String recieverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Reciever HERID1 is not available");
         String recieverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Reciever HERID2 is not available");
-        Patient patient = null;
-        ServiceRecord serviceRecord = null;
+        ServiceRecord receiverServiceRecord;
+        Dialogmelding dialogmelding = message.getBusinessMessage(Dialogmelding.class).orElseThrow();
         try {
             var reciever = (NhnIdentifier) message.getReceiver();
             if (reciever.isFastlegeIdentifier()) {
-                serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
+                receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
                     .conversationId(message.getSbd().getConversationId())
                     .process(message.getSbd().getProcess())
                     .build(), message.getSbd().getDocumentType());
-                patient = new Patient(serviceRecord.getPatient().fnr(), serviceRecord.getPatient().firstName(), serviceRecord.getPatient().middleName(), serviceRecord.getPatient().lastName(), "88888");
+                Person patient = new Person(receiverServiceRecord.getPatient().fnr(), receiverServiceRecord.getPatient().firstName(), receiverServiceRecord.getPatient().middleName(), receiverServiceRecord.getPatient().lastName(), "88888");
+                dialogmelding.setPatient(patient);
 
             }
             else {
-                //@TODO vi initialiserer midlertidig patient til vi finner ut hvordan vi gjør det for nhn partner
-                patient = new Patient("777777777","Pasient","NHN partner","NHN","2343432434");
+                //@TODO If the message is NHN we should validate the patient in the validation phase.
+                receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatient().fnr())
+                    .conversationId(message.getSbd().getConversationId())
+                    .process(message.getSbd().getProcess())
+                    .build(), message.getSbd().getDocumentType());
+
+                Patient pat = receiverServiceRecord.getPatient();
+                dialogmelding.setPatient(new Person(pat.fnr(), pat.firstName(),pat.middleName(),pat.lastName(),""));
             }
 
 
             //@TODO skal vi sende dialogmeldingen til og med at vi har ikke hentet patient detaliene ? Fortsatt vi har patient fødselsnummer kanskje det er nok ?
         } catch (Exception e) {
-            log.error("Not able to get information about Patient " + e.getMessage(), e);
+            log.error("Not able to get information about Person " + e.getMessage(), e);
         }
         String fagmelding = "";
+
         try {
-            fagmelding = ObjectMapperHolder.get().writeValueAsString(new Fagmelding("testSubject", "testbody", new HealthcareProfessional("345345345", "Healthcare", "", "Peterson", "234234234")));
+            fagmelding = ObjectMapperHolder.get().writeValueAsString(dialogmelding);
         } catch (JsonProcessingException e) {
             throw new NextMoveException(e);
         }
 
         Conversation conversation = conversationService.findConversation(message.getMessageId()).orElseThrow(() -> new NextMoveRuntimeException("Conversation not found for message " + message.getMessageId()));
-
         NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
 
         DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-            new Sender(senderHerId1, senderHerId2, "testname"), new Reciever(recieverHerId1, recieverHerId2 , nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, patient);
+            new Sender(senderHerId1, senderHerId2, "To Do"),  new Reciever(recieverHerId1, recieverHerId2 , nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding);
         var messageReference = adapterClient.messageOut(messageOut);
         conversation.setMessageReference(messageReference);
         conversationService.save(conversation);

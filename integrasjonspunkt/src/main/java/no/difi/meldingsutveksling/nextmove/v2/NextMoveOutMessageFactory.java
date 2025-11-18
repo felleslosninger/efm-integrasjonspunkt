@@ -7,14 +7,23 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.domain.NhnIdentifier;
-import no.difi.meldingsutveksling.domain.OrganizationIdentifier;
-import no.difi.meldingsutveksling.domain.PartnerIdentifier;
-import no.difi.meldingsutveksling.domain.PersonIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
+import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.Partner;
+import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
+import no.difi.meldingsutveksling.nextmove.MailReturn;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.nextmove.PostalCategory;
+import no.difi.meldingsutveksling.nextmove.PrintColor;
+import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -25,11 +34,12 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static no.difi.meldingsutveksling.ServiceIdentifier.*;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPH;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 
 @Component
 @RequiredArgsConstructor
