@@ -105,9 +105,14 @@ public class DpvStatusStrategy implements StatusStrategy {
             mappedStatus = LEVERT;
         } else if (CorrespondenceStatusExt.READ.equals(status)) {
             mappedStatus = LEST;
-        } else if (CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status)) {
+        } else if (
+                CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status) ||
+                CorrespondenceStatusExt.INITIALIZED.equals(status) ||
+                CorrespondenceStatusExt.FETCHED.equals(status))
+        {
             mappedStatus = null; // do not map this, just ignore it
         } else {
+            log.info("Unknown correspondence status [{}]", status);
             mappedStatus = ANNET;
         }
         return mappedStatus;
