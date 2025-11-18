@@ -110,6 +110,22 @@ public class ManuallyTestingSystemregister {
     }
 
     @Test
+    void getSystemUserDetails() {
+        // for system 991825827_integrasjonspunkt :
+        // 991825827 ca73c480-3a77-476e-9e94-2af6ee741586 991825827_integrasjonspunkt_systembruker_test
+        // 312797062 42d647ae-b335-4e85-9866-a5f01dbd5266 991825827_integrasjonspunkt_systembruker_skilpadde
+        var res = client.getSystemUser("312797062", "42d647ae-b335-4e85-9866-a5f01dbd5266");
+        System.out.println(res);
+    }
+
+    @Test
+    void deleteSystemUser() {
+        // 991825827 ca73c480-3a77-476e-9e94-2af6ee741586 991825827_integrasjonspunkt_systembruker_test// 312797062 42d647ae-b335-4e85-9866-a5f01dbd5266 991825827_integrasjonspunkt_systembruker_skilpadde
+        var res = client.deleteSystemUser("991825827", "ca73c480-3a77-476e-9e94-2af6ee741586");
+        System.out.println(res);
+    }
+
+    @Test
     void createAgentSystemUser() {
         var res = client.createAgentSystemUser();
         System.out.println(res);

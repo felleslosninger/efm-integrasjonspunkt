@@ -17,6 +17,7 @@ public class ProblemDetailsParser {
         try {
             var objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             var bodyAsBytes = response.getBody().readAllBytes();
+            if (bodyAsBytes.length == 0) return "%s: %d %s, %s".formatted(prefix, response.getStatusCode().value(), response.getStatusCode().toString(), "No body returned");
             jsonAsString = new String(bodyAsBytes, StandardCharsets.UTF_8);
             var problemDetails = objectMapper.readValue(jsonAsString, ProblemDetails.class);
             if (problemDetails.getTitle() == null) problemDetails.setTitle("No title was given");

@@ -21,7 +21,6 @@ import java.util.List;
 public class SystemregisterApiClient {
 
     @Qualifier("SystemregisterTokenProducer")
-    //@Qualifier("SystemuserTokenProducer")
     private final TokenProducer tokenProducer;
 
     private final SystemUserTokenProducer systemUserTokenProducer = new SystemUserTokenProducer();
@@ -42,11 +41,34 @@ public class SystemregisterApiClient {
         return systemUserTokenProducer.produceToken(List.of("altinn:broker.read", "altinn:broker.write"));
     }
 
+    public String getSystemUser(String party, String systemUserUuid) {
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
+        //String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
+        return restClient.get()
+            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/%s/%s".formatted(party, systemUserUuid))
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
     public String getAllSystemUsers(String systemId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 
         return restClient.get()
             .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/vendor/bysystem/" + systemId)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
+    public Object deleteSystemUser(String party, String systemUserUuid) {
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
+        return restClient.delete()
+            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/%s/%s".formatted(party, systemUserUuid))
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -211,7 +233,5 @@ public class SystemregisterApiClient {
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
         throw new RuntimeException(details);
     }
-
-
 
 }

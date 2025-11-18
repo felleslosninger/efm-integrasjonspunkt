@@ -6,12 +6,14 @@ import no.difi.meldingsutveksling.altinnv3.systemregister.SystemuserTokenProduce
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;
 import no.difi.meldingsutveksling.altinnv3.token.SystemUserTokenProducer;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -60,13 +62,27 @@ public class ManuallyTestingBroker {
         var uuids = client.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
         assertNotNull(uuids);
         Arrays.stream(uuids).forEach(System.out::println);
-        assertEquals(2, uuids.length);
+        assertEquals(24, uuids.length);
+    }
+
+    @Test
+    void testListFilesForAllSystemUsers() {
+        // henter også filer for "on behalf of" reportees
+        List<AltinnSystemUser> allSystemUsers = new ArrayList<>();
+        allSystemUsers.add(integrasjonspunktProperties.getDpo().getSystemUser());
+        allSystemUsers.addAll(integrasjonspunktProperties.getDpo().getReportees());
+        for (var systemuser : allSystemUsers) {
+            System.out.println("Listing files for systemuser: " + systemuser .getOrgId());
+            var uuids = client.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
+            assertNotNull(uuids);
+            Arrays.stream(uuids).forEach(System.out::println);
+        }
     }
 
     @Test
     void testFileDetails() {
         var details = client.getDetails(integrasjonspunktProperties.getDpo().getSystemUser(),
-            "5d59e5ef-6723-45d4-9f9f-2cb4664230a1"
+            "ee6b401e-76e0-4995-864a-c08cdfd4772a"
         );
         assertNotNull(details);
         System.out.println(details);

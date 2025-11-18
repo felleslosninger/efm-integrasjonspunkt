@@ -81,12 +81,13 @@ Person som kan lese taushetsbelagt post: HATT INTRIKAT (24914899369)
 Kun brukt som mottaker av meldinger i Altinn, ingen tilgang til maskinporten
 ```
 
-## DIGDIR (991825827)
+## DIGDIR (991825827) på vegne av seg selv DIGDIR (991825827)
 ```
 Dette er en ekte org.
 eformidling-meldingsteneste-test (a63cac91-3210-4c35-b961-5c7bf122345c)
 System : 991825827_integrasjonspunkt
-Systembruker (standard) : 991825827_integrasjonspunkt_systembruker_test (ca73c480-3a77-476e-9e94-2af6ee741586)
+Systembruker (standard) : 991825827_integrasjonspunkt_systembruker_digdir (38fc985d-0ecb-4e6c-8e0d-b26493e6b1c7)
+Denne har feil tilgangspakke, kan slettes : Systembruker (standard) : 991825827_integrasjonspunkt_systembruker_test (ca73c480-3a77-476e-9e94-2af6ee741586)
 ```
 
 ## DIGDIR (991825827) på vegne av RIKTIG FORSTÅELSESFULL SKILPADDE (312797062)
