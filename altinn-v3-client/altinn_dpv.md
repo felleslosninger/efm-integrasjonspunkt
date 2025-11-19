@@ -17,7 +17,7 @@ sequenceDiagram
     participant AR as Altinn ResourceRegistry<br><rest api>
     
     K->>S: Opprett maskinporten client (selvbetjent)
-    note over S : Tildele scope : move:dpv 
+    note over S : Tildele scope : eformidling:dpv 
     D->>AR: Legg virksomhet inn i tilgangslisten (/access-lists/{owner}/{identifier}/members) 
 ```
 
