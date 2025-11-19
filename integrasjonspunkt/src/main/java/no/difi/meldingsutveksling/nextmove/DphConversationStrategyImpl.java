@@ -58,10 +58,12 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
                     .build(), message.getSbd().getDocumentType());
                 Person patient = new Person(receiverServiceRecord.getPatient().fnr(), receiverServiceRecord.getPatient().firstName(), receiverServiceRecord.getPatient().middleName(), receiverServiceRecord.getPatient().lastName(), "88888");
                 dialogmelding.setPatient(patient);
+                dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
 
             }
             else {
                 //@TODO If the message is NHN we should validate the patient in the validation phase.
+
                 receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatient().fnr())
                     .conversationId(message.getSbd().getConversationId())
                     .process(message.getSbd().getProcess())
@@ -69,6 +71,9 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
 
                 Patient pat = receiverServiceRecord.getPatient();
                 dialogmelding.setPatient(new Person(pat.fnr(), pat.firstName(),pat.middleName(),pat.lastName(),""));
+                if (dialogmelding.getResponsibleHealthcareProfessionalId() == null) {
+                    dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
+                }
             }
 
 
