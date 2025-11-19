@@ -27,7 +27,9 @@ class DpvStatusStrategyTest {
         var mappedStatuses = List.of(
             CorrespondenceStatusExt.PUBLISHED,
             CorrespondenceStatusExt.READ,
-            CorrespondenceStatusExt.READY_FOR_PUBLISH
+            CorrespondenceStatusExt.READY_FOR_PUBLISH,
+            CorrespondenceStatusExt.FETCHED,
+            CorrespondenceStatusExt.INITIALIZED
         );
         Arrays.stream(CorrespondenceStatusExt.values())
             .filter(s -> !mappedStatuses.contains(s))
