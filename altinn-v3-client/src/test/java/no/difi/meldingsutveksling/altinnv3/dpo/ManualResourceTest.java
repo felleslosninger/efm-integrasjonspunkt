@@ -30,7 +30,7 @@ public class ManualResourceTest {
     @Test
     public void getResource() {
         var accessToken = dpoTokenProducer.produceToken(null, // need regular token, not system-user-token
-            List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
+            List.of("altinn:serviceowner")
         );
 
         RestClient restClient = RestClient.create();
@@ -48,12 +48,12 @@ public class ManualResourceTest {
     @Test
     public void updateResource() {
         var accessToken = dpoTokenProducer.produceToken(null, // need regular token, not system-user-token
-            List.of("altinn:broker.write","altinn:broker.read","altinn:serviceowner")
+            List.of("altinn:serviceowner")
         );
 
         String body = """
             {
-                "resourceId": "meldingsutveksling_dpo",
+                "resourceId": "eformidling-dpo-meldingsutveksling",
                 "maxFileTransferSize": "1073741824",
                 "fileTransferTimeToLive": "P30D",
                 "PurgeFileTransferAfterAllRecipientsConfirmed" : true,
@@ -63,6 +63,8 @@ public class ManualResourceTest {
                 "UseManifestFileShim": true
             }
         """;
+
+        // "ExternalServiceEditionCodeLegacy": "170101", produksjon
 
         RestClient restClient = RestClient.create();
         restClient.put()
