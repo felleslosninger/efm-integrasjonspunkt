@@ -12,9 +12,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import no.difi.meldingsutveksling.altinnv3.dpv.WithLogstashMarker;
 
 import java.util.UUID;
 
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @Component
@@ -38,14 +40,8 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             return;
         }
 
-        UUID correspondenceid = altinnService.send(message);
-
-// FIXME back-add this logstash marker thing?
-//        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
-//
-//        Object response = withLogstashMarker(markerFrom(message))
-//                .execute(() -> client.sendCorrespondence(correspondence));
-
+        UUID correspondenceid = WithLogstashMarker.withLogstashMarker(markerFrom(message))
+                .execute(() -> altinnService.send(message));
 
         conversationService.findConversation(message.getMessageId())
             .ifPresent(conversation -> conversationService.save(conversation
