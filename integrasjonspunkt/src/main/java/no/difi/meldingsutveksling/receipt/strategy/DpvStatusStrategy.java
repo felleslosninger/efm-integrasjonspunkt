@@ -108,7 +108,8 @@ public class DpvStatusStrategy implements StatusStrategy {
         } else if (
                 CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status) ||
                 CorrespondenceStatusExt.INITIALIZED.equals(status) ||
-                CorrespondenceStatusExt.FETCHED.equals(status))
+                CorrespondenceStatusExt.FETCHED.equals(status) ||
+                CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED.equals(status))
         {
             mappedStatus = null; // do not map this, just ignore it
         } else {

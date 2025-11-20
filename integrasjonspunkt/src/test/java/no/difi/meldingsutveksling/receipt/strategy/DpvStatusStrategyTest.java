@@ -29,7 +29,8 @@ class DpvStatusStrategyTest {
             CorrespondenceStatusExt.READ,
             CorrespondenceStatusExt.READY_FOR_PUBLISH,
             CorrespondenceStatusExt.FETCHED,
-            CorrespondenceStatusExt.INITIALIZED
+            CorrespondenceStatusExt.INITIALIZED,
+            CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED
         );
         Arrays.stream(CorrespondenceStatusExt.values())
             .filter(s -> !mappedStatuses.contains(s))
