@@ -92,7 +92,7 @@ include::{snippets}/messages/in/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/in/find/request-parameters.adoc[]
+include::{snippets}/messages/in/find/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -156,7 +156,7 @@ include::{snippets}/messages/in/peek/no-content/response-fields.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/in/peek/request-parameters.adoc[]
+include::{snippets}/messages/in/peek/query-parameters.adoc[]
 --
 
 [role="secondary"]

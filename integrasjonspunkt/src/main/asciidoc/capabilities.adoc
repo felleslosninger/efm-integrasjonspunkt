@@ -94,7 +94,7 @@ include::{snippets}/capabilities/dpi/process/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/capabilities/dpo/request-parameters.adoc[]
+include::{snippets}/capabilities/dpo/query-parameters.adoc[]
 --
 
 [role="secondary"]

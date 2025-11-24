@@ -99,7 +99,7 @@ include::{snippets}/messages/out/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/find/request-parameters.adoc[]
+include::{snippets}/messages/out/find/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -132,7 +132,7 @@ include::{snippets}/messages/out/get/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/get/request-parameters.adoc[]
+include::{snippets}/messages/out/get/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -416,7 +416,7 @@ include::{snippets}/messages/out/upload/request-headers.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/upload/request-parameters.adoc[]
+include::{snippets}/messages/out/upload/query-parameters.adoc[]
 --
 
 [#messages-out-send]
@@ -449,7 +449,7 @@ include::{snippets}/messages/out/send/request-headers.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/send/request-parameters.adoc[]
+include::{snippets}/messages/out/send/query-parameters.adoc[]
 --
 
 [#messages-out-multipart]
@@ -518,6 +518,6 @@ include::{snippets}/messages/out/delete/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/delete/request-parameters.adoc[]
+include::{snippets}/messages/out/delete/query-parameters.adoc[]
 --
 

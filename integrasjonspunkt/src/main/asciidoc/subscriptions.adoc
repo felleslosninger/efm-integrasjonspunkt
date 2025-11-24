@@ -40,7 +40,7 @@ include::{snippets}/subscriptions/list/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/subscriptions/list/request-parameters.adoc[]
+include::{snippets}/subscriptions/list/query-parameters.adoc[]
 --
 
 [role="secondary"]

@@ -72,7 +72,7 @@ public class ManuallyTestingBroker {
         allSystemUsers.add(integrasjonspunktProperties.getDpo().getSystemUser());
         allSystemUsers.addAll(integrasjonspunktProperties.getDpo().getReportees());
         for (var systemuser : allSystemUsers) {
-            System.out.println("Listing files for systemuser: " + systemuser .getOrgId());
+            System.out.printf("Listing files for systemuser: '%s' (%s)%n", systemuser.getName(), systemuser.getOrgId());
             var uuids = client.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
             assertNotNull(uuids);
             Arrays.stream(uuids).forEach(System.out::println);

@@ -68,7 +68,7 @@ include::{snippets}/conversations/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/conversations/find/request-parameters.adoc[]
+include::{snippets}/conversations/find/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -236,7 +236,7 @@ include::{snippets}/conversations/queue/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/conversations/queue/request-parameters.adoc[]
+include::{snippets}/conversations/queue/query-parameters.adoc[]
 --
 
 [role="secondary"]
