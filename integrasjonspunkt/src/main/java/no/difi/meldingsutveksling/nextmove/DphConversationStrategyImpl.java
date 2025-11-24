@@ -5,6 +5,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
+import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
@@ -17,7 +18,11 @@ import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @Slf4j
 @Component
@@ -27,11 +32,13 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
     private NhnAdapterClient adapterClient;
     private ServiceRegistryLookup serviceRegistryLookup;
     private ConversationService conversationService;
+    private CryptoMessagePersister fileRepository;
 
-    public DphConversationStrategyImpl(NhnAdapterClient adapterClient, ServiceRegistryLookup serviceRegistryLookup, ConversationService conversationService) {
+    public DphConversationStrategyImpl(NhnAdapterClient adapterClient, ServiceRegistryLookup serviceRegistryLookup, ConversationService conversationService,CryptoMessagePersister  fileRepository) {
         this.adapterClient = adapterClient;
         this.serviceRegistryLookup = serviceRegistryLookup;
         this.conversationService = conversationService;
+        this.fileRepository = fileRepository;
     }
 
 
@@ -42,6 +49,31 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
+
+        var filename = message.getFiles().stream().findFirst().map(BusinessMessageFile::getIdentifier).orElse(null);
+        Resource vedleg = null;
+        byte vedlegInnehold[];
+        String base64EncodedVedleg;
+        if (filename != null) {
+            try {
+                vedleg = fileRepository.read(message.getMessageId(), filename);
+                vedlegInnehold = vedleg.getContentAsByteArray();
+            } catch (IOException e) {
+                throw new NextMoveException("Can not postprocess file.");
+            }
+            catch (Exception e) {
+                throw new NextMoveException("Can not read file " + filename, e);
+            }
+        }
+        else {
+            throw new NextMoveException("Filename can not be null. ");
+        }
+
+
+        base64EncodedVedleg = new String(Base64.getEncoder().encode( vedlegInnehold));
+
+
+
         log.info("Attempt to send dialogmelding to nhn-adapter");
         String senderHerId1 = getHerID(message, ScopeType.SENDER_HERID1, "Sender HERID1 is not available");
         String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
@@ -49,6 +81,9 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         String recieverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Reciever HERID2 is not available");
         ServiceRecord receiverServiceRecord;
         Dialogmelding dialogmelding = message.getBusinessMessage(Dialogmelding.class).orElseThrow();
+        DialogmeldingOut.DialogmeldingOutBuilder outMessageBuilder = DialogmeldingOut.builder()
+            .notat(dialogmelding.getNotat())
+            .vedleggBeskrivelse(dialogmelding.getVedleggBeskrivelse());
         try {
             var reciever = (NhnIdentifier) message.getReceiver();
             if (reciever.isFastlegeIdentifier()) {
@@ -57,20 +92,21 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
                     .process(message.getSbd().getProcess())
                     .build(), message.getSbd().getDocumentType());
                 Person patient = new Person(receiverServiceRecord.getPatient().fnr(), receiverServiceRecord.getPatient().firstName(), receiverServiceRecord.getPatient().middleName(), receiverServiceRecord.getPatient().lastName(), "88888");
-                dialogmelding.setPatient(patient);
-                dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
+                outMessageBuilder
+                    .patient(patient)
+                    .responsibleHealthcareProfessionalId(reciever.getHerId2());
 
             }
             else {
                 //@TODO If the message is NHN we should validate the patient in the validation phase.
 
-                receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatient().fnr())
+                receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatientFnr())
                     .conversationId(message.getSbd().getConversationId())
                     .process(message.getSbd().getProcess())
                     .build(), message.getSbd().getDocumentType());
-
                 Patient pat = receiverServiceRecord.getPatient();
-                dialogmelding.setPatient(new Person(pat.fnr(), pat.firstName(),pat.middleName(),pat.lastName(),""));
+                outMessageBuilder.patient(new Person(pat.fnr(), pat.firstName(),pat.middleName(),pat.lastName(),""));
+
                 if (dialogmelding.getResponsibleHealthcareProfessionalId() == null) {
                     dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
                 }
@@ -84,7 +120,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         String fagmelding = "";
 
         try {
-            fagmelding = ObjectMapperHolder.get().writeValueAsString(dialogmelding);
+            fagmelding = ObjectMapperHolder.get().writeValueAsString(outMessageBuilder.build());
         } catch (JsonProcessingException e) {
             throw new NextMoveException(e);
         }
@@ -93,7 +129,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
         NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
 
         DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-            new Sender(senderHerId1, senderHerId2, "To Do"),  new Reciever(recieverHerId1, recieverHerId2 , nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding);
+            new Sender(senderHerId1, senderHerId2, "To Do"),  new Reciever(recieverHerId1, recieverHerId2 , nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding,base64EncodedVedleg);
         var messageReference = adapterClient.messageOut(messageOut);
         conversation.setMessageReference(messageReference);
         conversationService.save(conversation);

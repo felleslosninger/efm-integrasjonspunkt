@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.meldingsutveksling.config.VaultProtocolResolver;
 import no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor;
+import no.idporten.validators.identifier.PersonIdentifierValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,6 +36,7 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
+        PersonIdentifierValidator.setSyntheticPersonIdentifiersAllowed(true);
 
         ConfigurableApplicationContext context = new SpringApplicationBuilder(IntegrasjonspunktApplication.class)
                 .initializers(new VaultProtocolResolver())

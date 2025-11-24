@@ -17,7 +17,9 @@ public record DPHMessageOut (
     @JsonProperty("receiver")
     Reciever  reciever,
     @JsonProperty("fagmelding")
-    String fagmelding
+    String fagmelding,
+    @JsonProperty("vedlegg")
+    String vedlegg
 
 ){};
 

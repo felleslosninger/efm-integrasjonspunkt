@@ -15,7 +15,6 @@ public class Dialogmelding extends BusinessMessage<Dialogmelding> {
 
     Notat notat;
     String patientFnr;
-    Person patient;
     String responsibleHealthcareProfessionalId;
     String vedleggBeskrivelse;
 
