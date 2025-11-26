@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessageAsAttachment;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
@@ -38,14 +38,14 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         }
 
         if (SBDUtil.isReceipt(sbd)) {
-            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt ->
+            sbd.getBusinessMessage(ArkivmeldingKvitteringMessageAsAttachment.class).ifPresent(receipt ->
                 conversationService.registerStatus(receipt.getRelatedToMessageId(), toReceiptStatus(receipt),
                         toDescription(receipt), toRawReceipt(receipt))
             );
         }
     }
 
-    private ReceiptStatus toReceiptStatus(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+    private ReceiptStatus toReceiptStatus(ArkivmeldingKvitteringMessageAsAttachment arkivmeldingKvittering) {
         if ("ERROR".equals(arkivmeldingKvittering.getReceiptType())) {
             return ReceiptStatus.FEIL;
         } else if ("NOTSUPPORTED".equals(arkivmeldingKvittering.getReceiptType())) {
@@ -56,11 +56,11 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
         }
     }
 
-    private String toDescription(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+    private String toDescription(ArkivmeldingKvitteringMessageAsAttachment arkivmeldingKvittering) {
         return "ArkivmeldingKvittering: " + arkivmeldingKvittering.getReceiptType();
     }
 
-    private String toRawReceipt(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
+    private String toRawReceipt(ArkivmeldingKvitteringMessageAsAttachment arkivmeldingKvittering) {
         try {
             return new ObjectMapper().writeValueAsString(arkivmeldingKvittering);
         } catch (JsonProcessingException e) {

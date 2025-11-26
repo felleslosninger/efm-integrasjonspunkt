@@ -12,7 +12,7 @@ public class HealthcareTestData {
 
 
     public final static StandardBusinessDocumentTestData.MessageData DIALOGMELDING_MESSAGE_DATA = new StandardBusinessDocumentTestData.MessageData().setProcess("urn:no:difi:profile:digitalpost:fastlege:ver1.0")
-        .setStandard("urn:no:difi:digitalpost:json:schema::dialogmelding").setType("dialogmelding").setBusinessMessage(new Dialogmelding().setHoveddokument("dialogmelding.json").setSikkerhetsnivaa(4));
+        .setStandard("urn:no:difi:digitalpost:json:schema::dialogmelding").setType("dialogmelding").setBusinessMessage(new Dialogmelding());
 
     public static final String VALID_ORGNUMMER = "920640818";
     public static final String VALID_FNR = "21905297101";

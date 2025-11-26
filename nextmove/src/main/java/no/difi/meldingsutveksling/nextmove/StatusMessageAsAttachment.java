@@ -11,6 +11,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "status", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class StatusMessage extends BusinessMessage<StatusMessage> {
+public class StatusMessageAsAttachment extends BusinessMessageAsAttachment<StatusMessageAsAttachment> {
     private ReceiptStatus status;
 }

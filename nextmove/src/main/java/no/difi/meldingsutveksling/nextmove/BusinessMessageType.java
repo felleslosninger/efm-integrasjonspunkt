@@ -9,27 +9,27 @@ import java.util.stream.Collectors;
 @Getter
 public enum BusinessMessageType implements StandardBusinessDocumentType {
 
-    STATUS("status", StatusMessage.class),
+    STATUS("status", StatusMessageAsAttachment.class),
 
-    ARKIVMELDING("arkivmelding", ArkivmeldingMessage.class),
-    ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ArkivmeldingKvitteringMessage.class),
+    ARKIVMELDING("arkivmelding", ArkivmeldingMessageAsAttachment.class),
+    ARKIVMELDING_KVITTERING("arkivmelding_kvittering", ArkivmeldingKvitteringMessageAsAttachment.class),
 
-    AVTALT("avtalt", AvtaltMessage.class),
+    AVTALT("avtalt", AvtaltMessageAsAttachment.class),
 
-    FIKSIO("fiksio", FiksIoMessage.class),
-    DIGITAL("digital", DpiDigitalMessage.class),
-    DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
+    FIKSIO("fiksio", FiksIoMessageAsAttachment.class),
+    DIGITAL("digital", DpiDigitalMessageAsAttachment.class),
+    DIGITAL_DPV("digital_dpv", DigitalDpvMessageAsAttachment.class),
     DIALOGMELDING("dialogmelding",Dialogmelding.class),
-    PRINT("print", DpiPrintMessage.class),
+    PRINT("print", DpiPrintMessageAsAttachment.class),
 
-    INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),
-    PUBLISERING("publisering", PubliseringMessage.class),
-    EINNSYN_KVITTERING("einnsyn_kvittering", EinnsynKvitteringMessage.class);
+    INNSYNSKRAV("innsynskrav", InnsynskravMessageAsAttachment.class),
+    PUBLISERING("publisering", PubliseringMessageAsAttachment.class),
+    EINNSYN_KVITTERING("einnsyn_kvittering", EinnsynKvitteringMessageAsAttachment.class);
 
     private final String type;
-    private final Class<? extends BusinessMessage<?>> clazz;
+    private final Class<? extends BusinessMessage> clazz;
 
-    BusinessMessageType(String type, Class<? extends BusinessMessage<?>> clazz) {
+    BusinessMessageType(String type, Class<? extends BusinessMessage> clazz) {
         this.type = type;
         this.clazz = clazz;
     }

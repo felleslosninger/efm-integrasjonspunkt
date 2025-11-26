@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.UnsupportedOperationStatusException;
+import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -35,7 +36,7 @@ public class ServiceRecordProvider {
                 .orElseThrow(MissingMessageTypeException::new);
     }
 
-    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage,Participant participant) {
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage businessMessage, Participant participant) {
         try {
             String participantId;
             MessageType messageType = MessageType.valueOfType(sbd.getType())
@@ -88,17 +89,17 @@ public class ServiceRecordProvider {
         }
     }
 
-    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd,BusinessMessage<?> businessMessage, String participantId) throws ServiceRegistryLookupException {
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage businessMessage, String participantId) throws ServiceRegistryLookupException {
         SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(participantId)
             .process(sbd.getProcess());
 
         if (!Strings.isNullOrEmpty(sbd.getConversationId())) {
             parameterBuilder.conversationId(sbd.getConversationId());
         }
-
-        if (businessMessage.getSikkerhetsnivaa() != null) {
-            parameterBuilder.securityLevel(businessMessage.getSikkerhetsnivaa());
+        if (businessMessage instanceof HasSikkerhetsNivaa<?> bm && bm.getSikkerhetsnivaa() != null) {
+            parameterBuilder.securityLevel(bm.getSikkerhetsnivaa());
         }
+
         return serviceRegistryLookup.getServiceRecord(
             parameterBuilder.build(),
             sbd.getDocumentType());

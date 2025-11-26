@@ -7,9 +7,9 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.InnsynskravMessage;
+import no.difi.meldingsutveksling.nextmove.InnsynskravMessageAsAttachment;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.nextmove.PubliseringMessage;
+import no.difi.meldingsutveksling.nextmove.PubliseringMessageAsAttachment;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,7 @@ public class MessageOutController {
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultInnsynskravProcess(),
                     properties.getEinnsyn().getDefaultInnsynskravDocumentType(),
-                    new InnsynskravMessage()
+                    new InnsynskravMessageAsAttachment()
                             .setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
                             .setEpost(message.getCustomProperties().getOrDefault("epost", ""))
             );
@@ -57,7 +57,7 @@ public class MessageOutController {
                     message.getConversationId(),
                     properties.getEinnsyn().getDefaultJournalProcess(),
                     properties.getEinnsyn().getDefaultJournalDocumentType(),
-                    new PubliseringMessage().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
+                    new PubliseringMessageAsAttachment().setOrgnr(message.getCustomProperties().getOrDefault("orgnumber", properties.getOrg().getNumber()))
             );
         }
         messageService.createMessage(sbd);

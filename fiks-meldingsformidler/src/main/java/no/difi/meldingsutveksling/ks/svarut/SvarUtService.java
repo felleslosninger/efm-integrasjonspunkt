@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.CertificateParserException;
 import no.difi.meldingsutveksling.config.CacheConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
+import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -45,8 +46,9 @@ public class SvarUtService {
     public String send(NextMoveOutMessage message) {
         ServiceRecord serviceRecord;
         try {
+            Integer sikkerhetsNivaa = (message.getBusinessMessage() instanceof  HasSikkerhetsNivaa e) ? e.getSikkerhetsnivaa() : null;
             serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiverIdentifier())
-                            .securityLevel(message.getBusinessMessage().getSikkerhetsnivaa())
+                            .securityLevel(sikkerhetsNivaa)
                             .process(message.getSbd().getProcess())
                             .conversationId(message.getConversationId()).build(),
                     message.getSbd().getDocumentType());

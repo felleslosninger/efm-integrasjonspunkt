@@ -7,7 +7,7 @@ import no.difi.meldingsutveksling.api.NextMoveQueue
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties
 import no.difi.meldingsutveksling.domain.ICD
 import no.difi.meldingsutveksling.domain.Iso6523
-import no.difi.meldingsutveksling.nextmove.FiksIoMessage
+import no.difi.meldingsutveksling.nextmove.FiksIoMessageAsAttachment
 import no.difi.meldingsutveksling.sbd.SBDFactory
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
@@ -47,7 +47,7 @@ class FiksIoSubscriber(
             mottattMelding.meldingType,
             mottattMelding.meldingType,
             MessageType.FIKSIO,
-            FiksIoMessage()
+            FiksIoMessageAsAttachment()
         )
 
         nextMoveQueue.enqueueIncomingMessage(

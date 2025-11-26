@@ -11,6 +11,8 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @Setter
 @ToString
 @NoArgsConstructor
-@XmlRootElement(name = "fiksio", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class FiksIoMessage extends BusinessMessage<FiksIoMessage> {
+@XmlRootElement(name = "avtalt", namespace = "urn:no:difi:meldingsutveksling:2.0")
+public class AvtaltMessageAsAttachment extends BusinessMessageAsAttachment<AvtaltMessageAsAttachment> {
+    String identifier;
+    Object content;
 }

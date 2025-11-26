@@ -66,7 +66,7 @@ public class SvarInnNextMoveConverter {
             forsendelse.getId(),
             properties.getFiks().getInn().getProcess(),
             properties.getFiks().getInn().getDocumentType(),
-            new ArkivmeldingMessage());
+            new ArkivmeldingMessageAsAttachment());
         if (!Strings.isNullOrEmpty(forsendelse.getSvarPaForsendelse())) {
             sbd.addScope(ScopeFactory.fromRef(ScopeType.RECEIVER_REF, forsendelse.getSvarPaForsendelse()));
         }

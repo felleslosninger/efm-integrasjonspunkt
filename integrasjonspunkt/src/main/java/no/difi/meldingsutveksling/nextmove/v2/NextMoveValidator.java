@@ -116,7 +116,7 @@ public class NextMoveValidator {
     }
 
     private static void validatePrintBusinessMessage(StandardBusinessDocument sbd) {
-        DpiPrintMessage businessMessage = (DpiPrintMessage) sbd.getAny();
+        DpiPrintMessageAsAttachment businessMessage = (DpiPrintMessageAsAttachment) sbd.getAny();
         PostAddress receiverAddress = businessMessage.getMottaker();
         if (receiverAddress == null) {
             throw new MissingAddressInformationException("mottaker");
@@ -155,7 +155,7 @@ public class NextMoveValidator {
             return;
         }
         if (serviceIdentifier == DPF) {
-            sbd.getBusinessMessage(ArkivmeldingMessage.class).ifPresent(message -> {
+            sbd.getBusinessMessage(ArkivmeldingMessageAsAttachment.class).ifPresent(message -> {
                 DpfSettings dpfSettings = message.getDpf();
                 if (dpfSettings == null) {
                     return;
@@ -220,7 +220,7 @@ public class NextMoveValidator {
             Set<String> messageFilenames = message.getFiles().stream()
                     .map(BusinessMessageFile::getFilename)
                     .collect(Collectors.toSet());
-            DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getBusinessMessage();
+            DpiDigitalMessageAsAttachment bmsg = (DpiDigitalMessageAsAttachment) message.getBusinessMessage();
             Set<String> filerefs = Stream.of(bmsg.getMetadataFiler().keySet(), bmsg.getMetadataFiler().values())
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
@@ -293,7 +293,7 @@ public class NextMoveValidator {
         if (message.getServiceIdentifier() == DPI
                 && !StringUtils.hasText(file.getName())
                 && !message.isPrimaryDocument(file.getOriginalFilename())) {
-            message.getBusinessMessage(DpiDigitalMessage.class)
+            message.getBusinessMessage(DpiDigitalMessageAsAttachment.class)
                     .filter(p -> p.getMetadataFiler().containsValue(file.getOriginalFilename()))
                     .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
         }

@@ -67,7 +67,7 @@ public class MeldingsformidlerRequestFactory {
                         .fakturaReferanse(dpiMessage.getFakturaReferanse())
         );
 
-        nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class).ifPresent(digital ->
+        nextMoveMessage.getBusinessMessage(DpiDigitalMessageAsAttachment.class).ifPresent(digital ->
                 builder.subject(digital.getTittel())
                         .smsVarslingstekst(getSmsVarslingstekst(digital))
                         .emailVarslingstekst(getEmailVarslingstekst(digital))
@@ -77,7 +77,7 @@ public class MeldingsformidlerRequestFactory {
                         .aapningskvittering(digital.getDigitalPostInfo().getAapningskvittering())
         );
 
-        nextMoveMessage.getBusinessMessage(DpiPrintMessage.class).ifPresent(print ->
+        nextMoveMessage.getBusinessMessage(DpiPrintMessageAsAttachment.class).ifPresent(print ->
                 builder.postAddress(print.getMottaker())
                         .returnAddress(print.getRetur().getMottaker())
                         .printProvider(true)
@@ -96,13 +96,13 @@ public class MeldingsformidlerRequestFactory {
                 .build();
     }
 
-    private String getEmailVarslingstekst(DpiDigitalMessage digital) {
+    private String getEmailVarslingstekst(DpiDigitalMessageAsAttachment digital) {
         return Optional.ofNullable(digital.getVarsler())
                 .map(DpiNotification::getEpostTekst)
                 .orElse(null);
     }
 
-    private String getSmsVarslingstekst(DpiDigitalMessage digital) {
+    private String getSmsVarslingstekst(DpiDigitalMessageAsAttachment digital) {
         return Optional.ofNullable(digital.getVarsler())
                 .map(DpiNotification::getSmsTekst)
                 .orElse(null);
@@ -123,7 +123,7 @@ public class MeldingsformidlerRequestFactory {
 
     @NotNull
     private Predicate<BusinessMessageFile> isMetadataFile(NextMoveMessage nextMoveMessage) {
-        return p -> nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class)
+        return p -> nextMoveMessage.getBusinessMessage(DpiDigitalMessageAsAttachment.class)
                 .map(digital -> digital.getMetadataFiler().containsValue(p.getFilename()))
                 .orElse(false);
     }
@@ -147,13 +147,13 @@ public class MeldingsformidlerRequestFactory {
     }
 
     private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file) {
-        return nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class)
+        return nextMoveMessage.getBusinessMessage(DpiDigitalMessageAsAttachment.class)
                 .filter(digital -> digital.getMetadataFiler().containsKey(file.getFilename()))
                 .map(digital -> getMetadataDocument(nextMoveMessage, file, digital))
                 .orElse(null);
     }
 
-    private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file, DpiDigitalMessage digital) {
+    private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file, DpiDigitalMessageAsAttachment digital) {
         String metadataFilename = digital.getMetadataFiler().get(file.getFilename());
         if (nextMoveMessage.getFiles() == null) {
             return null;

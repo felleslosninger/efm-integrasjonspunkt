@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +12,10 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @XmlRootElement(name = "dialogmelding", namespace = "urn:no:difi:digitalpost:json:schema::dialogmelding")
-public class Dialogmelding extends BusinessMessage<Dialogmelding> {
+public class Dialogmelding implements BusinessMessage {
 
     Notat notat;
+    @NotNull
     String patientFnr;
     String responsibleHealthcareProfessionalId;
     String vedleggBeskrivelse;

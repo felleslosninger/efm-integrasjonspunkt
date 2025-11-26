@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessageAsAttachment;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class StandardBusinessDocumentJaxbTest {
     @BeforeEach
     @SneakyThrows
     public void createMarshaller() {
-        JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessage.class);
+        JAXBContext context = JAXBContext.newInstance(StandardBusinessDocument.class, ArkivmeldingMessageAsAttachment.class);
         marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         unmarshaller = context.createUnmarshaller();
@@ -87,7 +87,7 @@ class StandardBusinessDocumentJaxbTest {
                                 )
                         )
                 )
-                .setAny(new ArkivmeldingMessage()
+                .setAny(new ArkivmeldingMessageAsAttachment()
                         .setSikkerhetsnivaa(3));
     }
 }

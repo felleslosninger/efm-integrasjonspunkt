@@ -13,14 +13,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding_kvittering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class ArkivmeldingKvitteringMessage extends BusinessMessage<ArkivmeldingKvitteringMessage> {
+public class ArkivmeldingKvitteringMessageAsAttachment extends BusinessMessageAsAttachment<ArkivmeldingKvitteringMessageAsAttachment> {
 
     private String receiptType;
     private String relatedToMessageId;
     private Set<KvitteringStatusMessage> messages;
 
     @JsonIgnore
-    public ArkivmeldingKvitteringMessage addMessage(KvitteringStatusMessage message) {
+    public ArkivmeldingKvitteringMessageAsAttachment addMessage(KvitteringStatusMessage message) {
         if (this.messages == null) {
             this.messages = new HashSet<>();
         }

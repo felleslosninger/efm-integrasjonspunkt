@@ -46,14 +46,14 @@ open class NextMoveQueueImpl(
     ) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.messageId)
         when {
-            sbd.any !is BusinessMessage<*> -> throw MeldingsUtvekslingRuntimeException("SBD payload not of a known type")
+            sbd.any !is BusinessMessageAsAttachment<*> -> throw MeldingsUtvekslingRuntimeException("SBD payload not of a known type")
             sbdService.isExpired(sbd) -> {
                 timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, ConversationDirection.INCOMING)
                 return
             }
             SBDUtil.isStatus(sbd) -> {
                 log.debug("Message with id=${sbd.messageId} is a receipt")
-                conversationService.registerStatus(sbd.messageId, (sbd.any as StatusMessage).status)
+                conversationService.registerStatus(sbd.messageId, (sbd.any as StatusMessageAsAttachment).status)
                 return
             }
         }

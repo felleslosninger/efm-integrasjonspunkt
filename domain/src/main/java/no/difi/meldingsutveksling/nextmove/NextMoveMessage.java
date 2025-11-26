@@ -78,9 +78,9 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
     }
 
     @JsonIgnore
-    public BusinessMessage<?> getBusinessMessage() {
+    public BusinessMessage getBusinessMessage() {
         return getSbd().getBusinessMessage(BusinessMessage.class)
-                .orElseThrow(() -> new NextMoveRuntimeException("SBD.any not instance of BusinessMessage"));
+                .orElseThrow(() -> new NextMoveRuntimeException("SBD.any not instance of BusinessMessageAsAttachment"));
     }
 
     @JsonIgnore

@@ -9,9 +9,8 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
 import no.difi.meldingsutveksling.domain.Iso6523
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.nextmove.FiksIoMessage
+import no.difi.meldingsutveksling.nextmove.FiksIoMessageAsAttachment
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage
-import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord
 import no.ks.fiks.io.client.FiksIOKlient
@@ -70,7 +69,7 @@ internal class FiksIoServiceTest {
         val sbd = spyk(
             StandardBusinessDocument()
                 .setAny(
-                    FiksIoMessage()
+                    FiksIoMessageAsAttachment()
                         .setSikkerhetsnivaa(3)
                 )
         )

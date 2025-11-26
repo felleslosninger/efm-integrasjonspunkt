@@ -16,7 +16,7 @@ public class StandardBusinessDocumentTestData {
     public static class MessageData {
         private final String messageId = UUID.randomUUID().toString();
         private final String conversationId = UUID.randomUUID().toString();
-        private BusinessMessage<?> businessMessage;
+        private BusinessMessage businessMessage;
         private String process;
         private String standard;
         private String type;
@@ -28,7 +28,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:arkivmelding:planByggOgGeodata:ver1.0")
             .setStandard("urn:no:difi:arkivmelding:xsd::arkivmelding")
             .setType("arkivmelding")
-            .setBusinessMessage(new ArkivmeldingMessage()
+            .setBusinessMessage(new ArkivmeldingMessageAsAttachment()
                     .setHoveddokument("before_the_law.txt"));
 
 
@@ -40,7 +40,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital")
             .setType("digital")
-            .setBusinessMessage(new DpiDigitalMessage()
+            .setBusinessMessage(new DpiDigitalMessageAsAttachment()
                     .setSikkerhetsnivaa(4)
                     .setHoveddokument("kafka_quotes.txt")
                     .setSpraak("en")
@@ -63,7 +63,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:digitalpost:info:ver1.0")
             .setStandard("urn:no:difi:digitalpost:xsd:digital::digital_dpv")
             .setType("digital_dpv")
-            .setBusinessMessage(new DigitalDpvMessage()
+            .setBusinessMessage(new DigitalDpvMessageAsAttachment()
                     .setTittel("Our winters")
                     .setSammendrag("A quote from Franz Kafka's The Castle")
                     .setInnhold("Our winters are very long here, very long and very monotonous. But we don't complain about it downstairs, we're shielded against the winter. Oh, spring does come eventually, and summer, and they last for a while, but now, looking back, spring and summer seem too short, as if they were not much more than a couple of days, and even on those days, no matter how lovely the day, it still snows occasionally.")
@@ -77,7 +77,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:digitalpost:vedtak:ver1.0")
             .setStandard("urn:no:difi:digitalpost:xsd:fysisk::print")
             .setType("print")
-            .setBusinessMessage(new DpiPrintMessage()
+            .setBusinessMessage(new DpiPrintMessageAsAttachment()
                     .setHoveddokument("kafka_quotes.txt")
                     .setMottaker(PostAddress.builder()
                             .navn("Ola Nordmann")
@@ -116,7 +116,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:einnsyn:innsynskrav:ver1.0")
             .setStandard("urn:no:difi:einnsyn:xsd::innsynskrav")
             .setType("innsynskrav")
-            .setBusinessMessage(new InnsynskravMessage()
+            .setBusinessMessage(new InnsynskravMessageAsAttachment()
                     .setOrgnr("98765432")
                     .setEpost("doofenshmirtz@evil.inc")
             );
@@ -129,7 +129,7 @@ public class StandardBusinessDocumentTestData {
             .setProcess("urn:no:difi:profile:einnsyn:journalpost:ver1.0")
             .setStandard("urn:no:difi:einnsyn:xsd::publisering")
             .setType("publisering")
-            .setBusinessMessage(new PubliseringMessage()
+            .setBusinessMessage(new PubliseringMessageAsAttachment()
                     .setOrgnr("98765432")
             );
 

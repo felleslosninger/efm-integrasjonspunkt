@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.nextmove.EinnsynKvitteringMessage;
+import no.difi.meldingsutveksling.nextmove.EinnsynKvitteringMessageAsAttachment;
 import no.difi.meldingsutveksling.nextmove.EinnsynType;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -55,8 +55,8 @@ public class ServiceBusUtil {
         if (SBDUtil.isStatus(message.getSbd())) {
             return prefix + statusSuffix();
         }
-        if (message.getBusinessMessage() instanceof EinnsynKvitteringMessage) {
-            return prefix + receiptSuffix((EinnsynKvitteringMessage) message.getBusinessMessage());
+        if (message.getBusinessMessage() instanceof EinnsynKvitteringMessageAsAttachment) {
+            return prefix + receiptSuffix((EinnsynKvitteringMessageAsAttachment) message.getBusinessMessage());
         }
 
         try {
@@ -75,7 +75,7 @@ public class ServiceBusUtil {
         }
     }
 
-    private String receiptSuffix(EinnsynKvitteringMessage k) {
+    private String receiptSuffix(EinnsynKvitteringMessageAsAttachment k) {
         if (StringUtils.hasText(properties.getNextmove().getServiceBus().getReceiptQueue())) {
             return properties.getNextmove().getServiceBus().getReceiptQueue();
         }

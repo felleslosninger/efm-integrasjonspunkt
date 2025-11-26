@@ -7,7 +7,7 @@ import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceMan
 import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageAsAttachment;
 import no.difi.meldingsutveksling.shipping.UploadRequest;
 import no.difi.meldingsutveksling.shipping.sftp.BrokerServiceManifestBuilder;
 import no.difi.meldingsutveksling.shipping.sftp.ExternalServiceBuilder;
@@ -96,7 +96,7 @@ public class AltinnPackage {
     }
 
     private static String getFileName(UploadRequest document) {
-        if (document.getPayload().getAny() instanceof BusinessMessage) {
+        if (document.getPayload().getAny() instanceof BusinessMessageAsAttachment) {
             return SBD_FILE;
         }
 
@@ -121,7 +121,7 @@ public class AltinnPackage {
             marshallObject(recipient, zipOutputStream);
             zipOutputStream.closeEntry();
 
-            if (sbd.getAny() instanceof BusinessMessage) {
+            if (sbd.getAny() instanceof BusinessMessageAsAttachment) {
                 zipOutputStream.putNextEntry(new ZipEntry(SBD_FILE));
                 ObjectMapper om = context.getBean(ObjectMapper.class);
                 om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);

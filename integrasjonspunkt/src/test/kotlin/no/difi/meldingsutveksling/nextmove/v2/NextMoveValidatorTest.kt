@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import lombok.extern.slf4j.Slf4j
-import no.difi.meldingsutveksling.MessageType
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
@@ -77,7 +76,7 @@ class NextMoveValidatorTest {
     private val message = mockk<NextMoveOutMessage>()
     private val sbd = mockk<StandardBusinessDocument>()
     private val serviceRecord = mockk<ServiceRecord>()
-    private val businessMessage = ArkivmeldingMessage()
+    private val businessMessage = ArkivmeldingMessageAsAttachment()
             .setHoveddokument("foo.txt")
 
     @BeforeEach
@@ -125,7 +124,7 @@ class NextMoveValidatorTest {
         every { serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER) } returns serviceRecord
         every { serviceRecordProvider.getServiceIdentifier(sbd) } returns ServiceIdentifier.DPO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
-        every { asserter.isValid(any<ArkivmeldingMessage>(), any()) } just Runs
+        every { asserter.isValid(any<ArkivmeldingMessageAsAttachment>(), any()) } just Runs
 
         mockkStatic(SBDUtil::class)
         every { SBDUtil.isStatus(sbd) } returns false
@@ -189,8 +188,8 @@ class NextMoveValidatorTest {
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPFIO
         every { serviceRecordProvider.getServiceIdentifier(any()) } returns ServiceIdentifier.DPFIO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO) } returns true
-        every { sbd.any } returns mockkClass(FiksIoMessage::class)
-        every { asserter.isValid(any<FiksIoMessage>(), any()) } just Runs
+        every { sbd.any } returns mockkClass(FiksIoMessageAsAttachment::class)
+        every { asserter.isValid(any<FiksIoMessageAsAttachment>(), any()) } just Runs
 
         nextMoveValidator.validate(sbd)
     }

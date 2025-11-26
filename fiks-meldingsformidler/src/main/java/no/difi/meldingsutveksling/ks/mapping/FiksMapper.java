@@ -127,8 +127,8 @@ public class FiksMapper {
     }
 
     private Optional<DpfSettings> getDpfSettings(NextMoveOutMessage message) {
-        if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
-            ArkivmeldingMessage arkivmeldingMessage = (ArkivmeldingMessage) message.getBusinessMessage();
+        if (message.getBusinessMessage() instanceof ArkivmeldingMessageAsAttachment) {
+            ArkivmeldingMessageAsAttachment arkivmeldingMessage = (ArkivmeldingMessageAsAttachment) message.getBusinessMessage();
             return Optional.ofNullable(arkivmeldingMessage.getDpf());
         }
         return Optional.empty();
@@ -157,8 +157,11 @@ public class FiksMapper {
     }
 
     private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
-        Integer sikkerhetsnivaa = message.getBusinessMessage().getSikkerhetsnivaa();
-        return sikkerhetsnivaa != null && sikkerhetsnivaa == 4;
+        BusinessMessage businessMessage = message.getBusinessMessage();
+        if (businessMessage instanceof HasSikkerhetsNivaa<?> e) {
+            return e.getSikkerhetsnivaa() == 4;
+        }
+       return false;
     }
 
     private List<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {

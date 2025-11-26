@@ -3,14 +3,13 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessageAsAttachment;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.OffsetDateTime;
 
@@ -72,7 +71,7 @@ public class StandardBusinessDocumentJsonTest {
                                 )
                         )
                 )
-                .setAny(new ArkivmeldingMessage()
+                .setAny(new ArkivmeldingMessageAsAttachment()
                         .setSikkerhetsnivaa(3)
                 );
     }

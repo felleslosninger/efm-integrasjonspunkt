@@ -72,15 +72,15 @@ public class MessageInController {
 
         Map<String, String> customProperties = Maps.newHashMap();
         String si = null;
-        if (message.getBusinessMessage() instanceof InnsynskravMessage) {
+        if (message.getBusinessMessage() instanceof InnsynskravMessageAsAttachment) {
             si = "DPE_INNSYN";
-            InnsynskravMessage innsynskravMessage = (InnsynskravMessage) message.getBusinessMessage();
+            InnsynskravMessageAsAttachment innsynskravMessage = (InnsynskravMessageAsAttachment) message.getBusinessMessage();
             customProperties.put("orgnumber", innsynskravMessage.getOrgnr());
             customProperties.put("epost", innsynskravMessage.getEpost());
         }
-        if (message.getBusinessMessage() instanceof PubliseringMessage) {
+        if (message.getBusinessMessage() instanceof PubliseringMessageAsAttachment) {
             si = "DPE_DATA";
-            PubliseringMessage publiseringMessage = (PubliseringMessage) message.getBusinessMessage();
+            PubliseringMessageAsAttachment publiseringMessage = (PubliseringMessageAsAttachment) message.getBusinessMessage();
             customProperties.put("orgnumber", publiseringMessage.getOrgnr());
         }
 

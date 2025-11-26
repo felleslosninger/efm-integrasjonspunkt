@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessageAsAttachment;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -140,7 +139,7 @@ class PeekNextMoveMessageInImplTest {
 
     private NextMoveInMessage getNextMoveMessage() {
         NextMoveInMessage message = new NextMoveInMessage();
-        message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessage()));
+        message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessageAsAttachment()));
         return message;
     }
 }

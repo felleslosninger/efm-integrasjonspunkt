@@ -10,8 +10,10 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "publisering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class PubliseringMessage extends BusinessMessage<PubliseringMessage> {
+@XmlRootElement(name = "innsynskrav", namespace = "urn:no:difi:meldingsutveksling:2.0")
+public class InnsynskravMessageAsAttachment extends BusinessMessageAsAttachment<InnsynskravMessageAsAttachment> {
     @NotNull
     private String orgnr;
+    @NotNull
+    private String epost;
 }
