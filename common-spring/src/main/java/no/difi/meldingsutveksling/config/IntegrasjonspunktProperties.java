@@ -107,7 +107,7 @@ public class IntegrasjonspunktProperties {
         private String receiptProcess;
         @NotNull
         private String receiptDocumentType;
-        private boolean generateReceipts;
+        private boolean generateArkivmeldingReceipts;
     }
 
     @Data

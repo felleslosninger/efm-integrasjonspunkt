@@ -88,7 +88,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                             && properties.getArkivmelding() != null
                             && c.getDocumentIdentifier() != null
                             && c.getDocumentIdentifier().equals(properties.getArkivmelding().getDefaultDocumentType())
-                            && properties.getArkivmelding().isGenerateReceipts()) {
+                            && properties.getArkivmelding().isGenerateArkivmeldingReceipts()) {
                         nextMoveQueue.enqueueIncomingMessage(
                                 sbdFactory.createArkivmeldingReceiptFrom(c, ArkivmeldingKvitteringType.OK), DPV);
                     }
