@@ -5,7 +5,8 @@
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
 - [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
 - [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
-- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med 
+- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med
+- [ ] Fjerne bruk av docker-file og gå over bruke mvn spring boot build image: [jira](https://digdir.atlassian.net/jira/software/c/projects/MOVE/boards/32?assignee=5f2cfe00ef11df0025e5cd23&selectedIssue=MOVE-4422)
 
 Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
