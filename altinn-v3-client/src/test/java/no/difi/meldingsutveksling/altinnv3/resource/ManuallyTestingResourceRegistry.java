@@ -1,5 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.resource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
@@ -67,17 +70,37 @@ public class ManuallyTestingResourceRegistry {
     }
 
     @Test
-    void testAccessListMembers() {
-        String list = client.showAccesslistMembers("eformidling-meldingsteneste-test-tilgangsliste");
+    void testAddAccessListMember() {
+        String list = client.addAccesslistMember("eformidling-meldingsteneste-test-tilgangsliste", "821894492");
         assertNotNull(list, "List should not be null");
+        assertTrue(list.contains("821894492"), "List should contain the added user");
         System.out.println(list);
     }
 
     @Test
-    void testAddAccessListMember() {
-        String list = client.addAccesslistMember("eformidling-meldingsteneste-test-tilgangsliste");
+    void testRemoveAccessListMember() {
+        String list = client.removeAccesslistMember("eformidling-meldingsteneste-test-tilgangsliste", "821894492");
         assertNotNull(list, "List should not be null");
+        assertFalse(list.contains("821894492"), "List should no longer contain the removed user");
         System.out.println(list);
     }
+
+    @Test
+    void testAccessListMembers() throws Exception {
+        String list = client.showAccesslistMembers("eformidling-meldingsteneste-test-tilgangsliste");
+        assertNotNull(list, "List should not be null");
+        System.out.println(list);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        var accessList = mapper.readValue(list, AccessList.class);
+        System.out.println(accessList);
+        List<String> organizationNumbers = accessList.data.stream().map(it -> it.identifiers().organizationNumber()).toList();
+        System.out.println(organizationNumbers);
+    }
+
+    // for deserialization json to java
+    record AccessList(List<AccessListEntry> data) {}
+    record AccessListEntry(AccessListOrganization identifiers) {}
+    record AccessListOrganization(@JsonProperty("urn:altinn:organization:identifier-no") String organizationNumber) {}
 
 }

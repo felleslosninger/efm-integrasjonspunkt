@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -79,14 +80,15 @@ public class ResourceApiClient {
             ;
     }
 
-    public String addAccesslistMember(String accessList) {
+    public String addAccesslistMember(String accessList, String orgno) {
         var newMember = """
             {
               "data": [
-                "urn:altinn:organization:identifier-no:314240979"
+                "urn:altinn:organization:identifier-no:%s"
               ]
             }
-        """;
+        """.formatted(orgno);
+        // This method is idempotent, meaning that if a member already exists, it will not be added again.
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
         return restClient.post()
             .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
@@ -94,6 +96,27 @@ public class ResourceApiClient {
             .header("Accept", "application/json")
             .contentType(MediaType.APPLICATION_JSON)
             .body(newMember)
+            .retrieve()
+            .body(String.class)
+            ;
+    }
+
+    public String removeAccesslistMember(String accessList, String orgno) {
+        var member = """
+            {
+              "data": [
+                "urn:altinn:organization:identifier-no:%s"
+              ]
+            }
+        """.formatted(orgno);
+        // This method is idempotent, meaning that if a member does not exist, it will not be removed.
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_ACCESSLISTS);
+        return restClient.method(HttpMethod.DELETE)
+            .uri(apiEndpoint + "/access-lists/{owner}/{accesslist}/members", "digdir", accessList)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(member)
             .retrieve()
             .body(String.class)
             ;

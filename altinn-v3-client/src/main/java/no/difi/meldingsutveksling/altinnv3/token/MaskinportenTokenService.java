@@ -42,4 +42,5 @@ public class MaskinportenTokenService implements TokenService {
 
         return jwtTokenConfig;
     }
+
 }
