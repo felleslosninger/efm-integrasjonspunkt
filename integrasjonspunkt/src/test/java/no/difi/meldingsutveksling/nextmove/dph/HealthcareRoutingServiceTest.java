@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.dph;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
@@ -11,7 +10,6 @@ import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +21,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static no.difi.meldingsutveksling.nextmove.HealthcareTestData.*;
+import static no.difi.meldingsutveksling.nextmove.HealthcareTestData.Identifier;
+import static no.difi.meldingsutveksling.nextmove.HealthcareTestData.createDialogMelding;
+import static no.difi.meldingsutveksling.nextmove.HealthcareTestData.dialgmelding;
+import static no.difi.meldingsutveksling.nextmove.HealthcareTestData.serviceRecord;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 public class HealthcareRoutingServiceTest {
-
 
     @Mock
     private IntegrasjonspunktProperties integrasjonspunktProperties;
@@ -68,14 +71,14 @@ public class HealthcareRoutingServiceTest {
         safelyRun(()->healthcareRoutingService.validateAndApply(sbd));
 
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
-        Mockito.verify(spyRecord).getOrganisationNumber();
+        Mockito.verify(spyRecord,Mockito.times(1)).getOrganisationNumber();
 
     }
 
     @Test
     public void whenRecieverIsNhn_and_orgnumVerificationFail_ValidationException() {
         StandardBusinessDocument sbd = dialgmelding();
-        ServiceRecord recieverRecord =  HealthcareTestData.serviceRecord(Identifier.validNhnReceiverIdentifier.withIdentifier("invalid-identifier"));
+        ServiceRecord recieverRecord =  serviceRecord(Identifier.validNhnReceiverIdentifier.withIdentifier("invalid-identifier"));
         ServiceRecord spyRecord = Mockito.spy(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
         try {
@@ -84,77 +87,105 @@ public class HealthcareRoutingServiceTest {
 
         } catch (Throwable e) {
             e.printStackTrace();
-            Assertions.fail("It was supposed to throw HealthcareValidationException");
+            fail("It was supposed to throw HealthcareValidationException");
         }
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
         Mockito.verify(spyRecord,Mockito.times(1)).getOrganisationNumber();
 
     }
 
-
-
     @Test
-    public void whenMultitenancyIsFalse_SenderHerID1IsVerified() {
-        String MISSMATCHING_HERID1_FROM_CONFIGURATION = "4443333";
-        String SENDER_HERID1_FROM_BUSINESS_DOCUMENT = "8767123123";
+    public void whenMultitenancyIsFalse_moreThanOneOrgnummerWhitelisted_thenValidationExceptioon() {
+        List<String> WHITE_LISTED_ORGNUM = List.of("223423423","3232434");
         StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
-        sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(SENDER_HERID1_FROM_BUSINESS_DOCUMENT));
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
 
         ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
         ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
 
-        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setSenderHerId1(MISSMATCHING_HERID1_FROM_CONFIGURATION));
-
-        ServiceRecord spyRecord = Mockito.spy(recieverRecord);
-        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
-
         HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
-        Assertions.assertEquals("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1 " + MISSMATCHING_HERID1_FROM_CONFIGURATION +" and orgnum 920640818", e.getArgs()[0]);
+        assertEquals("Multinencancy configuration error. Only one organisation number should be whitelisted.",e.getArgs()[0]);
+    }
 
+    @Test
+    public void whenMultitenancyFalse_and_SenderHerId2_Organization_is_notWhitelisted_ThrowValidationException() {
+        List<String> WHITE_LISTED_ORGNUM = List.of("223423423");
+       // String SENDER_HERID1_FROM_BUSINESS_DOCUMENT = "8767123123";
+        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+       // sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(SENDER_HERID1_FROM_BUSINESS_DOCUMENT));
+
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
+
+        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
+
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
+        HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
+        assertEquals("Multitenancy is not supported. Sender organisation number:920640818 is not allowed to send in.",e.getArgs()[0]);
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.SENDER);
-        Mockito.verify(spyRecord, Mockito.times(1)).getOrganisationNumber();
-
-        Mockito.clearInvocations(serviceRecordProvider,spyRecord);
-        Mockito.lenient()
-            .when(integrasjonspunktProperties.getDph())
-            .thenReturn(new IntegrasjonspunktProperties.DphConfig()
-                .setAllowMultitenancy(false)
-                .setSenderHerId1(Identifier.validNhnSenderIdentifier.getHerId1()));
-
-        e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
-        Assertions.assertEquals("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1 8767123123 and orgnum 920640818", e.getArgs()[0]);
-
-        Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
-        Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.SENDER);
-        Mockito.verify(spyRecord, Mockito.times(1)).getOrganisationNumber();
-
 
     }
 
     @Test
-    public void whenMultitenancyIsFalse_SenderOrgnumberIsVerified() {
+    public void whenMultitenancyFalse_and_SenderOrgnum_DoesNotMatch_AR_then_ValidationException() {
+        List<String> WHITE_LISTED_ORGNUM = List.of(HealthcareTestData.Identifier.validNhnSenderIdentifier.getIdentifier());
 
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding().setSenderIdentifier(HealthcareTestData.Identifier.validNhnSenderIdentifier.withIdentifier("invalidIdentifier"));
+        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
 
         ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
-        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
+        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier.withIdentifier("77777"));
 
-        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setSenderHerId1(HealthcareTestData.Identifier.validNhnSenderIdentifier.getHerId1()));
-
-        ServiceRecord spyRecord = Mockito.spy(recieverRecord);
-        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
 
-        HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
-        Assertions.assertEquals("Multitenancy is not supported. Sender organisation number:invalidIdentifier is not registered in AR ", e.getArgs()[0]);
 
+        HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
+        assertEquals("Multitenancy is not supported. Sender organisation number:920640818 is not registered in AR.",e.getArgs()[0]);
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.RECEIVER);
         Mockito.verify(serviceRecordProvider,Mockito.times(1)).getServiceRecord(sbd, Participant.SENDER);
-        Mockito.verify(spyRecord, Mockito.times(1)).getOrganisationNumber();
 
     }
+   // Vi trenger å ha AR organisasjonsnummer som er basert på HerID2i scopes å matche whitelisted organisasjonsnummer og matche organisasjonsnummeret på sender
+    @Test
+    public void whenSenderOrgnumDoesNotMatchHerId2OrgNum_throwsValidationException(){
+        List<String> WHITE_LISTED_ORGNUM = List.of(Identifier.validNhnSenderIdentifier.getIdentifier());
+
+        StandardBusinessDocument sbd = createDialogMelding(Identifier.validNhnSenderIdentifier.withIdentifier("7234234"),Identifier.validNhnReceiverIdentifier);
+
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
+
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
+
+        assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
+
+
+    }
+
+    public void whenSenderOrgnum_and_ArOrgnum_and_whitelistedOrgnum_doesNotMatch_throwValidationException(){
+        List<String> WHITE_LISTED_ORGNUM = List.of(Identifier.validNhnSenderIdentifier.getIdentifier());
+        StandardBusinessDocument sbd = dialgmelding();
+        Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
+
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier.withIdentifier("77777"));
+
+
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
+
+
+
+    }
+
+
 
     @Test
     public void  MultitenancyIsEnabled_ArOrgnummerShouldBeWhitelisted() {

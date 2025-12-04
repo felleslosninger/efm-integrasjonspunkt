@@ -7,7 +7,6 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
-import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -40,6 +39,9 @@ public class HealthcareRoutingService {
         if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier recieverIdentifier)) {
             throw new HealthcareValidationException("Not able to construct identifier for document type: " + sbd.getDocumentType());
         }
+        sbd.getScope(ScopeType.RECEIVER_HERID2).ifPresent(t->{
+            if (!Objects.equals(t.getInstanceIdentifier(), srReciever.getHerIdLevel2())) throw new HealthcareValidationException("Reciever HerId 2 does not match information from address register.");
+        });
 
         if (recieverIdentifier.isNhnPartnerIdentifier()) {
             var recieverOrgnummer = recieverIdentifier.getIdentifier();
@@ -50,16 +52,12 @@ public class HealthcareRoutingService {
 
         var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
         if (!isMultitenantSetup) {
-            var fromConfigurationHerID = properties.getDph().getSenderHerId1();
+            if (properties.getDph().getWhitelistOrgnum().size()!=1) { throw new HealthcareValidationException("Multinencancy configuration error. Only one organisation number should be whitelisted.");}
 
-            if (!fromConfigurationHerID.equals(srSender.getHerIdLevel1()))
-                throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for herID1 " + properties.getDph().getSenderHerId1() + " and orgnum " + srSender.getOrganisationNumber());
-            sbd.getScope(ScopeType.SENDER_HERID1).ifPresent(t -> {
-                if (!Objects.equals(t.getInstanceIdentifier(), srSender.getHerIdLevel1()))
-                    throw new HealthcareValidationException("Multitenancy not supported: Routing information in message does not match Adressregister information for HerID level 1 " + t.getInstanceIdentifier() + " and orgnum " + sbd.getSenderIdentifier().getIdentifier());
-            });
             if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), srSender.getOrganisationNumber()))
-                throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not registered in AR ");
+                throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not registered in AR.");
+            if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), properties.getDph().getWhitelistOrgnum().getFirst()))
+                throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not allowed to send in.");
 
 
         } else {
@@ -77,21 +75,30 @@ public class HealthcareRoutingService {
         ServiceRecord srReceiver = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER);
 
-        if (sbd.getScope(ScopeType.SENDER_HERID1).isEmpty()) {
+        if (sbd.getScope(ScopeType.SENDER_HERID1).isPresent()) {
+            sbd.getScope(ScopeType.SENDER_HERID1).ifPresent(t -> {
+                if (!Objects.equals(t.getInstanceIdentifier(), srSender.getHerIdLevel1()))
+                    throw new HealthcareValidationException("Incoming Sender HerID 1 does not match Adressregister information for HerID level 1 " + t.getInstanceIdentifier() + "and identifier " +  sbd.getSenderIdentifier().getIdentifier());
+            });
+        }else {
             sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel1()));
         }
-        if (sbd.getScope(ScopeType.SENDER_HERID2).isEmpty()) {
-            sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID2.getFullname()).setInstanceIdentifier(srSender.getHerIdLevel2()));
-        }
-        if (sbd.getScope(ScopeType.RECEIVER_HERID2).isEmpty()) {
-            sbd.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier(srReceiver.getHerIdLevel2()));
-        }
+
         if ( sbd.getScope(ScopeType.RECEIVER_HERID1).isPresent()) {
             if (!sbd.getScope(ScopeType.RECEIVER_HERID1).get().getInstanceIdentifier().equals(srReceiver.getHerIdLevel1())) {
                 throw new HealthcareValidationException("Incoming HerID does not match expected HERID level 1!");
             }
         } else {
             sbd.getScopes().add(new Scope().setType( ScopeType.RECEIVER_HERID1.getFullname()).setInstanceIdentifier(srReceiver.getHerIdLevel1()));
+        }
+        if (sbd.getScope(ScopeType.RECEIVER_HERID2).isPresent()) {
+            sbd.getScope(ScopeType.RECEIVER_HERID2).ifPresent(t -> {
+                if (!Objects.equals(t.getInstanceIdentifier(), srReceiver.getHerIdLevel2()))
+                    throw new HealthcareValidationException("Incoming Receiver HerID 2 does not match Adressregister information for HerID level 2 " + t.getInstanceIdentifier() + " and identifier " + sbd.getReceiverIdentifier().getIdentifier());
+            });
+        }
+        else {
+            sbd.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier(srReceiver.getHerIdLevel2()));
         }
     }
 }

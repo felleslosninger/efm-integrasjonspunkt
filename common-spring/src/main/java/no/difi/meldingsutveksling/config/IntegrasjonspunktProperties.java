@@ -137,7 +137,6 @@ public class IntegrasjonspunktProperties {
     @Data
     public static class DphConfig {
         private List<String> whitelistOrgnum;
-        private String senderHerId1;
         private Boolean allowMultitenancy;
         private DataSize uploadSizeLimit;
         private String adapterUrl;
