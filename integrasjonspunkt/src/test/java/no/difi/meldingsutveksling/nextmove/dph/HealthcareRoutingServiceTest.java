@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.dph;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 public class HealthcareRoutingServiceTest {
@@ -97,11 +99,11 @@ public class HealthcareRoutingServiceTest {
     @Test
     public void whenMultitenancyIsFalse_moreThanOneOrgnummerWhitelisted_thenValidationExceptioon() {
         List<String> WHITE_LISTED_ORGNUM = List.of("223423423","3232434");
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+        StandardBusinessDocument sbd = dialgmelding();
         Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
 
-        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
-        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
 
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
@@ -112,14 +114,12 @@ public class HealthcareRoutingServiceTest {
     @Test
     public void whenMultitenancyFalse_and_SenderHerId2_Organization_is_notWhitelisted_ThrowValidationException() {
         List<String> WHITE_LISTED_ORGNUM = List.of("223423423");
-       // String SENDER_HERID1_FROM_BUSINESS_DOCUMENT = "8767123123";
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
-       // sbd.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier(SENDER_HERID1_FROM_BUSINESS_DOCUMENT));
+        StandardBusinessDocument sbd = dialgmelding();
 
         Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
 
-        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
-        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
 
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
@@ -210,10 +210,10 @@ public class HealthcareRoutingServiceTest {
 
     @Test
     public void whenStandardBusinessDocumentPassValidation_allScopeElementsArePresent() {
-        final StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+        final StandardBusinessDocument sbd = dialgmelding();
 
-        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
-        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier);
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
 
         ServiceRecord spyRecord = Mockito.spy(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
@@ -237,6 +237,52 @@ public class HealthcareRoutingServiceTest {
         assertEquals(Identifier.validNhnReceiverIdentifier.getHerId1(), sbd.getScope(ScopeType.RECEIVER_HERID1).get().getInstanceIdentifier());
         assertEquals(Identifier.validNhnReceiverIdentifier.getHerId2(), sbd.getScope(ScopeType.RECEIVER_HERID2).get().getInstanceIdentifier());
 
+
+    }
+
+    @Test
+    public void whenFnrReceiverAndReceiverHerId2_isTampered_throwsValidationException() {
+        final StandardBusinessDocument tamperedSenderHerId1 = createDialogMelding(Identifier.validNhnSenderIdentifier,Identifier.validFastlegeReceiverIdentifier);
+        tamperedSenderHerId1.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier("343437"));
+
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validFastlegeReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
+
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(tamperedSenderHerId1, Participant.RECEIVER)).thenReturn(recieverRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(tamperedSenderHerId1, Participant.SENDER)).thenReturn(senderRecord);
+
+        assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedSenderHerId1)) ;
+
+    }
+
+    @Test
+    public void whenSbdScopesAreTampered_scopes_are_validated() {
+        final StandardBusinessDocument tamperedSenderHerId1 = dialgmelding();
+        tamperedSenderHerId1.getScopes().add(new Scope().setType(ScopeType.SENDER_HERID1.getFullname()).setInstanceIdentifier("343437"));
+
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier);
+
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(Mockito.argThat(incomingSbd -> incomingSbd!=null && incomingSbd.getReceiverIdentifier().getIdentifier().equals(Identifier.validNhnReceiverIdentifier.getIdentifier())), eq(Participant.RECEIVER))).thenReturn(recieverRecord);
+        Mockito.lenient().when(serviceRecordProvider.getServiceRecord(Mockito.argThat(incomingSbd -> incomingSbd.getSenderIdentifier().getIdentifier().equals(Identifier.validNhnSenderIdentifier.getIdentifier())), eq(Participant.SENDER))).thenReturn(senderRecord);
+
+        Mockito.lenient()
+            .when(integrasjonspunktProperties.getDph()).
+            thenReturn(new IntegrasjonspunktProperties.DphConfig()
+                .setAllowMultitenancy(true)
+                .setWhitelistOrgnum(List.of(Identifier.validNhnSenderIdentifier.getIdentifier())));
+
+        assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedSenderHerId1)) ;
+
+        final StandardBusinessDocument tamperedReceiverHerId1 = dialgmelding();
+        tamperedReceiverHerId1.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID1.getFullname()).setInstanceIdentifier("343437"));
+
+        assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedReceiverHerId1)) ;
+
+        final StandardBusinessDocument tamperedReceiverHerId2 = dialgmelding();
+        tamperedReceiverHerId1.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier("343437"));
+
+        assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedReceiverHerId2)) ;
 
     }
 
