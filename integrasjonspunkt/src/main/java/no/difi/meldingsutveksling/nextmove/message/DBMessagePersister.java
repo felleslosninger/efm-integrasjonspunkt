@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.PersistenceException;
@@ -34,7 +35,7 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public Resource read(String messageId, String filename) throws IOException {
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
                 .orElseThrow(() -> new PersistenceException("Entry for conversationId=%s, filename=%s not found in database".formatted(messageId, filename)));
