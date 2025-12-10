@@ -17,7 +17,7 @@ import java.sql.Blob;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "difi.move.nextmove.useDbPersistence", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.nextmove.use-db-persistence", havingValue = "true")
 @RequiredArgsConstructor
 public class DBMessagePersister implements MessagePersister {
 
