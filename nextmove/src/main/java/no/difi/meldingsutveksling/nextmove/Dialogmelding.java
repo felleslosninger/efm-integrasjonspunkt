@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.ToString;
 public class Dialogmelding implements BusinessMessage {
 
     Notat notat;
-    @NotNull
+
     String patientFnr;
     String responsibleHealthcareProfessionalId;
     String vedleggBeskrivelse;

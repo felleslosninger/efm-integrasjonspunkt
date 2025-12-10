@@ -52,7 +52,7 @@ public class HealthcareRoutingServiceTest {
 
   @Test
   public void whenSenderHerId2NotPresent_ThrowIllegalArgumentException() {
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+        StandardBusinessDocument sbd = dialgmelding();
         sbd.getScopes().remove(sbd.getScopes().stream().filter(t -> Objects.equals(t.getType(), ScopeType.SENDER_HERID2.getFullname())).findFirst().orElse(null));
         assertThrows(
             IllegalArgumentException.class,
@@ -64,8 +64,8 @@ public class HealthcareRoutingServiceTest {
 
     @Test
     public void whenRecieverIsNhn_verifyOrgnumMatchesSR() {
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
-        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
+        StandardBusinessDocument sbd = dialgmelding();
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
 
         ServiceRecord spyRecord = Mockito.spy(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
