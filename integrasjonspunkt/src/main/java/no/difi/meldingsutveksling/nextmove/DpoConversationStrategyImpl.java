@@ -68,7 +68,7 @@ public class DpoConversationStrategyImpl implements DpoConversationStrategy {
 
     private void ifReceipt(NextMoveOutMessage message, Consumer<MessageChannelEntry> consumer) {
         if (SBDUtil.isReceipt(message.getSbd())) {
-            message.getSbd().getBusinessMessage(ArkivmeldingKvitteringMessageAsAttachment.class)
+            message.getSbd().getBusinessMessage(ArkivmeldingKvitteringMessage.class)
                     .flatMap(receipt -> messageChannelRepository.findByMessageId(receipt.getRelatedToMessageId()))
                     .ifPresent(consumer);
         }

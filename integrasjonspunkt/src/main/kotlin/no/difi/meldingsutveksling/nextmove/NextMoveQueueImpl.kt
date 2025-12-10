@@ -53,7 +53,7 @@ open class NextMoveQueueImpl(
             }
             SBDUtil.isStatus(sbd) -> {
                 log.debug("Message with id=${sbd.messageId} is a receipt")
-                conversationService.registerStatus(sbd.messageId, (sbd.any as StatusMessageAsAttachment).status)
+                conversationService.registerStatus(sbd.messageId, (sbd.any as StatusMessage).status)
                 return
             }
         }

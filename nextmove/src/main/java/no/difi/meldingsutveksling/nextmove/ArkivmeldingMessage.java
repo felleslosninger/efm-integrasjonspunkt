@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 @ToString
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class ArkivmeldingMessageAsAttachment extends BusinessMessageAsAttachment<ArkivmeldingMessageAsAttachment> implements HasSikkerhetsNivaa<ArkivmeldingMessageAsAttachment> {
+public class ArkivmeldingMessage extends BusinessMessageAsAttachment<ArkivmeldingMessage> implements HasSikkerhetsNivaa<ArkivmeldingMessage> {
     @NotNull(groups = {
         NextMoveValidationGroups.ServiceIdentifier.DPF.class
     })

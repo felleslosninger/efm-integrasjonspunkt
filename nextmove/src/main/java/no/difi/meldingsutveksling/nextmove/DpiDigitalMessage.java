@@ -20,7 +20,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-public class DpiDigitalMessageAsAttachment extends BusinessMessageAsAttachment<DpiDigitalMessageAsAttachment> implements DpiMessage,HasSikkerhetsNivaa<DpiDigitalMessageAsAttachment> {
+public class DpiDigitalMessage extends BusinessMessageAsAttachment<DpiDigitalMessage> implements DpiMessage,HasSikkerhetsNivaa<DpiDigitalMessage> {
     @NotNull(groups = {
         NextMoveValidationGroups.MessageType.Digital.class
     })

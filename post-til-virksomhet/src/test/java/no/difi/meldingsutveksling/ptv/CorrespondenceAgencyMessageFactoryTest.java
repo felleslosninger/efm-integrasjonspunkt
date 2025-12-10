@@ -133,7 +133,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
     @Test
     void testOverrideVarselTypeAndTransportType() {
-        ArkivmeldingMessageAsAttachment amMsg = new ArkivmeldingMessageAsAttachment();
+        ArkivmeldingMessage amMsg = new ArkivmeldingMessage();
         DpvSettings dpv = new DpvSettings();
         dpv.setVarselType(DpvVarselType.VARSEL_DPV_UTEN_REVARSEL);
         dpv.setVarselTransportType(DpvVarselTransportType.EPOST);
@@ -165,7 +165,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
     @Test
     void testSensitivVarselOverride() {
-        ArkivmeldingMessageAsAttachment amMsg = new ArkivmeldingMessageAsAttachment();
+        ArkivmeldingMessage amMsg = new ArkivmeldingMessage();
         DpvSettings dpv = new DpvSettings();
         String varselTekst = "taus foo $reporterName$ bar $reporteeName$";
         dpv.setTaushetsbelagtVarselTekst(varselTekst);
@@ -183,7 +183,7 @@ class CorrespondenceAgencyMessageFactoryTest {
 
     @Test
     void testOverrideSvarfrist() {
-        ArkivmeldingMessageAsAttachment amMsg = new ArkivmeldingMessageAsAttachment();
+        ArkivmeldingMessage amMsg = new ArkivmeldingMessage();
         DpvSettings dpv = new DpvSettings();
         dpv.setDagerTilSvarfrist(3);
         amMsg.setDpv(dpv);

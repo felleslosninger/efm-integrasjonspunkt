@@ -3,7 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessageAsAttachment;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -71,7 +71,7 @@ public class StandardBusinessDocumentJsonTest {
                                 )
                         )
                 )
-                .setAny(new ArkivmeldingMessageAsAttachment()
+                .setAny(new ArkivmeldingMessage()
                         .setSikkerhetsnivaa(3)
                 );
     }

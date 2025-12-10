@@ -16,7 +16,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.DpiPrintMessageAsAttachment;
+import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
 import no.difi.meldingsutveksling.nextmove.MailReturn;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -153,7 +153,7 @@ public class NextMoveOutMessageFactory {
             .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         if (messageType == MessageType.PRINT) {
-            DpiPrintMessageAsAttachment dpiMessage = (DpiPrintMessageAsAttachment) sbd.getAny();
+            DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
 
             if (dpiMessage.getUtskriftsfarge() == null) {
                 dpiMessage.setUtskriftsfarge(PrintColor.SORT_HVIT);

@@ -37,7 +37,7 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
         ServiceRecord serviceRecord = getServiceRecord(message);
 
-        message.getBusinessMessage(DpiDigitalMessageAsAttachment.class).ifPresent(bmsg ->
+        message.getBusinessMessage(DpiDigitalMessage.class).ifPresent(bmsg ->
                 conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
                     c.setMessageTitle(bmsg.getTittel());
                     conversationService.save(c);

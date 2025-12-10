@@ -65,20 +65,20 @@ public class CorrespondenceAgencyMessageFactory {
 
     @SneakyThrows
     public InsertCorrespondenceV2 create(NextMoveOutMessage message) {
-        if (message.getBusinessMessage() instanceof ArkivmeldingMessageAsAttachment) {
+        if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
             return handleArkivmeldingMessage(message);
         }
 
-        if (message.getBusinessMessage() instanceof DigitalDpvMessageAsAttachment) {
+        if (message.getBusinessMessage() instanceof DigitalDpvMessage) {
             return handleDigitalDpvMessage(message);
         }
 
         throw new NextMoveRuntimeException("StandardBusinessDocument.any not instance of %s or %s, aborting".formatted(
-                ArkivmeldingMessageAsAttachment.class.getName(), DigitalDpvMessageAsAttachment.class.getName()));
+                ArkivmeldingMessage.class.getName(), DigitalDpvMessage.class.getName()));
     }
 
     private InsertCorrespondenceV2 handleDigitalDpvMessage(NextMoveOutMessage message) {
-        DigitalDpvMessageAsAttachment msg = (DigitalDpvMessageAsAttachment) message.getBusinessMessage();
+        DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
         BinaryAttachmentExternalBEV2List attachmentExternalBEV2List = new BinaryAttachmentExternalBEV2List();
         attachmentExternalBEV2List.getBinaryAttachmentV2().addAll(getAttachments(message.getMessageId(), message.getFiles()));
@@ -301,14 +301,14 @@ public class CorrespondenceAgencyMessageFactory {
     }
 
     private Optional<DpvSettings> getDpvSettings(NextMoveOutMessage msg) {
-        if (msg.getBusinessMessage() instanceof ArkivmeldingMessageAsAttachment) {
-            ArkivmeldingMessageAsAttachment amMsg = (ArkivmeldingMessageAsAttachment) msg.getBusinessMessage();
+        if (msg.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            ArkivmeldingMessage amMsg = (ArkivmeldingMessage) msg.getBusinessMessage();
             if (amMsg.getDpv() != null) {
                 return Optional.of(amMsg.getDpv());
             }
         }
-        if (msg.getBusinessMessage() instanceof DigitalDpvMessageAsAttachment) {
-            DigitalDpvMessageAsAttachment ddMsg = (DigitalDpvMessageAsAttachment) msg.getBusinessMessage();
+        if (msg.getBusinessMessage() instanceof DigitalDpvMessage) {
+            DigitalDpvMessage ddMsg = (DigitalDpvMessage) msg.getBusinessMessage();
             if (ddMsg.getDpv() != null) {
                 return Optional.of(ddMsg.getDpv());
             }

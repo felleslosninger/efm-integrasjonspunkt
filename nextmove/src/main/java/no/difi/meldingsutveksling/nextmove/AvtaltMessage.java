@@ -12,7 +12,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @ToString
 @NoArgsConstructor
 @XmlRootElement(name = "avtalt", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class AvtaltMessageAsAttachment extends BusinessMessageAsAttachment<AvtaltMessageAsAttachment> {
+public class AvtaltMessage extends BusinessMessageAsAttachment<AvtaltMessage> {
     String identifier;
     Object content;
 }

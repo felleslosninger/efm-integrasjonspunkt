@@ -9,10 +9,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.*;
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessageAsAttachment;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringType;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
-import no.difi.meldingsutveksling.nextmove.StatusMessageAsAttachment;
+import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -89,14 +89,14 @@ public class SBDFactory {
                 sbd.getMessageId(),
                 createProcess(sbd),
                 props.getNextmove().getStatusDocumentType(),
-                new StatusMessageAsAttachment(status));
+                new StatusMessage(status));
 
         SBDUtil.getOptionalMessageChannel(sbd).ifPresent(statusSbd::addScope);
         return statusSbd;
     }
 
     public StandardBusinessDocument createArkivmeldingReceiptFrom(NextMoveMessage message, ArkivmeldingKvitteringType type) {
-        ArkivmeldingKvitteringMessageAsAttachment receipt = new ArkivmeldingKvitteringMessageAsAttachment(type.name(), message.getMessageId(), Sets.newHashSet());
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(type.name(), message.getMessageId(), Sets.newHashSet());
         return createNextMoveSBD(message.getReceiver(),
                 message.getSender(),
                 message.getConversationId(),
@@ -107,7 +107,7 @@ public class SBDFactory {
     }
 
     public StandardBusinessDocument createArkivmeldingReceiptFrom(Conversation conversation, ArkivmeldingKvitteringType type) {
-        ArkivmeldingKvitteringMessageAsAttachment receipt = new ArkivmeldingKvitteringMessageAsAttachment(type.name(), conversation.getMessageId(), Sets.newHashSet());
+        ArkivmeldingKvitteringMessage receipt = new ArkivmeldingKvitteringMessage(type.name(), conversation.getMessageId(), Sets.newHashSet());
         return createNextMoveSBD(PartnerIdentifier.parse(conversation.getReceiver()),
                 PartnerIdentifier.parse(conversation.getSender()),
                 conversation.getConversationId(),

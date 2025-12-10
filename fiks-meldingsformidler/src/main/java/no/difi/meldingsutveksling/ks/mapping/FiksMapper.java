@@ -127,8 +127,8 @@ public class FiksMapper {
     }
 
     private Optional<DpfSettings> getDpfSettings(NextMoveOutMessage message) {
-        if (message.getBusinessMessage() instanceof ArkivmeldingMessageAsAttachment) {
-            ArkivmeldingMessageAsAttachment arkivmeldingMessage = (ArkivmeldingMessageAsAttachment) message.getBusinessMessage();
+        if (message.getBusinessMessage() instanceof ArkivmeldingMessage) {
+            ArkivmeldingMessage arkivmeldingMessage = (ArkivmeldingMessage) message.getBusinessMessage();
             return Optional.ofNullable(arkivmeldingMessage.getDpf());
         }
         return Optional.empty();

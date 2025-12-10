@@ -24,14 +24,14 @@ class DocumentConverter {
         try {
             this.ctx = JAXBContextFactory.createContext(new Class[]{
                     StandardBusinessDocument.class,
-                    ArkivmeldingMessageAsAttachment.class,
-                    ArkivmeldingKvitteringMessageAsAttachment.class,
-                    DpiDigitalMessageAsAttachment.class,
-                    DpiPrintMessageAsAttachment.class,
-                    EinnsynKvitteringMessageAsAttachment.class,
-                    InnsynskravMessageAsAttachment.class,
-                    PubliseringMessageAsAttachment.class,
-                    StatusMessageAsAttachment.class}, null);
+                    ArkivmeldingMessage.class,
+                    ArkivmeldingKvitteringMessage.class,
+                    DpiDigitalMessage.class,
+                    DpiPrintMessage.class,
+                    EinnsynKvitteringMessage.class,
+                    InnsynskravMessage.class,
+                    PubliseringMessage.class,
+                    StatusMessage.class}, null);
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not initialize " + DocumentConverter.class, e);
         }

@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 @ToString
 @NoArgsConstructor
 @XmlRootElement(name = "fiksio", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class FiksIoMessageAsAttachment extends BusinessMessageAsAttachment<FiksIoMessageAsAttachment> implements HasSikkerhetsNivaa<FiksIoMessageAsAttachment> {
+public class FiksIoMessage extends BusinessMessageAsAttachment<FiksIoMessage> implements HasSikkerhetsNivaa<FiksIoMessage> {
     @NotNull(groups = {
         NextMoveValidationGroups.ServiceIdentifier.DPF.class
     })

@@ -11,8 +11,8 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument
-import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessageAsAttachment
-import no.difi.meldingsutveksling.nextmove.StatusMessageAsAttachment
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage
+import no.difi.meldingsutveksling.nextmove.StatusMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup
 import org.junit.jupiter.api.AfterEach
@@ -95,8 +95,8 @@ class SbdFactoryTest {
             receiver.identifier
         )
         assertEquals(arkivmeldingResponseProcess, statusSbd.process)
-        assertTrue(statusSbd.any is StatusMessageAsAttachment)
-        assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessageAsAttachment).status)
+        assertTrue(statusSbd.any is StatusMessage)
+        assertEquals(ReceiptStatus.LEVERT, (statusSbd.any as StatusMessage).status)
     }
 
     @Test
@@ -123,7 +123,7 @@ class SbdFactoryTest {
                 convId, msgId,
                 arkivmeldingProcess,
                 "foo::bar",
-                mockkClass(ArkivmeldingMessageAsAttachment::class)
+                mockkClass(ArkivmeldingMessage::class)
             )
         }
     }
@@ -141,7 +141,7 @@ class SbdFactoryTest {
             convId, msgId,
             arkivmeldingProcess,
             "foo::bar",
-            mockkClass(ArkivmeldingMessageAsAttachment::class)
+            mockkClass(ArkivmeldingMessage::class)
         )
     }
 }

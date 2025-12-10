@@ -478,14 +478,14 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> arkivmeldingMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessageAsAttachment.class, prefix, NextMoveValidationGroups.MessageType.Arkivmelding.class);
+        ConstrainedFields messageFields = new ConstrainedFields(ArkivmeldingMessage.class, prefix, NextMoveValidationGroups.MessageType.Arkivmelding.class);
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, "Should only be specified for DPF."))
                 .build();
     }
 
     static List<FieldDescriptor> dpiDigitalMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessageAsAttachment.class, prefix, NextMoveValidationGroups.MessageType.Digital.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiDigitalMessage.class, prefix, NextMoveValidationGroups.MessageType.Digital.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""), sikkerhetsnivaaDescriptor(messageFields))
@@ -547,7 +547,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> dpiPrintMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessageAsAttachment.class, prefix, NextMoveValidationGroups.MessageType.Print.class);
+        ConstrainedFields messageFields = new ConstrainedFields(DpiPrintMessage.class, prefix, NextMoveValidationGroups.MessageType.Print.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(hoveddokumentDescriptor(messageFields, ""))
@@ -627,7 +627,7 @@ class RestDocumentationCommon {
     }
 
     static FieldDescriptor[] digitalDpvMessageDescriptors(String prefix) {
-        ConstrainedFields fields = new ConstrainedFields(DigitalDpvMessageAsAttachment.class, prefix);
+        ConstrainedFields fields = new ConstrainedFields(DigitalDpvMessage.class, prefix);
 
         return new FieldDescriptor[]{
                 fields.withPath("tittel")
@@ -643,7 +643,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> innsynskravMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessageAsAttachment.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(InnsynskravMessage.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(
@@ -658,7 +658,7 @@ class RestDocumentationCommon {
     }
 
     static List<FieldDescriptor> publiseringMessageDescriptors(String prefix) {
-        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessageAsAttachment.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
+        ConstrainedFields messageFields = new ConstrainedFields(PubliseringMessage.class, prefix, NextMoveValidationGroups.MessageType.Innsynskrav.class);
 
         return new FieldDescriptorsBuilder()
                 .fields(
