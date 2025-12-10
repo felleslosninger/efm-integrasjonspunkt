@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.7</version>
         <relativePath />
     </parent>
 
     <groupId>no.difi.meldingsutveksling</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>DEV-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Multiproject for meldingsutveksling</name>
 
@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</developerConnection>
         <url>https://github.com/felleslosninger/efm-integrasjonspunkt</url>
-        <tag>v3.0.0-beta</tag>
+        <tag>v3.0.0</tag>
     </scm>
 
     <licenses>
@@ -352,7 +352,7 @@
             <dependency>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-plugins-runtime</artifactId>
-                <version>4.0.8</version>
+                <version>4.0.11</version>
             </dependency>
             <dependency>
                 <groupId>net.jimblackler.jsonschemafriend</groupId>
@@ -403,7 +403,7 @@
             <dependency>
                 <groupId>net.javacrumbs.json-unit</groupId>
                 <artifactId>json-unit-assertj</artifactId>
-                <version>4.1.0</version>
+                <version>4.1.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -515,7 +515,7 @@
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
                                 <artifactId>jaxb-plugins</artifactId>
-                                <version>4.0.8</version>
+                                <version>4.0.11</version>
                             </plugin>
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
@@ -544,22 +544,6 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <releaseProfiles>release</releaseProfiles>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>2.1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
