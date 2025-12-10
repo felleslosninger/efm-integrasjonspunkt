@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @Component
 @RequiredArgsConstructor
@@ -28,47 +29,88 @@ public class HealthcareRoutingService {
     }
 
 
+    private void requireAtMostOneScopePerType(StandardBusinessDocument sbd, ScopeType scopeType) {
+        if ( sbd.getScopes().stream().filter(t->t.getType().equals(scopeType.getFullname())).count() > 1) {
+            throw new HealthcareValidationException("Only one " + scopeType.getFullname() + " is allowed.");
+        }
+      }
+
+    private void requireOneScopePerType(StandardBusinessDocument sbd, ScopeType scopeType) {
+        if ( sbd.getScopes().stream().filter(t->t.getType().equals(scopeType.getFullname())).count() != 1) {
+            throw new HealthcareValidationException("Only one " + scopeType.getFullname() + " is allowed.");
+        }
+    }
+
+    private void withScopeValidation(StandardBusinessDocument sbd,
+                                     Consumer<StandardBusinessDocument> block) {
+        requireAtMostOneScopePerType(sbd,ScopeType.RECEIVER_HERID2);
+        requireAtMostOneScopePerType(sbd,ScopeType.SENDER_HERID2);
+        requireAtMostOneScopePerType(sbd,ScopeType.SENDER_HERID1);
+        requireAtMostOneScopePerType(sbd,ScopeType.RECEIVER_HERID1);
+
+        block.accept(sbd);
+
+        requireOneScopePerType(sbd,ScopeType.RECEIVER_HERID2);
+        requireOneScopePerType(sbd,ScopeType.SENDER_HERID2);
+        requireOneScopePerType(sbd,ScopeType.SENDER_HERID1);
+        requireOneScopePerType(sbd,ScopeType.RECEIVER_HERID1);
+    }
+
+
     private void validate(StandardBusinessDocument sbd) {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER);
 
-        if (!(sbd.getSenderIdentifier() instanceof NhnIdentifier)) {
-            throw new HealthcareValidationException("Not able to construct sender identifier for document type: " + sbd.getDocumentType());
-        }
 
-        if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier recieverIdentifier)) {
-            throw new HealthcareValidationException("Not able to construct identifier for document type: " + sbd.getDocumentType());
-        }
-        sbd.getScope(ScopeType.RECEIVER_HERID2).ifPresent(t->{
-            if (!Objects.equals(t.getInstanceIdentifier(), srReciever.getHerIdLevel2())) throw new HealthcareValidationException("Reciever HerId 2 does not match information from address register.");
+        withScopeValidation(sbd, doc ->{
+            if (!(sbd.getSenderIdentifier() instanceof NhnIdentifier)) {
+                throw new HealthcareValidationException("Not able to construct sender identifier for document type: " + sbd.getDocumentType());
+            }
+
+            if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier recieverIdentifier)) {
+                throw new HealthcareValidationException("Not able to construct identifier for document type: " + sbd.getDocumentType());
+            }
+            sbd.getScope(ScopeType.RECEIVER_HERID2).ifPresent(t->{
+                if (!Objects.equals(t.getInstanceIdentifier(), srReciever.getHerIdLevel2())) throw new HealthcareValidationException("Reciever HerId 2 does not match information from address register.");
+            });
+
+            if (recieverIdentifier.isNhnPartnerIdentifier()) {
+                var recieverOrgnummer = recieverIdentifier.getIdentifier();
+                if (!Objects.equals(recieverOrgnummer, srReciever.getOrganisationNumber())) {
+                    throw new HealthcareValidationException("Receiver organisation number does not match address register.");
+                }
+            }
+
+
+            if ( sbd.getScopes().stream().filter(t->t.getType().equals(ScopeType.RECEIVER_HERID2.getFullname())).count() > 1) {
+                throw new HealthcareValidationException("Only one receiver scope is allowed.");
+            }
+            if ( sbd.getScopes().stream().filter(t->t.getType().equals(ScopeType.SENDER_HERID1.getFullname())).count() > 1) {
+                throw new HealthcareValidationException("Only one sender scope is allowed.");
+            }
+
+            var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
+            if (!isMultitenantSetup) {
+                if (properties.getDph().getWhitelistOrgnum().size()!=1) { throw new HealthcareValidationException("Multinencancy configuration error. Only one organisation number should be whitelisted.");}
+
+                if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), srSender.getOrganisationNumber()))
+                    throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not registered in AR.");
+                if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), properties.getDph().getWhitelistOrgnum().getFirst()))
+                    throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not allowed to send in.");
+
+
+            } else {
+                if (!properties.getDph().getWhitelistOrgnum()
+                        .contains(srSender.getOrganisationNumber())) {
+                    throw new HealthcareValidationException("Sender not allowed " + srSender.getOrganisationNumber());
+                }
+                if (!sbd.getSenderIdentifier().getIdentifier().equals(srSender.getOrganisationNumber())) {
+                    throw new HealthcareValidationException("Sender information does not match Adressregister information.");
+                }
+            }
         });
 
-        if (recieverIdentifier.isNhnPartnerIdentifier()) {
-            var recieverOrgnummer = recieverIdentifier.getIdentifier();
-            if (!Objects.equals(recieverOrgnummer, srReciever.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Receiver organisation number does not match address register.");
-            }
-        }
 
-        var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
-        if (!isMultitenantSetup) {
-            if (properties.getDph().getWhitelistOrgnum().size()!=1) { throw new HealthcareValidationException("Multinencancy configuration error. Only one organisation number should be whitelisted.");}
-
-            if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), srSender.getOrganisationNumber()))
-                throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not registered in AR.");
-            if (!Objects.equals(sbd.getSenderIdentifier().getIdentifier(), properties.getDph().getWhitelistOrgnum().getFirst()))
-                throw new HealthcareValidationException("Multitenancy is not supported. Sender organisation number:" + sbd.getSenderIdentifier().getIdentifier() + " is not allowed to send in.");
-
-
-        } else {
-            if (!properties.getDph().getWhitelistOrgnum()
-                .contains(srSender.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Sender not allowed " + srSender.getOrganisationNumber());
-            }
-            if (!sbd.getSenderIdentifier().getIdentifier().equals(srSender.getOrganisationNumber())) {
-                throw new HealthcareValidationException("Sender information does not match Adressregister information.");
-            }
-        }
     }
 
     private void applyRouting(StandardBusinessDocument sbd) {

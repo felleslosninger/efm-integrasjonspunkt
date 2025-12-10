@@ -280,7 +280,8 @@ public class HealthcareRoutingServiceTest {
         assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedReceiverHerId1)) ;
 
         final StandardBusinessDocument tamperedReceiverHerId2 = dialgmelding();
-        tamperedReceiverHerId1.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier("343437"));
+        tamperedReceiverHerId2.getScopes().removeIf((t)-> t.getType().equals(ScopeType.RECEIVER_HERID2.getFullname()));
+        tamperedReceiverHerId2.getScopes().add(new Scope().setType(ScopeType.RECEIVER_HERID2.getFullname()).setInstanceIdentifier("343437"));
 
         assertThrows(HealthcareValidationException.class,()->healthcareRoutingService.validateAndApply(tamperedReceiverHerId2)) ;
 
