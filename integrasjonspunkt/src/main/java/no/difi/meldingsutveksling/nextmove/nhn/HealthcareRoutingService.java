@@ -24,8 +24,10 @@ public class HealthcareRoutingService {
 
 
     public void validateAndApply(StandardBusinessDocument sbd) {
-        validate(sbd);
-        applyRouting(sbd);
+        withScopeValidation(sbd, doc -> {
+            validate(sbd);
+            applyRouting(sbd);
+        });
     }
 
 
@@ -61,8 +63,6 @@ public class HealthcareRoutingService {
         ServiceRecord srReciever = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
         ServiceRecord srSender = serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER);
 
-
-        withScopeValidation(sbd, doc ->{
             if (!(sbd.getSenderIdentifier() instanceof NhnIdentifier)) {
                 throw new HealthcareValidationException("Not able to construct sender identifier for document type: " + sbd.getDocumentType());
             }
@@ -108,7 +108,7 @@ public class HealthcareRoutingService {
                     throw new HealthcareValidationException("Sender information does not match Adressregister information.");
                 }
             }
-        });
+
 
 
     }
