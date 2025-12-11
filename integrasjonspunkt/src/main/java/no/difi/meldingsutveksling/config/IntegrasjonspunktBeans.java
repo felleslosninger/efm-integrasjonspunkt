@@ -84,7 +84,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "use.frontend.faker", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "use.frontend.faker", matchIfMissing = true)
     public FrontendFunctionality frontendFunctionality(IntegrasjonspunktProperties props) {
         return new FrontendFunctionalityImpl(props);
     }

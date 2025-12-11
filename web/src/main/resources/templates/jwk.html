@@ -10,6 +10,7 @@
 <body class="bg-light">
 
 <div class="container py-4">
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1 class="mb-1">JWK Generator</h1>
@@ -22,42 +23,41 @@
 
     <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">An error occurred</div>
 
-<form method="post" th:action="@{/jwk}" class="row gy-2 gx-3 align-items-center">
-    <div class="col-auto">
-        <label class="visually-hidden" for="shortName">Short name</label>
-        <input type="text" id="shortName" name="shortName" class="form-control" placeholder="MyOrg" th:value="${shortName}" />
-    </div>
-    <div class="col-auto">
-        <label class="visually-hidden" for="keySize">Key size</label>
-        <select id="keySize" name="keySize" class="form-select">
-            <option th:each="s : ${sizes}"
-                    th:value="${s}"
-                    th:selected="${s} == ${selected}"
-                    th:text="${s}">2048</option>
-        </select>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">create</button>
-    </div>
-</form>
+    <form method="post" th:action="@{/jwk}" class="row gy-2 gx-3 align-items-center">
+        <div class="col-auto">
+            <label class="visually-hidden" for="shortName">Short name</label>
+            <input type="text" id="shortName" name="shortName" class="form-control" placeholder="MyOrg" th:value="${shortName}" />
+        </div>
+        <div class="col-auto">
+            <label class="visually-hidden" for="keySize">Key size</label>
+            <select id="keySize" name="keySize" class="form-select">
+                <option th:each="s : ${sizes}"
+                        th:value="${s}"
+                        th:selected="${s} == ${selected}"
+                        th:text="${s}">2048</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">create</button>
+        </div>
+    </form>
 
-<hr/>
+    <hr/>
 
-<div class="row mt-3">
-    <div class="col-md-6">
-        <label for="private" class="form-label">Private (JWK)</label>
-        <textarea id="private" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${private}"></textarea>
-        <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('private')">Download private JWK</button>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <label for="private" class="form-label">Private (JWK)</label>
+            <textarea id="private" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${private}"></textarea>
+            <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('private')">Download private JWK</button>
+        </div>
+        <div class="col-md-6">
+            <label for="public" class="form-label">Public (JWK)</label>
+            <textarea id="public" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${public}"></textarea>
+            <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('public')">Download public JWK</button>
+        </div>
     </div>
-    <div class="col-md-6">
-        <label for="public" class="form-label">Public (JWK)</label>
-        <textarea id="public" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${public}"></textarea>
-        <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('public')">Download public JWK</button>
-    </div>
+
 </div>
-
-</div>
-
 
 <script>
     function sanitizeName(name) {
@@ -90,5 +90,6 @@
 </script>
 
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
 </body>
 </html>

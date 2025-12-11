@@ -23,6 +23,7 @@ public class StatusController {
             si -> new RuntimeStatus(si, si, random.nextInt(1000))
         ).toList();
         model.addAttribute("status", stats);
+        model.addAttribute("error", "Dette er bare en demo - antall feil nedenfor er tilfeldige.");
         return "status";
     }
 

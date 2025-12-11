@@ -1,43 +1,57 @@
 <!doctype html>
-<html lang="no">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Status</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <title>System Status</title>
     <style>
-    .card {
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
-        transition: 0.3s;
-        border-radius: 5px;
-    }
+        /* Simple card effect */
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+            transition: 0.3s;
+            border-radius: 5px;
+        }
 
-    /* On mouse-over, add a deeper shadow */
-    .card:hover {
-        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.6);
-    }
+        /* On mouse-over, add a deeper shadow */
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.6);
+        }
 
-    /* Add some padding inside the card container */
-    .container {
-        padding: 2px 16px;
-    }
+        /* Add some padding inside the card container */
+        .container {
+            padding: 2px 16px;
+        }
     </style>
 </head>
-<body>
+<body class="bg-light">
 
-<h1>Status (just prototyping, random information below)</h1>
+<div class="container py-4">
 
-<th:block th:each="s : ${status}">
-    <div class="card">
-        <!--
-        <h2 th:unless="${s.service()}">DPO er disabled 🤦‍♂️</h2>
-        <div th:if="${s.dpo()}" class="container">
-        -->
-        <div class="container">
-            <h2 th:text="${s.service()}">unknown</h2>
-            <p>[[${s.config()}]] has [[${s.errors()}]] errors</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="mb-1">System Status</h1>
+            <p class="text-muted mb-0">Her kan man får en oversikt over systemets status akkurat nå.</p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary" th:href="@{/}">Tilbake til oversikt</a>
         </div>
     </div>
-</th:block>
+
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">Her vises en eventuell feilmelding.</div>
+
+    <th:block th:each="s : ${status}">
+        <div class="card">
+            <div class="container">
+                <h2 th:text="${s.service()}">unknown</h2>
+                <p>[[${s.config()}]] has [[${s.errors()}]] errors (det er ikke tilfelle, bare et random tall for demo'ens skyld)</p>
+            </div>
+        </div>
+        <br/>
+    </th:block>
+
+</div>
 
 </body>
 </html>
