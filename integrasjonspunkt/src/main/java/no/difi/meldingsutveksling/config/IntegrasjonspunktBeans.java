@@ -8,6 +8,8 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
+import no.difi.meldingsutveksling.web.FrontendFunctionality;
+import no.difi.meldingsutveksling.web.FrontendFunctionalityImpl;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
@@ -80,5 +82,12 @@ public class IntegrasjonspunktBeans {
     public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceApiClient correspondenceApiClient, IntegrasjonspunktProperties properties) {
         return new CorrespondenceAgencyConnectionCheck(correspondenceApiClient, properties);
     }
+
+    @Bean
+    @ConditionalOnProperty(name = "use.frontend.faker", havingValue = "true", matchIfMissing = true)
+    public FrontendFunctionality frontendFunctionality(IntegrasjonspunktProperties props) {
+        return new FrontendFunctionalityImpl(props);
+    }
+
 }
 
