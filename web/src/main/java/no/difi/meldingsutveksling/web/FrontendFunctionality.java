@@ -25,10 +25,16 @@ public interface FrontendFunctionality {
      * and {@link no.difi.meldingsutveksling.web.ThymeleafApplication#frontendFunctionality()}
      */
 
+    record Property(String key, String value, String description) {}
+
     default boolean isFake() {
         return false; // signal that this is a real implementation
     }
 
     List<String> getChannelsEnabled();
+
+    List<Property> configuration();
+
+    List<Property> configurationDPO();
 
 }
