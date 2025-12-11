@@ -74,6 +74,10 @@
             <artifactId>service-registry-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>web</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.difi.move-common</groupId>
             <artifactId>domain</artifactId>
         </dependency>

@@ -98,6 +98,7 @@
         <module>domain</module>
         <module>altinn-v3-client</module>
         <module>fiks-meldingsformidler</module>
+        <module>web</module>
         <module>integrasjonspunkt</module>
     </modules>
 
@@ -172,6 +173,11 @@
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>validation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>web</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

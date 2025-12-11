@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <title>Spring Boot + Thymeleaf</title>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+<h1 th:text="${message}">Placeholder</h1>
+<div class="mb-3">
+    <a class="btn btn-outline-primary" th:href="@{/onboarding}">Onboarding DPO</a>
+    <a class="btn btn-outline-primary" th:href="@{/jwk}">JWK Generator</a>
+</div>
+
+<ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab0-tab" data-bs-toggle="tab" data-bs-target="#tab0" type="button" role="tab" aria-controls="tab0" aria-selected="true">Info</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab" aria-controls="tab1" aria-selected="false">Linker</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab" aria-controls="tab2" aria-selected="false">DPO</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab" aria-controls="tab3" aria-selected="false">DPV</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab" aria-controls="tab4" aria-selected="false">DPI</button>
+    </li>
+</ul>
+<div class="tab-content border border-top-0 p-3" id="myTabContent">
+    <div class="tab-pane fade show active" id="tab0" role="tabpanel" aria-labelledby="tab0-tab">
+        <p>Integrasjonspunktet har kjørt i 2 timer, det har sendt 87 DPI brev, sendt 257 DPV meldinger og formidlet 38 DPO filer.</p>
+        <p>
+            Du har følgende kanaler aktivert:
+            <ul>
+                <li th:each="channel : ${channels}" th:text="${channel}">Channel</li>
+            </ul>
+        </p>
+        Bruk fanene for å se konfigurasjon på de ulike kanalene du har aktivert.
+        <br/><br/>
+        <button class="btn btn-danger" onclick="alert('Falsk alarm ...\n\nHer kunne vi vist konfigurasjonsfeil og advarsler.\nMen alt virker heldigvis lungt nå siden dette er en demo.\n\nNo worries 🤣')">DANGER DANGER</button>
+    </div>
+    <div class="tab-pane fade" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Internals</h5>
+                        <p class="card-subtitle mb-3 text-muted">Run-time informasjon fra kjørende Integrasjonspunkt (åpnes i ny fane).</p>
+                        <ul>
+                            <li><a target="_blank" href="/manage">Management Endpoints</a></li>
+                            <li><a target="_blank" href="/manage/scheduledtasks">Scheduledtasks</a></li>
+                            <li><a target="_blank" href="/manage/caches">Caches</a></li>
+                            <li><a target="_blank" href="/manage/metrics">Metrics</a></li>
+                            <li><a target="_blank" href="/manage/env">Environment</a></li>
+                            <li><a target="_blank" href="/manage/configprops">Configprops</a></li>
+                            <li><a target="_blank" href="/manage/mappings">Mappings</a></li>
+                            <li><a target="_blank" href="/manage/beans">Beans</a></li>
+                            <li><a href="/manage/conditions">Conditions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Observability</h5>
+                        <p class="card-subtitle mb-3 text-muted">Endepunkt for ekster overvåking (åpnes i ny fane).</p>
+                        <ul>
+                            <li><a target="_blank" href="/manage/info">Info about this build</a></li>
+                            <li><a target="_blank" href="/manage/prometheus">Prometheus metrics</a></li>
+                            <li><a target="_blank" href="/manage/logfile">Logfile</a></li>
+                            <li><a target="_blank" href="/manage/health">Health</a></li>
+                            <li><a target="_blank" href="/manage/health/liveness">Liveness</a></li>
+                            <li><a target="_blank" href="/manage/health/readiness">Readiness</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Andre funksjoner</h5>
+                        <p class="card-subtitle mb-3 text-muted">Andre og mer avanserte funksjoner</p>
+                        <ul class="list-unstyled mb-0">
+                            <li><a th:href="@{/status}">System Status</a></li>
+                            <li><a th:href="@{/conversations}">Conversations</a></li>
+                            <li><a target="_blank" href="/api/statuses">Conversations (JSON i ny fane)</a></li>
+                            <li><a th:href="@{/onboarding}">Onboarding DPO</a></li>
+                            <li><a th:href="@{/jwk}">JWK Generator</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+        <p>
+            DPO sørger for rask og sikker overføring mellom offentlige og private virksomheter.
+            Den er basert på <a href="https://docs.altinn.studio/nb/broker/" target="_blank">Altinn 3 Formidling</a> og krever at du konfigurert et gyldig virksomhestsertifikat og opprettet "SystemUser" for deg selv og andre organisasjoner du vil opptre på vegne av.
+        </p>
+        <p>
+            Din konfigurasjon er oppsummert i tabellen nedenfor.
+        </p>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Property</th>
+                <th scope="col">Verdi</th>
+                <th scope="col">Beskrivelse</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="dpo,iStat : ${config}">
+                <th th:text="${iStat.index}" scope="row">1</th>
+                <td th:text="${dpo.key()}">Navn</td>
+                <td th:text="${dpo.value()}">Verdi</td>
+                <td th:text="${dpo.description()}">Beskrivelse</td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-warning" onclick="alert('Din klient er IKKE konfigurert korrekt i Maskinporten.\nDu mangler scope altinn:authentication/systemregister.write\n\nDette må fikses før du kan gjennomføre onboarding.')">
+            🧨Onboarding Token
+        </button>
+        <button type="button" class="btn btn-warning" onclick="alert('Ditt org.nr er IKKE konfigurert korrekt i ELMA.\nDu mangler DokumentType urn:no:difi:avtalt:xsd::avtalt\n\nDette må support@digdir.no fikse før du kan benytte DPO.')">
+            🧨Dokument Oppsett
+        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
+                Access Token
+            </button>
+            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">SystemUser token for 311780735_systembruker_hund</a></li>
+                <li><a class="dropdown-item" href="#">SystemUser token for 313711218_systembruker_ape</a></li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messagesDialog">
+            List innkommende meldinger
+        </button>
+    </div>
+    <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+        <p>
+            DPV sørger for sikker utveksling av korrespondanse, som offisielle brev, varsler og andre dokumenter, mellom offentlige etater og enkeltpersoner eller bedrifter.
+            Den er baser på <a href="https://docs.altinn.studio/nb/correspondence/" target="_blank">Altinn 3 Melding</a> og krever at du har konfigurert et gyldig virksomhestsertifikat.
+        </p>
+        <p>
+            Din konfigurasjon er oppsummert i tabellen nedenfor.
+        </p>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
+            Hent Token
+        </button>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#correspondenceDialog">
+            📈 Vis sendt statistikk
+        </button>
+    </div>
+    <div class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
+        <p>
+            DPI gjør det mulig å sende sikker digital post til innbyggerne, uavhengig av hvilken postkasse innbyggerne har valgt (e-Boks eller Digipost).
+            Den er baser på <a href="https://www.digdir.no/felleslosninger/digital-postkasse-til-innbyggere/775" target="_blank">Digital postkasse til innbyggere</a> og krever at du har konfigurert et gyldig virksomhestsertifikat.
+        </p>
+        <p>
+            Din konfigurasjon er oppsummert i tabellen nedenfor.
+        </p>
+        <button class="btn btn-warning" onclick="alert('Din maskinporten klient er IKKE konfigurert korrekt.\nKlienten mangler scope digitalpost:send\n\nDette må fikses før du kan sende digital post til innbygger.')">🧨Access Token</button>
+        <button class="btn btn-success disabled">List kvitteringer</button>
+    </div>
+</div>
+
+<!-- The Token Dialog -->
+<div class="modal fade" id="tokenDialog" tabindex="-1" aria-labelledby="tokenDialogLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="tokenDialogLabel">AccessToken</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="theCurrentToken" class="text-break" th:text="${token}"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="copyToClipboard('theCurrentToken')">Copy and close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- The Messages Dialog -->
+<div class="modal fade" id="messagesDialog" tabindex="-1" aria-labelledby="messagesDialogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="messagesDialogLabel">Innkommende filer</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">FileTransferId</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Sender</th>
+                        <th scope="col">SendersReference</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Expiration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="message,iStat : ${messages}">
+                        <th th:text="${iStat.index}" scope="row">1</th>
+                        <td th:text="${message.transferId()}">transferId</td>
+                        <td th:text="${message.status()}">status</td>
+                        <td th:text="${message.sender()}">sender</td>
+                        <td th:text="${message.sendersReference()}">sendersReference</td>
+                        <td th:text="${message.created()}">created</td>
+                        <td th:text="${message.expiration()}">expiration</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- The Correspondence Dialog -->
+<div class="modal fade" id="correspondenceDialog" tabindex="-1" aria-labelledby="correspondenceDialogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="correspondenceDialogLabel">Sendt korrespondanse</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dpvStatistics" style="width: 700px;height:500px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<br/>
+<div class="alert alert-warning" role="alert">
+    Det finnes nyere versjon av Integrasjonspunktet enn den du benytter.
+    Last ned nyeste versjon <a href="https://docs.digdir.no/docs/eFormidling/Oppgradering/" target="_blank">her</a> for å komme ajour på funksjoner og sikkerhet.
+</div>
+
+</div>
+
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/echarts.min.js}"></script>
+
+<script>
+    async function copyToClipboard(element) {
+        const textToCopy = document.getElementById(element).innerText;
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+        } catch (err) {
+            alert('Failed to copy text.');
+        }
+    }
+</script>
+
+<script>
+
+    var myChart = echarts.init(document.getElementById('dpvStatistics'));
+    var option = {
+        title: {
+            text: 'Type post per dag'
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#6a7985'
+                }
+            }
+        },
+        legend: {
+            data: ['Tausetsbelagt', 'Helse', 'Skatt', 'Justis', 'Offentlig']
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: [
+            {
+                name: 'Tausetsbelagt',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+                name: 'Helse',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [220, 182, 191, 234, 290, 330, 310]
+            },
+            {
+                name: 'Skatt',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [150, 232, 201, 154, 190, 330, 410]
+            },
+            {
+                name: 'Justis',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [320, 332, 301, 334, 390, 330, 320]
+            },
+            {
+                name: 'Offentlig',
+                type: 'line',
+                stack: 'Total',
+                label: {
+                    show: true,
+                    position: 'top'
+                },
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [820, 932, 901, 934, 1290, 1330, 1320]
+            }
+        ]
+    };
+
+    myChart.setOption(option);
+</script>
+
+</body>
+</html>
