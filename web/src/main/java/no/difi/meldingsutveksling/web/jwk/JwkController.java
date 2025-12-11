@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.web.onboarding;
+package no.difi.meldingsutveksling.web.jwk;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.Random;
 
 @Controller
-public class Status {
+public class StatusController {
 
     @Inject
     FrontendFunctionality ff;

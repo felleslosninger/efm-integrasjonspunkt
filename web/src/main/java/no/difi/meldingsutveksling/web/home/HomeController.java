@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.web.onboarding;
+package no.difi.meldingsutveksling.web.home;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
