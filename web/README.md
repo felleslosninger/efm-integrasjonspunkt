@@ -24,6 +24,7 @@ Easiest would be cd-into the web module and use maven from there like this :
 ```bash
 cd web
 mvn spring-boot:run -Dspring-boot.run.profiles=reload
+open http://localhost:8080/
 ```
 This will read the correct properties file and start the application in hot reload mode.
 

@@ -37,4 +37,8 @@ public interface FrontendFunctionality {
 
     List<Property> configurationDPO();
 
+    List<Property> configurationDPV();
+
+    List<Property> configurationDPI();
+
 }

@@ -25,6 +25,8 @@ public class HomeController {
         model.addAttribute("token", "eyJhbGciOiJSUzI1NiIsImtpZCI6IjcxOUFGOTRFNDQ1MzE0Q0RDMjk1Rjk1MjUzODU4MDU0RjhCQ0FDODYiLCJ4NXQiOiJjWnI1VGtSVEZNM0NsZmxTVTRXQVZQaThySVkiLCJ0eXAiOiJKV1QifQ.eyJzY29wZSI6ImFsdGlubjpicm9rZXIud3JpdGUgYWx0aW5uOmJyb2tlci5yZWFkIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImV4cCI6MTc2MjQ1OTA0NywiaWF0IjoxNzYyNDU3MjQ3LCJjbGllbnRfaWQiOiJhNjNjYWM5MS0zMjEwLTRjMzUtYjk2MS01YzdiZjEyMjM0NWMiLCJjb25zdW1lciI6eyJhdXRob3JpdHkiOiJpc282NTIzLWFjdG9yaWQtdXBpcyIsIklEIjoiMDE5Mjo5OTE4MjU4MjcifSwidXJuOmFsdGlubjpvcmdOdW1iZXIiOiI5OTE4MjU4MjciLCJ1cm46YWx0aW5uOmF1dGhlbnRpY2F0ZW1ldGhvZCI6Im1hc2tpbnBvcnRlbiIsInVybjphbHRpbm46YXV0aGxldmVsIjozLCJpc3MiOiJodHRwczovL3BsYXRmb3JtLnR0MDIuYWx0aW5uLm5vL2F1dGhlbnRpY2F0aW9uL2FwaS92MS9vcGVuaWQvIiwianRpIjoiMzViNDRmMGItZWY2MC00YTJlLTk3OGUtNzZhZjJlMzZlYTU2IiwibmJmIjoxNzYyNDU3MjQ3fQ.lduC_6WFIZBBJO_kSaXoSK78Zh18Q0gaQsOt6_ffgN7bsnWPL0lKzPn5SIqzw2xHTT2D0WU_f8UOfmtUnf0uJ901wwd5QEb3ZxI6mp6dfbGDXbbflvdZSBVgs2RqsmzGxMw1Ok3VeCyT61_Q-NUN_h6i-yBSvg50VPGj91bcNlzYlXjeeh_aZcPGXp0Ks-tSXZEH3fYYUz6DuLGyS_Y0b8X6vBJI9vf51wjqoaM7BQGQAVDenBknlCTPtmw8SXozAPmT0Evf26gYUfAcIV6moDPV4C6mHgT65FNBh3uBLZSTa2faeLsILXjeRnL5DE3QQH-OdP0F3sMaSuLN-ua4ig");
         model.addAttribute("config", ff.configuration());
         model.addAttribute("config_dpo", ff.configurationDPO());
+        model.addAttribute("config_dpv", ff.configurationDPV());
+        model.addAttribute("config_dpi", ff.configurationDPI());
         model.addAttribute("messages", dpoMessages());
         model.addAttribute("channels", ff.getChannelsEnabled());
         return "index"; // corresponds to templates/index.html

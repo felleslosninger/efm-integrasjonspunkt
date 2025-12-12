@@ -40,10 +40,11 @@ og alle dets avhengigheter.
 Dette er by-design, slik at det skal være mulig å raskt utvikle websiden med hot-reload aktivert.
 For informasjon om hvordan dette fungerer kan du se [web/README.md](web/README.md).
 
-Kortversjon er at web-modulen med `fake` backend for viderutvikling kan startes slik :
+Kortversjon er at web-modulen med `fake` backend og hot-reload kan startes slik :
 ```bash
 cd web
 mvn spring-boot:run -Dspring-boot.run.profiles=reload
+open http://localhost:8080/
 ```
 
 ## Bygge REST API dokumentasjon

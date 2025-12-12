@@ -71,8 +71,8 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         var systemUser = dpo.getSystemUser();
         if (systemUser != null) config.addAll(List.of(
-            new Property("difi.move.dpo.systemUser.orgId", systemUser.getOrgId(), "Din systembrukers orgId"),
-            new Property("difi.move.dpo.systemUser.name", systemUser.getName(), "Din systembrukers navn")
+            new Property("difi.move.dpo.systemUser.orgId", systemUser.getOrgId(), "Din systembrukers org-id"),
+            new Property("difi.move.dpo.systemUser.name", systemUser.getName(), "Din systembrukerss navn")
         ));
 
         AtomicInteger counter = new AtomicInteger(0);
@@ -83,6 +83,16 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         )));
 
         return config;
+    }
+
+    @Override
+    public List<Property> configurationDPV() {
+        return List.of();
+    }
+
+    @Override
+    public List<Property> configurationDPI() {
+        return List.of();
     }
 
 }
