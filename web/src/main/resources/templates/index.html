@@ -12,10 +12,10 @@
 <div class="container py-4">
 
 <h1 th:text="${message}">Integrasjonspunkt</h1>
+
 <div class="mb-3">
     <a class="btn btn-outline-primary" th:href="@{/onboarding}">Onboarding DPO</a>
     <a class="btn btn-outline-primary" th:href="@{/conversations}">Conversations</a>
-    <a class="btn btn-outline-primary" th:href="@{/jwk}">JWK Generator</a>
     <a class="btn btn-outline-primary" th:href="@{/status}">System Status</a>
 </div>
 
@@ -44,23 +44,24 @@
     <li class="nav-item" role="presentation" th:if="${channels.contains('DPE')}">
         <button class="nav-link" id="tab7-tab" data-bs-toggle="tab" data-bs-target="#tab7" type="button" role="tab" aria-controls="tab7" aria-selected="false">DPE</button>
     </li>
+    <li class="nav-item" role="presentation" th:if="${channels.contains('DPH')}">
+        <button class="nav-link" id="tab8-tab" data-bs-toggle="tab" data-bs-target="#tab8" type="button" role="tab" aria-controls="tab8" aria-selected="false">DPH</button>
+    </li>
 </ul>
 
 <div class="tab-content border border-top-0 p-3" id="myTabContent">
     <div class="tab-pane fade show active" id="tab0" role="tabpanel" aria-labelledby="tab0-tab">
         <p th:text="${uptime}">Integrasjonspunktet ble startet for en stund siden.</p>
         <p>
-            Du har følgende kanaler aktivert:
+            Du har følgende kanaler aktivert :
             <ul>
                 <li th:each="channel : ${channels}" th:text="${channel}">Channel</li>
             </ul>
         </p>
         Bruk fanene for å se konfigurasjon på de ulike kanalene du har aktivert.
         <br/><br/>
-
         <!-- vis en liste med config properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${config})}"></table>
-
     </div>
     <div class="tab-pane fade" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
         <div class="row">
@@ -122,30 +123,28 @@
         <p>
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
-
         <!-- vis en liste med dpo properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${config_dpo})}"></table>
-
-        <button type="button" class="btn btn-warning" onclick="alert('Din klient er IKKE konfigurert korrekt i Maskinporten.\nDu mangler scope altinn:authentication/systemregister.write\n\nDette må fikses før du kan gjennomføre onboarding.')">
+        <button th:if="${ff.isFake()}" type="button" class="btn btn-warning" onclick="alert('Din klient er IKKE konfigurert korrekt i Maskinporten.\nDu mangler scope altinn:authentication/systemregister.write\n\nDette må fikses før du kan gjennomføre onboarding.')">
             🧨Onboarding Token
         </button>
-        <button type="button" class="btn btn-warning" onclick="alert('Ditt org.nr er IKKE konfigurert korrekt i ELMA.\nDu mangler DokumentType urn:no:difi:avtalt:xsd::avtalt\n\nDette må support@digdir.no fikse før du kan benytte DPO.')">
+        <button th:if="${ff.isFake()}" type="button" class="btn btn-warning" onclick="alert('Ditt org.nr er IKKE konfigurert korrekt i ELMA.\nDu mangler DokumentType urn:no:difi:avtalt:xsd::avtalt\n\nDette må support@digdir.no fikse før du kan benytte DPO.')">
             🧨Dokument Oppsett
         </button>
         <div class="btn-group">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
-                Access Token
+                Access Token (demo)
             </button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="visually-hidden">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">SystemUser token for 311780735_systembruker_hund</a></li>
-                <li><a class="dropdown-item" href="#">SystemUser token for 313711218_systembruker_ape</a></li>
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#tokenDialog">SystemUser token for 311780735_systembruker_hund</a></li>
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#tokenDialog">SystemUser token for 313711218_systembruker_ape</a></li>
             </ul>
         </div>
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messagesDialog">
-            List innkommende meldinger
+            List innkommende meldinger (demo)
         </button>
     </div>
     <div th:if="${channels.contains('DPV')}" class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
@@ -156,15 +155,13 @@
         <p>
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
-
         <!-- vis en liste med dpv properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${config_dpv})}"></table>
-
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
-            Hent Token
+            Access Token (demo)
         </button>
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#correspondenceDialog">
-            📈 Vis sendt statistikk
+            📈 Vis sendt statistikk (demo)
         </button>
     </div>
     <div th:if="${channels.contains('DPI')}" class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
@@ -175,17 +172,18 @@
         <p>
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
-
         <!-- vis en liste med dpi properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${config_dpi})}"></table>
-
-        <button class="btn btn-warning" onclick="alert('Din maskinporten klient er IKKE konfigurert korrekt.\nKlienten mangler scope digitalpost:send\n\nDette må fikses før du kan sende digital post til innbygger.')">🧨Access Token</button>
-        <button class="btn btn-success disabled">List kvitteringer</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
+            Access Token (demo)
+        </button>
+        <button class="btn btn-success disabled">List kvitteringer (demo)</button>
     </div>
 
     <div th:if="${channels.contains('DPF')}" th:replace="~{fragments/tab :: channel(id='tab5', type='DPF')}"></div>
     <div th:if="${channels.contains('DPFIO')}" th:replace="~{fragments/tab :: channel(id='tab6', type='DPFIO')}"></div>
     <div th:if="${channels.contains('DPE')}" th:replace="~{fragments/tab :: channel(id='tab7', type='DPE')}"></div>
+    <div th:if="${channels.contains('DPH')}" th:replace="~{fragments/tab :: channel(id='tab8', type='DPH')}"></div>
 
 </div>
 
@@ -272,9 +270,9 @@
 
 
 <br/>
-<div class="alert alert-warning" role="alert">
-    Det finnes nyere versjon av Integrasjonspunktet enn den du benytter.
-    Last ned nyeste versjon <a href="https://docs.digdir.no/docs/eFormidling/Oppgradering/" target="_blank">her</a> for å komme ajour på funksjoner og sikkerhet.
+<div th:if="${ff.getIntegrasjonspunktVersion().outdated()}" th:inline="text" class="alert alert-warning" role="alert">
+    Det finnes en nyere versjon av Integrasjonspunktet enn versjon <i>[[${ff.getIntegrasjonspunktVersion().yours()}]]</i> som du benytter i dag.
+    Last ned den nye <i>[[${ff.getIntegrasjonspunktVersion().latest()}]]</i> versjonen <a href="https://docs.digdir.no/docs/eFormidling/Oppgradering/" target="_blank">herfra</a> for å komme ajour på funksjoner og sikkerhet.
 </div>
 
 </div>

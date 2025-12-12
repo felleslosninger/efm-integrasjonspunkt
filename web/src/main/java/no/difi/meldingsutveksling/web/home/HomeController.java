@@ -29,6 +29,7 @@ public class HomeController {
         model.addAttribute("config_dpi", ff.configurationDPI());
         model.addAttribute("messages", dpoMessages());
         model.addAttribute("channels", ff.getChannelsEnabled());
+        model.addAttribute("ff", ff);
         return "index"; // corresponds to templates/index.html
     }
 

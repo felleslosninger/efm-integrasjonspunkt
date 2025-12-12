@@ -10,8 +10,13 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
+    public Version getIntegrasjonspunktVersion() {
+        return new Version("4.0.0-beta", "DEV-SNAPSHOT", true);
+    }
+
+    @Override
     public List<String> getChannelsEnabled() {
-        return List.of("DPO", "DPV", "DPI", "DPF", "DPFIO", "DPE");
+        return List.of("DPO", "DPV", "DPI", "DPF", "DPFIO", "DPE", "DPH");
     }
 
     @Override
@@ -39,12 +44,26 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
 
     @Override
     public List<Property> configurationDPV() {
-        return List.of();
+        return List.of(
+            new Property("difi.move.dpv.correspondenceServiceUrl", "https://eformidling.dev/altinn-proxy/correspondence/api/v1", "Altinn Correspondence Service Proxy url"),
+            new Property("difi.move.dpv.healthCheckUrl", "https://platform.altinn.no/health-probe/", "Altinn Health Check url"),
+            new Property("difi.move.dpv.altinnTokenExchangeUrl", "http://localhost:9800/altinntoken", "Altinn Token Exchange url"),
+            new Property("difi.move.dpv.sensitiveResource", "eformidling-dpv-taushetsbelagt", "Sensitve resource name"),
+            new Property("difi.move.dpv.notifyEmail", "true", "Aktiver varsling på EMAIL"),
+            new Property("difi.move.dpv.notifySms", "false", "Aktiver varsling på SMS"),
+            new Property("difi.move.dpv.email-subject", "Melding mottatt i Altinn", "Emne ved sending av epost varsel")
+        );
     }
 
     @Override
     public List<Property> configurationDPI() {
-        return List.of();
+        return List.of(
+            new Property("difi.move.dpi.mpcId", "KANAL", "DPI kanal for sending og mottak"),
+            new Property("difi.move.dpi.certificate.mode", "SELF_SIGNED", "Sertifikat modus"),
+            new Property("difi.move.dpi.asice.type", "CMS", "Hvilken type ASICe skal benyttes"),
+            new Property("difi.move.dpi.upload-size-limit", "150MB", "Maks upload størrelse"),
+            new Property("denne-listen-er-ikke-komplett", "FIXME", "Det er flere properties som ikke vises enda.")
+        );
     }
 
 }
