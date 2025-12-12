@@ -81,14 +81,6 @@ public class HealthcareRoutingService {
                 }
             }
 
-
-            if ( sbd.getScopes().stream().filter(t->t.getType().equals(ScopeType.RECEIVER_HERID2.getFullname())).count() > 1) {
-                throw new HealthcareValidationException("Only one receiver scope is allowed.");
-            }
-            if ( sbd.getScopes().stream().filter(t->t.getType().equals(ScopeType.SENDER_HERID1.getFullname())).count() > 1) {
-                throw new HealthcareValidationException("Only one sender scope is allowed.");
-            }
-
             var isMultitenantSetup = properties.getDph().getAllowMultitenancy();
             if (!isMultitenantSetup) {
                 if (properties.getDph().getWhitelistOrgnum().size()!=1) { throw new HealthcareValidationException("Multinencancy configuration error. Only one organisation number should be whitelisted.");}

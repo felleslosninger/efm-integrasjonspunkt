@@ -24,16 +24,21 @@ public class NhnAdapterClient {
     private RestClient dphClient;
 
     private String uri;
+    private String MESSAGE_OUT_PATH = uri + "/out";
+    private String MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+    private String ON_BEHALF_OF_PARAM = "onBehalfOf";
+    private String MESSAGE_STATUS_PATH = uri + "/status/%s";
+
 
     public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri) {
         log.info("adapter URL is " + uri);
         this.dphClient = dphClient;
         this.uri = uri;
     }
-    // bare internal brukx
+    // bare internal bruk
     public String messageOut(DPHMessageOut messageOut) {
         return dphClient.method(HttpMethod.POST)
-            .uri(uri + "/out")
+            .uri(MESSAGE_OUT_PATH)
             .body(messageOut)
             .retrieve()
             .onStatus(t -> t.equals(HttpStatus.BAD_REQUEST),
@@ -51,14 +56,14 @@ public class NhnAdapterClient {
 
     //bare internal bruk
     public DPHMessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
-        return dphClient.method(HttpMethod.GET).uri(uri + "/status/" + messageReference + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(DPHMessageStatus.class).getBody();
+        return dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference)  + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(DPHMessageStatus.class).getBody();
     }
 
     //extern bruk
     public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
 
         return dphClient.method(HttpMethod.GET)
-            .uri(uri + "/in/" + messageReference.toString() + "/receipt" + "?onBehalfOf=" + onBehalfOf)
+            .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM+"=" + onBehalfOf)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError,(request, resp) -> {
                 JsonNode errorBody = ObjectMapperHolder.get().readTree(resp.getBody());

@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.dpi.client.domain.messagetypes;
 import lombok.Getter;
 import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -47,7 +46,7 @@ public enum DpiMessageType implements StandardBusinessDocumentType {
                 .filter(p -> p.getClazz().isInstance(businessMessage))
                 .filter(p -> p.getDirection() == direction)
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown BusinessMessageAsAttachment = %s. Expecting one of %s",
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown BusinessMessage = %s. Expecting one of %s",
                         businessMessage.getClass().getSimpleName(),
                         Arrays.stream(values())
                                 .filter(p -> p.getDirection() == direction)

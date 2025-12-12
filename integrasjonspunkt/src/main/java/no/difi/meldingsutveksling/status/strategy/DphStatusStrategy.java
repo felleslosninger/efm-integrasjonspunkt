@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-//@ConditionalOnProperty(name = "difi.move.feature.enableDPH", havingValue = "true")
+@ConditionalOnProperty(name = "difi.move.feature.enableDPH", havingValue = "true")
 @Order
 public class DphStatusStrategy implements StatusStrategy {
 
