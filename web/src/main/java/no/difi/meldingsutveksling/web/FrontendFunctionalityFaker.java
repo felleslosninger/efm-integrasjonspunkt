@@ -22,7 +22,13 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     @Override
     public List<Property> configuration() {
         return List.of(
-            new Property("difi.move.org.number", "311780735", "Ditt organisasjonsnummer")
+            new Property("difi.move.org.number", "311780735", "Ditt organisasjonsnummer"),
+            new Property("difi.move.serviceregistryEndpoint", "https://test.eformidling.no/adressetjeneste", "Service Registry Endpoint"),
+            new Property("difi.move.arkivmelding.default-process", "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0", "Arkivmelding Process"),
+            new Property("difi.move.arkivmelding.default-document-type", "urn:no:difi:arkivmelding:xsd::arkivmelding", "Arkivmelding Document Type"),
+            new Property("difi.move.arkivmelding.receipt-process", "urn:no:difi:profile:arkivmelding:response:ver1.0", "Arkivkvittering Process"),
+            new Property("difi.move.arkivmelding.receipt-document-type", "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering", "Arkivkvittering Document Type"),
+            new Property("difi.move.arkivmelding.generate-arkivmelding-receipts", "true", "Generer arkivmelding kvitteringer automatisk")
         );
     }
 

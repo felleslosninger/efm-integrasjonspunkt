@@ -32,9 +32,23 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
     @Override
     public List<Property> configuration() {
-        return List.of(
-            new Property("difi.move.org.number", props.getOrg().getNumber(), "Ditt organisasjonsnummer")
-        );
+        var config = new ArrayList<Property>();
+
+        config.addAll(List.of(
+            new Property("difi.move.org.number", props.getOrg().getNumber(), "Ditt organisasjonsnummer"),
+            new Property("difi.move.serviceregistryEndpoint", props.getServiceregistryEndpoint(), "Service Registry Endpoint")
+        ));
+
+        var arkivmelding = props.getArkivmelding();
+        if (arkivmelding != null) config.addAll(List.of(
+            new Property("difi.move.arkivmelding.default-process", arkivmelding.getDefaultProcess(), "Arkivmelding Process"),
+            new Property("difi.move.arkivmelding.default-document-type", arkivmelding.getDefaultDocumentType(), "Arkivmelding Document Type"),
+            new Property("difi.move.arkivmelding.receipt-process", arkivmelding.getReceiptProcess(), "Arkivkvittering Process"),
+            new Property("difi.move.arkivmelding.receipt-document-type", arkivmelding.getReceiptDocumentType(), "Arkivkvittering Document Type"),
+            new Property("difi.move.arkivmelding.generate-arkivmelding-receipts", "" + arkivmelding.isGenerateArkivmeldingReceipts(), "Generer arkivmelding kvitteringer automatisk")
+        ));
+
+        return config;
     }
 
     @Override
