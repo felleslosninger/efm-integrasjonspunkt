@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micrometer.core.annotation.Timed;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
@@ -26,49 +27,40 @@ import java.util.Base64;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class DphConversationStrategyImpl implements ConversationStrategy {
 
 
-    private NhnAdapterClient adapterClient;
-    private ServiceRegistryLookup serviceRegistryLookup;
-    private ConversationService conversationService;
-    private CryptoMessagePersister fileRepository;
-
-    public DphConversationStrategyImpl(NhnAdapterClient adapterClient, ServiceRegistryLookup serviceRegistryLookup, ConversationService conversationService,CryptoMessagePersister  fileRepository) {
-        this.adapterClient = adapterClient;
-        this.serviceRegistryLookup = serviceRegistryLookup;
-        this.conversationService = conversationService;
-        this.fileRepository = fileRepository;
-    }
+    private final NhnAdapterClient adapterClient;
+    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final ConversationService conversationService;
+    private final CryptoMessagePersister fileRepository;
 
 
     private String getHerID(NextMoveOutMessage message, ScopeType scopeType, String errorMessage) {
-        return message.getSbd().getScope(scopeType).orElseThrow(() -> new RuntimeException(errorMessage)).getInstanceIdentifier();
+        return message.getSbd().getScope(scopeType).orElseThrow(() -> new NextMoveRuntimeException(errorMessage)).getInstanceIdentifier();
     }
 
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
         try {
-            var filename = message.getFiles().stream().findFirst().map(BusinessMessageFile::getIdentifier).orElse(null);
-            Resource vedleg = null;
+            var filename = message.getFiles().stream().findFirst().map(BusinessMessageFile::getIdentifier).orElseThrow(()->new NextMoveException("Filename can not be null. "));
             byte vedlegInnehold[];
             String base64EncodedVedleg;
-            if (filename != null) {
-                try {
-                    vedleg = fileRepository.read(message.getMessageId(), filename);
-                    vedlegInnehold = vedleg.getContentAsByteArray();
-                } catch (IOException e) {
-                    throw new NextMoveException("Can not postprocess file.");
-                } catch (Exception e) {
-                    throw new NextMoveException("Can not read file " + filename, e);
-                }
-            } else {
-                throw new NextMoveException("Filename can not be null. ");
+
+            try {
+                Resource vedlegg = fileRepository.read(message.getMessageId(), filename);
+                vedlegInnehold = vedlegg.getContentAsByteArray();
+            } catch (IOException e) {
+                throw new NextMoveException("Can not postprocess file.",e);
+            } catch (Exception e) {
+                throw new NextMoveException("Can not read file " + filename, e);
             }
 
 
-            base64EncodedVedleg = new String(Base64.getEncoder().encode(vedlegInnehold));
+
+            base64EncodedVedleg = Base64.getEncoder().encodeToString(vedlegInnehold);
 
 
             log.info("Attempt to send dialogmelding to nhn-adapter");
