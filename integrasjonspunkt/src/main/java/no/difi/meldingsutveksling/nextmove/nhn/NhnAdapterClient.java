@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.NextMoveClientInputException;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,11 +30,11 @@ public class NhnAdapterClient {
 
 
     public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri) {
-        log.info("adapter URL is " + uri);
+        log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
         this.uri = uri;
     }
-    // bare internal bruk
+
     public String messageOut(DPHMessageOut messageOut) {
         return dphClient.method(HttpMethod.POST)
             .uri(MESSAGE_OUT_PATH)
@@ -43,23 +42,23 @@ public class NhnAdapterClient {
             .retrieve()
             .onStatus(t -> t.equals(HttpStatus.BAD_REQUEST),
                 (request, resp) -> {
-                    throw new NextMoveClientInputException(resp.getStatusText());
+                    throw new NextMoveRuntimeException(resp.getStatusText());
                 })
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
 
-                throw new NextMoveClientInputException(resp.getStatusText());
+                throw new NextMoveRuntimeException(resp.getStatusText());
             })
             .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
                 throw new NextMoveRuntimeException("Server error");
             })).toEntity(String.class).getBody();
     }
 
-    //bare internal bruk
+
     public DPHMessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
         return dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference)  + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(DPHMessageStatus.class).getBody();
     }
 
-    //extern bruk
+
     public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
 
         return dphClient.method(HttpMethod.GET)

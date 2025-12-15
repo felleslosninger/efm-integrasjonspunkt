@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,7 @@ public class HealthcareRoutingServiceTest {
 
     @BeforeEach
     public void setup() {
+        ReflectionTestUtils.setField(healthcareRoutingService, "dphEnabled", true);
         Mockito.clearInvocations();
     }
 
@@ -60,6 +62,20 @@ public class HealthcareRoutingServiceTest {
             "Dialogmelding requires Receiver HerdId level 2 to be present"
         );
     }
+
+    @Test
+    public void whenDphNotEnabled_ThrowIllegalArgumentException() {
+        ReflectionTestUtils.setField(healthcareRoutingService, "dphEnabled", false);
+        StandardBusinessDocument sbd = dialgmelding();
+        HealthcareValidationException ex = assertThrows(
+            HealthcareValidationException.class,
+            () -> healthcareRoutingService.validateAndApply(sbd),
+            "When Healthcare feature is disabled. Validation should fail."
+        );
+
+        assertEquals("Can not process request. Healthcare feature is disabled.",ex.getArgs()[0]);
+    }
+
 
 
     @Test

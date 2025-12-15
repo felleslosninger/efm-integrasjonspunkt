@@ -41,9 +41,9 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 .initializers(new VaultProtocolResolver())
                 .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                 .run(args);
-        boolean allowSynthenticIdentifiers = context.getEnvironment()
+        boolean allowSyntheticIdentifiers = context.getEnvironment()
             .getProperty("difi.move.identifier.synthetic.allow", Boolean.class, false);
-        PersonIdentifierValidator.setSyntheticPersonIdentifiersAllowed(allowSynthenticIdentifiers);
+        PersonIdentifierValidator.setSyntheticPersonIdentifiersAllowed(allowSyntheticIdentifiers);
 
         checkNtpSync(context);
 

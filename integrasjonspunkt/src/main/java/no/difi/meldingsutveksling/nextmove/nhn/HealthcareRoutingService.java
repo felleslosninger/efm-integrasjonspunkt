@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
@@ -10,20 +11,28 @@ import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class HealthcareRoutingService {
 
     private final ServiceRecordProvider serviceRecordProvider;
     private final IntegrasjonspunktProperties properties;
+    @Value("${difi.move.feature.enableDPH:false}")
+    private Boolean dphEnabled;
 
 
     public void validateAndApply(StandardBusinessDocument sbd) {
+        if (!dphEnabled){
+            log.error("Attempting to process Healthcare request when feature is disabled.");
+            throw new HealthcareValidationException("Can not process request. Healthcare feature is disabled.");
+        }
         withScopeValidation(sbd, doc -> {
             validate(sbd);
             applyRouting(sbd);
