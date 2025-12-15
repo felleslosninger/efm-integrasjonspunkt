@@ -63,7 +63,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
             base64EncodedVedleg = Base64.getEncoder().encodeToString(vedlegInnehold);
 
 
-            log.info("Attempt to send dialogmelding to nhn-adapter");
+            log.info("Attempt to send dialogmelding to nhn-adapter {}", message.getMessageId());
             String senderHerId1 = getHerID(message, ScopeType.SENDER_HERID1, "Sender HERID1 is not available");
             String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
             String receiverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Receiver HERID1 is not available");
