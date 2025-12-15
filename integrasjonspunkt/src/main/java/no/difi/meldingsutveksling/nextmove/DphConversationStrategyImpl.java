@@ -12,7 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.Reciever;
+import no.difi.meldingsutveksling.nextmove.nhn.Receiver;
 import no.difi.meldingsutveksling.nextmove.nhn.Sender;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
@@ -66,8 +66,8 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
             log.info("Attempt to send dialogmelding to nhn-adapter");
             String senderHerId1 = getHerID(message, ScopeType.SENDER_HERID1, "Sender HERID1 is not available");
             String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
-            String recieverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Reciever HERID1 is not available");
-            String recieverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Reciever HERID2 is not available");
+            String receiverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Receiver HERID1 is not available");
+            String receiverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Receiver HERID2 is not available");
             ServiceRecord receiverServiceRecord;
             var reciever = (NhnIdentifier) message.getReceiver();
             Dialogmelding dialogmelding = message.getBusinessMessage(Dialogmelding.class).orElseThrow();
@@ -121,7 +121,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
             NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
 
             DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-                new Sender(senderHerId1, senderHerId2, "To Do"), new Reciever(recieverHerId1, recieverHerId2, nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, base64EncodedVedleg);
+                new Sender(senderHerId1, senderHerId2, "To Do"), new Receiver(receiverHerId1, receiverHerId2, nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, base64EncodedVedleg);
             var messageReference = adapterClient.messageOut(messageOut);
             conversation.setMessageReference(messageReference);
             conversationService.save(conversation);
