@@ -10,6 +10,11 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
+    public String getOrganizationNumber() {
+        return "311780735";
+    }
+
+    @Override
     public Version getIntegrasjonspunktVersion() {
         return new Version("4.0.0-beta", "DEV-SNAPSHOT", true);
     }
@@ -41,6 +46,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
             new Property("difi.move.dpo.oidc.authenticationType", "JWK", "Maskinporten autentiserings type"),
             new Property("difi.move.dpo.oidc.jwk.path", "classpath:311780735-sterk-ulydig-hund-da.jwk", "JWK for autentisering i maskinporten"),
             new Property("difi.move.dpo.oidc.clientId", "b590f149-d0ba-4fca-b367-bccd9e444a00", "Maskinporten client-id"),
+            new Property("difi.move.dpo.systemName", "311780735_integrasjonspunkt", "Ditt system i Altinn"),
             new Property("difi.move.dpo.systemUser.orgId", "0192:311780735", "Din systembrukers org-id"),
             new Property("difi.move.dpo.systemUser.name", "311780735_systembruker_hund", "Din systembrukers navn"),
             new Property("difi.move.dpo.reportees[0].orgId", "0192:313711218", "På vegne av systembrukers org-id"),

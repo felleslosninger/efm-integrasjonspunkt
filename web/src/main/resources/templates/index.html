@@ -15,7 +15,6 @@
 
 <div class="mb-3">
     <a class="btn btn-outline-primary" th:href="@{/onboarding}">Onboarding DPO</a>
-    <a class="btn btn-outline-primary" th:href="@{/status}">System Status</a>
     <a class="btn btn-outline-primary" target="_blank" th:href="@{/conversations}">Conversations</a>
 </div>
 
@@ -62,6 +61,8 @@
         <br/><br/>
         <!-- vis en liste med config properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configuration()})}"></table>
+        <a class="btn btn-outline-primary" th:href="@{/status}">System Status</a>
+
     </div>
     <div class="tab-pane fade" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
         <div class="row">
@@ -125,12 +126,14 @@
         </p>
         <!-- vis en liste med dpo properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPO()})}"></table>
+        <!--
         <button th:if="${ff.isFake()}" type="button" class="btn btn-warning" onclick="alert('Din klient er IKKE konfigurert korrekt i Maskinporten.\nDu mangler scope altinn:authentication/systemregister.write\n\nDette må fikses før du kan gjennomføre onboarding.')">
             🧨Onboarding Token
         </button>
         <button th:if="${ff.isFake()}" type="button" class="btn btn-warning" onclick="alert('Ditt org.nr er IKKE konfigurert korrekt i ELMA.\nDu mangler DokumentType urn:no:difi:avtalt:xsd::avtalt\n\nDette må support@digdir.no fikse før du kan benytte DPO.')">
             🧨Dokument Oppsett
         </button>
+        -->
         <div class="btn-group">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
                 Access Token (demo)

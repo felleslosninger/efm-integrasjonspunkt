@@ -13,6 +13,11 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     private final IntegrasjonspunktProperties props;
 
     @Override
+    public String getOrganizationNumber() {
+        return props.getOrg().getNumber();
+    }
+
+    @Override
     public Version getIntegrasjonspunktVersion() {
         return new Version("DEV-SNAPSHOT", "3.0.1", false);
     }
@@ -91,6 +96,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         var systemUser = dpo.getSystemUser();
         if (systemUser != null) config.addAll(List.of(
+            new Property("difi.move.dpo.systemName", dpo.getSystemName(), "Ditt system i Altinn"),
             new Property("difi.move.dpo.systemUser.orgId", systemUser.getOrgId(), "Din systembrukers org-id"),
             new Property("difi.move.dpo.systemUser.name", systemUser.getName(), "Din systembrukerss navn")
         ));

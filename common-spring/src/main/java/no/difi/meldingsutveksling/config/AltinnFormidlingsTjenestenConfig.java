@@ -34,6 +34,12 @@ public class AltinnFormidlingsTjenestenConfig {
     private Oidc oidc;
 
     /**
+     * Systemnavn i Altinn, benyttes for onboarding
+     */
+    @NotNull
+    private String systemName;
+
+    /**
      * Altinn systembruker
      */
     @NestedConfigurationProperty

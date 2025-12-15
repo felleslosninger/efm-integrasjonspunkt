@@ -32,6 +32,8 @@ public interface FrontendFunctionality {
         return false; // signal that this is a real implementation
     }
 
+    String getOrganizationNumber();
+
     Version getIntegrasjonspunktVersion();
 
     List<String> getChannelsEnabled();
