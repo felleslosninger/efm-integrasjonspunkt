@@ -108,7 +108,7 @@ public class HealthcareRoutingServiceTest {
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
         HealthcareValidationException e = assertThrows(HealthcareValidationException.class ,()->healthcareRoutingService.validateAndApply(sbd));
-        assertEquals("Multinencancy configuration error. Only one organisation number should be whitelisted.",e.getArgs()[0]);
+        assertEquals("Multitenancy configuration error. Only one organisation number should be whitelisted.",e.getArgs()[0]);
     }
 
     @Test
