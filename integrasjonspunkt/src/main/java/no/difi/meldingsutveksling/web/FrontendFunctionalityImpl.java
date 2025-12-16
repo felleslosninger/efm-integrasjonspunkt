@@ -83,7 +83,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         var keystore = oidc.getKeystore();
         if (keystore != null) config.addAll(List.of(
             new Property("difi.move.dpo.oidc.keystore.alias", keystore.getAlias(), "Sertifikat keystore alias"),
-            new Property("difi.move.dpo.oidc.keystore.password", keystore.getPassword(), "Sertifikat keystore passord"),
+            new Property("difi.move.dpo.oidc.keystore.password", mask(keystore.getPassword()), "Sertifikat keystore passord"),
             new Property("difi.move.dpo.oidc.keystore.type", keystore.getType(), "Sertifikat keystore type"),
             new Property("difi.move.dpo.oidc.keystore.path", keystore.getPath().toString(), "Sertifikat keystore path"),
             new Property("difi.move.dpo.oidc.keystore.lockProvider", keystore.getLockProvider().toString(), "Sertifikat keystore lock provider")
@@ -179,5 +179,11 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         return config;
     }
+
+    // utility to just mask secrets like passwords
+    private String mask(String text) {
+        return text.replaceAll(".", "*");
+    }
+
 
 }

@@ -3,6 +3,10 @@
 The web application is separated into a separate module from the rest-api and backend code.
 That way it is easier to develop and test the web application without having to start the full Integrasjonspunkt with it's rest-api and dependencies to queue, database etc.
 
+## Todo & Fixme
+- [ ] Switch to using webjars (remove old versions from integrasjonspunkt module)
+- [ ] What about adding "swagger-ui", bruke direkte uten postman ?
+
 ## How does it work?
 The web module does not have any dependencies to the rest-api or other modules.
 It uses the [Thymeleaf](https://www.thymeleaf.org/) templating engine to render the html pages.
