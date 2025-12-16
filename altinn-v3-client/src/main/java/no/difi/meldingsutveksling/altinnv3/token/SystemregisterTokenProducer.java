@@ -1,10 +1,6 @@
-package no.difi.meldingsutveksling.altinnv3.systemregister;
+package no.difi.meldingsutveksling.altinnv3.token;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.altinnv3.token.TokenConfig;
-import no.difi.meldingsutveksling.altinnv3.token.TokenExchangeService;
-import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
-import no.difi.meldingsutveksling.altinnv3.token.TokenService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

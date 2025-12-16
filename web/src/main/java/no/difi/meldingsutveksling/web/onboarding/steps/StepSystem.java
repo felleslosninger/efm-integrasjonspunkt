@@ -36,15 +36,15 @@ public class StepSystem implements Step {
     public StepInfo getStepInfo() {
 
         var dialogText = STEP_COMPLETED ? """
-            Systemet <code>'%s'</code> er registrert i Altinn's ressurs-register.""" : """
-            Vi finner ikke system <code>'%s'</code> i Altinn's ressurs-register.  Sjekk at du har konfigurert
+            Systemet <code>'%s'</code> er registrert i Altinn's System Register.""" : """
+            Vi finner ikke system <code>'%s'</code> i Altinn's System Register.  Sjekk at du har konfigurert
             systemnavn rett i properties filen eller bekreft for å opprette et systemet nå.<br><br>Når dette er
             gjort må du konfigurere rett systemnavnet i properties filen og restarte Integrasjonspunktet.""";
 
         return new StepInfo(
                 getName(),
                 "Opprett system",
-                "Registrer ett system i Altinn's ressurs-register for Integrasjonspunktet.",
+                "Registrer ett system for Integrasionspunktet i Altinn's System Register.",
                 dialogText.formatted(getSystemName()),
                 isCompleted() ? "Lukk" : "Opprett system",
                 isRequired(),

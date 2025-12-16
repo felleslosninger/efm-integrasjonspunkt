@@ -43,6 +43,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
             new Property("difi.move.dpo.brokerserviceUrl", "https://platform.tt02.altinn.no/broker/api/v1", "Altinn Broker Service url"),
             new Property("difi.move.dpo.altinnTokenExchangeUrl", "https://platform.tt02.altinn.no/authentication/api/v1/exchange/maskinporten", "Altinn Token Exchange url"),
             new Property("difi.move.dpo.resource", "eformidling-dpo-meldingsutveksling", "Hvilken broker service ressurs benyttes"),
+            new Property("difi.move.dpo.systemRegisterUrl", "https://platform.tt02.altinn.no/authentication/api/v1/systemregister", "Altinn System Register url"),
             new Property("difi.move.dpo.oidc.authenticationType", "JWK", "Maskinporten autentiserings type"),
             new Property("difi.move.dpo.oidc.jwk.path", "classpath:311780735-sterk-ulydig-hund-da.jwk", "JWK for autentisering i maskinporten"),
             new Property("difi.move.dpo.oidc.clientId", "b590f149-d0ba-4fca-b367-bccd9e444a00", "Maskinporten client-id"),

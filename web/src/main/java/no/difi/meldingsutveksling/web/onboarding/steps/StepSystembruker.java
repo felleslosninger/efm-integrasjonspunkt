@@ -37,14 +37,14 @@ public class StepSystembruker implements Step {
 
         var dialogText = STEP_COMPLETED ? """
             Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>.""".formatted(getSystemUserName(), getSystemName()) : """
-            Vi finner ikke systembruker <code>'%s'</code> i Altinn's ressurs-register.  Sjekk at du har konfigurert
+            Vi finner ikke systembruker <code>'%s'</code> i Altinn's System Register.  Sjekk at du har konfigurert
             systembruker rett i properties filen eller bekreft for å opprette en systembruker nå.<br><br>
             Om du bekrefter vil det opprettes en systembruker for virksomhet <code>'%s'</code>
             på system <code>'%s'</code>.<br><br> Husk at ansvarlig for virksomhet <code>'%s'</code> må bekrefte
             opprettelsen av systembruker i Altinn før den blir aktivert og DPO tjenesten kan tas i bruk.<br><br>
             Systembrukeren som opprettes vil få navn <code>'%s'</code>.<br><br>
             Når dette er gjort må du konfigurere det i properties filen og restarte Integrasjonspunktet."""
-            .formatted(getSystemUserName(), ff.getOrganizationNumber(), getSystemName(), ff.getOrganizationNumber(), getSystemUserName());
+            .formatted(getSystemUserName(), getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
 
         return new StepInfo(
                 getName(),
@@ -74,6 +74,10 @@ public class StepSystembruker implements Step {
             .map(p -> p.value())
             .findFirst()
             .orElse("0192:%s".formatted(ff.getOrganizationNumber()));
+    }
+
+    private Object getOrgNumberFromOrgId() {
+        return getSystemOrgId().split(":")[1];
     }
 
     private String getSystemUserName() {

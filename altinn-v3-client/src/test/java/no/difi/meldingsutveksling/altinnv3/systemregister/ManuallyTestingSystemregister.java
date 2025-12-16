@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.altinnv3.systemregister;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
+import no.difi.meldingsutveksling.altinnv3.token.SystemregisterTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
 @SpringBootTest(classes = {
-    SystemregisterApiClient.class,
+    SystemregisterExtendedApiClient.class,
     SystemregisterTokenProducer.class,
     SystemuserTokenProducer.class,
     AltinnConfiguration.class,
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ManuallyTestingSystemregister {
 
     @Inject
-    SystemregisterApiClient client;
+    SystemregisterExtendedApiClient client;
 
     @Inject
     SystemregisterTokenProducer tokenProducer;

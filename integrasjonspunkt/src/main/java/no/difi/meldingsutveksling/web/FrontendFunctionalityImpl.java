@@ -65,6 +65,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
             new Property("difi.move.dpo.brokerserviceUrl", dpo.getBrokerserviceUrl(), "Altinn Broker Service url"),
             new Property("difi.move.dpo.altinnTokenExchangeUrl", dpo.getAltinnTokenExchangeUrl(), "Altinn Token Exchange url"),
             new Property("difi.move.dpo.resource", dpo.getResource(), "Hvilken broker service ressurs benyttes"),
+            new Property("difi.move.dpo.systemRegisterUrl", dpo.getSystemRegisterUrl(), "Altinn System Register url"),
             new Property("difi.move.dpo.connectTimeout", "" + dpo.getConnectTimeout(), "Connection timeout i millisekunder"),
             new Property("difi.move.dpo.requestTimeout", "" + dpo.getRequestTimeout(), "Request timeout i millisekunder"),
             new Property("difi.move.dpo.uploadSizeLimit", "" + dpo.getUploadSizeLimit(), "Maks upload størrelse i bytes"),
