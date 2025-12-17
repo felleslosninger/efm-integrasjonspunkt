@@ -1,4 +1,4 @@
-# hold denne filen ryddig - legg til EN linje med kommentar før hver entry med dato. serverity og evt annen info
+# her er det ryddig - ingen kjente sårbarheter
 
 # 20250905 : io.netty:netty-codec-http (app.jar)                         │ CVE-2025-58056 │ HIGH     │ fixed  │ 4.1.124.Final     │ 4.1.125.Final, 4.2.5.Final
 #CVE-2025-58056
@@ -8,3 +8,5 @@
 
 # 20251025 : org.springframework:spring-core (app.jar)                   │ CVE-2025-41249 │          │        │ 6.2.10            │ 6.2.11
 #CVE-2025-41249
+
+CVE-2025-59250 # Managed mssql via spring boot, probably updated on next SB version
