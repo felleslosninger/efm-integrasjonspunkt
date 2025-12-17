@@ -1,6 +1,9 @@
 package no.difi.meldingsutveksling.web;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.AccessPackageEntry;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.SystemUserEntry;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 
 import java.util.ArrayList;
@@ -11,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
     private final IntegrasjonspunktProperties props;
+    private final SystemregisterApiClient srac;
 
     @Override
     public String getOrganizationNumber() {
@@ -54,6 +58,25 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         ));
 
         return config;
+    }
+
+    @Override
+    public String dpoClientId() {
+        return props.getDpo().getOidc().getClientId();
+    }
+
+    @Override
+    public List<String> dpoSystemDetails() {
+        return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
+            .map(AccessPackageEntry::urn)
+            .toList();
+    }
+
+    @Override
+    public List<String> dpoSystemUsersForSystem() {
+        return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
+            .map(SystemUserEntry::externalRef)
+            .toList();
     }
 
     @Override

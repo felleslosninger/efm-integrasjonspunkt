@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
@@ -85,8 +86,8 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @ConditionalOnProperty(name = "use.frontend.faker", matchIfMissing = true)
-    public FrontendFunctionality frontendFunctionality(IntegrasjonspunktProperties props) {
-        return new FrontendFunctionalityImpl(props);
+    public FrontendFunctionality frontendFunctionality(IntegrasjonspunktProperties props, SystemregisterApiClient client) {
+        return new FrontendFunctionalityImpl(props, client);
     }
 
 }

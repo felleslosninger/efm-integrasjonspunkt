@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.TmpFile;
 import org.hibernate.LobHelper;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
 import jakarta.persistence.EntityManager;
+
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +24,6 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 public class BlobFactory {
 
-    private final EntityManager em;
     private boolean useTemporaryFile = false;
 
     Blob createBlob(InputStream inputStream, Long size) throws IOException {
@@ -35,23 +37,19 @@ public class BlobFactory {
         return createBlobWithKnownSize(inputStream, size);
     }
 
+    @SneakyThrows
     private Blob createBlobWithKnownSize(InputStream inputStream, Long size) {
-        return getLobHelper().createBlob(inputStream, size);
+        return new SerialBlob(inputStream.readAllBytes());
     }
 
     private Blob createBlob(InputStream inputStream) throws IOException {
-
-        Blob blob = getLobHelper().createBlob(new byte[0]);
-
-        try (OutputStream outputStream = blob.setBinaryStream(1)) {
-            FileCopyUtils.copy(inputStream, outputStream);
+        try {
+            return new SerialBlob(inputStream.readAllBytes());
         } catch (SQLException | UnsupportedOperationException e) {
             log.info("Could not create BLOB of unknown size. Switching to temporary file before BLOB creation. Exception was: {}", e.getLocalizedMessage());
             useTemporaryFile = true;
             return createBlobUsingTemporaryFile(inputStream);
         }
-
-        return blob;
     }
 
     private Blob createBlobUsingTemporaryFile(InputStream inputStream) throws IOException {
@@ -59,14 +57,5 @@ public class BlobFactory {
         File file = tmpFile.getFile();
         AutoClosingInputStream is = new AutoClosingInputStream(tmpFile.getInputStream(), tmpFile::delete);
         return createBlob(is, file.length());
-    }
-
-    public Blob createBlob(byte[] message) {
-        LobHelper lobHelper = getLobHelper();
-        return lobHelper.createBlob(message);
-    }
-
-    private LobHelper getLobHelper() {
-        return em.unwrap(Session.class).getLobHelper();
     }
 }

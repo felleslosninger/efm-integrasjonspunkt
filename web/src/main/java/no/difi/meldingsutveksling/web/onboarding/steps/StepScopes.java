@@ -1,11 +1,18 @@
 package no.difi.meldingsutveksling.web.onboarding.steps;
 
+import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class StepScopes implements Step {
 
     private boolean STEP_COMPLETED = false;
+
+    @Inject
+    FrontendFunctionality ff;
 
     @Override
     public String getName() {
@@ -24,15 +31,36 @@ public class StepScopes implements Step {
 
     @Override
     public void verify(String value) {
+        // sjekk om vi får tak i systemuser token - i såfall er dette steget komplett
         STEP_COMPLETED = !STEP_COMPLETED;
     }
 
     @Override
     public StepInfo getStepInfo() {
 
-        var dialogText = STEP_COMPLETED ?
-            "Alt i orden, maskinporten-klienten har nødvendige Altinn-scopes." :
-            "Din maskinporten-klient mangler nødvendige Altinn-scopes for å kunne fullføre onboarding-prosessen. Du mangler også scope <code>eformidling:dpo</code> for å kunne benytte tjenesten.<br><br>Kontakt servicedesk for å få dette fikset.";
+        var missingOnboardingScopes = List.of(
+            "altinn:authentication/systemregister.write",
+            "altinn:authentication/systemuser.request.write",
+            "altinn:authentication/systemuser.request.read"
+        );
+
+        var missingDpoServiceScopes = List.of(
+            "eformidling:dpo",
+            "altinn:broker.read",
+            "altinn:broker.write"
+        );
+
+        var dialogText = STEP_COMPLETED ? """
+            Alt i orden, maskinporten-klienten har de nødvendige scopes.""" : """
+            Din maskinporten klient <code>%s</code> mangler nødvendige Altinn-scopes for å kunne fullføre
+            onboarding-prosessen.<br><br><small><code>%s</code></small><br><br>
+            Du mangler også scopes for å kunne benytte DPO broker tjenesten.<br><br>
+            <small><code>%s</code></small><br><br>
+            Kontakt servicedesk for å få dette fikset.""".formatted(
+                getClientId(),
+                String.join("<br>", missingOnboardingScopes),
+                String.join("<br>", missingDpoServiceScopes)
+        );
 
         return new StepInfo(
                 getName(),
@@ -44,6 +72,10 @@ public class StepScopes implements Step {
                 isCompleted()
         );
 
+    }
+
+    private String getClientId() {
+        return ff.dpoClientId();
     }
 
 }

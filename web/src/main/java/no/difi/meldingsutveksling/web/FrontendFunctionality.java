@@ -32,6 +32,8 @@ public interface FrontendFunctionality {
         return false; // signal that this is a real implementation
     }
 
+    // common functions for hele integrasjonspunkt
+
     String getOrganizationNumber();
 
     Version getIntegrasjonspunktVersion();
@@ -40,10 +42,24 @@ public interface FrontendFunctionality {
 
     List<Property> configuration();
 
+    // dpo specific functions
+
+    String dpoClientId();
+
+    List<String> dpoSystemDetails();
+
+    List<String> dpoSystemUsersForSystem();
+
     List<Property> configurationDPO();
+
+    // dpv specific functions
 
     List<Property> configurationDPV();
 
+    // dpi specific functions
+
     List<Property> configurationDPI();
+
+    // functions for other channels
 
 }

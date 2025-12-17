@@ -35,22 +35,33 @@ public class StepSystembruker implements Step {
     @Override
     public StepInfo getStepInfo() {
 
-        var dialogText = STEP_COMPLETED ? """
-            Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>.""".formatted(getSystemUserName(), getSystemName()) : """
-            Vi finner ikke systembruker <code>'%s'</code> i Altinn's System Register.  Sjekk at du har konfigurert
-            systembruker rett i properties filen eller bekreft for å opprette en systembruker nå.<br><br>
-            Om du bekrefter vil det opprettes en systembruker for virksomhet <code>'%s'</code>
-            på system <code>'%s'</code>.<br><br> Husk at ansvarlig for virksomhet <code>'%s'</code> må bekrefte
-            opprettelsen av systembruker i Altinn før den blir aktivert og DPO tjenesten kan tas i bruk.<br><br>
+        var dialogTextFinished = """
+            Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>."""
+            .formatted(getSystemUserName(), getSystemName());
+
+        var dialogTextMissing = "Vi finner ikke systembruker <code>'%s'</code> i Altinn's System Register.<br><br>"
+            .formatted(getSystemUserName());
+
+        if (!ff.dpoSystemUsersForSystem().isEmpty()) dialogTextMissing = dialogTextMissing + """
+             Men på system <code>'%s'</code> er følgende systembrukere allerede er registrert :<br><br>
+             <small><code>%s</code></small><br><br>"""
+            .formatted(getSystemName(), String.join("<br>", ff.dpoSystemUsersForSystem()));
+
+        dialogTextMissing = dialogTextMissing + """
+            Sjekk at du har konfigurert systembruker rett i properties filen eller bekreft at du vil å opprette
+            en ny systembruker.<br><br>Om du bekrefter vil det opprettes en systembruker for
+            virksomhet <code>'%s'</code> på system <code>'%s'</code>.<br><br>
+            Husk at ansvarlig for virksomhet <code>'%s'</code> må bekrefte opprettelsen av systembruker i Altinn
+            før den blir aktivert og DPO tjenesten kan tas i bruk.<br><br>
             Systembrukeren som opprettes vil få navn <code>'%s'</code>.<br><br>
-            Når dette er gjort må du konfigurere det i properties filen og restarte Integrasjonspunktet."""
-            .formatted(getSystemUserName(), getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
+            Når dette er gjort må du konfigurere om properties filen og restarte Integrasjonspunktet."""
+            .formatted(getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
 
         return new StepInfo(
                 getName(),
                 "Opprett systembruker",
                 "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
-                dialogText,
+                STEP_COMPLETED ? dialogTextFinished : dialogTextMissing,
                 isCompleted() ? "Lukk" : "Opprett systembruker",
                 isRequired(),
                 isCompleted()

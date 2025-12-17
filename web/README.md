@@ -4,6 +4,8 @@ The web application is separated into a separate module from the rest-api and ba
 That way it is easier to develop and test the web application without having to start the full Integrasjonspunkt with it's rest-api and dependencies to queue, database etc.
 
 ## Todo & Fixme
+- [ ] FrontendFunctionality getIntegrasjonspunktVersion() er ikke implementert 
+- [ ] Sjekk av tilgangspakker må også på plass
 - [ ] Switch to using webjars (remove old versions from integrasjonspunkt module)
 - [ ] What about adding "swagger-ui", bruke direkte uten postman ?
 

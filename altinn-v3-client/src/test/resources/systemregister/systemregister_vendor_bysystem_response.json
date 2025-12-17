@@ -1,0 +1,44 @@
+{
+    "links": {},
+    "data": [
+        {
+            "id": "ca73c480-3a77-476e-9e94-2af6ee741586",
+            "integrationTitle": "Digdir integrasjonspunkt",
+            "systemId": "991825827_integrasjonspunkt",
+            "productName": "",
+            "reporteeOrgNo": "991825827",
+            "created": "2025-09-18T13:04:43.351741Z",
+            "isDeleted": false,
+            "supplierName": "",
+            "supplierOrgno": "991825827",
+            "externalRef": "991825827_integrasjonspunkt_systembruker_test",
+            "userType": "standard"
+        },
+        {
+            "id": "42d647ae-b335-4e85-9866-a5f01dbd5266",
+            "integrationTitle": "Digdir integrasjonspunkt",
+            "systemId": "991825827_integrasjonspunkt",
+            "productName": "",
+            "reporteeOrgNo": "312797062",
+            "created": "2025-11-17T11:07:57.972018Z",
+            "isDeleted": false,
+            "supplierName": "",
+            "supplierOrgno": "991825827",
+            "externalRef": "991825827_integrasjonspunkt_systembruker_skilpadde",
+            "userType": "standard"
+        },
+        {
+            "id": "38fc985d-0ecb-4e6c-8e0d-b26493e6b1c7",
+            "integrationTitle": "Digdir integrasjonspunkt",
+            "systemId": "991825827_integrasjonspunkt",
+            "productName": "",
+            "reporteeOrgNo": "991825827",
+            "created": "2025-11-18T12:34:55.037769Z",
+            "isDeleted": false,
+            "supplierName": "",
+            "supplierOrgno": "991825827",
+            "externalRef": "991825827_integrasjonspunkt_systembruker_digdir",
+            "userType": "standard"
+        }
+    ]
+}
