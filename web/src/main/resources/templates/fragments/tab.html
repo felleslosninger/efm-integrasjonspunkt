@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Static prototyping elements can go here, but they won't be inserted into other pages -->
+</head>
+<body>
+
+<div th:fragment="channel" class="tab-pane fade" th:id="${id}" role="tabpanel" th:aria-labelledby="${id} + '-tab'">
+    <p th:inline="text">
+        [[${type}]] gjør det mulig å sende meldinger via kanalen '[[${type}]]'.
+        Denne placeholder tab'en har id='[[${id}]]'.
+    </p>
+    <p>
+        Kanal konfigurasjon er oppsummert i tabellen nedenfor.
+    </p>
+    <code>
+        konfig = ikke implementert
+    </code>
+    <br/><br/>
+    <button class="btn btn-danger" onclick="alert('Falsk alarm ...\n\nHer kunne vi vist konfigurasjonsfeil og advarsler.\nMen alt virker heldigvis lungt nå siden dette er en demo.\n\nNo worries 🤣')">DANGER DANGER</button>
+</div>
+
+</body>
+</html>

@@ -34,11 +34,23 @@ public class AltinnFormidlingsTjenestenConfig {
     private Oidc oidc;
 
     /**
-     * Altinn systembruker
+     * Altinn systemnavn (systemName) og url til systemregisteret (systemRegisterUrl), benyttes for onboarding av DPO
+     */
+    @NotNull
+    private String systemName;
+
+    @NotNull
+    private String systemRegisterUrl;
+
+    /**
+     * Altinn systembruker (systemUser) benyttes både ved onboarding DPO og ved senere bruk
      */
     @NestedConfigurationProperty
     private AltinnSystemUser systemUser;
 
+    /**
+     * Altinn liste av ekstra systembrukere (reportees) som det også skal behandles meldinger for
+     */
     private Set<AltinnSystemUser> reportees = Sets.newHashSet();
 
 }

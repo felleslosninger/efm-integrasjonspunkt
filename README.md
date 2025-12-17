@@ -32,6 +32,21 @@ Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/
 inneholder en optional import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
 
+## Utvikle nye web sider
+Prosjektet inneholder en `web` modul, som inneholder web sider for å administrere Integrasjonspunktet.
+Denne modulen inneholder en kjørbar klasse og kan startes separat uten resten av Integrasjonspunktet
+og alle dets avhengigheter.
+
+Dette er by-design, slik at det skal være mulig å raskt utvikle websiden med hot-reload aktivert.
+For informasjon om hvordan dette fungerer kan du se [web/README.md](web/README.md).
+
+Kortversjon er at web-modulen med `fake` backend og hot-reload kan startes slik :
+```bash
+cd web
+mvn spring-boot:run -Dspring-boot.run.profiles=reload
+open http://localhost:8080/
+```
+
 ## Bygge REST API dokumentasjon
 Tests must run for this to work (generated-snippets will be missing if you skip running tests).
 For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `restdocs` :

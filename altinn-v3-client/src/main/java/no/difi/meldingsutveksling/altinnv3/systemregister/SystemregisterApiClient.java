@@ -4,8 +4,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
-import no.difi.meldingsutveksling.altinnv3.token.SystemUserTokenProducer;
 import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
@@ -22,8 +22,7 @@ public class SystemregisterApiClient {
 
     @Qualifier("SystemregisterTokenProducer")
     private final TokenProducer tokenProducer;
-
-    private final SystemUserTokenProducer systemUserTokenProducer = new SystemUserTokenProducer();
+    private final IntegrasjonspunktProperties props;
 
     private RestClient restClient = RestClient.builder().defaultStatusHandler(HttpStatusCode::isError, this::getApiException).build();
 
@@ -34,16 +33,11 @@ public class SystemregisterApiClient {
 
     @PostConstruct
     public void init() {
-        apiEndpoint = "https://platform.tt02.altinn.no/authentication/api/v1/systemregister";
-    }
-
-    public String getTokenTest() {
-        return systemUserTokenProducer.produceToken(List.of("altinn:broker.read", "altinn:broker.write"));
+        apiEndpoint = props.getDpo().getSystemRegisterUrl();
     }
 
     public String getSystemUser(String party, String systemUserUuid) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-        //String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
         return restClient.get()
             .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/%s/%s".formatted(party, systemUserUuid))
             .header("Authorization", "Bearer " + accessToken)
@@ -55,7 +49,6 @@ public class SystemregisterApiClient {
 
     public String getAllSystemUsers(String systemId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-
         return restClient.get()
             .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/vendor/bysystem/" + systemId)
             .header("Authorization", "Bearer " + accessToken)
