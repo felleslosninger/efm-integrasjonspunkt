@@ -136,6 +136,11 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
+    public String dpoAccessToken() {
+        return srac.getAccessToken();
+    }
+
+    @Override
     public List<Property> configurationDPV() {
         var config = new ArrayList<Property>();
 
@@ -182,6 +187,11 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
+    public String dpvAccessToken() {
+        return "AccessToken funksjon ikke implementert for DPV";
+    }
+
+    @Override
     public List<Property> configurationDPI() {
         var config = new ArrayList<Property>();
 
@@ -202,6 +212,11 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         );
 
         return config;
+    }
+
+    @Override
+    public String dpiAccessToken() {
+        return "AccessToken funksjon ikke implementert for DPI";
     }
 
     // utility to just mask secrets like passwords

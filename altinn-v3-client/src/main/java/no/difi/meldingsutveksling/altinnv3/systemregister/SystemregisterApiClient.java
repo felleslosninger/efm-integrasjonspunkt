@@ -29,7 +29,8 @@ public class SystemregisterApiClient {
 
     private static List<String> SCOPES_FOR_SYSTEMREGISTER = List.of("altinn:authentication/systemregister.write");
     private static List<String> SCOPES_FOR_SYSTEMUSER = List.of("altinn:authentication/systemuser.request.write", "altinn:authentication/systemuser.request.read");
-    private static List<String> SCOPES_FOR_DPO = List.of("eformidling:dpo", "altinn:broker.read", "altinn:broker.write");
+    private static List<String> SCOPES_FOR_DPO = List.of("altinn:broker.read", "altinn:broker.write");
+    private static List<String> SCOPES_FOR_DPV = List.of("altinn:correspondence.read", "altinn:correspondence.write");
 
     private String apiEndpoint;
 
@@ -42,6 +43,10 @@ public class SystemregisterApiClient {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record SystemEntry(String id, List<AccessPackageEntry> accessPackages, boolean isDeleted, boolean isVisible) {};
     public record AccessPackageEntry(String urn) {};
+
+    public String getAccessToken() {
+        return tokenProducer.produceToken(SCOPES_FOR_DPO);
+    }
 
     public SystemEntry getSystem(String id) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);

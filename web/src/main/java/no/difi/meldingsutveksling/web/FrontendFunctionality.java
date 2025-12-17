@@ -33,32 +33,25 @@ public interface FrontendFunctionality {
     }
 
     // common functions for hele integrasjonspunkt
-
     String getOrganizationNumber();
-
     Version getIntegrasjonspunktVersion();
-
     List<String> getChannelsEnabled();
-
     List<Property> configuration();
 
     // dpo specific functions
-
     String dpoClientId();
-
     List<String> dpoSystemDetails();
-
     List<String> dpoSystemUsersForSystem();
-
     List<Property> configurationDPO();
+    String dpoAccessToken();
 
     // dpv specific functions
-
     List<Property> configurationDPV();
+    String dpvAccessToken();
 
     // dpi specific functions
-
     List<Property> configurationDPI();
+    String dpiAccessToken();
 
     // functions for other channels
 

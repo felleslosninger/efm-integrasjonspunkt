@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.web.onboarding;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.onboarding.steps.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,8 @@ public class OnboardingController {
     @Inject StepKonfigurer step4;
     @Inject StepElma step5;
     @Inject StepTest step6;
+
+    @Inject FrontendFunctionality ff;
 
     private List<Step> steps;
 
@@ -58,6 +61,18 @@ public class OnboardingController {
                 new ResourceLink("Digital post til innbyggere (DPI)", "https://www.digdir.no/felleslosninger/digital-postkasse-til-innbyggere/775"),
                 new ResourceLink("Maskinporten klientoppsett", "https://docs.digdir.no/docs/Maskinporten/maskinporten_sjolvbetjening_web.html")
         );
+    }
+
+    @GetMapping("/onboarding/token/{kanal}")
+    public ResponseEntity<?> accessToken(@PathVariable String kanal) {
+        System.out.println("Fetching accesstoken for kanal : " + kanal);
+        if (kanal == null) kanal = "";
+        String response = null;
+        if ("DPO".equalsIgnoreCase(kanal)) response = ff.dpoAccessToken();
+        if ("DPV".equalsIgnoreCase(kanal)) response = ff.dpvAccessToken();
+        if ("DPI".equalsIgnoreCase(kanal)) response = ff.dpiAccessToken();
+        if (response == null) response = "Får ikke tak i token, ukjent kanal '%s'".formatted(kanal);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/onboarding/dialog/{dialog}")

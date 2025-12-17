@@ -135,8 +135,8 @@
         </button>
         -->
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
-                Access Token (demo)
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPO')">
+                Access Token
             </button>
             <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="visually-hidden">Toggle Dropdown</span>
@@ -160,8 +160,8 @@
         </p>
         <!-- vis en liste med dpv properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPV()})}"></table>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
-            Access Token (demo)
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPV')">
+            Access Token
         </button>
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#correspondenceDialog">
             📈 Vis sendt statistikk (demo)
@@ -177,8 +177,8 @@
         </p>
         <!-- vis en liste med dpi properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPI()})}"></table>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog">
-            Access Token (demo)
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPI')">
+            Access Token
         </button>
         <button class="btn btn-success disabled">List kvitteringer (demo)</button>
     </div>
@@ -199,7 +199,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p id="theCurrentToken" class="text-break" th:text="${token}"></p>
+                <p id="theCurrentToken" class="text-break"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -291,6 +291,33 @@
             await navigator.clipboard.writeText(textToCopy);
         } catch (err) {
             alert('Failed to copy text.');
+        }
+    }
+
+    async function fetchAccessToken(kanal) {
+        // Update UI immediately
+        const label = document.getElementById('tokenDialogLabel');
+        const out = document.getElementById('theCurrentToken');
+        if (label) {
+            label.innerText = 'AccessToken for ' + kanal;
+        }
+        if (out) {
+            out.innerText = 'Fetching token...';
+        }
+
+        try {
+            const resp = await fetch(`/onboarding/token/${encodeURIComponent(kanal)}`);
+            const text = await resp.text();
+            if (!resp.ok) {
+                throw new Error(text || resp.statusText);
+            }
+            if (out) {
+                out.innerText = text;
+            }
+        } catch (e) {
+            if (out) {
+                out.innerText = 'Failed to fetch token: ' + (e && e.message ? e.message : e);
+            }
         }
     }
 </script>
