@@ -1,0 +1,28 @@
+{
+    "id": "991825827_integrasjonspunkt",
+    "vendor": {
+        "ID": "0192:991825827"
+    },
+    "name": {
+        "en": "Digdir integrasjonspunkt",
+        "nb": "Digdir integrasjonspunkt",
+        "nn": "Digdir integrasjonspunkt"
+    },
+    "description": {
+        "en": "integrasjonspunkt",
+        "nb": "integrasjonspunkt",
+        "nn": "integrasjonspunkt"
+    },
+    "rights": [],
+    "accessPackages": [
+        {
+            "urn": "urn:altinn:accesspackage:informasjon-og-kommunikasjon"
+        }
+    ],
+    "isDeleted": false,
+    "clientId": [
+        "a63cac91-3210-4c35-b961-5c7bf122345c"
+    ],
+    "isVisible": true,
+    "allowedRedirectUrls": []
+}

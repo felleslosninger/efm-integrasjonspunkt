@@ -63,6 +63,10 @@ public class CacheConfig extends CachingConfigurerSupport {
                         Caffeine.newBuilder()
                                 .expireAfterWrite(90, TimeUnit.SECONDS)
                                 .build()),
+                 new CaffeineCache("altinn.getSystemToken",
+                        Caffeine.newBuilder()
+                            .expireAfterWrite(25, TimeUnit.MINUTES)
+                            .build()),
                 new CaffeineCache("altinn.getDpoToken",
                         Caffeine.newBuilder()
                             .expireAfterWrite(25, TimeUnit.MINUTES)

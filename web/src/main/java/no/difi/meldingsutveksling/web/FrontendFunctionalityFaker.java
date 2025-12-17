@@ -38,6 +38,21 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
+    public String dpoClientId() {
+        return "b590f149-d0ba-4fca-b367-bccd9e444a00";
+    }
+
+    @Override
+    public List<String> dpoSystemDetails() {
+        return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+    }
+
+    @Override
+    public List<String> dpoSystemUsersForSystem() {
+        return List.of("311780735_systembruker_tiger", "311780735_systembruker_ape");
+    }
+
+    @Override
     public List<Property> configurationDPO() {
         return List.of(
             new Property("difi.move.dpo.brokerserviceUrl", "https://platform.tt02.altinn.no/broker/api/v1", "Altinn Broker Service url"),
