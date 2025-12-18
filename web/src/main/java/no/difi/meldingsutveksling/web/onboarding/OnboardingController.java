@@ -20,8 +20,7 @@ public class OnboardingController {
     @Inject StepSystem step2;
     @Inject StepSystembruker step3;
     @Inject StepKonfigurer step4;
-    @Inject StepElma step5;
-    @Inject StepTest step6;
+    @Inject StepTest step5;
 
     @Inject FrontendFunctionality ff;
 
@@ -29,7 +28,7 @@ public class OnboardingController {
 
     @PostConstruct
     void init() {
-        steps = List.of(step1, step2, step3, step4, step5, step6);
+        steps = List.of(step1, step2, step3, step4, step5);
         // FIXME do some checks on startup steps.stream().filter(Step::isRequired).forEach(s -> s.verify("init"));
         // FIXME is there some issues with the
     }
