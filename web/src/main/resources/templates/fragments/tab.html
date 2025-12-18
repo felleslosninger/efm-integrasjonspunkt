@@ -5,13 +5,13 @@
 </head>
 <body>
 
-<div th:fragment="channel" class="tab-pane fade" th:id="${id}" role="tabpanel" th:aria-labelledby="${id} + '-tab'">
+<div th:fragment="service" class="tab-pane fade" th:id="${id}" role="tabpanel" th:aria-labelledby="${id} + '-tab'">
     <p th:inline="text">
-        [[${type}]] gjør det mulig å sende meldinger via kanalen '[[${type}]]'.
+        [[${type}]] gjør det mulig å sende meldinger via meldingstjeneste '[[${type}]]'.
         Denne placeholder tab'en har id='[[${id}]]'.
     </p>
     <p>
-        Kanal konfigurasjon er oppsummert i tabellen nedenfor.
+        Konfigurasjon er oppsummert i tabellen nedenfor.
     </p>
     <code>
         konfig = ikke implementert

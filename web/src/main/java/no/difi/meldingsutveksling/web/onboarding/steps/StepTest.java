@@ -40,7 +40,7 @@ public class StepTest implements Step {
 
         return new StepInfo(
                 getName(),
-                "Testflyt",
+                "Test meldingsflyt",
                 "Send en testmelding til deg selv for å verifiser mottak før produksjonssetting.",
                 dialogText,
                 isCompleted() ? "Lukk" : "Send testmelding",

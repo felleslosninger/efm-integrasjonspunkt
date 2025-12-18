@@ -25,25 +25,25 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab" aria-controls="tab1" aria-selected="false">Linker</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPO')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPO')}">
         <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab" aria-controls="tab2" aria-selected="false">DPO</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPV')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPV')}">
         <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab" aria-controls="tab3" aria-selected="false">DPV</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPI')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPI')}">
         <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab" aria-controls="tab4" aria-selected="false">DPI</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPF')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPF')}">
         <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab" aria-controls="tab5" aria-selected="false">DPF</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPFIO')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPFIO')}">
         <button class="nav-link" id="tab6-tab" data-bs-toggle="tab" data-bs-target="#tab6" type="button" role="tab" aria-controls="tab6" aria-selected="false">DPFIO</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPE')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPE')}">
         <button class="nav-link" id="tab7-tab" data-bs-toggle="tab" data-bs-target="#tab7" type="button" role="tab" aria-controls="tab7" aria-selected="false">DPE</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${channels.contains('DPH')}">
+    <li class="nav-item" role="presentation" th:if="${services.contains('DPH')}">
         <button class="nav-link" id="tab8-tab" data-bs-toggle="tab" data-bs-target="#tab8" type="button" role="tab" aria-controls="tab8" aria-selected="false">DPH</button>
     </li>
 </ul>
@@ -52,12 +52,12 @@
     <div class="tab-pane fade show active" id="tab0" role="tabpanel" aria-labelledby="tab0-tab">
         <p th:text="${uptime}">Integrasjonspunktet ble startet for en stund siden.</p>
         <p>
-            Du har følgende kanaler aktivert :
+            Du har følgende meldingstjenester aktivert :
             <ul>
-                <li th:each="channel : ${channels}" th:text="${channel}">Channel</li>
+                <li th:each="service : ${services}" th:text="${service}">Meldingstjeneste</li>
             </ul>
         </p>
-        Bruk fanene for å se konfigurasjon på de ulike kanalene du har aktivert.
+        Bruk fanene for å se konfigurasjon på de ulike meldingstjenestene du har aktivert.
         <br/><br/>
         <!-- vis en liste med config properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configuration()})}"></table>
@@ -70,13 +70,12 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">Internals</h5>
-                        <p class="card-subtitle mb-3 text-muted">Run-time informasjon fra kjørende Integrasjonspunkt (åpnes i ny fane).</p>
+                        <p class="card-subtitle mb-3 text-muted">Informasjon fra kjørende Integrasjonspunkt (åpnes i ny fane).</p>
                         <ul>
                             <li><a target="_blank" href="/manage">Management Endpoints</a></li>
                             <li><a target="_blank" href="/manage/scheduledtasks">Scheduledtasks</a></li>
                             <li><a target="_blank" href="/manage/caches">Caches</a></li>
                             <li><a target="_blank" href="/manage/metrics">Metrics</a></li>
-                            <li><a target="_blank" href="/manage/env">Environment</a></li>
                             <li><a target="_blank" href="/manage/configprops">Configprops</a></li>
                             <li><a target="_blank" href="/manage/mappings">Mappings</a></li>
                             <li><a target="_blank" href="/manage/beans">Beans</a></li>
@@ -89,7 +88,7 @@
                 <div class="card shadow-sm mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Observability</h5>
-                        <p class="card-subtitle mb-3 text-muted">Endepunkt for ekster overvåking (åpnes i ny fane).</p>
+                        <p class="card-subtitle mb-3 text-muted">Endepunkt for ekstern overvåking (åpnes i ny fane).</p>
                         <ul>
                             <li><a target="_blank" href="/manage/info">Info about this build</a></li>
                             <li><a target="_blank" href="/manage/prometheus">Prometheus metrics</a></li>
@@ -116,7 +115,7 @@
             </div>
         </div>
     </div>
-    <div th:if="${channels.contains('DPO')}" class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+    <div th:if="${services.contains('DPO')}" class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
         <p>
             DPO sørger for rask og sikker overføring mellom offentlige og private virksomheter.
             Den er basert på <a href="https://docs.altinn.studio/nb/broker/" target="_blank">Altinn 3 Formidling</a> og krever at du konfigurert et gyldig virksomhestsertifikat og opprettet "SystemUser" for deg selv og andre organisasjoner du vil opptre på vegne av.
@@ -150,7 +149,7 @@
             List innkommende meldinger (demo)
         </button>
     </div>
-    <div th:if="${channels.contains('DPV')}" class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+    <div th:if="${services.contains('DPV')}" class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
         <p>
             DPV sørger for sikker utveksling av korrespondanse, som offisielle brev, varsler og andre dokumenter, mellom offentlige etater og enkeltpersoner eller bedrifter.
             Den er baser på <a href="https://docs.altinn.studio/nb/correspondence/" target="_blank">Altinn 3 Melding</a> og krever at du har konfigurert et gyldig virksomhestsertifikat.
@@ -167,7 +166,7 @@
             📈 Vis sendt statistikk (demo)
         </button>
     </div>
-    <div th:if="${channels.contains('DPI')}" class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
+    <div th:if="${services.contains('DPI')}" class="tab-pane fade" id="tab4" role="tabpanel" aria-labelledby="tab4-tab">
         <p>
             DPI gjør det mulig å sende sikker digital post til innbyggerne, uavhengig av hvilken postkasse innbyggerne har valgt (e-Boks eller Digipost).
             Den er baser på <a href="https://www.digdir.no/felleslosninger/digital-postkasse-til-innbyggere/775" target="_blank">Digital postkasse til innbyggere</a> og krever at du har konfigurert et gyldig virksomhestsertifikat.
@@ -183,10 +182,10 @@
         <button class="btn btn-success disabled">List kvitteringer (demo)</button>
     </div>
 
-    <div th:if="${channels.contains('DPF')}" th:replace="~{fragments/tab :: channel(id='tab5', type='DPF')}"></div>
-    <div th:if="${channels.contains('DPFIO')}" th:replace="~{fragments/tab :: channel(id='tab6', type='DPFIO')}"></div>
-    <div th:if="${channels.contains('DPE')}" th:replace="~{fragments/tab :: channel(id='tab7', type='DPE')}"></div>
-    <div th:if="${channels.contains('DPH')}" th:replace="~{fragments/tab :: channel(id='tab8', type='DPH')}"></div>
+    <div th:if="${services.contains('DPF')}" th:replace="~{fragments/tab :: service(id='tab5', type='DPF')}"></div>
+    <div th:if="${services.contains('DPFIO')}" th:replace="~{fragments/tab :: service(id='tab6', type='DPFIO')}"></div>
+    <div th:if="${services.contains('DPE')}" th:replace="~{fragments/tab :: service(id='tab7', type='DPE')}"></div>
+    <div th:if="${services.contains('DPH')}" th:replace="~{fragments/tab :: service(id='tab8', type='DPH')}"></div>
 
 </div>
 
@@ -294,19 +293,19 @@
         }
     }
 
-    async function fetchAccessToken(kanal) {
+    async function fetchAccessToken(meldingstjeneste) {
         // Update UI immediately
         const label = document.getElementById('tokenDialogLabel');
         const out = document.getElementById('theCurrentToken');
         if (label) {
-            label.innerText = 'AccessToken for ' + kanal;
+            label.innerText = 'AccessToken for ' + meldingstjeneste;
         }
         if (out) {
             out.innerText = 'Fetching token...';
         }
 
         try {
-            const resp = await fetch(`/onboarding/token/${encodeURIComponent(kanal)}`);
+            const resp = await fetch(`/onboarding/token/${encodeURIComponent(meldingstjeneste)}`);
             const text = await resp.text();
             if (!resp.ok) {
                 throw new Error(text || resp.statusText);

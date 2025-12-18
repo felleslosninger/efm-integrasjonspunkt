@@ -14,7 +14,11 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1 class="mb-1">JWK Generator</h1>
-            <p class="text-muted mb-0">Generate a new key pair using RSA and view both private and public keys as JWK (JSON Web Key) objects.</p>
+            <p class="text-muted mb-0">
+                Generer et nytt symetrisk nøkkelpar med RSA and vis både private og public delen som JWK (JSON Web Key).
+                <br/><br/>
+                Velg nøkkelstørrelse og angi ønsket navn på nøkkelparet før du genererer og laster ned JWK filene.
+            </p>
         </div>
         <div class="text-end">
             <a class="btn btn-outline-secondary" th:href="@{/}">Tilbake til oversikt</a>
@@ -38,7 +42,7 @@
             </select>
         </div>
         <div class="col-auto">
-            <button type="submit" class="btn btn-primary">create</button>
+            <button type="submit" class="btn btn-primary">Generer</button>
         </div>
     </form>
 

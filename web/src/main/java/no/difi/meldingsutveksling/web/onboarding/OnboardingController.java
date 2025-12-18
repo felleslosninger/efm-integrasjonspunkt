@@ -63,15 +63,15 @@ public class OnboardingController {
         );
     }
 
-    @GetMapping("/onboarding/token/{kanal}")
-    public ResponseEntity<?> accessToken(@PathVariable String kanal) {
-        System.out.println("Fetching accesstoken for kanal : " + kanal);
-        if (kanal == null) kanal = "";
+    @GetMapping("/onboarding/token/{meldingstjeneste}")
+    public ResponseEntity<?> accessToken(@PathVariable String meldingstjeneste) {
+        System.out.println("Fetching accesstoken for meldingstjeneste : " + meldingstjeneste);
+        if (meldingstjeneste == null) meldingstjeneste = "";
         String response = null;
-        if ("DPO".equalsIgnoreCase(kanal)) response = ff.dpoAccessToken();
-        if ("DPV".equalsIgnoreCase(kanal)) response = ff.dpvAccessToken();
-        if ("DPI".equalsIgnoreCase(kanal)) response = ff.dpiAccessToken();
-        if (response == null) response = "Får ikke tak i token, ukjent kanal '%s'".formatted(kanal);
+        if ("DPO".equalsIgnoreCase(meldingstjeneste)) response = ff.dpoAccessToken();
+        if ("DPV".equalsIgnoreCase(meldingstjeneste)) response = ff.dpvAccessToken();
+        if ("DPI".equalsIgnoreCase(meldingstjeneste)) response = ff.dpiAccessToken();
+        if (response == null) response = "Får ikke tak i token, ukjent meldingstjeneste '%s'".formatted(meldingstjeneste);
         return ResponseEntity.ok(response);
     }
 

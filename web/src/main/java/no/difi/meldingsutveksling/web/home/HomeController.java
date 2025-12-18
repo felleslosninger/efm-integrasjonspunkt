@@ -21,7 +21,7 @@ public class HomeController {
     @GetMapping("/")
     public String index(Model model) {
         model.addAttribute("ff", ff); // FrontendFunctionality is always available
-        model.addAttribute("channels", ff.getChannelsEnabled());
+        model.addAttribute("services", ff.getServicesEnabled());
         model.addAttribute("uptime", fs.getDurationSinceStartAsText());
         model.addAttribute("message", "Integrasjonspunkt v4");
         model.addAttribute("messages", dpoMessages());

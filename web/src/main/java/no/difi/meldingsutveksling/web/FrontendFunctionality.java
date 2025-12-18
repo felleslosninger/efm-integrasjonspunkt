@@ -35,7 +35,7 @@ public interface FrontendFunctionality {
     // common functions for hele integrasjonspunkt
     String getOrganizationNumber();
     Version getIntegrasjonspunktVersion();
-    List<String> getChannelsEnabled();
+    List<String> getServicesEnabled();
     List<Property> configuration();
 
     // dpo specific functions
@@ -53,6 +53,6 @@ public interface FrontendFunctionality {
     List<Property> configurationDPI();
     String dpiAccessToken();
 
-    // functions for other channels
+    // functions for other meldingstjenester
 
 }

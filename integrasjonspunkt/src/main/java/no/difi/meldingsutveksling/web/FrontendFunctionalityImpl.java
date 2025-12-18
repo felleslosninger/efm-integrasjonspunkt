@@ -27,7 +27,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> getChannelsEnabled() {
+    public List<String> getServicesEnabled() {
         var channels = new ArrayList<String>();
         if (props.getFeature().isEnableDPO()) channels.add("DPO");
         if (props.getFeature().isEnableDPV()) channels.add("DPV");
