@@ -1,0 +1,97 @@
+# Docker Compose file for running Integrasjonspunkt with many different database options.
+
+
+services:
+
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      # root / changeit
+      # jdbc:mariadb://localhost:3311/integrasjonspunkt?serverTimezone=Europe/Oslo
+      MARIADB_ROOT_PASSWORD: changeit
+      MARIADB_DATABASE: integrasjonspunkt
+    ports:
+      - "3311:3306"
+
+  mysql:
+    image: mysql:9.5
+    environment:
+      # root / changeit
+      MYSQL_ROOT_PASSWORD: changeit
+      MYSQL_DATABASE: integrasjonspunkt
+    ports:
+      - "3312:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pchangeit"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+
+  postgres:
+    image: postgres:18.1
+    environment:
+      # root / changeit
+      # jdbc:postgresql://localhost:3313/integrasjonspunkt
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: changeit
+      POSTGRES_DB: integrasjonspunkt
+    ports:
+      - "3313:5432"
+
+  mssql:
+     image: mcr.microsoft.com/mssql/server:2022-latest
+     # sa / change!T2
+     # jdbc:sqlserver://localhost:3314;encrypt=false
+     environment:
+       ACCEPT_EULA: "Y"
+       MSSQL_SA_PASSWORD: change!T2
+       MSSQL_PID: Developer
+     ports:
+       - "3314:1433"
+
+
+  integrasjonspunkt:
+    image: test_ip_paketo_tiny:3.0
+    container_name: integrasjonspunkt
+    # depends_on:
+    #   mysql:
+    #     condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: >
+        Her angir du alle miljøvariabler som du måtte trenge i ditt integrasjonspunkt.
+        De skal skrives på formen:
+        -Ddifi.move.org.number=
+        -Ddifi.move.org.keystore.alias=
+        -Ddifi.move.org.keystore.password=
+        og så videre. Se dokumentasjonen for ulike miljøvariabler her: https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+
+    volumes:
+    #Monter mappen din med jks-filer her
+      - /sti/på/din/data/jks:/workspace/certs
+      - /sti/på/din/data/logs:/workspace/integrasjonspunkt-logs/
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9093/manage/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    command: [""]
+
+
+  activemq:
+    image: apache/activemq-classic:5.17.7
+    container_name: activemq
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD:
+    ports:
+      - "61616:61616"   # OpenWire
+      - "8161:8161"     # Web console
+    volumes:
+      - activemq-data:/opt/activemq/data
+
+volumes:
+  activemq-data:

@@ -16,8 +16,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compilerPluginVersion>2.3.2</compilerPluginVersion>
         <jstlVersion>1.2</jstlVersion>
-        <docker.registry>docker-registry.dmz.local/difi</docker.registry>
-        <docker.build.version>${project.version}</docker.build.version>
     </properties>
 
     <dependencies>
