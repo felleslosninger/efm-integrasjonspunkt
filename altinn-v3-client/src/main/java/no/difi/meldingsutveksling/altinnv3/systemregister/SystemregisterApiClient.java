@@ -44,8 +44,8 @@ public class SystemregisterApiClient {
     public record SystemEntry(String id, List<AccessPackageEntry> accessPackages, boolean isDeleted, boolean isVisible) {};
     public record AccessPackageEntry(String urn) {};
 
-    public String getAccessToken() {
-        return tokenProducer.produceToken(SCOPES_FOR_DPO);
+    public String getAccessToken(List<String> scopes) {
+        return tokenProducer.produceToken(scopes);
     }
 
     public SystemEntry getSystem(String id) {

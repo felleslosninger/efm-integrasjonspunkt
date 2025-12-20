@@ -43,7 +43,7 @@ public interface FrontendFunctionality {
     List<String> dpoSystemDetails();
     List<String> dpoSystemUsersForSystem();
     List<Property> configurationDPO();
-    String dpoAccessToken();
+    String dpoAccessToken(List<String> scopes);
 
     // dpv specific functions
     List<Property> configurationDPV();

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.web;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.AccessPackageEntry;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.SystemUserEntry;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @RequiredArgsConstructor
 public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
@@ -136,8 +138,14 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoAccessToken() {
-        return srac.getAccessToken();
+    public String dpoAccessToken(List<String> scopes) {
+        if (scopes == null) scopes = List.of("altinn:serviceowner/data/read");
+        try {
+            return srac.getAccessToken(scopes);
+        } catch (Throwable e) {
+            log.info("Failed to get access token for scopes {}", scopes, e);
+        }
+        return null;
     }
 
     @Override

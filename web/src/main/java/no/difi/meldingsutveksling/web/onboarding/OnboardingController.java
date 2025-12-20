@@ -66,7 +66,7 @@ public class OnboardingController {
         System.out.println("Fetching accesstoken for meldingstjeneste : " + meldingstjeneste);
         if (meldingstjeneste == null) meldingstjeneste = "";
         String response = null;
-        if ("DPO".equalsIgnoreCase(meldingstjeneste)) response = ff.dpoAccessToken();
+        if ("DPO".equalsIgnoreCase(meldingstjeneste)) response = ff.dpoAccessToken(List.of("altinn:broker.read","altinn:broker.write"));
         if ("DPV".equalsIgnoreCase(meldingstjeneste)) response = ff.dpvAccessToken();
         if ("DPI".equalsIgnoreCase(meldingstjeneste)) response = ff.dpiAccessToken();
         if (response == null) response = "Får ikke tak i token, ukjent meldingstjeneste '%s'".formatted(meldingstjeneste);
