@@ -63,26 +63,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoClientId() {
-        return props.getDpo().getOidc().getClientId();
-    }
-
-    @Override
-    public List<String> dpoSystemDetails() {
-        return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
-            .map(AccessPackageEntry::urn)
-            .toList();
-    }
-
-    @Override
-    public List<String> dpoSystemUsersForSystem() {
-        return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
-            .map(SystemUserEntry::externalRef)
-            .toList();
-    }
-
-    @Override
-    public List<Property> configurationDPO() {
+    public List<Property> dpoConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpo = props.getDpo();
@@ -132,9 +113,33 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
             su -> config.addAll(List.of(
                 new Property("difi.move.dpo.reportees[%d].orgId".formatted(counter.get()), su.getOrgId(), "På vegne av systembrukers org-id"),
                 new Property("difi.move.dpo.reportees[%d].name".formatted(counter.getAndIncrement()), su.getName(), "På vegne av systembrukers navn")
-        )));
+            )));
 
         return config;
+    }
+
+    @Override
+    public String dpoClientId() {
+        return props.getDpo().getOidc().getClientId();
+    }
+
+    @Override
+    public List<String> dpoSystemDetails() {
+        try {
+            return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
+                .map(AccessPackageEntry::urn)
+                .toList();
+        } catch (Throwable e) {
+            log.info("Failed to get find system {} with required access packages.", props.getDpo().getSystemName(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> dpoSystemUsersForSystem() {
+        return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
+            .map(SystemUserEntry::externalRef)
+            .toList();
     }
 
     @Override
@@ -149,7 +154,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<Property> configurationDPV() {
+    public List<Property> dpvConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpv = props.getDpv();
@@ -200,7 +205,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<Property> configurationDPI() {
+    public List<Property> dpiConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpi = props.getDpi();
@@ -231,6 +236,5 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     private String mask(String text) {
         return text.replaceAll(".", "*");
     }
-
 
 }

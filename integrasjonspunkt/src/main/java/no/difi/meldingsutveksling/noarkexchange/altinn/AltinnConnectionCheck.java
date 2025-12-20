@@ -23,19 +23,22 @@ public class AltinnConnectionCheck {
 
     @PostConstruct
     public void checkTheConnection() {
-        var systemUsers = Sets.newHashSet(properties.getDpo().getSystemUser());
-        systemUsers.addAll(properties.getDpo().getReportees());
 
-        systemUsers.forEach(systemUser -> {
-            try {
-                brokerApiClient.getAvailableFiles(systemUser);
-            }
-            catch (Exception e) {
-                if(e instanceof HttpClientErrorException ex && ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                    throw new MeldingsUtvekslingRuntimeException("Could not connect to Altinn, got 404 not found, systemuser " + systemUser.getName() + " might not exist", e);
-                }
-                throw new MeldingsUtvekslingRuntimeException("Could not connect to Altinn with systemUser.orgId: " + systemUser.getOrgId() + " systemUser.name: " + systemUser.getName(), e);
-            }
-        });
+// FIXME denne sjekken stopper oppstart av IP om ikke alt er på plass, dermed virker ikke onboarding som den skal
+//        var systemUsers = Sets.newHashSet(properties.getDpo().getSystemUser());
+//        systemUsers.addAll(properties.getDpo().getReportees());
+//
+//        systemUsers.forEach(systemUser -> {
+//            try {
+//                brokerApiClient.getAvailableFiles(systemUser);
+//            }
+//            catch (Exception e) {
+//                if(e instanceof HttpClientErrorException ex && ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+//                    throw new MeldingsUtvekslingRuntimeException("Could not connect to Altinn, got 404 not found, systemuser " + systemUser.getName() + " might not exist", e);
+//                }
+//                throw new MeldingsUtvekslingRuntimeException("Could not connect to Altinn with systemUser.orgId: " + systemUser.getOrgId() + " systemUser.name: " + systemUser.getName(), e);
+//            }
+//        });
+
     }
 }

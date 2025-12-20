@@ -59,7 +59,7 @@ public class StepKonfigurer implements Step {
 
     private String getSystemName() {
         // 311780735_integrasjonspunkt
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -68,7 +68,7 @@ public class StepKonfigurer implements Step {
 
     private String getSystemOrgId() {
         // 0192:311780735
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -77,7 +77,7 @@ public class StepKonfigurer implements Step {
 
     private String getSystemUserName() {
         // 311780735_integrasjonspunkt_systembruker_test3
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.name".equals(p.key()))
             .map(p -> p.value())
             .findFirst()

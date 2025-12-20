@@ -31,11 +31,22 @@ public class StepSystem implements Step {
 
     @Override
     public void verify(String value) {
-        STEP_COMPLETED = !STEP_COMPLETED;
+
+        if (STEP_COMPLETED) return;
+
+        if ("confirm".equalsIgnoreCase(value)) {
+            // FIXME opprett system
+        }
+
+        var details = ff.dpoSystemDetails();
+        STEP_COMPLETED = details != null;
+
     }
 
     @Override
     public StepInfo getStepInfo() {
+
+        //verify("step_system");
 
         var dialogTextExists = """
             Systemet <code>'%s'</code> er registrert i Altinn's System Register med
@@ -61,7 +72,7 @@ public class StepSystem implements Step {
     }
 
     private String getSystemName() {
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -69,8 +80,8 @@ public class StepSystem implements Step {
     }
 
     private List<String> getAccessPackagesForSystem() {
-        return ff.dpoSystemDetails();
+        return List.of();
+        // FIXME return ff.dpoSystemDetails();
     }
 
 }
-

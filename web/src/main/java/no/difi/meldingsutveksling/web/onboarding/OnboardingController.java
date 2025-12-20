@@ -28,7 +28,8 @@ public class OnboardingController {
 
     @PostConstruct
     void init() {
-        steps = List.of(step1, step2, step3, step4, step5);
+        //steps = List.of(step1, step2, step3, step4, step5);
+        steps = List.of(step1, step2);
         // FIXME do some checks on startup steps.stream().filter(Step::isRequired).forEach(s -> s.verify("init"));
     }
 
@@ -84,7 +85,7 @@ public class OnboardingController {
     public ResponseEntity<?> confirmDialog(@PathVariable String dialog) {
         System.out.println("Confirming dialog: " + dialog);
         var step = findOnboardingStep(dialog);
-        step.verify("data");
+        step.verify("confirm");
         return ResponseEntity.ok(step.getStepInfo());
     }
 

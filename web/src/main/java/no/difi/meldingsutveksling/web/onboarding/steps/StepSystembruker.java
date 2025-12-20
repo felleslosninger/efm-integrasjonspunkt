@@ -29,7 +29,16 @@ public class StepSystembruker implements Step {
 
     @Override
     public void verify(String value) {
-        STEP_COMPLETED = !STEP_COMPLETED;
+
+        if (STEP_COMPLETED) return;
+
+        if ("confirm".equalsIgnoreCase(value)) {
+            // FIXME opprett systembruker, husk at denne ikke er aktiv før noen har godkjent den
+        }
+
+        var details = ff.dpoSystemUsersForSystem();
+        STEP_COMPLETED = details != null;
+
     }
 
     @Override
@@ -71,7 +80,7 @@ public class StepSystembruker implements Step {
 
     private String getSystemName() {
         // 311780735_integrasjonspunkt
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -80,7 +89,7 @@ public class StepSystembruker implements Step {
 
     private String getSystemOrgId() {
         // 0192:311780735
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -93,7 +102,7 @@ public class StepSystembruker implements Step {
 
     private String getSystemUserName() {
         // 311780735_integrasjonspunkt_systembruker_test3
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.name".equals(p.key()))
             .map(p -> p.value())
             .findFirst()

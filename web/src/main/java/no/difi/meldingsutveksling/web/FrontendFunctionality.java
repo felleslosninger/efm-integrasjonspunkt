@@ -39,18 +39,18 @@ public interface FrontendFunctionality {
     List<Property> configuration();
 
     // dpo specific functions
+    List<Property> dpoConfiguration();
     String dpoClientId();
     List<String> dpoSystemDetails();
     List<String> dpoSystemUsersForSystem();
-    List<Property> configurationDPO();
     String dpoAccessToken(List<String> scopes);
 
     // dpv specific functions
-    List<Property> configurationDPV();
+    List<Property> dpvConfiguration();
     String dpvAccessToken();
 
     // dpi specific functions
-    List<Property> configurationDPI();
+    List<Property> dpiConfiguration();
     String dpiAccessToken();
 
     // functions for other meldingstjenester

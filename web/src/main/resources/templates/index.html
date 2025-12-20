@@ -127,7 +127,7 @@
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
         <!-- vis en liste med dpo properties -->
-        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPO()})}"></table>
+        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.dpoConfiguration()})}"></table>
         <!--
         <button th:if="${ff.isFake()}" type="button" class="btn btn-warning" onclick="alert('Din klient er IKKE konfigurert korrekt i Maskinporten.\nDu mangler scope altinn:authentication/systemregister.write\n\nDette må fikses før du kan gjennomføre onboarding.')">
             🧨Onboarding Token
@@ -161,7 +161,7 @@
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
         <!-- vis en liste med dpv properties -->
-        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPV()})}"></table>
+        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.dpvConfiguration()})}"></table>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPV')">
             Access Token
         </button>
@@ -178,7 +178,7 @@
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
         <!-- vis en liste med dpi properties -->
-        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configurationDPI()})}"></table>
+        <table th:replace="~{fragments/lists :: propertylist(properties=${ff.dpiConfiguration()})}"></table>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPI')">
             Access Token
         </button>

@@ -38,22 +38,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoClientId() {
-        return "b590f149-d0ba-4fca-b367-bccd9e444a00";
-    }
-
-    @Override
-    public List<String> dpoSystemDetails() {
-        return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
-    }
-
-    @Override
-    public List<String> dpoSystemUsersForSystem() {
-        return List.of("311780735_systembruker_tiger", "311780735_systembruker_ape");
-    }
-
-    @Override
-    public List<Property> configurationDPO() {
+    public List<Property> dpoConfiguration() {
         return List.of(
             new Property("difi.move.dpo.brokerserviceUrl", "https://platform.tt02.altinn.no/broker/api/v1", "Altinn Broker Service url"),
             new Property("difi.move.dpo.altinnTokenExchangeUrl", "https://platform.tt02.altinn.no/authentication/api/v1/exchange/maskinporten", "Altinn Token Exchange url"),
@@ -71,12 +56,27 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
+    public String dpoClientId() {
+        return "b590f149-d0ba-4fca-b367-bccd9e444a00";
+    }
+
+    @Override
+    public List<String> dpoSystemDetails() {
+        return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+    }
+
+    @Override
+    public List<String> dpoSystemUsersForSystem() {
+        return List.of("311780735_systembruker_tiger", "311780735_systembruker_ape");
+    }
+
+    @Override
     public String dpoAccessToken(List<String> scopes) {
         return "eyJhbGciOiJSUzI1NiIsImtpZCI6IjcxOUFGOTRFNDQ1MzE0Q0RDMjk1Rjk1MjUzODU4MDU0RjhCQ0FDODYiLCJ4NXQiOiJjWnI1VGtSVEZNM0NsZmxTVTRXQVZQaThySVkiLCJ0eXAiOiJKV1QifQ.eyJzY29wZSI6ImFsdGlubjpicm9rZXIud3JpdGUgYWx0aW5uOmJyb2tlci5yZWFkIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImV4cCI6MTc2NTk4MDk3MiwiaWF0IjoxNzY1OTc5MTcyLCJjbGllbnRfaWQiOiJhNjNjYWM5MS0zMjEwLTRjMzUtYjk2MS01YzdiZjEyMjM0NWMiLCJqdGkiOiI4dTZlbGg0N3hFdmdCU0trcF9uQkdmdmtURFk4OFBJTUNidHRRamtVRC1VIiwiY29uc3VtZXIiOnsiYXV0aG9yaXR5IjoiaXNvNjUyMy1hY3RvcmlkLXVwaXMiLCJJRCI6IjAxOTI6OTkxODI1ODI3In0sInVybjphbHRpbm46b3JnTnVtYmVyIjoiOTkxODI1ODI3IiwidXJuOmFsdGlubjphdXRoZW50aWNhdGVtZXRob2QiOiJtYXNraW5wb3J0ZW4iLCJ1cm46YWx0aW5uOmF1dGhsZXZlbCI6MywiaXNzIjoiaHR0cHM6Ly9wbGF0Zm9ybS50dDAyLmFsdGlubi5uby9hdXRoZW50aWNhdGlvbi9hcGkvdjEvb3BlbmlkLyIsInNpZCI6ImI4YzkxNzEwLTkyMTktNGRiYy1iOTkzLTg3MmNmMWExMWMyZCIsIm5iZiI6MTc2NTk3OTE3Mn0.qpBYnHgSvwBr0Tf5RAynUwgzDf3hv6GObyEPs8ncLeLSD_Tt5WLxThzNvapmouJoOOS0_6Qf1NL1cFVk6QFagn-pVbh8jw-PrOmtsfPpnatQc6gL6xdb_ZKQ5e2HUjxXvWhy-TIBiXUffPsc_gXK1Wef3ykLi2UiyBwAq1PjxQTpyF_0HOoE-K5GTm81lGE2wFHgmRnf3KmVhZm5-m3LbGdyPd2_9qdjsz5TXbKnXLZ-O2BdTUigGUaLsWZgjyd8SADHYo_zMSYSIg2vQ6rNh0qJsWjAwSmp6DJ1yYDJw12a2UmEF6ONX3Uv1-2wj5akX3BYymSxItQp7J_BAiCyDg";
     }
 
     @Override
-    public List<Property> configurationDPV() {
+    public List<Property> dpvConfiguration() {
         return List.of(
             new Property("difi.move.dpv.correspondenceServiceUrl", "https://eformidling.dev/altinn-proxy/correspondence/api/v1", "Altinn Correspondence Service Proxy url"),
             new Property("difi.move.dpv.healthCheckUrl", "https://platform.altinn.no/health-probe/", "Altinn Health Check url"),
@@ -94,7 +94,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public List<Property> configurationDPI() {
+    public List<Property> dpiConfiguration() {
         return List.of(
             new Property("difi.move.dpi.mpcId", "KANAL", "DPI kanal for sending og mottak"),
             new Property("difi.move.dpi.certificate.mode", "SELF_SIGNED", "Sertifikat modus"),
