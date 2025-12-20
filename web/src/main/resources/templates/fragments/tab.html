@@ -14,10 +14,10 @@
         Konfigurasjon er oppsummert i tabellen nedenfor.
     </p>
     <code>
-        konfig = ikke implementert
+        konfig = konfig for denne meldingsformidler er ikke implementert enda
     </code>
     <br/><br/>
-    <button class="btn btn-danger" onclick="alert('Falsk alarm ...\n\nHer kunne vi vist konfigurasjonsfeil og advarsler.\nMen alt virker heldigvis lungt nå siden dette er en demo.\n\nNo worries 🤣')">DANGER DANGER</button>
+    <button th:if="${ff.isFake}" class="btn btn-danger" onclick="alert('Falsk alarm ...\n\nHer kunne vi vist konfigurasjonsfeil og advarsler.\nMen alt virker heldigvis lungt nå siden dette er en demo.\n\nNo worries 🤣')">DANGER DANGER</button>
 </div>
 
 </body>

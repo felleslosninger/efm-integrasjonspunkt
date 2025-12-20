@@ -30,7 +30,6 @@ public class OnboardingController {
     void init() {
         steps = List.of(step1, step2, step3, step4, step5);
         // FIXME do some checks on startup steps.stream().filter(Step::isRequired).forEach(s -> s.verify("init"));
-        // FIXME is there some issues with the
     }
 
     @GetMapping("/onboarding")

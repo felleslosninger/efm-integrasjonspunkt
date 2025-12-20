@@ -14,7 +14,6 @@
 <h1 th:text="${message}">Integrasjonspunkt</h1>
 
 <div class="mb-3">
-    <a class="btn btn-outline-primary" th:href="@{/onboarding}">Onboarding DPO</a>
     <a class="btn btn-outline-primary" target="_blank" th:href="@{/conversations}">Conversations</a>
 </div>
 
@@ -61,7 +60,7 @@
         <br/><br/>
         <!-- vis en liste med config properties -->
         <table th:replace="~{fragments/lists :: propertylist(properties=${ff.configuration()})}"></table>
-        <a class="btn btn-outline-primary" th:href="@{/status}">System Status (demo)</a>
+        <a th:if="${ff.isFake}" class="btn btn-outline-primary" th:href="@{/status}">System Status (demo)</a>
 
     </div>
     <div class="tab-pane fade" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
@@ -121,6 +120,10 @@
             Den er basert på <a href="https://docs.altinn.studio/nb/broker/" target="_blank">Altinn 3 Formidling</a> og krever at du konfigurert et gyldig virksomhestsertifikat og opprettet "SystemUser" for deg selv og andre organisasjoner du vil opptre på vegne av.
         </p>
         <p>
+        Verifiser din DPO konfigurasjon ved å benytte DPO sjekklisten :
+        <a class="btn btn-outline-primary" th:href="@{/onboarding}">DPO onboarding sjekkliste</a>
+        </p>
+        <p>
             Din konfigurasjon er oppsummert i tabellen nedenfor.
         </p>
         <!-- vis en liste med dpo properties -->
@@ -145,7 +148,7 @@
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#tokenDialog">SystemUser token for 313711218_systembruker_ape</a></li>
             </ul>
         </div>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messagesDialog">
+        <button th:if="${ff.isFake}" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#messagesDialog">
             List innkommende meldinger (demo)
         </button>
     </div>
@@ -162,7 +165,7 @@
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPV')">
             Access Token
         </button>
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#correspondenceDialog">
+        <button th:if="${ff.isFake}"  type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#correspondenceDialog">
             📈 Vis sendt statistikk (demo)
         </button>
     </div>
@@ -179,7 +182,7 @@
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tokenDialog" onclick="fetchAccessToken('DPI')">
             Access Token
         </button>
-        <button class="btn btn-success disabled">List kvitteringer (demo)</button>
+        <button th:if="${ff.isFake}"  class="btn btn-success disabled">List kvitteringer (demo)</button>
     </div>
 
     <div th:if="${services.contains('DPF')}" th:replace="~{fragments/tab :: service(id='tab5', type='DPF')}"></div>
