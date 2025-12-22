@@ -124,22 +124,50 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> dpoSystemDetails() {
+    public List<String> dpoSystemAccessPackages() {
         try {
             return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
                 .map(AccessPackageEntry::urn)
                 .toList();
         } catch (Throwable e) {
-            log.info("Failed to get find system {} with required access packages.", props.getDpo().getSystemName(), e);
+            log.info("Failed to find access packages for system {}.", props.getDpo().getSystemName(), e);
         }
         return null;
     }
 
     @Override
+    public boolean dpoSystemUserExists() {
+        var configuredName = props.getDpo().getSystemUser().getName();
+        try {
+            return dpoSystemUsersForSystem().stream().anyMatch(name -> name.equals(configuredName));
+        } catch (Throwable e) {
+            log.info("Failed to find system user {} with required access packages.", configuredName, e);
+        }
+        return false;
+    }
+
+    @Override
     public List<String> dpoSystemUsersForSystem() {
-        return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
-            .map(SystemUserEntry::externalRef)
-            .toList();
+        try {
+            return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
+                .map(SystemUserEntry::externalRef)
+                .toList();
+        } catch (Throwable e) {
+            log.info("Failed to get find system users for system {}", props.getDpo().getSystemName(), e);
+        }
+        return List.of();
+    }
+
+    @Override
+    public boolean dpoCreateSystem(String name) {
+        log.info("Creating system for DPO with name {}", name);
+        return false;
+    }
+
+    @Override
+    public String dpoCreateSystemUser(String name) {
+        log.info("Creating system user for DPO with name '{}'", name);
+        return null;
     }
 
     @Override

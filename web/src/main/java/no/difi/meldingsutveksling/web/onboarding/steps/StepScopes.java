@@ -72,7 +72,7 @@ public class StepScopes implements Step {
                 "Tildel scopes",
                 "Din maskinporten-klienten har de nødvendige scopes.",
                 "Alt i orden, din maskinporten-klienten har alle nødvendige scopes",
-                "Hurra!",
+                "Lukk",
                 isRequired(),
                 isCompleted()
             );

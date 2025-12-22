@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 public class StepSystembruker implements Step {
 
     private boolean STEP_COMPLETED = false;
+    private String acceptSystemUserURL = null;
 
     @Inject
     FrontendFunctionality ff;
@@ -32,17 +33,31 @@ public class StepSystembruker implements Step {
 
         if (STEP_COMPLETED) return;
 
+        // confirm action means verify should try to create a system user
         if ("confirm".equalsIgnoreCase(value)) {
-            // FIXME opprett systembruker, husk at denne ikke er aktiv før noen har godkjent den
+            acceptSystemUserURL = ff.dpoCreateSystemUser(getSystemUserName());
+            if (acceptSystemUserURL != null) STEP_COMPLETED = true;
         }
 
-        var details = ff.dpoSystemUsersForSystem();
-        STEP_COMPLETED = details != null;
+        // if no system user has been created, check if the configured one already exists
+        if (!STEP_COMPLETED) {
+            STEP_COMPLETED = ff.dpoSystemUserExists();
+        }
 
     }
 
     @Override
     public StepInfo getStepInfo() {
+
+        verify("verify_step");
+
+        var dialogCreatedButNotConfirmed = """
+            Systembruker <code>'%s'</code> opprettelse er i gangsatt for system <code>'%s'</code>, men blir
+            ikke aktivert og kan <b>ikke</b> tas i bruk før en ansvarlig for bedriften har logget inn i Altinn
+            via nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
+            Du kan videreformidle godkjennings URL'en nedenfor til vedkommende :<br><br><code>'%s'</code>
+            """
+            .formatted(getSystemUserName(), getSystemName(), acceptSystemUserURL);
 
         var dialogTextFinished = """
             Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>."""
@@ -66,11 +81,14 @@ public class StepSystembruker implements Step {
             Når dette er gjort må du konfigurere om properties filen og restarte Integrasjonspunktet."""
             .formatted(getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
 
+        var dialog = STEP_COMPLETED ? dialogTextFinished : dialogTextMissing;
+        if ((!STEP_COMPLETED) && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;
+
         return new StepInfo(
                 getName(),
                 "Opprett systembruker",
                 "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
-                STEP_COMPLETED ? dialogTextFinished : dialogTextMissing,
+                dialog,
                 isCompleted() ? "Lukk" : "Opprett systembruker",
                 isRequired(),
                 isCompleted()

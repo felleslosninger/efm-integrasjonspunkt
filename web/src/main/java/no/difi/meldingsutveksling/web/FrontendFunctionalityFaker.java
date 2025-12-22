@@ -61,13 +61,31 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> dpoSystemDetails() {
+    public List<String> dpoSystemAccessPackages() {
         return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+    }
+
+    @Override
+    public boolean dpoSystemUserExists() {
+        // simulate that system user exists
+        return true;
     }
 
     @Override
     public List<String> dpoSystemUsersForSystem() {
         return List.of("311780735_systembruker_tiger", "311780735_systembruker_ape");
+    }
+
+    @Override
+    public boolean dpoCreateSystem(String name) {
+        // simulate successful system creation by returning true
+        return true;
+    }
+
+    @Override
+    public String dpoCreateSystemUser(String name) {
+        // simulate successful system user creation by returning the onboarding url
+        return "https://ingensteds.no/aksepter/opprettelse/av/systembruker/%s".formatted(name);
     }
 
     @Override

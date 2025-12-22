@@ -77,6 +77,7 @@ public class SystemregisterApiClient {
         return response.data();
     }
 
+//
 //    public String getSystemUser(String party, String systemUserUuid) {
 //        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 //        return restClient.get()
@@ -87,6 +88,7 @@ public class SystemregisterApiClient {
 //            .body(String.class)
 //            ;
 //    }
+//
 //
 //    public String createStandardSystemUser(String orgNo, String systemId, String name, String accessPackage) {
 //        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);

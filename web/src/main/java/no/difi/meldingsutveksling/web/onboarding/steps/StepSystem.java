@@ -34,19 +34,23 @@ public class StepSystem implements Step {
 
         if (STEP_COMPLETED) return;
 
+        // confirm action means verify should try to create the system
         if ("confirm".equalsIgnoreCase(value)) {
-            // FIXME opprett system
+            STEP_COMPLETED = ff.dpoCreateSystem(getSystemName());
         }
 
-        var details = ff.dpoSystemDetails();
-        STEP_COMPLETED = details != null;
+        // if no system was created, check if one already exists
+        if (!STEP_COMPLETED) {
+            var details = ff.dpoSystemAccessPackages();
+            STEP_COMPLETED = details != null;
+        }
 
     }
 
     @Override
     public StepInfo getStepInfo() {
 
-        //verify("step_system");
+        verify("verify_step");
 
         var dialogTextExists = """
             Systemet <code>'%s'</code> er registrert i Altinn's System Register med
@@ -80,8 +84,7 @@ public class StepSystem implements Step {
     }
 
     private List<String> getAccessPackagesForSystem() {
-        return List.of();
-        // FIXME return ff.dpoSystemDetails();
+        return ff.dpoSystemAccessPackages();
     }
 
 }

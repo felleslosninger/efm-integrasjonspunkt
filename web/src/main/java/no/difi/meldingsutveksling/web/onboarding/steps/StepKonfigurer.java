@@ -29,15 +29,24 @@ public class StepKonfigurer implements Step {
 
     @Override
     public void verify(String value) {
-        STEP_COMPLETED = !STEP_COMPLETED;
+
+        // make sure the computed system configuration is the same as the configured one
+        var foundSystemName = checkPropertyHasValue("difi.move.dpo.systemName", getSystemName());
+        var foundSystemOrgId = checkPropertyHasValue("difi.move.dpo.systemUser.orgId", getSystemOrgId());
+        var foundSystemUserName = checkPropertyHasValue("difi.move.dpo.systemUser.name", getSystemUserName());
+
+        STEP_COMPLETED = foundSystemName && foundSystemOrgId && foundSystemUserName;
+
     }
 
     @Override
     public StepInfo getStepInfo() {
 
+        verify("verify_step");
+
         var dialogText = STEP_COMPLETED ?
             "Konfigurasjon ser ut til å være i orden." :  """
-            Du mangler disse konfigurasjonene.<br><br><small><code>
+            Sjekk at alle disse konfigurasjonene er på plass.<br><br><small><code>
             difi.move.dpo.systemName=%s<br>
             difi.move.dpo.systemUser.orgId=%s<br>
             difi.move.dpo.systemUser.name=%s<br>
@@ -82,6 +91,12 @@ public class StepKonfigurer implements Step {
             .map(p -> p.value())
             .findFirst()
             .orElse("%s_systembruker_%s".formatted(getSystemName(), ff.getOrganizationNumber()));
+    }
+
+    private boolean checkPropertyHasValue(String key, String value) {
+        return ff.dpoConfiguration().stream()
+            .filter(p -> key.equals(p.key()))
+            .anyMatch(p -> value.equals(p.value()));
     }
 
 }
