@@ -90,9 +90,9 @@ public class SystemregisterApiClient {
                 "ID": "0192:%s"
               },
               "name": {
-                "nb": "%s integrasjonspunkt",
-                "nn": "%s integrasjonspunkt",
-                "en": "%s integrasjonspunkt"
+                "nb": "%s",
+                "nn": "%s",
+                "en": "%s"
               },
               "description": {
                 "nb": "Integrasjonspunkt for %s",
@@ -118,9 +118,9 @@ public class SystemregisterApiClient {
              .header("Content-Type", "application/json")
             .body(body)
             .retrieve()
-            .toBodilessEntity();
+            .body(String.class);
 
-         return res.getStatusCode().toString();
+         return res;
     }
 
     public String updateAccessPackage(String systemId, String accessPackage) {
@@ -146,8 +146,11 @@ public class SystemregisterApiClient {
         return res.getStatusCode().toString();
     }
 
+    // Maps the response format, see "systemuser_vendor_request.json" for example
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record SystemUsersCreationResponse(String id, String externalRef, String systemId, String partyOrgNo, String status, String confirmUrl) {};
 
-    public String createStandardSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
+    public SystemUsersCreationResponse createStandardSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
 
         var body = """
@@ -168,12 +171,12 @@ public class SystemregisterApiClient {
             .header("Content-Type", "application/json")
             .body(body)
             .retrieve()
+            .body(SystemUsersCreationResponse.class)
             ;
 
-        return res.body(String.class);
+        return res;
     }
 
-//
 //    public String getSystemUser(String party, String systemUserUuid) {
 //        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 //        return restClient.get()

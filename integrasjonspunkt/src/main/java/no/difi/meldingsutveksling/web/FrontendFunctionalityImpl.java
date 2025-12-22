@@ -176,8 +176,8 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         String confirmSystemUserUrl = null;
         try {
             var details = srac.createStandardSystemUser(systemUserName, systemName, orgNo, accessPackage);
-            confirmSystemUserUrl = "none";
-            log.info("Successfully initated system user request with name {} for organization {}", systemUserName, orgNo);
+            confirmSystemUserUrl = details.confirmUrl();
+            log.info("Successfully initated system user request with name {} for organization {}", details.externalRef(), details.partyOrgNo());
             log.info("Confirm system user request at : {}", confirmSystemUserUrl);
         } catch (Throwable e) {
             log.info("Failed to initate system user request with name {} for for organization {}", systemUserName, orgNo, e);

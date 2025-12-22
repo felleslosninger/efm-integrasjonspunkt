@@ -61,7 +61,8 @@ public class StepSystembruker implements Step {
             godkjennes før det kan benyttes.<br><br>En ansvarlig for bedriften må logge inn på Altinn med
             sin nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
             Du kan videreformidle godkjennings URL'en nedenfor til vedkommende for å komme direkte til
-            godkjenningen det gjelder :<br><br><code>%s</code>
+            godkjenningen det gjelder :<br><br><code>%s</code><br><br>
+            Når godkjenningen er gjort må du restarte Integrasjonspunktet.
             """
             .formatted(systemUserName, systemName, acceptSystemUserURL);
 
@@ -88,7 +89,7 @@ public class StepSystembruker implements Step {
             .formatted(getSystemOrgId(), systemName, getOrgNumberFromOrgId(), systemUserName);
 
         var dialog = STEP_COMPLETED ? dialogTextFinished : dialogTextMissing;
-        if ((!STEP_COMPLETED) && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;
+        if (isCompleted() && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;
 
         var buttonText = isCompleted() ? "Lukk" : "Opprett systembruker";
         if (acceptSystemUserURL != null) buttonText = "Godkjenn i Altinn";
