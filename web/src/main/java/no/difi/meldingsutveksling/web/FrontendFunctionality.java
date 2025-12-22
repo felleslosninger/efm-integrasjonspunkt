@@ -41,10 +41,10 @@ public interface FrontendFunctionality {
     // dpo specific functions
     List<Property> dpoConfiguration();
     String dpoClientId();
-    List<String> dpoSystemAccessPackages(String name);
+    List<String> dpoSystemAccessPackages(String systemName);
     boolean dpoSystemUserExists(String systemName, String systemUserName);
     List<String> dpoSystemUsersForSystem(String systemName);
-    boolean dpoCreateSystem(String systemName);
+    boolean dpoCreateSystem(String systemName, String accessPackage);
     String dpoCreateSystemUser(String systemUserName);
     String dpoAccessToken(List<String> scopes);
 

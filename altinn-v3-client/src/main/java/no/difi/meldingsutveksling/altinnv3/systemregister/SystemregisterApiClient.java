@@ -36,6 +36,7 @@ public class SystemregisterApiClient {
 
     @PostConstruct
     public void init() {
+        // no trailing slash : https://platform.tt02.altinn.no/authentication/api/v1
         apiEndpoint = props.getDpo().getSystemRegisterUrl();
     }
 
@@ -51,7 +52,7 @@ public class SystemregisterApiClient {
     public SystemEntry getSystem(String id) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
         return restClient.get()
-            .uri(apiEndpoint + "/vendor/" + id)
+            .uri(apiEndpoint + "/systemregister/vendor/" + id)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -67,7 +68,7 @@ public class SystemregisterApiClient {
     public List<SystemUserEntry> getAllSystemUsers(String systemId) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
         var response = restClient.get()
-            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/vendor/bysystem/" + systemId)
+            .uri(apiEndpoint + "/systemuser/vendor/bysystem/" + systemId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
@@ -75,6 +76,101 @@ public class SystemregisterApiClient {
             ;
         if (response == null) return List.of();
         return response.data();
+    }
+
+    public String createSystem(String systemName) {
+        String orgNo = props.getOrg().getNumber();
+        String clientId = props.getDpo().getOidc().getClientId();
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
+        String body = """
+            {
+              "id": "%s",
+              "vendor": {
+                "authority": "iso6523-actorid-upis",
+                "ID": "0192:%s"
+              },
+              "name": {
+                "nb": "%s integrasjonspunkt",
+                "nn": "%s integrasjonspunkt",
+                "en": "%s integrasjonspunkt"
+              },
+              "description": {
+                "nb": "Integrasjonspunkt for %s",
+                "nn": "Integrasjonspunkt for %s",
+                "en": "Integrasjonspunkt for %s"
+              },
+              "clientId": [
+                "%s"
+              ],
+              "isVisible": true
+            }
+            """.formatted(
+                systemName, orgNo,
+                systemName, systemName, systemName,
+                orgNo, orgNo, orgNo,
+                clientId
+        );
+
+         var res =  restClient.post()
+            .uri(apiEndpoint + "/systemregister/vendor/")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+             .header("Content-Type", "application/json")
+            .body(body)
+            .retrieve()
+            .toBodilessEntity();
+
+         return res.getStatusCode().toString();
+    }
+
+    public String updateAccessPackage(String systemId, String accessPackage) {
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
+
+        String body = """
+            [
+                {
+                    "urn": "%s"
+                }
+            ]
+            """.formatted(accessPackage);
+
+        var res =  restClient.put()
+            .uri(apiEndpoint + "/systemregister/vendor/%s/accesspackages".formatted(systemId))
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .body(body)
+            .retrieve()
+            .toBodilessEntity();
+
+        return res.getStatusCode().toString();
+    }
+
+
+    public String createStandardSystemUser(String orgNo, String systemId, String name, String accessPackage) {
+        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
+
+        var body = """
+            {
+              "externalRef": "%s_systembruker_%s",
+              "systemId": "%s",
+              "partyOrgNo": "%s",
+              "rights": [ ],
+              "accesspackages": [ {"urn": "%s"} ],
+              "redirectUrl": ""
+            }
+            """.formatted(systemId, name, systemId, orgNo, accessPackage);
+
+        var res =  restClient.post()
+            .uri(apiEndpoint + "/systemuser/request/vendor")
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .body(body)
+            .retrieve()
+            ;
+
+        return res.body(String.class);
     }
 
 //
@@ -89,33 +185,6 @@ public class SystemregisterApiClient {
 //            ;
 //    }
 //
-//
-//    public String createStandardSystemUser(String orgNo, String systemId, String name, String accessPackage) {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
-//
-//        var body = """
-//            {
-//              "externalRef": "%s_systembruker_%s",
-//              "systemId": "%s",
-//              "partyOrgNo": "%s",
-//              "rights": [ ],
-//              "accesspackages": [ {"urn": "%s"} ],
-//              "redirectUrl": ""
-//            }
-//            """.formatted(systemId, name, systemId, orgNo, accessPackage);
-//
-//        var res =  restClient.post()
-//            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/request/vendor")
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .header("Content-Type", "application/json")
-//            .body(body)
-//            .retrieve()
-//            ;
-//
-//        return res.body(String.class);
-//    }
-//
 //    public String getAll() {
 //        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
 //
@@ -126,68 +195,6 @@ public class SystemregisterApiClient {
 //            .retrieve()
 //            .body(String.class)
 //            ;
-//    }
-//
-//    public String updateAccessPackage(String systemId, String accessPackage) {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-//
-//        String body = """
-//            [
-//                {
-//                    "urn": "%s"
-//                }
-//            ]
-//            """.formatted(accessPackage);
-//
-//        var res =  restClient.put()
-//            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemregister/vendor/%s/accesspackages".formatted(systemId))
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .header("Content-Type", "application/json")
-//            .body(body)
-//            .retrieve()
-//            .toBodilessEntity();
-//
-//        return res.getStatusCode().toString();
-//    }
-//
-//    public String createSystem(String orgno, String name, String clientId) {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-//
-//        String body = """
-//            {
-//              "id": "%s_integrasjonspunkt",
-//              "vendor": {
-//                "authority": "iso6523-actorid-upis",
-//                "ID": "0192:%s"
-//              },
-//              "name": {
-//                "nb": "%s integrasjonspunkt",
-//                "nn": "%s integrasjonspunkt",
-//                "en": "%s integrasjonspunkt"
-//              },
-//              "description": {
-//                "nb": "integrasjonspunkt",
-//                "nn": "integrasjonspunkt",
-//                "en": "integrasjonspunkt"
-//              },
-//              "clientId": [
-//                "%s"
-//              ],
-//              "isVisible": true
-//            }
-//            """.formatted(orgno, orgno, name, name, name, clientId);
-//
-//         var res =  restClient.post()
-//            .uri(apiEndpoint + "/vendor")
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//             .header("Content-Type", "application/json")
-//            .body(body)
-//            .retrieve()
-//            .toBodilessEntity();
-//
-//         return res.getStatusCode().toString();
 //    }
 //
 //    public String systemDetails(String systemId) {

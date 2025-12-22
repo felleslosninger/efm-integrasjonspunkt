@@ -80,7 +80,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public boolean dpoCreateSystem(String systemName) {
+    public boolean dpoCreateSystem(String systemName, String accessPackage) {
         // simulate successful system creation by returning true
         systemExists = true;
         return true;

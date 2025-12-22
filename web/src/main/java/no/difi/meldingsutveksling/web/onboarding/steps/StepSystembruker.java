@@ -55,10 +55,11 @@ public class StepSystembruker implements Step {
         final var systemUserName = getSystemUserName();
 
         var dialogCreatedButNotConfirmed = """
-            Systembruker <code>'%s'</code> opprettelse er i gangsatt for system <code>'%s'</code>, men blir
-            ikke aktivert og kan <b>ikke</b> tas i bruk før en ansvarlig for bedriften har logget inn i Altinn
-            via nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
-            Du kan videreformidle godkjennings URL'en nedenfor til vedkommende :<br><br><code>'%s'</code>
+            Opprettelse av systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>, men må
+            godkjennes før det kan benyttes.<br><br>En ansvarlig for bedriften må logge inn på Altinn med
+            sin nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
+            Du kan videreformidle godkjennings URL'en nedenfor til vedkommende for å komme direkte til
+            godkjenningen det gjelder :<br><br><code>%s</code>
             """
             .formatted(systemUserName, systemName, acceptSystemUserURL);
 
@@ -87,12 +88,15 @@ public class StepSystembruker implements Step {
         var dialog = STEP_COMPLETED ? dialogTextFinished : dialogTextMissing;
         if ((!STEP_COMPLETED) && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;
 
+        var buttonText = isCompleted() ? "Lukk" : "Opprett systembruker";
+        if (acceptSystemUserURL != null) buttonText = "Godkjenn i Altinn";
+
         return new StepInfo(
                 getName(),
                 "Opprett systembruker",
                 "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
                 dialog,
-                isCompleted() ? "Lukk" : "Opprett systembruker",
+                buttonText,
                 isRequired(),
                 isCompleted()
         );

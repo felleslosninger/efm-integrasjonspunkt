@@ -11,8 +11,11 @@ public class StepSystem implements Step {
 
     private boolean STEP_COMPLETED = false;
 
+    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+
     private boolean systemExists = false;
-    private boolean missingAccessPackage = true;
+    private boolean missingRequiredAccessPackage = true;
+    private List<String> accessPackages;
 
     @Inject
     FrontendFunctionality ff;
@@ -37,18 +40,17 @@ public class StepSystem implements Step {
 
         if (STEP_COMPLETED) return;
 
-        // confirm action means verify should try to create the system
-        if (ActionType.CONFIRM.equals(action)) {
-            systemExists = ff.dpoCreateSystem(getSystemName());
-            missingAccessPackage = !systemExists;
+        // confirm action means verify should try to create the system if one doesn't exist yet
+        if (ActionType.CONFIRM.equals(action) && !systemExists) {
+            systemExists = ff.dpoCreateSystem(getSystemName(), REQUIRED_ACCESS_PACKAGE);
+            missingRequiredAccessPackage = !systemExists;
             STEP_COMPLETED = systemExists;
         }
 
         // if no system was created, check if one already exists with correct access packages
         if (!STEP_COMPLETED) {
-            var details = getAccessPackagesForSystem();
-            missingAccessPackage = !details.contains("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
-            STEP_COMPLETED = !missingAccessPackage;
+            updateSystemAndAccessPackagesStatus();
+            STEP_COMPLETED = systemExists && !missingRequiredAccessPackage;
         }
 
     }
@@ -58,22 +60,33 @@ public class StepSystem implements Step {
 
         executeAction(ActionType.VERIFY);
 
+        var systemName = getSystemName();
+
         var dialogTextExists = """
             Systemet <code>'%s'</code> er registrert i Altinn's System Register med
             følgende tilgangspakker :<br><br><small><code>%s</code></small><br><br>"""
-            .formatted(getSystemName(), String.join("<br>", getAccessPackagesForSystem()));
+            .formatted(systemName, String.join("<br>", accessPackages));
 
         var dialogTextMissingSystem = """
             Vi finner ikke system <code>'%s'</code> i Altinn's System Register.  Sjekk at du har konfigurert
             systemnavn rett i properties filen eller bekreft for å opprette et systemet nå.<br><br>Når dette er
             gjort må du konfigurere rett systemnavnet i properties filen og restarte Integrasjonspunktet."""
-            .formatted(getSystemName());
+            .formatted(systemName);
+
+        var dialogTextMissingAccessPackage = """
+            Systemet <code>'%s'</code> finnes i Altinn's System Register, men det mangler tilgangspakken<br><br>
+            <code>'%s'</code>.<br><br>Dette må rettes opp før du kan benytte DPO løsningen.  Ditt system
+            er registrert med følgende tilgangspakker :<br><br><small><code>%s</code></small><br><br>"""
+            .formatted(systemName, REQUIRED_ACCESS_PACKAGE, String.join("<br>", accessPackages));
+
+        var dialog = STEP_COMPLETED ? dialogTextExists : dialogTextMissingSystem;
+        if (systemExists && missingRequiredAccessPackage) dialog = dialogTextMissingAccessPackage;
 
         return new StepInfo(
                 getName(),
                 "Opprett system",
                 "Registrer ett system for Integrasionspunktet i Altinn's System Register, med nødvendige tilgangspakke.",
-                STEP_COMPLETED ? dialogTextExists : dialogTextMissingSystem,
+                dialog,
                 isCompleted() ? "Lukk" : "Opprett system",
                 isRequired(),
                 isCompleted()
@@ -89,10 +102,16 @@ public class StepSystem implements Step {
             .orElse("%s_integrasjonspunkt".formatted(ff.getOrganizationNumber()));
     }
 
-    private List<String> getAccessPackagesForSystem() {
-        var accessPackages = ff.dpoSystemAccessPackages(getSystemName());
-        if (accessPackages == null) return List.of();
-        return accessPackages;
+    private void updateSystemAndAccessPackagesStatus() {
+        accessPackages = ff.dpoSystemAccessPackages(getSystemName());
+        if (accessPackages == null) {
+            systemExists = false;
+            missingRequiredAccessPackage = true;
+            accessPackages = List.of();
+        } else {
+            systemExists = true;
+            missingRequiredAccessPackage = !accessPackages.contains(REQUIRED_ACCESS_PACKAGE);
+        }
     }
 
 }

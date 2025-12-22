@@ -158,15 +158,22 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public boolean dpoCreateSystem(String systemName) {
+    public boolean dpoCreateSystem(String systemName, String accessPackage) {
         log.info("Creating system for DPO with name {}", systemName);
+        try {
+            srac.createSystem(systemName);
+            srac.updateAccessPackage(systemName, accessPackage);
+            log.info("Successfully created system for DPO with name {} and access package {}", systemName, accessPackage);
+        } catch (Throwable e) {
+            log.info("Failed to create system for DPO with name {} and access package {}", systemName, accessPackage, e);
+        }
         return false;
     }
 
     @Override
     public String dpoCreateSystemUser(String systemUserName) {
         log.info("Creating system user for DPO with name '{}'", systemUserName);
-        return null;
+        return "null";
     }
 
     @Override
