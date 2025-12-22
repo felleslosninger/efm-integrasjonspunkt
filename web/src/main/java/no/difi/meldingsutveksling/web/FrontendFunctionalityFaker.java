@@ -4,6 +4,9 @@ import java.util.List;
 
 public class FrontendFunctionalityFaker implements FrontendFunctionality {
 
+    private boolean systemExists = false;
+    private boolean systemUserExists = false;
+
     @Override
     public boolean isFake() {
         return true;
@@ -61,31 +64,33 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> dpoSystemAccessPackages() {
-        return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+    public List<String> dpoSystemAccessPackages(String systemName) {
+        if (systemExists) return List.of("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+        return null;
     }
 
     @Override
-    public boolean dpoSystemUserExists() {
-        // simulate that system user exists
-        return true;
+    public boolean dpoSystemUserExists(String systemName, String systemUserName) {
+        return systemUserExists;
     }
 
     @Override
-    public List<String> dpoSystemUsersForSystem() {
+    public List<String> dpoSystemUsersForSystem(String systemName) {
         return List.of("311780735_systembruker_tiger", "311780735_systembruker_ape");
     }
 
     @Override
-    public boolean dpoCreateSystem(String name) {
+    public boolean dpoCreateSystem(String systemName) {
         // simulate successful system creation by returning true
+        systemExists = true;
         return true;
     }
 
     @Override
-    public String dpoCreateSystemUser(String name) {
+    public String dpoCreateSystemUser(String systemUserName) {
         // simulate successful system user creation by returning the onboarding url
-        return "https://ingensteds.no/aksepter/opprettelse/av/systembruker/%s".formatted(name);
+        systemUserExists = true;
+        return "https://ingensteds.no/aksepter/opprettelse/av/systembruker/%s".formatted(systemUserName);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class StepScopes implements Step {
     }
 
     @Override
-    public void verify(String value) {
+    public void executeAction(ActionType action) {
 
         if (STEP_COMPLETED) return;
 
@@ -64,7 +64,7 @@ public class StepScopes implements Step {
     @Override
     public StepInfo getStepInfo() {
 
-        verify("verify_scopes");
+        executeAction(ActionType.VERIFY);
 
         if (STEP_COMPLETED) {
             return new StepInfo(

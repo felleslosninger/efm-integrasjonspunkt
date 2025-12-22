@@ -29,19 +29,19 @@ public class StepSystembruker implements Step {
     }
 
     @Override
-    public void verify(String value) {
+    public void executeAction(ActionType action) {
 
         if (STEP_COMPLETED) return;
 
         // confirm action means verify should try to create a system user
-        if ("confirm".equalsIgnoreCase(value)) {
+        if (ActionType.CONFIRM.equals(action)) {
             acceptSystemUserURL = ff.dpoCreateSystemUser(getSystemUserName());
             if (acceptSystemUserURL != null) STEP_COMPLETED = true;
         }
 
         // if no system user has been created, check if the configured one already exists
         if (!STEP_COMPLETED) {
-            STEP_COMPLETED = ff.dpoSystemUserExists();
+            STEP_COMPLETED = ff.dpoSystemUserExists(getSystemName(), getSystemUserName());
         }
 
     }
@@ -49,7 +49,10 @@ public class StepSystembruker implements Step {
     @Override
     public StepInfo getStepInfo() {
 
-        verify("verify_step");
+        executeAction(ActionType.VERIFY);
+
+        final var systemName = getSystemName();
+        final var systemUserName = getSystemUserName();
 
         var dialogCreatedButNotConfirmed = """
             Systembruker <code>'%s'</code> opprettelse er i gangsatt for system <code>'%s'</code>, men blir
@@ -57,19 +60,19 @@ public class StepSystembruker implements Step {
             via nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
             Du kan videreformidle godkjennings URL'en nedenfor til vedkommende :<br><br><code>'%s'</code>
             """
-            .formatted(getSystemUserName(), getSystemName(), acceptSystemUserURL);
+            .formatted(systemUserName, systemName, acceptSystemUserURL);
 
         var dialogTextFinished = """
             Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>."""
-            .formatted(getSystemUserName(), getSystemName());
+            .formatted(systemUserName, systemName);
 
         var dialogTextMissing = "Vi finner ikke systembruker <code>'%s'</code> i Altinn's System Register.<br><br>"
-            .formatted(getSystemUserName());
+            .formatted(systemUserName);
 
-        if (!ff.dpoSystemUsersForSystem().isEmpty()) dialogTextMissing = dialogTextMissing + """
+        if (!ff.dpoSystemUsersForSystem(systemName).isEmpty()) dialogTextMissing = dialogTextMissing + """
              Men på system <code>'%s'</code> er følgende systembrukere allerede er registrert :<br><br>
              <small><code>%s</code></small><br><br>"""
-            .formatted(getSystemName(), String.join("<br>", ff.dpoSystemUsersForSystem()));
+            .formatted(systemName, String.join("<br>", ff.dpoSystemUsersForSystem(systemName)));
 
         dialogTextMissing = dialogTextMissing + """
             Sjekk at du har konfigurert systembruker rett i properties filen eller bekreft at du vil å opprette
@@ -79,7 +82,7 @@ public class StepSystembruker implements Step {
             før den blir aktivert og DPO tjenesten kan tas i bruk.<br><br>
             Systembrukeren som opprettes vil få navn <code>'%s'</code>.<br><br>
             Når dette er gjort må du konfigurere om properties filen og restarte Integrasjonspunktet."""
-            .formatted(getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
+            .formatted(getSystemOrgId(), systemName, getOrgNumberFromOrgId(), systemUserName);
 
         var dialog = STEP_COMPLETED ? dialogTextFinished : dialogTextMissing;
         if ((!STEP_COMPLETED) && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;

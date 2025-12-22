@@ -124,49 +124,48 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> dpoSystemAccessPackages() {
+    public List<String> dpoSystemAccessPackages(String systemName) {
         try {
-            return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
+            return srac.getSystem(systemName).accessPackages().stream()
                 .map(AccessPackageEntry::urn)
                 .toList();
         } catch (Throwable e) {
-            log.info("Failed to find access packages for system {}.", props.getDpo().getSystemName(), e);
+            log.info("Failed to find access packages for system {}.", systemName, e);
         }
         return null;
     }
 
     @Override
-    public boolean dpoSystemUserExists() {
-        var configuredName = props.getDpo().getSystemUser().getName();
+    public boolean dpoSystemUserExists(String systemName, String systemUserName) {
         try {
-            return dpoSystemUsersForSystem().stream().anyMatch(name -> name.equals(configuredName));
+            return dpoSystemUsersForSystem(systemName).stream().anyMatch(it -> it.equals(systemUserName));
         } catch (Throwable e) {
-            log.info("Failed to find system user {} with required access packages.", configuredName, e);
+            log.info("Failed to find system user {} with required access packages.", systemUserName, e);
         }
         return false;
     }
 
     @Override
-    public List<String> dpoSystemUsersForSystem() {
+    public List<String> dpoSystemUsersForSystem(String systemName) {
         try {
-            return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
+            return srac.getAllSystemUsers(systemName).stream()
                 .map(SystemUserEntry::externalRef)
                 .toList();
         } catch (Throwable e) {
-            log.info("Failed to get find system users for system {}", props.getDpo().getSystemName(), e);
+            log.info("Failed to get find system users for system {}", systemName, e);
         }
         return List.of();
     }
 
     @Override
-    public boolean dpoCreateSystem(String name) {
-        log.info("Creating system for DPO with name {}", name);
+    public boolean dpoCreateSystem(String systemName) {
+        log.info("Creating system for DPO with name {}", systemName);
         return false;
     }
 
     @Override
-    public String dpoCreateSystemUser(String name) {
-        log.info("Creating system user for DPO with name '{}'", name);
+    public String dpoCreateSystemUser(String systemUserName) {
+        log.info("Creating system user for DPO with name '{}'", systemUserName);
         return null;
     }
 

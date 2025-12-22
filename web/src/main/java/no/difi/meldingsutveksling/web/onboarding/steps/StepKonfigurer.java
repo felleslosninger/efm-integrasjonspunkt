@@ -28,7 +28,7 @@ public class StepKonfigurer implements Step {
     }
 
     @Override
-    public void verify(String value) {
+    public void executeAction(ActionType action) {
 
         // make sure the computed system configuration is the same as the configured one
         var foundSystemName = checkPropertyHasValue("difi.move.dpo.systemName", getSystemName());
@@ -42,7 +42,7 @@ public class StepKonfigurer implements Step {
     @Override
     public StepInfo getStepInfo() {
 
-        verify("verify_step");
+        executeAction(ActionType.VERIFY);
 
         var dialogText = STEP_COMPLETED ?
             "Konfigurasjon ser ut til å være i orden." :  """

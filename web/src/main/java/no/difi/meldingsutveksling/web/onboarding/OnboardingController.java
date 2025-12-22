@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.onboarding.steps.*;
+import no.difi.meldingsutveksling.web.onboarding.steps.Step.ActionType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,7 +84,7 @@ public class OnboardingController {
     public ResponseEntity<?> confirmDialog(@PathVariable String dialog) {
         System.out.println("Confirming dialog: " + dialog);
         var step = findOnboardingStep(dialog);
-        step.verify("confirm");
+        step.executeAction(ActionType.CONFIRM);
         return ResponseEntity.ok(step.getStepInfo());
     }
 

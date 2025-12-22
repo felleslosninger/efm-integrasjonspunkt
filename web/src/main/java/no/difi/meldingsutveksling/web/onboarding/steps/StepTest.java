@@ -24,7 +24,7 @@ public class StepTest implements Step {
     }
 
     @Override
-    public void verify(String value) {
+    public void executeAction(ActionType action) {
         STEP_COMPLETED = !STEP_COMPLETED;
         hasSentTestMessage = true;
     }

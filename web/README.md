@@ -5,7 +5,7 @@ That way it is easier to develop and test the web application without having to 
 
 ## Todo & Fixme
 - [ ] FrontendFunctionality getIntegrasjonspunktVersion() er ikke implementert 
-- [ ] Sjekk av tilgangspakker må også på plass
+- [ ] Siden verifikasjon "action" ofte kalles fra rendering funksjon, blir det endel dobbelt kall når dialogenen rendres
 - [ ] Switch to using webjars (remove old versions from integrasjonspunkt module)
 - [ ] What about adding "swagger-ui", bruke direkte uten postman ?
 

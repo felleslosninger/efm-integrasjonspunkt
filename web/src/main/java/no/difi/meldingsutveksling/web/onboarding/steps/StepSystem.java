@@ -11,6 +11,9 @@ public class StepSystem implements Step {
 
     private boolean STEP_COMPLETED = false;
 
+    private boolean systemExists = false;
+    private boolean missingAccessPackage = true;
+
     @Inject
     FrontendFunctionality ff;
 
@@ -30,19 +33,22 @@ public class StepSystem implements Step {
     }
 
     @Override
-    public void verify(String value) {
+    public void executeAction(ActionType action) {
 
         if (STEP_COMPLETED) return;
 
         // confirm action means verify should try to create the system
-        if ("confirm".equalsIgnoreCase(value)) {
-            STEP_COMPLETED = ff.dpoCreateSystem(getSystemName());
+        if (ActionType.CONFIRM.equals(action)) {
+            systemExists = ff.dpoCreateSystem(getSystemName());
+            missingAccessPackage = !systemExists;
+            STEP_COMPLETED = systemExists;
         }
 
-        // if no system was created, check if one already exists
+        // if no system was created, check if one already exists with correct access packages
         if (!STEP_COMPLETED) {
-            var details = ff.dpoSystemAccessPackages();
-            STEP_COMPLETED = details != null;
+            var details = getAccessPackagesForSystem();
+            missingAccessPackage = !details.contains("urn:altinn:accesspackage:informasjon-og-kommunikasjon");
+            STEP_COMPLETED = !missingAccessPackage;
         }
 
     }
@@ -50,7 +56,7 @@ public class StepSystem implements Step {
     @Override
     public StepInfo getStepInfo() {
 
-        verify("verify_step");
+        executeAction(ActionType.VERIFY);
 
         var dialogTextExists = """
             Systemet <code>'%s'</code> er registrert i Altinn's System Register med
@@ -84,7 +90,9 @@ public class StepSystem implements Step {
     }
 
     private List<String> getAccessPackagesForSystem() {
-        return ff.dpoSystemAccessPackages();
+        var accessPackages = ff.dpoSystemAccessPackages(getSystemName());
+        if (accessPackages == null) return List.of();
+        return accessPackages;
     }
 
 }
