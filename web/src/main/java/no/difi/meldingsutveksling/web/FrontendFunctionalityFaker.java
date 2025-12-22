@@ -87,7 +87,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoCreateSystemUser(String systemUserName) {
+    public String dpoCreateSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
         // simulate successful system user creation by returning the onboarding url
         systemUserExists = true;
         return "https://ingensteds.no/aksepter/opprettelse/av/systembruker/%s".formatted(systemUserName);

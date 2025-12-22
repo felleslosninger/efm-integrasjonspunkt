@@ -147,19 +147,19 @@ public class SystemregisterApiClient {
     }
 
 
-    public String createStandardSystemUser(String orgNo, String systemId, String name, String accessPackage) {
+    public String createStandardSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
         String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMUSER);
 
         var body = """
             {
-              "externalRef": "%s_systembruker_%s",
+              "externalRef": "%s",
               "systemId": "%s",
               "partyOrgNo": "%s",
               "rights": [ ],
               "accesspackages": [ {"urn": "%s"} ],
               "redirectUrl": ""
             }
-            """.formatted(systemId, name, systemId, orgNo, accessPackage);
+            """.formatted(systemUserName, systemName, orgNo, accessPackage);
 
         var res =  restClient.post()
             .uri(apiEndpoint + "/systemuser/request/vendor")

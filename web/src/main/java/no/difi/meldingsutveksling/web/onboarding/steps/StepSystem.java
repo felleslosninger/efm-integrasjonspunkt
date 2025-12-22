@@ -9,10 +9,9 @@ import java.util.List;
 @Service
 public class StepSystem implements Step {
 
-    private boolean STEP_COMPLETED = false;
-
     private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
 
+    private boolean STEP_COMPLETED = false;
     private boolean systemExists = false;
     private boolean missingRequiredAccessPackage = true;
     private List<String> accessPackages;

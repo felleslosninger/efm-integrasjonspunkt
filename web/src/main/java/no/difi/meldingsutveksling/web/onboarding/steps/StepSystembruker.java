@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class StepSystembruker implements Step {
 
+    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+
     private boolean STEP_COMPLETED = false;
     private String acceptSystemUserURL = null;
 
@@ -35,7 +37,7 @@ public class StepSystembruker implements Step {
 
         // confirm action means verify should try to create a system user
         if (ActionType.CONFIRM.equals(action)) {
-            acceptSystemUserURL = ff.dpoCreateSystemUser(getSystemUserName());
+            acceptSystemUserURL = ff.dpoCreateSystemUser(getSystemUserName(), getSystemName(), getOrgNumberFromOrgId(), REQUIRED_ACCESS_PACKAGE);
             if (acceptSystemUserURL != null) STEP_COMPLETED = true;
         }
 
@@ -121,7 +123,7 @@ public class StepSystembruker implements Step {
             .orElse("0192:%s".formatted(ff.getOrganizationNumber()));
     }
 
-    private Object getOrgNumberFromOrgId() {
+    private String getOrgNumberFromOrgId() {
         return getSystemOrgId().split(":")[1];
     }
 

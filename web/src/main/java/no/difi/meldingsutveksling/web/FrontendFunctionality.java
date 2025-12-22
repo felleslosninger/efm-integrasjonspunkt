@@ -45,7 +45,7 @@ public interface FrontendFunctionality {
     boolean dpoSystemUserExists(String systemName, String systemUserName);
     List<String> dpoSystemUsersForSystem(String systemName);
     boolean dpoCreateSystem(String systemName, String accessPackage);
-    String dpoCreateSystemUser(String systemUserName);
+    String dpoCreateSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage);
     String dpoAccessToken(List<String> scopes);
 
     // dpv specific functions

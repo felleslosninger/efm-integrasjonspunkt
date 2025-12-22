@@ -171,9 +171,18 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoCreateSystemUser(String systemUserName) {
+    public String dpoCreateSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
         log.info("Creating system user for DPO with name '{}'", systemUserName);
-        return "null";
+        String confirmSystemUserUrl = null;
+        try {
+            var details = srac.createStandardSystemUser(systemUserName, systemName, orgNo, accessPackage);
+            confirmSystemUserUrl = "none";
+            log.info("Successfully initated system user request with name {} for organization {}", systemUserName, orgNo);
+            log.info("Confirm system user request at : {}", confirmSystemUserUrl);
+        } catch (Throwable e) {
+            log.info("Failed to initate system user request with name {} for for organization {}", systemUserName, orgNo, e);
+        }
+        return confirmSystemUserUrl;
     }
 
     @Override
