@@ -115,7 +115,7 @@ public class SystemregisterApiClient {
             .uri(apiEndpoint + "/systemregister/vendor/")
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
-             .header("Content-Type", "application/json")
+            .header("Content-Type", "application/json")
             .body(body)
             .retrieve()
             .body(String.class);

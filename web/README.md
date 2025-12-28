@@ -4,19 +4,22 @@ The web application is separated into a separate module from the rest-api and ba
 That way it is easier to develop and test the web application without having to start the full Integrasjonspunkt with it's rest-api and dependencies to queue, database etc.
 
 ## Todo & Fixme
-- [ ] FrontendFunctionality getIntegrasjonspunktVersion() er ikke implementert 
+- [ ] [ProblemDetailsParser.java](../altinn-v3-client/src/main/java/no/difi/meldingsutveksling/altinnv3/ProblemDetailsParser.java) fanger ikke valideringsfeil (se [systemregister_problemdetails.json](../altinn-v3-client/src/test/resources/systemregister/systemregister_problemdetails.json))
+- [ ] Sørg for at [valideringsfeil](https://docs.altinn.studio/nb/api/authentication/systemuserapi/systemregister/create/#error-codes) vises i onboarding dialogen
+- [ ] FrontendFunctionality getIntegrasjonspunktVersion() er ikke implementert
 - [ ] Siden verifikasjon "action" ofte kalles fra rendering funksjon, blir det endel dobbelt kall når dialogenen rendres
 - [ ] Switch to using webjars (remove old versions from integrasjonspunkt module)
 - [ ] What about adding "swagger-ui", bruke direkte uten postman ?
+- [ ] Sjekk mot altinn ved oppstart er disablet `AltinnConnectionCheck.java` (hindrer DPO onboarding)
 
 ## How does it work?
 The web module does not have any dependencies to the rest-api or other modules.
 It uses the [Thymeleaf](https://www.thymeleaf.org/) templating engine to render the html pages.
 
 All the functionality it needs is defined by the [FrontendFunctionality.java](src/main/java/no/difi/meldingsutveksling/web/FrontendFunctionality.java) interface,
-and in the web-module there is a `fake` implementation of this [FrontendFunctionalityFaker.java](src/main/java/no/difi/meldingsutveksling/web/FrontendFunctionalityFaker.java).
+and in the web-module there is a `fake` implementation of this [FrontendFunctionalityFaker.java](src/main/java/no/difi/meldingsutveksling/web/FrontendFunctionalityFaker.java) used while developing.
 
-In the `integrasjonspunkt` application module there is a real implementation of this interface which is then used in production.
+In the `integrasjonspunkt` application module there is a real implementation of this interface which is used in production.
 For more details about this implementation see comments in [FrontendFunctionality.java](src/main/java/no/difi/meldingsutveksling/web/FrontendFunctionality.java).
 
 ## HotReload development from IntelliJ

@@ -1,5 +1,6 @@
 ## FIXME og mulige forbedringer i etterkant
 - [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes?
+- [ ] Sjekk at vi har nyeste OpenAPI spec fra Altinn v3 i `altinn-v3-client` pakken
 - [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
 - [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
 - [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
@@ -12,7 +13,7 @@ Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i en
 - Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
 
 ## Bygg og kjør lokalt
-Testet og bygget med OpenJDK 21.0.8 og Maven 3.9.11.
+Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
 
 Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
 (alternativt `integrasjonspunkt-local.yml` eller `integrasjonspunkt-local.yaml`).  Den vil bli inkludert
@@ -23,13 +24,13 @@ mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
-Når man starter med `dev | staging | yt | production` profil så vil den kunne overstyres med properties fra
+Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
 en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
 
 Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
 [application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties) og
 [application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
-inneholder en optional import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
+inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
 
 ## Utvikle nye web sider
@@ -54,7 +55,6 @@ For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `rest
 mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
-
 
 ## Linker når Integrasjonspunkt er starter lokalt
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/

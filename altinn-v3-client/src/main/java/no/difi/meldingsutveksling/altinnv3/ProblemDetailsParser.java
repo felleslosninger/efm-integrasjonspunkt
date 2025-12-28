@@ -19,6 +19,7 @@ public class ProblemDetailsParser {
             var bodyAsBytes = response.getBody().readAllBytes();
             if (bodyAsBytes.length == 0) return "%s: %d %s, %s".formatted(prefix, response.getStatusCode().value(), response.getStatusCode().toString(), "No body returned");
             jsonAsString = new String(bodyAsBytes, StandardCharsets.UTF_8);
+            // FIXME denne ProblemDetails inneholder ikke valideringsfeil (den er fra correspondence og ikke systemregister)
             var problemDetails = objectMapper.readValue(jsonAsString, ProblemDetails.class);
             if (problemDetails.getTitle() == null) problemDetails.setTitle("No title was given");
             if (problemDetails.getDetail() == null) problemDetails.setDetail("Response was : " + jsonAsString);
