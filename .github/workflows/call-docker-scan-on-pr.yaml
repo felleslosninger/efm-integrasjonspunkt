@@ -4,15 +4,15 @@ on:
   pull_request:
 
 jobs:
-#  call-workflow-maven-build:
-#    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
-#    with:
-#      java-version: 21
-#      application-path: integrasjonspunkt/
-#    secrets: inherit
+  call-workflow-maven-build:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
+    with:
+      java-version: 21
+      application-path: integrasjonspunkt/
+    secrets: inherit
 
   call-container-scan:
-#    needs: call-workflow-maven-build
+    needs: call-workflow-maven-build
     uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
     with:
       java-version: 21
