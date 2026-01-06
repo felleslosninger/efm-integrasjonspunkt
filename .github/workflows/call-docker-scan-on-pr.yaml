@@ -13,7 +13,7 @@ jobs:
 
   call-container-scan:
 #    needs: call-workflow-maven-build
-    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@work/MOVE-4779
+    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
     with:
       java-version: 21
       module-name: integrasjonspunkt
