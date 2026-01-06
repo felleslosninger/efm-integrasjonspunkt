@@ -33,7 +33,7 @@ inneholder en optional import av lokal konfig slik (vha `spring.config.import=op
 
 
 ## Bygge dockerbilde lokalt:
-Stå i roten av prosjektet og kjør kommandoen:
+Stå i roten av prosjektet og kjør kommandoene:
 ```bash
 mvn clean install
 mvn spring-boot:build-image --file integrasjonspunkt/pom.xml -Dspring-boot.build-image.imageName=NAME:TAG -Dspring-boot.build-image.builder=paketobuildpacks/builder-jammy-tiny

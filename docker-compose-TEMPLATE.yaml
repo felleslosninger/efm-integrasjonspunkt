@@ -1,5 +1,4 @@
-# Docker Compose file for running Integrasjonspunkt with many different database options.
-
+# Template Docker Compose file for running Integrasjonspunkt with many different database options.
 
 services:
 
@@ -16,6 +15,7 @@ services:
   mysql:
     image: mysql:9.5
     environment:
+      #jdbc:mysql://localhost:3312/integrasjonspunkt?serverTimezone=Europe/Oslo
       # root / changeit
       MYSQL_ROOT_PASSWORD: changeit
       MYSQL_DATABASE: integrasjonspunkt
@@ -52,7 +52,7 @@ services:
 
 
   integrasjonspunkt:
-    image: test_ip_paketo_tiny:3.0
+    image: navn_på_ip_containeren_du_vil_bruke #eksempelvis integrasjonspunkt:3.0.1
     container_name: integrasjonspunkt
     # depends_on:
     #   mysql:
@@ -64,6 +64,12 @@ services:
         -Ddifi.move.org.number=
         -Ddifi.move.org.keystore.alias=
         -Ddifi.move.org.keystore.password=
+
+        -Ddifi.activemq.broker-url=tcp://activemq:61616
+        -Ddifi.activemq.user=admin
+        -Ddifi.activemq.password=
+        -Ddifi.move.nextmove.use-db-persistence=true
+
         og så videre. Se dokumentasjonen for ulike miljøvariabler her: https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
 
     volumes:
@@ -82,6 +88,7 @@ services:
 
 
   activemq:
+    #Må bruke activemq når man kjører i docker
     image: apache/activemq-classic:5.17.7
     container_name: activemq
     environment:
