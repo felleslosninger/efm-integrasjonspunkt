@@ -40,6 +40,7 @@ public class DpiClientImpl implements DpiClient {
     public void sendMessage(Shipment shipment) {
         try (InMemoryWithTempFileFallbackResource cmsEncryptedAsice = createCmsEncryptedAsice(shipment)) {
             SendMessageInput input = createSendMessageInput.createSendMessageInput(shipment, cmsEncryptedAsice);
+            log.debug("Sending/writing DPI message: {}", input);
             corner2Client.sendMessage(input);
         } catch (DpiException e) {
             throw e;
