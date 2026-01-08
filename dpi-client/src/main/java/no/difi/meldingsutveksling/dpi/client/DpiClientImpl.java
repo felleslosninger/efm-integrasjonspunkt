@@ -74,8 +74,9 @@ public class DpiClientImpl implements DpiClient {
     @Override
     public Flux<ReceivedMessage> getMessages(GetMessagesInput input) {
         return corner2Client.getMessages(input)
-                .map(messageUnwrapper::unwrap)
-                .onErrorContinue(IllegalStateException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i));
+            .map(messageUnwrapper::unwrap)
+            .onErrorContinue(IllegalStateException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i))
+            .onErrorContinue(NullPointerException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i));
     }
 
     @Override
