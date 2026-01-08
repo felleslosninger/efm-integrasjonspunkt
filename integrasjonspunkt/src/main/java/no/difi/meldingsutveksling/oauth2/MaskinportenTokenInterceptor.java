@@ -50,12 +50,13 @@ public class MaskinportenTokenInterceptor implements ClientHttpRequestIntercepto
         if (props.getFeature().isEnableDPF()) scopeList.add("move/dpf.read");
         if (props.getFeature().isEnableDPFIO()) scopeList.add("ks:fiks");
         if (props.getFeature().isEnableDPI()) scopeList.addAll(List.of("move/dpi.read",
-                "global/kontaktinformasjon.read",
-                "global/sikkerdigitalpost.read",
-                "global/varslingsstatus.read",
-                "global/sertifikat.read",
-                "global/navn.read",
-                "global/postadresse.read"));
+            "digitalpostinnbygger:send",
+            "global/kontaktinformasjon.read",
+            "global/sikkerdigitalpost.read",
+            "global/varslingsstatus.read",
+            "global/sertifikat.read",
+            "global/navn.read",
+            "global/postadresse.read"));
         return scopeList;
     }
 
