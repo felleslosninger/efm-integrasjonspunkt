@@ -13,8 +13,8 @@ jobs:
 
   call-container-scan:
     needs: call-workflow-maven-build
-    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-scan-integrasjonspunkt.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
     with:
       java-version: 21
-      application-path: integrasjonspunkt/
+      module-name: integrasjonspunkt
     secrets: inherit
