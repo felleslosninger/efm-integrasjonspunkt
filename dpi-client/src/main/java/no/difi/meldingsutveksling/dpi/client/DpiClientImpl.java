@@ -53,14 +53,14 @@ public class DpiClientImpl implements DpiClient {
         InMemoryWithTempFileFallbackResource resource = resourceFactory.getResource("dpi-", ".asic.cms");
 
         createCmsEncryptedAsice.createCmsEncryptedAsice(CreateCMSEncryptedAsice.Input.builder()
-                        .documents(shipment.getParcel().getDocuments())
-                        .manifest(createManifest.createManifest(shipment))
-                        .certificate(shipment.getReceiverBusinessCertificate())
-                        .signatureMethod(SignatureMethod.XAdES)
-                        .signatureHelper(keystoreHelper.getSignatureHelper())
-                        .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
-                        .build(),
-                resource
+                .documents(shipment.getParcel().getDocuments())
+                .manifest(createManifest.createManifest(shipment))
+                .certificate(shipment.getReceiverBusinessCertificate())
+                .signatureMethod(SignatureMethod.XAdES)
+                .signatureHelper(keystoreHelper.getSignatureHelper())
+                .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
+                .build(),
+            resource
         );
 
         return resource;

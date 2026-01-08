@@ -33,11 +33,11 @@ public class MaskinportenTokenInterceptor implements ClientHttpRequestIntercepto
 
     private JwtTokenClient jwtTokenClient() {
         JwtTokenConfig config = new JwtTokenConfig(
-                props.getOidc().getClientId(),
-                props.getOidc().getUrl().toString(),
-                props.getOidc().getAudience(),
-                getCurrentScopes(),
-                props.getOidc().getKeystore()
+            props.getOidc().getClientId(),
+            props.getOidc().getUrl().toString(),
+            props.getOidc().getAudience(),
+            getCurrentScopes(),
+            props.getOidc().getKeystore()
         );
         return new JwtTokenClient(config);
     }
