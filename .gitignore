@@ -135,7 +135,17 @@ atlassian-ide-plugin.xml
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 
-# Local properties
+
+# Integrasjonspunkt runtime files
+/activemq-data
+/integrasjonspunkt/activemq-data
+/integrasjonspunkt-logs
+/integrasjonspunkt/integrasjonspunkt-logs
+/messages
+*.log
+*.db
+
+# Integrasjonspunkt local properties
 integrasjonspunkt-local.properties
 integrasjonspunkt-local.properties.bak
 integrasjonspunkt/application.properties
