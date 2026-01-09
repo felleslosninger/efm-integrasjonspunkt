@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +37,10 @@ class OnBehalfOfNormalizerTest {
 
         StandardBusinessDocument sbd = new StandardBusinessDocument()
                 .setSenderIdentifier(PartnerIdentifier.parse(before));
+
+        sbd.getStandardBusinessDocumentHeader()
+            .setDocumentIdentification(new DocumentIdentification().setStandard("dummy-not-null"));
+
         target.normalize(sbd);
         assertThat(sbd.getSenderIdentifier()).isEqualTo(PartnerIdentifier.parse(after));
     }

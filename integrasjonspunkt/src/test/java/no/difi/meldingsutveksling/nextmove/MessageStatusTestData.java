@@ -75,7 +75,7 @@ class MessageStatusTestData {
                 .setRawReceipt("The raw receipt"));
     }
 
-    private static MessageStatus getMessageStatus(MessageStatusDTO dto) {
+     static MessageStatus getMessageStatus(MessageStatusDTO dto) {
         MessageStatus messageStatus = spy(MessageStatus.of(ReceiptStatus.valueOf(dto.getStatus()), dto.getLastUpdate(), dto.getDescription())
                 .setConversation(new Conversation()
                         .setMessageId(dto.getMessageId())

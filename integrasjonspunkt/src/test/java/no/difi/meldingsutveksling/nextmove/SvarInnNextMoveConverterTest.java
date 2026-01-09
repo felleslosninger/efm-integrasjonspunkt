@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.FiksConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.FiksIoIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.ks.svarinn.Forsendelse;
@@ -26,6 +27,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import jakarta.xml.bind.JAXBException;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,11 +65,8 @@ class SvarInnNextMoveConverterTest {
         FiksConfig fiksConfig = mockFiksConfig();
         when(propertiesMock.getFiks()).thenReturn(fiksConfig);
         StandardBusinessDocument standardBusinessDocument = mock(StandardBusinessDocument.class);
-        PartnerIdentifier receiverIdentifier = mock(PartnerIdentifier.class);
-        when(receiverIdentifier.getPrimaryIdentifier()).thenReturn("receiver-primary-identifier");
-        PartnerIdentifier senderIdentifier = mock(PartnerIdentifier.class);
-        when(senderIdentifier.hasOrganizationPartIdentifier()).thenReturn(false);
-        when(senderIdentifier.getPrimaryIdentifier()).thenReturn("sender-primary-identifier");
+        FiksIoIdentifier receiverIdentifier = FiksIoIdentifier.of(UUID.randomUUID());
+        PartnerIdentifier senderIdentifier = FiksIoIdentifier.of(UUID.randomUUID());
         when(standardBusinessDocument.getSenderIdentifier()).thenReturn(senderIdentifier);
         when(standardBusinessDocument.getReceiverIdentifier()).thenReturn(receiverIdentifier);
         when(sbdFactoryMock.createNextMoveSBD(any(PartnerIdentifier.class),

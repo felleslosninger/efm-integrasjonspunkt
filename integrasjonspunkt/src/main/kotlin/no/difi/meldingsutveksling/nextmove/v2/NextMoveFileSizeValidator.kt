@@ -21,6 +21,7 @@ class NextMoveFileSizeValidator(private val props: IntegrasjonspunktProperties) 
             DPF -> props.fiks.ut.uploadSizeLimit
             DPI -> props.dpi.uploadSizeLimit
             DPFIO -> props.fiks.io.uploadSizeLimit
+            DPH -> props.dph.uploadSizeLimit
             else -> throw NextMoveRuntimeException("Unknown Service Identifier")
         }
         if (total > limit) {

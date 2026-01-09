@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "digital_dpv", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-public class DigitalDpvMessage extends BusinessMessage<DigitalDpvMessage> {
+public class DigitalDpvMessage extends BusinessMessageAsAttachment<DigitalDpvMessage> {
 
     @NotNull
     private String tittel;
