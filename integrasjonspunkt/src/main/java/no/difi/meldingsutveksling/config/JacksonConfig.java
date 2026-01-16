@@ -36,6 +36,7 @@ public class JacksonConfig {
                         .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
                         .featuresToEnable(
                                 SerializationFeature.INDENT_OUTPUT,
+                                DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE,
                                 JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,
                                 MapperFeature.DEFAULT_VIEW_INCLUSION)
                         .featuresToDisable(

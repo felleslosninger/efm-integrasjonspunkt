@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.SneakyThrows;
@@ -35,6 +36,7 @@ import java.util.UUID;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -61,7 +63,8 @@ public class ServiceRegistryLookupTest {
 
         @Bean
         ObjectMapper objectMapper() {
-            return new ObjectMapper();
+            return new ObjectMapper()
+                    .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
         }
     }
 
@@ -154,6 +157,38 @@ public class ServiceRegistryLookupTest {
         assertThat(service.getSasKey(), is("456"));
     }
 
+    @Test
+    public void getInfoRecordWhenUnknownServiceIdentifierFromServiceRegistry() throws BadJWSException {
+        when(client.getResource(any(), anyMap())).thenReturn("{\n" +
+                "  \"infoRecord\": {\n" +
+                "    \"identifier\": \"910077473\",\n" +
+                "    \"organizationName\": \"TEST - C4\",\n" +
+                "    \"postadresse\": null,\n" +
+                "    \"entityType\": {\n" +
+                "      \"name\": \"ORGL\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"serviceRecords\": [\n" +
+                "    {\n" +
+                "      \"organisationNumber\": \"910077473\",\n" +
+                "      \"pemCertificate\": \"-----BEGIN CERTIFICATE-----\\nMIICujCCAaKgAwIBAgIEXIe4TjANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNE\\nSUZJIHRlc3QgOTEwMDc1OTE4MCAXDTE5MDMxMjEzNDY1NFoYDzIxMTkwMzEyMTM0\\nNjU0WjAeMRwwGgYDVQQDDBNESUZJIHRlc3QgOTEwMDc1OTE4MIIBIjANBgkqhkiG\\n9w0BAQEFAAOCAQ8AMIIBCgKCAQEArdbwXXtDgA3SJiNlYoG1F65zzOMqxJyd4Rvl\\n8ofMP7gVfze9E2ydRg05m/dzQPIRhOPPlzsYwBBtkIH+iy+lJ6lh+l62SLXLhUCF\\n4Z36uxbIIw8C/w0VMuiuoYwMig7AKX+hwqa2qCmL45b9eRMXkMMrZuWQvloXCONQ\\nyCrQ5uNkZ/sGCiHqPekobjQ4AU0m/W0O2+NbyBsddZQ88BnBhEZyMj7K8xul0pM0\\nT5JkGybfKVBYooyHFeWfJTZ+z8sae8cB4b6XJtjil3MPfOgIU1W2cj8hkY7DyGfI\\n7pjwAKNL45S2F0v2jaI37a5p4x5BzSvmDksh2pmevkwGBHRkMQIDAQABMA0GCSqG\\nSIb3DQEBCwUAA4IBAQAKZACSKEWNvcVzKuP/e17w/abzLRB4iIrFktb1wlJV4Zab\\n5LP8spP6yfpTRSnle7P+K145dSSYCnsutFe7aZ0wOSLKQLOUWCmZFHSXlSYymss1\\nx3aRk8Cg3itMuRwrViugHpWpJq+TRMq863W7sPgGLLAoGBIdWa9swI9JdazGD7/o\\nyUTK1+GOI2yciDQaFiH+HlP9auGCs8X0HlZizYtJqivbSyGM9nH0Z0/T5asTHFig\\nARLdWrnH1oKfEfE3sN/whPXoZtHyD/39u+Sk/FIzjnNEIrSHgpkSN6lY3DfjYH+k\\nF/OZ/A6+cmGBmH7aMO7GIVR2NZgUeVj7Bu1W7WkP\\n-----END CERTIFICATE-----\",\n" +
+                "      \"process\": \"urn:no:difi:profile:arkivmelding:administrasjon:ver1.0\",\n" +
+                "      \"documentTypes\": [\n" +
+                "        \"urn:no:difi:arkivmelding:xsd::arkivmelding\"\n" +
+                "      ],\n" +
+                "      \"service\": {\n" +
+                "        \"identifier\": \"STRANGE\",\n" +
+                "        \"endpointUrl\": \"http://localhost:9800\",\n" +
+                "        \"serviceCode\": \"4192\",\n" +
+                "        \"serviceEditionCode\": \"270815\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}");
+
+        assertNotNull(service.getInfoRecord(ORGNR));
+    }
+
     public static class SRContentBuilder {
         private ServiceRecord serviceRecord;
 
@@ -167,8 +202,8 @@ public class ServiceRegistryLookupTest {
             InfoRecord infoRecord = new InfoRecord(ORGNR, ORGNAME, entityType);
 
             IdentifierResource resource = new IdentifierResource()
-                .setInfoRecord(infoRecord)
-                .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
+                    .setInfoRecord(infoRecord)
+                    .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
             try {
                 return new ObjectMapper().writeValueAsString(resource);
