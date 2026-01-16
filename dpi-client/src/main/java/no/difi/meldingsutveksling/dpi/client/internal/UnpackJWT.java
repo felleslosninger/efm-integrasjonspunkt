@@ -41,6 +41,9 @@ public class UnpackJWT {
     }
 
     private JWSObject getJwsObject(String jwt) {
+        if (jwt == null) {
+            throw new IllegalStateException("JWT string cannot be null");
+        }
         try {
             return JWSObject.parse(jwt);
         } catch (ParseException e) {
