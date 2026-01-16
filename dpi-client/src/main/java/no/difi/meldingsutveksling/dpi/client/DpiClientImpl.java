@@ -40,6 +40,7 @@ public class DpiClientImpl implements DpiClient {
     public void sendMessage(Shipment shipment) {
         try (InMemoryWithTempFileFallbackResource cmsEncryptedAsice = createCmsEncryptedAsice(shipment)) {
             SendMessageInput input = createSendMessageInput.createSendMessageInput(shipment, cmsEncryptedAsice);
+            log.debug("Sending/writing DPI message: {}", input);
             corner2Client.sendMessage(input);
         } catch (DpiException e) {
             throw e;
@@ -73,8 +74,9 @@ public class DpiClientImpl implements DpiClient {
     @Override
     public Flux<ReceivedMessage> getMessages(GetMessagesInput input) {
         return corner2Client.getMessages(input)
-                .map(messageUnwrapper::unwrap)
-                .onErrorContinue(IllegalStateException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i));
+            .map(messageUnwrapper::unwrap)
+            .onErrorContinue(IllegalStateException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i))
+            .onErrorContinue(NullPointerException.class, (e, i) -> log.warn("Unwrapping message failed: {} {}", e, i));
     }
 
     @Override

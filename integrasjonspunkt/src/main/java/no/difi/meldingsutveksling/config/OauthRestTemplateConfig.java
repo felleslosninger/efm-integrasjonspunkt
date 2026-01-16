@@ -35,6 +35,7 @@ public class OauthRestTemplateConfig {
     private static final String SCOPE_DPF = "move/dpf.read";
     private static final String SCOPE_DPFIO = "ks:fiks";
     private static final List<String> SCOPES_DPI = Arrays.asList("move/dpi.read",
+            "digitalpostinnbygger:send",
             "global/kontaktinformasjon.read",
             "global/sikkerdigitalpost.read",
             "global/varslingsstatus.read",
