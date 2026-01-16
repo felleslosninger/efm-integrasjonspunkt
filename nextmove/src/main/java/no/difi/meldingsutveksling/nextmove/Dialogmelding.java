@@ -18,5 +18,4 @@ public class Dialogmelding implements BusinessMessage {
     String patientFnr;
     String responsibleHealthcareProfessionalId;
     String vedleggBeskrivelse;
-
 }

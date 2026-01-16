@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
 import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
 import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
@@ -56,6 +57,12 @@ public class IntegrasjonspunktBeans {
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
     }
+
+    @Bean
+    public Kryptering kryptering(IntegrasjonspunktProperties properties) {
+        return new Kryptering();
+    }
+
 
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {

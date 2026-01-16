@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
 import no.difi.meldingsutveksling.jackson.PartnerIdentifierModule;
 import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentModule;
-import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
+import no.difi.meldingsutveksling.json.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageType;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;

@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
-import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
+import no.difi.meldingsutveksling.json.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
 import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;

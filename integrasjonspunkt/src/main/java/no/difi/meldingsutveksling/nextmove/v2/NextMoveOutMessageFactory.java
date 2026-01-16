@@ -55,6 +55,9 @@ public class NextMoveOutMessageFactory {
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
 
         setDefaults(sbd, serviceIdentifier);
+        if (serviceIdentifier == DPH) {
+            healthcareRoutingService.validateAndApply(sbd);
+        }
 
         return new NextMoveOutMessage(
             sbd.getConversationId(),

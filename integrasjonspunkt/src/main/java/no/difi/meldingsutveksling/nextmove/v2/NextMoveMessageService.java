@@ -8,6 +8,7 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
@@ -18,6 +19,7 @@ import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
 import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
@@ -33,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +53,7 @@ public class NextMoveMessageService {
     private final NextMoveValidator validator;
     private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
+    private final NhnCryptoMessagePersister nhnCryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
@@ -145,7 +150,21 @@ public class NextMoveMessageService {
         String identifier = UUID.randomUUID().toString();
 
         try (InputStream inputStream = file.getInputStream()) {
-            optionalCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream));
+            if (message.getServiceIdentifier() == ServiceIdentifier.DPH) {
+                    try {
+                        X509Certificate certificate = message.getBusinessMessage(EncryptedBusinessMessage.class).get().getX509Certificate();
+                        nhnCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream),certificate );
+                    } catch (CertificateException e) {
+                        //@TODO make exception handling more precise here.
+                        throw new RuntimeException("Not able to encrypt message, due to failed certificate",e);
+                    } catch (EncryptionException e) {
+                        throw new RuntimeException("Not able to encrypt message, due to failed encryption",e);
+                    }
+                }
+            else  {
+                optionalCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream));
+            }
+
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }
