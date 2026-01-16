@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,7 @@ public enum ServiceIdentifier {
     @XmlEnumValue("DPF") DPF("DPF"),
     @XmlEnumValue("DPFIO") DPFIO("DPFIO"),
     @XmlEnumValue("DPE") DPE("DPE"),
-    UNKNOWN("UNKNOWN");
+    @JsonEnumDefaultValue UNKNOWN("UNKNOWN");
 
     private final String fullname;
 }
