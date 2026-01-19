@@ -22,6 +22,7 @@ public class ServiceRecord {
     private boolean kanVarsles;
     private PostAddress postAddress;
     private PostAddress returnAddress;
+    private String spraak;
     private String process;
     private List<String> documentTypes;
     private Service service;
