@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove;
 
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.json.ObjectMapperHolder;
+import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
 import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;
 import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;

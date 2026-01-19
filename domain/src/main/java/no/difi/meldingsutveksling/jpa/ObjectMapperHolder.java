@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.json;
+package no.difi.meldingsutveksling.jpa;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

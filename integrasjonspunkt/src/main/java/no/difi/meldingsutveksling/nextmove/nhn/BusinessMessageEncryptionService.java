@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.nextmove.nhn;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.json.ObjectMapperHolder;
+import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.nextmove.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
