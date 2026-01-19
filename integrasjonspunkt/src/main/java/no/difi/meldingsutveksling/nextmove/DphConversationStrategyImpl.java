@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
-import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
@@ -14,6 +13,7 @@ import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.nextmove.nhn.Receiver;
 import no.difi.meldingsutveksling.nextmove.nhn.Sender;
+import no.difi.meldingsutveksling.nextmove.v2.NhnCryptoMessagePersister;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
@@ -34,7 +34,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
     private final NhnAdapterClient adapterClient;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final ConversationService conversationService;
-    private final CryptoMessagePersister fileRepository;
+    private final NhnCryptoMessagePersister fileRepository;
 
 
     private String getHerID(NextMoveOutMessage message, ScopeType scopeType, String errorMessage) {

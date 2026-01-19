@@ -59,7 +59,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public Kryptering kryptering(IntegrasjonspunktProperties properties) {
+    public Kryptering kryptering() {
         return new Kryptering();
     }
 

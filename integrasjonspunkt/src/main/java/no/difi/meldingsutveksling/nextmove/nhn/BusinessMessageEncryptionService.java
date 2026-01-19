@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 @Component
@@ -38,7 +39,10 @@ public class BusinessMessageEncryptionService {
         try{
             var businessMessageJson = ObjectMapperHolder.get().writeValueAsString(businessMessage);
             var encryptedMessage = kryptering.krypter(businessMessageJson.getBytes(StandardCharsets.UTF_8),certificate);
-            return new EncryptedBusinessMessage(new String(Base64.encode(encryptedMessage)),new String(Base64.encode(certificate.getEncoded())));
+            var certificateString = new String(java.util.Base64.getEncoder().encode(certificate.getEncoded()));
+            X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(java.util.Base64.getDecoder().decode(certificateString.getBytes(StandardCharsets.UTF_8))));
+            System.out.println(x509Certificate.getSubjectDN().getName());
+            return new EncryptedBusinessMessage(certificateString,new String(Base64.encode(encryptedMessage)));
         } catch (JsonProcessingException e) {
             throw new EncryptionException("Not able to parse business message during encyrption",e);
         } catch (CertificateException e) {

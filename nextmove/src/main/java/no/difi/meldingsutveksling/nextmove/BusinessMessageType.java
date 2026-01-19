@@ -20,6 +20,7 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
     DIALOGMELDING("dialogmelding",Dialogmelding.class),
+    ENCRYPTEDMESSAGE("encryptedmessage",EncryptedBusinessMessage.class),
     PRINT("print", DpiPrintMessage.class),
 
     INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),

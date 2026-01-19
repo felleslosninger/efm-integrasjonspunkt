@@ -40,6 +40,7 @@ public class HealthcareRoutingService {
         withScopeValidation(sbd, doc -> {
             validate(sbd);
             applyRouting(sbd);
+            encryptBusinessMessage(sbd);
         });
     }
 
@@ -122,9 +123,9 @@ public class HealthcareRoutingService {
 
     private void encryptBusinessMessage(StandardBusinessDocument sbd) {
         ServiceRecord srReceiver = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
-
-
+        
             var dialogmelding = sbd.getBusinessMessage(Dialogmelding.class).get();
+
             if (dialogmelding.getResponsibleHealthcareProfessionalId()==null) {
                 dialogmelding.setResponsibleHealthcareProfessionalId(((NhnIdentifier)sbd.getReceiverIdentifier()).getHerId2());
             }

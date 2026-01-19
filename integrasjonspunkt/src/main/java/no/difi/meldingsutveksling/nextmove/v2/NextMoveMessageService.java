@@ -152,7 +152,7 @@ public class NextMoveMessageService {
         try (InputStream inputStream = file.getInputStream()) {
             if (message.getServiceIdentifier() == ServiceIdentifier.DPH) {
                     try {
-                        X509Certificate certificate = message.getBusinessMessage(EncryptedBusinessMessage.class).get().getX509Certificate();
+                        X509Certificate certificate = message.getBusinessMessage(EncryptedBusinessMessage.class).get().x509Certificate();
                         nhnCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream),certificate );
                     } catch (CertificateException e) {
                         //@TODO make exception handling more precise here.
