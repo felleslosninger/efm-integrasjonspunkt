@@ -19,7 +19,7 @@ import java.io.IOException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "difi.move.nextmove.useDbPersistence", havingValue = "false")
+@ConditionalOnProperty(name = "difi.move.nextmove.use-db-persistence", havingValue = "false")
 public class FileMessagePersister implements MessagePersister {
 
     private final IntegrasjonspunktProperties props;
