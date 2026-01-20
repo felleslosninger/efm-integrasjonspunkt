@@ -304,6 +304,7 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class FeatureToggle {
+        private boolean enableBetaFeatures;
         private boolean enableDsfPrintLookup;
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
