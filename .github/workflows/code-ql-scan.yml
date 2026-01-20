@@ -33,6 +33,20 @@ jobs:
           languages: java
           build-mode: manual
 
+      - uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # pin@v4.0.0
+        with:
+          servers: |
+            [{
+                "id": "github-oidc-sdk",
+                "username": "${{ secrets.MAVEN_USER }}",
+                "password": "${{ secrets.MAVEN_PASSWORD }}"
+            },
+            {
+                "id": "github",
+                "username": "${{ secrets.MAVEN_USER }}",
+                "password": "${{ secrets.MAVEN_PASSWORD }}"
+            }]
+
       - name: Build with Maven (Kotlin + Java)
         run: mvn -B -DskipTests package
 
