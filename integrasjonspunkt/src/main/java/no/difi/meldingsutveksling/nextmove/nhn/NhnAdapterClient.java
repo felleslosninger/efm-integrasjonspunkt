@@ -22,17 +22,21 @@ public class NhnAdapterClient {
 
     private RestClient dphClient;
 
-    private String uri;
-    private String MESSAGE_OUT_PATH = uri + "/out";
-    private String MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
-    private String ON_BEHALF_OF_PARAM = "onBehalfOf";
-    private String MESSAGE_STATUS_PATH = uri + "/status/%s";
+    private final String uri;
+    private final String MESSAGE_OUT_PATH ;
+    private final String MESSAGE_RECEIPT_PATH;
+    private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
+    private final String MESSAGE_STATUS_PATH;
 
 
     public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri) {
         log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
         this.uri = uri;
+
+        this.MESSAGE_OUT_PATH = uri + "/out";
+        this.MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+        this.MESSAGE_STATUS_PATH = uri + "/status/%s";
     }
 
     public String messageOut(DPHMessageOut messageOut) {

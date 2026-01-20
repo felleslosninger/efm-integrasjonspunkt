@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.nextmove.nhn;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
+import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.nextmove.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
 import org.bouncycastle.util.encoders.Base64;

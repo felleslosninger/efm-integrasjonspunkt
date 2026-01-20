@@ -10,9 +10,11 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
 import no.difi.meldingsutveksling.nextmove.Dialogmelding;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingOut;
+import no.difi.meldingsutveksling.nextmove.Person;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -123,17 +125,25 @@ public class HealthcareRoutingService {
 
     private void encryptBusinessMessage(StandardBusinessDocument sbd) {
         ServiceRecord srReceiver = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
-        
+
+            var reciever = (NhnIdentifier) sbd.getReceiverIdentifier();
             var dialogmelding = sbd.getBusinessMessage(Dialogmelding.class).get();
 
             if (dialogmelding.getResponsibleHealthcareProfessionalId()==null) {
-                dialogmelding.setResponsibleHealthcareProfessionalId(((NhnIdentifier)sbd.getReceiverIdentifier()).getHerId2());
+                dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
             }
 
             DialogmeldingOut.DialogmeldingOutBuilder outMessageBuilder = DialogmeldingOut.builder()
                 .notat(dialogmelding.getNotat())
                 .vedleggBeskrivelse(dialogmelding.getVedleggBeskrivelse())
                 .responsibleHealthcareProfessionalId(((NhnIdentifier)sbd.getReceiverIdentifier()).getHerId2());
+        if (reciever.isFastlegeIdentifier()) {
+            Patient pat = srReceiver.getPatient();
+            dialogmelding.setPatient(new Person(pat.fnr(),pat.firstName(),pat.middleName(), pat.lastName(), "8888888"));
+        }
+        else {
+
+        }
             try {
                 sbd.setAny(businessMessageEncryptionService.encrypt(dialogmelding, srReceiver.getPemCertificate()));
             } catch (EncryptionException e) {

@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.MessagePersister
 import no.difi.meldingsutveksling.api.NextMoveQueue
+import no.difi.meldingsutveksling.domain.BusinessMessage
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException
 import no.difi.meldingsutveksling.domain.sbdh.SBDService
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil
