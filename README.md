@@ -86,7 +86,7 @@ Linker til logger, config og alt annet :
 - `curl http://localhost:9093/manage/env | jq` (lister over alle properties og env settings)
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
-## Release
+## Release (for interne)
 
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo

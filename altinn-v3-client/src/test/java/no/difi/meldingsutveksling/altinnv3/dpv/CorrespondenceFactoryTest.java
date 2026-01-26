@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
@@ -79,6 +80,12 @@ public class CorrespondenceFactoryTest {
 
         StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
         standardBusinessDocument.setSenderIdentifier(SENDER);
+        standardBusinessDocument.setStandardBusinessDocumentHeader(
+            standardBusinessDocument.getStandardBusinessDocumentHeader()
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue")
+                )
+        );
 
         message = new NextMoveOutMessage();
         message.setReceiverIdentifier("222222222");
