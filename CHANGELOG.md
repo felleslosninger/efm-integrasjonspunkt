@@ -15,6 +15,7 @@ DPV
 - Nytt Notification
 - Nytt oppsett for onboarding av kunder.
 - "allowForwarding" på varsel er fjernet i Altinn 3
+- Ny [proxy klient](https://github.com/felleslosninger/efm-dpv-proxy) mellom integrasjonspunktet og Altinn
 
 DPO
 
