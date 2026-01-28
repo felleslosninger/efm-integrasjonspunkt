@@ -1,17 +1,3 @@
-## FIXME og mulige forbedringer i etterkant
-- [ ] AltinnPackage.java har referanse til gamle / ukjente service code / edition codes, kan det ryddes / fjernes?
-- [ ] Sjekk at vi har nyeste OpenAPI spec fra Altinn v3 i `altinn-v3-client` pakken
-- [ ] Er error responser alltid samme format, bør vi da sette request headers `Accept: application/hal+json` ?
-- [ ] Fjerne `endpointUrl` fra mocket SR data, tror ikke denne finnes lenger (eksempel [974720760.json](integrasjonspunkt/src/test/resources/restmocks/identifier/974720760.json))
-- [ ] Det er kode for ASIC generering i [altinn-v3-client](altinn-v3-client), kan vurderes å benytte tilsvarende funksjonalitet i [dokumentpakking](dokumentpakking)
-- [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach
-- [ ] Onboarding støtte i kode, vi har koden som skal til (se i de manuelle testene), kan f.eks. eksponeres som WEB eller API
-- [ ] Undersøk om websidene som er innebygget i IP fremdeles er relevante og skal være med
-- [ ] Fjerne bruk av docker-file og gå over bruke mvn spring boot build image: [jira](https://digdir.atlassian.net/jira/software/c/projects/MOVE/boards/32?assignee=5f2cfe00ef11df0025e5cd23&selectedIssue=MOVE-4422)
-
-Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
-- Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
-
 ## Bygg og kjør lokalt
 Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
 
