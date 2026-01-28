@@ -16,4 +16,5 @@ public class TestClockConfig {
     public TestClock testClock() {
         return new TestClock(TestClock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
     }
+
 }

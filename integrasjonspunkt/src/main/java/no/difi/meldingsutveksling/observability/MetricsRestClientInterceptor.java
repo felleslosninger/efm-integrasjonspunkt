@@ -22,10 +22,6 @@ public class MetricsRestClientInterceptor implements ClientHttpRequestIntercepto
         this.meterRegistry = meterRegistry;
     }
 
-    // FIXME : Verify that timings are still included : https://digdir.atlassian.net/browse/MOVE-2438
-    // import org.springframework.boot.actuate.metrics.web.client.MetricsRestTemplateCustomizer;
-    // import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
-
     @NotNull
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {

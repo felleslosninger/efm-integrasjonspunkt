@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <title>System Status</title>
+    <style>
+        /* Simple card effect */
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+            transition: 0.3s;
+            border-radius: 5px;
+        }
+
+        /* On mouse-over, add a deeper shadow */
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.6);
+        }
+
+        /* Add some padding inside the card container */
+        .container {
+            padding: 2px 16px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="mb-1">System Status</h1>
+            <p class="text-muted mb-0">Her kan man får en oversikt over systemets status akkurat nå.</p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary" th:href="@{/}">Tilbake til oversikt</a>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">Her vises en eventuell feilmelding.</div>
+
+    <th:block th:each="s : ${status}">
+        <div class="card">
+            <div class="container">
+                <h2 th:text="${s.service()}">unknown</h2>
+                <p>[[${s.config()}]] har [[${s.errors()}]] meldinger som har feilet</p>
+            </div>
+        </div>
+        <br/>
+    </th:block>
+
+</div>
+
+</body>
+</html>

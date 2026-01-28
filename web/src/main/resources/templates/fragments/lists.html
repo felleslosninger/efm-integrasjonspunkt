@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Static prototyping elements can go here, but they won't be inserted into other pages -->
+</head>
+<body>
+
+<table th:fragment="propertylist" class="table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Property</th>
+        <th scope="col">Verdi</th>
+        <th scope="col">Beskrivelse</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="it,iStat : ${properties}">
+        <th th:text="${iStat.index + 1}" scope="row">1</th>
+        <td th:text="${it.key()}">Navn</td>
+        <td th:text="${it.value()}">Verdi</td>
+        <td th:text="${it.description()}">Beskrivelse</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

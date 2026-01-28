@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <title>Onboarding</title>
+</head>
+
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="mb-1">Onboarding DPO</h1>
+            <p class="text-muted mb-0">Sjekkliste for å få integrasjonspunktet klart til bruk.</p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary" th:href="@{/}">Tilbake til oversikt</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Sjekkliste</h5>
+                    <p class="card-subtitle mb-3 text-muted">Gå gjennom punktene under og verifiser før produksjonssetting.</p>
+                    <div th:each="step,iter : ${checklist}" class="border rounded p-3 mb-3 bg-white">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small text-secondary" th:text="|Steg ${iter.index + 1}|">Steg 1</div>
+                                <h6 class="mb-1" th:text="${step.title()}">Steg tittel</h6>
+                                <p class="mb-1" th:text="${step.description()}">Beskrivelse av steget.</p>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        th:attr="data-bs-target=${'#' + step.name()}, aria-controls=${step.name()}"
+                                        data-bs-toggle="modal">
+                                    Verifiser
+                                </button>
+                            </div>
+                            <span class="badge"
+                                  th:with="badgeClass=${step.completed() ? 'bg-success' : (step.required() ? 'bg-danger' : 'bg-secondary')},
+                                           label=${step.completed() ? 'Gjennomført' : (step.required() ? 'Må på plass' : 'Valgfritt')}"
+                                  th:classappend="${badgeClass}"
+                                  th:text="${label}">Må på plass</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Kontaktpersoner</h5>
+                    <p class="card-subtitle mb-3 text-muted">Hvem kan du spørre om hva.</p>
+                    <div th:each="contact : ${contacts}" class="mb-2 pb-2 border-bottom">
+                        <div class="fw-semibold" th:text="${contact.role()}">Rolle</div>
+                        <div th:text="${contact.name()}">Navn</div>
+                        <a th:href="|mailto:${contact.email()}|" th:text="${contact.email()}">epost</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Ressurser</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li th:each="resource : ${resources}" class="mb-2">
+                            <a th:href="${resource.url()}" target="_blank" rel="noreferrer" th:text="${resource.label()}">Lenke</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+<div th:each="step : ${checklist}"
+     class="modal fade"
+     th:id="${step.name()}"
+     tabindex="-1"
+     aria-hidden="true"
+     th:aria-labelledby="${step.name()} + '_label'"
+     data-onboarding-modal
+     th:attr="data-dialog=${step.name()}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" th:id="${step.name()} + '_label'" th:text="${step.title()}">Steg</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger d-none" role="alert" data-dialog-error>Kunne ikke hente innhold.</div>
+                <p class="mb-0" data-dialog-body th:utext="${step.dialogText()}">Detaljer om steget.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" autofocus>Avbryt</button>
+                <button th:disabled="${!step.required()}" type="button" class="btn btn-primary" th:text="${step.buttonText()}" data-dialog-confirm>Bekreft</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modals = document.querySelectorAll('[data-onboarding-modal]');
+        modals.forEach(modalEl => {
+            const dialogId = modalEl.getAttribute('data-dialog');
+            const bodyEl = modalEl.querySelector('[data-dialog-body]');
+            const errorEl = modalEl.querySelector('[data-dialog-error]');
+            const confirmBtn = modalEl.querySelector('[data-dialog-confirm]');
+
+            modalEl.addEventListener('show.bs.modal', () => {
+                errorEl.classList.add('d-none');
+                errorEl.textContent = '';
+                bodyEl.textContent = 'Laster inn...';
+                fetch(`/onboarding/dialog/${dialogId}`)
+                    .then(async response => {
+                        const payload = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            throw new Error(payload.message || 'Kunne ikke hente innhold.');
+                        }
+                        return payload;
+                    })
+                    .then(data => {
+                        bodyEl.innerHTML = data.body || data.dialogText || 'Ingen detaljer tilgjengelig.';
+                    })
+                    .catch(err => {
+                        bodyEl.textContent = '';
+                        errorEl.textContent = err.message || 'Kunne ikke hente innhold.';
+                        errorEl.classList.remove('d-none');
+                    });
+
+                confirmBtn.onclick = () => {
+                    errorEl.classList.add('d-none');
+                    errorEl.textContent = '';
+                    fetch(`/onboarding/dialog/${dialogId}/confirm`, { method: 'POST' })
+                        .then(async response => {
+                            const payload = await response.json().catch(() => ({}));
+                            if (!response.ok) {
+                                throw new Error(payload.message || 'Bekreftelse feilet.');
+                            }
+                            return payload;
+                        })
+                        .then(() => {
+                            const bsModal = bootstrap.Modal.getInstance(modalEl);
+                            if (bsModal) {
+                                bsModal.hide();
+                            }
+                            window.location.reload();
+                        })
+                        .catch(err => {
+                            errorEl.textContent = err.message || 'Bekreftelse feilet.';
+                            errorEl.classList.remove('d-none');
+                        });
+                };
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
