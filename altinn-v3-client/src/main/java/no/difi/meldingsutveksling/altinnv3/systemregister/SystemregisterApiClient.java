@@ -177,40 +177,6 @@ public class SystemregisterApiClient {
         return res;
     }
 
-//    public String getSystemUser(String party, String systemUserUuid) {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-//        return restClient.get()
-//            .uri("https://platform.tt02.altinn.no/authentication/api/v1/systemuser/%s/%s".formatted(party, systemUserUuid))
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .retrieve()
-//            .body(String.class)
-//            ;
-//    }
-//
-//    public String getAll() {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-//
-//        return restClient.get()
-//            .uri(apiEndpoint)
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .retrieve()
-//            .body(String.class)
-//            ;
-//    }
-//
-//    public String systemDetails(String systemId) {
-//        String accessToken = tokenProducer.produceToken(SCOPES_FOR_SYSTEMREGISTER);
-//        return restClient.get()
-//            .uri(apiEndpoint + "/vendor/" + systemId)
-//            .header("Authorization", "Bearer " + accessToken)
-//            .header("Accept", "application/json")
-//            .retrieve()
-//            .body(String.class)
-//            ;
-//    }
-
     private void getApiException(HttpRequest request, ClientHttpResponse response) {
         var prefix = "Api error: %s".formatted(request.getURI());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);

@@ -18,7 +18,7 @@ public class SystemregisterTokenProducer implements TokenProducer {
     @Override
     @Cacheable(cacheNames = {"altinn.getSystemToken"})
     public String produceToken(List<String> scopes) {
-        // FIXME we "misuse" OIDC configuration intended for DPO to fetch the token
+        // We "misuse" OIDC configuration intended for DPO to fetch the token
         var config = new TokenConfig(properties.getDpo().getOidc(), properties.getDpo().getAltinnTokenExchangeUrl());
         String maskinPortenToken = tokenService.fetchToken(config, scopes, null);
         String altinnToken = tokenExchangeService.exchangeToken(maskinPortenToken, config.exchangeUrl());
