@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.ks.fiksio
 
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
+import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage
 import no.difi.meldingsutveksling.receipt.ReceiptStatus.*
 import no.difi.meldingsutveksling.serviceregistry.SRParameter
@@ -38,9 +39,12 @@ class FiksIoService(
         val params = SRParameter.builder(msg.receiverIdentifier)
             .process(msg.sbd.process)
             .conversationId(msg.conversationId)
-        if (msg.businessMessage.sikkerhetsnivaa != null) {
-            params.securityLevel(msg.businessMessage.sikkerhetsnivaa)
+
+        val bm = msg.businessMessage
+        if (bm!=null && bm is HasSikkerhetsNivaa<*>) {
+            params.securityLevel(bm.sikkerhetsnivaa)
         }
+
         val serviceRecord: ServiceRecord =
             serviceRegistryLookup.getServiceRecord(params.build(), msg.sbd.documentType)
 

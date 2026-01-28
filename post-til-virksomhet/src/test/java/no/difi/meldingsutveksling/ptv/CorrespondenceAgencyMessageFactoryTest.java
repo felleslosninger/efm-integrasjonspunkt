@@ -140,7 +140,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         String varselTekstOverride = "foo $reporterName$ bar $reporteeName$";
         dpv.setVarselTekst(varselTekstOverride);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessageAsAttachment) amMsg);
 
         setupForProcessAndServiceCode(PROCESS, SERVICE_CODE);
         List<Notification2009> notifications = ReflectionTestUtils.invokeMethod(messageFactory, "createNotifications", msg);
@@ -170,7 +170,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         String varselTekst = "taus foo $reporterName$ bar $reporteeName$";
         dpv.setTaushetsbelagtVarselTekst(varselTekst);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessageAsAttachment) amMsg);
 
         setupForProcessAndServiceCode(PROCESS_SENSITIVE, SERVICE_CODE_SENSITIVE);
 
@@ -187,7 +187,7 @@ class CorrespondenceAgencyMessageFactoryTest {
         DpvSettings dpv = new DpvSettings();
         dpv.setDagerTilSvarfrist(3);
         amMsg.setDpv(dpv);
-        when(msg.getBusinessMessage()).thenReturn((BusinessMessage) amMsg);
+        when(msg.getBusinessMessage()).thenReturn((BusinessMessageAsAttachment) amMsg);
 
         setupForProcessAndServiceCode(PROCESS, SERVICE_CODE);
         MyInsertCorrespondenceV2 correspondence = ReflectionTestUtils.invokeMethod(messageFactory, "getMyInsertCorrespondenceV2", msg, "title", "summary", "body", null);

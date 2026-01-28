@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.nextmove.v2
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import lombok.extern.slf4j.Slf4j
-import no.difi.meldingsutveksling.MessageType
 import no.difi.meldingsutveksling.ServiceIdentifier
 import no.difi.meldingsutveksling.api.ConversationService
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister
@@ -122,7 +121,7 @@ class NextMoveValidatorTest {
         every { nextMoveMessageOutRepository.findByMessageId(messageId) } returns Optional.empty()
         every { conversationService.findConversation(messageId) } returns Optional.empty()
         every { serviceRecord.serviceIdentifier } returns ServiceIdentifier.DPO
-        every { serviceRecordProvider.getServiceRecord(sbd) } returns serviceRecord
+        every { serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER) } returns serviceRecord
         every { serviceRecordProvider.getServiceIdentifier(sbd) } returns ServiceIdentifier.DPO
         every { conversationStrategyFactory.isEnabled(ServiceIdentifier.DPO) } returns true
         every { asserter.isValid(any<ArkivmeldingMessage>(), any()) } just Runs

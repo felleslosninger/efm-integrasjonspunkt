@@ -23,7 +23,8 @@ public class ConversationStrategyFactory {
                                        ObjectProvider<DpeConversationStrategy> dpeStrat,
                                        ObjectProvider<DpvConversationStrategy> dpvStrat,
                                        ObjectProvider<DpiConversationStrategy> dpiStrat,
-                                       ObjectProvider<DpfioConversationStrategy> dpfioStrat) {
+                                       ObjectProvider<DpfioConversationStrategy> dpfioStrat,
+                                       ObjectProvider<DphConversationStrategyImpl> dphStrat) {
         strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
             dpoStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPO, s));
@@ -42,6 +43,9 @@ public class ConversationStrategyFactory {
         }
         if (props.getFeature().isEnableDPE()) {
             dpeStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPE, s));
+        }
+        if (props.getFeature().isEnableDPH()) {
+            dphStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPH, s));
         }
     }
 

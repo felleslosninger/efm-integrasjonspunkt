@@ -19,7 +19,8 @@ public enum ServiceIdentifier {
     @XmlEnumValue("DPF") DPF("DPF"),
     @XmlEnumValue("DPFIO") DPFIO("DPFIO"),
     @XmlEnumValue("DPE") DPE("DPE"),
-    @JsonEnumDefaultValue UNKNOWN("UNKNOWN");
+    @XmlEnumValue("DPH") DPH("DPH"),
+    UNKNOWN("UNKNOWN");
 
     private final String fullname;
 }
