@@ -69,7 +69,7 @@ public class NextMoveMessageOutController {
         // Check for duplicate filenames
         List<String> filenames = files.stream()
                 .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
+                .toList();
         filenames.stream()
                 .filter(f -> Collections.frequency(filenames, f) > 1)
                 .reduce((a, b) -> a + ", " + b)
