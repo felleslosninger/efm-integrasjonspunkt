@@ -10,3 +10,5 @@
 #CVE-2025-41249
 
 CVE-2025-59250 # Managed mssql via spring boot, probably updated on next SB version
+
+CVE-2026-24400 # Må se på denne i IPv4-branchen. #TODO
