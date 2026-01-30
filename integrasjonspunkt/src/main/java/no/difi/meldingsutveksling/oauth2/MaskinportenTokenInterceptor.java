@@ -57,6 +57,7 @@ public class MaskinportenTokenInterceptor implements ClientHttpRequestIntercepto
             "global/sertifikat.read",
             "global/navn.read",
             "global/postadresse.read"));
+        if (props.getFeature().isEnableDPH()) scopeList.add("eformidling:dph.read");
         return scopeList;
     }
 

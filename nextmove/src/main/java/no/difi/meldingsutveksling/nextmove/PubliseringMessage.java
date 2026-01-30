@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "publisering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class PubliseringMessage extends BusinessMessage<PubliseringMessage> {
+public class PubliseringMessage extends BusinessMessageAsAttachment<PubliseringMessage> {
     @NotNull
     private String orgnr;
 }

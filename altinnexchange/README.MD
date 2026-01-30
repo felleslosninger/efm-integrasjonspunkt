@@ -1,1 +1,0 @@
-Project contains WSDL from Altinn Formidlingstjenesten and generates JAX-WS clients and endpoints based on those files.

@@ -11,8 +11,8 @@ import org.springframework.web.util.UriTemplate;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-
 import static org.springframework.http.HttpHeaders.ACCEPT;
+
 
 /**
  * RestClient using simple http requests to manipulate services
@@ -29,8 +29,7 @@ public class ServiceRegistryRestClient {
     static final String X_ENABLE_BETA_FEATURES = "X-Enable-Beta-Features";
 
     private final IntegrasjonspunktProperties props;
-    @Getter
-    private final RestClient restClient;
+    @Getter private final RestClient restClient;
     private final JWTDecoder jwtDecoder;
     private final URI baseUrl;
 
@@ -67,4 +66,5 @@ public class ServiceRegistryRestClient {
             .toEntity(String.class)
             .getBody();
     }
+
 }

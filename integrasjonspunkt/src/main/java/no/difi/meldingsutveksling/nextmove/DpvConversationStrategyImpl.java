@@ -3,21 +3,20 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.altinn.services.serviceengine.correspondence._2009._10.InsertCorrespondenceV2;
+import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyMessageFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import no.difi.meldingsutveksling.altinnv3.dpv.WithLogstashMarker;
+
+import java.util.UUID;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
-import static no.difi.meldingsutveksling.ptv.WithLogstashMarker.withLogstashMarker;
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 
 @Component
@@ -27,10 +26,8 @@ import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 @RequiredArgsConstructor
 public class DpvConversationStrategyImpl implements DpvConversationStrategy {
 
-    private final CorrespondenceAgencyMessageFactory correspondenceAgencyMessageFactory;
-    private final CorrespondenceAgencyClient client;
     private final ConversationService conversationService;
-    private final IntegrasjonspunktProperties props;
+    private final AltinnDPVService altinnService;
 
     @Override
     @Transactional
@@ -43,21 +40,13 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             return;
         }
 
-        InsertCorrespondenceV2 correspondence = correspondenceAgencyMessageFactory.create(message);
+        UUID correspondenceid = WithLogstashMarker.withLogstashMarker(markerFrom(message))
+                .execute(() -> altinnService.send(message));
 
-        Object response = withLogstashMarker(markerFrom(message))
-                .execute(() -> client.sendCorrespondence(correspondence));
-
-        if (response == null) {
-            throw new NextMoveRuntimeException("Failed to create Correspondence Agency Request");
-        }
-
-        String serviceCode = correspondence.getCorrespondence().getServiceCode().getValue();
-        String serviceEditionCode = correspondence.getCorrespondence().getServiceEdition().getValue();
         conversationService.findConversation(message.getMessageId())
-                .ifPresent(conversation -> conversationService.save(conversation
-                        .setServiceCode(serviceCode)
-                        .setServiceEditionCode(serviceEditionCode)));
+            .ifPresent(conversation -> conversationService.save(conversation
+                .setExternalSystemReference(correspondenceid.toString())));
+
     }
 
 }
