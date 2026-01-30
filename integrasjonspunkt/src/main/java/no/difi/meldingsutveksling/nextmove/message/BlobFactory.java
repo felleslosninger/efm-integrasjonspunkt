@@ -4,18 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.TmpFile;
-import org.hibernate.LobHelper;
-import org.hibernate.Session;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileCopyUtils;
-
-import jakarta.persistence.EntityManager;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 

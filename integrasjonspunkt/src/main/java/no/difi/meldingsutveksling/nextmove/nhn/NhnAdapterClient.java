@@ -20,19 +20,22 @@ import java.util.UUID;
 @Component
 public class NhnAdapterClient {
 
-    private RestClient dphClient;
+    private final RestClient dphClient;
 
-    private String uri;
-    private String MESSAGE_OUT_PATH = uri + "/out";
-    private String MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+
+    private final String MESSAGE_OUT_PATH;
+    private final String MESSAGE_RECEIPT_PATH;
     private String ON_BEHALF_OF_PARAM = "onBehalfOf";
-    private String MESSAGE_STATUS_PATH = uri + "/status/%s";
+    private final String MESSAGE_STATUS_PATH;
 
 
     public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri) {
         log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
-        this.uri = uri;
+
+        MESSAGE_OUT_PATH = uri + "/out";
+        MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+        MESSAGE_STATUS_PATH = uri + "/status/%s";
     }
 
     public String messageOut(DPHMessageOut messageOut) {

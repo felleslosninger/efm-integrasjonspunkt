@@ -54,6 +54,7 @@ public class IntegrasjonspunktProperties {
     private Einnsyn einnsyn;
 
     @Valid
+    @NestedConfigurationProperty
     private PostVirksomheter dpv;
 
     @Valid
@@ -90,7 +91,6 @@ public class IntegrasjonspunktProperties {
 
     @Valid
     private DeadLock deadlock;
-
 
     @Data
     public static class Vault {
@@ -186,32 +186,6 @@ public class IntegrasjonspunktProperties {
         @NotNull(message = "Certificate properties not set.")
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
-    }
-
-    @Data
-    @ToString(exclude = "password")
-    public static class PostVirksomheter {
-
-        private String username;
-        private String password;
-        private URL endpointUrl;
-        @NotNull
-        private String sensitiveServiceCode;
-        private boolean notifyEmail;
-        private boolean notifySms;
-        @NotNull
-        private String notificationText;
-        @NotNull
-        private String sensitiveNotificationText;
-        private boolean allowForwarding;
-        private boolean enableDueDate;
-        private Long daysToReply;
-        @NotNull
-        private DataSize uploadSizeLimit;
-        @NotNull
-        private Integer defaultTtlHours;
-
-
     }
 
     /**

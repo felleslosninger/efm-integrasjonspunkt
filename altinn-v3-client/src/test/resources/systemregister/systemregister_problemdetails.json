@@ -1,0 +1,12 @@
+{
+    "type" : "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+    "title" : "Bad Request",
+    "status" : 400,
+    "detail" : "One or more validation errors occurred.",
+    "code" : "STD-00000",
+    "validationErrors" : [ {
+        "code" : "AUTH.VLD-00004",
+        "detail" : "One of the client id is already tagged with an existing system",
+        "paths" : [ "/registersystemrequest/clientid" ]
+    } ]
+}

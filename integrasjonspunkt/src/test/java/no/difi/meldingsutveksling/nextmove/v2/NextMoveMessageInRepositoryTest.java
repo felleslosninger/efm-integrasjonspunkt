@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,6 +29,7 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 class NextMoveMessageInRepositoryTest {
 
     @Autowired
+    @Qualifier("fixedClock")
     private Clock clock;
 
     @Autowired
@@ -117,4 +119,5 @@ class NextMoveMessageInRepositoryTest {
         message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessage()));
         return message;
     }
+
 }

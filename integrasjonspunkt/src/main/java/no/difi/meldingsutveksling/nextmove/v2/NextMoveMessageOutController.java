@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -23,10 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;

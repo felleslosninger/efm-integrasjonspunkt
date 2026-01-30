@@ -15,4 +15,5 @@ public class StandardBusinessDocumentConverterTest {
         sbd.setAny(new ObjectFactory().createScopeInformation("Hello world!"));
         converter.marshallToBytes(sbd);
     }
+
 }

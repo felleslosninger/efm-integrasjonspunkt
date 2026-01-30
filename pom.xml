@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</developerConnection>
         <url>https://github.com/felleslosninger/efm-integrasjonspunkt</url>
-        <tag>v3.0.0</tag>
+        <tag>v4.0.0</tag>
     </scm>
 
     <licenses>
@@ -79,55 +79,36 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.2.10</kotlin.version>
         <efm-common.version>2.0.10</efm-common.version>
         <bouncycastle.version>1.82</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dokka.skip>true</dokka.skip>
     </properties>
 
     <modules>
-        <module>api</module>
         <module>common</module>
-        <module>common-spring</module>
-        <module>altinnexchange</module>
-        <module>dokumentpakking</module>
-        <module>integrasjonspunkt</module>
         <module>validation</module>
+        <module>dokumentpakking</module>
         <module>nextmove</module>
-        <module>domain</module>
-        <module>altinn-client</module>
-        <module>post-til-virksomhet</module>
+        <module>common-spring</module>
+        <module>api</module>
         <module>dpi-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
+        <module>domain</module>
+        <module>altinn-v3-client</module>
         <module>fiks-meldingsformidler</module>
+        <module>web</module>
+        <module>integrasjonspunkt</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
 
             <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-bom</artifactId>
-                <version>${kotlin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-bom</artifactId>
-                <version>1.10.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
-                <version>7.20.1</version>
+                <version>7.23.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -136,12 +117,7 @@
 
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinn-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>altinnexchange</artifactId>
+                <artifactId>altinn-v3-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -191,17 +167,17 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>post-til-virksomhet</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>service-registry-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>validation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>web</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -417,46 +393,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-coroutines-reactor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-coroutines-reactive</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-coroutines-core-jvm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test-junit</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.mockk</groupId>
-            <artifactId>mockk-jvm</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -466,6 +402,10 @@
                     <groupId>com.vaadin.external.google</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
 
@@ -479,32 +419,6 @@
                     <configuration>
                         <release>${java.version}</release>
                     </configuration>
-                    <executions>
-                        <!-- Replacing maven default-compile, kotlin plugin will do this -->
-                        <execution>
-                            <id>default-compile</id>
-                            <phase>none</phase>
-                        </execution>
-                        <!-- Replacing maven default-testCompile, kotlin plugin will do this -->
-                        <execution>
-                            <id>default-testCompile</id>
-                            <phase>none</phase>
-                        </execution>
-                        <execution>
-                            <id>java-compile</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>java-test-compile</id>
-                            <phase>test-compile</phase>
-                            <goals>
-                                <goal>testCompile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.jvnet.jaxb</groupId>
@@ -551,75 +465,6 @@
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                                <sourceDir>${project.basedir}/src/main/java</sourceDir>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>${project.basedir}/src/test/java</sourceDir>
-                                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <jvmTarget>${java.version}</jvmTarget>
-                    <compilerPlugins>
-                        <plugin>spring</plugin>
-                    </compilerPlugins>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-maven-allopen</artifactId>
-                        <version>${kotlin.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.jetbrains.dokka</groupId>
-                <artifactId>dokka-maven-plugin</artifactId>
-                <version>2.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>javadocJar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${dokka.skip}</skip>
-                    <sourceDirectories>
-                        <dir>${project.basedir}/src/main/java</dir>
-                        <dir>${project.basedir}/src/main/kotlin</dir>
-                        <dir>${project.basedir}/target/generated-sources/wsimport</dir>
-                        <dir>${project.basedir}/target/generated-sources/xjc</dir>
-                    </sourceDirectories>
-                    <skipEmptyPackages>true</skipEmptyPackages>
                 </configuration>
             </plugin>
             <plugin>
