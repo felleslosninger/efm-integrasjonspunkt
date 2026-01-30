@@ -1,65 +1,75 @@
-# Move Integrasjonspunkt v3
-
-<img style="float:right" width="100" height="100" src="docs/EF.png" alt="Integrasjonspunkt, ein del av eFormidling">
-
-## Føremål
-Integrasjonspunkt er ein del av eFormidling og fungerer som eit knutepunkt for trygg og sikker utveksling av elektroniske dokument offentlege etatar seg i mellom, samt mellom offentlege og private verksemder i Noreg.
-
-## Teknologiar i bruk
-- Spring Boot
-- Maven
-- Java 21+
-
-## Oppstart
-### Føresetnadar
-
-- Java 21
-- Maven 3+
+## Bygg og kjør lokalt
+Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
 
 Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
 (alternativt `integrasjonspunkt-local.yml` eller `integrasjonspunkt-local.yaml`).  Den vil bli inkludert
-automatisk når du starter en av de forhåndsdefinerte maven-profilene (som `staging`, `dev`, `prod`). 
-Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på konfig,
-for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+automatisk når du starter en av de forhåndsdefinerte maven-profilene.
 
-### Bygging
 ```bash
 mvn clean package
-
-# start med staging profil (som også leser fra din lokale konfigurasjonsfil) :
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
-For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
+Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
+en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
+
+Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
+[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties) og
+[application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
+inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
+
+
+## Utvikle nye web sider
+Prosjektet inneholder en `web` modul, som inneholder web sider for å administrere Integrasjonspunktet.
+Denne modulen inneholder en kjørbar klasse og kan startes separat uten resten av Integrasjonspunktet
+og alle dets avhengigheter.
+
+Dette er by-design, slik at det skal være mulig å raskt utvikle websiden med hot-reload aktivert.
+For informasjon om hvordan dette fungerer kan du se [web/README.md](web/README.md).
+
+Kortversjon er at web-modulen med `fake` backend og hot-reload kan startes slik :
+```bash
+cd web
+mvn spring-boot:run -Dspring-boot.run.profiles=reload
+open http://localhost:8080/
+```
+
+## Bygge REST API dokumentasjon
+Tests must run for this to work (generated-snippets will be missing if you skip running tests).
+For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `restdocs` :
 ```bash
 mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
 
-## Grensesnitt
-
+## Linker når Integrasjonspunkt er starter lokalt
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
 
-### Lokale endepunkter
+Hovedsiden med masse informasjon om Integrasjonspunktet :
+- http://localhost:9093/
+
 Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
-- http://localhost:9093/viewreceipts  🚨 Ikke i bruk / kan fjernes ? 🚨
 
 En API funksjon som er lett å teste i nettleser :
 - http://localhost:9093/api/statuses
 
 Linker til observability :
-http://localhost:9093/manage/info
+- http://localhost:9093/manage/info
 - http://localhost:9093/manage/health
 - http://localhost:9093/manage/health/liveness
 - http://localhost:9093/manage/health/readiness
 - http://localhost:9093/manage/metrics
 - http://localhost:9093/manage/prometheus
 
+Work in progress (kan dette ta over for REST API dokumentasjon, `restdoc`) :
+- http://localhost:9093/swagger-ui/index.html
+
 Linker til logger, config og alt annet :
 - http://localhost:9093/manage/logfile
 - `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
 - `curl http://localhost:9093/manage/configprops | jq`
+- `curl http://localhost:9093/manage/env | jq` (lister over alle properties og env settings)
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
 ## Release (for interne)
