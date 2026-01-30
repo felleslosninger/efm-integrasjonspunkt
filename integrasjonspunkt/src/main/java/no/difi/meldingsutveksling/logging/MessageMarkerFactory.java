@@ -2,10 +2,11 @@ package no.difi.meldingsutveksling.logging;
 
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
-import no.difi.meldingsutveksling.FileReference;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.apache.commons.io.FileUtils;
+
+import java.util.UUID;
 
 import static no.difi.meldingsutveksling.logging.MarkerFactory.*;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.documentTypeMarker;
@@ -21,7 +22,6 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.processM
  */
 public class MessageMarkerFactory {
 
-    private static final String ALTINN_RECEIPT_ID = "altinn-receipt-id";
     private static final String PAYLOAD_SIZE = "payload-size";
 
     private MessageMarkerFactory() {
@@ -66,10 +66,7 @@ public class MessageMarkerFactory {
                 .and(processMarker);
     }
 
-    public static LogstashMarker markerFrom(FileReference reference) {
-        LogstashMarker receiptIdMarker = Markers.append(ALTINN_RECEIPT_ID, reference.getReceiptID());
-        LogstashMarker referenceValueMarker = Markers.append("altinn-reference-value", reference.getValue());
-        return receiptIdMarker.and(referenceValueMarker);
+    public static LogstashMarker markerFrom(String fieldName, UUID reference) {
+        return Markers.append(fieldName, reference);
     }
-
 }

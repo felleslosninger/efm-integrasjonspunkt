@@ -39,51 +39,51 @@ public class MeldingsformidlerRequestFactory {
 
     public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
         MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
-                .parcel(getParcel(nextMoveMessage))
-                .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
-                .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
-                .messageId(nextMoveMessage.getMessageId())
-                .conversationId(nextMoveMessage.getConversationId())
-                .mpcId(mpcIdHolder.getNextMpcId())
-                .expectedResponseDateTime(nextMoveMessage.getSbd().getExpectedResponseDateTime().orElse(null))
-                .postkasseAdresse(serviceRecord.getPostkasseAdresse())
-                .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
-                .postkasseProvider(Iso6523.of(ICD.NO_ORG, serviceRecord.getOrgnrPostkasse()))
-                .emailAddress(serviceRecord.getEpostAdresse())
-                .mobileNumber(getMobilnummer(serviceRecord))
-                .notifiable(serviceRecord.isKanVarsles())
-                .virkningsdato(OffsetDateTime.now(clock))
-                .language(properties.getDpi().getLanguage())
-                .printColor(PrintColor.SORT_HVIT)
-                .postalCategory(PostalCategory.B_OEKONOMI)
-                .returnHandling(ReturnHandling.DIREKTE_RETUR);
+            .parcel(getParcel(nextMoveMessage))
+            .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
+            .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))
+            .messageId(nextMoveMessage.getMessageId())
+            .conversationId(nextMoveMessage.getConversationId())
+            .mpcId(mpcIdHolder.getNextMpcId())
+            .expectedResponseDateTime(nextMoveMessage.getSbd().getExpectedResponseDateTime().orElse(null))
+            .postkasseAdresse(serviceRecord.getPostkasseAdresse())
+            .certificate(serviceRecord.getPemCertificate().getBytes(StandardCharsets.UTF_8))
+            .postkasseProvider(Iso6523.of(ICD.NO_ORG, serviceRecord.getOrgnrPostkasse()))
+            .emailAddress(serviceRecord.getEpostAdresse())
+            .mobileNumber(getMobilnummer(serviceRecord))
+            .notifiable(serviceRecord.isKanVarsles())
+            .virkningsdato(OffsetDateTime.now(clock))
+            .language(Optional.ofNullable(serviceRecord.getSpraak()).orElseGet(() -> properties.getDpi().getLanguage()))
+            .printColor(PrintColor.SORT_HVIT)
+            .postalCategory(PostalCategory.B_OEKONOMI)
+            .returnHandling(ReturnHandling.DIREKTE_RETUR);
 
         if (nextMoveMessage.getReceiver() != null) {
             builder.mottakerPid(nextMoveMessage.getReceiver().cast(PersonIdentifier.class));
         }
 
         nextMoveMessage.getBusinessMessage(DpiMessage.class).ifPresent(dpiMessage ->
-                builder.avsenderIdentifikator(dpiMessage.getAvsenderId())
-                        .fakturaReferanse(dpiMessage.getFakturaReferanse())
+            builder.avsenderIdentifikator(dpiMessage.getAvsenderId())
+                .fakturaReferanse(dpiMessage.getFakturaReferanse())
         );
 
         nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class).ifPresent(digital ->
-                builder.subject(digital.getTittel())
-                        .smsVarslingstekst(getSmsVarslingstekst(digital))
-                        .emailVarslingstekst(getEmailVarslingstekst(digital))
-                        .securityLevel(digital.getSikkerhetsnivaa())
-                        .virkningsdato(digital.getDigitalPostInfo().getVirkningsdato().atStartOfDay(clock.getZone()).toOffsetDateTime())
-                        .language(digital.getSpraak())
-                        .aapningskvittering(digital.getDigitalPostInfo().getAapningskvittering())
+            builder.subject(digital.getTittel())
+                .smsVarslingstekst(getSmsVarslingstekst(digital))
+                .emailVarslingstekst(getEmailVarslingstekst(digital))
+                .securityLevel(digital.getSikkerhetsnivaa())
+                .virkningsdato(digital.getDigitalPostInfo().getVirkningsdato().atStartOfDay(clock.getZone()).toOffsetDateTime())
+                .language(digital.getSpraak())
+                .aapningskvittering(digital.getDigitalPostInfo().getAapningskvittering())
         );
 
         nextMoveMessage.getBusinessMessage(DpiPrintMessage.class).ifPresent(print ->
-                builder.postAddress(print.getMottaker())
-                        .returnAddress(print.getRetur().getMottaker())
-                        .printProvider(true)
-                        .printColor(print.getUtskriftsfarge())
-                        .postalCategory(print.getPosttype())
-                        .returnHandling(print.getRetur().getReturhaandtering())
+            builder.postAddress(print.getMottaker())
+                .returnAddress(print.getRetur().getMottaker())
+                .printProvider(true)
+                .printColor(print.getUtskriftsfarge())
+                .postalCategory(print.getPosttype())
+                .returnHandling(print.getRetur().getReturhaandtering())
         );
 
         return builder.build();
@@ -91,21 +91,21 @@ public class MeldingsformidlerRequestFactory {
 
     private Parcel getParcel(NextMoveMessage nextMoveMessage) {
         return Parcel.builder()
-                .mainDocument(getMainDocument(nextMoveMessage))
-                .attachments(getAttachments(nextMoveMessage))
-                .build();
+            .mainDocument(getMainDocument(nextMoveMessage))
+            .attachments(getAttachments(nextMoveMessage))
+            .build();
     }
 
     private String getEmailVarslingstekst(DpiDigitalMessage digital) {
         return Optional.ofNullable(digital.getVarsler())
-                .map(DpiNotification::getEpostTekst)
-                .orElse(null);
+            .map(DpiNotification::getEpostTekst)
+            .orElse(null);
     }
 
     private String getSmsVarslingstekst(DpiDigitalMessage digital) {
         return Optional.ofNullable(digital.getVarsler())
-                .map(DpiNotification::getSmsTekst)
-                .orElse(null);
+            .map(DpiNotification::getSmsTekst)
+            .orElse(null);
     }
 
     private String getMobilnummer(ServiceRecord serviceRecord) {
@@ -114,43 +114,43 @@ public class MeldingsformidlerRequestFactory {
 
     private List<Document> getAttachments(NextMoveMessage nextMoveMessage) {
         return nextMoveMessage.getFiles()
-                .stream()
-                .filter(p -> p.getPrimaryDocument() == Boolean.FALSE)
-                .filter(not(isMetadataFile(nextMoveMessage)))
-                .map(p -> getDocument(nextMoveMessage, p))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(p -> p.getPrimaryDocument() == Boolean.FALSE)
+            .filter(not(isMetadataFile(nextMoveMessage)))
+            .map(p -> getDocument(nextMoveMessage, p))
+            .collect(Collectors.toList());
     }
 
     @NotNull
     private Predicate<BusinessMessageFile> isMetadataFile(NextMoveMessage nextMoveMessage) {
         return p -> nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class)
-                .map(digital -> digital.getMetadataFiler().containsValue(p.getFilename()))
-                .orElse(false);
+            .map(digital -> digital.getMetadataFiler().containsValue(p.getFilename()))
+            .orElse(false);
     }
 
     private Document getMainDocument(NextMoveMessage nextMoveMessage) {
         return nextMoveMessage.getFiles().stream()
-                .filter(p -> p.getPrimaryDocument() == Boolean.TRUE)
-                .map(p -> getDocument(nextMoveMessage, p))
-                .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
+            .filter(p -> p.getPrimaryDocument() == Boolean.TRUE)
+            .map(p -> getDocument(nextMoveMessage, p))
+            .findFirst()
+            .orElseThrow(() -> new NextMoveRuntimeException("No primary documents found, aborting send"));
     }
 
     private Document getDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file) {
         return Document.builder()
-                .resource(getContent(nextMoveMessage, file))
-                .mimeType(file.getMimetype())
-                .filename(file.getFilename())
-                .title(StringUtils.hasText(file.getTitle()) ? file.getTitle() : "Missing title")
-                .metadataDocument(getMetadataDocument(nextMoveMessage, file))
-                .build();
+            .resource(getContent(nextMoveMessage, file))
+            .mimeType(file.getMimetype())
+            .filename(file.getFilename())
+            .title(StringUtils.hasText(file.getTitle()) ? file.getTitle() : "Missing title")
+            .metadataDocument(getMetadataDocument(nextMoveMessage, file))
+            .build();
     }
 
     private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file) {
         return nextMoveMessage.getBusinessMessage(DpiDigitalMessage.class)
-                .filter(digital -> digital.getMetadataFiler().containsKey(file.getFilename()))
-                .map(digital -> getMetadataDocument(nextMoveMessage, file, digital))
-                .orElse(null);
+            .filter(digital -> digital.getMetadataFiler().containsKey(file.getFilename()))
+            .map(digital -> getMetadataDocument(nextMoveMessage, file, digital))
+            .orElse(null);
     }
 
     private MetadataDocument getMetadataDocument(NextMoveMessage nextMoveMessage, BusinessMessageFile file, DpiDigitalMessage digital) {
@@ -159,16 +159,16 @@ public class MeldingsformidlerRequestFactory {
             return null;
         }
         BusinessMessageFile messageFile = nextMoveMessage.getFiles()
-                .stream()
-                .filter(p -> p.getFilename().equals(metadataFilename))
-                .findFirst()
-                .orElseThrow(() -> new NextMoveRuntimeException("Metadata document %s specified for %s, but is not attached".formatted(metadataFilename, file.getFilename())));
+            .stream()
+            .filter(p -> p.getFilename().equals(metadataFilename))
+            .findFirst()
+            .orElseThrow(() -> new NextMoveRuntimeException("Metadata document %s specified for %s, but is not attached".formatted(metadataFilename, file.getFilename())));
 
         return MetadataDocument.builder()
-                .filename(metadataFilename)
-                .mimeType(messageFile.getMimetype())
-                .resource(getContent(nextMoveMessage, messageFile))
-                .build();
+            .filename(metadataFilename)
+            .mimeType(messageFile.getMimetype())
+            .resource(getContent(nextMoveMessage, messageFile))
+            .build();
     }
 
     private Resource getContent(NextMoveMessage nextMoveMessage, BusinessMessageFile file) {

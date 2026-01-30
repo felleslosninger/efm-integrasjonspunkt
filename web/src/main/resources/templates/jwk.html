@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <title>JWK Generator</title>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="mb-1">JWK Generator</h1>
+            <p class="text-muted mb-0">
+                Generer et nytt symetrisk nøkkelpar med RSA and vis både private og public delen som JWK (JSON Web Key).
+                <br/><br/>
+                Velg nøkkelstørrelse og angi ønsket navn på nøkkelparet før du genererer og laster ned JWK filene.
+            </p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary" th:href="@{/}">Tilbake til oversikt</a>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">An error occurred</div>
+
+    <form method="post" th:action="@{/jwk}" class="row gy-2 gx-3 align-items-center">
+        <div class="col-auto">
+            <label class="visually-hidden" for="shortName">Short name</label>
+            <input type="text" id="shortName" name="shortName" class="form-control" placeholder="MyOrg" th:value="${shortName}" />
+        </div>
+        <div class="col-auto">
+            <label class="visually-hidden" for="keySize">Key size</label>
+            <select id="keySize" name="keySize" class="form-select">
+                <option th:each="s : ${sizes}"
+                        th:value="${s}"
+                        th:selected="${s} == ${selected}"
+                        th:text="${s}">2048</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Generer</button>
+        </div>
+    </form>
+
+    <hr/>
+
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <label for="private" class="form-label">Private (JWK)</label>
+            <textarea id="private" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${private}"></textarea>
+            <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('private')">Download private JWK</button>
+        </div>
+        <div class="col-md-6">
+            <label for="public" class="form-label">Public (JWK)</label>
+            <textarea id="public" class="form-control" rows="16" readonly wrap="off" style="white-space: pre; overflow: auto;" th:text="${public}"></textarea>
+            <button type="button" class="btn btn-outline-secondary mt-2" onclick="downloadJwk('public')">Download public JWK</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function sanitizeName(name) {
+        if (!name) return 'MyOrg';
+        name = name.trim();
+        if (name.length === 0) return 'MyOrg';
+        // Replace anything except letters, digits, dot, dash, underscore
+        return name.replace(/[^A-Za-z0-9._-]/g, '_');
+    }
+    function downloadJwk(which) {
+        const nameInput = document.getElementById('shortName');
+        const base = sanitizeName(nameInput ? nameInput.value : 'MyOrg');
+        const ta = document.getElementById(which);
+        if (!ta || !ta.value) {
+            alert('Nothing to download: generate keys first.');
+            return;
+        }
+        const suffix = which === 'private' ? '_private.jwk' : '_public.jwk';
+        const filename = base + suffix;
+        const blob = new Blob([ta.value], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

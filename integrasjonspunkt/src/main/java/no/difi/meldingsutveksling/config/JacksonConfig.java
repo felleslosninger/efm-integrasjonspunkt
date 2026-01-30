@@ -36,19 +36,20 @@ public class JacksonConfig {
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer(Clock clock) {
 
         return builder ->
-                builder.modulesToInstall(new JavaTimeModule(), new StandardBusinessDocumentModule(BusinessMessageType::fromType), new PartnerIdentifierModule())
-                        .serializationInclusion(JsonInclude.Include.NON_NULL)
-                        .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
-                        .featuresToEnable(
-                                SerializationFeature.INDENT_OUTPUT,
-                                JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,
-                                MapperFeature.DEFAULT_VIEW_INCLUSION)
-                        .featuresToDisable(
-                                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-                                SerializationFeature.CLOSE_CLOSEABLE,
-                                DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-                                DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                                DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+            builder.modulesToInstall(new JavaTimeModule(), new StandardBusinessDocumentModule(BusinessMessageType::fromType), new PartnerIdentifierModule())
+                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
+                .featuresToEnable(
+                    SerializationFeature.INDENT_OUTPUT,
+                    DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE,
+                    JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,
+                    MapperFeature.DEFAULT_VIEW_INCLUSION)
+                .featuresToDisable(
+                    SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
+                    SerializationFeature.CLOSE_CLOSEABLE,
+                    DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+                    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
     }
 
     @SuppressWarnings("squid:MaximumInheritanceDepth")
@@ -57,13 +58,13 @@ public class JacksonConfig {
 
         IsoDateTimeDeserializer(Clock clock) {
             super(
-                    OffsetDateTime.class,
-                    DateTimeFormatter.ISO_DATE_TIME,
-                    temporal -> getOffsetDateTime(clock, temporal),
-                    a -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId),
-                    a -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction), a.zoneId),
-                    (d, z) -> d.withOffsetSameInstant(z.getRules().getOffset(d.toLocalDateTime())),
-                    true // yes, replace +0000 with Z
+                OffsetDateTime.class,
+                DateTimeFormatter.ISO_DATE_TIME,
+                temporal -> getOffsetDateTime(clock, temporal),
+                a -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId),
+                a -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction), a.zoneId),
+                (d, z) -> d.withOffsetSameInstant(z.getRules().getOffset(d.toLocalDateTime())),
+                true // yes, replace +0000 with Z
             );
         }
 
@@ -75,7 +76,7 @@ public class JacksonConfig {
             }
 
             return LocalDateTime.from(temporal)
-                    .atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now(clock)));
+                .atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now(clock)));
         }
     }
 

@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>altinn-client</artifactId>
+            <artifactId>altinn-v3-client</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
@@ -77,6 +77,10 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>service-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>web</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.move-common</groupId>
@@ -347,14 +351,6 @@
                     <artifactId>commons-certvalidator</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>altinnexchange</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
-            <artifactId>post-til-virksomhet</artifactId>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>

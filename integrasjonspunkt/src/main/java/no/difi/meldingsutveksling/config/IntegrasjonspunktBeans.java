@@ -1,18 +1,16 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.AltinnWsClient;
-import no.difi.meldingsutveksling.AltinnWsConfigurationFactory;
-import no.difi.meldingsutveksling.ApplicationContextHolder;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceAgencyConnectionCheck;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
 import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyClient;
-import no.difi.meldingsutveksling.ptv.CorrespondenceAgencyConfiguration;
-import no.difi.meldingsutveksling.ptv.mapping.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
+import no.difi.meldingsutveksling.web.FrontendFunctionality;
+import no.difi.meldingsutveksling.web.FrontendFunctionalityImpl;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
@@ -40,29 +38,9 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 public class IntegrasjonspunktBeans {
 
     @Bean
-    @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
-    public AltinnWsClient getAltinnWsClient(ApplicationContextHolder applicationContextHolder,
-                                            AltinnWsConfigurationFactory altinnWsConfigurationFactory,
-                                            Plumber plumber,
-                                            PromiseMaker promiseMaker,
-                                            IntegrasjonspunktProperties properties) {
-        return new AltinnWsClient(altinnWsConfigurationFactory.create(),
-                applicationContextHolder.getApplicationContext(),
-                plumber,
-                promiseMaker,
-                properties);
-    }
-
-    @Bean
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
     }
-
-    @Bean
-    public Kryptering kryptering() {
-        return new Kryptering();
-    }
-
 
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
@@ -89,21 +67,6 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
-    public CorrespondenceAgencyConfiguration correspondenceAgencyConfiguration(IntegrasjonspunktProperties properties) {
-        return new CorrespondenceAgencyConfiguration()
-                .setPassword(properties.getDpv().getPassword())
-                .setSystemUserCode(properties.getDpv().getUsername())
-                .setSensitiveServiceCode(properties.getDpv().getSensitiveServiceCode())
-                .setNotifyEmail(properties.getDpv().isNotifyEmail())
-                .setNotifySms(properties.getDpv().isNotifySms())
-                .setNotificationText(properties.getDpv().getNotificationText())
-                .setSensitiveNotificationText(properties.getDpv().getSensitiveNotificationText())
-                .setNextmoveFiledir(properties.getNextmove().getFiledir())
-                .setAllowForwarding(properties.getDpv().isAllowForwarding())
-                .setEndpointUrl(properties.getDpv().getEndpointUrl().toString());
-    }
-
-    @Bean
     @ConditionalOnProperty(name = "difi.move.fiks.inn.enable", havingValue = "true")
     public SvarInnConnectionCheck svarInnConnectionCheck(SvarInnClient svarInnClient, IntegrasjonspunktProperties properties) {
         return new SvarInnConnectionCheck(svarInnClient, properties);
@@ -117,8 +80,14 @@ public class IntegrasjonspunktBeans {
 
     @Bean
     @ConditionalOnProperty(name = "difi.move.feature.enableDPV", havingValue = "true")
-    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceAgencyClient correspondenceAgencyClient) {
-        return new CorrespondenceAgencyConnectionCheck(correspondenceAgencyClient);
+    public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck(CorrespondenceApiClient correspondenceApiClient, IntegrasjonspunktProperties properties) {
+        return new CorrespondenceAgencyConnectionCheck(correspondenceApiClient, properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "use.frontend.faker", matchIfMissing = true)
+    public FrontendFunctionality frontendFunctionality(IntegrasjonspunktProperties props, SystemregisterApiClient client) {
+        return new FrontendFunctionalityImpl(props, client);
     }
 
 }

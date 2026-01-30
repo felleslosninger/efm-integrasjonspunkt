@@ -118,6 +118,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
             throw e;
         }
         catch(Exception e) {
+            log.error("Error during conversation for message {}", message.getMessageId(), e);
             throw new NextMoveException("Not able to send in melding over nhn for " + message.getMessageId(),e);
         }
     }

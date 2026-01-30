@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,7 +37,13 @@ class OnBehalfOfNormalizerTest {
         );
 
         StandardBusinessDocument sbd = new StandardBusinessDocument()
-                .setSenderIdentifier(PartnerIdentifier.parse(before));
+            .setStandardBusinessDocumentHeader(
+                new StandardBusinessDocumentHeader()
+                    .setDocumentIdentification(
+                        new DocumentIdentification().setStandard("DummyValue")
+                    )
+            )
+            .setSenderIdentifier(PartnerIdentifier.parse(before));
 
         sbd.getStandardBusinessDocumentHeader()
             .setDocumentIdentification(new DocumentIdentification().setStandard("dummy-not-null"));
