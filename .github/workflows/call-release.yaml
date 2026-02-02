@@ -19,7 +19,7 @@ jobs:
   build-and-deploy-image:
     #builds and deploys docker image to Github Packages Container Registry
     needs: call-workflow-maven-install-deploy
-    uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@multi-cr-support
+    uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
     with:
       image-tag: ${{ github.event.release.tag_name }}
       module-name: integrasjonspunkt
