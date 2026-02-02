@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.cache.Cache;
@@ -44,5 +43,4 @@ public class EvictCacheBeforeCreateAndSendMessage {
             cache.invalidate();
         }
     }
-
 }

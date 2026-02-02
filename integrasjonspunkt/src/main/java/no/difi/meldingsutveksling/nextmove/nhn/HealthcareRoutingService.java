@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
 import no.difi.meldingsutveksling.nextmove.Dialogmelding;
-import no.difi.meldingsutveksling.nextmove.DialogmeldingOut;
 import no.difi.meldingsutveksling.nextmove.Person;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
@@ -133,17 +132,11 @@ public class HealthcareRoutingService {
                 dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
             }
 
-            DialogmeldingOut.DialogmeldingOutBuilder outMessageBuilder = DialogmeldingOut.builder()
-                .notat(dialogmelding.getNotat())
-                .vedleggBeskrivelse(dialogmelding.getVedleggBeskrivelse())
-                .responsibleHealthcareProfessionalId(((NhnIdentifier)sbd.getReceiverIdentifier()).getHerId2());
-        if (reciever.isFastlegeIdentifier()) {
-            Patient pat = srReceiver.getPatient();
-            dialogmelding.setPatient(new Person(pat.fnr(),pat.firstName(),pat.middleName(), pat.lastName(), "8888888"));
-        }
-        else {
+            if (reciever.isFastlegeIdentifier()) {
+                Patient pat = srReceiver.getPatient();
+                dialogmelding.setPatient(new Person(pat.fnr(),pat.firstName(),pat.middleName(), pat.lastName(), "8888888"));
+            }
 
-        }
             try {
                 sbd.setAny(businessMessageEncryptionService.encrypt(dialogmelding, srReceiver.getPemCertificate()));
             } catch (EncryptionException e) {
