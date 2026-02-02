@@ -2,7 +2,9 @@ package no.difi.meldingsutveksling.web.onboarding;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.onboarding.steps.*;
+import no.difi.meldingsutveksling.web.onboarding.steps.Step.ActionType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,16 +21,15 @@ public class OnboardingController {
     @Inject StepSystem step2;
     @Inject StepSystembruker step3;
     @Inject StepKonfigurer step4;
-    @Inject StepElma step5;
-    @Inject StepTest step6;
+    @Inject StepTest step5;
+
+    @Inject FrontendFunctionality ff;
 
     private List<Step> steps;
 
     @PostConstruct
     void init() {
-        steps = List.of(step1, step2, step3, step4, step5, step6);
-        // FIXME do some checks on startup steps.stream().filter(Step::isRequired).forEach(s -> s.verify("init"));
-        // FIXME is there some issues with the
+        steps = List.of(step1, step2, step3, step4, step5);
     }
 
     @GetMapping("/onboarding")
@@ -60,6 +61,18 @@ public class OnboardingController {
         );
     }
 
+    @GetMapping("/onboarding/token/{meldingstjeneste}")
+    public ResponseEntity<?> accessToken(@PathVariable String meldingstjeneste) {
+        System.out.println("Fetching accesstoken for meldingstjeneste : " + meldingstjeneste);
+        if (meldingstjeneste == null) meldingstjeneste = "";
+        String response = null;
+        if ("DPO".equalsIgnoreCase(meldingstjeneste)) response = ff.dpoAccessToken(List.of("altinn:broker.read","altinn:broker.write"));
+        if ("DPV".equalsIgnoreCase(meldingstjeneste)) response = ff.dpvAccessToken();
+        if ("DPI".equalsIgnoreCase(meldingstjeneste)) response = ff.dpiAccessToken();
+        if (response == null) response = "Får ikke tak i token, ukjent meldingstjeneste '%s'".formatted(meldingstjeneste);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/onboarding/dialog/{dialog}")
     public ResponseEntity<?> dialogDetails(@PathVariable String dialog) {
         System.out.println("Fetching dialog: " + dialog);
@@ -71,7 +84,7 @@ public class OnboardingController {
     public ResponseEntity<?> confirmDialog(@PathVariable String dialog) {
         System.out.println("Confirming dialog: " + dialog);
         var step = findOnboardingStep(dialog);
-        step.verify("data");
+        step.executeAction(ActionType.CONFIRM);
         return ResponseEntity.ok(step.getStepInfo());
     }
 

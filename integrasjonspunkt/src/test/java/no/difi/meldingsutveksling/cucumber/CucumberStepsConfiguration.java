@@ -19,7 +19,6 @@ import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.KrrPrintResponse;
 import no.difi.meldingsutveksling.nextmove.PrintService;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
-import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnConnectionCheck;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.ks.fiks.io.client.FiksIOKlient;
@@ -193,7 +192,6 @@ public class CucumberStepsConfiguration {
     @MockitoBean public ServiceBusRestTemplate serviceBusRestTemplate;
     @MockitoBean public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockitoBean public SvarInnConnectionCheck svarInnConnectionCheck;
-    @MockitoBean public AltinnConnectionCheck altinnConnectionCheck;
 //    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
     @MockitoBean public FiksIOKlient fiksIOKlient;
 

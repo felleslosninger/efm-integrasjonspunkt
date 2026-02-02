@@ -37,7 +37,7 @@ Fremgangsmåten for å gjøre dette er da :
 - Snakk med Daniel for å få lagt til scopes som klientene trenger for å opprette system og systembruker
 - - Legg til scopes `altinn:authentication/systemregister.write`, `altinn:authentication/systemuser.request.write` og `altinn:authentication/systemuser.request.read`
 - - Opprett system for integrasjonspunktet for organisasjon (navnestandard `<orgnr>_integrasjonspunkt`)
-- - Legg til tilgangspakke `urn:altinn:accesspackage:maskinlesbare-hendelser` (NB denne er midlertidig, ikke avklart at vi skal benytte denne, `urn:altinn:accesspackage:programmeringsgrensesnitt` eller opprette vår egen tilgangspakke) på systemet (sånn at systembrukeren kan benytte det)
+- - Legg til tilgangspakke `urn:altinn:accesspackage:informasjon-og-kommunikasjon`
 - - Opprett `standard systembruker` i system `<orgnr>_integrasjonspunkt` med tilgangspakken som ble definert på systemet
 - - Bruk approval url fra responsen for å logge inn i Altinn som daglig leder og godkjenne at systembrukeren får tilgangspakken
 - - Verifiser at systembrukeren kan få token fra maskinporten

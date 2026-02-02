@@ -29,12 +29,7 @@ public class SystemuserTokenProducer implements TokenProducer {
     @Cacheable(cacheNames = {"altinn.getSystemuserToken"})
     public String produceToken(List<String> scopes) {
         try {
-            var maskinportenToken = fetchMaskinportenToken(scopes);
-//            Ikke nødvendig med Altinn tokens egentlig, fungerer med vanlig MP token
-//            System.out.println("MaskinportenToken: " + maskinportenToken);
-//            var altinnToken = exchangeAltinnToken(maskinportenToken);
-//            System.out.println("AltinnToken: " + altinnToken);
-            return maskinportenToken;
+            return fetchMaskinportenToken(scopes);
         } catch (Exception e) {
             e.printStackTrace();
         }

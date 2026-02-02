@@ -28,16 +28,25 @@ public class StepKonfigurer implements Step {
     }
 
     @Override
-    public void verify(String value) {
-        STEP_COMPLETED = !STEP_COMPLETED;
+    public void executeAction(ActionType action) {
+
+        // make sure the computed system configuration is the same as the configured one
+        var foundSystemName = checkPropertyHasValue("difi.move.dpo.systemName", getSystemName());
+        var foundSystemOrgId = checkPropertyHasValue("difi.move.dpo.systemUser.orgId", getSystemOrgId());
+        var foundSystemUserName = checkPropertyHasValue("difi.move.dpo.systemUser.name", getSystemUserName());
+
+        STEP_COMPLETED = foundSystemName && foundSystemOrgId && foundSystemUserName;
+
     }
 
     @Override
     public StepInfo getStepInfo() {
 
+        executeAction(ActionType.VERIFY);
+
         var dialogText = STEP_COMPLETED ?
             "Konfigurasjon ser ut til å være i orden." :  """
-            Du mangler disse konfigurasjonene.<br><br><small><code>
+            Sjekk at alle disse konfigurasjonene er på plass.<br><br><small><code>
             difi.move.dpo.systemName=%s<br>
             difi.move.dpo.systemUser.orgId=%s<br>
             difi.move.dpo.systemUser.name=%s<br>
@@ -59,7 +68,7 @@ public class StepKonfigurer implements Step {
 
     private String getSystemName() {
         // 311780735_integrasjonspunkt
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -68,7 +77,7 @@ public class StepKonfigurer implements Step {
 
     private String getSystemOrgId() {
         // 0192:311780735
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -77,11 +86,17 @@ public class StepKonfigurer implements Step {
 
     private String getSystemUserName() {
         // 311780735_integrasjonspunkt_systembruker_test3
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.name".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
             .orElse("%s_systembruker_%s".formatted(getSystemName(), ff.getOrganizationNumber()));
+    }
+
+    private boolean checkPropertyHasValue(String key, String value) {
+        return ff.dpoConfiguration().stream()
+            .filter(p -> key.equals(p.key()))
+            .anyMatch(p -> value.equals(p.value()));
     }
 
 }

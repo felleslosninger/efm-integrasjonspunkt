@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.move.common.io.pipe.PromiseMaker;
@@ -86,18 +87,27 @@ public class AltinnUploadServiceTest {
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setSenderIdentifier(SENDER_IS_SYSTEOWNER)
                 .setReceiverIdentifier(RECEIVER)
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue")
+                )
             );
 
         sbdFraReportee = new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setSenderIdentifier(SENDER_IS_REPORTEE)
                 .setReceiverIdentifier(RECEIVER)
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue")
+                )
             );
 
         sbdFraUkjentAvsender = new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setSenderIdentifier(SENDER_IS_UNKNOWN)
                 .setReceiverIdentifier(RECEIVER)
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue")
+                )
             );
 
     }

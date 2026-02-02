@@ -19,7 +19,7 @@ public class StatusController {
     @GetMapping("/status")
     public String showIndexPage(Model model) {
         var random = new Random();
-        var stats = ff.getChannelsEnabled().stream().map(
+        var stats = ff.getServicesEnabled().stream().map(
             si -> new RuntimeStatus(si, si, random.nextInt(1000))
         ).toList();
         model.addAttribute("status", stats);

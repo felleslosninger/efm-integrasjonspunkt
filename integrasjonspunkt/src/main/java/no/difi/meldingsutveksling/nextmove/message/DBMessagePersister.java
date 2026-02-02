@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
+import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.MessagePersister;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;

@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</connection>
         <developerConnection>scm:git:https://github.com/felleslosninger/efm-integrasjonspunkt</developerConnection>
         <url>https://github.com/felleslosninger/efm-integrasjonspunkt</url>
-        <tag>v4.0.0-beta</tag>
+        <tag>v4.0.0</tag>
     </scm>
 
     <licenses>
@@ -79,8 +79,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <efm-common.version>2.0.6-SNAPSHOT</efm-common.version>
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <efm-common.version>2.0.10</efm-common.version>
+        <bouncycastle.version>1.82</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -313,7 +313,7 @@
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
-                <version>3.2.0</version>
+                <version>3.2.3</version>
             </dependency>
             <dependency>
                 <groupId>com.jayway.jsonpath</groupId>
@@ -343,7 +343,7 @@
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
-                <version>8.0</version>
+                <version>9.0</version>
             </dependency>
             <dependency>
                 <groupId>commons-beanutils</groupId>

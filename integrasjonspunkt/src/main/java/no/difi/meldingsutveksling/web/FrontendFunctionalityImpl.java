@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.web;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.AccessPackageEntry;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient.SystemUserEntry;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @RequiredArgsConstructor
 public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
@@ -27,7 +29,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<String> getChannelsEnabled() {
+    public List<String> getServicesEnabled() {
         var channels = new ArrayList<String>();
         if (props.getFeature().isEnableDPO()) channels.add("DPO");
         if (props.getFeature().isEnableDPV()) channels.add("DPV");
@@ -61,26 +63,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public String dpoClientId() {
-        return props.getDpo().getOidc().getClientId();
-    }
-
-    @Override
-    public List<String> dpoSystemDetails() {
-        return srac.getSystem(props.getDpo().getSystemName()).accessPackages().stream()
-            .map(AccessPackageEntry::urn)
-            .toList();
-    }
-
-    @Override
-    public List<String> dpoSystemUsersForSystem() {
-        return srac.getAllSystemUsers(props.getDpo().getSystemName()).stream()
-            .map(SystemUserEntry::externalRef)
-            .toList();
-    }
-
-    @Override
-    public List<Property> configurationDPO() {
+    public List<Property> dpoConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpo = props.getDpo();
@@ -130,13 +113,91 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
             su -> config.addAll(List.of(
                 new Property("difi.move.dpo.reportees[%d].orgId".formatted(counter.get()), su.getOrgId(), "På vegne av systembrukers org-id"),
                 new Property("difi.move.dpo.reportees[%d].name".formatted(counter.getAndIncrement()), su.getName(), "På vegne av systembrukers navn")
-        )));
+            )));
 
         return config;
     }
 
     @Override
-    public List<Property> configurationDPV() {
+    public String dpoClientId() {
+        return props.getDpo().getOidc().getClientId();
+    }
+
+    @Override
+    public List<String> dpoSystemAccessPackages(String systemName) {
+        try {
+            return srac.getSystem(systemName).accessPackages().stream()
+                .map(AccessPackageEntry::urn)
+                .toList();
+        } catch (Throwable e) {
+            log.info("Failed to find access packages for system {}.", systemName, e);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean dpoSystemUserExists(String systemName, String systemUserName) {
+        try {
+            return dpoSystemUsersForSystem(systemName).stream().anyMatch(it -> it.equals(systemUserName));
+        } catch (Throwable e) {
+            log.info("Failed to find system user {} with required access packages.", systemUserName, e);
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> dpoSystemUsersForSystem(String systemName) {
+        try {
+            return srac.getAllSystemUsers(systemName).stream()
+                .map(SystemUserEntry::externalRef)
+                .toList();
+        } catch (Throwable e) {
+            log.info("Failed to get find system users for system {}", systemName, e);
+        }
+        return List.of();
+    }
+
+    @Override
+    public boolean dpoCreateSystem(String systemName, String accessPackage) {
+        log.info("Creating system for DPO with name {}", systemName);
+        try {
+            srac.createSystem(systemName);
+            srac.updateAccessPackage(systemName, accessPackage);
+            log.info("Successfully created system for DPO with name {} and access package {}", systemName, accessPackage);
+        } catch (Throwable e) {
+            log.info("Failed to create system for DPO with name {} and access package {}", systemName, accessPackage, e);
+        }
+        return false;
+    }
+
+    @Override
+    public String dpoCreateSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage) {
+        log.info("Creating system user for DPO with name '{}'", systemUserName);
+        String confirmSystemUserUrl = null;
+        try {
+            var details = srac.createStandardSystemUser(systemUserName, systemName, orgNo, accessPackage);
+            confirmSystemUserUrl = details.confirmUrl();
+            log.info("Successfully initated system user request with name {} for organization {}", details.externalRef(), details.partyOrgNo());
+            log.info("Confirm system user request at : {}", confirmSystemUserUrl);
+        } catch (Throwable e) {
+            log.info("Failed to initate system user request with name {} for for organization {}", systemUserName, orgNo, e);
+        }
+        return confirmSystemUserUrl;
+    }
+
+    @Override
+    public String dpoAccessToken(List<String> scopes) {
+        if (scopes == null) scopes = List.of("altinn:serviceowner/data/read");
+        try {
+            return srac.getAccessToken(scopes);
+        } catch (Throwable e) {
+            log.info("Failed to get access token for scopes {}", scopes, e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Property> dpvConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpv = props.getDpv();
@@ -182,7 +243,12 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
     }
 
     @Override
-    public List<Property> configurationDPI() {
+    public String dpvAccessToken() {
+        return "AccessToken funksjon ikke implementert for DPV";
+    }
+
+    @Override
+    public List<Property> dpiConfiguration() {
         var config = new ArrayList<Property>();
 
         var dpi = props.getDpi();
@@ -204,10 +270,14 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         return config;
     }
 
+    @Override
+    public String dpiAccessToken() {
+        return "AccessToken funksjon ikke implementert for DPI";
+    }
+
     // utility to just mask secrets like passwords
     private String mask(String text) {
         return text.replaceAll(".", "*");
     }
-
 
 }

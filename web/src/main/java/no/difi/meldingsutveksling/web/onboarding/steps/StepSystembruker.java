@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class StepSystembruker implements Step {
 
+    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+
     private boolean STEP_COMPLETED = false;
+    private String acceptSystemUserURL = null;
 
     @Inject
     FrontendFunctionality ff;
@@ -28,24 +31,52 @@ public class StepSystembruker implements Step {
     }
 
     @Override
-    public void verify(String value) {
-        STEP_COMPLETED = !STEP_COMPLETED;
+    public void executeAction(ActionType action) {
+
+        if (STEP_COMPLETED) return;
+
+        // confirm action means verify should try to create a system user
+        if (ActionType.CONFIRM.equals(action)) {
+            acceptSystemUserURL = ff.dpoCreateSystemUser(getSystemUserName(), getSystemName(), getOrgNumberFromOrgId(), REQUIRED_ACCESS_PACKAGE);
+            if (acceptSystemUserURL != null) STEP_COMPLETED = true;
+        }
+
+        // if no system user has been created, check if the configured one already exists
+        if (!STEP_COMPLETED) {
+            STEP_COMPLETED = ff.dpoSystemUserExists(getSystemName(), getSystemUserName());
+        }
+
     }
 
     @Override
     public StepInfo getStepInfo() {
 
+        executeAction(ActionType.VERIFY);
+
+        final var systemName = getSystemName();
+        final var systemUserName = getSystemUserName();
+
+        var dialogCreatedButNotConfirmed = """
+            Opprettelse av systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>, men må
+            godkjennes før det kan benyttes.<br><br>En ansvarlig for bedriften må logge inn på Altinn med
+            sin nettleser og bekreftet at det opprettes en systembruker for virksomheten.<br><br>
+            Du kan videreformidle godkjennings URL'en nedenfor til vedkommende for å komme direkte til
+            godkjenningen det gjelder :<br><br><code>%s</code><br><br>
+            Når godkjenningen er gjort må du restarte Integrasjonspunktet.
+            """
+            .formatted(systemUserName, systemName, acceptSystemUserURL);
+
         var dialogTextFinished = """
             Systembruker <code>'%s'</code> er registrert på system <code>'%s'</code>."""
-            .formatted(getSystemUserName(), getSystemName());
+            .formatted(systemUserName, systemName);
 
         var dialogTextMissing = "Vi finner ikke systembruker <code>'%s'</code> i Altinn's System Register.<br><br>"
-            .formatted(getSystemUserName());
+            .formatted(systemUserName);
 
-        if (!ff.dpoSystemUsersForSystem().isEmpty()) dialogTextMissing = dialogTextMissing + """
+        if (!ff.dpoSystemUsersForSystem(systemName).isEmpty()) dialogTextMissing = dialogTextMissing + """
              Men på system <code>'%s'</code> er følgende systembrukere allerede er registrert :<br><br>
              <small><code>%s</code></small><br><br>"""
-            .formatted(getSystemName(), String.join("<br>", ff.dpoSystemUsersForSystem()));
+            .formatted(systemName, String.join("<br>", ff.dpoSystemUsersForSystem(systemName)));
 
         dialogTextMissing = dialogTextMissing + """
             Sjekk at du har konfigurert systembruker rett i properties filen eller bekreft at du vil å opprette
@@ -55,14 +86,20 @@ public class StepSystembruker implements Step {
             før den blir aktivert og DPO tjenesten kan tas i bruk.<br><br>
             Systembrukeren som opprettes vil få navn <code>'%s'</code>.<br><br>
             Når dette er gjort må du konfigurere om properties filen og restarte Integrasjonspunktet."""
-            .formatted(getSystemOrgId(), getSystemName(), getOrgNumberFromOrgId(), getSystemUserName());
+            .formatted(getSystemOrgId(), systemName, getOrgNumberFromOrgId(), systemUserName);
+
+        var dialog = STEP_COMPLETED ? dialogTextFinished : dialogTextMissing;
+        if (isCompleted() && (acceptSystemUserURL != null)) dialog = dialogCreatedButNotConfirmed;
+
+        var buttonText = isCompleted() ? "Lukk" : "Opprett systembruker";
+        if (acceptSystemUserURL != null) buttonText = "Godkjenn i Altinn";
 
         return new StepInfo(
                 getName(),
                 "Opprett systembruker",
                 "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
-                STEP_COMPLETED ? dialogTextFinished : dialogTextMissing,
-                isCompleted() ? "Lukk" : "Opprett systembruker",
+                dialog,
+                buttonText,
                 isRequired(),
                 isCompleted()
         );
@@ -71,7 +108,7 @@ public class StepSystembruker implements Step {
 
     private String getSystemName() {
         // 311780735_integrasjonspunkt
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
@@ -80,20 +117,20 @@ public class StepSystembruker implements Step {
 
     private String getSystemOrgId() {
         // 0192:311780735
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
             .orElse("0192:%s".formatted(ff.getOrganizationNumber()));
     }
 
-    private Object getOrgNumberFromOrgId() {
+    private String getOrgNumberFromOrgId() {
         return getSystemOrgId().split(":")[1];
     }
 
     private String getSystemUserName() {
         // 311780735_integrasjonspunkt_systembruker_test3
-        return ff.configurationDPO().stream()
+        return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemUser.name".equals(p.key()))
             .map(p -> p.value())
             .findFirst()

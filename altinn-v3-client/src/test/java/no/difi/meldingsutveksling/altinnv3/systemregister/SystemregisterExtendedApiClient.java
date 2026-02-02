@@ -111,7 +111,7 @@ public class SystemregisterExtendedApiClient {
               "partyOrgNo": "314240979",
               "accesspackages": [
                   {
-                    "urn": "urn:altinn:accesspackage:maskinlesbare-hendelser"
+                    "urn": "urn:altinn:accesspackage:informasjon-og-kommunikasjon"
                   }
                 ],
               "redirectUrl": ""

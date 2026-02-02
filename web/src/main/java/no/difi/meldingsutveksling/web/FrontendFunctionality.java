@@ -33,33 +33,29 @@ public interface FrontendFunctionality {
     }
 
     // common functions for hele integrasjonspunkt
-
     String getOrganizationNumber();
-
     Version getIntegrasjonspunktVersion();
-
-    List<String> getChannelsEnabled();
-
+    List<String> getServicesEnabled();
     List<Property> configuration();
 
     // dpo specific functions
-
+    List<Property> dpoConfiguration();
     String dpoClientId();
-
-    List<String> dpoSystemDetails();
-
-    List<String> dpoSystemUsersForSystem();
-
-    List<Property> configurationDPO();
+    List<String> dpoSystemAccessPackages(String systemName);
+    boolean dpoSystemUserExists(String systemName, String systemUserName);
+    List<String> dpoSystemUsersForSystem(String systemName);
+    boolean dpoCreateSystem(String systemName, String accessPackage);
+    String dpoCreateSystemUser(String systemUserName, String systemName, String orgNo, String accessPackage);
+    String dpoAccessToken(List<String> scopes);
 
     // dpv specific functions
-
-    List<Property> configurationDPV();
+    List<Property> dpvConfiguration();
+    String dpvAccessToken();
 
     // dpi specific functions
+    List<Property> dpiConfiguration();
+    String dpiAccessToken();
 
-    List<Property> configurationDPI();
-
-    // functions for other channels
+    // functions for other meldingstjenester
 
 }
