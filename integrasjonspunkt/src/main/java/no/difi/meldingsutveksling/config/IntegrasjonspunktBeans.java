@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.FrontendFunctionalityImpl;
@@ -40,6 +41,11 @@ public class IntegrasjonspunktBeans {
     @Bean
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
+    }
+
+    @Bean
+    public Kryptering kryptering() {
+        return new Kryptering();
     }
 
     @Bean

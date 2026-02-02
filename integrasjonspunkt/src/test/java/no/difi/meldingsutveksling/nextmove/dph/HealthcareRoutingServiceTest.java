@@ -1,15 +1,18 @@
 package no.difi.meldingsutveksling.nextmove.dph;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
 import no.difi.meldingsutveksling.nextmove.HealthcareTestData;
+import no.difi.meldingsutveksling.nextmove.nhn.BusinessMessageEncryptionService;
 import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +45,9 @@ public class HealthcareRoutingServiceTest {
 
     @Mock
     private ServiceRecordProvider serviceRecordProvider;
+
+    @Mock
+    private BusinessMessageEncryptionService businessMessageEncryptionService;
 
     @InjectMocks
     private HealthcareRoutingService healthcareRoutingService;
@@ -150,11 +157,11 @@ public class HealthcareRoutingServiceTest {
     public void whenMultitenancyFalse_and_SenderOrgnum_DoesNotMatch_AR_then_ValidationException() {
         List<String> WHITE_LISTED_ORGNUM = List.of(HealthcareTestData.Identifier.validNhnSenderIdentifier.getIdentifier());
 
-        StandardBusinessDocument sbd = HealthcareTestData.dialgmelding();
+        StandardBusinessDocument sbd = dialgmelding();
         Mockito.lenient().when(integrasjonspunktProperties.getDph()).thenReturn(new IntegrasjonspunktProperties.DphConfig().setAllowMultitenancy(false).setWhitelistOrgnum(WHITE_LISTED_ORGNUM));
 
-        ServiceRecord recieverRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnReceiverIdentifier);
-        ServiceRecord senderRecord = HealthcareTestData.serviceRecord(HealthcareTestData.Identifier.validNhnSenderIdentifier.withIdentifier("77777"));
+        ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
+        ServiceRecord senderRecord = serviceRecord(Identifier.validNhnSenderIdentifier.withIdentifier("77777"));
 
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
@@ -225,7 +232,7 @@ public class HealthcareRoutingServiceTest {
     }
 
     @Test
-    public void whenStandardBusinessDocumentPassValidation_allScopeElementsArePresent() {
+    public void whenStandardBusinessDocumentPassValidation_allScopeElementsArePresent() throws EncryptionException {
         final StandardBusinessDocument sbd = dialgmelding();
 
         ServiceRecord recieverRecord = serviceRecord(Identifier.validNhnReceiverIdentifier);
@@ -234,6 +241,7 @@ public class HealthcareRoutingServiceTest {
         ServiceRecord spyRecord = Mockito.spy(recieverRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER)).thenReturn(spyRecord);
         Mockito.lenient().when(serviceRecordProvider.getServiceRecord(sbd, Participant.SENDER)).thenReturn(senderRecord);
+        Mockito.lenient().when(businessMessageEncryptionService.encrypt(any(), (String) any())).thenReturn(new EncryptedBusinessMessage("dymmy","dummy"));
 
         Mockito.lenient()
             .when(integrasjonspunktProperties.getDph()).
