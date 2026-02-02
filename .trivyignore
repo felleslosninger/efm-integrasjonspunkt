@@ -13,3 +13,4 @@ CVE-2025-59250 # Managed mssql via spring boot, probably updated on next SB vers
 CVE-2025-68973 # GnuPG: GnuPG: Information disclosure and potential arbitrary
 CVE-2025-61728
 CVE-2025-61726
+CVE-2026-24400
