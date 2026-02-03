@@ -423,7 +423,7 @@
                 <plugin>
                     <groupId>org.jvnet.jaxb</groupId>
                     <artifactId>jaxb-maven-plugin</artifactId>
-                    <version>4.0.8</version>
+                    <version>4.0.12</version>
                     <configuration>
                         <plugins>
                             <plugin>
