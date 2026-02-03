@@ -1,36 +1,38 @@
 = Outgoing messages
 
-[plantuml,create-message,png]
-....
-    participant "End User System" as fs
-    participant Integrasjonspunkt as ip
-    participant "Service Registry" as sr
-    participant "Service Provider" as mf
+[plantuml, create-message, png]
+----
+@startuml
+participant "End User System" as fs
+participant Integrasjonspunkt as ip
+participant "Service Registry" as sr
+participant "Service Provider" as mf
 
-    fs->>ip: GET /api/capabilities/{receiverid}
+fs->>ip: GET /api/capabilities/{receiverid}
 
-    ip->>sr: GET /identifier/{receiverid}
-    sr-->>ip: capabilities
+ip->>sr: GET /identifier/{receiverid}
+sr-->>ip: capabilities
 
-    ip-->>fs: capabilities
-    fs->>fs: select capability
-    fs->>fs: Create message
-    fs->>ip: POST /api/messages/out
-    ip-->>fs: conversationresponse
-    loop
-    fs->>ip: PUT /api/messages/out/{messageId}
-    end
-    fs->>ip: POST /api/messages/out/{messageId}
+ip-->>fs: capabilities
+fs->>fs: select capability
+fs->>fs: Create message
+fs->>ip: POST /api/messages/out
+ip-->>fs: conversationresponse
+loop
+fs->>ip: PUT /api/messages/out/{messageId}
+end
+fs->>ip: POST /api/messages/out/{messageId}
 
-    ip->>mf: Upload
-    loop
-        ip->>mf: GetStatus
-        mf-->>ip: status
-    end
+ip->>mf: Upload
+loop
+    ip->>mf: GetStatus
+    mf-->>ip: status
+end
 
-    fs->>ip: GET /api/statuses/{messageId}
-    ip-->>fs: statuses
-....
+fs->>ip: GET /api/statuses/{messageId}
+ip-->>fs: statuses
+@enduml
+----
 
 [#messages-out-find]
 == Find outgoing messages
@@ -99,7 +101,7 @@ include::{snippets}/messages/out/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/find/request-parameters.adoc[]
+include::{snippets}/messages/out/find/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -132,7 +134,7 @@ include::{snippets}/messages/out/get/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/get/request-parameters.adoc[]
+include::{snippets}/messages/out/get/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -416,7 +418,7 @@ include::{snippets}/messages/out/upload/request-headers.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/upload/request-parameters.adoc[]
+include::{snippets}/messages/out/upload/query-parameters.adoc[]
 --
 
 [#messages-out-send]
@@ -449,7 +451,7 @@ include::{snippets}/messages/out/send/request-headers.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/send/request-parameters.adoc[]
+include::{snippets}/messages/out/send/query-parameters.adoc[]
 --
 
 [#messages-out-multipart]
@@ -518,6 +520,6 @@ include::{snippets}/messages/out/delete/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/out/delete/request-parameters.adoc[]
+include::{snippets}/messages/out/delete/query-parameters.adoc[]
 --
 

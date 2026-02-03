@@ -40,7 +40,7 @@ include::{snippets}/subscriptions/list/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/subscriptions/list/request-parameters.adoc[]
+include::{snippets}/subscriptions/list/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -120,15 +120,17 @@ include::{snippets}/subscriptions/create/http-request.adoc[]
 .Response
 include::{snippets}/subscriptions/create/http-response.adoc[]
 
+=== Note about event validation
+
 Please note that during validation of the input, the
 service will attempt to POST a ping message to the URL specified in the "pushEndpoint" attribute. Below is an example
 of such a ping message:
 
 [source,http,role="primary"]
-.Ping event
+.Ping event example
 include::{snippets}/events/ping/http-request.adoc[]
 
-==== Message Status Filters
+=== Message Status Filters
 
 Currently the following filters are available:
 
@@ -152,7 +154,7 @@ Currently the following filters are available:
 All these can be combined using standard HTTP query style.
 
 [role="primary"]
-.Example
+.Filter Example
 [source,http,options="nowrap"]
 ----
 status=FEIL,LEVETID_UTLOPT&direction=INCOMING&serviceIdentifier=DPO,DPI

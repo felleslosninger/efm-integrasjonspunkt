@@ -1,8 +1,4 @@
-# her er det ryddig - ingen kjente sårbarheter
-
-CVE-2025-64720 #Ligger i alpine-pakken
-CVE-2025-65018 #Ligger i alpine-pakken
-CVE-2025-66293 #Ligger i alpine-pakken
-
-CVE-2025-59250 # Managed mssql via spring boot, probably updated on next SB version
-CVE-2025-68973 # GnuPG: GnuPG: Information disclosure and potential arbitrary
+CVE-2026-24400
+CVE-2025-59250
+CVE-2025-61726
+CVE-2025-61728

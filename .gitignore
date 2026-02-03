@@ -5,6 +5,7 @@
 *.class
 .run
 *.p12
+*.gz
 
 # Maven
 /**/target
@@ -117,3 +118,7 @@ integrasjonspunkt/docker-compose-local.yml
 .settings
 .springBeans
 .sts4-cache
+
+# Local and personal env variables
+.env
+*.env

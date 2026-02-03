@@ -9,6 +9,11 @@
 :source-highlighter: highlightjs
 :imagesdir: images/eformidling
 
+++++
+<link rel="stylesheet" href="assets/css/magic-tabs.css">
+<script src="assets/js/magic-tabs.js"></script>
+++++
+
 = NextMove API Specification
 Version {project-version}
 
