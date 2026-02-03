@@ -68,7 +68,7 @@ include::{snippets}/statuses/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/statuses/find/request-parameters.adoc[]
+include::{snippets}/statuses/find/query-parameters.adoc[]
 --
 
 [role="secondary"]

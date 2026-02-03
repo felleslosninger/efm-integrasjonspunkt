@@ -2,25 +2,27 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Sets;
 import io.micrometer.core.annotation.Timed;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
-import no.difi.meldingsutveksling.*;
-import no.difi.meldingsutveksling.altinn.mock.brokerbasic.IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage;
+import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
+import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.api.DpoPolling;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.noarkexchange.altinn.AltinnNextMoveMessageHandler;
-import no.difi.meldingsutveksling.shipping.ws.AltinnReasonFactory;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,39 +37,39 @@ public class DefaultDpoPolling implements DpoPolling {
 
     private final IntegrasjonspunktProperties properties;
     private final AltinnNextMoveMessageHandler altinnNextMoveMessageHandler;
-    private final AltinnWsClient altinnWsClient;
+    private final AltinnDPODownloadService altinnDownloadService;
 
-    private Set<String> orgnrs;
+    private Set<AltinnSystemUser> systemUsers;
 
     @PostConstruct
     public void init() {
-        orgnrs = Sets.newHashSet(properties.getOrg().getNumber());
-        orgnrs.addAll(properties.getDpo().getReportees());
+        systemUsers = Sets.newHashSet(properties.getDpo().getSystemUser());
+        systemUsers.addAll(properties.getDpo().getReportees());
     }
 
     @Override
     @Timed
     public void poll() {
-        orgnrs.forEach(o -> {
-            log.debug("Polling messages for " + o);
+        systemUsers.forEach(system -> {
+            log.debug("Polling messages for " + system.getOrgId());
             try {
-                if (altinnWsClient.checkIfAvailableFiles(o)) {
-                    log.debug("New DPO message(s) detected for " + o);
-                    List<FileReference> fileReferences = altinnWsClient.availableFiles(o);
-                    fileReferences.forEach(reference -> handleFileReference(altinnWsClient, reference, o));
-                }
-            } catch (IBrokerServiceExternalBasicCheckIfAvailableFilesBasicAltinnFaultFaultFaultMessage e) {
-                log.error("Could not check for available files from Altinn: " + AltinnReasonFactory.from(e), e);
+                UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles(system);
+                if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for {}", system.getOrgId());
+                Arrays.stream(fileTransferIds).forEach(fileTransferId -> {
+                    handleFileReference(system, fileTransferId);
+                });
+            } catch (Exception e) {
+                log.error("Could not check for available files from Altinn: " + e.getMessage(), e);
             }
         });
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void handleFileReference(AltinnWsClient client, FileReference reference, String orgnr) {
+    private void handleFileReference(AltinnSystemUser systemUser, UUID fileTransferId) {
         try {
-            final DownloadRequest request = new DownloadRequest(reference.getValue(), orgnr);
-            log.debug("Downloading message with altinnId=%s".formatted(reference.getValue()));
-            AltinnPackage altinnPackage = client.download(request);
+            String orgNumber = systemUser.getOrgId().substring(5);
+            final DownloadRequest request = new DownloadRequest(fileTransferId, orgNumber);
+            log.debug("Downloading message with altinnId={}", fileTransferId);
+            AltinnPackage altinnPackage = altinnDownloadService.download(systemUser, request);
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
@@ -78,15 +80,15 @@ public class DefaultDpoPolling implements DpoPolling {
                 UUID.fromString(sbd.getConversationId());
             } catch (IllegalArgumentException e) {
                 log.error("Found invalid UUID in either messageId={} or conversationId={} - discarding message.", sbd.getMessageId(), sbd.getConversationId());
-                client.confirmDownload(request);
+                altinnDownloadService.confirmDownload(systemUser, request);
                 return;
             }
 
             altinnNextMoveMessageHandler.handleAltinnPackage(altinnPackage);
-            client.confirmDownload(request);
-            log.debug(markerFrom(reference).and(logstashMarkers), "Message confirmed downloaded");
+            altinnDownloadService.confirmDownload(systemUser, request);
+            log.debug(markerFrom("altinn-reference-value", fileTransferId).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
-            log.error("Error during Altinn message polling, message altinnId=%s".formatted(reference.getValue()), e);
+            log.error("Error during Altinn message polling, message altinnId=%s".formatted(fileTransferId), e);
         }
     }
 }

@@ -62,7 +62,19 @@ public class CacheConfig extends CachingConfigurerSupport {
                 new CaffeineCache("dpiClient.getMaskinportenToken",
                         Caffeine.newBuilder()
                                 .expireAfterWrite(90, TimeUnit.SECONDS)
-                                .build())
+                                .build()),
+                 new CaffeineCache("altinn.getSystemToken",
+                        Caffeine.newBuilder()
+                            .expireAfterWrite(25, TimeUnit.MINUTES)
+                            .build()),
+                new CaffeineCache("altinn.getDpoToken",
+                        Caffeine.newBuilder()
+                            .expireAfterWrite(25, TimeUnit.MINUTES)
+                            .build()),
+                new CaffeineCache("altinn.getDpvToken",
+                    Caffeine.newBuilder()
+                        .expireAfterWrite(25, TimeUnit.MINUTES)
+                        .build())
         ));
         return cacheManager;
     }

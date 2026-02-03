@@ -59,8 +59,6 @@ public class Conversation extends AbstractEntity<Long> {
     private String documentIdentifier;
     private String messageReference;
     private String messageTitle;
-    private String serviceCode;
-    private String serviceEditionCode;
     @UpdateTimestamp
     @Setter(AccessLevel.PRIVATE)
     private OffsetDateTime lastUpdate;
@@ -70,6 +68,7 @@ public class Conversation extends AbstractEntity<Long> {
     private OffsetDateTime expiry;
     private ConversationDirection direction;
     private ServiceIdentifier serviceIdentifier;
+    private String externalSystemReference;
 
     @OneToMany(mappedBy = "conversation", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
