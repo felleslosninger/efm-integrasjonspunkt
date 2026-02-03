@@ -247,7 +247,7 @@
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>4.0.5</version>
+                <version>4.0.9</version>
             </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
@@ -434,7 +434,7 @@
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
                                 <artifactId>jaxb-plugin-annotate</artifactId>
-                                <version>4.0.8</version>
+                                <version>4.0.12</version>
                             </plugin>
                             <plugin>
                                 <groupId>net.codesup.util</groupId>
