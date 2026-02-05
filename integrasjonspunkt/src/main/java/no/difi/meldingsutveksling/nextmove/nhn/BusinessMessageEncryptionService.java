@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.Dekryptering;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
 import org.bouncycastle.util.encoders.Base64;
@@ -20,6 +21,7 @@ import java.security.cert.X509Certificate;
 @RequiredArgsConstructor
 public class BusinessMessageEncryptionService {
     private final Kryptering kryptering;
+    private final Dekryptering dekryptering;
 
     public EncryptedBusinessMessage encrypt(BusinessMessage businessMessage, String pemCertificate) throws EncryptionException {
         try {
@@ -54,4 +56,9 @@ public class BusinessMessageEncryptionService {
             throw new EncryptionException("Not able to encrypt message",e);
         }
     }
+
+    public byte[] decrypt(EncryptedBusinessMessage encryptedBusinessMessage) throws EncryptionException {
+        return dekryptering.dekrypter(encryptedBusinessMessage.getMessage().getBytes());
+    }
+
 }

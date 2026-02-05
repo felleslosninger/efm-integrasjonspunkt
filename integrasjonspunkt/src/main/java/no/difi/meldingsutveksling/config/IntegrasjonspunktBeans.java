@@ -9,7 +9,9 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.CryptoConfig;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.Dekryptering;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
@@ -51,6 +53,24 @@ public class IntegrasjonspunktBeans {
     @Bean
     public Kryptering kryptering() {
         return new Kryptering();
+    }
+
+    @Bean
+    public Dekryptering dekryptering(NhnKeystore keystore) {
+        return new Dekryptering(keystore);
+    }
+
+    @Bean
+    public NhnKeystore nhnKeystore(IntegrasjonspunktProperties properties) throws IOException {
+        KeystoreProperties keyProps = properties.getOidc().getKeystore();
+        CryptoConfig config;
+        if (keyProps.getPath().isFile()) {
+            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
+        }
+        else {
+            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
+        }
+        return new NhnKeystore(config);
     }
 
     @Bean

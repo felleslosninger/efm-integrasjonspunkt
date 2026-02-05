@@ -3,9 +3,11 @@ package no.difi.meldingsutveksling.nextmove.nhn;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,11 +33,13 @@ public class NhnAdapterClient {
     private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
     private final String MESSAGE_STATUS_PATH;
     private final Signer signer;
+    private final NhnKeystore keystore;
 
 
 
-    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer) {
+    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer, NhnKeystore keystore) {
         this.signer = signer;
+        this.keystore = keystore;
         log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
         this.uri = uri;
@@ -82,10 +86,11 @@ public class NhnAdapterClient {
     }
 
 
-    public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
+    public List<EncryptedBusinessMessage> messageReceipt(UUID messageReference, String onBehalfOf) {
 
+        String kid = keystore.getKidByOrgnummer(onBehalfOf);
         return dphClient.method(HttpMethod.GET)
-            .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM+"=" + onBehalfOf)
+            .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM+"=" + onBehalfOf + "&kid=" + kid)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError,(request, resp) -> {
                 JsonNode errorBody = ObjectMapperHolder.get().readTree(resp.getBody());
@@ -94,7 +99,7 @@ public class NhnAdapterClient {
                 log.error("error while retriving receipt stacktrace:{}", stackTrace);
                 throw new CanNotRetrieveHealthcareStatusException(HttpStatus.BAD_REQUEST, error);
             })
-            .toEntity(new ParameterizedTypeReference<List<IncomingReceipt>>() {
+            .toEntity(new ParameterizedTypeReference<List<EncryptedBusinessMessage>>() {
         }).getBody();
     }
 }
