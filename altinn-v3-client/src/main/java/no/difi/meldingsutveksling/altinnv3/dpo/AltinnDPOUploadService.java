@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyMap;
+
 @Service
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
 @RequiredArgsConstructor
@@ -89,6 +91,7 @@ public class AltinnDPOUploadService {
         fileTransferInitalizeExt.setResourceId(props.getDpo().getResource());
         fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getIdentifier());
         fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
+        fileTransferInitalizeExt.setPropertyList(emptyMap());
 
         return fileTransferInitalizeExt;
     }
