@@ -44,6 +44,10 @@ class OnBehalfOfNormalizerTest {
                     )
             )
             .setSenderIdentifier(PartnerIdentifier.parse(before));
+
+        sbd.getStandardBusinessDocumentHeader()
+            .setDocumentIdentification(new DocumentIdentification().setStandard("dummy-not-null"));
+
         target.normalize(sbd);
         assertThat(sbd.getSenderIdentifier()).isEqualTo(PartnerIdentifier.parse(after));
     }

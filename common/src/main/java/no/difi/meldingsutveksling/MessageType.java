@@ -25,6 +25,7 @@ public enum MessageType {
     FIKSIO("fiksio"),
     DIGITAL("digital"),
     DIGITAL_DPV("digital_dpv"),
+    DIALOGMELDING("dialogmelding"),
     PRINT("print"),
 
     INNSYNSKRAV("innsynskrav"),

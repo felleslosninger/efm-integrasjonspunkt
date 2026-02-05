@@ -47,6 +47,9 @@ public class NextMoveFileSizeValidator {
             case DPFIO:
                 limit = props.getFiks().getIo().getUploadSizeLimit();
                 break;
+            case DPH:
+                limit = props.getDph().getUploadSizeLimit();
+                break;
             default:
                 throw new NextMoveRuntimeException("Unknown Service Identifier");
         }

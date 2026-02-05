@@ -5,6 +5,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktPropertiesValidator;
 import no.difi.meldingsutveksling.config.VaultProtocolResolver;
 import no.difi.meldingsutveksling.spring.IntegrasjonspunktLocalPropertyEnvironmentPostProcessor;
+import no.idporten.validators.identifier.PersonIdentifierValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -40,6 +41,10 @@ public class IntegrasjonspunktApplication extends SpringBootServletInitializer {
                 .initializers(new VaultProtocolResolver())
                 .listeners(new IntegrasjonspunktLocalPropertyEnvironmentPostProcessor())
                 .run(args);
+        boolean allowSyntheticIdentifiers = context.getEnvironment()
+            .getProperty("difi.move.identifier.synthetic.allow", Boolean.class, false);
+        PersonIdentifierValidator.setSyntheticPersonIdentifiersAllowed(allowSyntheticIdentifiers);
+
         checkNtpSync(context);
 
     }

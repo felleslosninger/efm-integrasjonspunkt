@@ -1,12 +1,17 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.collect.Maps;
-import lombok.*;
-import no.difi.meldingsutveksling.validation.Avsenderidentifikator;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import no.difi.meldingsutveksling.validation.Avsenderidentifikator;
+import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
+
 import java.util.Map;
 
 @Getter
@@ -15,7 +20,11 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "digital", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-public class DpiDigitalMessage extends BusinessMessage<DpiDigitalMessage> implements DpiMessage {
+public class DpiDigitalMessage extends BusinessMessageAsAttachment<DpiDigitalMessage> implements DpiMessage,HasSikkerhetsNivaa<DpiDigitalMessage> {
+    @NotNull(groups = {
+        NextMoveValidationGroups.MessageType.Digital.class
+    })
+    private Integer sikkerhetsnivaa;
 
     @Avsenderidentifikator
     private String avsenderId;

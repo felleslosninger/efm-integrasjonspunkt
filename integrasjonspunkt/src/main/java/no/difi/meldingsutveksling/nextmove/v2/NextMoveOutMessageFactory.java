@@ -7,9 +7,24 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.domain.sbdh.*;
+import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.Partner;
+import no.difi.meldingsutveksling.domain.sbdh.PartnerIdentification;
+import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
+import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
+import no.difi.meldingsutveksling.nextmove.MailReturn;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.PostAddress;
+import no.difi.meldingsutveksling.nextmove.PostalCategory;
+import no.difi.meldingsutveksling.nextmove.PrintColor;
+import no.difi.meldingsutveksling.nextmove.ReturnHandling;
+import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -22,6 +37,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static no.difi.meldingsutveksling.ServiceIdentifier.DPH;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 
@@ -33,6 +49,7 @@ public class NextMoveOutMessageFactory {
     private final ServiceRecordProvider serviceRecordProvider;
     private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final HealthcareRoutingService healthcareRoutingService;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
@@ -40,30 +57,30 @@ public class NextMoveOutMessageFactory {
         setDefaults(sbd, serviceIdentifier);
 
         return new NextMoveOutMessage(
-                sbd.getConversationId(),
-                sbd.getMessageId(),
-                sbd.getProcess(),
-                sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
-                sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
-                        sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
-                        sbd.getSenderIdentifier().getPrimaryIdentifier(),
-                serviceIdentifier,
-                sbd);
+            sbd.getConversationId(),
+            sbd.getMessageId(),
+            sbd.getProcess(),
+            sbd.getReceiverIdentifier() != null ? sbd.getReceiverIdentifier().getPrimaryIdentifier() : null,
+            sbd.getSenderIdentifier().hasOrganizationPartIdentifier() ?
+                sbd.getSenderIdentifier().getOrganizationPartIdentifier() :
+                sbd.getSenderIdentifier().getPrimaryIdentifier(),
+            serviceIdentifier,
+            sbd);
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
         sbd.getScopes()
-                .stream()
-                .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
-                .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
+            .stream()
+            .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
+            .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
 
         if (sbd.getSenderIdentifier() == null) {
             Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
-                    new Partner()
-                            .setIdentifier(new PartnerIdentification()
-                                    .setValue(org.getIdentifier())
-                                    .setAuthority(org.getAuthority()))
+                new Partner()
+                    .setIdentifier(new PartnerIdentification()
+                        .setValue(org.getIdentifier())
+                        .setAuthority(org.getAuthority()))
             );
         }
 
@@ -78,18 +95,19 @@ public class NextMoveOutMessageFactory {
         }
 
         if (sbd.getExpectedResponseDateTime().isEmpty()) {
+            //@TODO DPH melding har noe constraint fra NHN
             OffsetDateTime ttl = OffsetDateTime.now(clock).plusHours(getDefaultTtlHours(serviceIdentifier));
 
             Scope scope = sbd.getScope(ScopeType.CONVERSATION_ID)
-                    .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
+                .orElseThrow(() -> new NextMoveRuntimeException("Missing conversation ID scope!"));
 
             if (scope.getScopeInformation().isEmpty()) {
                 CorrelationInformation ci = new CorrelationInformation().setExpectedResponseDateTime(ttl);
                 scope.getScopeInformation().add(ci);
             } else {
                 scope.getScopeInformation().stream()
-                        .findFirst()
-                        .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
+                    .findFirst()
+                    .ifPresent(ci -> ci.setExpectedResponseDateTime(ttl));
             }
         }
 
@@ -105,6 +123,9 @@ public class NextMoveOutMessageFactory {
 
         if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);
+        }
+        if (serviceIdentifier == DPH) {
+            healthcareRoutingService.validateAndApply(sbd);
         }
     }
 
@@ -129,7 +150,7 @@ public class NextMoveOutMessageFactory {
 
     private void setDpiDefaults(StandardBusinessDocument sbd) {
         MessageType messageType = MessageType.valueOfType(sbd.getType())
-                .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
+            .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
 
         if (messageType == MessageType.PRINT) {
             DpiPrintMessage dpiMessage = (DpiPrintMessage) sbd.getAny();
@@ -148,10 +169,10 @@ public class NextMoveOutMessageFactory {
                 }
                 if (dpiMessage.getRetur() == null) {
                     dpiMessage.setRetur(new MailReturn()
-                            .setMottaker(new PostAddress())
-                            .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
+                        .setMottaker(new PostAddress())
+                        .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
                 }
-                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd);
+                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd,Participant.RECEIVER);
                 setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
                 setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
             }

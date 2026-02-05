@@ -13,13 +13,15 @@ import java.util.UUID;
 public class StandardBusinessDocumentTestData {
 
     @Data
-    static class MessageData {
+    public static class MessageData {
         private final String messageId = UUID.randomUUID().toString();
         private final String conversationId = UUID.randomUUID().toString();
         private BusinessMessage businessMessage;
         private String process;
         private String standard;
         private String type;
+        private String senderIdentifier = "910077473";
+        private String receiverIdentifier = "910075918";
     }
 
     public static final MessageData ARKIVMELDING_MESSAGE_DATA = new MessageData()
@@ -28,6 +30,7 @@ public class StandardBusinessDocumentTestData {
             .setType("arkivmelding")
             .setBusinessMessage(new ArkivmeldingMessage()
                     .setHoveddokument("before_the_law.txt"));
+
 
     static final StandardBusinessDocument ARKIVMELDING_INPUT = getInputSbd(ARKIVMELDING_MESSAGE_DATA);
     static final StandardBusinessDocument ARKIVMELDING_SBD = getResponseSbd(ARKIVMELDING_MESSAGE_DATA);
@@ -176,13 +179,13 @@ public class StandardBusinessDocumentTestData {
                         .addReceiver(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
-                                        .setValue("0192:910075918")
+                                        .setValue("0192:" + message.receiverIdentifier)
                                 )
                         )
                         .addSender(new Partner()
                                 .setIdentifier(new PartnerIdentification()
                                         .setAuthority("iso6523-actorid-upis")
-                                        .setValue("0192:910077473")
+                                        .setValue("0192:" + message.senderIdentifier)
                                 )
                         )
                 )

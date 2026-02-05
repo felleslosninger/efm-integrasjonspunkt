@@ -15,7 +15,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "print", namespace = "urn:no:difi:profile:digitalpost:ver1.0")
-public class DpiPrintMessage extends BusinessMessage<DpiPrintMessage> implements DpiMessage {
+public class DpiPrintMessage extends BusinessMessageAsAttachment<DpiPrintMessage> implements DpiMessage {
 
     @Avsenderidentifikator
     private String avsenderId;

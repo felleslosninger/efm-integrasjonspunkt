@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "einnsyn_kvittering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class EinnsynKvitteringMessage extends BusinessMessage<EinnsynKvitteringMessage> {
+public class EinnsynKvitteringMessage extends BusinessMessageAsAttachment<EinnsynKvitteringMessage> {
 
     @NotNull
     private String dokumentId;

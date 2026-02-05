@@ -58,6 +58,7 @@ public class ServiceRegistryClient {
             byte[] errorBody = httpException.getResponseBodyAsByteArray();
             try {
                 ErrorResponse error = objectMapper.readValue(errorBody, ErrorResponse.class);
+
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status %s (%s): %s",
                         parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
             } catch (IOException e) {

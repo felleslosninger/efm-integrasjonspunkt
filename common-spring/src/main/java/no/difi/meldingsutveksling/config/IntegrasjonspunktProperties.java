@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -55,6 +56,9 @@ public class IntegrasjonspunktProperties {
     @Valid
     @NestedConfigurationProperty
     private PostVirksomheter dpv;
+
+    @Valid
+    private DphConfig dph;
 
     @Valid
     @NestedConfigurationProperty
@@ -128,6 +132,14 @@ public class IntegrasjonspunktProperties {
         private String defaultInnsynskravDocumentType;
         private String receiptProcess;
 
+    }
+
+    @Data
+    public static class DphConfig {
+        private List<String> whitelistOrgnum;
+        private Boolean allowMultitenancy;
+        private DataSize uploadSizeLimit;
+        private String adapterUrl;
     }
 
     @Data
@@ -298,6 +310,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableDPF;
         private boolean enableDPFIO;
         private boolean enableDPE;
+        private boolean enableDPH;
 
     }
 

@@ -13,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "arkivmelding_kvittering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class ArkivmeldingKvitteringMessage extends BusinessMessage<ArkivmeldingKvitteringMessage> {
+public class ArkivmeldingKvitteringMessage extends BusinessMessageAsAttachment<ArkivmeldingKvitteringMessage> {
 
     private String receiptType;
     private String relatedToMessageId;
