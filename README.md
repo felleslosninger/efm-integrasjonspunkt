@@ -19,6 +19,22 @@ Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/
 inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
 
+## Bygge dockerbilde lokalt:
+Stå i roten av prosjektet og kjør kommandoene:
+```bash
+mvn clean install
+mvn spring-boot:build-image --file integrasjonspunkt/pom.xml -Dspring-boot.build-image.imageName=NAME:TAG -Dspring-boot.build-image.builder=paketobuildpacks/builder-jammy-tiny
+```
+
+
+## Kjøre dockerbilde bygget lokalt eller lastet ned fra [GitHub Container Registry](https://github.com/felleslosninger/efm-integrasjonspunkt/pkgs/container/efm-integrasjonspunkt)
+- Docker-bildet er bygget med maven spring boot plugin, og bruker paketo-base-tiny som builder. Dette er et sterkt herdet base-bilde som blir vedlikeholdt av Paketo Buildpacks. 
+- Se docker-compose-TEMPLATE.yaml for hvordan starte opp lokalt med docker compose, ekstern ActiveMQ og Postgres, MariaDB, MYSQL og MSSQL.
+- Man _må_ bruke ekstern activemq ved bruk av dockerimage
+- Mount opp certs mot /workspace-mappen
+- Mount opp logger mot /workspace/integrasjonspunkt-logs
+
+
 ## Utvikle nye web sider
 Prosjektet inneholder en `web` modul, som inneholder web sider for å administrere Integrasjonspunktet.
 Denne modulen inneholder en kjørbar klasse og kan startes separat uten resten av Integrasjonspunktet
