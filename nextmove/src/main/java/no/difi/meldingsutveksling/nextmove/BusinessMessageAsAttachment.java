@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.*;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 
 import jakarta.validation.constraints.NotNull;
