@@ -140,6 +140,7 @@ public class IntegrasjonspunktProperties {
         private Boolean allowMultitenancy;
         private DataSize uploadSizeLimit;
         private String adapterUrl;
+        private KeystoreProperties keystore;
     }
 
     @Data

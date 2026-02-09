@@ -5,14 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
-import no.difi.meldingsutveksling.nextmove.nhn.BusinessMessageEncryptionService;
 import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;
-import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -56,7 +53,6 @@ public class MessageStatusController {
     private final MessageStatusRepository statusRepo;
     private final StatusQueue statusQueue;
     private final NhnAdapterClient nhnAdapterClient;
-    private final BusinessMessageEncryptionService businessMessageEncryptionService;
 
     @GetMapping
     @JsonView(Views.MessageStatus.class)
@@ -134,11 +130,7 @@ public class MessageStatusController {
 
     private void decorateWithApprecInfo(MessageStatus t) throws Exception{
         String rawReceipt;
-        EncryptedBusinessMessage encryptedBusinessMessage = nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
-
-        var decryptedMessage = businessMessageEncryptionService.decrypt(encryptedBusinessMessage);
-
-        var receiptIn =  ObjectMapperHolder.get().readValue(decryptedMessage,IncomingReceipt.class);
+        var receiptIn =  nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
 
         try {
             HashMap<String, Object> reciept = new HashMap<>();

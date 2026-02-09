@@ -8,16 +8,10 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.CryptoConfig;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Dekryptering;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.FrontendFunctionalityImpl;
 import no.difi.move.common.cert.KeystoreHelper;
-import no.difi.move.common.config.KeystoreProperties;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import no.difi.move.common.oauth.JWTDecoder;
@@ -29,11 +23,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.time.Clock;
 import java.util.function.Supplier;
@@ -42,52 +34,14 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
-@Import({DpiConfig.class, Plumber.class, PromiseMaker.class})
+@Import({DpiConfig.class, Plumber.class, PromiseMaker.class,DphConfig.class})
 public class IntegrasjonspunktBeans {
 
     @Bean
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
     }
-
-    @Bean
-    public Kryptering kryptering() {
-        return new Kryptering();
-    }
-
-    @Bean
-    public Dekryptering dekryptering(NhnKeystore keystore) {
-        return new Dekryptering(keystore);
-    }
-
-    @Bean
-    public NhnKeystore nhnKeystore(IntegrasjonspunktProperties properties) throws IOException {
-        KeystoreProperties keyProps = properties.getOidc().getKeystore();
-        CryptoConfig config;
-        if (keyProps.getPath().isFile()) {
-            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
-        }
-        else {
-            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
-        }
-        return new NhnKeystore(config);
-    }
-
-    @Bean
-    public Signer signer(IntegrasjonspunktProperties properties) throws IOException {
-        KeystoreProperties keyProps =  properties.getOidc().getKeystore();
-        CryptoConfig config;
-        if (keyProps.getPath().isFile()) {
-            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
-        }
-        else {
-            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
-        }
-
-        return new Signer(config,"signature");
-    }
-
-
+    
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
         return new JWTDecoder();
