@@ -29,14 +29,14 @@
 
                             <!-- Path to client certificate and key in a PKCS#12 bundle -->
                             <keyStore>
-                                <location>/logstash/client.p12</location>
+                                <location>classpath:logstash/client.p12</location>
                                 <password>changeit</password>
                                 <type>PKCS12</type>
                             </keyStore>
 
                             <!-- Truststore containing the CA certificate that signed the Logstash server cert -->
                             <trustStore>
-                                <location>/logstash/truststore.jks</location>
+                                <location>classpath:logstash/truststore.jks</location>
                                 <password>changeit</password>
                                 <type>JKS</type>
                             </trustStore>
