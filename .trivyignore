@@ -1,13 +1,4 @@
-# her er det ryddig - ingen kjente sårbarheter
-
-# 20250905 : io.netty:netty-codec-http (app.jar)                         │ CVE-2025-58056 │ HIGH     │ fixed  │ 4.1.124.Final     │ 4.1.125.Final, 4.2.5.Final
-#CVE-2025-58056
-
-# 20251025 : org.springframework.security:spring-security-core (app.jar) │ CVE-2025-41248 │ HIGH     │ fixed  │ 6.5.3             │ 6.4.10, 6.5.4
-#CVE-2025-41248
-
-# 20251025 : org.springframework:spring-core (app.jar)                   │ CVE-2025-41249 │          │        │ 6.2.10            │ 6.2.11
-#CVE-2025-41249
-
-CVE-2025-59250 # Managed mssql via spring boot, probably updated on next SB version
-CVE-2025-68973 # GnuPG: GnuPG: Information disclosure and potential arbitrary
+CVE-2026-24400
+CVE-2025-59250
+CVE-2025-61726
+CVE-2025-61728
