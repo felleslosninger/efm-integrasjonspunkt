@@ -1,0 +1,36 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build/publish Docker image & deploy to TEST
+
+on:
+  push:
+    branches:
+      - main
+      - MOVE-4853-Tilpasse-CI-CD-pipelina-for-efm-integrasjonspunkt-for-å-publisere-i-TEST
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy-image:
+    #builds and deploys docker image to CREIDDEV to be deployed to TEST in the next step
+    uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
+    with:
+      java-version: 21
+      module-name: integrasjonspunkt
+    secrets: inherit
+
+
+  call-update-image:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-call-update-image.yml@main
+    needs: build-and-deploy-image
+    with:
+      application-name: efm-integrasjonspunkt
+      deployment-environment: test
+      image-digest: ${{ needs.build-and-deploy-image.outputs.image-digest }}
+      image-name: efm-integrasjonspunkt
+      image-version: ${{ needs.build-and-deploy-image.outputs.image-version }}
+      kubernetes-repo: eformidling-cd
+      product-name: eformidling
+    secrets: inherit
