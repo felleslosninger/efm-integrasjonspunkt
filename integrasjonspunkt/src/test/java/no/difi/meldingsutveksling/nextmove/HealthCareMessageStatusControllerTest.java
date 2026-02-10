@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvitter
 import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.nextmove.nhn.StatusForMottakAvMelding;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.status.Conversation;
@@ -125,7 +126,7 @@ public class HealthCareMessageStatusControllerTest {
     }
 
     @Test
-    public void whenHealthcareStatusFAILED_apprecIsRetrieved() {
+    public void whenHealthcareStatusFAILED_apprecIsRetrieved() throws EncryptionException {
         List<MessageStatus> failedMessages = List.of(healthCareStatus(ReceiptStatus.FEIL,"Failed during transport",MessageStatusController.FASTLEGE_PROCESS),healthCareStatus(ReceiptStatus.FEIL,"Person not found",MessageStatusController.NHN_PROCESS));
         List<MessageStatus> okMessage = List.of(messageStatus1());
         List<MessageStatus> allMessages = Stream.concat(failedMessages.stream(),okMessage.stream()).collect(Collectors.toList());

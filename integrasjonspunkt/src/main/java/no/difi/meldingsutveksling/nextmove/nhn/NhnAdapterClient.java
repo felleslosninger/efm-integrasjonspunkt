@@ -1,15 +1,21 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -20,35 +26,58 @@ import java.util.UUID;
 @Component
 public class NhnAdapterClient {
 
-    private final RestClient dphClient;
+    private RestClient dphClient;
 
-
-    private final String MESSAGE_OUT_PATH;
+    private final String uri;
+    private final String MESSAGE_OUT_PATH ;
     private final String MESSAGE_RECEIPT_PATH;
-    private String ON_BEHALF_OF_PARAM = "onBehalfOf";
+    private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
     private final String MESSAGE_STATUS_PATH;
+    private final Signer signer;
+    private final NhnKeystore keystore;
+    private final BusinessMessageEncryptionService businessMessageEncryptionService;
+    private final SignatureValidator signatureValidator;
 
 
-    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri) {
+
+    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer, NhnKeystore keystore, BusinessMessageEncryptionService businessMessageEncryptionService, SignatureValidator signatureValidator) {
+        this.signer = signer;
+        this.keystore = keystore;
+        this.businessMessageEncryptionService = businessMessageEncryptionService;
+        this.signatureValidator = signatureValidator;
         log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
+        this.uri = uri;
 
-        MESSAGE_OUT_PATH = uri + "/out";
-        MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
-        MESSAGE_STATUS_PATH = uri + "/status/%s";
+        this.MESSAGE_OUT_PATH = uri + "/out";
+        this.MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+        this.MESSAGE_STATUS_PATH = uri + "/status/%s";
     }
 
     public String messageOut(DPHMessageOut messageOut) {
+        final String signedJson;
+        try {
+
+            String rawJson = ObjectMapperHolder.get().writeValueAsString(messageOut);
+
+            signedJson = signer.sign(rawJson);
+
+        } catch (JsonProcessingException e) {
+            throw new NextMoveRuntimeException("Failed to serialize DPHMessageOut to JSON for signingKeystore", e);
+        } catch (Exception e) {
+            throw new NextMoveRuntimeException("Failed to sign DPHMessageOut JSON", e);
+        }
+
         return dphClient.method(HttpMethod.POST)
             .uri(MESSAGE_OUT_PATH)
-            .body(messageOut)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(signedJson)
             .retrieve()
             .onStatus(t -> t.equals(HttpStatus.BAD_REQUEST),
                 (request, resp) -> {
                     throw new NextMoveRuntimeException(resp.getStatusText());
                 })
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
-
                 throw new NextMoveRuntimeException(resp.getStatusText());
             })
             .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
@@ -62,19 +91,40 @@ public class NhnAdapterClient {
     }
 
 
-    public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) {
+    public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
 
-        return dphClient.method(HttpMethod.GET)
-            .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM+"=" + onBehalfOf)
+        String kid = keystore.getKidByOrgnummer(onBehalfOf);
+        var encryptedReciepts = dphClient.method(HttpMethod.GET)
+            .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM + "=" + onBehalfOf + "&kid=" + kid)
             .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError,(request, resp) -> {
+            .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
                 JsonNode errorBody = ObjectMapperHolder.get().readTree(resp.getBody());
                 String error = errorBody.get("error").asText();
                 String stackTrace = errorBody.get("stackTrace").asText();
                 log.error("error while retriving receipt stacktrace:{}", stackTrace);
                 throw new CanNotRetrieveHealthcareStatusException(HttpStatus.BAD_REQUEST, error);
             })
-            .toEntity(new ParameterizedTypeReference<List<IncomingReceipt>>() {
-        }).getBody();
+            .toEntity(String.class).getBody();
+
+        signatureValidator.validate(encryptedReciepts);
+
+
+
+        List<IncomingReceipt> result;
+        try {
+            EncryptedReceipts encryptedReceipts = ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
+            byte[] decryptedReceipts = businessMessageEncryptionService.decrypt(encryptedReceipts.receipts());
+            result = ObjectMapperHolder.get().readValue(
+                decryptedReceipts,
+                new TypeReference<List<IncomingReceipt>>() {}
+            );
+
+
+        } catch (EncryptionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new NextMoveRuntimeException("Not able to parse incoming receipt", e);
+        }
+        return result;
     }
 }

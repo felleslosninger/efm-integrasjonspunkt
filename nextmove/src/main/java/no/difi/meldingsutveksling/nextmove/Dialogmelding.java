@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 
 @Getter
 @Setter
@@ -18,5 +19,5 @@ public class Dialogmelding implements BusinessMessage {
     String patientFnr;
     String responsibleHealthcareProfessionalId;
     String vedleggBeskrivelse;
-
+    Person patient;
 }

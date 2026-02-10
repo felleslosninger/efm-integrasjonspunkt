@@ -10,7 +10,6 @@ import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
 import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;
-import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -68,7 +67,11 @@ public class MessageStatusController {
 
         messageStatus.get().forEach(t-> {
             if(isDphMessage(t) && shouldRetrieveApprecInfo(t)) {
-                decorateWithApprecInfo(t);
+                try {
+                    decorateWithApprecInfo(t);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -87,7 +90,11 @@ public class MessageStatusController {
         var status = statusRepo.findByConversationMessageId(messageId, pageable);
         status.get().forEach(t-> {
             if(isDphMessage(t) && shouldRetrieveApprecInfo(t)) {
-                decorateWithApprecInfo(t);
+                try {
+                    decorateWithApprecInfo(t);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -121,9 +128,9 @@ public class MessageStatusController {
         return Objects.equals(t.getStatus(), ReceiptStatus.FEIL.name());
     }
 
-    private void decorateWithApprecInfo(MessageStatus t) {
+    private void decorateWithApprecInfo(MessageStatus t) throws Exception{
         String rawReceipt;
-        IncomingReceipt receiptIn = nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
+        var receiptIn =  nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
 
         try {
             HashMap<String, Object> reciept = new HashMap<>();
