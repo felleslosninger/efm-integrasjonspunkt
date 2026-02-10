@@ -41,7 +41,7 @@ public class IntegrasjonspunktBeans {
     public KeystoreHelper keystoreHelper(IntegrasjonspunktProperties properties) {
         return new KeystoreHelper(properties.getOrg().getKeystore());
     }
-    
+
     @Bean
     public JWTDecoder jwtDecoder() throws CertificateException {
         return new JWTDecoder();

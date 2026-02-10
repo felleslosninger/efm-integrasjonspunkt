@@ -8,3 +8,4 @@ public record IncomingReceipt(
     List<ApplicationReceiptError> errors
 ) {
 }
+

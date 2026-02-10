@@ -28,7 +28,7 @@ public class BusinessMessageEncryptionService {
             X509Certificate certificate = (X509Certificate) EncryptedBusinessMessage.cf.generateCertificate(new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
             return this.encrypt(businessMessage, certificate);
         } catch (CertificateException e) {
-            throw new EncryptionException("Not able to obtain encryption certificate",e);
+            throw new EncryptionException("Not able to obtain encryptionKeystore certificate",e);
         } catch (EncryptionException e) {
             throw e;
         }
@@ -48,7 +48,7 @@ public class BusinessMessageEncryptionService {
         } catch (JsonProcessingException e) {
             throw new EncryptionException("Not able to parse business message during encyrption",e);
         } catch (CertificateException e) {
-            throw new EncryptionException("Not able to obtain encryption certificate",e);
+            throw new EncryptionException("Not able to obtain encryptionKeystore certificate",e);
         } catch (EncryptionException e) {
             throw e;
         }

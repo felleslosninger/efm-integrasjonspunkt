@@ -159,7 +159,7 @@ public class NextMoveMessageService {
                         //@TODO make exception handling more precise here.
                         throw new RuntimeException("Not able to encrypt message, due to failed certificate",e);
                     } catch (EncryptionException e) {
-                        throw new RuntimeException("Not able to encrypt message, due to failed encryption",e);
+                        throw new RuntimeException("Not able to encrypt message, due to failed encryptionKeystore",e);
                     }
                 }
             else  {

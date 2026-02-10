@@ -1,17 +1,17 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,13 +36,15 @@ public class NhnAdapterClient {
     private final Signer signer;
     private final NhnKeystore keystore;
     private final BusinessMessageEncryptionService businessMessageEncryptionService;
+    private final SignatureValidator signatureValidator;
 
 
 
-    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer, NhnKeystore keystore, BusinessMessageEncryptionService businessMessageEncryptionService) {
+    public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer, NhnKeystore keystore, BusinessMessageEncryptionService businessMessageEncryptionService, SignatureValidator signatureValidator) {
         this.signer = signer;
         this.keystore = keystore;
         this.businessMessageEncryptionService = businessMessageEncryptionService;
+        this.signatureValidator = signatureValidator;
         log.info("adapter URL is {}", uri);
         this.dphClient = dphClient;
         this.uri = uri;
@@ -62,7 +63,7 @@ public class NhnAdapterClient {
             signedJson = signer.sign(rawJson);
 
         } catch (JsonProcessingException e) {
-            throw new NextMoveRuntimeException("Failed to serialize DPHMessageOut to JSON for signing", e);
+            throw new NextMoveRuntimeException("Failed to serialize DPHMessageOut to JSON for signingKeystore", e);
         } catch (Exception e) {
             throw new NextMoveRuntimeException("Failed to sign DPHMessageOut JSON", e);
         }
@@ -93,7 +94,7 @@ public class NhnAdapterClient {
     public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
 
         String kid = keystore.getKidByOrgnummer(onBehalfOf);
-        var encryptedReiepts = dphClient.method(HttpMethod.GET)
+        var encryptedReciepts = dphClient.method(HttpMethod.GET)
             .uri(MESSAGE_RECEIPT_PATH.formatted(messageReference) + "?" + ON_BEHALF_OF_PARAM + "=" + onBehalfOf + "&kid=" + kid)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
@@ -103,13 +104,22 @@ public class NhnAdapterClient {
                 log.error("error while retriving receipt stacktrace:{}", stackTrace);
                 throw new CanNotRetrieveHealthcareStatusException(HttpStatus.BAD_REQUEST, error);
             })
-            .toEntity(new ParameterizedTypeReference<List<EncryptedBusinessMessage>>() {
-            }).getBody();
-        List<IncomingReceipt> result = new ArrayList<>();
+            .toEntity(String.class).getBody();
+
+        signatureValidator.validate(encryptedReciepts);
+
+
+
+        List<IncomingReceipt> result;
         try {
-        for (EncryptedBusinessMessage t : encryptedReiepts) {
-            result.add(ObjectMapperHolder.get().readValue( businessMessageEncryptionService.decrypt(t),IncomingReceipt.class));
-        }
+            EncryptedReceipts encryptedReceipts = ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
+            byte[] decryptedReceipts = businessMessageEncryptionService.decrypt(encryptedReceipts.receipts());
+            result = ObjectMapperHolder.get().readValue(
+                decryptedReceipts,
+                new TypeReference<List<IncomingReceipt>>() {}
+            );
+
+
         } catch (EncryptionException e) {
             throw e;
         } catch (Exception e) {

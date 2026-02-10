@@ -140,7 +140,9 @@ public class IntegrasjonspunktProperties {
         private Boolean allowMultitenancy;
         private DataSize uploadSizeLimit;
         private String adapterUrl;
-        private KeystoreProperties keystore;
+        private KeystoreProperties signingKeystore;
+        private KeystoreProperties encryptionKeystore;
+        private KeystoreProperties truststore;
     }
 
     @Data
@@ -206,7 +208,7 @@ public class IntegrasjonspunktProperties {
     }
 
     /**
-     * SR signing
+     * SR signingKeystore
      */
     @Data
     public static class Sign {
