@@ -93,6 +93,10 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande)
+- Velg tag (ny eller eksisterande, tag MÅ være semantisk `vX.Y.Z`)
 - Fyll inn tittel og beskrivelse
+- Last opp artifacts (Kosmos trenger disse 3 filene) 
+  - Last opp jar filen (eks `integrasjonspunkt-v4.0.0.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.0.jar.sha1`)
+  - Signer jar filen og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.0.jar.asc`)
 - Klikk på "Publish release"

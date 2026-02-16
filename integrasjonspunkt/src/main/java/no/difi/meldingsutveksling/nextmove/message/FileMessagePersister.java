@@ -26,6 +26,8 @@ public class FileMessagePersister implements MessagePersister {
 
     @Override
     public void write(String messageId, String filename, Resource resource) throws IOException {
+        preventUncontrolledDataInPath(messageId);
+        preventUncontrolledDataInPath(filename);
         String filedir = getMessageFiledirPath(messageId);
         File localFile = new File(filedir + filename);
         localFile.getParentFile().mkdirs();
@@ -43,6 +45,8 @@ public class FileMessagePersister implements MessagePersister {
 
     @Override
     public Resource read(String messageId, String filename) throws IOException {
+        preventUncontrolledDataInPath(messageId);
+        preventUncontrolledDataInPath(filename);
         String filedir = getMessageFiledirPath(messageId);
         File file = new File(filedir + filename);
         return new FileSystemResource(file);
@@ -50,9 +54,19 @@ public class FileMessagePersister implements MessagePersister {
 
     @Override
     public void delete(String messageId) throws IOException {
+        preventUncontrolledDataInPath(messageId);
         File dir = new File(getMessageFiledirPath(messageId));
         log.debug("Deleting directory {} for message[id={}]", dir.getAbsolutePath(), messageId);
         FileUtils.deleteDirectory(dir);
+    }
+
+    private void preventUncontrolledDataInPath(String input) {
+        if (input == null || input.isEmpty()) {
+            throw new IllegalArgumentException("Input cannot be null or empty");
+        }
+        if (input.contains("..") || input.contains("/") || input.contains("\\")) {
+            throw new IllegalArgumentException("Input contains illegal characters");
+        }
     }
 
     private String humanReadableByteCount(int bytes) {
