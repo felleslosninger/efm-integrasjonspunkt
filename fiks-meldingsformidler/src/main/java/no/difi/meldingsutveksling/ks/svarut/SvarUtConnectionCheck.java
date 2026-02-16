@@ -23,7 +23,13 @@ public class SvarUtConnectionCheck {
 
             properties.getFiks().getUt().getPaaVegneAv().keySet().forEach(svarUtService::retreiveForsendelseTyper);
         } catch (Exception e) {
-            throw new NextMoveRuntimeException("Couldn't retrieve forsendelse typer from SvarUt", e);
+            String message = "SvarUt connection check failed. Couldn't retrieve forsendelse typer from SvarUt.";
+            String errorMessage = e.getMessage();
+            if(errorMessage != null && errorMessage.contains("401")) {
+                message += " Unauthorized (401) when calling SvarUt, this can be caused by wrong username or password, please ensure that difi.move.fiks.ut.username and difi.move.fiks.ut.password in properties are correct.";
+            }
+
+            throw new NextMoveRuntimeException(message, e);
         }
     }
 }
