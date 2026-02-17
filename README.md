@@ -98,5 +98,7 @@ Release av ny versjon gjerast via GitHub GUI
 - Last opp artifacts (Disse 3 filene er nødvendig for bla Kosmos) 
   - Last opp jar filen (eks `integrasjonspunkt-4.0.1.jar`)
   - Last opp sha1 filen (eks `integrasjonspunkt-4.0.1.jar.sha1`)
-  - Signer jar filen og last opp ASC signaturfilen (eks `integrasjonspunkt-4.0.1.jar.asc`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-4.0.1.jar.asc`)
+  - Det er viktig at SHA1 og ASC filen heter nøyaktig det sammen med jar filen, bare med ulike filendelse som vist her
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon, eks `4.0.1` begge steder som vist her
 - Klikk på "Publish release"
