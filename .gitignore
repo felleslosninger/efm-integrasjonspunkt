@@ -122,3 +122,6 @@ integrasjonspunkt/docker-compose-local.yml
 # Local and personal env variables
 .env
 *.env
+
+*.key
+*.jar.*

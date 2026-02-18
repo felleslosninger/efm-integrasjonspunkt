@@ -9,7 +9,7 @@ That way it is easier to develop and test the web application without having to 
 - [ ] FrontendFunctionality getIntegrasjonspunktVersion() er ikke implementert
 - [ ] Siden verifikasjon "action" ofte kalles fra rendering funksjon, blir det endel dobbelt kall når dialogenen rendres
 - [ ] Switch to using webjars (remove old versions from integrasjonspunkt module)
-- [ ] What about adding "swagger-ui", bruke direkte uten postman ?
+- [ ] What about adding "swagger-ui", bruke direkte uten postman (`springdoc-openapi-starter-webmvc-ui`)
 
 ## How does it work?
 The web module does not have any dependencies to the rest-api or other modules.
