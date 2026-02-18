@@ -78,9 +78,6 @@ Linker til observability :
 - http://localhost:9093/manage/metrics
 - http://localhost:9093/manage/prometheus
 
-Work in progress (kan dette ta over for REST API dokumentasjon, `restdoc`) :
-- http://localhost:9093/swagger-ui/index.html
-
 Linker til logger, config og alt annet :
 - http://localhost:9093/manage/logfile
 - `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
