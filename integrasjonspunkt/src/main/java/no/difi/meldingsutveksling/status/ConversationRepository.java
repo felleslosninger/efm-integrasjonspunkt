@@ -188,6 +188,16 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
             builder.and(conversation.direction.eq(input.getDirection()));
         }
 
+        if (input.getLastUpdateFrom() != null) {
+            OffsetDateTime start = DateTimeUtil.toOffsetDateTime(input.getLastUpdateFrom().atStartOfDay());
+            builder.and(conversation.lastUpdate.goe(start));
+        }
+
+        if (input.getLastUpdateTo() != null) {
+            OffsetDateTime end = DateTimeUtil.toOffsetDateTime(input.getLastUpdateTo().atTime(LocalTime.MAX));
+            builder.and(conversation.lastUpdate.loe(end));
+        }
+
         return builder;
     }
 

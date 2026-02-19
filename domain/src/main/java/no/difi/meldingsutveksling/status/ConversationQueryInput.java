@@ -2,6 +2,9 @@ package no.difi.meldingsutveksling.status;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Data
 public class ConversationQueryInput {
@@ -18,5 +21,9 @@ public class ConversationQueryInput {
     Boolean pollable;
     Boolean finished;
     ConversationDirection direction;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate lastUpdateFrom;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate lastUpdateTo;
 
 }
