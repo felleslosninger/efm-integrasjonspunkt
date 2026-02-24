@@ -8,7 +8,7 @@ gpg --batch --yes \
     --passphrase "$GPG_PASSPHRASE" \
     --quick-set-expire AEF27AA6948A3856932AF98ECA5643393753ECE3 5y
 
-gpg --armor --export AEF27AA6948A3856932AF98ECA5643393753ECE3 > $1
+gpg --armor --export AEF27AA6948A3856932AF98ECA5643393753ECE3 > "$1"
 
 rm -rf "$GNUPGHOME"
 unset GNUPGHOME
