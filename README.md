@@ -90,7 +90,7 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.1`)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.1`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse
 - Last opp artifacts (Disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
   - Last opp jar filen (eks `integrasjonspunkt-v4.0.1.jar`)
