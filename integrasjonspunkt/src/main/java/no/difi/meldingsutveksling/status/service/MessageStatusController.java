@@ -77,7 +77,7 @@ public class MessageStatusController {
 
 
 
-    @GetMapping("{messageId}")
+    @GetMapping(value = "{messageId}", produces = "application/json; charset=utf-8")
     @JsonView(Views.MessageStatus.class)
     @Transactional(readOnly = true)
     public Page<MessageStatus> findByMessageId(
