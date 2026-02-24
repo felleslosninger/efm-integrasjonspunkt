@@ -1,3 +1,4 @@
+#!/bin/bash
 export GNUPGHOME=$(mktemp -d)
 chmod 700 "$GNUPGHOME"
 

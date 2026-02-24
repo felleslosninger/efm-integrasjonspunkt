@@ -65,7 +65,7 @@ public class FileMessagePersister implements MessagePersister {
             throw new IllegalArgumentException("Input cannot be null or empty");
         }
         if (input.contains("..") || input.contains("/") || input.contains("\\")) {
-            throw new IllegalArgumentException("Input contains illegal characters");
+            throw new IllegalArgumentException("Input contains illegal characters '..', '/' or '\\'");
         }
     }
 

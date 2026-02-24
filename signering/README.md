@@ -52,7 +52,7 @@ Det er denne filen med signatur som skal lastes opp til GitHub releasen sammen m
 
 Forlengar utløpsdatoen til kodesigneringsnøkkelen med 5 år og eksporterer ny og oppdaterte offentlege nøkkelen.
 
-Den nye offentlege nøkkelen vil kunne valider både tidligere og nye signaturer, og
+Den nye offentlege nøkkelen vil kunne validere både tidligere og nye signaturer, og
 det er *ikke* nødvendig å oppdatere den private nøkkelen når man forlenger på denne måten. 
 
 **Krev:** `kodesignering-eformidling-private.key` og miljøvariabelen `GPG_PASSPHRASE`.
