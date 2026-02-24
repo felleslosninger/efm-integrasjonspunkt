@@ -90,12 +90,12 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag må være semantisk - kun tall `4.0.1`)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.1`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse
 - Last opp artifacts (Disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
-  - Last opp jar filen (eks `integrasjonspunkt-4.0.1.jar`)
-  - Last opp sha1 filen (eks `integrasjonspunkt-4.0.1.jar.sha1`)
-  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-4.0.1.jar.asc`)
+  - Last opp jar filen (eks `integrasjonspunkt-v4.0.1.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.1.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.1.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
-  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `4.0.1` begge steder som vist i filnavna ovenfor)
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.1` begge steder som vist i filnavna ovenfor)
 - Klikk på "Publish release"
