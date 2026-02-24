@@ -7,7 +7,7 @@ gpg --batch --yes \
     --pinentry-mode loopback \
     --passphrase "$GPG_PASSPHRASE" \
     --detach-sign --armor \
-    $1
+    "$1"
 
 rm -rf "$GNUPGHOME"
 unset GNUPGHOME
