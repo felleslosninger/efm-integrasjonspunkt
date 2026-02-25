@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import kotlinx.serialization.SerializationException;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
@@ -11,6 +11,10 @@ import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
+import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
+import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.SerializeableIncomingBusinessDocument;
+import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -54,7 +58,7 @@ public class NhnAdapterClient {
         this.MESSAGE_STATUS_PATH = uri + "/status/%s";
     }
 
-    public String messageOut(DPHMessageOut messageOut) {
+    public String messageOut(MessageOut.Unsigned messageOut) {
         final String signedJson;
         try {
 
@@ -62,10 +66,16 @@ public class NhnAdapterClient {
 
             signedJson = signer.sign(rawJson);
 
-        } catch (JsonProcessingException e) {
-            throw new NextMoveRuntimeException("Failed to serialize DPHMessageOut to JSON for signingKeystore", e);
+        } catch (SerializationException e) {
+            throw new NextMoveRuntimeException(
+                "Failed to serialize DPHMessageOut to JSON",
+                e
+            );
         } catch (Exception e) {
-            throw new NextMoveRuntimeException("Failed to sign DPHMessageOut JSON", e);
+            throw new NextMoveRuntimeException(
+                "Failed to sign DPHMessageOut JSON",
+                e
+            );
         }
 
         return dphClient.method(HttpMethod.POST)
@@ -86,9 +96,26 @@ public class NhnAdapterClient {
     }
 
 
-    public DPHMessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
-        return dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference)  + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(DPHMessageStatus.class).getBody();
+    public MessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
+        var statusString = dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference)  + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
+        if (statusString == null) {
+            throw new NextMoveRuntimeException("DPHMessageStatus returned null");
+        }
+        return KxJson.decode(statusString,MessageStatus.Companion.serializer());
     }
+
+    public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {
+        var documentString = dphClient.method(HttpMethod.GET).uri("/readMessage").retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
+                throw new NextMoveRuntimeException(resp.getStatusText());
+            })
+            .onStatus(HttpStatusCode::is5xxServerError, (request, resp) -> {
+                throw new NextMoveRuntimeException("Server error");
+            })
+            .toEntity(String.class).getBody();
+         return KxJson.decode(documentString, SerializeableIncomingBusinessDocument.Companion.serializer());
+    }
+
 
 
     public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
