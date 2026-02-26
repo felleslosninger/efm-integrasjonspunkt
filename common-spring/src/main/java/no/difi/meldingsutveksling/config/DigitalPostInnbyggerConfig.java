@@ -5,17 +5,17 @@
  */
 package no.difi.meldingsutveksling.config;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import no.difi.meldingsutveksling.config.dpi.dpi.PrintSettings;
 import no.difi.meldingsutveksling.config.dpi.dpi.Priority;
 import no.difi.meldingsutveksling.properties.LoggedProperty;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
@@ -58,6 +58,16 @@ public class DigitalPostInnbyggerConfig {
      */
     @LoggedProperty
     private List<String> mpcIdListe;
+
+    /**
+     * How many messages to fetch when polling (max limit, max page size)
+     */
+    @Positive
+    private int pageSize = 10;
+
+    @Positive
+    private long pollingrate = 30000;
+
     /**
      * ID for queue messages are sent to and their corresponding receipts can be retrieved from.
      * This is to avoid reading receipts from other applications that use the same service

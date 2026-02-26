@@ -91,6 +91,7 @@ public class DpiClientConfig {
             CreateMaskinportenToken createMaskinportenToken,
             CreateMultipart createMultipart,
             InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
+        log.info("Creating Corner2Client with DPI configuration: {}", properties);
         return new Corner2ClientImpl(
                 WebClient.builder()
                         .baseUrl(properties.getUri())
@@ -106,7 +107,9 @@ public class DpiClientConfig {
                 dpiClientErrorHandler,
                 createMaskinportenToken,
                 createMultipart,
-                resourceFactory);
+                resourceFactory,
+                properties.getPageSize());
+
     }
 
     private static ExchangeFilterFunction logRequest() {
