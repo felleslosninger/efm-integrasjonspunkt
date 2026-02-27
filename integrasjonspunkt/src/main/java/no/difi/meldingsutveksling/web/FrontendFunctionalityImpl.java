@@ -253,7 +253,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         var dpi = props.getDpi();
         if (dpi != null) config.addAll(List.of(
-            new Property("difi.move.dpi.uri", dpi.getUri(), "The DPI API uri at Corner 2"),
+            new Property("difi.move.dpi.uri", dpi.getUri(), "DPI API uri til Hjørne 2"),
             new Property("difi.move.dpi.mpcId", dpi.getMpcId(), "DPI kanal for sending og mottak"),
             new Property("difi.move.dpi.pollingrate", "" + dpi.getPollingrate(), "Hvor ofte skal det sjekkes for kvitteringer (ms)"),
             new Property("difi.move.dpi.pageSize", "" + dpi.getPageSize(), " Maks antall kvitteringer pr polling"),
