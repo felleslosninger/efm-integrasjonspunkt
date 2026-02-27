@@ -3,12 +3,11 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
-import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;
-import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.StatusForMottakAvMelding;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
+import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
+import no.difi.meldingsutveksling.nhn.adapter.model.SerializableIncomingApplicationReceiptError;
+import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.status.Conversation;
@@ -16,6 +15,8 @@ import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusQueryInput;
 import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.status.service.MessageStatusController;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
+import no.ks.fiks.hdir.StatusForMottakAvMelding;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,7 +135,7 @@ public class HealthCareMessageStatusControllerTest {
             .willAnswer(invocation -> new PageImpl<>(allMessages, invocation.getArgument(1), allMessages.size()));
         given(nhnAdapterClient.messageReceipt(any(),any())).willReturn(
 
-            List.of(new IncomingReceipt("1111", StatusForMottakAvMelding.AVVIST,List.of(new ApplicationReceiptError(FeilmeldingForApplikasjonskvittering.LEGE_FINNES_IKKE,"some details"))))
+            List.of(new SerializableApplicationReceiptInfo(1111, no.ks.fiks.hdir.StatusForMottakAvMelding.AVVIST,List.of(new SerializableIncomingApplicationReceiptError(no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering.LEGE_FINNES_IKKE,"some details","","",""))))
             );
         var response = webClient.get().uri("/api/statuses").accept(MediaType.APPLICATION_JSON).exchange();
 
@@ -154,9 +155,9 @@ public class HealthCareMessageStatusControllerTest {
 
     private  void validateReceipt(Object receipt) {
         try {
-            IncomingReceipt reciept = ObjectMapperHolder.get().readValue((String) receipt, IncomingReceipt.class);
-            assertEquals(reciept.status(),StatusForMottakAvMelding.AVVIST);
-            assertEquals(reciept.errors().getFirst().type(),FeilmeldingForApplikasjonskvittering.LEGE_FINNES_IKKE);
+            SerializableApplicationReceiptInfo reciept = KxJson.decode((String)receipt,SerializableApplicationReceiptInfo.Companion.serializer());
+            assertEquals(StatusForMottakAvMelding.AVVIST, reciept.getStatus());
+            assertEquals(FeilmeldingForApplikasjonskvittering.LEGE_FINNES_IKKE, reciept.getErrors().getFirst().getType());
         }catch(Exception e) {
             throw new RuntimeException(e);
         }

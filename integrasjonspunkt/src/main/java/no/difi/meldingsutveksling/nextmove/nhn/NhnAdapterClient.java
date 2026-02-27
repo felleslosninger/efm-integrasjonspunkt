@@ -1,8 +1,10 @@
 package no.difi.meldingsutveksling.nextmove.nhn;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
+import kotlinx.serialization.builtins.BuiltinSerializersKt;
+import kotlinx.serialization.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
@@ -11,8 +13,10 @@ import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
+import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
 import no.difi.meldingsutveksling.nhn.adapter.model.SerializeableIncomingBusinessDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -62,13 +67,13 @@ public class NhnAdapterClient {
         final String signedJson;
         try {
 
-            String rawJson = ObjectMapperHolder.get().writeValueAsString(messageOut);
+            String rawJson =   KxJson.encode(messageOut, MessageOut.Unsigned.Companion.serializer());
 
             signedJson = signer.sign(rawJson);
 
         } catch (SerializationException e) {
             throw new NextMoveRuntimeException(
-                "Failed to serialize DPHMessageOut to JSON",
+                "Failed to serialize MessageOut to JSON",
                 e
             );
         } catch (Exception e) {
@@ -118,7 +123,7 @@ public class NhnAdapterClient {
 
 
 
-    public List<IncomingReceipt> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
+    public List<SerializableApplicationReceiptInfo> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
 
         String kid = keystore.getKidByOrgnummer(onBehalfOf);
         var encryptedReciepts = dphClient.method(HttpMethod.GET)
@@ -135,16 +140,20 @@ public class NhnAdapterClient {
 
         signatureValidator.validate(encryptedReciepts);
 
-
-
-        List<IncomingReceipt> result;
+        List<SerializableApplicationReceiptInfo> receipts;
         try {
-            EncryptedReceipts encryptedReceipts = ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
-            byte[] decryptedReceipts = businessMessageEncryptionService.decrypt(encryptedReceipts.receipts());
-            result = ObjectMapperHolder.get().readValue(
-                decryptedReceipts,
-                new TypeReference<List<IncomingReceipt>>() {}
-            );
+            JsonObject encryptedReceiptsJson =  KxJson.decode(encryptedReciepts, JsonObject.Companion.serializer()); // ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
+            EncryptedFagmelding encryptedReceipts = KxJson.decode(Objects.requireNonNull(encryptedReceiptsJson.get("receipts")), EncryptedFagmelding.Companion.serializer());
+
+            byte[] decryptedReceipts = businessMessageEncryptionService.decrypt(encryptedReceipts);
+
+            KSerializer<List<SerializableApplicationReceiptInfo>> ser =
+                BuiltinSerializersKt.ListSerializer(SerializableApplicationReceiptInfo.Companion.serializer());
+
+
+            receipts = KxJson.decode(new String(decryptedReceipts), ser);
+
+
 
 
         } catch (EncryptionException e) {
@@ -152,6 +161,6 @@ public class NhnAdapterClient {
         } catch (Exception e) {
             throw new NextMoveRuntimeException("Not able to parse incoming receipt", e);
         }
-        return result;
+        return receipts;
     }
 }

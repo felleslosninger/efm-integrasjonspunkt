@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Dekryptering;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
+import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.stereotype.Component;
 
@@ -59,6 +60,10 @@ public class BusinessMessageEncryptionService {
 
     public byte[] decrypt(EncryptedBusinessMessage encryptedBusinessMessage) throws EncryptionException {
         return dekryptering.dekrypter(encryptedBusinessMessage.getMessage().getBytes());
+    }
+
+    public byte[] decrypt(EncryptedFagmelding encryptedFagmelding) throws EncryptionException {
+        return dekryptering.dekrypter(encryptedFagmelding.getMessage().getBytes());
     }
 
 }
