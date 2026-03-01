@@ -14,6 +14,7 @@ import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
+import no.difi.meldingsutveksling.nhn.adapter.model.InMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
@@ -42,6 +43,8 @@ public class NhnAdapterClient {
     private final String MESSAGE_RECEIPT_PATH;
     private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
     private final String MESSAGE_STATUS_PATH;
+    private final String INCOMING_MESSAGE_PATH;
+    private final String INCOMING_BUSINES_DOCUMENT_PATH;
     private final Signer signer;
     private final NhnKeystore keystore;
     private final BusinessMessageEncryptionService businessMessageEncryptionService;
@@ -60,7 +63,10 @@ public class NhnAdapterClient {
 
         this.MESSAGE_OUT_PATH = uri + "/out";
         this.MESSAGE_RECEIPT_PATH = uri + "/in/%s/receipt";
+        this.INCOMING_MESSAGE_PATH = uri + "/in/%s";
+        this.INCOMING_BUSINES_DOCUMENT_PATH = uri + "/in/%s/businessDocument";
         this.MESSAGE_STATUS_PATH = uri + "/status/%s";
+
     }
 
     public String messageOut(MessageOut.Unsigned messageOut) {
@@ -107,6 +113,13 @@ public class NhnAdapterClient {
             throw new NextMoveRuntimeException("DPHMessageStatus returned null");
         }
         return KxJson.decode(statusString,MessageStatus.Companion.serializer());
+    }
+
+    public List<InMessage> incomingMessages(Integer herId2, String onBehalfOf) {
+        var messageId = dphClient.method(HttpMethod.GET).uri(INCOMING_MESSAGE_PATH.formatted(herId2)+ "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
+        KSerializer<List<InMessage>> ser =
+            BuiltinSerializersKt.ListSerializer(InMessage.Companion.serializer());
+        return KxJson.decode(messageId, ser);
     }
 
     public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {

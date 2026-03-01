@@ -53,12 +53,21 @@ public class NextMoveMessageInController {
 
     @GetMapping(value = "peek")
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
+        if (input.herId2 != null) {
+
+        }
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
+    @GetMapping(path = "/peek/nhn/{herId2}")
+    public StandardBusinessDocument getMessage(Integer herId2) {
+
+    }
+
+
 
     @GetMapping(value = "pop/{messageId}")
     @Transactional
