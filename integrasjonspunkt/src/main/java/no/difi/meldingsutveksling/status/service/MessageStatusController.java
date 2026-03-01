@@ -10,8 +10,9 @@ import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.nhn.ApplicationReceiptError;
 import no.difi.meldingsutveksling.nextmove.nhn.FeilmeldingForApplikasjonskvittering;
-import no.difi.meldingsutveksling.nextmove.nhn.IncomingReceipt;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
+import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
+import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
 import no.difi.meldingsutveksling.status.MessageStatus;
@@ -68,7 +69,11 @@ public class MessageStatusController {
 
         messageStatus.get().forEach(t-> {
             if(isDphMessage(t) && shouldRetrieveApprecInfo(t)) {
-                decorateWithApprecInfo(t);
+                try {
+                    decorateWithApprecInfo(t);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -87,7 +92,11 @@ public class MessageStatusController {
         var status = statusRepo.findByConversationMessageId(messageId, pageable);
         status.get().forEach(t-> {
             if(isDphMessage(t) && shouldRetrieveApprecInfo(t)) {
-                decorateWithApprecInfo(t);
+                try {
+                    decorateWithApprecInfo(t);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -121,20 +130,20 @@ public class MessageStatusController {
         return Objects.equals(t.getStatus(), ReceiptStatus.FEIL.name());
     }
 
-    private void decorateWithApprecInfo(MessageStatus t) {
+    private void decorateWithApprecInfo(MessageStatus t) throws Exception{
         String rawReceipt;
-        IncomingReceipt receiptIn = nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
+        var receiptIn =  nhnAdapterClient.messageReceipt(UUID.fromString(t.getConversation().getMessageReference()), t.getConversation().getSender()).getLast();
 
         try {
             HashMap<String, Object> reciept = new HashMap<>();
-            reciept.put("status", receiptIn.status());
-            reciept.put("errors", receiptIn.errors());
-            rawReceipt = ObjectMapperHolder.get().writeValueAsString(reciept);
+            reciept.put("status", receiptIn.getStatus());
+            reciept.put("errors", receiptIn.getErrors());
+            rawReceipt = KxJson.encode(receiptIn, SerializableApplicationReceiptInfo.Companion.serializer());
         } catch (Exception e) {
             try {
                 log.error("Unable to format apprec information",e);
                 rawReceipt = ObjectMapperHolder.get().writeValueAsString(Map.of("error",List.of(new ApplicationReceiptError(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL_FORMAT,"Unable to format apprec information"),
-                    "status",receiptIn.status())));
+                    "status",receiptIn.getStatus())));
             } catch (JsonProcessingException ex) {
                 throw new IllegalStateException("Unable to process apprec information");
             }

@@ -1,23 +1,20 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
-import no.difi.meldingsutveksling.api.CryptoMessagePersister;
+import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
-import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.Receiver;
-import no.difi.meldingsutveksling.nextmove.nhn.Sender;
-import no.difi.meldingsutveksling.serviceregistry.SRParameter;
+import no.difi.meldingsutveksling.nextmove.v2.NhnCryptoMessagePersister;
+import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
+import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
+import no.difi.meldingsutveksling.nhn.adapter.model.Receiver;
+import no.difi.meldingsutveksling.nhn.adapter.model.Sender;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -34,7 +31,7 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
     private final NhnAdapterClient adapterClient;
     private final ServiceRegistryLookup serviceRegistryLookup;
     private final ConversationService conversationService;
-    private final CryptoMessagePersister fileRepository;
+    private final NhnCryptoMessagePersister fileRepository;
 
 
     private String getHerID(NextMoveOutMessage message, ScopeType scopeType, String errorMessage) {
@@ -68,60 +65,13 @@ public class DphConversationStrategyImpl implements ConversationStrategy {
             String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
             String receiverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Receiver HERID1 is not available");
             String receiverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Receiver HERID2 is not available");
-            ServiceRecord receiverServiceRecord;
-            var reciever = (NhnIdentifier) message.getReceiver();
-            Dialogmelding dialogmelding = message.getBusinessMessage(Dialogmelding.class).orElseThrow();
-            DialogmeldingOut.DialogmeldingOutBuilder outMessageBuilder = DialogmeldingOut.builder()
-                .notat(dialogmelding.getNotat())
-                .vedleggBeskrivelse(dialogmelding.getVedleggBeskrivelse())
-                .responsibleHealthcareProfessionalId(reciever.getHerId2());
-            try {
-
-                if (reciever.isFastlegeIdentifier()) {
-                    receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
-                        .conversationId(message.getSbd().getConversationId())
-                        .process(message.getSbd().getProcess())
-                        .build(), message.getSbd().getDocumentType());
-
-
-                    Person patient = new Person(receiverServiceRecord.getPatient().fnr(), receiverServiceRecord.getPatient().firstName(), receiverServiceRecord.getPatient().middleName(), receiverServiceRecord.getPatient().lastName(), "88888");
-                    outMessageBuilder
-                        .patient(patient);
-
-                } else {
-                    //@TODO If the message is NHN we should validate the patient in the validation phase.
-                    // vi trenger å sikre at sånn fødselsnummer eksisterer.
-
-                    receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatientFnr())
-                        .conversationId(message.getSbd().getConversationId())
-                        .process(message.getSbd().getProcess())
-                        .build(), message.getSbd().getDocumentType());
-                    Patient pat = receiverServiceRecord.getPatient();
-                    if (dialogmelding.getResponsibleHealthcareProfessionalId() == null) {
-                        outMessageBuilder.responsibleHealthcareProfessionalId(reciever.getHerId2());
-                    }
-                    outMessageBuilder.patient(new Person(pat.fnr(), pat.firstName(), pat.middleName(), pat.lastName(), ""));
-
-
-                }
-
-            } catch (Exception e) {
-                log.error("Not able to get information about Person {} for {}", e.getMessage(), message.getMessageId(), e);
-                throw new NextMoveException("Not able to get information about Person " + e.getMessage(), e);
-            }
-            String fagmelding = "";
-
-            try {
-                fagmelding = ObjectMapperHolder.get().writeValueAsString(outMessageBuilder.build());
-            } catch (JsonProcessingException e) {
-                throw new NextMoveException(e);
-            }
+            EncryptedFagmelding dialogmelding = message.getBusinessMessage(EncryptedBusinessMessage.class).map(t-> new EncryptedFagmelding(t.getBase64DerEncryptionCertificate(),t.getMessage())).orElseThrow();
 
             Conversation conversation = conversationService.findConversation(message.getMessageId()).orElseThrow(() -> new NextMoveRuntimeException("Conversation not found for message " + message.getMessageId()));
             NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
 
-            DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-                new Sender(senderHerId1, senderHerId2, "To Do"), new Receiver(receiverHerId1, receiverHerId2, nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, base64EncodedVedleg);
+            MessageOut.Unsigned messageOut = new MessageOut.Unsigned(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
+                new Sender(senderHerId1, senderHerId2, "To Do"), new Receiver(receiverHerId1, receiverHerId2, nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), dialogmelding, base64EncodedVedleg);
             var messageReference = adapterClient.messageOut(messageOut);
             conversation.setMessageReference(messageReference);
             conversationService.save(conversation);

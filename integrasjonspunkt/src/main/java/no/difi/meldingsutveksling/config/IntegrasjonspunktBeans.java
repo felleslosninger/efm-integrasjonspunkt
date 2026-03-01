@@ -34,7 +34,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
-@Import({DpiConfig.class, Plumber.class, PromiseMaker.class})
+@Import({DpiConfig.class, Plumber.class, PromiseMaker.class,DphConfig.class})
 public class IntegrasjonspunktBeans {
 
     @Bean

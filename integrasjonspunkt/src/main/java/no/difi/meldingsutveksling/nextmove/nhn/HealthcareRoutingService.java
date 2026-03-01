@@ -8,8 +8,12 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.HealthcareValidationException;
+import no.difi.meldingsutveksling.nextmove.Dialogmelding;
+import no.difi.meldingsutveksling.nextmove.Person;
 import no.difi.meldingsutveksling.nextmove.v2.Participant;
 import no.difi.meldingsutveksling.nextmove.v2.ServiceRecordProvider;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,6 +28,7 @@ public class HealthcareRoutingService {
 
     private final ServiceRecordProvider serviceRecordProvider;
     private final IntegrasjonspunktProperties properties;
+    private final BusinessMessageEncryptionService businessMessageEncryptionService;
     @Value("${difi.move.feature.enableDPH:false}")
     private Boolean dphEnabled;
 
@@ -36,6 +41,7 @@ public class HealthcareRoutingService {
         withScopeValidation(sbd, doc -> {
             validate(sbd);
             applyRouting(sbd);
+            encryptBusinessMessage(sbd);
         });
     }
 
@@ -114,6 +120,28 @@ public class HealthcareRoutingService {
         }
 
 
+    }
+
+    private void encryptBusinessMessage(StandardBusinessDocument sbd) {
+        ServiceRecord srReceiver = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
+
+            var reciever = (NhnIdentifier) sbd.getReceiverIdentifier();
+            var dialogmelding = sbd.getBusinessMessage(Dialogmelding.class).get();
+
+            if (dialogmelding.getResponsibleHealthcareProfessionalId()==null) {
+                dialogmelding.setResponsibleHealthcareProfessionalId(reciever.getHerId2());
+            }
+
+            if (reciever.isFastlegeIdentifier()) {
+                Patient pat = srReceiver.getPatient();
+                dialogmelding.setPatient(new Person(pat.fnr(),pat.firstName(),pat.middleName(), pat.lastName(), "8888888"));
+            }
+
+            try {
+                sbd.setAny(businessMessageEncryptionService.encrypt(dialogmelding, srReceiver.getPemCertificate()));
+            } catch (EncryptionException e) {
+                throw new HealthcareValidationException("Not able to encrypt business message");
+            }
     }
 
     private void applyRouting(StandardBusinessDocument sbd) {

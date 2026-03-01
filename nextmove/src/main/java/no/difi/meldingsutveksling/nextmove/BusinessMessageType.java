@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import lombok.Getter;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
 import java.util.Arrays;
@@ -19,7 +20,11 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     FIKSIO("fiksio", FiksIoMessage.class),
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
-    DIALOGMELDING("dialogmelding",Dialogmelding.class),
+    DIALOGMELDING("dialogmelding",Dialogmelding.class) {
+        public boolean supportsEncryption() {
+            return true;
+        }
+    },
     PRINT("print", DpiPrintMessage.class),
 
     INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),

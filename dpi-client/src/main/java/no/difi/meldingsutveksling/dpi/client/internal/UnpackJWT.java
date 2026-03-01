@@ -67,9 +67,9 @@ public class UnpackJWT {
             return X509CertChainUtils.parse(jwsObject.getHeader().getX509CertChain())
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new DpiException("Could not find signing certificate!", Blame.SERVER));
+                    .orElseThrow(() -> new DpiException("Could not find signingKeystore certificate!", Blame.SERVER));
         } catch (ParseException e) {
-            throw new IllegalStateException("Could not parse signing certificate!", e);
+            throw new IllegalStateException("Could not parse signingKeystore certificate!", e);
         }
     }
 
