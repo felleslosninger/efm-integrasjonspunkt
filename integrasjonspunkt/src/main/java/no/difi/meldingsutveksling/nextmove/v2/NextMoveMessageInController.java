@@ -10,6 +10,7 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.core.io.Resource;
@@ -42,6 +43,7 @@ public class NextMoveMessageInController {
     private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final NextMoveMessageInService messageService;
+    private final NhnNextMoveMessageInService nhnMessageService;
 
     @GetMapping
     @Transactional
@@ -52,13 +54,17 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "peek")
-    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
+    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException {
+        if (input.herId2 != null) {
+            return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2),input.receiverIdentifier);
+        }
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
+
 
     @GetMapping(value = "pop/{messageId}")
     @Transactional

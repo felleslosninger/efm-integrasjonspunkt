@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -13,7 +14,6 @@ import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessExcepti
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.UnsupportedOperationStatusException;
 import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
