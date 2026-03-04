@@ -1,51 +1,46 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
 import no.difi.meldingsutveksling.nextmove.DpvVarselType;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.EmailContentType;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
 import no.digdir.altinn3.correspondence.model.NotificationChannelExt;
 import no.digdir.altinn3.correspondence.model.NotificationTemplateExt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {
-    NotificationFactory.class,
-    DpvTestConfig.class
-})
+@ExtendWith(MockitoExtension.class)
 public class NotificationFactoryTest {
 
-    @Inject
     private NotificationFactory notificationFactory;
 
-    @Inject
-    private Clock clock;
+    private final Clock clock = Clock.fixed(Instant.parse("2026-03-01T10:00:00Z"), ZoneId.of("UTC"));
 
-    @MockitoBean
+    @Mock
     private IntegrasjonspunktProperties properties;
 
-    @MockitoBean
+    @Mock
     private DpvHelper dpvHelper;
 
-    @MockitoBean
+    @Mock
     private ServiceRegistryHelper serviceRegistryHelper;
 
     private static final String SENDER_ORGNAME = "ACME Corp.";
@@ -60,16 +55,15 @@ public class NotificationFactoryTest {
 
     @BeforeEach
     void beforeEach() {
+
+        notificationFactory = new NotificationFactory(properties, clock, dpvHelper, serviceRegistryHelper);
+
         dpv.setNotificationText(NOTIFICATION_TEXT);
         dpv.setSensitiveNotificationText(NOTIFICATION_TEXT_SENSITIVE);
         dpv.setSensitiveResource(SENSITIVE_RESOURCE);
         dpv.setEmailSubject(EMAIL_SUBJECT);
 
         when(properties.getDpv()).thenReturn(dpv);
-        when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(
-            new ServiceRecord()
-                .setService(new Service()
-                    .setResource(RESOURCE)));
         when(serviceRegistryHelper.getSenderName(Mockito.any())).thenReturn(SENDER_ORGNAME);
     }
 

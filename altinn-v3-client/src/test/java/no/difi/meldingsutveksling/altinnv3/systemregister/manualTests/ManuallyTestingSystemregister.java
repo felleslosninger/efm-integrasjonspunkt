@@ -1,7 +1,9 @@
-package no.difi.meldingsutveksling.altinnv3.systemregister;
+package no.difi.meldingsutveksling.altinnv3.systemregister.manualTests;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterExtendedApiClient;
+import no.difi.meldingsutveksling.altinnv3.systemregister.SystemuserTokenProducer;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.SystemregisterTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
