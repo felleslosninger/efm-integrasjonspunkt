@@ -1,7 +1,8 @@
-package no.difi.meldingsutveksling.altinnv3.dpo;
+package no.difi.meldingsutveksling.altinnv3.dpo.manualTests;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.dpo.BrokerApiClient;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemuserTokenProducer;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.DpoTokenProducer;

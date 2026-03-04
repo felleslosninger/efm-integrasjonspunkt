@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.dpo;
+package no.difi.meldingsutveksling.altinnv3.dpo.manualTests;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;

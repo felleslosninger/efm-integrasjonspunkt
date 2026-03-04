@@ -1,17 +1,19 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import jakarta.xml.bind.JAXBException;
-import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.digdir.altinn3.broker.model.FileTransferOverviewExt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -21,20 +23,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPODownloadService.class)
-@UseFullTestConfiguration
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AltinnDownloadServiceTest {
 
-    @MockitoBean
+    @Mock
     private BrokerApiClient brokerApiClient;
 
-    @MockitoBean
+    @Mock
     private IntegrasjonspunktProperties integrasjonspunktProperties;
 
-    @MockitoBean
+    @Mock
     private ZipUtils zipUtils;
 
-    @Autowired
+    @InjectMocks
     private AltinnDPODownloadService altinnDownloadService;
 
     private final UUID fileWithRandomMessageChannel = UUID.fromString("dc11ecad-dc5c-44a3-b566-b460485580f8");
