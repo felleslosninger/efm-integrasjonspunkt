@@ -123,7 +123,7 @@ public class NhnAdapterClient {
     }
 
     public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {
-        var documentString = dphClient.method(HttpMethod.GET).uri("/readMessage").retrieve()
+        var documentString = dphClient.method(HttpMethod.GET).uri(INCOMING_BUSINES_DOCUMENT_PATH.formatted(messageReference.toString())+ "?onBehalfOf=" + onBehalfOf).retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
                 throw new NextMoveRuntimeException(resp.getStatusText());
             })
