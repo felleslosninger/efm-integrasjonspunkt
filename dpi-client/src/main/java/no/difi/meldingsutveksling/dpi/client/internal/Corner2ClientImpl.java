@@ -35,6 +35,7 @@ public class Corner2ClientImpl implements Corner2Client {
     private final CreateMaskinportenToken createMaskinportenToken;
     private final CreateMultipart createMultipart;
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
+    private final int pageSize;
 
     @Override
     public void sendMessage(SendMessageInput input) {
@@ -70,6 +71,7 @@ public class Corner2ClientImpl implements Corner2Client {
                     uriBuilder.path("/messages/in");
                     Optional.ofNullable(input.getSenderId()).ifPresent(p -> uriBuilder.queryParam("avsenderidentifikator", p));
                     Optional.ofNullable(input.getChannel()).ifPresent(p -> uriBuilder.queryParam("kanal", p));
+                    uriBuilder.queryParam("page_size", pageSize);
                     return uriBuilder.build();
                 })
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
@@ -113,4 +115,5 @@ public class Corner2ClientImpl implements Corner2Client {
                 .onErrorResume(WebClientResponseException.NotFound.class, notFound -> Mono.empty())
                 .block();
     }
+
 }

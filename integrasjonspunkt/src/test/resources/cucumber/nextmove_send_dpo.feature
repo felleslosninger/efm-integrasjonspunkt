@@ -159,34 +159,8 @@ Feature: Sending a Next Move DPO message
     """
     And the sent Altinn ZIP contains the following files:
       | filename       |
-      | manifest.xml   |
-      | recipients.xml |
       | sbd.json       |
       | asic.zip       |
-    And the content of the Altinn ZIP file named "manifest.xml" is:
-    """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <BrokerServiceManifest xmlns="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
-       <ExternalServiceCode>v3888</ExternalServiceCode>
-       <ExternalServiceEditionCode>70515</ExternalServiceEditionCode>
-       <SendersReference>19efbd4c-413d-4e2c-bbc5-257ef4a65b38</SendersReference>
-       <Reportee>910077473</Reportee>
-       <FileList>
-          <File>
-             <FileName>sbd.json</FileName>
-          </File>
-       </FileList>
-    </BrokerServiceManifest>
-    """
-    And the content of the Altinn ZIP file named "recipients.xml" is:
-    """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <BrokerServiceRecipientList xmlns="http://schema.altinn.no/services/ServiceEngine/Broker/2015/06">
-       <Recipient>
-          <PartyNumber>910075918</PartyNumber>
-       </Recipient>
-    </BrokerServiceRecipientList>
-    """
     And the JSON content of the Altinn ZIP file named "sbd.json" is:
     """
     {
