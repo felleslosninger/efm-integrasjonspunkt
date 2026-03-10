@@ -7,7 +7,9 @@ import no.difi.move.common.oauth.JwtTokenAdditionalClaims;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ClaimsFactoryTest {
 
@@ -15,18 +17,18 @@ public class ClaimsFactoryTest {
     @DisplayName("Should create authorization claims from values set in properties")
     void shouldReturnAuthorizationClaims() throws JsonProcessingException {
         String expectedResultInJsonFormat = """
-        {
-          "claims" : {
-            "authorization_details" : [ {
-              "systemuser_org" : {
-                "authority" : "iso6523-actorid-upis",
-                "ID" : "0192:311780735"
-              },
-              "type" : "urn:altinn:systemuser",
-              "externalRef" : "externalref"
-            } ]
-          }
-        }""";
+            {
+              "claims" : {
+                "authorization_details" : [ {
+                  "systemuser_org" : {
+                    "authority" : "iso6523-actorid-upis",
+                    "ID" : "0192:311780735"
+                  },
+                  "type" : "urn:altinn:systemuser",
+                  "externalRef" : "externalref"
+                } ]
+              }
+            }""";
 
         var systemUser = new AltinnSystemUser();
         systemUser.setOrgId("0192:311780735");
@@ -40,7 +42,9 @@ public class ClaimsFactoryTest {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
 
-        assertEquals(expectedResultInJsonFormat, json, "Generated claims should be the same as expected result");
+        assertThat(expectedResultInJsonFormat)
+            .describedAs("Generated claims should be the same as expected result")
+            .isEqualToIgnoringNewLines(json);
     }
 
 }
