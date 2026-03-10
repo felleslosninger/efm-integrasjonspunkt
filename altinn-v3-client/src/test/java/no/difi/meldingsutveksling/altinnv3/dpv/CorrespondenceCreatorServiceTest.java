@@ -9,10 +9,11 @@ import no.difi.meldingsutveksling.nextmove.DigitalDpvMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 
@@ -20,21 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {
-    CorrespondenceCreatorService.class,
-})
+@ExtendWith(MockitoExtension.class)
 public class CorrespondenceCreatorServiceTest {
 
-    @Autowired
+    @InjectMocks
     private CorrespondenceCreatorService correspondenceCreatorService;
 
-    @MockitoBean
+    @Mock
     private CorrespondenceFactory correspondenceFactory;
 
-    @MockitoBean
+    @Mock
     private DpvHelper dpvHelper;
 
-    @MockitoBean
+    @Mock
     private ArkivmeldingUtil arkivmeldingUtil;
 
     private NextMoveOutMessage message;
