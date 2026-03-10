@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -14,10 +13,11 @@ import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
 import no.digdir.altinn3.correspondence.model.InitializedCorrespondencesExt;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,24 +25,20 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(classes = AltinnDPVService.class)
-@UseFullTestConfiguration
+@ExtendWith(MockitoExtension.class)
 public class AltinnDPVServiceTest {
 
-    @Autowired
+    @InjectMocks
     private AltinnDPVService altinnDPVService;
 
-    @MockitoBean
+    @Mock
     private CorrespondenceApiClient correspondenceApiClient;
 
-    @MockitoBean
+    @Mock
     private CorrespondenceCreatorService correspondenceCreatorService;
 
-    @MockitoBean
+    @Mock
     private FileRetriever fileRetriever;
-
-    @MockitoBean
-    private ServiceRegistryHelper serviceRegistryHelper;
 
     private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
     private static final Iso6523 RECEIVER = Iso6523.of(ICD.NO_ORG, "222222222");
@@ -71,7 +67,6 @@ public class AltinnDPVServiceTest {
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setService(new Service());
 
-        Mockito.when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
         Mockito.when(fileRetriever.getFiles(Mockito.any())).thenReturn(List.of(new FileUploadRequest(new BusinessMessageFile(), null)));
         Mockito.when(correspondenceCreatorService.create(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(initializeCorrespondencesExt);
         Mockito.when(correspondenceApiClient.upload(Mockito.any(), Mockito.any())).thenReturn(response2);

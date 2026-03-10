@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.altinnv3.token;
+package no.difi.meldingsutveksling.altinnv3.token.manualTests;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import no.difi.meldingsutveksling.altinnv3.token.*;
 import org.junit.jupiter.api.*;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
