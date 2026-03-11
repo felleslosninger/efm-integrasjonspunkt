@@ -7,6 +7,7 @@ import kotlinx.serialization.builtins.BuiltinSerializersKt;
 import kotlinx.serialization.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.exceptions.CanNotRetrieveHealthcareStatusException;
+import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
@@ -126,6 +127,9 @@ public class NhnAdapterClient {
 
     public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {
         var documentString = dphClient.method(HttpMethod.GET).uri(INCOMING_BUSINES_DOCUMENT_PATH.formatted(messageReference.toString())+ "?onBehalfOf=" + onBehalfOf).retrieve()
+            .onStatus(t-> t == HttpStatus.NOT_FOUND,  (request, resp) -> {
+                throw new NoContentException();
+            })
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
                 throw new NextMoveRuntimeException(resp.getStatusText());
             })
@@ -165,11 +169,7 @@ public class NhnAdapterClient {
             KSerializer<List<SerializableApplicationReceiptInfo>> ser =
                 BuiltinSerializersKt.ListSerializer(SerializableApplicationReceiptInfo.Companion.serializer());
 
-
             receipts = KxJson.decode(new String(decryptedReceipts), ser);
-
-
-
 
         } catch (EncryptionException e) {
             throw e;
@@ -183,7 +183,6 @@ public class NhnAdapterClient {
         String uri = MARK_AS_READ_PATH.formatted(herId2, messageReference) + "?onBehalfOf=" + onBehalfOf;
         dphClient.method(HttpMethod.POST)
             .uri(uri)
-           // .body("This is body")
             .retrieve()
             .toEntity(String.class).getBody();
     }

@@ -61,7 +61,7 @@ public class NextMoveMessageInController {
     @GetMapping(value = "peek")
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException {
         if (input.herId2 != null) {
-            return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2),input.receiverIdentifier);
+            return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2));
         }
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
@@ -120,16 +120,12 @@ public class NextMoveMessageInController {
     @Transactional
     public StandardBusinessDocument deleteMessage(
         @PathVariable String messageId,
-        @RequestParam(required = false) Integer herId2,
-        @RequestParam(required = false) String onBehalfOf) throws ServiceRegistryLookupException {
+        @RequestParam(required = false) Integer herId2) throws ServiceRegistryLookupException {
 
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         if (herId2!=null) {
-            if (nhnMessageService.isMessageRead(messageId, herId2, onBehalfOf)) {
-                throw new RuntimeException("Message is already read");
-            }
-            StandardBusinessDocument sbd = nhnMessageService.getMessageById(messageId,herId2,onBehalfOf);
-            nhnMessageService.markAsRead(messageId, herId2,onBehalfOf);
+            StandardBusinessDocument sbd = nhnMessageService.getMessageById(messageId,herId2);
+            nhnMessageService.markAsRead(messageId, herId2);
             return sbd;
         }
         else {
