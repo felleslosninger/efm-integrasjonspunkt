@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-slim
+FROM eclipse-temurin:8-jre
 
 RUN groupadd -o -g 1000 java \
     && useradd -o -r -m -u 1000 -g 1000 java
@@ -17,6 +17,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     rm -rf /var/cache/apt/* && \
     openssl s_client -connect ${HOST}:${PORT} </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ${HOST}.cert && \
     keytool -import -noprompt -trustcacerts -alias ${HOST} -file ${HOST}.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
+    openssl s_client -showcerts -connect eformidling.no:443 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > eformidling.cert && \
+    keytool -import -noprompt -trustcacerts -file eformidling.cert -keystore ${KEYSTOREFILE} -storepass ${KEYSTOREPASS} && \
     mkdir ${APP_DIR} && \
     touch ${APP_DIR}/integrasjonspunkt-local.properties
 
