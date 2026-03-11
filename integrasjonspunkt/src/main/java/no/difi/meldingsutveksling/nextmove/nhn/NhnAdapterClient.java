@@ -41,6 +41,7 @@ public class NhnAdapterClient {
     private final String uri;
     private final String MESSAGE_OUT_PATH ;
     private final String MESSAGE_RECEIPT_PATH;
+    private final String MARK_AS_READ_PATH;
     private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
     private final String MESSAGE_STATUS_PATH;
     private final String INCOMING_MESSAGE_PATH;
@@ -66,6 +67,7 @@ public class NhnAdapterClient {
         this.INCOMING_MESSAGE_PATH = uri + "/in/%s";
         this.INCOMING_BUSINES_DOCUMENT_PATH = uri + "/in/%s/businessDocument";
         this.MESSAGE_STATUS_PATH = uri + "/status/%s";
+        this.MARK_AS_READ_PATH = uri + "/in/%d/%s/markAsRead";
 
     }
 
@@ -175,5 +177,14 @@ public class NhnAdapterClient {
             throw new NextMoveRuntimeException("Not able to parse incoming receipt", e);
         }
         return receipts;
+    }
+
+    public void markAsRead(UUID messageReference, Integer herId2,String onBehalfOf) {
+        String uri = MARK_AS_READ_PATH.formatted(herId2, messageReference) + "?onBehalfOf=" + onBehalfOf;
+        dphClient.method(HttpMethod.POST)
+            .uri(uri)
+           // .body("This is body")
+            .retrieve()
+            .toEntity(String.class).getBody();
     }
 }

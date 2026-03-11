@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
@@ -21,10 +23,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -64,7 +69,6 @@ public class NextMoveMessageInController {
         Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
     }
-
 
     @GetMapping(value = "pop/{messageId}")
     @Transactional
@@ -110,13 +114,27 @@ public class NextMoveMessageInController {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to copy stream!", e);
         }
-
     }
 
     @DeleteMapping(value = "/{messageId}")
     @Transactional
-    public StandardBusinessDocument deleteMessage(@PathVariable String messageId) {
+    public StandardBusinessDocument deleteMessage(
+        @PathVariable String messageId,
+        @RequestParam(required = false) Integer herId2,
+        @RequestParam(required = false) String onBehalfOf) throws ServiceRegistryLookupException {
+
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
-        return messageService.deleteMessage(messageId);
+        if (herId2!=null) {
+            if (nhnMessageService.isMessageRead(messageId, herId2, onBehalfOf)) {
+                throw new RuntimeException("Message is already read");
+            }
+            StandardBusinessDocument sbd = nhnMessageService.getMessageById(messageId,herId2,onBehalfOf);
+            nhnMessageService.markAsRead(messageId, herId2,onBehalfOf);
+            return sbd;
+        }
+        else {
+            return messageService.deleteMessage(messageId);
+        }
+
     }
 }

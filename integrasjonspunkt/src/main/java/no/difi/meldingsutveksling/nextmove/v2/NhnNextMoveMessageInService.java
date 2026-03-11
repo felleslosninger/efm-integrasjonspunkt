@@ -47,11 +47,43 @@ public class NhnNextMoveMessageInService {
             String conversationId = incomingDocument.getConversationRef()!=null ? incomingDocument.getConversationRef().getRefToConversation() : UUID.randomUUID().toString();
             var notatFromBd = incomingDocument.getMessage().getNotat();
             var patient = incomingDocument.getReceiver().getPatient();
-            Dialogmelding dialogmelding = new Dialogmelding(new Notat(notatFromBd.getTema(),notatFromBd.getInnhold()),patient.getFnr(),senderSr.getHerIdLevel2(),incomingDocument.getVedlegg().getDescription(), new Person(patient.getFnr(),patient.getFnr(),patient.getMiddleName(), patient.getLastName(),""));
+            Dialogmelding dialogmelding = new Dialogmelding(new Notat(notatFromBd.getTemaBeskrivelse(),notatFromBd.getInnhold()),patient.getFnr(),senderSr.getHerIdLevel2(),incomingDocument.getVedlegg().getDescription(), new Person(patient.getFnr(),patient.getFnr(),patient.getMiddleName(), patient.getLastName(),""));
 
-            return sbdFactory.createNextMoveSBD(senderIdentifier,receiverIdentifier,conversationId,incomingDocument.getId(),nhnProcess,standardDocumentType ,dialogmelding);
+            return sbdFactory.createNextMoveSBD(senderIdentifier,receiverIdentifier,conversationId,firstIncoming.getId(),nhnProcess,standardDocumentType ,dialogmelding);
         }
     return null;
+    }
+
+    public boolean isMessageRead(String messageId, Integer herId2, String onBehalfOf) {
+        return nhnClient.incomingMessages(herId2,onBehalfOf).stream().noneMatch(t->t.getId().equals(messageId));
+    }
+
+    public StandardBusinessDocument getMessageById(String id,Integer herId2,String onBehalfOf) throws ServiceRegistryLookupException {
+
+            SerializeableIncomingBusinessDocument incomingDocument = nhnClient.incomingBusinessDocument(UUID.fromString(id),onBehalfOf);
+            // jeg tror ikke det kan komme noe annet en HerID her men......
+            var recieverHerId1 = incomingDocument.getReceiver().getParent().getIds().getFirst().getId();
+            var recieverHerId2 = incomingDocument.getReceiver().getChild().getIds().getFirst().getId();
+            var senderHerId1 = incomingDocument.getSender().getParent().getIds().getFirst().getId();
+            var senderHerId2 = incomingDocument.getSender().getChild().getIds().getFirst().getId();
+
+            var senderSr = serviceRegistryLookup.getServiceRecord(SRParameter.builder(senderHerId2+"").process(nhnProcess).build(), standardDocumentType);
+            var receiverSr = serviceRegistryLookup.getServiceRecord(SRParameter.builder(recieverHerId2 +"").process(nhnProcess).build(),standardDocumentType);
+
+            NhnIdentifier receiverIdentifier = NhnIdentifier.of(receiverSr.getOrganisationNumber(),receiverSr.getHerIdLevel1(), receiverSr.getHerIdLevel2());
+            NhnIdentifier  senderIdentifier = NhnIdentifier.of(senderSr.getOrganisationNumber(),senderSr.getHerIdLevel1(), senderSr.getHerIdLevel2());
+
+
+            String conversationId = incomingDocument.getConversationRef()!=null ? incomingDocument.getConversationRef().getRefToConversation() : UUID.randomUUID().toString();
+            var notatFromBd = incomingDocument.getMessage().getNotat();
+            var patient = incomingDocument.getReceiver().getPatient();
+            Dialogmelding dialogmelding = new Dialogmelding(new Notat(notatFromBd.getTemaBeskrivelse(),notatFromBd.getInnhold()),patient.getFnr(),senderSr.getHerIdLevel2(),incomingDocument.getVedlegg().getDescription(), new Person(patient.getFnr(),patient.getFnr(),patient.getMiddleName(), patient.getLastName(),""));
+
+            return sbdFactory.createNextMoveSBD(senderIdentifier,receiverIdentifier,conversationId,incomingDocument.getId(),nhnProcess,standardDocumentType ,dialogmelding);
+    }
+
+    public void markAsRead(String messageId, Integer herId2, String onBehalfOf) {
+        nhnClient.markAsRead(UUID.fromString(messageId),herId2,onBehalfOf);
     }
 
 }
