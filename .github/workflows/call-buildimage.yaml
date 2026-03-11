@@ -14,7 +14,7 @@ jobs:
       java-version: 8
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
-      artifact-path: integrasjonspunkt/
+      application-path: integrasjonspunkt/
     secrets: inherit
 
   build-and-deploy-image:
