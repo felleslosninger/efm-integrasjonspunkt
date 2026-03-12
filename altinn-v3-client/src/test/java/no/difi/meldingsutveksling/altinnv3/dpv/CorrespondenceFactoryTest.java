@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
 import no.difi.meldingsutveksling.domain.ICD;
@@ -15,12 +14,14 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -33,32 +34,25 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {
-    CorrespondenceFactory.class,
-    DpvTestConfig.class
-})
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CorrespondenceFactoryTest {
 
-    @Autowired
     private CorrespondenceFactory correspondenceFactory;
 
-    @MockitoBean
+    @Mock
     private NotificationFactory notificationFactory;
 
-    @MockitoBean
+    @Mock
     private IntegrasjonspunktProperties properties;
 
-    @Autowired
-    private Clock clock;
-
-    @MockitoBean
+    @Mock
     private DpvHelper dpvHelper;
 
-    @MockitoBean
+    @Mock
     private ServiceRegistryHelper serviceRegistryHelper;
 
-    @MockitoBean
-    private ArkivmeldingUtil arkivmeldingUtil;
+    private final Clock clock = Clock.fixed(OffsetDateTime.now().toInstant(), OffsetDateTime.now().getOffset());
 
     private NextMoveOutMessage message;
     private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
@@ -70,6 +64,15 @@ public class CorrespondenceFactoryTest {
 
     @BeforeEach
     public void setup() {
+
+        correspondenceFactory = new CorrespondenceFactory(
+            notificationFactory,
+            clock,
+            dpvHelper,
+            serviceRegistryHelper,
+            properties
+        );
+
         ServiceRecord serviceRecord = new ServiceRecord();
         serviceRecord.setService(new Service().setResource(ALTINN_RESOURCE_ID));
 
