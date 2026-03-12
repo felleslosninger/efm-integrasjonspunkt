@@ -3,12 +3,16 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
-import no.difi.meldingsutveksling.config.*;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktHandlerExceptionResolver;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
+import no.difi.meldingsutveksling.nextmove.v2.NhnNextMoveMessageInService;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,33 +30,52 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
-import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.arkivmeldingMessageDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getPagingParameterDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageableDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.publiseringMessageDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.standardBusinessDocumentHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.ARKIVMELDING_SBD;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.PUBLISERING_MESSAGE_RESPONSE;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.PUBLISERING_SBD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {
@@ -78,6 +101,9 @@ class NextMoveMessageInControllerTest {
 
     @Mock
     private IntegrasjonspunktProperties.Organization organization;
+
+    @MockitoBean
+    private NhnNextMoveMessageInService nhnNextMoveMessageInService;
 
     @Captor
     private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;

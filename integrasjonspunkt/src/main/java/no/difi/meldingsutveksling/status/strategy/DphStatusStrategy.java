@@ -7,10 +7,9 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
-import no.difi.meldingsutveksling.nextmove.nhn.ApprecStatus;
-import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageStatus;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.TransportStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.ApprecStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.TransportStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
@@ -45,29 +44,29 @@ public class DphStatusStrategy implements StatusStrategy {
                 try {
                 NhnIdentifier sender = getNhnIdentifier(conversation::getSender, conversation::getSenderIdentifier);
                 NhnIdentifier reciever = getNhnIdentifier(conversation::getReceiver, conversation::getReceiverIdentifier);
-                DPHMessageStatus status = nhnAdapterClient.messageStatus(UUID.fromString(conversation.getMessageReference()), sender.getIdentifier());
+                no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus status = nhnAdapterClient.messageStatus(UUID.fromString(conversation.getMessageReference()), sender.getIdentifier());
 
                 Optional<MessageStatus> mottat = conversation.getMessageStatuses().stream().filter(t -> Objects.equals(t.getStatus(), ReceiptStatus.MOTTATT.name())).findAny();
 
-                if (!mottat.isPresent() && status.transportStatus() == TransportStatus.REJECTED) {
+                if (!mottat.isPresent() && status.getTransportStatus() == TransportStatus.REJECTED) {
                     conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Message rejected in transport"));
 
                 }
-                if (!mottat.isPresent() && status.transportStatus() == TransportStatus.ACKNOWLEDGED) {
+                if (!mottat.isPresent() && status.getTransportStatus() == TransportStatus.ACKNOWLEDGED) {
                     conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.MOTTATT, OffsetDateTime.now(), "Transport reciept is recieved"));
                 }
 
                 Optional<MessageStatus> levert = conversation.getMessageStatuses().stream().filter(t -> Objects.equals(t.getStatus(), ReceiptStatus.LEVERT.name())).findAny();
 
-                if (!levert.isPresent() && status.apprecStatus() != null) {
-                    if (status.apprecStatus() == ApprecStatus.OK) {
+                if (!levert.isPresent() && status.getApprecStatus() != null) {
+                    if (status.getApprecStatus() == no.difi.meldingsutveksling.nhn.adapter.model.ApprecStatus.OK) {
                         conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.LEST, OffsetDateTime.now(), "Application reciept has been recieved."));
-                    } else if (status.apprecStatus() == ApprecStatus.REJECTED) {
+                    } else if (status.getApprecStatus() == no.difi.meldingsutveksling.nhn.adapter.model.ApprecStatus.REJECTED) {
                         conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Message has been rejected by the application"));
-                    } else if (status.apprecStatus() == ApprecStatus.OK_ERROR_IN_MESSAGE_PART) {
+                    } else if (status.getApprecStatus() == ApprecStatus.OK_ERROR_IN_MESSAGE_PART) {
                         conversationService.registerStatus(conversation, MessageStatus.of(ReceiptStatus.FEIL, OffsetDateTime.now(), "Error in business message."));
                     } else {
-                        throw new NextMoveRuntimeException("Apprec status is not known to the application" + status.apprecStatus());
+                        throw new NextMoveRuntimeException("Apprec status is not known to the application" + status.getApprecStatus());
                     }
                 }
             } catch(Exception e) {

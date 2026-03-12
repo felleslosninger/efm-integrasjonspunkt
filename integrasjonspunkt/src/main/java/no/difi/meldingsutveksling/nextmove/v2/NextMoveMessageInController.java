@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
@@ -10,6 +12,7 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.core.io.Resource;
@@ -20,10 +23,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,6 +48,7 @@ public class NextMoveMessageInController {
     private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final NextMoveMessageInService messageService;
+    private final NhnNextMoveMessageInService nhnMessageService;
 
     @GetMapping
     @Transactional
@@ -52,7 +59,10 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "peek")
-    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
+    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException {
+        if (input.herId2 != null) {
+            return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2));
+        }
         NextMoveInMessage message = messageService.peek(input)
                 .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
@@ -104,13 +114,23 @@ public class NextMoveMessageInController {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to copy stream!", e);
         }
-
     }
 
     @DeleteMapping(value = "/{messageId}")
     @Transactional
-    public StandardBusinessDocument deleteMessage(@PathVariable String messageId) {
+    public StandardBusinessDocument deleteMessage(
+        @PathVariable String messageId,
+        @RequestParam(required = false) Integer herId2) throws ServiceRegistryLookupException {
+
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
-        return messageService.deleteMessage(messageId);
+        if (herId2!=null) {
+            StandardBusinessDocument sbd = nhnMessageService.getMessageById(messageId,herId2);
+            nhnMessageService.markAsRead(messageId, herId2);
+            return sbd;
+        }
+        else {
+            return messageService.deleteMessage(messageId);
+        }
+
     }
 }
