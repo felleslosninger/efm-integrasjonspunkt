@@ -36,10 +36,7 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -151,6 +148,12 @@ public class AltinnWsClient {
                     !p.matcher(f.getSendersReference().getValue()).matches());
         }
         return fileStream
+                .sorted(Comparator.comparing(
+                        BrokerServiceAvailableFile::getSentDate,
+                        Comparator.nullsLast(Comparator.comparingLong(cal ->
+                                cal.toGregorianCalendar().getTimeInMillis()
+                        ))
+                ))
                 .map(f -> new FileReference(f.getFileReference(), f.getReceiptID()))
                 .collect(Collectors.toList());
     }
