@@ -14,21 +14,20 @@ import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
-import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
-import no.difi.meldingsutveksling.nhn.adapter.model.InMessage;
-import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
-import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
-import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
-import no.difi.meldingsutveksling.nhn.adapter.model.SerializeableIncomingBusinessDocument;
+import no.difi.meldingsutveksling.nhn.adapter.model.*;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -40,7 +39,7 @@ public class NhnAdapterClient {
     private RestClient dphClient;
 
     private final String uri;
-    private final String MESSAGE_OUT_PATH ;
+    private final String MESSAGE_OUT_PATH;
     private final String MESSAGE_RECEIPT_PATH;
     private final String MARK_AS_READ_PATH;
     private final String ON_BEHALF_OF_PARAM = "onBehalfOf";
@@ -51,7 +50,6 @@ public class NhnAdapterClient {
     private final NhnKeystore keystore;
     private final BusinessMessageEncryptionService businessMessageEncryptionService;
     private final SignatureValidator signatureValidator;
-
 
 
     public NhnAdapterClient(RestClient dphClient, @Value("${difi.move.dph.adapter.url}") String uri, Signer signer, NhnKeystore keystore, BusinessMessageEncryptionService businessMessageEncryptionService, SignatureValidator signatureValidator) {
@@ -76,7 +74,7 @@ public class NhnAdapterClient {
         final String signedJson;
         try {
 
-            String rawJson =   KxJson.encode(messageOut, MessageOut.Unsigned.Companion.serializer());
+            String rawJson = KxJson.encode(messageOut, MessageOut.Unsigned.Companion.serializer());
 
             signedJson = signer.sign(rawJson);
 
@@ -97,37 +95,36 @@ public class NhnAdapterClient {
             .contentType(MediaType.APPLICATION_JSON)
             .body(signedJson)
             .retrieve()
-            .onStatus(t -> t.equals(HttpStatus.BAD_REQUEST),
-                (request, resp) -> {
-                    throw new NextMoveRuntimeException(resp.getStatusText());
-                })
-            .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
-                throw new NextMoveRuntimeException(resp.getStatusText());
-            })
-            .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
-                throw new NextMoveRuntimeException("Server error");
-            })).toEntity(String.class).getBody();
+            .onStatus(HttpStatusCode::isError, (request, resp) -> throwNextMoveRuntimeException(resp)).toEntity(String.class).getBody();
     }
 
+    private void throwNextMoveRuntimeException(ClientHttpResponse response) throws IOException {
+        try (InputStream is = response.getBody()) {
+            String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            throw new NextMoveRuntimeException(text);
+        } catch (IOException e) {
+            throw new NextMoveRuntimeException(response.getStatusText());
+        }
+    }
 
     public MessageStatus messageStatus(UUID messageReference, String onBehalfOf) {
-        var statusString = dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference)  + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
+        var statusString = dphClient.method(HttpMethod.GET).uri(MESSAGE_STATUS_PATH.formatted(messageReference) + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
         if (statusString == null) {
             throw new NextMoveRuntimeException("DPHMessageStatus returned null");
         }
-        return KxJson.decode(statusString,MessageStatus.Companion.serializer());
+        return KxJson.decode(statusString, MessageStatus.Companion.serializer());
     }
 
     public List<InMessage> incomingMessages(Integer herId2, String onBehalfOf) {
-        var messageId = dphClient.method(HttpMethod.GET).uri(INCOMING_MESSAGE_PATH.formatted(herId2)+ "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
+        var messageId = dphClient.method(HttpMethod.GET).uri(INCOMING_MESSAGE_PATH.formatted(herId2) + "?onBehalfOf=" + onBehalfOf).retrieve().toEntity(String.class).getBody();
         KSerializer<List<InMessage>> ser =
             BuiltinSerializersKt.ListSerializer(InMessage.Companion.serializer());
         return KxJson.decode(messageId, ser);
     }
 
     public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {
-        var documentString = dphClient.method(HttpMethod.GET).uri(INCOMING_BUSINES_DOCUMENT_PATH.formatted(messageReference.toString())+ "?onBehalfOf=" + onBehalfOf).retrieve()
-            .onStatus(t-> t == HttpStatus.NOT_FOUND,  (request, resp) -> {
+        var documentString = dphClient.method(HttpMethod.GET).uri(INCOMING_BUSINES_DOCUMENT_PATH.formatted(messageReference.toString()) + "?onBehalfOf=" + onBehalfOf).retrieve()
+            .onStatus(t -> t == HttpStatus.NOT_FOUND, (request, resp) -> {
                 throw new NoContentException();
             })
             .onStatus(HttpStatusCode::is4xxClientError, (request, resp) -> {
@@ -137,9 +134,8 @@ public class NhnAdapterClient {
                 throw new NextMoveRuntimeException("Server error");
             })
             .toEntity(String.class).getBody();
-         return KxJson.decode(documentString, SerializeableIncomingBusinessDocument.Companion.serializer());
+        return KxJson.decode(documentString, SerializeableIncomingBusinessDocument.Companion.serializer());
     }
-
 
 
     public List<SerializableApplicationReceiptInfo> messageReceipt(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException {
@@ -161,7 +157,7 @@ public class NhnAdapterClient {
 
         List<SerializableApplicationReceiptInfo> receipts;
         try {
-            JsonObject encryptedReceiptsJson =  KxJson.decode(encryptedReciepts, JsonObject.Companion.serializer()); // ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
+            JsonObject encryptedReceiptsJson = KxJson.decode(encryptedReciepts, JsonObject.Companion.serializer()); // ObjectMapperHolder.get().readValue(encryptedReciepts, EncryptedReceipts.class);
             EncryptedFagmelding encryptedReceipts = KxJson.decode(Objects.requireNonNull(encryptedReceiptsJson.get("receipts")), EncryptedFagmelding.Companion.serializer());
 
             byte[] decryptedReceipts = businessMessageEncryptionService.decrypt(encryptedReceipts);
@@ -179,7 +175,7 @@ public class NhnAdapterClient {
         return receipts;
     }
 
-    public void markAsRead(UUID messageReference, Integer herId2,String onBehalfOf) {
+    public void markAsRead(UUID messageReference, Integer herId2, String onBehalfOf) {
         String uri = MARK_AS_READ_PATH.formatted(herId2, messageReference) + "?onBehalfOf=" + onBehalfOf;
         dphClient.method(HttpMethod.POST)
             .uri(uri)
