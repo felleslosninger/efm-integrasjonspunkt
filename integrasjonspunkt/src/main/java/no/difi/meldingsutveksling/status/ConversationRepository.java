@@ -76,8 +76,9 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     List<Conversation> findByDirection(ConversationDirection direction);
 
     void deleteByMessageId(String messageId);
-
-    @Query("SELECT id FROM Conversation WHERE pollable = true")
+    
+    // Support for legacy conversations where finished is set to true, but pollable for some reason is still true. These should be cleaned up by a scheduled task, but in the meantime, they should not be polled.
+    @Query("SELECT id FROM Conversation WHERE pollable = true AND finished = false")
     Page<Long> findIdsForPollableConversations(Pageable pageable);
 
     @Transactional(readOnly = true)
