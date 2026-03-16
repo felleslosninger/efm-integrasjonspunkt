@@ -60,6 +60,10 @@ public class DpvStatusStrategy implements StatusStrategy {
 
         for (Conversation conversation : conversations) {
             try {
+                if (conversation.getExternalSystemReference() == null) {
+                    throw new IllegalStateException(
+                            "Missing externalSystemReference (Altinn correspondence ID) for conversation " + conversation.getConversationId());
+                }
                 List<CorrespondenceStatusEventExt> statuses = altinnService.getStatus(conversation);
                 updateStatus(conversation, statuses);
             } catch (Exception e) {

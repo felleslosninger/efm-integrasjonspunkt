@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.pipe.PromiseRuntimeException;
@@ -61,6 +62,13 @@ public class InternalQueue {
         try {
             MDC.put(NextMoveConsts.CORRELATION_ID, nextMoveMessage.getMessageId());
             nextMoveSender.send(nextMoveMessage);
+        } catch (CorrespondenceApiException e) {
+            if (e.isClientError()) {
+                log.error("Altinn rejected message [{}] with client error, failing immediately: {}", nextMoveMessage.getMessageId(), e.getMessage());
+                deadLetterQueueHandler.handleNextMoveMessage(nextMoveMessage, e.getMessage());
+            } else {
+                throw e;
+            }
         } catch (PromiseRuntimeException e) {
             if (e.getCause() instanceof QueueInterruptException) {
                 log.error("Caught interrupting exception, registering error and removing message from queue. Error was: {}", e.getCause().getMessage());
