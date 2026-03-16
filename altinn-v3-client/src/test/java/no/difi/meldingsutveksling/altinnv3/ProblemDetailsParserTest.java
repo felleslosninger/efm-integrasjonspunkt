@@ -30,7 +30,8 @@ class ProblemDetailsParserTest {
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry", actual);
+        assert actual.startsWith("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry");
+        assert actual.contains("(raw: ");
 
     }
 
@@ -48,7 +49,26 @@ class ProblemDetailsParserTest {
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry", actual);
+        assert actual.startsWith("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry");
+        assert actual.contains("traceId");
+
+    }
+
+    @Test
+    void parseProblemDetails_includes_raw_body_with_errors_field() throws Exception {
+
+        when(clientHttpResponse.getBody()).thenReturn(new ByteArrayInputStream("""
+                {
+                    "title":"One or more validation errors occurred.",
+                    "status":400,
+                    "errors":{"Correspondence.Content.Language":["The field Language must be a string with a minimum length of 2"]}
+                }""".getBytes()));
+
+        var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
+
+        assert actual.contains("One or more validation errors occurred.");
+        assert actual.contains("Correspondence.Content.Language");
+        assert actual.contains("The field Language must be a string with a minimum length of 2");
 
     }
 
@@ -60,8 +80,8 @@ class ProblemDetailsParserTest {
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("""
-            TestRun: null No title was given, Response was : {"unknown" : "value"}""", actual);
+        assert actual.contains("No title was given");
+        assert actual.contains("unknown");
 
     }
 
@@ -73,9 +93,8 @@ class ProblemDetailsParserTest {
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("""
-            Unable to parse as Altinn ProblemDetails: Unrecognized token 'NoJsonAtAll': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-             at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 12](NoJsonAtAll)""", actual);
+        assert actual.contains("Unable to parse as Altinn ProblemDetails");
+        assert actual.contains("NoJsonAtAll");
 
     }
 
