@@ -22,11 +22,12 @@ public class ProblemDetailsParser {
             var problemDetails = objectMapper.readValue(jsonAsString, ProblemDetails.class);
             if (problemDetails.getTitle() == null) problemDetails.setTitle("No title was given");
             if (problemDetails.getDetail() == null) problemDetails.setDetail("Response was : " + jsonAsString);
-            return "%s: %d %s, %s".formatted(
+            return "%s: %d %s, %s (raw: %s)".formatted(
                 prefix,
                 problemDetails.getStatus(),
                 problemDetails.getTitle(),
-                problemDetails.getDetail()
+                problemDetails.getDetail(),
+                jsonAsString
             );
         } catch (Exception e) {
             return "Unable to parse as Altinn ProblemDetails: " + e.getMessage() + "(" + jsonAsString + ")";
