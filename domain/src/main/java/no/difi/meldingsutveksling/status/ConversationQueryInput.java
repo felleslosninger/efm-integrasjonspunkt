@@ -21,8 +21,18 @@ public class ConversationQueryInput {
     Boolean pollable;
     Boolean finished;
     ConversationDirection direction;
+    /**
+     * Lower bound (inclusive) for the last update date of the conversation.
+     * <p>
+     * Expected format: {@code yyyy-MM-dd}.
+     */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDate lastUpdateFrom;
+    /**
+     * Upper bound (inclusive) for the last update date of the conversation.
+     * <p>
+     * Expected format: {@code yyyy-MM-dd}.
+     */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDate lastUpdateTo;
 
