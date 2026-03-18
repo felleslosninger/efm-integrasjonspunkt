@@ -44,12 +44,12 @@ public class MaskinportenTokenInterceptor implements ClientHttpRequestIntercepto
 
     private List<String> getCurrentScopes() {
         var scopeList = new ArrayList<String>();
-        if (props.getFeature().isEnableDPO()) scopeList.add("move/dpo.read");
-        if (props.getFeature().isEnableDPE()) scopeList.add("move/dpe.read");
-        if (props.getFeature().isEnableDPV()) scopeList.add("move/dpv.read");
-        if (props.getFeature().isEnableDPF()) scopeList.add("move/dpf.read");
+        if (props.getFeature().isEnableDPO()) scopeList.add("eformidling:dpo");
+        if (props.getFeature().isEnableDPE()) scopeList.add("eformidling:dpe");
+        if (props.getFeature().isEnableDPV()) scopeList.add("eformidling:dpv");
+        if (props.getFeature().isEnableDPF()) scopeList.add("eformidling:dpf");
         if (props.getFeature().isEnableDPFIO()) scopeList.add("ks:fiks");
-        if (props.getFeature().isEnableDPI()) scopeList.addAll(List.of("move/dpi.read",
+        if (props.getFeature().isEnableDPI()) scopeList.addAll(List.of("eformidling:dpi",
             "digitalpostinnbygger:send",
             "global/kontaktinformasjon.read",
             "global/sikkerdigitalpost.read",

@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpo;
 
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.ZipUtils;
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
+import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
@@ -12,18 +13,19 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,40 +33,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {
-    AltinnDPOUploadService.class,
-    TaskExecutorConfig.class,
-    PromiseMaker.class,
-    IntegrasjonspunktProperties.class,
-    UUIDGenerator.class
-})
-@UseFullTestConfiguration
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AltinnUploadServiceTest {
 
-    @DynamicPropertySource
-    static void overrideProps(DynamicPropertyRegistry registry) {
-        // systemowner
-        registry.add("difi.move.dpo.systemUser.orgId", () -> "0192:111111111");
-        registry.add("difi.move.dpo.systemUser.name", () -> "111111111_integrasjonspunkt_systembruker_test");
-        // reportees, på vegne av konfigurasjon
-        registry.add("difi.move.dpo.reportees[0].orgId", () -> "0192:222222222");
-        registry.add("difi.move.dpo.reportees[0].name", () -> "222222222_integrasjonspunkt_systembruker_test");
-    }
-
-    @Autowired
     private AltinnDPOUploadService altinnUploadService;
 
-    @MockitoBean
+    @Mock
     private BrokerApiClient brokerApiClient;
 
-    @MockitoBean
+    @Mock
     private ZipUtils zipUtils;
 
-    @MockitoBean
+    @Mock
     private TransactionTemplate transactionTemplate;
 
-    @MockitoBean
+    @Mock
     private TransactionStatus transactionStatus;
+
+    @Mock
+    private IntegrasjonspunktProperties integrasjonspunktProperties;
 
     private static final Iso6523 SENDER_IS_SYSTEOWNER = Iso6523.of(ICD.NO_ORG, "111111111");
     private static final Iso6523 SENDER_IS_REPORTEE = Iso6523.of(ICD.NO_ORG, "222222222");
@@ -77,8 +65,25 @@ public class AltinnUploadServiceTest {
 
     @BeforeEach
     public void beforeEach() {
+        altinnUploadService = new AltinnDPOUploadService(brokerApiClient,
+            new PromiseMaker(Runnable::run, transactionTemplate),
+            zipUtils,
+            integrasjonspunktProperties,
+            new UUIDGenerator()
+        );
+
         InputStreamResource emptyResource = new InputStreamResource(new ByteArrayInputStream(new byte[0]));
 
+        var dpoSettings = new AltinnFormidlingsTjenestenConfig();
+        dpoSettings.setSystemUser(new AltinnSystemUser().setOrgId("0192:111111111").setName("111111111_integrasjonspunkt_systembruker_test"));
+        var reportee = new AltinnSystemUser()
+            .setOrgId("0192:222222222")
+            .setName("222222222_integrasjonspunkt_systembruker_test");
+        var reportees = new HashSet<AltinnSystemUser>();
+        reportees.add(reportee);
+        dpoSettings.setReportees(reportees);
+
+        when(integrasjonspunktProperties.getDpo()).thenReturn(dpoSettings);
         Mockito.when(zipUtils.getAltinnZip(Mockito.any(), Mockito.any())).thenReturn(emptyResource);
         when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));

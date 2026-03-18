@@ -119,7 +119,10 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
     @Override
     public List<Property> dpiConfiguration() {
         return List.of(
+            new Property("difi.move.dpi.uri", "https://c2.ingensteds.no/dpi", "DPI API uri til Hjørne 2"),
             new Property("difi.move.dpi.mpcId", "KANAL", "DPI kanal for sending og mottak"),
+            new Property("difi.move.dpi.pollingrate", "10000", "Hvor ofte skal det sjekkes for kvitteringer (ms)"),
+            new Property("difi.move.dpi.pageSize", "100", " Maks antall kvitteringer pr polling"),
             new Property("difi.move.dpi.certificate.mode", "SELF_SIGNED", "Sertifikat modus"),
             new Property("difi.move.dpi.asice.type", "CMS", "Hvilken type ASICe skal benyttes"),
             new Property("difi.move.dpi.upload-size-limit", "150MB", "Maks upload størrelse"),

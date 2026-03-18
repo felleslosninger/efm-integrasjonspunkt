@@ -5,8 +5,6 @@ import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceAttachment
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceContentExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,13 +12,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {
-    DotNotationFlattener.class
-})
 public class DotNotationFlattenerTest {
 
-    @Autowired
-    private DotNotationFlattener dotNotationFlattener;
+    private final DotNotationFlattener dotNotationFlattener = new DotNotationFlattener();
 
     @Test
     public void flatten() {

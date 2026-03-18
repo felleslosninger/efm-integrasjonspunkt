@@ -1,10 +1,12 @@
-package no.difi.meldingsutveksling.altinnv3.resource;
+package no.difi.meldingsutveksling.altinnv3.resource.manualTests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.resource.ResourceApiClient;
+import no.difi.meldingsutveksling.altinnv3.resource.ResourceTokenProducer;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.Disabled;
