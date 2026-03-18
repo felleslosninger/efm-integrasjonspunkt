@@ -38,10 +38,10 @@ public class OidcTokenClientTest {
     private ObservationRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
 
     private List<String> scopes = Arrays.asList(
-            "move/dpo.read",
-            "move/dpe.read",
-            "move/dpv.read",
-            "move/dpi.read",
+            "eformidling:dpo",
+            "eformidling:dpe",
+            "eformidling:dpv",
+            "eformidling:dpi",
             "global/kontaktinformasjon.read",
             "global/sikkerdigitalpost.read",
             "global/varslingsstatus.read",

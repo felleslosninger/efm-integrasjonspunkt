@@ -3,8 +3,6 @@ package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceManifest;
-import no.altinn.schema.services.serviceengine.broker._2015._06.BrokerServiceRecipientList;
 import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -22,14 +20,11 @@ import org.springframework.util.StreamUtils;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
@@ -42,59 +37,28 @@ import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 @Slf4j
 public class AltinnPackage {
     private static final String CONTENT_XML = "content.xml";
-    private static final String RECIPIENTS_XML = "recipients.xml";
-    private static final String MANIFEST_XML = "manifest.xml";
 
     private static final JAXBContext ctx;
-    private final BrokerServiceManifest manifest;
-    private final BrokerServiceRecipientList recipient;
     private final StandardBusinessDocument sbd;
     private final Resource asic;
     private final TmpFile tmpFile;
 
     static {
         try {
-            ctx = JAXBContextFactory.createContext(new Class[]{BrokerServiceManifest.class,
-                BrokerServiceRecipientList.class, StandardBusinessDocument.class}, new HashMap());
+            ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class}, new HashMap());
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext", e);
         }
     }
 
-    private AltinnPackage(BrokerServiceManifest manifest,
-                          BrokerServiceRecipientList recipient,
-                          StandardBusinessDocument sbd,
-                          Resource asic,
-                          TmpFile tmpFile) {
-        this.manifest = manifest;
-        this.recipient = recipient;
+    private AltinnPackage(StandardBusinessDocument sbd, Resource asic, TmpFile tmpFile) {
         this.sbd = sbd;
         this.asic = asic;
         this.tmpFile = tmpFile;
     }
 
     public static AltinnPackage from(UploadRequest document) {
-        BrokerServiceManifest manifest = new BrokerServiceManifestBuilder()
-            .withSender(document.getSender())
-            .withSenderReference(document.getSenderReference())
-            .withExternalService(
-                new ExternalServiceBuilder()
-                    .withExternalServiceCode("v3888")
-                    .withExternalServiceEditionCode(BigInteger.valueOf(70515))
-                    .build())
-            .withFileName(getFileName(document))
-            .build();
-
-        BrokerServiceRecipientList recipient = new RecipientBuilder(document.getReceiver()).build();
-        return new AltinnPackage(manifest, recipient, document.getPayload(), document.getAsic(), null);
-    }
-
-    private static String getFileName(UploadRequest document) {
-        if (document.getPayload().getAny() instanceof BusinessMessageAsAttachment) {
-            return SBD_FILE;
-        }
-
-        return CONTENT_XML;
+        return new AltinnPackage(document.getPayload(), document.getAsic(), null);
     }
 
     /**
@@ -106,15 +70,6 @@ public class AltinnPackage {
      */
     public void write(WritableResource writableResource, ApplicationContext context) throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(writableResource.getOutputStream())) {
-
-            zipOutputStream.putNextEntry(new ZipEntry(MANIFEST_XML));
-            marshallObject(manifest, zipOutputStream);
-            zipOutputStream.closeEntry();
-
-            zipOutputStream.putNextEntry(new ZipEntry(RECIPIENTS_XML));
-            marshallObject(recipient, zipOutputStream);
-            zipOutputStream.closeEntry();
-
             if (sbd.getAny() instanceof BusinessMessageAsAttachment) {
                 zipOutputStream.putNextEntry(new ZipEntry(SBD_FILE));
                 ObjectMapper om = context.getBean(ObjectMapper.class);
@@ -137,8 +92,6 @@ public class AltinnPackage {
         try (ZipFile zipFile = new ZipFile(f)) {
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
-            BrokerServiceManifest manifest = null;
-            BrokerServiceRecipientList recipientList = null;
             StandardBusinessDocument sbd = null;
             TmpFile tmpAsicFile = null;
             Resource asic = null;
@@ -147,12 +100,6 @@ public class AltinnPackage {
             while (entries.hasMoreElements()) {
                 ZipEntry zipEntry = entries.nextElement();
                 switch (zipEntry.getName()) {
-                    case MANIFEST_XML:
-                        manifest = (BrokerServiceManifest) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
-                        break;
-                    case RECIPIENTS_XML:
-                        recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(zipFile.getInputStream(zipEntry));
-                        break;
                     case SBD_FILE:
                         ObjectMapper om = context.getBean(ObjectMapper.class);
                         om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -174,7 +121,7 @@ public class AltinnPackage {
             if (sbd == null) {
                 throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
             }
-            return new AltinnPackage(manifest, recipientList, sbd, asic, tmpAsicFile);
+            return new AltinnPackage(sbd, asic, tmpAsicFile);
         }
     }
 
@@ -183,37 +130,17 @@ public class AltinnPackage {
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
 
             ArchiveEntry zipEntry;
-            BrokerServiceManifest manifest = null;
-            BrokerServiceRecipientList recipientList = null;
             StandardBusinessDocument sbd = null;
 
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                switch (zipEntry.getName()) {
-                    case MANIFEST_XML:
-                        manifest = (BrokerServiceManifest) unmarshaller.unmarshal(StreamUtils.nonClosing(zipInputStream));
-                        break;
-                    case RECIPIENTS_XML:
-                        recipientList = (BrokerServiceRecipientList) unmarshaller.unmarshal(StreamUtils.nonClosing(zipInputStream));
-                        break;
-                    case CONTENT_XML:
-                        Source source = new StreamSource(StreamUtils.nonClosing(zipInputStream));
-                        sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
-                        break;
-                    default:
-                        log.info("Skipping file: {}", zipEntry.getName());
+                if (zipEntry.getName().equals(CONTENT_XML)) {
+                    Source source = new StreamSource(StreamUtils.nonClosing(zipInputStream));
+                    sbd = unmarshaller.unmarshal(source, StandardBusinessDocument.class).getValue();
+                } else {
+                    log.info("Skipping file: {}", zipEntry.getName());
                 }
             }
-            return new AltinnPackage(manifest, recipientList, sbd, null, null);
-        }
-    }
-
-    private void marshallObject(Object object, OutputStream outputStream) {
-        try {
-            Marshaller marshaller = ctx.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.marshal(object, outputStream);
-        } catch (JAXBException e) {
-            throw new MeldingsUtvekslingRuntimeException("Couldn't marshall object");
+            return new AltinnPackage(sbd, null, null);
         }
     }
 

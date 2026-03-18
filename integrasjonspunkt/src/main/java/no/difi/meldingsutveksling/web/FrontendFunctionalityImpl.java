@@ -25,7 +25,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
     @Override
     public Version getIntegrasjonspunktVersion() {
-        return new Version("DEV-SNAPSHOT", "3.0.1", false);
+        return new Version("4.0.1", "DEV-SNAPSHOT", false);
     }
 
     @Override
@@ -253,7 +253,10 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         var dpi = props.getDpi();
         if (dpi != null) config.addAll(List.of(
+            new Property("difi.move.dpi.uri", dpi.getUri(), "DPI API uri til Hjørne 2"),
             new Property("difi.move.dpi.mpcId", dpi.getMpcId(), "DPI kanal for sending og mottak"),
+            new Property("difi.move.dpi.pollingrate", "" + dpi.getPollingrate(), "Hvor ofte skal det sjekkes for kvitteringer (ms)"),
+            new Property("difi.move.dpi.pageSize", "" + dpi.getPageSize(), " Maks antall kvitteringer pr polling"),
             new Property("difi.move.dpi.certificate.mode", dpi.getCertificate().getMode(), "Sertifikat modus"),
             new Property("difi.move.dpi.upload-size-limit", "" + dpi.getUploadSizeLimit().toBytes(), "Maks upload størrelse i bytes")
         ));

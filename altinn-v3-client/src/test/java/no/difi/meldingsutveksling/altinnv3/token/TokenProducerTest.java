@@ -1,13 +1,15 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
-import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.config.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.List;
 
@@ -20,26 +22,23 @@ import static org.mockito.Mockito.*;
  * called the same number of times that the produceToken() is called and that
  * the Qualifiers work as expected.
  */
-@SpringBootTest(classes = {
-    DpoTokenProducer.class,
-    DpvTokenProducer.class
-})
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class TokenProducerTest {
 
-    @Inject
+    @InjectMocks
     DpoTokenProducer dpoTokenProducer;
 
-    @Inject
-    @Qualifier("DpvTokenProducer")
-    TokenProducer dpvTokenProducer;
+    @InjectMocks
+    DpvTokenProducer dpvTokenProducer;
 
-    @MockitoBean
+    @Mock
     IntegrasjonspunktProperties integrasjonspunktProperties;
 
-    @MockitoBean
+    @Mock
     TokenService tokenService;
 
-    @MockitoBean
+    @Mock
     TokenExchangeService tokenExchangeService;
 
     @BeforeEach

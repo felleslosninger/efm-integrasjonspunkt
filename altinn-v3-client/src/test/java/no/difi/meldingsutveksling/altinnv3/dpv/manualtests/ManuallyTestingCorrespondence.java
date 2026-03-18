@@ -1,7 +1,10 @@
-package no.difi.meldingsutveksling.altinnv3.dpv;
+package no.difi.meldingsutveksling.altinnv3.dpv.manualtests;
 
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
+import no.difi.meldingsutveksling.altinnv3.dpv.DotNotationFlattener;
+import no.difi.meldingsutveksling.altinnv3.dpv.FileUploadRequest;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnConfiguration;
 import no.difi.meldingsutveksling.altinnv3.token.DpvTokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;

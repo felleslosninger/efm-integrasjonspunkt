@@ -106,7 +106,9 @@ public class DpiClientConfig {
                 dpiClientErrorHandler,
                 createMaskinportenToken,
                 createMultipart,
-                resourceFactory);
+                resourceFactory,
+                properties.getPageSize());
+
     }
 
     private static ExchangeFilterFunction logRequest() {
