@@ -12,7 +12,9 @@ import no.difi.meldingsutveksling.nextmove.Dialogmelding;
 import no.difi.meldingsutveksling.nextmove.Notat;
 import no.difi.meldingsutveksling.nextmove.Person;
 import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.nhn.adapter.model.InMessage;
+import no.difi.meldingsutveksling.nhn.adapter.model.InMessageWithDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.SerializeableIncomingBusinessDocument;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -36,7 +38,7 @@ public class NhnNextMoveMessageInService {
     private final IntegrasjonspunktProperties integrasjonspunktProperties;
 
 
-    public StandardBusinessDocument getMessageByHerId(Integer herId2) throws ServiceRegistryLookupException {
+    public StandardBusinessDocument getMessageByHerId(Integer herId2) throws EncryptionException {
         var receiverSr = lookupServiceRegistry(herId2 + "");
         var onBehalfOf = receiverSr.getOrganisationNumber();
         if (!integrasjonspunktProperties.getDph().getWhitelistOrgnum().contains(onBehalfOf)) {
@@ -55,7 +57,8 @@ public class NhnNextMoveMessageInService {
             NhnIdentifier receiverIdentifier = NhnIdentifier.of(receiverSr.getOrganisationNumber(),receiverSr.getHerIdLevel1(), receiverSr.getHerIdLevel2());
             NhnIdentifier  senderIdentifier = NhnIdentifier.of(senderSr.getOrganisationNumber(),senderSr.getHerIdLevel1(), senderSr.getHerIdLevel2());
 
-            SerializeableIncomingBusinessDocument incomingDocument = nhnClient.incomingBusinessDocument(UUID.fromString(firstIncoming.getId()),onBehalfOf);
+            InMessageWithDocument incomingMessageWithDocument = nhnClient.incomingBusinessDocument(UUID.fromString(firstIncoming.getId()),onBehalfOf);
+            SerializeableIncomingBusinessDocument incomingDocument = incomingMessageWithDocument.getBusinessDocument();
             String conversationId = incomingDocument.getConversationRef() != null ? incomingDocument.getConversationRef().getRefToConversation() : UUID.randomUUID().toString();
             var notatFromBd = incomingDocument.getMessage().getNotat();
             var patient = incomingDocument.getReceiver().getPatient();
@@ -93,10 +96,11 @@ public class NhnNextMoveMessageInService {
         return onBehalfOf;
     }
 
-    public StandardBusinessDocument getMessageById(String id,Integer herId2) throws ServiceRegistryLookupException {
+    public StandardBusinessDocument getMessageById(String id,Integer herId2) throws ServiceRegistryLookupException,EncryptionException {
             var onBehalfOf = validateAddressing(id,herId2);
 
-            SerializeableIncomingBusinessDocument incomingDocument = nhnClient.incomingBusinessDocument(UUID.fromString(id),onBehalfOf);
+            InMessageWithDocument incomingMessageWithDocument = nhnClient.incomingBusinessDocument(UUID.fromString(id),onBehalfOf);
+            SerializeableIncomingBusinessDocument incomingDocument = incomingMessageWithDocument.getBusinessDocument();
             // jeg tror ikke det kan komme noe annet en HerID her men......
             var recieverHerId2 = incomingDocument.getReceiver().getChild().getIds().getFirst().getId();
             var senderHerId2 = incomingDocument.getSender().getChild().getIds().getFirst().getId();

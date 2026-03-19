@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
@@ -59,7 +60,7 @@ public class NextMoveMessageInController {
     }
 
     @GetMapping(value = "peek")
-    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException {
+    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException, EncryptionException {
         if (input.herId2 != null) {
             return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2));
         }
@@ -120,7 +121,7 @@ public class NextMoveMessageInController {
     @Transactional
     public StandardBusinessDocument deleteMessage(
         @PathVariable String messageId,
-        @RequestParam(required = false) Integer herId2) throws ServiceRegistryLookupException {
+        @RequestParam(required = false) Integer herId2) throws ServiceRegistryLookupException,EncryptionException {
 
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
         if (herId2!=null) {

@@ -58,12 +58,9 @@ public class BusinessMessageEncryptionService {
         }
     }
 
-    public byte[] decrypt(EncryptedBusinessMessage encryptedBusinessMessage) throws EncryptionException {
-        return dekryptering.dekrypter(encryptedBusinessMessage.getMessage().getBytes());
+    public byte[] decrypt(EncryptedFagmelding dialogMeling) throws EncryptionException {
+        return dekryptering.dekrypter(dialogMeling.getMessage().getBytes());
     }
 
-    public byte[] decrypt(EncryptedFagmelding encryptedFagmelding) throws EncryptionException {
-        return dekryptering.dekrypter(encryptedFagmelding.getMessage().getBytes());
-    }
 
 }

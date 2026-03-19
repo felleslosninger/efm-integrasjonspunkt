@@ -16,6 +16,8 @@ import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
 import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
 import no.difi.meldingsutveksling.nhn.adapter.model.EncryptedFagmelding;
 import no.difi.meldingsutveksling.nhn.adapter.model.InMessage;
+import no.difi.meldingsutveksling.nhn.adapter.model.InMessageWithDocument;
+import no.difi.meldingsutveksling.nhn.adapter.model.InMessageWithEncyrptedDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageOut;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.SerializableApplicationReceiptInfo;
@@ -125,7 +127,7 @@ public class NhnAdapterClient {
         return KxJson.decode(messageId, ser);
     }
 
-    public SerializeableIncomingBusinessDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) {
+    public InMessageWithDocument incomingBusinessDocument(UUID messageReference, String onBehalfOf) throws no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException  {
         var documentString = dphClient.method(HttpMethod.GET).uri(INCOMING_BUSINES_DOCUMENT_PATH.formatted(messageReference.toString())+ "?onBehalfOf=" + onBehalfOf).retrieve()
             .onStatus(t-> t == HttpStatus.NOT_FOUND,  (request, resp) -> {
                 throw new NoContentException();
@@ -137,7 +139,20 @@ public class NhnAdapterClient {
                 throw new NextMoveRuntimeException("Server error");
             })
             .toEntity(String.class).getBody();
-         return KxJson.decode(documentString, SerializeableIncomingBusinessDocument.Companion.serializer());
+        signatureValidator.validate(documentString);
+
+        try {
+            InMessageWithEncyrptedDocument encryptedDialogMelding =  KxJson.decode(documentString,InMessageWithEncyrptedDocument.Companion.serializer());
+
+            byte[] decryptedDialogmelding = businessMessageEncryptionService.decrypt(encryptedDialogMelding.getEncryptedFagmelding());
+            return new InMessageWithDocument(encryptedDialogMelding.getMessageMetadata(),KxJson.decode(new String( decryptedDialogmelding), SerializeableIncomingBusinessDocument.Companion.serializer()));
+
+        } catch (EncryptionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new NextMoveRuntimeException("Not able to parse incoming receipt", e);
+        }
+
     }
 
 
