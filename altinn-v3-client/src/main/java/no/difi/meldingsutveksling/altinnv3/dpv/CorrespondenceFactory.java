@@ -1,0 +1,132 @@
+package no.difi.meldingsutveksling.altinnv3.dpv;
+
+import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceAttachmentExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceContentExt;
+import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
+import org.springframework.stereotype.Component;
+
+import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+
+@Component
+@RequiredArgsConstructor
+public class CorrespondenceFactory {
+
+    private final NotificationFactory notificationFactory;
+    private final Clock clock;
+    private final DpvHelper dpvHelper;
+    private final ServiceRegistryHelper serviceRegistryHelper;
+    private final IntegrasjonspunktProperties props;
+
+    public InitializeCorrespondencesExt create(NextMoveOutMessage message,
+                                                String messageTitle,
+                                                String messageSummary,
+                                                String messageBody,
+                                                List<UUID> existingAttachments,
+                                                List<BusinessMessageFile> newAttachmentsMetaData) {
+
+
+        InitializeCorrespondencesExt correspondencesExt = new InitializeCorrespondencesExt();
+
+        correspondencesExt.setCorrespondence(getBaseCorrespondence(message, messageTitle, messageSummary, messageBody, newAttachmentsMetaData));
+        correspondencesExt.setRecipients(getRecipient(message.getReceiverIdentifier()));
+
+        if(existingAttachments != null && !existingAttachments.isEmpty()) correspondencesExt.setExistingAttachments(existingAttachments);
+
+        return correspondencesExt;
+    }
+
+    private List<String> getRecipient(String receiverIdentifier){
+        if(receiverIdentifier.length() == 11) return List.of("urn:altinn:person:identifier-no:" + receiverIdentifier);
+        else return List.of("urn:altinn:organization:identifier-no:" + receiverIdentifier);
+    }
+
+    private BaseCorrespondenceExt getBaseCorrespondence(NextMoveOutMessage message,
+                                                        String messageTitle,
+                                                        String messageSummary,
+                                                        String messageBody,
+                                                        List<BusinessMessageFile> newAttachmentsMetaData) {
+
+        BaseCorrespondenceExt correspondence = new BaseCorrespondenceExt();
+
+        correspondence.setContent(getContent(messageTitle, messageSummary, messageBody, newAttachmentsMetaData));
+        correspondence.setNotification(notificationFactory.getNotification(message));
+        correspondence.setResourceId(getResourceId(message));
+        correspondence.setRequestedPublishTime(OffsetDateTime.now(clock));
+        correspondence.setMessageSender(serviceRegistryHelper.getSenderName(message));
+        correspondence.setDueDateTime(getDueDateTime(message));
+        correspondence.setIsConfirmationNeeded(false);
+        correspondence.setSender(message.getSender().getIdentifier());
+        correspondence.setSendersReference(message.getMessageId());
+        correspondence.setIsConfidential(dpvHelper.isConfidential(message));
+
+        return correspondence;
+    }
+
+    private OffsetDateTime getDueDateTime(NextMoveOutMessage message) {
+        Optional<Integer> daysToReply = dpvHelper.getDpvSettings(message)
+            .flatMap(s -> s.getDagerTilSvarfrist() != null ? Optional.of(s.getDagerTilSvarfrist()) : Optional.empty());
+
+
+        if (daysToReply.isPresent()) {
+            if (daysToReply.get() > 0) {
+                return OffsetDateTime.now(clock).plusDays(daysToReply.get());
+            }
+        } else {
+            if (props.getDpv().isEnableDueDate()) {
+                return OffsetDateTime.now(clock).plusDays(getDaysToReply());
+            }
+        }
+        return null;
+    }
+
+    private Long getDaysToReply() {
+        return Optional.ofNullable(props.getDpv().getDaysToReply()).orElse(7L);
+    }
+
+    private InitializeCorrespondenceContentExt getContent(String messageTitle, String messageSummary, String messageBody, List<BusinessMessageFile> newAttachmentsMetaData) {
+        InitializeCorrespondenceContentExt content = new InitializeCorrespondenceContentExt();
+
+        content.setLanguage("nb");
+        content.setMessageTitle(messageTitle);
+        content.setMessageSummary(messageSummary);
+        content.setMessageBody(messageBody);
+        if(newAttachmentsMetaData != null && !newAttachmentsMetaData.isEmpty()) content.setAttachments(getAttachments(newAttachmentsMetaData));
+
+        return content;
+    }
+
+    private List<InitializeCorrespondenceAttachmentExt> getAttachments(List<BusinessMessageFile> newAttachmentsMetaData) {
+        return newAttachmentsMetaData.stream()
+            .map(file -> createInitializeAttachmentExt(file.getFilename(), file.getTitle()))
+            .collect(Collectors.toList());
+    }
+
+    private InitializeCorrespondenceAttachmentExt createInitializeAttachmentExt(String filename, String title){
+        var attachment = new InitializeCorrespondenceAttachmentExt();
+
+        attachment.setFileName(filename);
+        attachment.setDisplayName(title);
+        attachment.setIsEncrypted(false);
+        attachment.setSendersReference("AttachmentReference_as123452");
+
+        return attachment;
+    }
+
+    private String getResourceId(NextMoveOutMessage message) {
+        ServiceRecord serviceRecord = serviceRegistryHelper.getServiceRecord(message);
+
+        return serviceRecord.getService().getResource();
+    }
+}

@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.difi.meldingsutveksling</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>DEV-SNAPSHOT</version>
     </parent>
 
     <artifactId>fiks-meldingsformidler</artifactId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>no.ks.fiks</groupId>
             <artifactId>fiks-io-klient-java</artifactId>
-            <version>3.4.1</version>
+            <version>3.5.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jetbrains.kotlin</groupId>

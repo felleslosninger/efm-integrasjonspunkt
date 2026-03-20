@@ -1,65 +1,77 @@
-# Move Integrasjonspunkt v3
+## Bygg og kjør lokalt
+Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
 
-Dette blir en ny versjon med Java 21+ og SpringBoot 3+
-
-- Java 21+ oppgradering (some code require 17+)
-- Spring Boot 3.4 oppgradering ([lots of changes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes))
-- Jakarta EE migrering (from Java EE i SB 2.x)
-- All jaxb/jaxws usage migrated to jakarata
-- JUnit upgrade (5.x)
-- Removed Spring Cloud and Eureka
-- Removed Sikker Digital Post Klient
-- Removed old / un-maintained "spring-security-oauth2" 2.5.2.RELEASE
-- Merged removal of old DPI message service
-- Merged removal of eFormidling 1.0 (BEST/EDU)
-- Logstash default endepunkt endret til `*logs.eformidling.no:80`, ref [MOVE-1634](https://digdir.atlassian.net/browse/MOVE-1634)
-
-Fixme & todo
-- [x] Enable `enableLogstash` as default for prod and staging again ([see v2 bootstrap config](https://github.com/felleslosninger/efm-integrasjonspunkt/blob/main/integrasjonspunkt/src/main/resources/config/bootstrap.yml))
-- [x] Bytte usikret logstash fra `*stream-meldingsutveksling.difi.no:443` til `*logs.eformidling.no:80`
-- [ ] Støtte for secure logstash på `*logs.eformidling.no:443`
-- [ ] `management.endpoints.enabled-by-default` is deprecated (but still used in some property files)
-- [ ] Started to remove Kotlin (fremdeles endel som gjenstår, men dette må skrives om)
-- [ ] Search for StatisticsrepositoryNoOperations "usage" (non-existing service loader reference)
-- [ ] Det er noen eldre `TODO` kommentarer som har vært med i flere år og som kanskje bare kan fjernes?
-- [ ] Dokumentere hvilke applikasjons-spesifikke metrics vi har lagt til (see `@Timed` og `MetricsRestClientInterceptor`)
-- [ ] Make sure ["old rest template"](https://digdir.atlassian.net/browse/MOVE-2438) metrics still works with the new rest client approach 
-
-Foreløpige `eksperimentelle` endringer som testes ut (kommer / kommer ikke i endelig versjon) :
-- Maven Wrapper (sikrer at alle bygger med korrekt Maven versjon)
-- Swagger-UI (http://localhost:9093/swagger-ui/index.html)
-
-## Bygg og kjøre lokalt 
-Testet og bygget med OpenJDK 21.0.6 og Maven 3.9.9.
+Lag egen lokale konfigurasjonsfil i roten av prosjektet med navn `integrasjonspunkt-local.properties`
+(alternativt `integrasjonspunkt-local.yml` eller `integrasjonspunkt-local.yaml`).  Den vil bli inkludert
+automatisk når du starter en av de forhåndsdefinerte maven-profilene.
 
 ```bash
 mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
-For å bygge API dokumentasjon samtidig og sjekke den i lokal nettleser bruk profil `restdocs` :
+Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
+en lokal [integrasjonspunkt-local.properties](integrasjonspunkt-local.properties) fil.
+
+Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/main/resources/config/application-dev.properties),
+[application-staging.properties](integrasjonspunkt/src/main/resources/config/application-staging.properties) og
+[application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
+inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
+
+
+## Bygge dockerbilde lokalt:
+Stå i roten av prosjektet og kjør kommandoene:
+```bash
+mvn clean install
+mvn spring-boot:build-image --file integrasjonspunkt/pom.xml -Dspring-boot.build-image.imageName=NAME:TAG -Dspring-boot.build-image.builder=paketobuildpacks/builder-jammy-tiny
+```
+
+
+## Kjøre dockerbilde bygget lokalt eller lastet ned fra [GitHub Container Registry](https://github.com/felleslosninger/efm-integrasjonspunkt/pkgs/container/efm-integrasjonspunkt)
+- Docker-bildet er bygget med maven spring boot plugin, og bruker paketo-base-tiny som builder. Dette er et sterkt herdet base-bilde som blir vedlikeholdt av Paketo Buildpacks. 
+- Se docker-compose-TEMPLATE.yaml for hvordan starte opp lokalt med docker compose, ekstern ActiveMQ og Postgres, MariaDB, MYSQL og MSSQL.
+- Man _må_ bruke ekstern activemq ved bruk av dockerimage
+- Mount opp certs mot /workspace-mappen
+- Mount opp logger mot /workspace/integrasjonspunkt-logs
+
+
+## Utvikle nye web sider
+Prosjektet inneholder en `web` modul, som inneholder web sider for å administrere Integrasjonspunktet.
+Denne modulen inneholder en kjørbar klasse og kan startes separat uten resten av Integrasjonspunktet
+og alle dets avhengigheter.
+
+Dette er by-design, slik at det skal være mulig å raskt utvikle websiden med hot-reload aktivert.
+For informasjon om hvordan dette fungerer kan du se [web/README.md](web/README.md).
+
+Kortversjon er at web-modulen med `fake` backend og hot-reload kan startes slik :
+```bash
+cd web
+mvn spring-boot:run -Dspring-boot.run.profiles=reload
+open http://localhost:8080/
+```
+
+## Bygge REST API dokumentasjon
+Tests must run for this to work (generated-snippets will be missing if you skip running tests).
+For å bygge API dokumentasjon og sjekke den i lokal nettleser bruk profil `restdocs` :
 ```bash
 mvn clean package -Prestdocs
 open integrasjonspunkt/target/generated-docs/restdocs.html
 ```
 
-For å bygge, kjøre dokka og signere med gpg bruk profil `ossrh` :
-```bash
-mvn clean package -Possrh
-```
-
 ## Linker når Integrasjonspunkt er starter lokalt
 Ekstern dokumentasjon finnes her : https://docs.digdir.no/docs/eFormidling/
 
+Hovedsiden med masse informasjon om Integrasjonspunktet :
+- http://localhost:9093/
+
 Webside der man kan kikke på og slette konversasjoner :
 - http://localhost:9093/conversations
-- http://localhost:9093/viewreceipts  🚨 Ikke i bruk / kan fjernes ? 🚨
 
 En API funksjon som er lett å teste i nettleser :
 - http://localhost:9093/api/statuses
 
 Linker til observability :
-  http://localhost:9093/manage/info
+- http://localhost:9093/manage/info
 - http://localhost:9093/manage/health
 - http://localhost:9093/manage/health/liveness
 - http://localhost:9093/manage/health/readiness
@@ -70,8 +82,20 @@ Linker til logger, config og alt annet :
 - http://localhost:9093/manage/logfile
 - `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
 - `curl http://localhost:9093/manage/configprops | jq`
+- `curl http://localhost:9093/manage/env | jq` (lister over alle properties og env settings)
 - `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
 
-## Konfigurasjon av Integrasjonspunktet
-Det ligger en [sample.properties](integrasjonspunkt-local.sample.properties) fil i dette prosjektet som vise eksempler på konfig,
-for mer detaljer sjekk dokumentasjonen https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
+## Release (for interne)
+
+Release av ny versjon gjerast via GitHub GUI
+- Gå til "Releases" i GitHub repo
+- Klikk på "Draft a new release"
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.1`, det er best practice for github releases)
+- Fyll inn tittel og beskrivelse
+- Last opp artifacts (Disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
+  - Last opp jar filen (eks `integrasjonspunkt-v4.0.1.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.1.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.1.jar.asc`)
+  - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.1` begge steder som vist i filnavna ovenfor)
+- Klikk på "Publish release"

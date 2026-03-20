@@ -49,7 +49,7 @@ public class AsicHandlerImpl implements AsicHandler {
     @Override
     public void createCmsEncryptedAsice(@NotNull NextMoveMessage msg, @NotNull WritableResource writableResource) {
         List<Document> documents = nextMoveMessageService.getDocuments(msg);
-        createCMSEncryptedAsice.createCmsEncryptedAsice(getInputBuilder(msg, documents.get(0))
+        createCMSEncryptedAsice.createCmsEncryptedAsice(getInputBuilder(msg, documents.getFirst())
                 .documents(documents.stream())
                 .certificate(getMottakerSertifikat(msg))
                 .build(), writableResource);
@@ -59,7 +59,7 @@ public class AsicHandlerImpl implements AsicHandler {
     @Override
     public Resource createCmsEncryptedAsice(@NotNull NextMoveMessage msg, @NotNull Reject reject) {
         List<Document> documents = nextMoveMessageService.getDocuments(msg);
-        return createCMSEncryptedAsice.createCmsEncryptedAsice(getInputBuilder(msg, documents.get(0))
+        return createCMSEncryptedAsice.createCmsEncryptedAsice(getInputBuilder(msg, documents.getFirst())
                 .documents(documents.stream())
                 .certificate(getMottakerSertifikat(msg))
                 .build(), reject);

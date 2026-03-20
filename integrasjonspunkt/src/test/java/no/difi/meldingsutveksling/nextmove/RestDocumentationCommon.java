@@ -218,12 +218,9 @@ class RestDocumentationCommon {
                         fieldWithPath(prefix + "messageTitle")
                                 .type(JsonFieldType.STRING)
                                 .description("The message title"),
-                        fieldWithPath(prefix + "serviceCode")
+                        fieldWithPath(prefix + "externalSystemReference")
                                 .type(JsonFieldType.STRING)
-                                .description("Altinn service code"),
-                        fieldWithPath(prefix + "serviceEditionCode")
-                                .type(JsonFieldType.STRING)
-                                .description("Altinn service edition code."),
+                                .description("Reference from an external system. For DPV external reference is correspondenceid"),
                         fieldWithPath(prefix + "lastUpdate")
                                 .type(JsonFieldType.STRING)
                                 .description("Date and time of status."),

@@ -1,9 +1,9 @@
-CVE-2025-24970
-CVE-2024-57699
-CVE-2025-27820
-CVE-2025-24813
-CVE-2025-22235
-CVE-2025-22228
-CVE-2025-48734
-CVE-2025-48988
-CVE-2025-49146
+CVE-2026-24400
+CVE-2025-59250
+CVE-2025-61726
+CVE-2025-61728
+CVE-2025-68121
+
+GHSA-72hv-8253-57qq # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
+CVE-2026-29062 # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
+

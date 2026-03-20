@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 
 @RequiredArgsConstructor
 public class MessageStatusMapper {
@@ -14,7 +14,7 @@ public class MessageStatusMapper {
     public MessageStatus getMessageStatus(DpiMessageType dpiMessageType) {
         switch (dpiMessageType) {
             case LEVERINGSKVITTERING:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at en fysisk post er postlagt");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Kvittering på at digital post er tilgjengeliggjort eller at fysisk post er klargjort for utskrift");
             case AAPNINGSKVITTERING:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.LEST, "Kvittering fra Innbygger for at digital post er åpnet");
             case VARSLINGFEILETKVITTERING:
@@ -46,4 +46,5 @@ public class MessageStatusMapper {
                 return getDefaultMessageStatus();
         }
     }
+
 }

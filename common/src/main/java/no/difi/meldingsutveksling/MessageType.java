@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 @Getter
 public enum MessageType {
 
-
     STATUS("status"),
     FEIL("feil"),
 
@@ -26,6 +25,7 @@ public enum MessageType {
     FIKSIO("fiksio"),
     DIGITAL("digital"),
     DIGITAL_DPV("digital_dpv"),
+    DIALOGMELDING("dialogmelding"),
     PRINT("print"),
 
     INNSYNSKRAV("innsynskrav"),
@@ -74,4 +74,5 @@ public enum MessageType {
     public static Stream<MessageType> stream() {
         return Arrays.stream(MessageType.values());
     }
+
 }

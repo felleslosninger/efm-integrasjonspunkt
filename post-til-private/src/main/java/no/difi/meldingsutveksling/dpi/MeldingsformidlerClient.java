@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface MeldingsformidlerClient {
+
     boolean skalPolleMeldingStatus();
 
     void sendMelding(MeldingsformidlerRequest request) throws MeldingsformidlerException;
@@ -14,4 +15,5 @@ public interface MeldingsformidlerClient {
     void sjekkEtterKvitteringer(String avsenderidentifikator, String mpcId, Consumer<ExternalReceipt> callback);
 
     Stream<MessageStatus> hentMeldingStatusListe(String messageId);
+
 }

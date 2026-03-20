@@ -11,6 +11,8 @@ import org.springframework.web.util.UriTemplate;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+import static org.springframework.http.HttpHeaders.ACCEPT;
+
 
 /**
  * RestClient using simple http requests to manipulate services
@@ -23,6 +25,8 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 public class ServiceRegistryRestClient {
+
+    static final String X_ENABLE_BETA_FEATURES = "X-Enable-Beta-Features";
 
     private final IntegrasjonspunktProperties props;
     @Getter private final RestClient restClient;
@@ -42,11 +46,25 @@ public class ServiceRegistryRestClient {
     public String getResource(String urlTemplate, Map<String, String> urlVariables) throws BadJWSException {
         UriTemplate uriTemplate = new UriTemplate(baseUrl.toString().concat("/").concat(urlTemplate));
         var uri = uriTemplate.expand(urlVariables);
+        RestClient.RequestHeadersSpec<?> spec = restClient.get().uri(uri);
+
+        if (props.getFeature().isEnableBetaFeatures()) {
+            spec = spec.header(X_ENABLE_BETA_FEATURES, "true");
+        }
+
         if (props.getSign().isEnable()) {
-            var body = restClient.get().uri(uri).header("Accept", "application/jose", "application/json").retrieve().toEntity(String.class).getBody();
+            var body = spec
+                .header(ACCEPT, "application/jose", "application/json")
+                .retrieve()
+                .toEntity(String.class)
+                .getBody();
             return jwtDecoder.getPayload(body, props.getSign().getJwkUrl());
         }
-        return restClient.get().uri(uri).retrieve().toEntity(String.class).getBody();
+
+        return spec
+            .retrieve()
+            .toEntity(String.class)
+            .getBody();
     }
 
 }

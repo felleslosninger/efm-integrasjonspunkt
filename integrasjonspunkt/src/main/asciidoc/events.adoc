@@ -3,6 +3,8 @@
 [#event-ping]
 == Ping event
 
+=== Example 1 - Ping event
+
 [source,http,role="primary"]
 .Curl
 include::{snippets}/events/ping/curl-request.adoc[]
@@ -20,6 +22,8 @@ include::{snippets}/events/ping/request-fields.adoc[]
 
 [#event-message-status]
 == Message status event
+
+=== Example 1 - Message status event
 
 [source,http,role="primary"]
 .Curl

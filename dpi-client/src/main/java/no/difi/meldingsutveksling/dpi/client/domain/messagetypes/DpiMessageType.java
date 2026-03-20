@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.dpi.client.domain.messagetypes;
 import lombok.Getter;
 import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentType;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 

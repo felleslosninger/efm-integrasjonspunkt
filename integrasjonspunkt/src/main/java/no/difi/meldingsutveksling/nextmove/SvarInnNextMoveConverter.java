@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.google.common.base.Strings;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.*;
@@ -30,8 +31,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.xml.bind.JAXBException;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -39,11 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.math.BigInteger;
 import java.time.Year;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.springframework.util.StringUtils.hasText;
@@ -115,7 +110,7 @@ public class SvarInnNextMoveConverter {
             Element root = document.createElement("virksomhetsspesifikkeMetadata");
 
             List<Map<String, String>> ekstraMetadata = metadata.getEkstraMetadata();
-            if(ekstraMetadata == null || ekstraMetadata.isEmpty()) {return null;}
+            if (ekstraMetadata == null || ekstraMetadata.isEmpty()) { return null; }
 
             ekstraMetadata.forEach(
                 data ->

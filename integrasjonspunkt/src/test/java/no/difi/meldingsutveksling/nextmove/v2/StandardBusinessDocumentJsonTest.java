@@ -10,14 +10,12 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @Import({JacksonConfig.class, FixedClockConfig.class})
 public class StandardBusinessDocumentJsonTest {

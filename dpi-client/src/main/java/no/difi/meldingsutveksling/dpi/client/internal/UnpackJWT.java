@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.meldingsutveksling.dpi.client.Blame;
 import no.difi.meldingsutveksling.dpi.client.DpiException;
-import no.digdir.certvalidator.api.CertificateValidationException;
+
+import no.idporten.validator.certificate.api.CertificateValidationException;
 import org.springframework.util.Assert;
 
 import java.security.cert.X509Certificate;
@@ -40,6 +41,9 @@ public class UnpackJWT {
     }
 
     private JWSObject getJwsObject(String jwt) {
+        if (jwt == null) {
+            throw new IllegalStateException("JWT string cannot be null");
+        }
         try {
             return JWSObject.parse(jwt);
         } catch (ParseException e) {

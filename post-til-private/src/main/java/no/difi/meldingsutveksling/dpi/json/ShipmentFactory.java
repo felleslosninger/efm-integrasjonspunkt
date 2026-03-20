@@ -178,4 +178,5 @@ public class ShipmentFactory {
         Iso6523 iso6523 = Optional.ofNullable(request.getOnBehalfOf()).orElseGet(request::getSender);
         return new Identifikator(iso6523.getAuthority(), iso6523.getIdentifier());
     }
+
 }

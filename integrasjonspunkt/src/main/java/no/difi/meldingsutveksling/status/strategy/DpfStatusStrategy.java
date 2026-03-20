@@ -83,7 +83,7 @@ public class DpfStatusStrategy implements StatusStrategy {
                         if (!c.hasStatus(status)) {
                             if (ReceiptStatus.valueOf(status.getStatus()) == LEST &&
                                     c.getDocumentIdentifier().equals(props.getArkivmelding().getDefaultDocumentType()) &&
-                                    props.getArkivmelding().isGenerateReceipts()) {
+                                    props.getArkivmelding().isGenerateArkivmeldingReceipts()) {
                                 nextMoveQueue.enqueueIncomingMessage(sbdFactory.createArkivmeldingReceiptFrom(c, OK), DPF);
                             }
                             conversationService.registerStatus(c, status);

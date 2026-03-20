@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -53,7 +54,11 @@ public class IntegrasjonspunktProperties {
     private Einnsyn einnsyn;
 
     @Valid
+    @NestedConfigurationProperty
     private PostVirksomheter dpv;
+
+    @Valid
+    private DphConfig dph;
 
     @Valid
     @NestedConfigurationProperty
@@ -87,7 +92,6 @@ public class IntegrasjonspunktProperties {
     @Valid
     private DeadLock deadlock;
 
-
     @Data
     public static class Vault {
         private String uri;
@@ -107,7 +111,7 @@ public class IntegrasjonspunktProperties {
         private String receiptProcess;
         @NotNull
         private String receiptDocumentType;
-        private boolean generateReceipts;
+        private boolean generateArkivmeldingReceipts;
     }
 
     @Data
@@ -128,6 +132,14 @@ public class IntegrasjonspunktProperties {
         private String defaultInnsynskravDocumentType;
         private String receiptProcess;
 
+    }
+
+    @Data
+    public static class DphConfig {
+        private List<String> whitelistOrgnum;
+        private Boolean allowMultitenancy;
+        private DataSize uploadSizeLimit;
+        private String adapterUrl;
     }
 
     @Data
@@ -174,32 +186,6 @@ public class IntegrasjonspunktProperties {
         @NotNull(message = "Certificate properties not set.")
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
-    }
-
-    @Data
-    @ToString(exclude = "password")
-    public static class PostVirksomheter {
-
-        private String username;
-        private String password;
-        private URL endpointUrl;
-        @NotNull
-        private String sensitiveServiceCode;
-        private boolean notifyEmail;
-        private boolean notifySms;
-        @NotNull
-        private String notificationText;
-        @NotNull
-        private String sensitiveNotificationText;
-        private boolean allowForwarding;
-        private boolean enableDueDate;
-        private Long daysToReply;
-        @NotNull
-        private DataSize uploadSizeLimit;
-        @NotNull
-        private Integer defaultTtlHours;
-
-
     }
 
     /**
@@ -304,6 +290,7 @@ public class IntegrasjonspunktProperties {
 
     @Data
     public static class FeatureToggle {
+        private boolean enableBetaFeatures;
         private boolean enableDsfPrintLookup;
         private boolean enableReceipts;
         private boolean forwardReceivedAppReceipts;
@@ -323,6 +310,7 @@ public class IntegrasjonspunktProperties {
         private boolean enableDPF;
         private boolean enableDPFIO;
         private boolean enableDPE;
+        private boolean enableDPH;
 
     }
 

@@ -1,14 +1,11 @@
 package no.difi.meldingsutveksling.config;
 
-import jakarta.xml.bind.JAXBException;
 import no.difi.meldingsutveksling.DpiReceiptHandler;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.dpi.MeldingsformidlerClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClient;
 import no.difi.meldingsutveksling.dpi.client.DpiClientConfig;
-import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
-import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.json.*;
 import no.difi.meldingsutveksling.nextmove.DpiConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.MeldingsformidlerRequestFactory;
@@ -27,9 +24,7 @@ import java.time.Clock;
 
 @Configuration
 @ConditionalOnProperty(name = "difi.move.feature.enableDPI", havingValue = "true")
-@Import({
-        DpiConfig.Json.class
-})
+@Import({ DpiConfig.Json.class })
 public class DpiConfig {
 
     @Bean
@@ -94,11 +89,6 @@ public class DpiConfig {
     @Import(DpiClientConfig.class)
     public static class Json {
 
-//        @Bean
-//        public MeldingsformidlerClient meldingsformidlerClient(MeldingsformidlerClient jsonMeldingsformidlerClient) {
-//            return jsonMeldingsformidlerClient;
-//        }
-
         @Bean
         public JsonMeldingsformidlerClient jsonMeldingsformidlerClient(DpiClient dpiClient,
                                                                        ShipmentFactory shipmentFactory,
@@ -152,27 +142,6 @@ public class DpiConfig {
             }
         }
 
-        @Configuration
-        @ConditionalOnProperty(name = "difi.move.dpi.receipt-type", havingValue = "xmlsoap")
-        public static class RecieptTypeXmlSoap {
-
-            @Bean
-            public XmlSoapDpiMessageStatusFilter xmlXmlSoapDpiMessageStatusFilter() {
-                return new XmlSoapDpiMessageStatusFilter();
-            }
-
-            @Bean
-            public JWT2XmlSoapDpiReceiptConverter jwt2XmlSoapDpiReceiptConverter(UnpackJWT unpackJWT,
-                                                                                 UnpackStandardBusinessDocument unpackStandardBusinessDocument) throws JAXBException {
-                return new JWT2XmlSoapDpiReceiptConverter(unpackJWT, unpackStandardBusinessDocument);
-            }
-
-            @Bean
-            public MessageStatusRawReceiptXmlDecorator messageStatusRawReceiptXmlDecorator() throws JAXBException {
-                return new MessageStatusRawReceiptXmlDecorator();
-            }
-
-        }
     }
 
 }

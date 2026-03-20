@@ -19,6 +19,7 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     FIKSIO("fiksio", FiksIoMessage.class),
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
+    DIALOGMELDING("dialogmelding",Dialogmelding.class),
     PRINT("print", DpiPrintMessage.class),
 
     INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),
@@ -26,9 +27,9 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     EINNSYN_KVITTERING("einnsyn_kvittering", EinnsynKvitteringMessage.class);
 
     private final String type;
-    private final Class<? extends BusinessMessage<?>> clazz;
+    private final Class<? extends BusinessMessage> clazz;
 
-    BusinessMessageType(String type, Class<? extends BusinessMessage<?>> clazz) {
+    BusinessMessageType(String type, Class<? extends BusinessMessage> clazz) {
         this.type = type;
         this.clazz = clazz;
     }

@@ -17,7 +17,6 @@ import java.time.OffsetDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-@TestPropertySource("classpath:/config/application-test.properties")
 @ActiveProfiles("test")
 @Import({JacksonConfig.class, TestClockConfig.class})
 public class JacksonConfigTest {

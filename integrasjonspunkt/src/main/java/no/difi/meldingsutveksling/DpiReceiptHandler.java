@@ -13,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEVERT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.MOTTATT;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -31,21 +32,18 @@ public class DpiReceiptHandler {
 
         if (conversation.isPresent()) {
             MessageStatus status = externalReceipt.toMessageStatus();
-            boolean isProxyClient = "xmlsoap".equals(properties.getDpi().getReceiptType());
 
             // If LEVERT comes before MOTTATT
-            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && !isProxyClient && conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
+            if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT && conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                 // Ensures that status MOTTATT is registered before LEVERT
                 // If MOTTATT was previously registered this attempt will be discarded and not cause duplicates
-                // If integrasjonspunktet is configured for use from the DPI proxy client MOTTATT won't be registered at
-                // all, because it causes the proxy client to crash (!)
                 MessageStatus mottatt = MessageStatus.of(MOTTATT, status.getLastUpdate().minusSeconds(1));
                 conversationService.registerStatus(conversation.get(), mottatt);
             }
 
             // If MOTTATT comes after LEVERT.
             if (ReceiptStatus.valueOf(status.getStatus()) == MOTTATT) {
-                if (!isProxyClient && conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
+                if (conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                     conversationService.registerStatus(conversation.get(), status);
                     log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
                 }
