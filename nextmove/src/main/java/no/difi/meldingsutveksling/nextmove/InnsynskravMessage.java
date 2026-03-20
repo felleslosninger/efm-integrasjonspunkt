@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "innsynskrav", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class InnsynskravMessage extends BusinessMessage<InnsynskravMessage> {
+public class InnsynskravMessage extends BusinessMessageAsAttachment<InnsynskravMessage> {
     @NotNull
     private String orgnr;
     @NotNull

@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -23,10 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +57,7 @@ public class NextMoveMessageOutController {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+
         // Check for max size
         files.stream()
                 .filter(p -> p.getSize() > MAX_SIZE)
@@ -64,6 +65,7 @@ public class NextMoveMessageOutController {
                 .ifPresent(p -> {
                     throw new MultipartFileToLargeException(p.getOriginalFilename(), MAX_SIZE);
                 });
+
         // Check for duplicate filenames
         List<String> filenames = files.stream()
                 .map(MultipartFile::getOriginalFilename)
@@ -74,9 +76,10 @@ public class NextMoveMessageOutController {
                 .ifPresent(d -> {
                     throw new DuplicateFilenameException(d);
                 });
-        NextMoveOutMessage message = messageService.createMessage(sbd, files);
-        messageService.sendMessage(message.getId());
-        return message.getSbd();
+
+            NextMoveOutMessage message = messageService.createMessage(sbd, files);
+            messageService.sendMessage(message.getId());
+            return message.getSbd();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.status.service;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
@@ -12,11 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING;
 
@@ -76,4 +75,5 @@ public class ConversationController {
     public Page<Conversation> queuedConversations(@PageableDefault(sort = "lastUpdate", direction = Sort.Direction.DESC) Pageable pageable) {
         return conversationRepository.findByPollable(true, pageable);
     }
+
 }

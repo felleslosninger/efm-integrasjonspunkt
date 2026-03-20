@@ -6,23 +6,25 @@ If you are looking for a specific type of message, then there are several filter
 When the message is locked, it can be retrieved with <<messages-in-pop>>.
 After the message is successfully downloaded, it should be deleted using the <<messages-in-delete>> operation.
 
-[plantuml,messages-in,png]
-....
-    participant "End User System" as fs
-    participant "Integrasjonspunkt" as ip
-    participant "Service Provider" as mf
+[plantuml, messages-in, png]
+----
+@startuml
+participant "End User System" as fs
+participant "Integrasjonspunkt" as ip
+participant "Service Provider" as mf
 
-    loop
-        ip->>mf: GetMessages
-        mf-->>ip: messages
-    end
+loop
+ip->>mf: GetMessages
+mf-->>ip: messages
+end
 
-    fs->>ip: GET /api/messages/in/peek[?process={processName}]
-    ip-->>fs: messageMetaData
-    fs->>ip: GET /api/messages/in/pop/{messageId}
-    ip-->>fs: ASiC
-    fs->>ip: DELETE /api/messages/in/{messageId}
-....
+fs->>ip: GET /api/messages/in/peek[?process={processName}]
+ip-->>fs: messageMetaData
+fs->>ip: GET /api/messages/in/pop/{messageId}
+ip-->>fs: ASiC
+fs->>ip: DELETE /api/messages/in/{messageId}
+@enduml
+----
 
 [#messages-in-find]
 == Find incoming messages
@@ -92,7 +94,7 @@ include::{snippets}/messages/in/find/paging/http-response.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/in/find/request-parameters.adoc[]
+include::{snippets}/messages/in/find/query-parameters.adoc[]
 --
 
 [role="secondary"]
@@ -156,7 +158,7 @@ include::{snippets}/messages/in/peek/no-content/response-fields.adoc[]
 .Request parameters
 [.request-parameters]
 --
-include::{snippets}/messages/in/peek/request-parameters.adoc[]
+include::{snippets}/messages/in/peek/query-parameters.adoc[]
 --
 
 [role="secondary"]

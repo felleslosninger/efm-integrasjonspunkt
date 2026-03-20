@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Static prototyping elements can go here, but they won't be inserted into other pages -->
+</head>
+<body>
+
+<div th:fragment="service" class="tab-pane fade" th:id="${id}" role="tabpanel" th:aria-labelledby="${id} + '-tab'">
+    <p th:inline="text">
+        [[${type}]] gjør det mulig å sende meldinger via meldingstjeneste '[[${type}]]'.
+        Denne placeholder tab'en har id='[[${id}]]'.
+    </p>
+    <p>
+        Konfigurasjon er oppsummert i tabellen nedenfor.
+    </p>
+    <code>
+        konfig = konfig for denne meldingsformidler er ikke implementert enda
+    </code>
+    <br/><br/>
+    <button th:if="${ff.isFake}" class="btn btn-danger" onclick="alert('Falsk alarm ...\n\nHer kunne vi vist konfigurasjonsfeil og advarsler.\nMen alt virker heldigvis lungt nå siden dette er en demo.\n\nNo worries 🤣')">DANGER DANGER</button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      # root / changeit
+      # jdbc:mariadb://localhost:3311/integrasjonspunkt?serverTimezone=Europe/Oslo
+      MARIADB_ROOT_PASSWORD: changeit
+      MARIADB_DATABASE: integrasjonspunkt
+    ports:
+      - "3311:3306"
+
+  mysql:
+    image: mysql:9.5
+    environment:
+      # root / changeit
+      # jdbc:mysql://localhost:3312/integrasjonspunkt?serverTimezone=Europe/Oslo
+      MYSQL_ROOT_PASSWORD: changeit
+      MYSQL_DATABASE: integrasjonspunkt
+    ports:
+      - "3312:3306"
+
+  postgres:
+    image: postgres:18.1
+    environment:
+      # root / changeit
+      # jdbc:postgresql://localhost:3313/integrasjonspunkt
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: changeit
+      POSTGRES_DB: integrasjonspunkt
+    ports:
+      - "3313:5432"
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    # sa / change!T2
+    # jdbc:sqlserver://localhost:3314;encrypt=false
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: change!T2
+      MSSQL_PID: Developer
+    ports:
+      - "3314:1433"
+
+  activemq:
+    image: apache/activemq-classic:5.17.7
+    container_name: activemq
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: admin
+    ports:
+      - "61616:61616"   # OpenWire
+      - "8161:8161"     # Web console
+    volumes:
+      - activemq-data:/opt/activemq/data
+
+volumes:
+  activemq-data:

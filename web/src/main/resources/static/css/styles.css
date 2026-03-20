@@ -1,0 +1,85 @@
+:root {
+    --brand: #0d6efd; /* bootstrap primary */
+    --brand-600: #0b5ed7;
+    --ink: #212529;
+    --muted-ink: #6c757d;
+    --surface: #ffffff;
+    --surface-soft: #f8f9fa;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: radial-gradient(1200px 600px at top left, #eef3ff 0%, #f7f9fc 40%, #ffffff 100%);
+    color: var(--ink);
+}
+
+h1 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+}
+
+h1 + .nav-tabs { /* snug to header */
+    margin-top: 0.75rem !important;
+}
+
+/* Tabs */
+.nav-tabs {
+    --bs-nav-tabs-border-color: rgba(13, 110, 253, .25);
+}
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-radius: .5rem .5rem 0 0;
+    color: var(--muted-ink);
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+    padding: 0.5rem 0.9rem;
+}
+.nav-tabs .nav-link:hover {
+    color: var(--brand-600);
+    background-color: rgba(13,110,253,.06);
+}
+.nav-tabs .nav-link.active {
+    color: var(--brand-600);
+    font-weight: 600;
+    background-color: var(--surface);
+    border-color: rgba(13,110,253,.35) rgba(13,110,253,.35) transparent;
+}
+
+/* Tab content card */
+.tab-content {
+    background: var(--surface);
+    border-radius: 0 .5rem .5rem .5rem;
+    box-shadow: 0 6px 18px rgba(33,37,41,.08);
+}
+
+/* Buttons spacing */
+.btn { margin-right: .5rem; margin-bottom: .5rem; }
+
+/* Ensure no gap in split buttons */
+.btn-group .btn { margin-right: 0; }
+
+/* Table tweaks */
+table.table tbody tr:hover {
+    background-color: rgba(13,110,253,.06);
+}
+table.table thead th {
+    background: var(--surface-soft);
+}
+
+/* Optional callout styling if used */
+.callout {
+    background: linear-gradient(0deg, #fff, #fff) padding-box,
+                linear-gradient(135deg, rgba(13,110,253,.35), rgba(25,135,84,.35)) border-box;
+    border: 1px solid transparent;
+    border-radius: .75rem;
+    padding: 1rem 1.25rem;
+    color: var(--ink);
+    box-shadow: 0 4px 12px rgba(33,37,41,.06);
+    margin: 1rem 0;
+}
+
+/* Layout niceties */
+.container { margin-top: 1rem; }
