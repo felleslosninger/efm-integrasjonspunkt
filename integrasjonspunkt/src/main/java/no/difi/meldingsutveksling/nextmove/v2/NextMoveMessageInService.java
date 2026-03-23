@@ -74,6 +74,11 @@ public class NextMoveMessageInService {
 
         try {
             Audit.info("Pop - returning ASiC stream for message with id=%s".formatted(message.getMessageId()), markerFrom(message));
+            // PersistenceException is a RuntimeException, and if thrown from cryptoMessagePersister.read()
+            // the whole transaction will be marked for rollback EVEN if we catch that exception explicitly.
+            // A rollback of the transaction will cause the database calls in the catch statement below to fail.
+            // That is why the cryptoMessagePersister.read() for now calls DBPersister.read() in a separate
+            // transaction using Propagation.REQUIRES_NEW (@see DBMessagePersister.read())
             return cryptoMessagePersister.read(messageId, ASIC_FILE);
         } catch (PersistenceException | IOException e) {
             String errorMsg = "Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.".formatted(
