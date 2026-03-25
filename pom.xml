@@ -80,6 +80,7 @@
     <properties>
         <java.version>21</java.version>
         <efm-common.version>DEV-SNAPSHOT</efm-common.version>
+        <nhn-adapter.version>0.0.1</nhn-adapter.version>
         <bouncycastle.version>1.83</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -226,7 +227,16 @@
                 <artifactId>commons-asic</artifactId>
                 <version>1.0.1</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.difi.meldingsutveksling.nhn-adapter</groupId>
+                <artifactId>nhn-crypto</artifactId>
+                <version>${nhn-adapter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling.nhn-adapter</groupId>
+                <artifactId>nhn-model</artifactId>
+                <version>${nhn-adapter.version}</version>
+            </dependency>
             <!-- versjonsstyring av dependencies -->
 
             <dependency>
