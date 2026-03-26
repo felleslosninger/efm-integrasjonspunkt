@@ -52,4 +52,5 @@ public class BlobFactory {
         AutoClosingInputStream is = new AutoClosingInputStream(tmpFile.getInputStream(), tmpFile::delete);
         return createBlob(is, file.length());
     }
+
 }

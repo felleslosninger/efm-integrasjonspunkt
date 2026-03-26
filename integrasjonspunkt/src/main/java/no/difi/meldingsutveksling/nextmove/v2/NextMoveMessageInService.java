@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -79,6 +79,16 @@ public class NextMoveMessageInService {
             String errorMsg = "Can not read file \"%s\" for message [messageId=%s, sender=%s], removing from queue.".formatted(
                     ASIC_FILE, message.getMessageId(), message.getSenderIdentifier());
             Audit.error(errorMsg, markerFrom(message), e);
+            if (e instanceof PersistenceException) {
+                // PersistenceException is a RuntimeException, if thrown from cryptoMessagePersister.read()
+                // the active transaction will already be marked for rollback EVEN if we catch that exception
+                // explicitly here.
+                //
+                // This cause database calls for messageRepo.delete() and conversationService.registerStatus() to fail.
+                // We log this situation as a warning to be able to assess if this is a problem.
+                //
+                log.warn("Unexpected PersistenceException when reading asic for messageId={}", messageId);
+            }
             messageRepo.delete(message);
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
             // throw checked AsicPersistanceException so that deletion transaction is not rolled back
@@ -122,4 +132,5 @@ public class NextMoveMessageInService {
         conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
         throw new AsicReadException(messageId);
     }
+
 }
