@@ -81,17 +81,12 @@ public class NextMoveMessageInService {
             Audit.error(errorMsg, markerFrom(message), e);
             if (e instanceof PersistenceException) {
                 // PersistenceException is a RuntimeException, if thrown from cryptoMessagePersister.read()
-                // the whole transaction will be marked for rollback EVEN if we catch that exception explicitly.
-                // A rollback of the transaction will cause database calls for messageRepo.delete() and
-                // conversationService.registerStatus() to fail.
+                // the active transaction will already be marked for rollback EVEN if we catch that exception
+                // explicitly here.
                 //
-                // As a workaround cryptoMessagePersister.read() calls DBPersister.read() in a separate
-                // transaction using Propagation.REQUIRES_NEW (@see DBMessagePersister.read()).  That way
-                // only the DBPersister.read() transaction is marked for rollback and the outer transaction
-                // in this method (popMessage()) will still be valid for essageRepo.delete() and
-                // conversationService.registerStatus()
-                //
+                // This cause database calls for messageRepo.delete() and conversationService.registerStatus() to fail.
                 // We log this situation as a warning to be able to assess if this is a problem.
+                //
                 log.warn("Unexpected PersistenceException when reading asic for messageId={}", messageId);
             }
             messageRepo.delete(message);
@@ -137,4 +132,5 @@ public class NextMoveMessageInService {
         conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
         throw new AsicReadException(messageId);
     }
+
 }

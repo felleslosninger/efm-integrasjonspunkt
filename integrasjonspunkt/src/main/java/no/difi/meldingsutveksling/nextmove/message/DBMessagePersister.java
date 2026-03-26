@@ -8,7 +8,6 @@ import no.difi.meldingsutveksling.nextmove.NextMoveMessageEntry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -35,12 +34,10 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    //@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     @Transactional(readOnly = true) // readOnly will not actually be applied when joining existsing transaction
     public Resource read(String messageId, String filename) throws IOException {
-        // throws PersistenceException (which is a RuntimeException) and will mark the transaction for rollback
-        // that is why we run this in it's own transaction (propagation.REQUIRES_NEW), so that it does not stop
-        // any outer transactions @see NextMoveMessageInService.popMessage()
+        // NOTE : When throwing PersistenceException (which is a RuntimeException) the active transaction
+        // will be marked for rollback even if we later catch it explicitly.
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
                 .orElseThrow(() -> new PersistenceException("Entry for conversationId=%s, filename=%s not found in database".formatted(messageId, filename)));
         return new BlobResource(entry.getContent(), "BLOB for messageId=%s, filename=%s".formatted(messageId, filename));
@@ -51,4 +48,5 @@ public class DBMessagePersister implements MessagePersister {
     public void delete(String messageId) throws IOException {
         repo.deleteByMessageId(messageId);
     }
+
 }
