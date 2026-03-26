@@ -35,11 +35,12 @@ public class DBMessagePersister implements MessagePersister {
     }
 
     @Override
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = true) // readOnly will not actually be applied when joining existsing transaction
     public Resource read(String messageId, String filename) throws IOException {
         // throws PersistenceException (which is a RuntimeException) and will mark the transaction for rollback
-        // runs in own transaction (propagation.REQUIRES_NEW) right now so that it does not stop any outer transactions
-        // @see NextMoveMessageInService.popMessage()
+        // that is why we run this in it's own transaction (propagation.REQUIRES_NEW), so that it does not stop
+        // any outer transactions @see NextMoveMessageInService.popMessage()
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
                 .orElseThrow(() -> new PersistenceException("Entry for conversationId=%s, filename=%s not found in database".formatted(messageId, filename)));
         return new BlobResource(entry.getContent(), "BLOB for messageId=%s, filename=%s".formatted(messageId, filename));
