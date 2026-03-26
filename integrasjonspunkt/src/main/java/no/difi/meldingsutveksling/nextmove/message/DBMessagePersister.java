@@ -39,7 +39,7 @@ public class DBMessagePersister implements MessagePersister {
         // NOTE : When throwing PersistenceException (which is a RuntimeException) the active transaction
         // will be marked for rollback even if we later catch it explicitly.
         NextMoveMessageEntry entry = repo.findByMessageIdAndFilename(messageId, filename).findFirst()
-                .orElseThrow(() -> new PersistenceException("Entry for conversationId=%s, filename=%s not found in database".formatted(messageId, filename)));
+                .orElseThrow(() -> new PersistenceException("Entry for messageId=%s, filename=%s not found in database".formatted(messageId, filename)));
         return new BlobResource(entry.getContent(), "BLOB for messageId=%s, filename=%s".formatted(messageId, filename));
     }
 
