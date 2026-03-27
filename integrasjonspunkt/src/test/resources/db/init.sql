@@ -1,0 +1,1 @@
+-- Database initialization script, used by manual Database Integration Tests in no.difi.meldingsutveksling.databases

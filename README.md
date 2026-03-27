@@ -8,6 +8,9 @@ automatisk når du starter en av de forhåndsdefinerte maven-profilene.
 ```bash
 mvn clean package
 java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+
+# eller overstyr konfigurasjon med en lokal fil
+java -Dspring.config.additional-location=file:integrasjonspunkt-minimal-dpo.properties -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
 ```
 
 Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
@@ -18,6 +21,10 @@ Dette skjer automatisk siden [application-dev.properties](integrasjonspunkt/src/
 [application-production.properties](integrasjonspunkt/src/main/resources/config/application-production.properties)
 inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=optional:file:integrasjonspunkt-local.properties,optional:file:integrasjonspunkt-local.yml,optional:file:integrasjonspunkt-local.yaml`).
 
+## Teste på ulike database versjoner
+Under [test/java/no/difi/meldingsutveksling/databases](integrasjonspunkt/src/test/java/no/difi/meldingsutveksling/databases) 
+finnes det tester som starter de ulike databasene med Testcontainers og gjør noen enkle sjekker på at tabeller og sekvenser
+er opprettet korrekt.  Disse er såpass tunge at de er `@Disabled` som default, men kan kjøres manuelt ved behov. 
 
 ## Bygge dockerbilde lokalt:
 Stå i roten av prosjektet og kjør kommandoene:
@@ -90,12 +97,12 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.1`, det er best practice for github releases)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.2`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse
 - Last opp artifacts (Disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
-  - Last opp jar filen (eks `integrasjonspunkt-v4.0.1.jar`)
-  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.1.jar.sha1`)
-  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.1.jar.asc`)
+  - Last opp jar filen (eks `integrasjonspunkt-v4.0.2.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.2.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.2.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
-  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.1` begge steder som vist i filnavna ovenfor)
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.2` begge steder som vist i filnavna ovenfor)
 - Klikk på "Publish release"
