@@ -23,7 +23,7 @@ inneholder en `optional` import av lokal konfig slik (vha `spring.config.import=
 
 ## Teste på ulike database versjoner
 Under [test/java/no/difi/meldingsutveksling/databases](integrasjonspunkt/src/test/java/no/difi/meldingsutveksling/databases) 
-finnes det tester som starter de ulike databasene med Testcontainer og gjør noen enkle sjekker på at tabeller og sekvenser
+finnes det tester som starter de ulike databasene med Testcontainers og gjør noen enkle sjekker på at tabeller og sekvenser
 er opprettet korrekt.  Disse er såpass tunge at de er `@Disabled` som default, men kan kjøres manuelt ved behov. 
 
 ## Bygge dockerbilde lokalt:

@@ -29,7 +29,7 @@ public class PostgresDatabaseIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.0")
         .withDatabaseName("integrasjonspunkt")
         .withUsername("root")
         .withPassword("changeit")
@@ -54,7 +54,7 @@ public class PostgresDatabaseIT {
     @SuppressWarnings("unchecked")
     void verify_all_database_tables() {
         var result = entityManager
-            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", String.class)
+            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = 'public'", String.class)
             .getResultList();
         assertThat(result).contains(CommonDatabase.TABLES);
     }

@@ -53,7 +53,7 @@ public class MSSQLDatabaseIT {
     @SuppressWarnings("unchecked")
     void verify_all_database_tables() {
         var result = entityManager
-            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", String.class)
+            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = 'dbo'", String.class)
             .getResultList();
         assertThat(result).contains(CommonDatabase.TABLES);
     }

@@ -29,7 +29,7 @@ public class MariaDBDatabaseIT {
 
     @Container
     @ServiceConnection
-    static MariaDBContainer<?> mysqlContainer = new MariaDBContainer<>("mariadb:10.5.5")
+    static MariaDBContainer<?> mariaDbContainer = new MariaDBContainer<>("mariadb:10.5.5")
         .withDatabaseName("integrasjonspunkt")
         .withUsername("root")
         .withPassword("changeit")
@@ -54,7 +54,7 @@ public class MariaDBDatabaseIT {
     @SuppressWarnings("unchecked")
     void verify_all_database_tables() {
         var result = entityManager
-            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", String.class)
+            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = DATABASE()", String.class)
             .getResultList();
         assertThat(result).contains(CommonDatabase.TABLES);
     }

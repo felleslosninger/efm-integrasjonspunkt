@@ -40,7 +40,7 @@ public class MySQLDatabaseIT {
 
     @Test
     void verify_database_has_legacy_sequence() {
-        // MySQL does not support sequences, it uses auto_increment or a table called called hibernate_sequence
+        // MySQL does not support sequences, it uses auto_increment or a table called hibernate_sequence
         var result = entityManager.createNativeQuery("SELECT * FROM hibernate_sequence").getSingleResult();
         assertThat(result).isNotNull();
     }
@@ -55,7 +55,7 @@ public class MySQLDatabaseIT {
     @SuppressWarnings("unchecked")
     void verify_all_database_tables() {
         var result = entityManager
-            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", String.class)
+            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = 'integrasjonspunkt'", String.class)
             .getResultList();
         assertThat(result).contains(CommonDatabase.TABLES);
     }
