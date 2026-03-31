@@ -7,19 +7,20 @@ on:
 
 jobs:
   build-and-deploy-libs:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@PF-2334-improve-trivyignore-detection
+    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
     with:
       java-version: 8
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
       application-path: integrasjonspunkt/
+      package-version: '2.28.10-test'
     secrets: inherit
 
   build-and-deploy-image:
     needs: build-and-deploy-libs
-    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@PF-2334-improve-trivyignore-detection
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
     with:
       slack-channel-id: C05NLQCFR41
-      package-version: 2.28.8
+      package-version: 2.28.10-test
       java-version: 8
     secrets: inherit
