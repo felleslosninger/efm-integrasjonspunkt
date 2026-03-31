@@ -13,7 +13,7 @@ jobs:
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
       application-path: integrasjonspunkt/
-      package-version: '2.28.10-test'
+      package-version: ${{ github.event.release.tag_name }}
     secrets: inherit
 
   build-and-deploy-image:
@@ -21,6 +21,6 @@ jobs:
     uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
     with:
       slack-channel-id: C05NLQCFR41
-      package-version: 2.28.10-test
+      package-version: ${{ github.event.release.tag_name }}
       java-version: 8
     secrets: inherit
