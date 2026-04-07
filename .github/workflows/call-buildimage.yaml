@@ -23,4 +23,5 @@ jobs:
       slack-channel-id: C05NLQCFR41
       package-version: ${{ github.event.release.tag_name }}
       java-version: 8
+      fetch-depth: 0
     secrets: inherit
