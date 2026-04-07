@@ -24,3 +24,4 @@ jobs:
       package-version: ${{ github.event.release.tag_name }}
       java-version: 8
     secrets: inherit
+
