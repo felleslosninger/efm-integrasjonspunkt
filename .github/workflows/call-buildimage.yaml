@@ -18,7 +18,7 @@ jobs:
 
   build-and-deploy-image:
     needs: build-and-deploy-libs
-    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@MOVE-4941-ipv2-pipeline
     with:
       slack-channel-id: C05NLQCFR41
       package-version: ${{ github.event.release.tag_name }}
