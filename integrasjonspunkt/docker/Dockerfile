@@ -28,7 +28,7 @@ WORKDIR ${APP_DIR}
 # Add jar last, since this changes the most
 RUN chown -R java:java ${APP_DIR}
 RUN chmod +x ${APP_DIR}/*
-COPY --chown=java:java /target/integrasjonspunkt.jar ${APP_DIR}/app.jar
+COPY --chown=java:java integrasjonspunkt/target/integrasjonspunkt.jar ${APP_DIR}/app.jar
 
 USER java
 
