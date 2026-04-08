@@ -1,28 +1,28 @@
-name: CI Workflow
+name: Release Integrasjonspunkt v2.x
 
 on:
-  workflow_dispatch:
-  push:
-  pull_request:
-    types: [ ] # Empty list ensures PRs are not triggered. Trigger nytt bygg...
+  release:
+    types:
+      - created
 
 jobs:
   build-and-deploy-libs:
-    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
     with:
       java-version: 8
       sbom-path: integrasjonspunkt/target
       fetch-depth: 0
       application-path: integrasjonspunkt/
+      package-version: ${{ github.event.release.tag_name }}
     secrets: inherit
 
   build-and-deploy-image:
-    if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, '[run-ci]')
     needs: build-and-deploy-libs
     uses: felleslosninger/github-workflows/.github/workflows/ci-docker-build-publish-integrasjonspunkt.yml@main
     with:
       slack-channel-id: C05NLQCFR41
-      package-version: 2.28.8
+      package-version: ${{ github.event.release.tag_name }}
       java-version: 8
+      fetch-depth: 0
     secrets: inherit
+
