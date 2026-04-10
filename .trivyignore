@@ -1,16 +1,16 @@
-CVE-2026-24400
-CVE-2025-59250
-CVE-2025-61726
-CVE-2025-61728
-CVE-2025-68121
+#CVE-2026-24400
+#CVE-2025-59250
+#CVE-2025-61726
+#CVE-2025-61728
+#CVE-2025-68121
 
-GHSA-72hv-8253-57qq # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
-CVE-2026-29062 # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
+#GHSA-72hv-8253-57qq # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
+#CVE-2026-29062 # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
 
-Blir fiksa i 4.0.3:
-CVE-2026-33870
-CVE-2026-33871
-CVE-2026-22731
-CVE-2026-22732
-CVE-2026-22733
-GHSA-2m67-wjpj-xhg9
+#Blir fiksa i 4.0.3:
+#CVE-2026-33870
+#CVE-2026-33871
+#CVE-2026-22731
+#CVE-2026-22732
+#CVE-2026-22733
+#GHSA-2m67-wjpj-xhg9
