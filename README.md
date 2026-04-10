@@ -97,12 +97,14 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.2`, det er best practice for github releases)
-- Fyll inn tittel og beskrivelse
-- Last opp artifacts (Disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
-  - Last opp jar filen (eks `integrasjonspunkt-v4.0.2.jar`)
-  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.2.jar.sha1`)
-  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.2.jar.asc`)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.3`, det er best practice for github releases)
+- Fyll inn tittel og beskrivelse med endrings loggen
+- Velg "Publish release" (det trigger workflows som generer pakker og container image, *ikke* bruk "Save draft" den vil ikke trigge bygg)
+- Etter at pakker har blitt bygget og publisert må stegene nedenfor utføres manuelt
+- Last opp artifacts i release (disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
+  - Last opp jar filen (eks `integrasjonspunkt-v4.0.3.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.3.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.3.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
-  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.2` begge steder som vist i filnavna ovenfor)
-- Klikk på "Publish release"
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.3` begge steder som vist i filnavna ovenfor)
+  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md` og `_docs/eFormidling/Oppgradering/endringslogg.md`

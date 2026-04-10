@@ -25,7 +25,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
     @Override
     public Version getIntegrasjonspunktVersion() {
-        return new Version("4.0.2", "DEV-SNAPSHOT", false);
+        return new Version("4.0.3", "DEV-SNAPSHOT", false);
     }
 
     @Override
