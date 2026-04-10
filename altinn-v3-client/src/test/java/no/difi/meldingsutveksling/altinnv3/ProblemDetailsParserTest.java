@@ -75,7 +75,7 @@ class ProblemDetailsParserTest {
 
         assertEquals("""
             Unable to parse as Altinn ProblemDetails: Unrecognized token 'NoJsonAtAll': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-             at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 12](NoJsonAtAll)""", actual);
+             at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1](NoJsonAtAll)""", actual);
 
     }
 
