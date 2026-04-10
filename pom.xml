@@ -356,6 +356,13 @@
                 <version>1.5.4</version>
             </dependency>
 
+            <!-- overstyring av versjoner med CVE sårbarheter -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>3.1.1</version>
+            </dependency>
+
             <!-- versjonsstyring av test dependencies -->
 
             <dependency>
