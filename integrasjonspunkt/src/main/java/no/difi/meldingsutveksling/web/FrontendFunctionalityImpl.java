@@ -228,7 +228,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         var keystore = oidc.getKeystore();
         if (keystore != null) config.addAll(List.of(
             new Property("difi.move.dpv.oidc.keystore.alias", keystore.getAlias(), "Sertifikat keystore alias"),
-            new Property("difi.move.dpv.oidc.keystore.password", keystore.getPassword(), "Sertifikat keystore passord"),
+            new Property("difi.move.dpv.oidc.keystore.password", mask(keystore.getPassword()), "Sertifikat keystore passord"),
             new Property("difi.move.dpv.oidc.keystore.type", keystore.getType(), "Sertifikat keystore type"),
             new Property("difi.move.dpv.oidc.keystore.path", keystore.getPath().toString(), "Sertifikat keystore path"),
             new Property("difi.move.dpv.oidc.keystore.lockProvider", keystore.getLockProvider().toString(), "Sertifikat keystore lock provider")
