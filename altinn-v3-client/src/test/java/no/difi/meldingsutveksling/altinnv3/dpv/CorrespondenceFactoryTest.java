@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
@@ -29,8 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -257,5 +257,19 @@ public class CorrespondenceFactoryTest {
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
         assertEquals(confidential, result.getCorrespondence().getIsConfidential(), "If resource is confidential, it should be mapped correctly on correspondence");
+    }
+
+    @Test
+    public void throw_error_when_resource_is_null(){
+        ServiceRecord serviceRecord = new ServiceRecord();
+        serviceRecord.setService(new Service().setResource(null));
+
+        when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
+
+        Exception exception = assertThrows(NextMoveRuntimeException.class, () -> {
+            correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+        });
+
+        assertEquals("Service Registry returned empty Altinn resource id. Resource id cannot be null or blank, contact Digdir for support.", exception.getMessage());
     }
 }

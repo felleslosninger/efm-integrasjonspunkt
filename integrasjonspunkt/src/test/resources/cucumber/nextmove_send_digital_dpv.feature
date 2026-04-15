@@ -107,7 +107,8 @@ Feature: Sending a Next Move Digital DPV message
         "correspondence.content.attachments[0].displayName" : "Test",
         "correspondence.notification.notificationTemplate" : "CustomMessage",
         "correspondence.notification.emailSubject" : "Melding mottatt i Altinn",
-        "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn"
+        "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn",
+        "correspondence.resourceId": "eformidling-dpv-administrasjon"
     }
     """
     And the sent message contains the following files:
