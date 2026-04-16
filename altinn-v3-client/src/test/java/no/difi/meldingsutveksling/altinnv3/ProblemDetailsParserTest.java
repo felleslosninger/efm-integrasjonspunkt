@@ -21,16 +21,22 @@ class ProblemDetailsParserTest {
     void parseProblemDetails_ok() throws Exception {
 
         when(clientHttpResponse.getBody()).thenReturn(new ByteArrayInputStream("""
-                {
-                    "type":"https://datatracker.ietf.org/doc/html/rfc7807",
-                    "title":"Unauthorized",
-                    "status":401,
-                    "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
-                }""".getBytes()));
+            {
+                "type":"https://datatracker.ietf.org/doc/html/rfc7807",
+                "title":"Unauthorized",
+                "status":401,
+                "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+            }""".getBytes()));
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry", actual);
+        assertEquals("""
+            TestRun: {
+                "type":"https://datatracker.ietf.org/doc/html/rfc7807",
+                "title":"Unauthorized",
+                "status":401,
+                "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+            }""", actual);
 
     }
 
@@ -38,17 +44,24 @@ class ProblemDetailsParserTest {
     void parseProblemDetails_ok_with_unknown_property_traceId() throws Exception {
 
         when(clientHttpResponse.getBody()).thenReturn(new ByteArrayInputStream("""
-                {
-                    "type":"https://tools.ietf.org/html/rfc9110#section-15.5.2",
-                    "title":"Unauthorized",
-                    "status":401,
-                    "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry",
-                    "traceId":"00-5f87f02bb2dac47bd8791b7e511ece2c-34c74bd580503f64-01"
-                }""".getBytes()));
+            {
+                "type":"https://tools.ietf.org/html/rfc9110#section-15.5.2",
+                "title":"Unauthorized",
+                "status":401,
+                "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry",
+                "traceId":"00-5f87f02bb2dac47bd8791b7e511ece2c-34c74bd580503f64-01"
+            }""".getBytes()));
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("TestRun: 401 Unauthorized, You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry", actual);
+        assertEquals("""
+            TestRun: {
+                "type":"https://tools.ietf.org/html/rfc9110#section-15.5.2",
+                "title":"Unauthorized",
+                "status":401,
+                "detail":"You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry",
+                "traceId":"00-5f87f02bb2dac47bd8791b7e511ece2c-34c74bd580503f64-01"
+            }""", actual);
 
     }
 
@@ -61,7 +74,7 @@ class ProblemDetailsParserTest {
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
         assertEquals("""
-            TestRun: null No title was given, Response was : {"unknown" : "value"}""", actual);
+            TestRun: {"unknown" : "value"}""", actual);
 
     }
 
@@ -69,13 +82,11 @@ class ProblemDetailsParserTest {
     void parseProblemDetails_error_parsing_non_json() throws Exception {
 
         when(clientHttpResponse.getBody()).thenReturn(new ByteArrayInputStream("""
-                NoJsonAtAll""".getBytes()));
+            NoJsonAtAll""".getBytes()));
 
         var actual = ProblemDetailsParser.parseClientHttpResponse("TestRun", clientHttpResponse);
 
-        assertEquals("""
-            Unable to parse as Altinn ProblemDetails: Unrecognized token 'NoJsonAtAll': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-             at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1](NoJsonAtAll)""", actual);
+        assertEquals( "TestRun: NoJsonAtAll", actual);
 
     }
 
