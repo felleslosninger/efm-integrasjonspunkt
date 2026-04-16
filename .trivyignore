@@ -1,1 +1,8 @@
 CVE-2025-59250 # com.microsoft.sqlserver:mssql-jdbc (mssql-jdbc-12.10.2.jre11.jar)
+
+# blir som regel oppdatert via neste spring boot patch
+CVE-2026-34197 # org.apache.activemq:activemq-broker
+CVE-2026-39304 # org.apache.activemq:activemq-client
+CVE-2026-34483 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-34486 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-34487 # org.apache.tomcat.embed:tomcat-embed-core

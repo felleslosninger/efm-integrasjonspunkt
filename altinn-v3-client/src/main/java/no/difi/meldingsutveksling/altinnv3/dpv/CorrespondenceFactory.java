@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceAttachmentExt;
@@ -127,6 +128,12 @@ public class CorrespondenceFactory {
     private String getResourceId(NextMoveOutMessage message) {
         ServiceRecord serviceRecord = serviceRegistryHelper.getServiceRecord(message);
 
-        return serviceRecord.getService().getResource();
+        var altinnResource = serviceRecord.getService().getResource();
+
+        if(altinnResource == null || altinnResource.isBlank()) {
+            throw new NextMoveRuntimeException("Service Registry returned empty Altinn resource id. Resource id cannot be null or blank, contact Digdir for support.");
+        }
+
+        return altinnResource;
     }
 }
