@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.status.Conversation;
 import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,6 +77,19 @@ public class AltinnDPVServiceTest {
 
         assertEquals(correspondenceId, result, "The returned value needs to be the correspondence id of the correspondence");
         verify(correspondenceApiClient).upload(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void getStatusThrowsErrorWhenExternalSystemReferenceIsMissing(){
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("abc");
+        conversation.setExternalSystemReference(null); // When message has been sent with IP older than 4.x.x, the message will not have an external system reference
+
+        var exception = assertThrows(InvalidConversationReferenceException.class, () -> {
+            altinnDPVService.getStatus(conversation);
+        });
+
+        assertEquals("Missing correspondenceId in conversation reference for conversation abc", exception.getMessage());
     }
 
 }
