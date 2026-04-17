@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>3.5.13</version>
         <relativePath />
     </parent>
 
@@ -354,6 +354,13 @@
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
                 <version>1.5.4</version>
+            </dependency>
+
+            <!-- overstyring av versjoner med CVE sårbarheter -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>3.1.1</version>
             </dependency>
 
             <!-- versjonsstyring av test dependencies -->

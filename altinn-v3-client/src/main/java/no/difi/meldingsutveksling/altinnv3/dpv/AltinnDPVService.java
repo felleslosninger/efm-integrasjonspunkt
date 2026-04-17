@@ -37,7 +37,13 @@ public class AltinnDPVService {
     }
 
     public List<CorrespondenceStatusEventExt> getStatus(Conversation conversation){
-        return client.getCorrespondenceDetails(UUID.fromString(conversation.getExternalSystemReference()))
+        var correspondenceId = conversation.getExternalSystemReference();
+
+        if(correspondenceId == null || correspondenceId.isEmpty()) {
+            throw new InvalidConversationReferenceException("Missing correspondenceId in conversation reference for conversation " + conversation.getConversationId());
+        }
+
+        return client.getCorrespondenceDetails(UUID.fromString(correspondenceId))
             .getStatusHistory();
     }
 
