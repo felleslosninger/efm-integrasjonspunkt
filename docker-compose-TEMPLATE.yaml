@@ -72,9 +72,14 @@ services:
 
         og så videre. Se dokumentasjonen for ulike miljøvariabler her: https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
 
+        For å skru av logging til disk, kan du la være å mounte opp volumet for logging beskrevet under, og heller sette følgende miljøvariabel tom:
+        -Dlogging.file.path=
+
+
     volumes:
     #Monter mappen din med jks-filer her
       - /sti/på/din/data/jks:/workspace/certs
+      #Ønsker du å logge til fil, må du sette opp volumet loggene havner i slik. La den stå tom ellers:
       - /sti/på/din/data/logs:/workspace/integrasjonspunkt-logs/
     ports:
       - "9093:9093"
