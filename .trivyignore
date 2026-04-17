@@ -6,3 +6,5 @@ CVE-2026-39304 # org.apache.activemq:activemq-client
 CVE-2026-34483 # org.apache.tomcat.embed:tomcat-embed-core
 CVE-2026-34486 # org.apache.tomcat.embed:tomcat-embed-core
 CVE-2026-34487 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-40477 # org.thymeleaf:thymeleaf
+CVE-2026-40478 # org.thymeleaf:thymeleaf-spring6
