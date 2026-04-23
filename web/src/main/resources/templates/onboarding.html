@@ -145,12 +145,22 @@
                             }
                             return payload;
                         })
-                        .then(() => {
-                            const bsModal = bootstrap.Modal.getInstance(modalEl);
-                            if (bsModal) {
-                                bsModal.hide();
+                        .then(data => {
+                            if (data.showInformationAfterCompletion) {
+                                // Re-render dialog content with updated info
+                                fetch(`/onboarding/dialog/${dialogId}`)
+                                    .then(r => r.json())
+                                    .then(updated => {
+                                        bodyEl.innerHTML = updated.body || updated.dialogText || '';
+                                        if (updated.buttonText) confirmBtn.textContent = updated.buttonText;
+                                    });
+                            } else {
+                                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                                if (bsModal) {
+                                    bsModal.hide();
+                                }
+                                window.location.reload();
                             }
-                            window.location.reload();
                         })
                         .catch(err => {
                             errorEl.textContent = err.message || 'Bekreftelse feilet.';

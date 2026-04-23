@@ -11,6 +11,7 @@ public class StepSystembruker implements Step {
 
     private boolean STEP_COMPLETED = false;
     private String acceptSystemUserURL = null;
+    private int actionsAfterCompletion = 0;
 
     @Inject
     FrontendFunctionality ff;
@@ -31,9 +32,18 @@ public class StepSystembruker implements Step {
     }
 
     @Override
+    public boolean showInformationAfterCompletion() {
+        // we only need to show information after first successful action
+        return actionsAfterCompletion < 2;
+    }
+
+    @Override
     public void executeAction(ActionType action) {
 
-        if (STEP_COMPLETED) return;
+        if (STEP_COMPLETED) {
+            actionsAfterCompletion++;
+            return;
+        }
 
         // confirm action means verify should try to create a system user
         if (ActionType.CONFIRM.equals(action)) {
@@ -101,7 +111,8 @@ public class StepSystembruker implements Step {
                 dialog,
                 buttonText,
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                showInformationAfterCompletion()
         );
 
     }

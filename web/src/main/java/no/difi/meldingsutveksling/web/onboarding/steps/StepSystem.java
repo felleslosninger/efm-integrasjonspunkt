@@ -88,7 +88,8 @@ public class StepSystem implements Step {
                 dialog,
                 isCompleted() ? "Lukk" : "Opprett system",
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                showInformationAfterCompletion()
         );
 
     }

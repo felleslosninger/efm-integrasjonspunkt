@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -73,6 +74,7 @@ public class OnboardingController {
         return ResponseEntity.ok(response);
     }
 
+    @ResponseBody
     @GetMapping("/onboarding/dialog/{dialog}")
     public ResponseEntity<?> dialogDetails(@PathVariable String dialog) {
         System.out.println("Fetching dialog: " + dialog);
@@ -80,6 +82,7 @@ public class OnboardingController {
         return ResponseEntity.ok(step.getStepInfo());
     }
 
+    @ResponseBody
     @PostMapping("/onboarding/dialog/{dialog}/confirm")
     public ResponseEntity<?> confirmDialog(@PathVariable String dialog) {
         System.out.println("Confirming dialog: " + dialog);

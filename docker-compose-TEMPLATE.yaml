@@ -73,7 +73,7 @@ services:
         og så videre. Se dokumentasjonen for ulike miljøvariabler her: https://docs.digdir.no/docs/eFormidling/installasjon/installasjon
 
         For å skru av logging til disk, kan du la være å mounte opp volumet for logging beskrevet under, og heller sette følgende miljøvariabel tom:
-        -Dlogging.file.path=
+        -Dlogging.file.name=
 
 
     volumes:

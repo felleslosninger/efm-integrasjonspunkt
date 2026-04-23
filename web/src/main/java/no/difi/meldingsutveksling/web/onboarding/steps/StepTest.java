@@ -45,7 +45,8 @@ public class StepTest implements Step {
                 dialogText,
                 isCompleted() ? "Lukk" : "Send testmelding",
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                showInformationAfterCompletion()
         );
 
     }

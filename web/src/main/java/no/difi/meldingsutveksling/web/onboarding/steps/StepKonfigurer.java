@@ -61,7 +61,8 @@ public class StepKonfigurer implements Step {
                 dialogText,
                 "Lukk",
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                showInformationAfterCompletion()
         );
 
     }
