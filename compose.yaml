@@ -45,7 +45,7 @@ services:
       - "3314:1433"
 
   activemq:
-    image: apache/activemq-classic:5.17.7
+    image: apache/activemq-classic:5.19.2
     container_name: activemq
     environment:
       ACTIVEMQ_ADMIN_LOGIN: admin
