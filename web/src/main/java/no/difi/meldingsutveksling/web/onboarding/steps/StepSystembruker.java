@@ -32,12 +32,6 @@ public class StepSystembruker implements Step {
     }
 
     @Override
-    public boolean showInformationAfterCompletion() {
-        // we only need to show information after first successful action
-        return actionsAfterCompletion < 2;
-    }
-
-    @Override
     public void executeAction(ActionType action) {
 
         if (STEP_COMPLETED) {
@@ -107,14 +101,20 @@ public class StepSystembruker implements Step {
         return new StepInfo(
                 getName(),
                 "Opprett systembruker",
-                "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
+                "Registrer en systembruker i Altinn for å sende og motta meldinger for din virksomhet.",
                 dialog,
                 buttonText,
                 isRequired(),
                 isCompleted(),
+                true,
                 showInformationAfterCompletion()
         );
 
+    }
+
+    public boolean showInformationAfterCompletion() {
+        // we only need to show information after first successful action
+        return actionsAfterCompletion < 2;
     }
 
     private String getSystemName() {

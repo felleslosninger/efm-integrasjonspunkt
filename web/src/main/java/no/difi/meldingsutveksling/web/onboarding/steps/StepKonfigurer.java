@@ -62,7 +62,8 @@ public class StepKonfigurer implements Step {
                 "Lukk",
                 isRequired(),
                 isCompleted(),
-                showInformationAfterCompletion()
+                true,
+                false
         );
 
     }

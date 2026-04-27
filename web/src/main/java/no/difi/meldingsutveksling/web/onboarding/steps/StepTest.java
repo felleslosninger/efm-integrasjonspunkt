@@ -46,7 +46,8 @@ public class StepTest implements Step {
                 isCompleted() ? "Lukk" : "Send testmelding",
                 isRequired(),
                 isCompleted(),
-                showInformationAfterCompletion()
+            false,
+            false
         );
 
     }

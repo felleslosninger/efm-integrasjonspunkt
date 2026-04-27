@@ -89,7 +89,8 @@ public class StepSystem implements Step {
                 isCompleted() ? "Lukk" : "Opprett system",
                 isRequired(),
                 isCompleted(),
-                showInformationAfterCompletion()
+                true,
+                false
         );
 
     }

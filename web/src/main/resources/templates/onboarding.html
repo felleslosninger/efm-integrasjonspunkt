@@ -98,7 +98,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" autofocus>Avbryt</button>
-                <button th:disabled="${!step.required()}" type="button" class="btn btn-primary" th:text="${step.buttonText()}" data-dialog-confirm>Bekreft</button>
+                <button th:disabled="${!step.enableActionButton()}" type="button" class="btn btn-primary" th:text="${step.buttonText()}" data-dialog-confirm>Bekreft</button>
             </div>
         </div>
     </div>
@@ -137,7 +137,13 @@
                 confirmBtn.onclick = () => {
                     errorEl.classList.add('d-none');
                     errorEl.textContent = '';
-                    fetch(`/onboarding/dialog/${dialogId}/confirm`, { method: 'POST' })
+                    const inputParams = {};
+                    bodyEl.querySelectorAll('input[name]').forEach(el => { inputParams[el.name] = el.value; });
+                    fetch(`/onboarding/dialog/${dialogId}/confirm`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(inputParams)
+                    })
                         .then(async response => {
                             const payload = await response.json().catch(() => ({}));
                             if (!response.ok) {

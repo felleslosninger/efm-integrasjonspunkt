@@ -8,12 +8,10 @@ import no.difi.meldingsutveksling.web.onboarding.steps.Step.ActionType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class OnboardingController {
@@ -22,7 +20,8 @@ public class OnboardingController {
     @Inject StepSystem step2;
     @Inject StepSystembruker step3;
     @Inject StepKonfigurer step4;
-    @Inject StepTest step5;
+    @Inject StepPaavegneav step5;
+    @Inject StepTest step6;
 
     @Inject FrontendFunctionality ff;
 
@@ -30,7 +29,7 @@ public class OnboardingController {
 
     @PostConstruct
     void init() {
-        steps = List.of(step1, step2, step3, step4, step5);
+        steps = List.of(step1, step2, step3, step4, step5, step6);
     }
 
     @GetMapping("/onboarding")
@@ -84,9 +83,10 @@ public class OnboardingController {
 
     @ResponseBody
     @PostMapping("/onboarding/dialog/{dialog}/confirm")
-    public ResponseEntity<?> confirmDialog(@PathVariable String dialog) {
+    public ResponseEntity<?> confirmDialog(@PathVariable String dialog, @RequestBody(required = false) Map<String, String> params) {
         System.out.println("Confirming dialog: " + dialog);
         var step = findOnboardingStep(dialog);
+        step.setParams(params);
         step.executeAction(ActionType.CONFIRM);
         return ResponseEntity.ok(step.getStepInfo());
     }
