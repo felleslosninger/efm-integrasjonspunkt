@@ -190,7 +190,8 @@ Feature: Sending a Next Move DPV message
         "correspondence.notification.notificationTemplate" : "CustomMessage",
         "correspondence.notification.emailSubject" : "Melding mottatt i Altinn",
         "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn",
-        "correspondence.resourceId": "eformidling-dpv-administrasjon"
+        "correspondence.resourceId": "eformidling-dpv-administrasjon",
+        "correspondence.propertyList.senderOrgNumber": "910077473"
     }
     """
     And the sent message contains the following files:

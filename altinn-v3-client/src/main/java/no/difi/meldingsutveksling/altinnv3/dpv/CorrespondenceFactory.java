@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
 
 
 @Component
@@ -71,8 +71,17 @@ public class CorrespondenceFactory {
         correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setSendersReference(message.getMessageId());
         correspondence.setIsConfidential(dpvHelper.isConfidential(message));
+        correspondence.setPropertyList(getPropertyList(message));
 
         return correspondence;
+    }
+
+    private Map<String, String> getPropertyList(NextMoveOutMessage message) {
+        Map<String, String> propertyList = new HashMap<>();
+
+        propertyList.put("senderOrgNumber",  getPartOrPrimaryIdentifier(message.getSender()));
+
+        return propertyList;
     }
 
     private OffsetDateTime getDueDateTime(NextMoveOutMessage message) {
