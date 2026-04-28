@@ -16,13 +16,13 @@ public class StepPaavegneav implements Step {
     FrontendFunctionality ff;
 
     enum StepState {
-        NOT_STARTED,
+        STARTING,
         IN_PROGRESS,
-        COMPLETED,
+        FINISHED,
         ERROR
     }
 
-    private StepState state = StepState.NOT_STARTED;
+    private StepState state = StepState.STARTING;
 
     // info about the system we are registering on
     private String systemName;
@@ -66,11 +66,11 @@ public class StepPaavegneav implements Step {
 
         if (action == ActionType.CANCEL) {
             // we will only cancel if we are in progress
-            if (StepState.IN_PROGRESS.equals(state)) state = StepState.NOT_STARTED;
+            if (StepState.IN_PROGRESS.equals(state)) state = StepState.STARTING;
             return;
         }
 
-        if (state == StepState.NOT_STARTED) {
+        if (state == StepState.STARTING) {
             if (orgNumber == null) orgNumber = "";
             if (orgNumber.length() == 9) {
                 systemUserName = systemName + "_systembruker_" + orgNumber;
@@ -82,14 +82,14 @@ public class StepPaavegneav implements Step {
         } else if (state == StepState.IN_PROGRESS) {
             acceptSystemUserURL = ff.dpoCreateSystemUser(systemUserName, systemName, orgNumber, REQUIRED_ACCESS_PACKAGE);
             if (acceptSystemUserURL != null) {
-                state = StepState.COMPLETED;
+                state = StepState.FINISHED;
             } else {
                 errorMessage = "Kunne ikke opprette systembruker, sjekk logger for feilmelding.";
                 state = StepState.ERROR;
             }
-        } else if (state == StepState.COMPLETED) {
+        } else if (state == StepState.FINISHED) {
             orgNumber = "";
-            state = StepState.NOT_STARTED;
+            state = StepState.STARTING;
         }
 
     }
@@ -114,7 +114,7 @@ public class StepPaavegneav implements Step {
 
         // update dialogs for each state
 
-        if (state == StepState.NOT_STARTED) {
+        if (state == StepState.STARTING) {
             var dialogOrgInputFields = """
                 <label for="paavegneav-orgnummer">Orgnummer på ny virksomhet du vil registrere</label><br>
                 <input type="text" id="paavegneav-orgnummer" name="orgnummer" maxlength="9" pattern="[0-9]{9}" placeholder="9 siffer" value="%s">
@@ -132,7 +132,7 @@ public class StepPaavegneav implements Step {
             dialogText = dialogText + "<br><br>" + dialogTextSystembrukere + dialogSystemUserInputFields;
         }
 
-        if (state == StepState.COMPLETED) {
+        if (state == StepState.FINISHED) {
             var dialogSystemUserCreated = """
                 Opprettelse av systembruker <code>'%s'</code> for organisasjon <code>'%s'</code> er registrert
                 på system <code>'%s'</code>, men må godkjennes før det kan benyttes.<br><br>
@@ -158,9 +158,9 @@ public class StepPaavegneav implements Step {
         //  update button text for each state
 
         var buttonText = switch (state) {
-            case NOT_STARTED -> "Start med orgnummer";
+            case STARTING -> "Start med orgnummer";
             case IN_PROGRESS -> "Registrer i Altinn";
-            case COMPLETED -> "Opprett enda en systembruker";
+            case FINISHED -> "Opprett enda en systembruker";
             case ERROR -> "Kan ikke utføre noe";
         };
 
