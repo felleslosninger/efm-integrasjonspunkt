@@ -1,0 +1,43 @@
+name: CI PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+  permissions:
+    contents: write
+    pull-requests: write
+    issues: write
+    repository-projects: read
+
+jobs:
+  run-pr-checks:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-pr-checks.yml@main
+    with:
+      application-type: spring-boot
+      java-version: 21
+      pull-request-title: ${{ github.event.pull_request.title }}
+      pull-request-allowed-prefixes: "MOVE-,Bump,PF-"
+      enable-auto-merge-dependabot: true
+      auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
+      enable-trivy-image-scan: false
+      module-name: integrasjonspunkt
+
+#  call-workflow-maven-build:
+#    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
+#    with:
+#      java-version: 21
+#      application-path: integrasjonspunkt/
+#    secrets: inherit
+#
+#  call-container-scan:
+#    needs: call-workflow-maven-build
+#    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
+#    with:
+#      java-version: 21
+#      module-name: integrasjonspunkt
+#    secrets: inherit

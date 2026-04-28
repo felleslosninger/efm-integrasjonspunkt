@@ -11,6 +11,16 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  repository-projects: read
+
 jobs:
   build-and-deploy-image:
     #builds and deploys docker image to CREIDDEV to be deployed to TEST in the next step

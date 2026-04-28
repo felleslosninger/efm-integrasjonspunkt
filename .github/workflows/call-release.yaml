@@ -4,6 +4,17 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  repository-projects: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   #builds and deploys libs to github packages
   call-workflow-maven-install-deploy:

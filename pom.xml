@@ -40,10 +40,6 @@
     </developers>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
-        </snapshotRepository>
         <repository>
             <id>github</id>
             <name>GitHub felleslosninger Apache Maven Packages</name>
@@ -67,9 +63,6 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
         <repository>
             <id>jitpack.io</id>
