@@ -26,7 +26,6 @@ public class StepPaavegneav implements Step {
 
     // info about the system we are registering on
     private String systemName;
-    private String systemOrgId;
     private String errorMessage;
 
     // info about the new organization and system user we are adding
@@ -74,14 +73,14 @@ public class StepPaavegneav implements Step {
         if (state == StepState.NOT_STARTED) {
             if (orgNumber == null) orgNumber = "";
             if (orgNumber.length() == 9) {
-                systemUserName = systemName + "_" + orgNumber;
+                systemUserName = systemName + "_systembruker_" + orgNumber;
                 errorMessage = "";
                 state = StepState.IN_PROGRESS;
             } else {
                 errorMessage = "Må være 9 siffer";
             }
         } else if (state == StepState.IN_PROGRESS) {
-            acceptSystemUserURL = ff.dpoCreateSystemUser(systemUserName, systemName, systemOrgId, REQUIRED_ACCESS_PACKAGE);
+            acceptSystemUserURL = ff.dpoCreateSystemUser(systemUserName, systemName, orgNumber, REQUIRED_ACCESS_PACKAGE);
             if (acceptSystemUserURL != null) {
                 state = StepState.COMPLETED;
             } else {
@@ -99,7 +98,6 @@ public class StepPaavegneav implements Step {
     public StepInfo getStepInfo() {
 
         if (systemName == null) systemName = getSystemName();
-        if (systemOrgId == null) systemOrgId = getOrgNumberFromOrgId();
         if (errorMessage == null) errorMessage = "";
         if (orgNumber == null) orgNumber = "";
 
@@ -152,10 +150,9 @@ public class StepPaavegneav implements Step {
             dialogText = """
                 Ikke mulig å opprette systembruker - sjekk at du har konfigurert system innstillinger korrekt.<br><br>
                 <small><code>System Name = %s</code></small><br>
-                <small><code>System Owner = %s</code></small><br><br>
                 Siste feilmelding var :<br>
                 <small><code>%s</code></small>
-                """.formatted(systemName, systemOrgId, errorMessage);
+                """.formatted(systemName, errorMessage);
         }
 
         //  update button text for each state
@@ -190,19 +187,6 @@ public class StepPaavegneav implements Step {
             .map(Property::value)
             .findFirst()
             .orElse("difi.move.dpo.systemName er ikke konfigurert");
-    }
-
-    private String getSystemOrgId() {
-        // 0192:311780735
-        return ff.dpoConfiguration().stream()
-            .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
-            .map(p -> p.value())
-            .findFirst()
-            .orElse("difi.move.dpo.systemUser.orgId er ikke konfigurert");
-    }
-
-    private String getOrgNumberFromOrgId() {
-        return getSystemOrgId().split(":")[1];
     }
 
 }
