@@ -26,6 +26,7 @@ jobs:
       auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
       enable-trivy-image-scan: false
       module-name: integrasjonspunkt
+      maven-lifecycle: 'verify'
 
 #  call-workflow-maven-build:
 #    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main

@@ -21,5 +21,6 @@ jobs:
       java-version: 21
       module-path: integrasjonspunkt
       application-path: integrasjonspunkt/
+      maven-lifecycle: 'verify'
     secrets: inherit
 
