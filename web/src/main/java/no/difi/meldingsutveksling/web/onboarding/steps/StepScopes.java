@@ -75,6 +75,7 @@ public class StepScopes implements Step {
                 "Lukk",
                 isRequired(),
                 isCompleted(),
+                false,
                 true,
                 false
             );
@@ -109,6 +110,7 @@ public class StepScopes implements Step {
                 "Lukk",
                 isRequired(),
                 isCompleted(),
+                false,
                 true,
                 false
         );

@@ -97,7 +97,9 @@
                 <p class="mb-0" data-dialog-body th:utext="${step.dialogText()}">Detaljer om steget.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" autofocus>Avbryt</button>
+                <button type="button" class="btn btn-secondary" autofocus
+                        th:attr="data-bs-dismiss=${!step.enableCancelButton() ? 'modal' : null},
+                                 data-dialog-cancel=${step.enableCancelButton() ? 'true' : null}">Avbryt</button>
                 <button th:disabled="${!step.enableActionButton()}" type="button" class="btn btn-primary" th:text="${step.buttonText()}" data-dialog-confirm>Bekreft</button>
             </div>
         </div>
@@ -112,6 +114,22 @@
             const bodyEl = modalEl.querySelector('[data-dialog-body]');
             const errorEl = modalEl.querySelector('[data-dialog-error]');
             const confirmBtn = modalEl.querySelector('[data-dialog-confirm]');
+            const cancelBtn = modalEl.querySelector('[data-dialog-cancel]');
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    fetch(`/onboarding/dialog/${dialogId}/cancel`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(() => {
+                            const bsModal = bootstrap.Modal.getInstance(modalEl);
+                            if (bsModal) bsModal.hide();
+                        })
+                        .catch(() => {
+                            const bsModal = bootstrap.Modal.getInstance(modalEl);
+                            if (bsModal) bsModal.hide();
+                        });
+                });
+            }
 
             modalEl.addEventListener('show.bs.modal', () => {
                 errorEl.classList.add('d-none');

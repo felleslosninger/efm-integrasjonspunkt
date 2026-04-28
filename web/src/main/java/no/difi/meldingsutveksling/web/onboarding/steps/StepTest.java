@@ -39,13 +39,14 @@ public class StepTest implements Step {
                     "Sender en testmelding til deg selv.";
 
         return new StepInfo(
-                getName(),
-                "Test meldingsflyt",
-                "Send en testmelding til deg selv for å verifiser mottak før produksjonssetting.",
-                dialogText,
-                isCompleted() ? "Lukk" : "Send testmelding",
-                isRequired(),
-                isCompleted(),
+            getName(),
+            "Test meldingsflyt",
+            "Send en testmelding til deg selv for å verifiser mottak før produksjonssetting.",
+            dialogText,
+            isCompleted() ? "Lukk" : "Send testmelding",
+            isRequired(),
+            isCompleted(),
+            false,
             false,
             false
         );

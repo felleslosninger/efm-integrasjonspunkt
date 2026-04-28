@@ -51,6 +51,12 @@ public class StepPaavegneav implements Step {
     @Override
     public void executeAction(ActionType action) {
 
+        if (ActionType.CANCEL.equals(action)) {
+            // we will only cancel if we are in progress
+            if (StepState.IN_PROGRESS.equals(state)) state = StepState.NOT_STARTED;
+            return;
+        }
+
         if (StepState.NOT_STARTED.equals(state)) {
             if (orgNumber.length() == 9) {
                 systemUserName = systemName + "_" + orgNumber;
@@ -136,49 +142,26 @@ public class StepPaavegneav implements Step {
         //
 
         return new StepInfo(
-                getName(),
-                "På vegne av systembrukere",
-                "Systemleverandørere kan registrere systembrukere i Altinn for andre organisasjoner og virksomheter de skal sende og motta meldinger på vegne av.",
-                dialogText,
-                buttonText,
-                isRequired(),
-                isCompleted(),
-                true,
+            getName(),
+            "På vegne av systembrukere",
+            "Systemleverandørere kan registrere systembrukere i Altinn for andre organisasjoner og virksomheter de skal sende og motta meldinger på vegne av.",
+            dialogText,
+            buttonText,
+            isRequired(),
+            isCompleted(),
+            true,
+            true,
             true
         );
 
     }
 
-
     private String getSystemName() {
-        // 311780735_integrasjonspunkt
         return ff.dpoConfiguration().stream()
             .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
             .map(p -> p.value())
             .findFirst()
-            .orElse("%s_integrasjonspunkt".formatted(ff.getOrganizationNumber()));
-    }
-
-    private String getSystemOrgId() {
-        // 0192:311780735
-        return ff.dpoConfiguration().stream()
-            .filter(p -> "difi.move.dpo.systemUser.orgId".equals(p.key()))
-            .map(p -> p.value())
-            .findFirst()
-            .orElse("0192:%s".formatted(ff.getOrganizationNumber()));
-    }
-
-    private String getOrgNumberFromOrgId() {
-        return getSystemOrgId().split(":")[1];
-    }
-
-    private String getSystemUserName(String orgnummer) {
-        // 311780735_integrasjonspunkt_systembruker_test3
-        return ff.dpoConfiguration().stream()
-            .filter(p -> "difi.move.dpo.systemUser.name".equals(p.key()))
-            .map(p -> p.value())
-            .findFirst()
-            .orElse("%s_systembruker_%s".formatted(getSystemName(), ff.getOrganizationNumber()));
+            .orElse("Du må konfigurere systemnavn i integrasjonspunktet difi.move.dpo.systemName");
     }
 
 }

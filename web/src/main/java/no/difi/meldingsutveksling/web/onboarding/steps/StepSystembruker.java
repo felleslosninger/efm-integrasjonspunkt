@@ -99,15 +99,16 @@ public class StepSystembruker implements Step {
         if (acceptSystemUserURL != null) buttonText = "Godkjenn i Altinn";
 
         return new StepInfo(
-                getName(),
-                "Opprett systembruker",
-                "Registrer en systembruker i Altinn for å sende og motta meldinger for din virksomhet.",
-                dialog,
-                buttonText,
-                isRequired(),
-                isCompleted(),
-                true,
-                showInformationAfterCompletion()
+            getName(),
+            "Opprett systembruker",
+            "Registrer en systembruker i Altinn for å sende og motta meldinger for din virksomhet.",
+            dialog,
+            buttonText,
+            isRequired(),
+            isCompleted(),
+            false,
+            true,
+            showInformationAfterCompletion()
         );
 
     }

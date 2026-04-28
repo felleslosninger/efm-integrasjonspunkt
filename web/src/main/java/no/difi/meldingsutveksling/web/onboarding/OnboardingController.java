@@ -91,6 +91,15 @@ public class OnboardingController {
         return ResponseEntity.ok(step.getStepInfo());
     }
 
+    @ResponseBody
+    @PostMapping("/onboarding/dialog/{dialog}/cancel")
+    public ResponseEntity<?> cancelDialog(@PathVariable String dialog) {
+        System.out.println("Cancelling dialog: " + dialog);
+        var step = findOnboardingStep(dialog);
+        step.executeAction(ActionType.CANCEL);
+        return ResponseEntity.ok(step.getStepInfo());
+    }
+
     private Step findOnboardingStep(String dialog) {
         return steps.stream().filter(step -> step.getName().equals(dialog)).findFirst().get();
     }
