@@ -15,16 +15,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  repository-projects: read
-
 jobs:
   build-and-deploy-image:
     #builds and deploys docker image to CREIDDEV to be deployed to TEST in the next step
     uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      repository-projects: read
+      packages: write
+      id-token: write
     with:
       java-version: 21
       module-name: integrasjonspunkt
@@ -33,6 +34,11 @@ jobs:
 
   call-update-image:
     uses: felleslosninger/github-workflows/.github/workflows/ci-call-update-image.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      repository-projects: read
     needs: build-and-deploy-image
     with:
       application-name: efm-integrasjonspunkt

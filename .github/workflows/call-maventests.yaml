@@ -19,7 +19,6 @@ jobs:
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
     with:
       java-version: 21
-      module-path: integrasjonspunkt
       application-path: integrasjonspunkt/
       maven-lifecycle: 'verify'
     secrets: inherit
