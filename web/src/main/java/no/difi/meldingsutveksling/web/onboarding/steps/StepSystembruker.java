@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class StepSystembruker implements Step {
 
-    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+    private static final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
 
     private boolean STEP_COMPLETED = false;
     private String acceptSystemUserURL = null;

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class StepPaavegneav implements Step {
 
-    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+    private static final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
 
     @Inject
     FrontendFunctionality ff;
