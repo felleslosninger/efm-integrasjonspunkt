@@ -1,4 +1,4 @@
-name: CI PR Checks
+name: Call CI PR Checks
 
 on:
   pull_request:
