@@ -13,6 +13,7 @@ permissions:
   pull-requests: write
   issues: write
   repository-projects: read
+  packages: read
 
 jobs:
   run-pr-checks:
