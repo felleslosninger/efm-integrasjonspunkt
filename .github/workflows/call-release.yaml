@@ -4,11 +4,6 @@ on:
   release:
     types: [created]
 
-permissions:
-  contents: write
-  repository-projects: read
-  packages: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,6 +12,10 @@ jobs:
   #builds and deploys libs to github packages
   call-workflow-maven-install-deploy:
     uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
+    permissions:
+      contents: write
+      repository-projects: read
+      packages: write
     with:
       package-version: ${{ github.event.release.tag_name }}
       deployment-repository: ${{ github.repository }}
@@ -29,6 +28,11 @@ jobs:
     #builds and deploys docker image to Github Packages Container Registry
     needs: call-workflow-maven-install-deploy
     uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
+    permissions:
+      contents: write
+      repository-projects: read
+      packages: write
+      id-token: write
     with:
       image-tag: ${{ github.event.release.tag_name }}
       module-name: integrasjonspunkt
