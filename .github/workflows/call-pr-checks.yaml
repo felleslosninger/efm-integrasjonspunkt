@@ -25,22 +25,8 @@ jobs:
       pull-request-allowed-prefixes: "MOVE-,Bump,PF-"
       enable-auto-merge-dependabot: true
       auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
-      enable-trivy-image-scan: false
+      enable-trivy-image-scan: true
       module-name: integrasjonspunkt
       maven-lifecycle: 'verify'
     secrets: inherit
 
-#  call-workflow-maven-build:
-#    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
-#    with:
-#      java-version: 21
-#      application-path: integrasjonspunkt/
-#    secrets: inherit
-#
-#  call-container-scan:
-#    needs: call-workflow-maven-build
-#    uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
-#    with:
-#      java-version: 21
-#      module-name: integrasjonspunkt
-#    secrets: inherit
