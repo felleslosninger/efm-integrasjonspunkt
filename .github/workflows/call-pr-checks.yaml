@@ -28,6 +28,7 @@ jobs:
       enable-trivy-image-scan: false
       module-name: integrasjonspunkt
       maven-lifecycle: 'verify'
+    secrets: inherit
 
 #  call-workflow-maven-build:
 #    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
