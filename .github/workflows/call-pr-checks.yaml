@@ -22,7 +22,7 @@ jobs:
       java-version: 21
       pull-request-title: ${{ github.event.pull_request.title }}
       pull-request-allowed-prefixes: "MOVE-,Bump,PF-"
-      enable-auto-merge-dependabot: true
+      enable-auto-merge-dependabot: false
       auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
       enable-trivy-image-scan: true
       module-name: integrasjonspunkt
