@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.onboarding.steps.*;
 import no.difi.meldingsutveksling.web.onboarding.steps.Step.ActionType;
+import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,8 @@ import java.util.Map;
 
 @Controller
 public class OnboardingController {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OnboardingController.class);
 
     @Inject StepScopes step1;
     @Inject StepSystem step2;
@@ -63,7 +66,7 @@ public class OnboardingController {
 
     @GetMapping("/onboarding/token/{meldingstjeneste}")
     public ResponseEntity<?> accessToken(@PathVariable String meldingstjeneste) {
-        System.out.println("Fetching accesstoken for meldingstjeneste : " + meldingstjeneste);
+        log.info("Fetching accesstoken for meldingstjeneste : {}", meldingstjeneste);
         if (meldingstjeneste == null) meldingstjeneste = "";
         String response = null;
         if ("DPO".equalsIgnoreCase(meldingstjeneste)) response = ff.dpoAccessToken(List.of("altinn:broker.read","altinn:broker.write"));
@@ -76,7 +79,7 @@ public class OnboardingController {
     @ResponseBody
     @GetMapping("/onboarding/dialog/{dialog}")
     public ResponseEntity<?> dialogDetails(@PathVariable String dialog) {
-        System.out.println("Fetching dialog: " + dialog);
+        log.info("Fetching dialog: {}", dialog);
         var step = findOnboardingStep(dialog);
         return ResponseEntity.ok(step.getStepInfo());
     }
@@ -84,7 +87,7 @@ public class OnboardingController {
     @ResponseBody
     @PostMapping("/onboarding/dialog/{dialog}/confirm")
     public ResponseEntity<?> confirmDialog(@PathVariable String dialog, @RequestBody(required = false) Map<String, String> params) {
-        System.out.println("Confirming dialog: " + dialog);
+        log.info("Confirming dialog: {}", dialog);
         var step = findOnboardingStep(dialog);
         step.setParams(params);
         step.executeAction(ActionType.CONFIRM);
@@ -94,7 +97,7 @@ public class OnboardingController {
     @ResponseBody
     @PostMapping("/onboarding/dialog/{dialog}/cancel")
     public ResponseEntity<?> cancelDialog(@PathVariable String dialog) {
-        System.out.println("Cancelling dialog: " + dialog);
+        log.info("Cancelling dialog: {}", dialog);
         var step = findOnboardingStep(dialog);
         step.executeAction(ActionType.CANCEL);
         return ResponseEntity.ok(step.getStepInfo());

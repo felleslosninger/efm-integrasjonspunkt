@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -39,7 +38,7 @@ public class SystemUserTokenProducer implements TokenProducer {
         RSAKey rsaJWK = RSAKey.parse(new String(this.getClass().getResourceAsStream("/311780735-sterk-ulydig-hund-da.jwk").readAllBytes()));
 
         JWSSigner signer = new RSASSASigner(rsaJWK);
-        signer.supportedJWSAlgorithms().forEach(System.out::println);
+        // signer.supportedJWSAlgorithms().forEach(System.out::println);
 
         Map<String, Object> systemuserOrg = new HashMap<>();
         systemuserOrg.put("authority", "iso6523-actorid-upis");
@@ -79,8 +78,8 @@ public class SystemUserTokenProducer implements TokenProducer {
         String[] chunks = serializedJwt.split("\\.");
         Base64.Decoder decoder = Base64.getUrlDecoder();
         String payload = new String(decoder.decode(chunks[1]));
-        System.out.println("Payload: " + payload);
-        System.out.println("SerializedJWT: " + serializedJwt);
+//        System.out.println("Payload: " + payload);
+//        System.out.println("SerializedJWT: " + serializedJwt);
 
         // https://docs.digdir.no/docs/Maskinporten/maskinporten_guide_apikonsument#registrere-klient-som-bruker-egen-nøkkel
         RestClient restClient = RestClient.create("https://test.maskinporten.no/token");

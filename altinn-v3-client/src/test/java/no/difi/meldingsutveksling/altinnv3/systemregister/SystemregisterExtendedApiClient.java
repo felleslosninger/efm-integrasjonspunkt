@@ -126,8 +126,7 @@ public class SystemregisterExtendedApiClient {
             .body(body)
             .retrieve();
 
-        System.out.println(res.toEntity(String.class));
-        return "";
+        return res.toEntity(String.class).getBody();
     }
 
     public String getAll() {
