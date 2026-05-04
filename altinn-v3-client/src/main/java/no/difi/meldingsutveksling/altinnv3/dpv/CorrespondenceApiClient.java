@@ -26,6 +26,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -130,10 +131,10 @@ public class CorrespondenceApiClient {
             ;
     }
 
-    private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) {
+    private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) throws IOException {
         var prefix = "Correspondence api error: %s [%s]".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
-        throw new CorrespondenceApiException(details);
+        throw new CorrespondenceApiException(details, response.getStatusCode());
     }
 
     private void addJacksonAsConverter(List<HttpMessageConverter<?>> converters) {

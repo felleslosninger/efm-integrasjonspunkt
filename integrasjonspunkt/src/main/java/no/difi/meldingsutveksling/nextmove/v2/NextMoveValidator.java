@@ -213,6 +213,10 @@ public class NextMoveValidator {
             if (!missingFiles.isEmpty()) {
                 throw new MissingArkivmeldingFileException(String.join(",", missingFiles));
             }
+
+            if (message.getServiceIdentifier() == DPV) {
+                validateArkivmeldingForDpv(message);
+            }
         }
 
         // Validate that files given in metadata mapping exist
@@ -248,6 +252,22 @@ public class NextMoveValidator {
                 throw new InvalidCertificateException(e.getMessage());
             }
         });
+    }
+
+    private void validateArkivmeldingForDpv(NextMoveOutMessage message) {
+        Arkivmelding arkivmelding = getArkivmelding(message);
+        no.arkivverket.standarder.noark5.arkivmelding.Journalpost jp;
+        try {
+            jp = arkivmeldingUtil.getJournalpost(arkivmelding);
+        } catch (Exception e) {
+            throw new MissingJournalpostFieldException("basisregistrering (journalpost)");
+        }
+        if (isNullOrEmpty(jp.getTittel())) {
+            throw new MissingJournalpostFieldException("tittel");
+        }
+        if (isNullOrEmpty(jp.getOffentligTittel())) {
+            throw new MissingJournalpostFieldException("offentligTittel");
+        }
     }
 
     private Arkivmelding getArkivmelding(NextMoveOutMessage message) {
