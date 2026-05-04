@@ -156,10 +156,10 @@ public class FiksMapper {
             .orElseGet(() -> mottakerFrom(serviceRegistry.getInfoRecord(message.getSenderIdentifier())));
     }
 
-    private boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
+    static boolean kreverNiva4Innlogging(NextMoveOutMessage message) {
         BusinessMessage businessMessage = message.getBusinessMessage();
         if (businessMessage instanceof HasSikkerhetsNivaa<?> e) {
-            return e.getSikkerhetsnivaa() == 4;
+            return Integer.valueOf(4).equals(e.getSikkerhetsnivaa());
         }
        return false;
     }
