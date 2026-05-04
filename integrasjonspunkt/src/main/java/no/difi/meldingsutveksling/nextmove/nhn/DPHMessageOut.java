@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.nhn;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 
 
 public record DPHMessageOut (
@@ -17,7 +18,7 @@ public record DPHMessageOut (
     @JsonProperty("receiver")
     Receiver receiver,
     @JsonProperty("fagmelding")
-    String fagmelding,
+    EncryptedBusinessMessage fagmelding,
     @JsonProperty("vedlegg")
     String vedlegg
 
