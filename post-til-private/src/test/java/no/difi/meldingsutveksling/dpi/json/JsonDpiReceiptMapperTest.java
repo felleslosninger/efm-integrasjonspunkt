@@ -54,14 +54,14 @@ class JsonDpiReceiptMapperTest {
     }
 
     @Test
-    void givenMottakskvittering_thenStatusIsLest() {
+    void givenMottakskvittering_thenStatusIsLevert() {
         var result = mapper.from(sbdWith("mottakskvittering", new Mottakskvittering()));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.LEVERT.toString());
     }
 
     @Test
-    void givenReturpostkvittering_thenStatusIsLest() {
+    void givenReturpostkvittering_thenStatusIsFeil() {
         var result = mapper.from(sbdWith("returpostkvittering", new Returpostkvittering()));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.FEIL.toString());
