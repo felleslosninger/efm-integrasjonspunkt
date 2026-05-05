@@ -17,6 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonDpiReceiptMapperTest {
 
+    // testing the mapping logic with timstamp from kvittering and fallback to now()
+
     private final Clock clock = Clock.fixed(Instant.parse("2024-01-15T10:00:00Z"), DateTimeUtil.DEFAULT_ZONE_ID);
     private final JsonDpiReceiptMapper mapper = new JsonDpiReceiptMapper(new MessageStatusMapper(new MessageStatusFactory(clock)));
 
@@ -48,30 +50,50 @@ class JsonDpiReceiptMapperTest {
 
     @Test
     void givenAapningskvittering_thenStatusIsLest() {
-        var result = mapper.from(sbdWith("aapningskvittering", new Aapningskvittering()));
+        OffsetDateTime receiptTimestamp = OffsetDateTime.parse("2026-04-29T12:30:06.344+00:00");
+        Aapningskvittering kvittering = new Aapningskvittering();
+        kvittering.setTidspunkt(receiptTimestamp);
+
+        var result = mapper.from(sbdWith("aapningskvittering", kvittering));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.LEST.toString());
+        assertThat(result.getLastUpdate()).isEqualTo(receiptTimestamp);
     }
 
     @Test
     void givenMottakskvittering_thenStatusIsLevert() {
-        var result = mapper.from(sbdWith("mottakskvittering", new Mottakskvittering()));
+        OffsetDateTime receiptTimestamp = OffsetDateTime.parse("2026-04-28T12:30:06.344+00:00");
+        Mottakskvittering kvittering = new Mottakskvittering();
+        kvittering.setTidspunkt(receiptTimestamp);
+
+        var result = mapper.from(sbdWith("mottakskvittering", kvittering));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.LEVERT.toString());
+        assertThat(result.getLastUpdate()).isEqualTo(receiptTimestamp);
     }
 
     @Test
     void givenReturpostkvittering_thenStatusIsFeil() {
-        var result = mapper.from(sbdWith("returpostkvittering", new Returpostkvittering()));
+        OffsetDateTime receiptTimestamp = OffsetDateTime.parse("2026-04-28T12:30:06.344+00:00");
+        Returpostkvittering kvittering = new Returpostkvittering();
+        kvittering.setTidspunkt(receiptTimestamp);
+
+        var result = mapper.from(sbdWith("returpostkvittering", kvittering));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.FEIL.toString());
+        assertThat(result.getLastUpdate()).isEqualTo(receiptTimestamp);
     }
 
     @Test
     void givenVarslingfeiletkvittering_thenStatusIsFeil() {
-        var result = mapper.from(sbdWith("varslingfeiletkvittering", new Varslingfeiletkvittering()));
+        OffsetDateTime receiptTimestamp = OffsetDateTime.parse("2026-04-28T12:30:06.344+00:00");
+        Varslingfeiletkvittering kvittering = new Varslingfeiletkvittering();
+        kvittering.setTidspunkt(receiptTimestamp);
+
+        var result = mapper.from(sbdWith("varslingfeiletkvittering", kvittering));
 
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.FEIL.toString());
+        assertThat(result.getLastUpdate()).isEqualTo(receiptTimestamp);
     }
 
     private StandardBusinessDocument sbdWith(String type, Object kvittering) {
