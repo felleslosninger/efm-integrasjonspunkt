@@ -9,10 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  repository-projects: read
+  contents: read
+  packages: read
 
 jobs:
   call-workflow-maven-build:
