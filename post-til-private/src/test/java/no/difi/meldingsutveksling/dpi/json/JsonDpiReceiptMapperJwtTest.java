@@ -1,24 +1,18 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.dpi.client.domain.StandardBusinessDocumentWrapper;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Aapningskvittering;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
+import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Base64;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,26 +20,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JsonDpiReceiptMapperJwtTest {
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-06-07T20:22:21Z"), DateTimeUtil.DEFAULT_ZONE_ID);
-    private final JsonDpiReceiptMapper mapper = new JsonDpiReceiptMapper(new MessageStatusMapper(new MessageStatusFactory(clock)));
-    private final ObjectMapper om = new ObjectMapper();
+    private final JsonDpiReceiptMapper jsonDpiReceiptMapper = new JsonDpiReceiptMapper(new MessageStatusMapper(new MessageStatusFactory(clock)));
+    private final DpiMapper dpiMapper = new DpiMapper();
 
     @Test
     void givenJsonWithKvitteringInAnyNode_thenLastUpdateIsFromReceipt() {
-        var sbd = om.readValue(json_aapningskvittering, StandardBusinessDocumentWrapper.class);
 
-        // manually parse the json where forretningsmelding is in the "any" field
-        var kvitteringString = om.writeValueAsString(sbd.getStandardBusinessDocument().getAny());
-        Kvittering kvittering = om.readValue(kvitteringString, Aapningskvittering.class);
-        assertThat(kvittering.getTidspunkt()).isEqualTo(OffsetDateTime.parse("2021-11-15T14:00:44.295+00:00"));
+        var sbd = dpiMapper.readStandardBusinessDocument(json_aapningskvittering);
+
+        // check the 'aapningskvittering' node is actually there
+        Map<String, Object> json = dpiMapper.convertToJsonObject(sbd);
+        var jsonSbd = (Map<String, Object>) json.get("standardBusinessDocument");
+        assertThat(jsonSbd.get("aapningskvittering")).isNotNull();
+        assertThat(jsonSbd.get("any")).isNull();
 
         // make sure the mapper can parse the kvittering and return the correct receipt status
-        var result = mapper.from(sbd.getStandardBusinessDocument());
+        var result = jsonDpiReceiptMapper.from(sbd);
         assertThat(result.getStatus()).isEqualTo(ReceiptStatus.LEST.toString());
         assertThat(result.getDescription()).isEqualTo("Kvittering fra Innbygger for at digital post er åpnet");
         assertThat(result.getLastUpdate()).isEqualTo(OffsetDateTime.parse("2021-11-15T14:00:44.295+00:00"));
+
     }
 
-    record TestFile(String jwt, OffsetDateTime timestamp, ReceiptStatus status, String description){}
+    @ParameterizedTest
+    @MethodSource("testFileProvider")
+    void givenRealJwtForretninsmeldingHasBeenRenamedToAnyNode_thenLastUpdateIsFromReceipt(TestFile testFile) {
+        var sbd = dpiMapper.readStandardBusinessDocument(payloadFromJWT(testFile.jwt));
+        var result = jsonDpiReceiptMapper.from(sbd);
+        assertThat(result.getLastUpdate()).isEqualTo(testFile.timestamp);
+        assertThat(result.getStatus()).isEqualTo(testFile.status.toString());
+        assertThat(result.getDescription()).isEqualTo(testFile.description);
+    }
+
+    record TestFile(String jwt, OffsetDateTime timestamp, ReceiptStatus status, String description) {}
 
     static Stream<TestFile> testFileProvider() {
         return Stream.of(
@@ -58,41 +65,9 @@ class JsonDpiReceiptMapperJwtTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("testFileProvider")
-    void givenRealJwtForretninsmeldingHasBeenRenamedToAnyNode_thenLastUpdateIsFromReceipt(TestFile testFile) {
-        var sbd = sbdFromSignertForretningsMelding(testFile.jwt);
-        var result = mapper.from(sbd);
-        assertThat(result.getLastUpdate()).isEqualTo(testFile.timestamp);
-        assertThat(result.getStatus()).isEqualTo(testFile.status.toString());
-        assertThat(result.getDescription()).isEqualTo(testFile.description);
-    }
-
-    private StandardBusinessDocument sbdFromSignertForretningsMelding(String jwt) {
-
-        // decode the JTW
+    private String payloadFromJWT(String jwt) {
         var base64 = jwt.split("\\.")[1];
-        var payload = new String(Base64.getDecoder().decode(base64));
-
-        // parse the json and get the standardBusinessDocument
-        ObjectNode node = (ObjectNode) om.readTree(payload);
-        var sbd = (ObjectNode) node.get("standardBusinessDocument");
-
-        // look for known businessmessage node name, if found rename it to "any"
-        for (DpiMessageType dmt : DpiMessageType.values()) {
-            var type = dmt.getType();
-            var businessNode = sbd.get(type);
-            if (businessNode != null) {
-                sbd.set("any", businessNode);
-                sbd.remove(type);
-                break;
-            }
-        }
-
-        // when we go here we always have the "any" field containing the businessmessage
-        var sbdw = om.treeToValue(node, StandardBusinessDocumentWrapper.class);
-        Objects.requireNonNull(sbdw.getStandardBusinessDocument().getAny());
-        return sbdw.getStandardBusinessDocument();
+        return new String(Base64.getDecoder().decode(base64));
     }
 
     final static String jwt_feil = "eyJ4NWMiOlsiTUlJRmxEQ0NBM3lnQXdJQkFnSUpBTEJKeUF3SzRIdEVNQTBHQ1NxR1NJYjNEUUVCREFVQU1IY3hDekFKQmdOVkJBWVRBazVQTVEwd0N3WURWUVFJRXdSUGMyeHZNUTB3Q3dZRFZRUUhFd1JQYzJ4dk1SZ3dGZ1lEVlFRS0V3OVFiM04wWlc0Z1RtOXlaMlVnUVZNeEVUQVBCZ05WQkFzVENFUnBaMmx3YjNOME1SMHdHd1lEVlFRRERCUlRkbVZ1TFVyRHVISm5aVzRnUzJGeWJITmxiakFnRncweU1UQTNNamd4TXpNeE1qZGFHQTh6TURBM01ETXlNakV6TXpFeU4xb3dkekVMTUFrR0ExVUVCaE1DVGs4eERUQUxCZ05WQkFnVEJFOXpiRzh4RFRBTEJnTlZCQWNUQkU5emJHOHhHREFXQmdOVkJBb1REMUJ2YzNSbGJpQk9iM0puWlNCQlV6RVJNQThHQTFVRUN4TUlSR2xuYVhCdmMzUXhIVEFiQmdOVkJBTU1GRk4yWlc0dFNzTzRjbWRsYmlCTFlYSnNjMlZ1TUlJQ0lqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUF5VzBXa05RamErQ1BLSlUwcjcyenpacTlvR0VDM2hZdStSOHE5N0tNbTE4SndHSFdIWDFvOW9zTlB2MTBjTGhzYytUeXFRVGpURjhEK2w1c3NOTUdKNlJTK1lsTlVNUk1iWGJONGp2RjZDQWkwZWw3YjBrZEpaN2Zra0ZpWkF3c2J5V2R5QW9raGR1bVJSRzl6MjZWWVl3L2FLQ1FqY3cwVlY5WitHUDlLVTdhOWZPRFJRVWxmdG55MW1udkxFbTdpYnZmK1k3Sk1Fc0J4Nk5wMEtzTzl3YjJHSGNtcVBIUk81T2tUOHpHN04vVW00cGN3QjM3Z1ErZUtjSmxyZzB4QitXZEZlK1ZBT1dtTzJKNVNGUUl5TWhIVUVWMzhnT2MzRHIwRWxUUHE5dkU1VnhyZXhwSVZsVVRZTkFCa0lnZk9ZQ3RWaXdaYXNKYkNlQ2ZKcFdwUlA4am0xRjIya0JsMS9rN3V3YWV1VkxUUlpPRHlQZm40ZXVObXg5aml4OHhqNXZRWE1OUUNBejlnaG0reFovN0M2V2tneWNlY0JjeHdUZHl0K0xzZE5FUUpyUVRJWnZMRmJFZ25CdVZ6RGlOVHlsNVlRK1hqVUh6QlRHRzFBdjBscTFjQTRxSytQSVdNcGZqaTYvTU5MZnFUTFFseWEvUU9YaFUwazJQeVJLU2NmUTdrUW1Tb1VqamtBblZVUFh6OGNWMDN2dlRZc0RrNDM4biszOHRvblVTNWtFTG41NXd2K1RPeDlQM2xXT0gyaFJiaENmUGc0ZHZxenhSY1RlUllnSmxJUkloS0tFbmdwYjVkMkczRVZ2UFRJVGpBSzdTYXloYS9kdHNidU5VWENuUGM3ZDA5MWo1ckJMUy9EQzR2S2JrOFpHR1VyOEEvR1NsM1lRd01wRUNBd0VBQWFNaE1COHdIUVlEVlIwT0JCWUVGTTBWdUt3cVd1K0ZNSkd5aUoyck9Ea0FMSWhHTUEwR0NTcUdTSWIzRFFFQkRBVUFBNElDQVFDYVltd3llOFU1cWlMOHVwTiszcGZTM2xLYVlDazI3MU9kRHppbG1CZTZaVUkrMXZXZkNMdi81RWFOY0hSMFEyamxveFppYzc3a0U2R2hzeU5aY2dqN3BRMldFL29KamtSTEpZUGExY215VC9XRU9KUDRYb2tEUUZzSTlTUE53SVJ2ZG9xUGE1K2VnS2F3TWZtMGJ4N21YaWdSeEdRV1h1S3RQc3FRTEt5RFJaejN3WEZyU0twMm83bmFaa3l2K2hnT0VydDB0SHF6SktLcXBjNktvWm80NkluNjRhMlgzLzhPT0tnOTgyWWtvZUxGaXp6LzNiWnBDQ2QxWnc1b29NVXFSMGdSRFhWc3pYVVVDNTgzUklqeDlKQlpFUWFyUnR1UDlSTGFaMGFNZWJnZ1NGR1NHRGRjdDFkTXJXc3hOV3BCTE5MaUszNWZwOVdZNGxIV1VQQ1ladm1yN1R3LzBzaE5DdUM4WlJPZ0gzbkJiZGdPUkFLM2U3Rlovd2hXdzJocUEzblZyWExBVVJLUHh5bWxabUtFQXBCQU9kNTRnczB1NkF3ZkU0ZTBqMlBoamd2Q1oyR0Q2RTZ2a0pIdDZkNzBHN0QxbkV2Qmo3UlF3eUlIQi9QU1ZJZmJqUmRmb2tWLysvSnFZdFlpTG9PZEJLUmMwSGgxMy9aMjBma1FDK3lHbFJ3T2FrcGlVdVI2clB6WEh4YU9lL3NMbGZKR0orVUZMSC9nRGc4RDBMV3BJTlFsaEErRDJJVnFaMzZmZ3Y4K3BvY3Aza0M4bmhvRTVrdk1ibzBWVkczY0svcWRiOEgyaVNZOXMreFdSUTJNNkdHeGt5UHgwd3hDNVl2azVsNFZzMUJHSExkUjQ0ZW5WdWowNjI1RkJybWhseTFFMnQwaFZpT2IvNEFwM2c9PSJdLCJhbGciOiJSUzUxMiJ9.eyJzdGFuZGFyZEJ1c2luZXNzRG9jdW1lbnQiOnsic3RhbmRhcmRCdXNpbmVzc0RvY3VtZW50SGVhZGVyIjp7ImhlYWRlclZlcnNpb24iOiIxLjAiLCJzZW5kZXIiOlt7ImlkZW50aWZpZXIiOnsiYXV0aG9yaXR5IjoiaXNvNjUyMy1hY3RvcmlkLXVwaXMiLCJ2YWx1ZSI6IjAxOTI6OTg0NjYxMTg1In19XSwicmVjZWl2ZXIiOlt7ImlkZW50aWZpZXIiOnsiYXV0aG9yaXR5IjoiaXNvNjUyMy1hY3RvcmlkLXVwaXMiLCJ2YWx1ZSI6IjAxOTI6MTQ3MTMyNTU3In19XSwiZG9jdW1lbnRJZGVudGlmaWNhdGlvbiI6eyJzdGFuZGFyZCI6InVybjpmZGM6ZGlnZGlyLm5vOjIwMjA6aW5uYnlnZ2VycG9zdDp4c2Q6OklubmJ5Z2dlcnBvc3QjI3VybjpmZGM6ZGlnZGlyLm5vOjIwMjA6aW5uYnlnZ2VycG9zdDpzY2hlbWE6ZmVpbDo6MS4wIiwidHlwZVZlcnNpb24iOiIxLjAiLCJpbnN0YW5jZUlkZW50aWZpZXIiOiI3MjM5MjMxNy04ODQyLTQ2YzMtODdiZC0wYjdmMTQ5MmM2MWIiLCJ0eXBlIjoiZmVpbCIsImNyZWF0aW9uRGF0ZUFuZFRpbWUiOiIyMDIxLTAxLTE0VDEwOjEzOjE5LjQ3NSswMDowMCJ9LCJidXNpbmVzc1Njb3BlIjp7InNjb3BlIjpbeyJ0eXBlIjoiQ29udmVyc2F0aW9uSWQiLCJpbnN0YW5jZUlkZW50aWZpZXIiOiIwYjkzNGE4Yy0zNDVhLTRlOTAtYmJiMi04NjMwM2U0NzE1ZTQiLCJpZGVudGlmaWVyIjoidXJuOmZkYzpkaWdkaXIubm86MjAyMDpwcm9maWxlOmVnb3Zlcm5tZW50OmlubmJ5Z2dlcnBvc3Q6ZGlnaXRhbDp2ZXIxLjAiLCJzY29wZUluZm9ybWF0aW9uIjpbXX1dfX0sImZlaWwiOnsiYXZzZW5kZXIiOnsidmlya3NvbWhldHNpZGVudGlmaWthdG9yIjp7ImF1dGhvcml0eSI6ImlzbzY1MjMtYWN0b3JpZC11cGlzIiwidmFsdWUiOiIwMTkyOjk4NDY2MTE4NSJ9fSwibW90dGFrZXIiOnsidmlya3NvbWhldHNpZGVudGlmaWthdG9yIjp7ImF1dGhvcml0eSI6ImlzbzY1MjMtYWN0b3JpZC11cGlzIiwidmFsdWUiOiIwMTkyOjE0NzEzMjU1NyJ9fSwidGlkc3B1bmt0IjoiMjAyMS0wMS0xNFQxMDoxMzoxOS40NzUrMDA6MDAiLCJmZWlsdHlwZSI6IlNFUlZFUiIsImRldGFsamVyIjoiRGlnaXBvc3QgY291bGQgbm90IHByb2Nlc3MgdGhlIG1lc3NhZ2UuIn19fQ.twSEnEXjLyby5Ukmw1nqdFFUR1ssx9bkw5h8U_Ei7KPkxyNZXF6GDYnJeS3nR3yIsbTLW_guQJ_zRVQbYrzCEjMyh5ElG8Aw5dFTUqzZjFSI4fR9qUV51u9wIY00WMqf3C9WGaFug-V7r03ssfYd-8EoAlzzroI2-LWCfLPB64KAlV835JqE7nklvZm9Mi1B9HkHn_0S8roKXLtwvyvvNr6OTTUNm54--KmAYrPcmMCV42PrHnUtCjCHLDchewkQQEY5Am_9SRPCaAxovIPIX7TstN9YEzxWzfHD9d78SQvkGGwpvP_-D4TNTOmTn-T_IkxsLOCfPl1eXG3B3HSrF-fHBBcSAcPOTrXORNJHrWQ9F1qGaE9buFHWuVd3hlsqRMATwGwM6h66UYLNO7gjLvsN365HCtyVvq949nOn9gpPXHhrUBUZine2yhPHbNcB6STjJJ3JnOMzgiwsmWNLaehPuOjArERBCbbQ2Ov36_hE00DMmTBOAz6szirUkM3i3AOPPUdHfMAsjtU75cGZHqCYxmlSXtR-sSA6ZJS2jcsLPpEY3ODD5grWdz3LjSteUmxX6X7O6IeHuu3aTlOALFIXYwMEqQ5_W_AmOjDQDl1nF7VsY43ZWRhUrHpytVfnlBKOrBGe_e05hTqSW85paShG5s9WukoDui5Qe2U7p4g";
@@ -142,7 +117,7 @@ class JsonDpiReceiptMapperJwtTest {
                 ]
               }
             },
-            "any": {
+            "aapningskvittering": {
               "avsender": {
                 "virksomhetsidentifikator": {
                   "authority": "iso6523-actorid-upis",

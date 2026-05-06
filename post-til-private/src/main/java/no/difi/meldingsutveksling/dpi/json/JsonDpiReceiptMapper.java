@@ -1,42 +1,30 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
-import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Kvittering;
 import no.difi.meldingsutveksling.status.MessageStatus;
 
-import java.time.OffsetDateTime;
-import java.util.Map;
-import java.util.Optional;
-
+@Slf4j
 @RequiredArgsConstructor
 public class JsonDpiReceiptMapper {
 
     private final MessageStatusMapper messageStatusMapper;
-    private DpiMapper dpiMapper = new DpiMapper();
 
     public MessageStatus from(StandardBusinessDocument standardBusinessDocument) {
 
         String type = standardBusinessDocument.getType();
-        MessageStatus ms = messageStatusMapper.getMessageStatus(
-                DpiMessageType.fromType(type));
+        MessageStatus ms = messageStatusMapper.getMessageStatus(DpiMessageType.fromType(type));
 
-        var map = dpiMapper.convertToJsonObject(standardBusinessDocument);
-
-//        var sbd = (Map<Object, Object>) map.get("standardBusinessDocument");
-//        var sfm = (Map<Object, Object>) sbd.get(type);
-//        var tidspunkt = sfm.get("tidspunkt");
-
-        Optional.ofNullable((Map<Object, Object>) map.get("standardBusinessDocument"))
-            .map(sbd -> (Map<Object, Object>) sbd.get(type))
-            .map(sfm -> sfm.get("tidspunkt"))
-            .map(t -> OffsetDateTime.parse(t.toString()))
-            .ifPresent(ms::setLastUpdate);
-
-//        standardBusinessDocument.getBusinessMessage(Kvittering.class)
-//                .filter(kvittering -> kvittering.getTidspunkt() != null)
-//                .ifPresent(kvittering -> ms.setLastUpdate(kvittering.getTidspunkt()));
+        // jackson will try to parse what's in the "xs:any field" to an instance of Kvittering
+        standardBusinessDocument.getBusinessMessage(Kvittering.class)
+                .filter(kvittering -> kvittering.getTidspunkt() != null)
+                .ifPresentOrElse(
+                        kvittering -> ms.setLastUpdate(kvittering.getTidspunkt()),
+                        () -> log.warn("No tidspunkt found in kvittering with conversationId={} and type={}", standardBusinessDocument.getConversationId(), type)
+                );
 
         return ms;
     }
