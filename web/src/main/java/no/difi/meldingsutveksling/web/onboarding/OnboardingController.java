@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +76,25 @@ public class OnboardingController {
         if (response == null) response = "Får ikke tak i token, ukjent meldingstjeneste '%s'".formatted(meldingstjeneste);
         return ResponseEntity.ok(response);
     }
+
+    @ResponseBody
+    @GetMapping("/onboarding/systemusers/{meldingstjeneste}")
+    public ResponseEntity<?> systemUsers(@PathVariable String meldingstjeneste) {
+        log.info("Fetching systemusers for meldingstjeneste : {}", meldingstjeneste);
+
+        var systemName = ff.dpoConfiguration().stream()
+            .filter(p -> "difi.move.dpo.systemName".equals(p.key()))
+            .map(FrontendFunctionality.Property::value)
+            .findFirst()
+            .orElse("");
+
+        List<String> systemUsers = systemName.isEmpty() ? List.of() : ff.dpoSystemUsersForSystem(systemName);
+        var message = systemName.isEmpty() ? "Systemnavn er ikke konfigurert i difi.move.dpo.systemName" : "Listen viser alle systembrukere som er aktivert pr %s.".formatted(LocalDateTime.now());
+
+        return ResponseEntity.ok(new SystemUserInfo(ff.getOrganizationNumber(), systemName, message, systemUsers));
+    }
+
+    record SystemUserInfo(String orgNumber, String systemName, String message, List<String> systemUsers) { }
 
     @ResponseBody
     @GetMapping("/onboarding/dialog/{dialog}")
