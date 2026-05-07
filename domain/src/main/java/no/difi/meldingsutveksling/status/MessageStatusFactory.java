@@ -24,4 +24,9 @@ public class MessageStatusFactory {
     public MessageStatus getMessageStatus(ReceiptStatus status, String description) {
         return MessageStatus.of(status, OffsetDateTime.now(clock), description);
     }
+
+    public MessageStatus getMessageStatus(ReceiptStatus status, String description, OffsetDateTime lastUpdate) {
+        return MessageStatus.of(status, lastUpdate, description);
+    }
+
 }

@@ -1,11 +1,13 @@
 package no.difi.meldingsutveksling.dpi.json;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 
+@Slf4j
 @RequiredArgsConstructor
 public class MessageStatusMapper {
 
@@ -35,11 +37,12 @@ public class MessageStatusMapper {
     }
 
     public MessageStatus getMessageStatus(no.difi.meldingsutveksling.dpi.client.domain.MessageStatus in) {
+        log.debug("Received MessageStatus from corner 2 : {}", in);
         switch (in.getStatus()) {
             case OPPRETTET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT, "Hjørne 2 har mottatt meldingen");
             case SENDT:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen");
+                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen", in.getTimestamp());
             case FEILET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Generell melding om at det har skjedd en feil");
             default:
