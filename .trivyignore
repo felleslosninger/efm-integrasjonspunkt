@@ -1,10 +1,14 @@
-#CVE-2025-59250 # com.microsoft.sqlserver:mssql-jdbc (mssql-jdbc-12.10.2.jre11.jar)
-
 # blir som regel oppdatert via neste spring boot patch
-#CVE-2026-34197 # org.apache.activemq:activemq-broker
-#CVE-2026-39304 # org.apache.activemq:activemq-client
-#CVE-2026-34483 # org.apache.tomcat.embed:tomcat-embed-core
-#CVE-2026-34486 # org.apache.tomcat.embed:tomcat-embed-core
-#CVE-2026-34487 # org.apache.tomcat.embed:tomcat-embed-core
-#CVE-2026-40477 # org.thymeleaf:thymeleaf
-#CVE-2026-40478 # org.thymeleaf:thymeleaf-spring6
+CVE-2025-59250 #JDBC Driver for SQL Server has improper input validation
+CVE-2026-42583 #Netty Lz4FrameDecoder is vulnerable to resource exhaustion
+CVE-2026-42579 #Netty has a DNS Codec Input Validation Bypass
+CVE-2026-42584 #Netty has HttpClientCodec response desynchronization
+CVE-2026-42587 #Netty: HttpContentDecompressor maxAllocation bypass
+CVE-2026-42577 #Netty epoll transport denial of service via RST
+CVE-2026-34197 #org.apache.activemq/activemq-broker
+CVE-2026-39304 # org.apache.activemq:activemq-client
+CVE-2026-40466 # org.apache.activemq/activemq-all
+CVE-2026-41044 # org.apache.activemq/activemq-broker
+CVE-2026-39304 # Apache ActiveMQ Client: Apache ActiveMQ Broker: Apache
+CVE-2026-5598 # bouncycastle: BC-JAVA: private key leakage via non-constant
+CVE-2026-42198 # jdbc.postgresql.org: pgjdbc: Client-side Denial of Service
