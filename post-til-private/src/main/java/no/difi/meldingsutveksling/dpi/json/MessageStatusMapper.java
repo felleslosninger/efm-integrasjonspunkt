@@ -42,7 +42,8 @@ public class MessageStatusMapper {
             case OPPRETTET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.SENDT, "Hjørne 2 har mottatt meldingen");
             case SENDT:
-                return messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen", in.getTimestamp());
+                return (in.getTimestamp() == null) ? messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen") :
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.MOTTATT, "Hjørne 3 har mottatt meldingen", in.getTimestamp());
             case FEILET:
                 return messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Generell melding om at det har skjedd en feil");
             default:
