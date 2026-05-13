@@ -107,4 +107,5 @@ Release av ny versjon gjerast via GitHub GUI
   - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.3.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
   - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.3` begge steder som vist i filnavna ovenfor)
-  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md` og `_docs/eFormidling/Oppgradering/endringslogg.md`
+  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
+- Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)
