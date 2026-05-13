@@ -9,6 +9,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.DpvSettings;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceNotificationExt;
@@ -25,12 +26,9 @@ import org.mockito.quality.Strictness;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +53,7 @@ public class CorrespondenceFactoryTest {
     private final Clock clock = Clock.fixed(OffsetDateTime.now().toInstant(), OffsetDateTime.now().getOffset());
 
     private NextMoveOutMessage message;
-    private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "111111111");
+    private static final Iso6523 SENDER = Iso6523.of(ICD.NO_ORG, "123454321");
     private static final String MESSAGE_TITLE = "";
     private static final String MESSAGE_BODY = "";
     private static final String MESSAGE_SUMMARY = "";
@@ -234,6 +232,32 @@ public class CorrespondenceFactoryTest {
     }
 
     @Test
+    public void create_mapsPropertyList(){
+        var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+
+        var expectedResult = new HashMap<String, String>();
+        expectedResult.put("senderOrgNumber", SENDER.getOrganizationIdentifier());
+
+        assertEquals(expectedResult, result.getCorrespondence().getPropertyList(), "Should map senderOrgNumbers in propertylist, value is used by Altinn to know who the sender of the message is");
+    }
+
+    @Test
+    public void create_mapsPropertyList_OnBehalfOf(){
+
+        Iso6523 BehalfOfSender = Iso6523.of(ICD.NO_ORG, "123454321", "88889999");
+
+        message.getSbd().setSenderIdentifier(BehalfOfSender);
+
+
+        var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+
+        var expectedResult = new HashMap<String, String>();
+        expectedResult.put("senderOrgNumber", BehalfOfSender.getOrganizationPartIdentifier());
+
+        assertEquals(expectedResult, result.getCorrespondence().getPropertyList(), "Should map senderOrgNumbers in propertylist to behalf of organization number, value is used by Altinn to know who the sender of the message is");
+    }
+
+    @Test
     public void create_mapsIsConfirmationNeededToFalse(){
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
@@ -257,5 +281,19 @@ public class CorrespondenceFactoryTest {
         var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
 
         assertEquals(confidential, result.getCorrespondence().getIsConfidential(), "If resource is confidential, it should be mapped correctly on correspondence");
+    }
+
+    @Test
+    public void throw_error_when_resource_is_null(){
+        ServiceRecord serviceRecord = new ServiceRecord();
+        serviceRecord.setService(new Service().setResource(null));
+
+        when(serviceRegistryHelper.getServiceRecord(Mockito.any())).thenReturn(serviceRecord);
+
+        Exception exception = assertThrows(NextMoveRuntimeException.class, () -> {
+            correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+        });
+
+        assertEquals("Service Registry returned empty Altinn resource id. Resource id cannot be null or blank, contact Digdir for support.", exception.getMessage());
     }
 }

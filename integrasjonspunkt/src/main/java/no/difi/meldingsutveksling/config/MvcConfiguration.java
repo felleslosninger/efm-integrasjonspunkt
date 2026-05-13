@@ -3,9 +3,11 @@ package no.difi.meldingsutveksling.config;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.converter.MultipartFileToStandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.converter.StringToStandardBusinessDocumentConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -16,9 +18,19 @@ public class MvcConfiguration implements WebMvcConfigurer {
     private final StringToStandardBusinessDocumentConverter stringToStandardBusinessDocumentConverter;
     private final MultipartFileToStandardBusinessDocumentConverter multipartFileToStandardBusinessDocumentConverter;
 
+    @Value("${difi.move.feature.allowDeprecatedTrailingSlash:false}")
+    private boolean allowDeprecatedTrailingSlash;
+
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(stringToStandardBusinessDocumentConverter);
         registry.addConverter(multipartFileToStandardBusinessDocumentConverter);
+    }
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        if (allowDeprecatedTrailingSlash) {
+            configurer.setUseTrailingSlashMatch(true);
+        }
     }
 }

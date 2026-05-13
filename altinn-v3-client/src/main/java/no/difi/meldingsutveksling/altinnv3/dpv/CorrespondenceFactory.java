@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondenceAttachmentExt;
@@ -13,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static no.difi.meldingsutveksling.domain.PartnerUtil.getPartOrPrimaryIdentifier;
 
 
 @Component
@@ -70,8 +71,17 @@ public class CorrespondenceFactory {
         correspondence.setSender(message.getSender().getIdentifier());
         correspondence.setSendersReference(message.getMessageId());
         correspondence.setIsConfidential(dpvHelper.isConfidential(message));
+        correspondence.setPropertyList(getPropertyList(message));
 
         return correspondence;
+    }
+
+    private Map<String, String> getPropertyList(NextMoveOutMessage message) {
+        Map<String, String> propertyList = new HashMap<>();
+
+        propertyList.put("senderOrgNumber",  getPartOrPrimaryIdentifier(message.getSender()));
+
+        return propertyList;
     }
 
     private OffsetDateTime getDueDateTime(NextMoveOutMessage message) {
@@ -127,6 +137,12 @@ public class CorrespondenceFactory {
     private String getResourceId(NextMoveOutMessage message) {
         ServiceRecord serviceRecord = serviceRegistryHelper.getServiceRecord(message);
 
-        return serviceRecord.getService().getResource();
+        var altinnResource = serviceRecord.getService().getResource();
+
+        if(altinnResource == null || altinnResource.isBlank()) {
+            throw new NextMoveRuntimeException("Service Registry returned empty Altinn resource id. Resource id cannot be null or blank, contact Digdir for support.");
+        }
+
+        return altinnResource;
     }
 }

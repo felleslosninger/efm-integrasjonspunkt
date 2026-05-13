@@ -290,6 +290,7 @@ public class IntegrasjonspunktProperties {
         private boolean retryOnDeadLock;
         private boolean cryptoMessagePersister;
         private Set<ServiceIdentifier> statusQueueIncludes = Sets.newHashSet();
+        private boolean allowDeprecatedTrailingSlash;
 
         /**
          * Service toggles

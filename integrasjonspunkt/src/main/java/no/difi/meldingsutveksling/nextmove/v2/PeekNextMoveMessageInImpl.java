@@ -1,12 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
-import org.hibernate.CacheMode;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
@@ -14,16 +7,32 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
+import org.hibernate.CacheMode;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * EntityManager direkte for å unngå diverse caching og locking i Spring data
- * READ_UNCOMMITTED og cache disabled for at lock skal reflekteres i uthenta id-er så kjapt som mulig (og ikkje vente på heile lock-transaksjonen)
+ * Cache disabled for at lock skal reflekteres i uthenta id-er så kjapt som mulig (og ikkje vente på heile lock-transaksjonen)
  * Hente opp til 20 kandidater for å tåle nokre kollisjoner på lock utan å måtte hente fleire fra database
  * Loop gjennom kandidater til ein fakisk får LOCK ok
  * ber i praksis konsument om å vente litt mha å returnere NO_CONTENT dersom ein ikkje får LOCK på nokon av kandidatane
+ *
+ * READ_UNCOMMITTED optimaliseringen er fjernet, da PostgreSQL ikke støtter dette isolasjonsnivået.
+ * PG vil normalt bare bruke READ_COMMITTED i stede (uten å feile), men siden dette er Spring med Hibernate
+ * så vil setTransactionIsolation() kalles av rammeverket og den feiler hvis PostgreSQL brukes.  Dette
+ * problemet er meldt inn som JIRA-4932 og feilmeldingen er org.postgresql.util.PSQLException:
+ * Cannot change transaction isolation level in the middle of a transaction
+ *
+ * Fjerne READ_UNCOMMITTED skal ikke endre funksjonalitet, det er allerede "atomisk låsing" i metoden
+ * lock() nedenfor (optimistisk låsing som sjekker at update count == 1).  Selve optimaliseringen med
+ * READ_UNCOMMITTED reduserte mulighet for feilede låse-forsøk.
  */
 @Slf4j
 public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
@@ -32,7 +41,7 @@ public class PeekNextMoveMessageInImpl implements PeekNextMoveMessageIn {
     private EntityManager em;
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(readOnly = true) // Isolation.READ_UNCOMMITTED optimalisering fjernet (se kommentar i toppen)
     public List<Long> findIdsForUnlockedMessages(NextMoveInMessageQueryInput input, int maxResults) {
         return em.createQuery(getQuery(input))
                 .setMaxResults(maxResults)

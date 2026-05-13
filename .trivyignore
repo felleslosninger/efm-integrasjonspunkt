@@ -1,9 +1,14 @@
-CVE-2026-24400
-CVE-2025-59250
-CVE-2025-61726
-CVE-2025-61728
-CVE-2025-68121
-
-GHSA-72hv-8253-57qq # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
-CVE-2026-29062 # Siden det er en minor version endring som fikser problemet, så venter vi på at Spring Boot kommer med en patch
-
+# blir som regel oppdatert via neste spring boot patch
+CVE-2025-59250 #JDBC Driver for SQL Server has improper input validation
+CVE-2026-42583 #Netty Lz4FrameDecoder is vulnerable to resource exhaustion
+CVE-2026-42579 #Netty has a DNS Codec Input Validation Bypass
+CVE-2026-42584 #Netty has HttpClientCodec response desynchronization
+CVE-2026-42587 #Netty: HttpContentDecompressor maxAllocation bypass
+CVE-2026-42577 #Netty epoll transport denial of service via RST
+CVE-2026-34197 #org.apache.activemq/activemq-broker
+CVE-2026-39304 # org.apache.activemq:activemq-client
+CVE-2026-40466 # org.apache.activemq/activemq-all
+CVE-2026-41044 # org.apache.activemq/activemq-broker
+CVE-2026-39304 # Apache ActiveMQ Client: Apache ActiveMQ Broker: Apache
+CVE-2026-5598 # bouncycastle: BC-JAVA: private key leakage via non-constant
+CVE-2026-42198 # jdbc.postgresql.org: pgjdbc: Client-side Denial of Service

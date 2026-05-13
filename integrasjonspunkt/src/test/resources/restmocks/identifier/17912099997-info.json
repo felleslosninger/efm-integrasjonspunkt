@@ -19,7 +19,8 @@
       "service": {
         "identifier": "DPV",
         "serviceCode": "4255",
-        "serviceEditionCode": "10"
+        "serviceEditionCode": "10",
+        "resource": "eformidling-dpv-administrasjon"
       }
     }
   ]

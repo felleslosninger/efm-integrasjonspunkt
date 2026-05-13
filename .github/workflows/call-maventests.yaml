@@ -1,8 +1,16 @@
-name: Maven build and test
+name: Run maven tests
 
 on:
   push:
-    branches-ignore: [main]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
 
 jobs:
   call-workflow-maven-build:
@@ -10,5 +18,6 @@ jobs:
     with:
       java-version: 21
       application-path: integrasjonspunkt/
+      maven-lifecycle: 'verify'
     secrets: inherit
 

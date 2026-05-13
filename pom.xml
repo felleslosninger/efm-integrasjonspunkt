@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>3.5.14</version>
         <relativePath />
     </parent>
 
@@ -40,10 +40,6 @@
     </developers>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/felleslosninger/efm-integrasjonspunkt</url>
-        </snapshotRepository>
         <repository>
             <id>github</id>
             <name>GitHub felleslosninger Apache Maven Packages</name>
@@ -67,9 +63,6 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -366,6 +359,13 @@
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
                 <version>1.5.4</version>
+            </dependency>
+
+            <!-- overstyring av versjoner med CVE sårbarheter -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>3.1.1</version>
             </dependency>
 
             <!-- versjonsstyring av test dependencies -->

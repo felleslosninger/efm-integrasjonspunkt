@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.InvalidConversationReferenceException;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.api.StatusStrategy;
@@ -62,6 +63,19 @@ public class DpvStatusStrategy implements StatusStrategy {
             try {
                 List<CorrespondenceStatusEventExt> statuses = altinnService.getStatus(conversation);
                 updateStatus(conversation, statuses);
+            } catch (InvalidConversationReferenceException e) {
+                log.warn("""
+                    {}
+                    The message has probably been sent with an earlier version of Integrasjonspunkt than 4.x.x, using the old Altinn api.
+                    Can't fetch statuses for the conversation. Setting conversation as finished and stops polling for this conversation.
+                    """, e.getMessage())
+                ;
+
+                conversation.setPollable(false);
+                conversation.setFinished(true);
+
+                conversationService.save(conversation);
+
             } catch (Exception e) {
                 log.error("Error during status check for " + conversation.getConversationId(), e);
             }

@@ -25,6 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,9 @@ import static no.difi.meldingsutveksling.nextmove.ConversationDirection.OUTGOING
 import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpiConversation;
 import static no.difi.meldingsutveksling.nextmove.ConversationTestData.dpoConversation;
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import org.mockito.ArgumentCaptor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -90,7 +94,9 @@ public class ConversationControllerTest {
                                 parameterWithName("finished").optional().description("Filter on finished (true/false)"),
                                 parameterWithName("direction").optional().description("Filter on direction. Can be one of: %s".formatted(Arrays.stream(ConversationDirection.values())
                                         .map(Enum::name)
-                                        .collect(Collectors.joining(", "))))
+                                        .collect(Collectors.joining(", ")))),
+                                parameterWithName("lastUpdateFrom").optional().description("Filter on lastUpdate >= date (inclusive). Format: yyyy-MM-dd"),
+                                parameterWithName("lastUpdateTo").optional().description("Filter on lastUpdate <= date (inclusive). Format: yyyy-MM-dd")
                         ).and(getPagingParameterDescriptors()),
                         responseFields()
                                 .and(conversationDescriptors("content[]."))
@@ -166,6 +172,57 @@ public class ConversationControllerTest {
                 .andDo(document("conversations/find/paging"));
 
         verify(conversationRepository).findWithMessageStatuses(any(ConversationQueryInput.class), any(Pageable.class));
+    }
+
+    @Test
+    public void findByDateRange() throws Exception {
+
+        given(conversationRepository.findWithMessageStatuses(any(ConversationQueryInput.class), any(Pageable.class)))
+                .willAnswer(invocation -> {
+                    List<Conversation> content = Collections.singletonList(dpoConversation());
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                        .param("lastUpdateFrom", "2024-01-01")
+                        .param("lastUpdateTo", "2024-12-31")
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ConversationQueryInput> captor = ArgumentCaptor.forClass(ConversationQueryInput.class);
+        verify(conversationRepository).findWithMessageStatuses(captor.capture(), any(Pageable.class));
+        assertThat(captor.getValue().getLastUpdateFrom()).isEqualTo(LocalDate.of(2024, 1, 1));
+        assertThat(captor.getValue().getLastUpdateTo()).isEqualTo(LocalDate.of(2024, 12, 31));
+
+    }
+
+    @Test
+    public void findByDateRangeOnlyFrom() throws Exception {
+
+        given(conversationRepository.findWithMessageStatuses(any(ConversationQueryInput.class), any(Pageable.class)))
+                .willAnswer(invocation -> {
+                    List<Conversation> content = Collections.singletonList(dpoConversation());
+                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
+                });
+
+        mvc.perform(
+                get("/api/conversations")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                        .param("lastUpdateFrom", "2024-06-15")
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ConversationQueryInput> captor = ArgumentCaptor.forClass(ConversationQueryInput.class);
+        verify(conversationRepository).findWithMessageStatuses(captor.capture(), any(Pageable.class));
+        assertThat(captor.getValue().getLastUpdateFrom()).isEqualTo(LocalDate.of(2024, 6, 15));
+        assertThat(captor.getValue().getLastUpdateTo()).isNull();
+
     }
 
     @Test

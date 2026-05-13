@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,4 +125,38 @@ public class AltinnDownloadServiceTest {
         verify(brokerApiClient).confirmDownload(any(), eq(uuid));
     }
 
+    @Test
+    public void shouldSortListReturnedFromAltinn(){
+        UUID uuidFirst = UUID.fromString("7e2b1a2c-8c3a-4e2a-9f1a-2b6e4c8d9a1b");
+        UUID uuidSecond = UUID.fromString("3c5f2d4e-1b7a-4c8e-8f2a-7d9e1b2c3a4f");
+        UUID uuidThird = UUID.fromString("9a8b7c6d-5e4f-3a2b-1c0d-8e7f6a5b4c3d");
+
+        var first = new FileTransferOverviewExt();
+        first.setCreated(OffsetDateTime.parse("2010-01-01T00:00:01Z"));
+        first.setFileTransferId(uuidFirst);
+        first.setSendersFileTransferReference(UUID.randomUUID().toString());
+
+        var second = new FileTransferOverviewExt();
+        second.setCreated(OffsetDateTime.parse("2010-01-01T00:00:02Z"));
+        second.setFileTransferId(uuidSecond);
+        second.setSendersFileTransferReference(UUID.randomUUID().toString());
+
+        var third = new FileTransferOverviewExt();
+        third.setCreated(OffsetDateTime.parse("2010-01-01T00:00:03Z"));
+        third.setFileTransferId(uuidThird);
+        third.setSendersFileTransferReference(UUID.randomUUID().toString());
+
+
+        Mockito.when(brokerApiClient.getAvailableFiles(any())).thenReturn(new UUID[] {uuidThird, uuidFirst, uuidSecond}); // return list in random order
+        Mockito.when(brokerApiClient.getDetails(any(), eq(uuidFirst.toString()))).thenReturn(first);
+        Mockito.when(brokerApiClient.getDetails(any(), eq(uuidSecond.toString()))).thenReturn(second);
+        Mockito.when(brokerApiClient.getDetails(any(), eq(uuidThird.toString()))).thenReturn(third);
+
+        UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
+
+        var expected = new UUID[] {uuidFirst, uuidSecond, uuidThird};
+
+        assertThat(result).isEqualTo(expected)
+            .as("Should order the list returned from altinn based upon created date, oldest first");;
+    }
 }

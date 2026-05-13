@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -30,9 +31,11 @@ public class AltinnDPODownloadService {
         UUID[] fileTransferIds = brokerApiClient.getAvailableFiles(systemUser);
 
         List<FileTransferOverviewExt> files = Arrays.stream(fileTransferIds)
-                .map(fileTransferId -> brokerApiClient.getDetails(systemUser, fileTransferId.toString())).toList();
+            .map(fileTransferId -> brokerApiClient.getDetails(systemUser, fileTransferId.toString())).toList();
 
         files = filterBasedUponSendersFileTransferReference(files);
+
+        files = sortListBasedUponCreated(files);
 
         return files.stream().map(FileTransferOverviewExt::getFileTransferId).toArray(UUID[]::new);
     }
@@ -42,7 +45,7 @@ public class AltinnDPODownloadService {
 
         try {
             return zipUtils.getAltinnPackage(bytes);
-        }catch (IOException | JAXBException e){
+        } catch (IOException | JAXBException e) {
             throw new BrokerApiException("Error when downloading file with reference %s".formatted(request.getFileReference()), e);
         }
     }
@@ -51,7 +54,7 @@ public class AltinnDPODownloadService {
         brokerApiClient.confirmDownload(systemUser, request.getFileReference());
     }
 
-    private List<FileTransferOverviewExt> filterBasedUponSendersFileTransferReference(List<FileTransferOverviewExt> files){
+    private List<FileTransferOverviewExt> filterBasedUponSendersFileTransferReference(List<FileTransferOverviewExt> files) {
         if (!isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             return files.stream().filter(this::isMessageMatchingConfiguredMessageChannel).toList();
         } else {
@@ -61,7 +64,12 @@ public class AltinnDPODownloadService {
         }
     }
 
-    private boolean isMessageMatchingMessageChannelPattern(FileTransferOverviewExt details){
+    private List<FileTransferOverviewExt> sortListBasedUponCreated(List<FileTransferOverviewExt> files) {
+        return files.stream()
+            .sorted(Comparator.comparing(FileTransferOverviewExt::getCreated, Comparator.nullsLast(Comparator.naturalOrder()))).toList();
+    }
+
+    private boolean isMessageMatchingMessageChannelPattern(FileTransferOverviewExt details) {
         Pattern pattern = Pattern.compile("^[a-zA-Z0-9-_]{0,25}$");
 
         return details.getSendersFileTransferReference() == null ||
