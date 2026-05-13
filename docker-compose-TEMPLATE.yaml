@@ -51,7 +51,7 @@ services:
 
 
   integrasjonspunkt:
-    image: ghcr.io/felleslosninger/efm-integrasjonspunkt:v4.0.4  # eller nyere versjon
+    image: ghcr.io/felleslosninger/efm-integrasjonspunkt:v4.0.5  # eller nyere versjon
     container_name: integrasjonspunkt
     # depends_on:
     #   mysql:

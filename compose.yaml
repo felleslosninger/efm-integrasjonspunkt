@@ -1,4 +1,9 @@
-version: '3.8'
+# Compose filen benyttes under utvikling for å starte opp alle supporterte databaser
+# og kø-system for å kunne verifisert Integrasjonspunktet mot ulike konfigurasjoner.
+#
+# `docker compose up -d`
+
+name: efm-ip-services
 
 services:
 
@@ -35,6 +40,7 @@ services:
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     # sa / change!T2
     # jdbc:sqlserver://localhost:3314;encrypt=false
     environment:
