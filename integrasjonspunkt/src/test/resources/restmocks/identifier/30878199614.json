@@ -1,0 +1,34 @@
+{
+    "infoRecord": {
+        "identifier": "30878199614",
+        "entityType": {
+            "name": "citizen"
+        }
+    },
+    "serviceRecords": [
+        {
+            "organisationNumber": "310673145",
+            "process": "urn:no:difi:profile:digitalpost:fastlege:ver1.0",
+            "herIdLevel1": "8143541",
+            "herIdLevel2": "8143548",
+            "patient": {
+                "fnr": "30878199614",
+                "firstName": "Raff",
+                "middleName": null,
+                "lastName": "Raffen"
+            },
+            "documentTypes": [
+                "urn:no:difi:digitalpost:json:schema::dialogmelding"
+            ],
+            "pemCertificate": "-----BEGIN CERTIFICATE-----\n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\n-----END CERTIFICATE-----\n",
+            "service": {
+                "identifier": "DPH",
+                "endpointUrl": "testedi-address",
+                "resource": null,
+                "securityLevel": null,
+                "serviceCode": null,
+                "serviceEditionCode": null
+            }
+        }
+    ]
+}

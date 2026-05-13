@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
@@ -54,7 +53,6 @@ public class JacksonConfig {
 
     @SuppressWarnings("squid:MaximumInheritanceDepth")
     private static final class IsoDateTimeDeserializer extends InstantDeserializer<OffsetDateTime> {
-        ObjectMapper mapper;
 
         IsoDateTimeDeserializer(Clock clock) {
             super(

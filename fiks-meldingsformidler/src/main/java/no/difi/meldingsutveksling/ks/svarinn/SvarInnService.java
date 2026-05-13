@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.move.common.io.pipe.Reject;
 import org.jetbrains.annotations.NotNull;

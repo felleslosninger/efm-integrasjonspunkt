@@ -66,7 +66,7 @@ public class StatusPolling {
             StatusStrategy strategy = statusStrategyFactory.getStrategy(si);
             strategy.checkStatus(conversations);
         } catch (Exception e) {
-            log.error("Exception during receipt polling for %s".formatted(si), e);
+            log.error("Exception during receipt polling for {}", si, e);
         } finally {
             MDC.clear();
         }

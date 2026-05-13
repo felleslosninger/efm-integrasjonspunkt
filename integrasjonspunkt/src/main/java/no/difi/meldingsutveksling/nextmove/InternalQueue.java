@@ -1,10 +1,10 @@
 package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.Session;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.QueueInterruptException;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.pipe.PromiseRuntimeException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import jakarta.jms.Session;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 

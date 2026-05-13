@@ -22,5 +22,5 @@ public interface ConversationService {
     Conversation registerConversation(StandardBusinessDocument sbd, ServiceIdentifier si, ConversationDirection direction, ReceiptStatus... statuses);
     Optional<Conversation> findConversation(String messageId);
     Optional<Conversation> findConversation(String conversationId, ConversationDirection direction);
-
+    String getExternalSystemReference(String messageId);
 }

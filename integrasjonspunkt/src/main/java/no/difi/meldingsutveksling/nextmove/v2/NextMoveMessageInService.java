@@ -24,6 +24,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static no.difi.meldingsutveksling.MessageType.DIALOGMELDING_KVITTERING;
 import static no.difi.meldingsutveksling.NextMoveConsts.ASIC_FILE;
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
@@ -68,7 +69,7 @@ public class NextMoveMessageInService {
             throw new MessageNotLockedException(messageId);
         }
 
-        if (SBDUtil.isReceipt(message.getSbd())) {
+        if (SBDUtil.isReceipt(message.getSbd()) && !SBDUtil.isType(message.getSbd(), DIALOGMELDING_KVITTERING)) {
             return null;
         }
 

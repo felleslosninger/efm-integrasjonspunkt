@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
@@ -8,20 +9,21 @@ import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
 import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.NextMoveConsts;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
-import no.difi.meldingsutveksling.domain.EncryptedBusinessMessage;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.MessageNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MessagePersistException;
 import no.difi.meldingsutveksling.exceptions.TimeToLiveException;
-import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.EncryptionException;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.InternalQueue;
+import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.slf4j.MDC;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -33,11 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,7 +53,6 @@ public class NextMoveMessageService {
     private final NextMoveValidator validator;
     private final NextMoveOutMessageFactory nextMoveOutMessageFactory;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
-    private final NhnCryptoMessagePersister nhnCryptoMessagePersister;
     private final NextMoveMessageOutRepository messageRepo;
     private final InternalQueue internalQueue;
     private final ConversationService conversationService;
@@ -65,7 +63,7 @@ public class NextMoveMessageService {
     @Transactional(readOnly = true)
     public NextMoveOutMessage getMessage(String messageId) {
         return messageRepo.findByMessageId(messageId)
-                .orElseThrow(() -> new MessageNotFoundException(messageId));
+            .orElseThrow(() -> new MessageNotFoundException(messageId));
     }
 
     public Page<NextMoveOutMessage> findMessages(Predicate predicate, Pageable pageable) {
@@ -97,10 +95,10 @@ public class NextMoveMessageService {
         }
 
         messageRepo.findIdByMessageId(messageId).ifPresent(
-                id -> {
-                    businessMessageFileRepository.deleteFilesByMessageId(id);
-                    messageRepo.deleteMessageById(id);
-                }
+            id -> {
+                businessMessageFileRepository.deleteFilesByMessageId(id);
+                messageRepo.deleteMessageById(id);
+            }
         );
     }
 
@@ -110,12 +108,12 @@ public class NextMoveMessageService {
         String identifier = persistFile(message, file);
 
         message.addFile(new BusinessMessageFile()
-                .setIdentifier(identifier)
-                .setTitle(getTitle(file.getName()))
-                .setFilename(file.getOriginalFilename())
-                .setSize(file.getSize())
-                .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
-                .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
+            .setIdentifier(identifier)
+            .setTitle(getTitle(file.getName()))
+            .setFilename(file.getOriginalFilename())
+            .setSize(file.getSize())
+            .setMimetype(getMimeType(file.getContentType(), file.getOriginalFilename()))
+            .setPrimaryDocument(message.isPrimaryDocument(file.getOriginalFilename())));
 
         if (ARKIVMELDING_FILE.equals(file.getOriginalFilename())) {
             Arkivmelding arkivmelding = getArkivmelding(message, identifier);
@@ -151,21 +149,7 @@ public class NextMoveMessageService {
         String identifier = UUID.randomUUID().toString();
 
         try (InputStream inputStream = file.getInputStream()) {
-            if (message.getServiceIdentifier() == ServiceIdentifier.DPH) {
-                    try {
-                        X509Certificate certificate = message.getBusinessMessage(EncryptedBusinessMessage.class).get().x509Certificate();
-                        nhnCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream),certificate );
-                    } catch (CertificateException e) {
-                        //@TODO make exception handling more precise here.
-                        throw new RuntimeException("Not able to encrypt message, due to failed certificate",e);
-                    } catch (EncryptionException e) {
-                        throw new RuntimeException("Not able to encrypt message, due to failed encryptionKeystore",e);
-                    }
-                }
-            else  {
-                optionalCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream));
-            }
-
+            optionalCryptoMessagePersister.write(message.getMessageId(), identifier, new InputStreamResource(inputStream));
         } catch (IOException e) {
             throw new MessagePersistException(file.getOriginalFilename());
         }
@@ -186,16 +170,16 @@ public class NextMoveMessageService {
 
     public List<Document> getDocuments(NextMoveMessage msg) {
         return msg.getFiles().stream()
-                .sorted((a, b) -> {
-                    if (Boolean.TRUE.equals(a.getPrimaryDocument())) return -1;
-                    if (Boolean.TRUE.equals(b.getPrimaryDocument())) return 1;
-                    return a.getDokumentnummer().compareTo(b.getDokumentnummer());
-                }).map(f -> Document.builder()
-                        .filename(f.getFilename())
-                        .mimeType(getMimeType(f.getMimetype(), f.getFilename()))
-                        .title(f.getTitle())
-                        .resource(getResource(msg, f))
-                        .build()).collect(Collectors.toList());
+            .sorted((a, b) -> {
+                if (Boolean.TRUE.equals(a.getPrimaryDocument())) return -1;
+                if (Boolean.TRUE.equals(b.getPrimaryDocument())) return 1;
+                return a.getDokumentnummer().compareTo(b.getDokumentnummer());
+            }).map(f -> Document.builder()
+                .filename(f.getFilename())
+                .mimeType(getMimeType(f.getMimetype(), f.getFilename()))
+                .title(f.getTitle())
+                .resource(getResource(msg, f))
+                .build()).collect(Collectors.toList());
     }
 
     private Resource getResource(NextMoveMessage msg, BusinessMessageFile f) {

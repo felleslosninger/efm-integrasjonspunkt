@@ -20,12 +20,10 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
     FIKSIO("fiksio", FiksIoMessage.class),
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
-    DIALOGMELDING("dialogmelding",Dialogmelding.class) {
-        public boolean supportsEncryption() {
-            return true;
-        }
-    },
     PRINT("print", DpiPrintMessage.class),
+
+    DIALOGMELDING("dialogmelding", DialogmeldingMessage.class),
+    DIALOGMELDING_KVITTERING("dialogmelding_kvittering", DialogmeldingKvitteringMessage.class),
 
     INNSYNSKRAV("innsynskrav", InnsynskravMessage.class),
     PUBLISERING("publisering", PubliseringMessage.class),

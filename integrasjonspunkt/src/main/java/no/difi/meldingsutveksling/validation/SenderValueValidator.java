@@ -1,9 +1,8 @@
 package no.difi.meldingsutveksling.validation;
 
-import no.difi.meldingsutveksling.domain.Iso6523;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 
 public class SenderValueValidator implements ConstraintValidator<SenderValue, String> {
 
@@ -12,6 +11,6 @@ public class SenderValueValidator implements ConstraintValidator<SenderValue, St
         if (value == null) {
             return true;
         }
-        return !Iso6523.parse(value).getOrganizationIdentifier().isEmpty();
+        return PartnerIdentifier.isValid(value);
     }
 }

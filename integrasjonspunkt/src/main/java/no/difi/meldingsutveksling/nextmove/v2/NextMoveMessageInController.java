@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.core.io.Resource;
@@ -23,12 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,28 +37,24 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class NextMoveMessageInController {
 
-    private static final MediaType MIMETYPE_ASICE = MediaType.parseMediaType(AsicUtils.MIMETYPE_ASICE);
+    public static final MediaType MIMETYPE_ASICE = MediaType.parseMediaType(AsicUtils.MIMETYPE_ASICE);
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachment; filename=";
 
     private final NextMoveMessageInService messageService;
-    private final NhnNextMoveMessageInService nhnMessageService;
 
     @GetMapping
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
-            @Valid NextMoveInMessageQueryInput input,
-            @PageableDefault Pageable pageable) {
+        @Valid NextMoveInMessageQueryInput input,
+        @PageableDefault Pageable pageable) {
         return messageService.findMessages(input, pageable);
     }
 
     @GetMapping(value = "peek")
-    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) throws ServiceRegistryLookupException {
-        if (input.herId2 != null) {
-            return nhnMessageService.getMessageByHerId(Integer.parseInt( input.herId2));
-        }
+    public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
         NextMoveInMessage message = messageService.peek(input)
-                .orElseThrow(NoContentException::new);
+            .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();
@@ -114,23 +104,13 @@ public class NextMoveMessageInController {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to copy stream!", e);
         }
+
     }
 
     @DeleteMapping(value = "/{messageId}")
     @Transactional
-    public StandardBusinessDocument deleteMessage(
-        @PathVariable String messageId,
-        @RequestParam(required = false) Integer herId2) throws ServiceRegistryLookupException {
-
+    public StandardBusinessDocument deleteMessage(@PathVariable String messageId) {
         MDC.put(NextMoveConsts.CORRELATION_ID, messageId);
-        if (herId2!=null) {
-            StandardBusinessDocument sbd = nhnMessageService.getMessageById(messageId,herId2);
-            nhnMessageService.markAsRead(messageId, herId2);
-            return sbd;
-        }
-        else {
-            return messageService.deleteMessage(messageId);
-        }
-
+        return messageService.deleteMessage(messageId);
     }
 }

@@ -1,79 +1,68 @@
 package no.difi.meldingsutveksling.config;
 
-import no.difi.meldingsutveksling.nhn.adapter.crypto.CryptoConfig;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Dekryptering;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Kryptering;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnKeystore;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.NhnTrustStore;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.SignatureValidator;
-import no.difi.meldingsutveksling.nhn.adapter.crypto.Signer;
-import no.difi.move.common.config.KeystoreProperties;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import no.difi.meldingsutveksling.CertificateParser;
+import no.difi.meldingsutveksling.CertificateParserException;
+import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.dph.DphAppStartupRunner;
+import no.difi.meldingsutveksling.dph.DphService;
+import no.difi.meldingsutveksling.dph.client.DigdirBusinessCertificateSupplier;
+import no.difi.meldingsutveksling.dph.client.DphClient;
+import no.difi.meldingsutveksling.dph.client.DphClientConfig;
+import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
+import no.difi.meldingsutveksling.nextmove.DphConversationStrategyImpl;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryClient;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
+@Import(DphClientConfig.class)
 @Configuration
+@ConditionalOnProperty(name = "difi.move.feature.enableDPH", havingValue = "true")
+@RequiredArgsConstructor
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
 public class DphConfig {
 
     @Bean
-    public Kryptering kryptering() {
-        return new Kryptering();
+    public DphAppStartupRunner dphAppStartupRunner(
+        DphClient dphClient,
+        IntegrasjonspunktProperties properties,
+        ServiceRegistryLookup serviceRegistryLookup) {
+        return new DphAppStartupRunner(dphClient, properties, serviceRegistryLookup);
     }
 
     @Bean
-    public Dekryptering dekryptering(@Qualifier("nhnKryptering") NhnKeystore keystore) {
-        return new Dekryptering(keystore);
-    }
-
-    @Bean("nhnKryptering")
-    public NhnKeystore nhnKrypteringKeystore(IntegrasjonspunktProperties properties) throws IOException {
-        KeystoreProperties keyProps = properties.getDph().getEncryptionKeystore();
-        CryptoConfig config;
-        if (keyProps.getPath().isFile()) {
-            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
-        }
-        else {
-            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
-        }
-        return new NhnKeystore(config);
+    public DphService dphService(ServiceRegistryLookup serviceRegistryLookup) {
+        return new DphService(serviceRegistryLookup);
     }
 
     @Bean
-    public NhnTrustStore nhntrustStore(IntegrasjonspunktProperties properties) throws IOException {
-        KeystoreProperties keyProps = properties.getDph().getTruststore();
-        CryptoConfig config;
-        if (keyProps.getPath().isFile()) {
-            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
-        }
-        else {
-            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
-        }
-        return new NhnTrustStore(config);
+    public DphConversationStrategyImpl dphConversationStrategy(
+        DphClient dphClient,
+        DphService dphService,
+        DphParcelService dphParcelService,
+        ConversationService conversationService,
+        @Lazy NextMoveMessageService nextMoveMessageService) {
+        return new DphConversationStrategyImpl(dphClient, dphService, dphParcelService, conversationService, nextMoveMessageService);
     }
 
     @Bean
-    public Signer signer(IntegrasjonspunktProperties properties) throws IOException {
-        KeystoreProperties keyProps =  properties.getDph().getSigningKeystore();
-        CryptoConfig config;
-        if (keyProps.getPath().isFile()) {
-            config = new CryptoConfig(keyProps.getAlias(),null,keyProps.getPath().getFile().getAbsolutePath(),keyProps.getPassword(),keyProps.getType());
-        }
-        else {
-            config = new CryptoConfig(keyProps.getAlias(), keyProps.getPath().getContentAsString(StandardCharsets.UTF_8),null,keyProps.getPassword(),keyProps.getType());
-        }
-
-        return new Signer(config,"signature");
+    public DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier(ServiceRegistryClient serviceRegistryClient) {
+        return () -> {
+            try {
+                return CertificateParser.parse(serviceRegistryClient.getCertificate("991825827"));
+            } catch (ServiceRegistryLookupException e) {
+                throw new NextMoveRuntimeException("Could not fetch DigDir certificate!");
+            } catch (CertificateParserException e) {
+                throw new NextMoveRuntimeException("Could not parse DigDir certificate!");
+            }
+        };
     }
-
-    @Bean
-    public SignatureValidator signatureValidator(NhnTrustStore trustStore) {
-
-        return new SignatureValidator(trustStore,"signature");
-    }
-
 }

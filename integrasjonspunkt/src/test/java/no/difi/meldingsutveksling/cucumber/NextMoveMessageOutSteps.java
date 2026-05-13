@@ -10,17 +10,26 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.v2.ContentDisposition;
+import no.difi.move.common.io.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.env.Environment;
-import org.springframework.http.*;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +50,9 @@ public class NextMoveMessageOutSteps {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @Before
     public void before() {
@@ -86,17 +98,17 @@ public class NextMoveMessageOutSteps {
         headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/multipart",
-                HttpMethod.POST,
-                new HttpEntity<>(multipart, headers),
-                String.class);
+            "/api/messages/out/multipart",
+            HttpMethod.POST,
+            new HttpEntity<>(multipart, headers),
+            String.class);
 
         assertThat(response.getStatusCode())
-                .withFailMessage(response.toString())
-                .isEqualTo(HttpStatus.OK);
+            .withFailMessage(response.toString())
+            .isEqualTo(HttpStatus.OK);
 
         messageOutHolder.getOrCalculate(Message::new)
-                .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
+            .setSbd(objectMapper.readValue(response.getBody(), StandardBusinessDocument.class));
     }
 
     @Then("^I post the multipart request and get a \"([^\"]+)\" response$")
@@ -109,14 +121,14 @@ public class NextMoveMessageOutSteps {
         headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/multipart",
-                HttpMethod.POST,
-                new HttpEntity<>(multipart, headers),
-                String.class);
+            "/api/messages/out/multipart",
+            HttpMethod.POST,
+            new HttpEntity<>(multipart, headers),
+            String.class);
 
         assertThat(response.getStatusCode())
-                .withFailMessage(response.toString())
-                .isEqualTo(HttpStatus.valueOf(expectedStatusName));
+            .withFailMessage(response.toString())
+            .isEqualTo(HttpStatus.valueOf(expectedStatusName));
     }
 
     @Given("^I POST the following message:$")
@@ -129,28 +141,39 @@ public class NextMoveMessageOutSteps {
         headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out",
-                HttpMethod.POST,
-                new HttpEntity<>(body, headers),
-                String.class);
+            "/api/messages/out",
+            HttpMethod.POST,
+            new HttpEntity<>(body, headers),
+            String.class);
 
         if (response.getStatusCode() == HttpStatus.OK) {
             StandardBusinessDocument sbd = objectMapper.readValue(response.getBody(), StandardBusinessDocument.class);
 
             messageOutHolder.getOrCalculate(Message::new)
-                    .setSbd(sbd);
+                .setSbd(sbd);
         }
     }
 
     @Then("^the response status is \"([^\"]+)\"")
     public void thenTheResponseStatusIs(String expectedStatusName) {
         assertThat(response.getStatusCode())
-                .withFailMessage(response.getBody())
-                .isEqualTo(HttpStatus.valueOf(expectedStatusName));
+            .withFailMessage(response.getBody())
+            .isEqualTo(HttpStatus.valueOf(expectedStatusName));
+    }
+
+    @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\"$")
+    public void iUploadAFileToTheMessage(String filename, String mimetype, String title) {
+        Resource resource = resourceLoader.getResource("classpath:files/" + filename);
+        iUploadAFile(filename, mimetype, title, ResourceUtils.toByteArray(resource));
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\" with the following body:$")
     public void iUploadAFileToTheMessage(String filename, String mimetype, String title, String body) {
+        iUploadAFile(filename, mimetype, title, body.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void iUploadAFile(String filename, String mimetype, String title, byte[] body) {
+
         String username = env.getProperty("spring.security.user.name");
         String password = env.getProperty("spring.security.user.password");
 
@@ -158,11 +181,11 @@ public class NextMoveMessageOutSteps {
         headers.setContentType(MediaType.valueOf(mimetype));
         headers.setBasicAuth(username, password);
         headers.set(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.builder()
-                .type("inline")
-                .name(title)
-                .filename(filename)
-                .build()
-                .toString()
+            .type("inline")
+            .name(title)
+            .filename(filename)
+            .build()
+            .toString()
         );
 
         Map<String, String> uriVariables = new HashMap<>();
@@ -170,15 +193,15 @@ public class NextMoveMessageOutSteps {
         uriVariables.put("title", title);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{messageId}?title={title}",
-                HttpMethod.PUT,
-                new HttpEntity<>(body, headers),
-                String.class,
-                uriVariables);
+            "/api/messages/out/{messageId}?title={title}",
+            HttpMethod.PUT,
+            new HttpEntity<>(body, headers),
+            String.class,
+            uriVariables);
 
         assertThat(response.getStatusCode())
-                .withFailMessage(response.toString())
-                .isEqualTo(HttpStatus.OK);
+            .withFailMessage(response.toString())
+            .isEqualTo(HttpStatus.OK);
     }
 
     @Given("^I send the message$")
@@ -190,13 +213,13 @@ public class NextMoveMessageOutSteps {
         headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity<>(headers),
-                String.class,
-                messageOutHolder.get().getSbd().getMessageId());
+            "/api/messages/out/{messageId}",
+            HttpMethod.POST, new HttpEntity<>(headers),
+            String.class,
+            messageOutHolder.get().getSbd().getMessageId());
         assertThat(response.getStatusCode())
-                .withFailMessage(response.toString())
-                .isEqualTo(HttpStatus.OK);
+            .withFailMessage(response.toString())
+            .isEqualTo(HttpStatus.OK);
     }
 
     @Given("^I send the message and get the following error response:$")
@@ -208,14 +231,14 @@ public class NextMoveMessageOutSteps {
         headers.setBasicAuth(username, password);
 
         this.response = testRestTemplate.exchange(
-                "/api/messages/out/{messageId}",
-                HttpMethod.POST, new HttpEntity<>(headers),
-                String.class,
-                messageOutHolder.get().getSbd().getMessageId());
+            "/api/messages/out/{messageId}",
+            HttpMethod.POST, new HttpEntity<>(headers),
+            String.class,
+            messageOutHolder.get().getSbd().getMessageId());
 
         try {
             new JsonContentAssert(String.class, response.getBody())
-                    .isStrictlyEqualToJson(body);
+                .isStrictlyEqualToJson(body);
         } catch (AssertionError e) {
             log.info(response.getBody());
             throw e;

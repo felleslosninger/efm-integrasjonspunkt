@@ -3,16 +3,12 @@ package no.difi.meldingsutveksling.nextmove;
 import no.difi.asic.AsicUtils;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.clock.FixedClockConfig;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktHandlerExceptionResolver;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.config.ValidationConfig;
+import no.difi.meldingsutveksling.config.*;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.AsicReadException;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveInMessageQueryInput;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInController;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageInService;
-import no.difi.meldingsutveksling.nextmove.v2.NhnNextMoveMessageInService;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,62 +26,43 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.arkivmeldingMessageDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getPagingParameterDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageableDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.publiseringMessageDescriptors;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.standardBusinessDocumentHeaderDescriptors;
-import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.ARKIVMELDING_SBD;
-import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.PUBLISERING_MESSAGE_RESPONSE;
-import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.PUBLISERING_SBD;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ContextConfiguration(classes = {
-        Oauth2ClientSecurityConfig.class,
-        FixedClockConfig.class,
-        ValidationConfig.class,
-        JacksonConfig.class,
-        JacksonMockitoConfig.class,
-        IntegrasjonspunktHandlerExceptionResolver.class,
-        NextMoveMessageInController.class})
+    Oauth2ClientSecurityConfig.class,
+    FixedClockConfig.class,
+    ValidationConfig.class,
+    JacksonConfig.class,
+    JacksonMockitoConfig.class,
+    IntegrasjonspunktHandlerExceptionResolver.class,
+    NextMoveMessageInController.class})
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
@@ -102,9 +79,6 @@ class NextMoveMessageInControllerTest {
     @Mock
     private IntegrasjonspunktProperties.Organization organization;
 
-    @MockitoBean
-    private NhnNextMoveMessageInService nhnNextMoveMessageInService;
-
     @Captor
     private ArgumentCaptor<NextMoveInMessageQueryInput> nextMoveInMessageQueryInputArgumentCaptor;
 
@@ -117,44 +91,44 @@ class NextMoveMessageInControllerTest {
     @Test
     void find() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
-                        get("/api/messages/in")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .accept(MediaType.APPLICATION_JSON)
+                get("/api/messages/in")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/find",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    queryParameters(
+                        parameterWithName("messageId").optional().description("Filter on messageId."),
+                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
+                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
+                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
+                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
+                            .map(Enum::name)
+                            .collect(Collectors.joining(", ")))),
+                        parameterWithName("process").optional().description("Filter on process.")
+                    ).and(getPagingParameterDescriptors()),
+                    responseFields()
+                        .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
+                        .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
+                        .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
+                        .and(subsectionWithPath("content[].publisering.").description("The publisering DPI business message").optional())
+                        .and(publiseringMessageDescriptors("content[].publisering."))
+                        .and(pageDescriptors())
+                        .andWithPrefix("pageable.", pageableDescriptors())
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/find",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                queryParameters(
-                                        parameterWithName("messageId").optional().description("Filter on messageId."),
-                                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
-                                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
-                                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
-                                                .map(Enum::name)
-                                                .collect(Collectors.joining(", ")))),
-                                        parameterWithName("process").optional().description("Filter on process.")
-                                ).and(getPagingParameterDescriptors()),
-                                responseFields()
-                                        .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
-                                        .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
-                                        .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
-                                        .and(subsectionWithPath("content[].publisering.").description("The publisering DPI business message").optional())
-                                        .and(publiseringMessageDescriptors("content[].publisering."))
-                                        .and(pageDescriptors())
-                                        .andWithPrefix("pageable.", pageableDescriptors())
-                        )
-                );
+            );
 
         verify(messageService).findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class));
     }
@@ -162,20 +136,20 @@ class NextMoveMessageInControllerTest {
     @Test
     void findSearch() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
-                        get("/api/messages/in")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .param("serviceIdentifier", "DPO")
-                                .accept(MediaType.APPLICATION_JSON)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/find/search"));
+                get("/api/messages/in")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("serviceIdentifier", "DPO")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/find/search"));
 
         verify(messageService).findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class));
     }
@@ -183,20 +157,20 @@ class NextMoveMessageInControllerTest {
     @Test
     void findSorting() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<StandardBusinessDocument> content = Arrays.asList(ARKIVMELDING_SBD, PUBLISERING_SBD);
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
-                        get("/api/messages/in")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .param("sort", "lastUpdated,asc")
-                                .accept(MediaType.APPLICATION_JSON)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/find/sorting"));
+                get("/api/messages/in")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("sort", "lastUpdated,asc")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/find/sorting"));
 
         verify(messageService).findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class));
     }
@@ -204,21 +178,21 @@ class NextMoveMessageInControllerTest {
     @Test
     void findPaging() throws Exception {
         given(messageService.findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
-                    return new PageImpl<>(content, invocation.getArgument(1), 31L);
-                });
+            .willAnswer(invocation -> {
+                List<StandardBusinessDocument> content = Collections.singletonList(ARKIVMELDING_SBD);
+                return new PageImpl<>(content, invocation.getArgument(1), 31L);
+            });
 
         mvc.perform(
-                        get("/api/messages/in")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .param("page", "3")
-                                .param("size", "10")
-                                .accept(MediaType.APPLICATION_JSON)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/find/paging"));
+                get("/api/messages/in")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("page", "3")
+                    .param("size", "10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/find/paging"));
 
         verify(messageService).findMessages(any(NextMoveInMessageQueryInput.class), any(Pageable.class));
     }
@@ -228,34 +202,34 @@ class NextMoveMessageInControllerTest {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
-                        get("/api/messages/in/peek")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .accept(MediaType.APPLICATION_JSON)
+                get("/api/messages/in/peek")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/peek",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    queryParameters(
+                        parameterWithName("messageId").optional().description("Filter on messageId."),
+                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
+                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
+                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
+                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
+                            .map(Enum::name)
+                            .collect(Collectors.joining(", ")))),
+                        parameterWithName("process").optional().description("Filter on process.")
+                    ),
+                    responseFields()
+                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                        .and(publiseringMessageDescriptors("publisering."))
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/peek",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                queryParameters(
-                                        parameterWithName("messageId").optional().description("Filter on messageId."),
-                                        parameterWithName("conversationId").optional().description("Filter on conversationId."),
-                                        parameterWithName("receiverIdentifier").optional().description("Filter on receiverIdentifier."),
-                                        parameterWithName("senderIdentifier").optional().description("Filter on senderIdentifier."),
-                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
-                                                .map(Enum::name)
-                                                .collect(Collectors.joining(", ")))),
-                                        parameterWithName("process").optional().description("Filter on process.")
-                                ),
-                                responseFields()
-                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
-                                        .and(publiseringMessageDescriptors("publisering."))
-                        )
-                );
+            );
 
         verify(messageService).peek(any(NextMoveInMessageQueryInput.class));
     }
@@ -265,30 +239,30 @@ class NextMoveMessageInControllerTest {
         given(messageService.peek(any(NextMoveInMessageQueryInput.class))).willReturn(Optional.of(PUBLISERING_MESSAGE_RESPONSE));
 
         mvc.perform(
-                        get("/api/messages/in/peek")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
-                                .accept(MediaType.APPLICATION_JSON)
+                get("/api/messages/in/peek")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("serviceIdentifier", ServiceIdentifier.DPE.getFullname())
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/peek/dpe",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    queryParameters(
+                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
+                            .map(Enum::name)
+                            .collect(Collectors.joining(", "))))
+                    ),
+                    responseFields()
+                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                        .and(publiseringMessageDescriptors("publisering."))
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/peek/dpe",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                queryParameters(
-                                        parameterWithName("serviceIdentifier").optional().description("Filter on serviceIdentifier. Can be one of: %s".formatted(Arrays.stream(ServiceIdentifier.values())
-                                                .map(Enum::name)
-                                                .collect(Collectors.joining(", "))))
-                                ),
-                                responseFields()
-                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
-                                        .and(publiseringMessageDescriptors("publisering."))
-                        )
-                );
+            );
 
         verify(messageService).peek(any(NextMoveInMessageQueryInput.class));
     }
@@ -298,33 +272,33 @@ class NextMoveMessageInControllerTest {
         NextMoveInMessage message = PUBLISERING_MESSAGE_RESPONSE;
 
         given(messageService.peek(any(NextMoveInMessageQueryInput.class)))
-                .willReturn(Optional.of(message));
+            .willReturn(Optional.of(message));
 
         mvc.perform(
-                        get("/api/messages/in/peek")
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .param("messageId", message.getMessageId())
-                                .param("conversationId", message.getConversationId())
-                                .accept(MediaType.APPLICATION_JSON)
+                get("/api/messages/in/peek")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("messageId", message.getMessageId())
+                    .param("conversationId", message.getConversationId())
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/peek/messageIdAndConversationId",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    queryParameters(
+                        parameterWithName("messageId").optional().description("Filter on messageId"),
+                        parameterWithName("conversationId").optional().description("Filter on conversationId")
+                    ),
+                    responseFields()
+                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
+                        .and(publiseringMessageDescriptors("publisering."))
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/peek/messageIdAndConversationId",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                queryParameters(
-                                        parameterWithName("messageId").optional().description("Filter on messageId"),
-                                        parameterWithName("conversationId").optional().description("Filter on conversationId")
-                                ),
-                                responseFields()
-                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                        .and(subsectionWithPath("publisering").description("The DPE business message").optional())
-                                        .and(publiseringMessageDescriptors("publisering."))
-                        )
-                );
+            );
 
         verify(messageService).peek(nextMoveInMessageQueryInputArgumentCaptor.capture());
 
@@ -346,27 +320,27 @@ class NextMoveMessageInControllerTest {
         zipOutputStream.close();
 
         given(messageService.popMessage(anyString())).willReturn(
-                new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()))
+            new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()))
         );
 
         mvc.perform(
-                        get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .accept(AsicUtils.MIMETYPE_ASICE)
+                get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(AsicUtils.MIMETYPE_ASICE)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/pop",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    pathParameters(
+                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                    )
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/pop",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                pathParameters(
-                                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
-                                )
-                        )
-                );
+            );
 
         verify(messageService).popMessage(ARKIVMELDING_SBD.getMessageId());
     }
@@ -381,8 +355,8 @@ class NextMoveMessageInControllerTest {
         mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
                 .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                 .accept(AsicUtils.MIMETYPE_ASICE))
-                .andExpect(status().is5xxServerError())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof AsicReadException));
+            .andExpect(status().is5xxServerError())
+            .andExpect(result -> Assertions.assertInstanceOf(AsicReadException.class, result.getResolvedException()));
 
         verify(messageService).handleCorruptMessage(ARKIVMELDING_SBD.getMessageId());
     }
@@ -397,7 +371,7 @@ class NextMoveMessageInControllerTest {
         mvc.perform(get("/api/messages/in/pop/{messageId}", ARKIVMELDING_SBD.getMessageId())
                 .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
                 .accept(AsicUtils.MIMETYPE_ASICE))
-                .andExpect(status().is2xxSuccessful());
+            .andExpect(status().is2xxSuccessful());
 
         verify(messageService, never()).handleCorruptMessage(ARKIVMELDING_SBD.getMessageId());
     }
@@ -408,27 +382,27 @@ class NextMoveMessageInControllerTest {
         given(messageService.deleteMessage(anyString())).willReturn(ARKIVMELDING_SBD);
 
         mvc.perform(
-                        delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
-                                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                                .accept(MediaType.APPLICATION_JSON)
+                delete("/api/messages/in/{messageId}", ARKIVMELDING_SBD.getMessageId())
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("messages/in/delete",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    pathParameters(
+                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
+                    ),
+                    responseFields()
+                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
+                        .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
+                        .and(arkivmeldingMessageDescriptors("arkivmelding."))
                 )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("messages/in/delete",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-                                requestHeaders(
-                                        getDefaultHeaderDescriptors()
-                                ),
-                                pathParameters(
-                                        parameterWithName("messageId").optional().description("The messageId of the message to pop.")
-                                ),
-                                responseFields()
-                                        .and(standardBusinessDocumentHeaderDescriptors("standardBusinessDocumentHeader."))
-                                        .and(subsectionWithPath("arkivmelding").description("The DPO business message").optional())
-                                        .and(arkivmeldingMessageDescriptors("arkivmelding."))
-                        )
-                );
+            );
 
         verify(messageService).deleteMessage(ARKIVMELDING_SBD.getMessageId());
     }

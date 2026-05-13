@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
+import no.difi.move.common.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.move.common.cert.X509CertificateHelper;
 import org.springframework.core.io.Resource;

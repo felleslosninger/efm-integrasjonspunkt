@@ -11,7 +11,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.StandardBusinessDocumentTestData;
-import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,6 @@ class NextMoveOutMessageFactoryTest {
     @MockitoBean private ServiceRecordProvider serviceRecordProvider;
     @MockitoBean private UUIDGenerator uuidGenerator;
     @MockitoBean private Clock clock;
-    @MockitoBean private HealthcareRoutingService healthcareRoutingService;
 
     private NextMoveOutMessageFactory factory;
 
@@ -46,7 +44,7 @@ class NextMoveOutMessageFactoryTest {
 
     @BeforeEach
     public void setup() {
-        factory = new NextMoveOutMessageFactory(props, serviceRecordProvider, uuidGenerator, clock,healthcareRoutingService);
+        factory = new NextMoveOutMessageFactory(props, serviceRecordProvider, uuidGenerator, clock);
 
         srPostAddress = Mockito.mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         when(srPostAddress.getName()).thenReturn("Foo");
@@ -94,7 +92,7 @@ class NextMoveOutMessageFactoryTest {
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 
@@ -110,7 +108,7 @@ class NextMoveOutMessageFactoryTest {
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 
@@ -124,7 +122,7 @@ class NextMoveOutMessageFactoryTest {
 
         PostAddress postAddress = new PostAddress();
         Method m = NextMoveOutMessageFactory.class.getDeclaredMethod("setReceiverDefaults",
-                PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
+            PostAddress.class, no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         m.setAccessible(true);
         m.invoke(factory, postAddress, srPostAddress);
 
@@ -133,5 +131,4 @@ class NextMoveOutMessageFactoryTest {
         assertEquals("c", postAddress.getAdresselinje3());
         assertEquals("d", postAddress.getAdresselinje4());
     }
-
 }

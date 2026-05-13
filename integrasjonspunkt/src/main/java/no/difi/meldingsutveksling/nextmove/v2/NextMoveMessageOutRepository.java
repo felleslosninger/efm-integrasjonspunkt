@@ -35,5 +35,4 @@ public interface NextMoveMessageOutRepository extends PagingAndSortingRepository
     default void customize(QuerydslBindings bindings, QNextMoveOutMessage root) {
         bindings.excluding(root.sbd);
     }
-
 }
