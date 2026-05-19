@@ -125,7 +125,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
             new Property("difi.move.dpi.pageSize", "100", " Maks antall kvitteringer pr polling"),
             new Property("difi.move.dpi.certificate.mode", "SELF_SIGNED", "Sertifikat modus"),
             new Property("difi.move.dpi.asice.type", "CMS", "Hvilken type ASICe skal benyttes"),
-            new Property("difi.move.dpi.upload-size-limit", "150MB", "Maks upload størrelse"),
+            new Property("difi.move.dpi.upload-size-limit", "50MB", "Maks upload størrelse"),
             new Property("denne-listen-er-ikke-komplett", "FIXME", "Det er flere properties som ikke vises enda.")
         );
     }
