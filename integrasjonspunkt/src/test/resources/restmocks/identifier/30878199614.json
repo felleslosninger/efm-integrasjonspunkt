@@ -8,7 +8,7 @@
     "serviceRecords": [
         {
             "organisationNumber": "310673145",
-            "process": "urn:no:difi:profile:digitalpost:fastlege:ver1.0",
+            "process": "urn:no:difi:profile:helse:helse:ver1.0",
             "herIdLevel1": "8143541",
             "herIdLevel2": "8143548",
             "patient": {

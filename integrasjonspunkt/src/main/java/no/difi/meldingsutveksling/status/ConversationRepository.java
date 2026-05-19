@@ -75,6 +75,9 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByDirection(ConversationDirection direction);
 
+    @EntityGraph(value = "Conversation.messageStatuses")
+    Optional<Conversation> findByExternalSystemReference(String externalSystemReference);
+
     void deleteByMessageId(String messageId);
 
     @Query("SELECT id FROM Conversation WHERE pollable = true")

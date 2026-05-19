@@ -21,6 +21,7 @@ import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
+import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -86,10 +87,15 @@ public class DefaultDphPolling implements DphPolling {
     private void handleDialogmelding(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
         BusinessDocumentResponse response = dphClient.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
 
+        log.debug("DPH dialogmelding received: incomingMessage={}, response={}", incomingMessage, response);
+
         StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
             NhnIdentifier.herId(incomingMessage.getSenderHerId()),
             NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-            response.getConversationId(),
+            Optional.ofNullable(response.getConversationId())
+                .flatMap(conversationService::findConversationByExternalSystemReference)
+                .map(Conversation::getConversationId)
+                .orElse(response.getMessageId()),
             response.getMessageId(),
             properties.getDph().getNhnProcess(),
             properties.getDph().getDialogmeldingDocumentType(),
@@ -97,6 +103,8 @@ public class DefaultDphPolling implements DphPolling {
         );
 
         Optional.ofNullable(response.getParentId())
+            .flatMap(conversationService::findConversationByExternalSystemReference)
+            .map(Conversation::getMessageId)
             .ifPresent(parentId -> sbd.getScopes().add(ScopeFactory.fromParentId(parentId)));
 
         nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());

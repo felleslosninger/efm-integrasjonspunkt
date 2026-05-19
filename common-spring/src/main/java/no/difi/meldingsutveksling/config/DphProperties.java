@@ -24,8 +24,6 @@ public class DphProperties {
     private List<@NotNull Integer> herIds;
 
     @NotNull
-    private String fastlegeProcess;
-    @NotNull
     private String nhnProcess;
     @NotNull
     private String dialogmeldingDocumentType;

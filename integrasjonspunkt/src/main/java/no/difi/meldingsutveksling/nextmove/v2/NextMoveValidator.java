@@ -18,6 +18,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ForsendelseTypeNotFoundException;
@@ -174,11 +175,10 @@ public class NextMoveValidator {
                 throw new ReceiverException("Receiver have to be a %s for DPH messages!".formatted(NHN_ACTORID));
             }
 
-            Optional.ofNullable(sbd.getConversationId()).ifPresent(conversationService::getExternalSystemReference);
-            Optional.ofNullable(sbd.getParentId()).ifPresent(conversationService::getExternalSystemReference);
-
             sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
-                .ifPresent(kvittering -> conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId()));
+                .ifPresent(kvittering -> conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId())
+                    .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(kvittering.getRelatedToMessageId()))
+                );
         }
     }
 

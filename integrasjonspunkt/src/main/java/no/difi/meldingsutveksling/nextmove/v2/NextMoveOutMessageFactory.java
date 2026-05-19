@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
+import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
@@ -16,6 +17,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
@@ -46,10 +48,11 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 @RequiredArgsConstructor
 public class NextMoveOutMessageFactory {
 
-    private final IntegrasjonspunktProperties properties;
-    private final ServiceRecordProvider serviceRecordProvider;
-    private final UUIDGenerator uuidGenerator;
     private final Clock clock;
+    private final UUIDGenerator uuidGenerator;
+    private final ConversationService conversationService;
+    private final ServiceRecordProvider serviceRecordProvider;
+    private final IntegrasjonspunktProperties properties;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
@@ -144,6 +147,12 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDphDefaults(StandardBusinessDocument sbd) {
+        Optional.ofNullable(sbd.getConversationId()).ifPresent(p -> conversationService.getExternalSystemReference(p)
+            .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(p))
+        );
+        Optional.ofNullable(sbd.getParentId()).ifPresent(p -> conversationService.getExternalSystemReference(p)
+            .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(p))
+        );
         // For DPH - The ConversationId should be equal to the first message in a conversation.
         sbd.getScope(ScopeType.CONVERSATION_ID)
             .filter(p -> p.getInstanceIdentifier() == null)

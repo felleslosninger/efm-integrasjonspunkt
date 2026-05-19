@@ -13,6 +13,7 @@ import no.difi.meldingsutveksling.dph.client.DphClient;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
+import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -20,6 +21,7 @@ import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.core.io.Resource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -65,16 +67,19 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
 
         switch (businessMessage) {
             case DialogmeldingMessage dialogmelding -> {
-                UUID nhnMessageId =
-                    dphClient.sendBusinessDocument(onBehalfOf, new SendBusinessDocumentInput()
-                        .setSenderHerId(sender.getHerId())
-                        .setReceiverHerId(infoRecordReceiver.getHerId())
-                        .setConversationId(conversationService.getExternalSystemReference(message.getConversationId()))
-                        .setParentId(conversationService.getExternalSystemReference(message.getSbd().getParentId()))
-                        .setMessageId(message.getMessageId())
-                        .setPayload(dialogmelding)
-                        .setEncryptedAsic(encryptedAsic)
-                    );
+                SendBusinessDocumentInput input = new SendBusinessDocumentInput()
+                    .setSenderHerId(sender.getHerId())
+                    .setReceiverHerId(infoRecordReceiver.getHerId())
+                    .setConversationId(conversationService.getExternalSystemReference(message.getConversationId()).orElse(null))
+                    .setParentId(Optional.ofNullable(message.getSbd().getParentId())
+                        .flatMap(conversationService::getExternalSystemReference)
+                        .orElse(null))
+                    .setMessageId(message.getMessageId())
+                    .setPayload(dialogmelding)
+                    .setEncryptedAsic(encryptedAsic);
+                log.debug("DPH Sending dialogmelding messageId={}, conversationId={}, input = {}", message.getMessageId(), message.getConversationId(), input);
+
+                UUID nhnMessageId = dphClient.sendBusinessDocument(onBehalfOf, input);
 
                 log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
 
@@ -84,7 +89,9 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
                 });
             }
             case DialogmeldingKvitteringMessage kvittering -> {
-                kvittering.setRelatedToMessageId(conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId()));
+                kvittering.setRelatedToMessageId(conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId())
+                    .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(kvittering.getRelatedToMessageId()))
+                );
 
                 UUID nhnMessageId = dphClient.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
                     .setSenderHerId(sender.getHerId())
