@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.DphService;
-import no.difi.meldingsutveksling.dph.client.DphClient;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
@@ -36,10 +36,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DefaultDphPolling implements DphPolling {
 
-    private final DphClient dphClient;
     private final DphService dphService;
     private final SBDFactory sbdFactory;
     private final NextMoveQueue nextMoveQueue;
+    private final DphClientService dphClientService;
     private final ConversationService conversationService;
     private final IntegrasjonspunktProperties properties;
 
@@ -51,7 +51,7 @@ public class DefaultDphPolling implements DphPolling {
 
     private void pollForHerId(@NotNull Integer herId) {
         Iso6523 onBehalfOf = dphService.getOnBehalfOf(NhnIdentifier.herId(herId));
-        List<IncomingMessage> messages = dphClient.getMessages(onBehalfOf, herId);
+        List<IncomingMessage> messages = dphClientService.getMessages(onBehalfOf, herId);
         messages.forEach(message -> handleMessage(onBehalfOf, message));
     }
 
@@ -69,12 +69,12 @@ public class DefaultDphPolling implements DphPolling {
                 conversationService.save(conversation);
             });
 
-        dphClient.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
+        dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
 
         if (!incomingMessage.isAppRec() && !properties.getFeature().isEnableReceipts()) {
             log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
 
-            dphClient.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
+            dphClientService.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
                 .setSenderHerId(incomingMessage.getReceiverHerId())
                 .setPayload(new DialogmeldingKvitteringMessage()
                     .setRelatedToMessageId(incomingMessage.getId())
@@ -85,7 +85,7 @@ public class DefaultDphPolling implements DphPolling {
     }
 
     private void handleDialogmelding(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        BusinessDocumentResponse response = dphClient.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
+        BusinessDocumentResponse response = dphClientService.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
 
         log.debug("DPH dialogmelding received: incomingMessage={}, response={}", incomingMessage, response);
 
@@ -111,7 +111,7 @@ public class DefaultDphPolling implements DphPolling {
     }
 
     private void handleApplicationReceipt(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        ApplicationReceiptResponse response = dphClient.receiveApplicationReceipt(onBehalfOf, incomingMessage.getId());
+        ApplicationReceiptResponse response = dphClientService.receiveApplicationReceipt(onBehalfOf, incomingMessage.getId());
         DialogmeldingKvitteringMessage message = response.getPayload();
 
         conversationService.findConversation(message.getRelatedToMessageId()).ifPresentOrElse(conversation -> {

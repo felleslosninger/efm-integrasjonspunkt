@@ -7,8 +7,8 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.dph.DphAppStartupRunner;
 import no.difi.meldingsutveksling.dph.DphService;
 import no.difi.meldingsutveksling.dph.client.DigdirBusinessCertificateSupplier;
-import no.difi.meldingsutveksling.dph.client.DphClient;
 import no.difi.meldingsutveksling.dph.client.DphClientConfig;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.meldingsutveksling.nextmove.DphConversationStrategyImpl;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
@@ -32,10 +32,10 @@ public class DphConfig {
 
     @Bean
     public DphAppStartupRunner dphAppStartupRunner(
-        DphClient dphClient,
+        DphClientService dphClientService,
         IntegrasjonspunktProperties properties,
         ServiceRegistryLookup serviceRegistryLookup) {
-        return new DphAppStartupRunner(dphClient, properties, serviceRegistryLookup);
+        return new DphAppStartupRunner(dphClientService, properties, serviceRegistryLookup);
     }
 
     @Bean
@@ -45,12 +45,12 @@ public class DphConfig {
 
     @Bean
     public DphConversationStrategyImpl dphConversationStrategy(
-        DphClient dphClient,
         DphService dphService,
+        DphClientService dphClientService,
         DphParcelService dphParcelService,
         ConversationService conversationService,
         @Lazy NextMoveMessageService nextMoveMessageService) {
-        return new DphConversationStrategyImpl(dphClient, dphService, dphParcelService, conversationService, nextMoveMessageService);
+        return new DphConversationStrategyImpl(dphService, dphClientService, dphParcelService, conversationService, nextMoveMessageService);
     }
 
     @Bean

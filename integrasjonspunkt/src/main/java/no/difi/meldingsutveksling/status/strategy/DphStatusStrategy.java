@@ -8,7 +8,7 @@ import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.dph.DphService;
-import no.difi.meldingsutveksling.dph.client.DphClient;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.nhn.adapter.model.TransportStatus;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.status.Conversation;
@@ -30,8 +30,8 @@ import java.util.Set;
 public class DphStatusStrategy implements StatusStrategy {
 
     private final Clock clock;
-    private final DphClient dphClient;
     private final DphService dphService;
+    private final DphClientService dphClientService;
     private final ConversationService conversationService;
 
     @Override
@@ -42,7 +42,7 @@ public class DphStatusStrategy implements StatusStrategy {
     public void checkStatus(Conversation conversation) {
         NhnIdentifier sender = NhnIdentifier.parse(conversation.getSender());
         Iso6523 onBehalfOf = dphService.getOnBehalfOf(sender);
-        dphClient.getStatus(onBehalfOf, conversation.getExternalSystemReference())
+        dphClientService.getStatus(onBehalfOf, conversation.getExternalSystemReference())
             .forEach(status -> handleMessageStatus(conversation, status));
     }
 

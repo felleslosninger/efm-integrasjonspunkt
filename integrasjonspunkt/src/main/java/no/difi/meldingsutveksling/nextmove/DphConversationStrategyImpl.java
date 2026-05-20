@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.dph.DphService;
-import no.difi.meldingsutveksling.dph.client.DphClient;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
@@ -30,8 +30,8 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class DphConversationStrategyImpl implements DphConversationStrategy {
 
-    private final DphClient dphClient;
     private final DphService dphService;
+    private final DphClientService dphClientService;
     private final DphParcelService dphParcelService;
     private final ConversationService conversationService;
     private final NextMoveMessageService nextMoveMessageService;
@@ -79,7 +79,7 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
                     .setEncryptedAsic(encryptedAsic);
                 log.debug("DPH Sending dialogmelding messageId={}, conversationId={}, input = {}", message.getMessageId(), message.getConversationId(), input);
 
-                UUID nhnMessageId = dphClient.sendBusinessDocument(onBehalfOf, input);
+                UUID nhnMessageId = dphClientService.sendBusinessDocument(onBehalfOf, input);
 
                 log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
 
@@ -93,7 +93,7 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
                     .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(kvittering.getRelatedToMessageId()))
                 );
 
-                UUID nhnMessageId = dphClient.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
+                UUID nhnMessageId = dphClientService.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
                     .setSenderHerId(sender.getHerId())
                     .setPayload(kvittering)
                 );

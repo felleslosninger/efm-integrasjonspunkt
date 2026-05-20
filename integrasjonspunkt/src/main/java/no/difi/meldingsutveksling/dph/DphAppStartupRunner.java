@@ -9,7 +9,7 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
-import no.difi.meldingsutveksling.dph.client.DphClient;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.springframework.boot.CommandLineRunner;
@@ -20,7 +20,7 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 public class DphAppStartupRunner implements CommandLineRunner {
 
-    private final DphClient dphClient;
+    private final DphClientService dphClientService;
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistryLookup;
 
@@ -36,12 +36,12 @@ public class DphAppStartupRunner implements CommandLineRunner {
                 String.join(", ", properties.getDph().getOidc().getScopes()),
                 infoRecord.getOrganizationNumber());
             Iso6523 onBehalfOf = Iso6523.of(ICD.NO_ORG, infoRecord.getOrganizationNumber());
-            String token = dphClient.getMaskinportenToken(onBehalfOf);
+            String token = dphClientService.getMaskinportenToken(onBehalfOf);
             JWT jwt = JWTParser.parse(token);
             JWTClaimsSet claims = jwt.getJWTClaimsSet();
             log.info("DPH - Access token claims = {}", claims);
             log.info("DPH - Trying to fetch messages for HER-id = {}", herId);
-            dphClient.getMessages(onBehalfOf, herId);
+            dphClientService.getMessages(onBehalfOf, herId);
             log.info("DPH - HER-id = {} verified successfully", herId);
         }
     }

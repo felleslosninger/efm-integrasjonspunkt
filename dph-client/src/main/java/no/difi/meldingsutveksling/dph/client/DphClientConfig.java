@@ -10,6 +10,9 @@ import no.difi.meldingsutveksling.dph.client.internal.CreateMaskinportenToken;
 import no.difi.meldingsutveksling.dph.client.internal.CreateMaskinportenTokenImpl;
 import no.difi.meldingsutveksling.dph.client.internal.CreateMaskinportenTokenMock;
 import no.difi.meldingsutveksling.dph.client.internal.CreateMultipart;
+import no.difi.meldingsutveksling.dph.client.internal.DphClient;
+import no.difi.meldingsutveksling.dph.client.internal.DphClientErrorHandlerImpl;
+import no.difi.meldingsutveksling.dph.client.internal.DphClientImpl;
 import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -50,6 +53,18 @@ public class DphClientConfig {
     }
 
     @Bean
+    public DphDocumentConverter dphDocumentConverter() {
+        return new DphDocumentConverter();
+    }
+
+    @Bean
+    public DphClientService dphClientService(DphClient dphClient,
+                                             DphParcelService parcelService,
+                                             DphDocumentConverter dphDocumentConverter) {
+        return new DphClientService(dphClient, parcelService, dphDocumentConverter);
+    }
+
+    @Bean
     public DphClient dphClient(DphParcelService dphParcelService,
                                CreateMaskinportenToken createMaskinportenToken) {
         return new DphClientImpl(
@@ -67,7 +82,7 @@ public class DphClientConfig {
                         connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
                     })))
                 .build(),
-            new CreateMultipart(), dphParcelService, new DphDocumentConverter(), new DphClientErrorHandlerImpl(), createMaskinportenToken);
+            new CreateMultipart(), dphParcelService, new DphClientErrorHandlerImpl(), createMaskinportenToken);
     }
 
     private static ExchangeFilterFunction logRequest() {

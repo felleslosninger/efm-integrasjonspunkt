@@ -1,5 +1,6 @@
-package no.difi.meldingsutveksling.dph.client;
+package no.difi.meldingsutveksling.dph.client.internal;
 
+import no.difi.meldingsutveksling.dph.client.DphException;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 

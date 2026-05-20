@@ -1,22 +1,11 @@
-package no.difi.meldingsutveksling.dph.client;
+package no.difi.meldingsutveksling.dph.client.internal;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
-import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
-import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
-import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
-import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
-import no.difi.meldingsutveksling.dph.client.internal.CreateMaskinportenToken;
-import no.difi.meldingsutveksling.dph.client.internal.CreateMultipart;
-import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
-import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
-import no.difi.meldingsutveksling.nhn.adapter.model.IncomingApplicationReceipt;
-import no.difi.meldingsutveksling.nhn.adapter.model.IncomingBusinessDocument;
+import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
-import no.difi.meldingsutveksling.nhn.adapter.model.OutgoingApplicationReceipt;
-import no.difi.meldingsutveksling.nhn.adapter.model.OutgoingBusinessDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.move.common.dokumentpakking.PartUtils;
 import org.jspecify.annotations.NonNull;
@@ -41,7 +30,6 @@ public class DphClientImpl implements DphClient {
     private final WebClient webClient;
     private final CreateMultipart createMultipart;
     private final DphParcelService parcelService;
-    private final DphDocumentConverter dphDocumentConverter;
     private final DphClientErrorHandler errorHandler;
     private final CreateMaskinportenToken createMaskinportenToken;
 
@@ -59,17 +47,13 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public UUID sendBusinessDocument(Iso6523 onBehalfOf, SendBusinessDocumentInput input) {
-        String foretningsmelding = parcelService.signAndEncrypt(KxJson.encode(
-            dphDocumentConverter.toExternal(input), OutgoingBusinessDocument.Companion.serializer()
-        ));
-
+    public UUID sendBusinessDocument(Iso6523 onBehalfOf, WrappedPackage wrappedPackage) {
         return webClient.post()
             .uri("/messages/out")
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .accept(MediaType.TEXT_PLAIN)
-            .body(BodyInserters.fromMultipartData(createMultipart.createMultipart(foretningsmelding, input.getEncryptedAsic())))
+            .body(BodyInserters.fromMultipartData(createMultipart.createMultipart(wrappedPackage)))
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
@@ -78,17 +62,13 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public UUID sendApplicationReceipt(Iso6523 onBehalfOf, SendApplicationReceiptInput input) {
-        String foretningsmelding = parcelService.signAndEncrypt(KxJson.encode(
-            dphDocumentConverter.toExternal(input),
-            OutgoingApplicationReceipt.Companion.serializer()));
-
+    public UUID sendApplicationReceipt(Iso6523 onBehalfOf, WrappedPackage wrappedPackage) {
         return webClient.post()
             .uri("/messages/out/receipt")
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
             .contentType(APPLICATION_JOSE)
             .accept(MediaType.TEXT_PLAIN)
-            .bodyValue(foretningsmelding)
+            .bodyValue(wrappedPackage.forretningsmelding())
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
@@ -113,7 +93,7 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public ApplicationReceiptResponse receiveApplicationReceipt(Iso6523 onBehalfOf, String id) {
+    public WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String id) {
         MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.get()
             .uri("/messages/in/{id}/receipt", id)
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
@@ -124,22 +104,13 @@ public class DphClientImpl implements DphClient {
             })
             .block()).orElseThrow(() -> new IllegalStateException("Could not receive application receipt for id " + id));
 
-        IncomingApplicationReceipt businessDocument = getIncomingApplicationReceipt(getPart(parts, MultipartNames.FORRETNINGSMELDING));
-        return new ApplicationReceiptResponse()
-            .setMessageId(businessDocument.getId())
-            .setRawReceipt(businessDocument.getRawReceipt())
-            .setPayload(dphDocumentConverter.toInternal(businessDocument.getPayload()))
-            .setEncryptedAsic(parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE)));
-    }
-
-    private IncomingApplicationReceipt getIncomingApplicationReceipt(Part part) {
-        String jweToken = PartUtils.toString(part);
-        String json = parcelService.decryptAndVerify(jweToken);
-        return KxJson.decode(json, IncomingApplicationReceipt.Companion.serializer());
+        return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
+            parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
+        );
     }
 
     @Override
-    public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
+    public WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
         MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.get()
             .uri("/messages/in/{id}", id)
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
@@ -150,22 +121,9 @@ public class DphClientImpl implements DphClient {
             })
             .block()).orElseThrow(() -> new DphException("Could not receive business document for id " + id));
 
-        IncomingBusinessDocument businessDocument = getIncomingBusinessDocument(getPart(parts, MultipartNames.FORRETNINGSMELDING));
-
-        return new BusinessDocumentResponse()
-            .setMessageId(businessDocument.getId())
-            .setSenderHerId(businessDocument.getSenderHerId())
-            .setReceiverHerId(businessDocument.getReceiverHerId())
-            .setConversationId(businessDocument.getConversationId())
-            .setParentId(businessDocument.getParentId())
-            .setPayload(dphDocumentConverter.toInternal(businessDocument.getPayload()))
-            .setEncryptedAsic(parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE)));
-    }
-
-    private IncomingBusinessDocument getIncomingBusinessDocument(Part part) {
-        String jweToken = PartUtils.toString(part);
-        String json = parcelService.decryptAndVerify(jweToken);
-        return KxJson.decode(json, IncomingBusinessDocument.Companion.serializer());
+        return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
+            parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
+        );
     }
 
     @Override
