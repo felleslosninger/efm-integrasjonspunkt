@@ -7,7 +7,8 @@ import java.time.OffsetDateTime;
 @Data
 public class MessageStatus {
 
-    // response from DPI API /messages/out/{id}/statuses
+    // this class only parses a subset of the full DPI API /messages/out/{id}/statuses response
+    // the full response also contain a description / beskrivelse as stings like this :
     //
     //     String status,
     //     String beskrivelse,
