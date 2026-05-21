@@ -36,8 +36,9 @@ public class MessageStatusMapper {
         return messageStatusFactory.getMessageStatus(ReceiptStatus.ANNET, "Ukjent kvittering");
     }
 
-    // status changes from corner 3 can be based on status or receipt, not all have a timestamp
-    // if we have a timestamp from c3 we use it, if not we use the current time locally (we are c2)
+    // status changes from corner 3 can be based on status or receipt, not all have a timestamps
+    // (simple status updates don't have timestamps, but receipt messages from corner 3 and corner 4 do)
+    // when we have a timestamp we use it, if not we use the current time locally (we are corner 2)
     public MessageStatus getMessageStatus(no.difi.meldingsutveksling.dpi.client.domain.MessageStatus in) {
         log.debug("Received MessageStatus from corner 2 : {}", in);
         switch (in.getStatus()) {
