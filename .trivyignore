@@ -12,3 +12,10 @@ CVE-2026-41044 # org.apache.activemq/activemq-broker
 CVE-2026-39304 # Apache ActiveMQ Client: Apache ActiveMQ Broker: Apache
 CVE-2026-5598 # bouncycastle: BC-JAVA: private key leakage via non-constant
 CVE-2026-42198 # jdbc.postgresql.org: pgjdbc: Client-side Denial of Service
+
+CVE-2026-41293 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-43512 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-43515 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-41284 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-42498 # org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-43513 # org.apache.tomcat.embed:tomcat-embed-core

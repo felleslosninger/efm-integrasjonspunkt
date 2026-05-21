@@ -39,7 +39,7 @@ sequenceDiagram
     
     K->>IP: Send melding
     IP->>M: Hent access token for client
-    note over M : scopes : [move:dpv]
+    note over M : scopes : [eformidling:dpv]
     note over M : Vi støtter client autentisering med cert eller jwk
     IP-->>AT: Gjør token exchange hos Altinn (anbefalt, strengt tatt ikke påkrevet)
     note over AT : Altinn token har lang levetid på (30 min)
