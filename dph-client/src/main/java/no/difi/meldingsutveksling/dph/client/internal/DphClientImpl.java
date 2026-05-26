@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.move.common.dokumentpakking.PartUtils;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -43,6 +44,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
             .map(json -> KxJson.decode(json, ListSerializer(MessageStatus.Companion.serializer())))
+            .retry(3)
             .block();
     }
 
@@ -89,6 +91,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
             .map(json -> KxJson.decode(json, ListSerializer(IncomingMessage.Companion.serializer())))
+            .retry(3)
             .block();
     }
 
@@ -102,7 +105,8 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
             })
-            .block()).orElseThrow(() -> new IllegalStateException("Could not receive application receipt for id " + id));
+            .retry(3)
+            .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
             parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
@@ -119,7 +123,8 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
             })
-            .block()).orElseThrow(() -> new DphException("Could not receive business document for id " + id));
+            .retry(3)
+            .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
             parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
@@ -137,6 +142,7 @@ public class DphClientImpl implements DphClient {
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .toBodilessEntity()
+            .retry(3)
             .block();
     }
 
@@ -147,6 +153,6 @@ public class DphClientImpl implements DphClient {
 
     private static @NonNull Part getPart(MultiValueMap<String, Part> parts, String key) {
         return Optional.ofNullable(parts.getFirst(key))
-            .orElseThrow(() -> new DphException("%s part not found in response".formatted(key)));
+            .orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
     }
 }

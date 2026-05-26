@@ -12,7 +12,6 @@ import no.difi.meldingsutveksling.api.StatusStrategy;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.mail.IpMailSender;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
@@ -264,18 +263,5 @@ public class DefaultConversationService implements ConversationService {
     public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection
         direction) {
         return repo.findByConversationIdAndDirection(conversationId, direction);
-    }
-
-    @Override
-    public Optional<String> getExternalSystemReference(String messageId) {
-        Conversation conversation = findConversation(messageId)
-            .orElseThrow(() -> new ConversationNotFoundException(messageId));
-
-        return Optional.ofNullable(conversation.getExternalSystemReference());
-    }
-
-    @Override
-    public Optional<Conversation> findConversationByExternalSystemReference(String externalSystemReference) {
-        return repo.findByExternalSystemReference(externalSystemReference);
     }
 }

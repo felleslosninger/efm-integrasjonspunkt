@@ -14,9 +14,10 @@ import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.DphService;
 import no.difi.meldingsutveksling.dph.client.DphClientService;
+import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
-import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
@@ -41,6 +42,7 @@ public class DefaultDphPolling implements DphPolling {
     private final NextMoveQueue nextMoveQueue;
     private final DphClientService dphClientService;
     private final ConversationService conversationService;
+    private final NextMoveMessageService nextMoveMessageService;
     private final IntegrasjonspunktProperties properties;
 
     @Override
@@ -57,30 +59,70 @@ public class DefaultDphPolling implements DphPolling {
 
     private void handleMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
         log.info("DPH message received: incomingMessage={}", incomingMessage);
+
+        try {
+            enqueueBusinessDoucment(onBehalfOf, incomingMessage);
+
+            conversationService.findConversation(incomingMessage.getBusinessDocumentId())
+                .ifPresent(conversation -> {
+                    conversation.setExternalSystemReference(incomingMessage.getId());
+                    conversationService.save(conversation);
+                });
+
+            if (!incomingMessage.isAppRec() && !properties.getFeature().isEnableReceipts()) {
+                log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
+
+                sendMessage(sbdFactory.createNextMoveSBD(
+                    NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
+                    NhnIdentifier.herId(incomingMessage.getSenderHerId()),
+                    incomingMessage.getBusinessDocumentId(),
+                    null,
+                    properties.getDph().getReceiptProcess(),
+                    properties.getDph().getReceiptDocumentType(),
+                    new DialogmeldingKvitteringMessage()
+                        .setRelatedToMessageId(incomingMessage.getId())
+                        .setStatus(DialogmeldingKvitteringStatus.OK)
+                ));
+            }
+
+            dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
+        } catch (DphException e) {
+            DialogmeldingKvitteringMessage message = new DialogmeldingKvitteringMessage()
+                .setRelatedToMessageId(incomingMessage.getId())
+                .setStatus(DialogmeldingKvitteringStatus.REJECTED)
+                .addMessage(new KvitteringStatusMessage()
+                    .setCode(e.getErrorCode())
+                    .setText(e.getMessage())
+                );
+
+            log.warn("Client error while attempting to fetch business document for incomingMessage = {} - Sending automatic ApplicationReceipt: {}", incomingMessage, message);
+
+            StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
+                NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
+                NhnIdentifier.herId(incomingMessage.getSenderHerId()),
+                incomingMessage.getBusinessDocumentId(),
+                null,
+                properties.getDph().getReceiptProcess(),
+                properties.getDph().getReceiptDocumentType(),
+                message
+            );
+
+            sendMessage(sbd);
+
+            dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
+        }
+    }
+
+    private void sendMessage(StandardBusinessDocument sbd) {
+        NextMoveOutMessage message = nextMoveMessageService.createMessage(sbd);
+        nextMoveMessageService.sendMessage(message);
+    }
+
+    private void enqueueBusinessDoucment(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
         if (incomingMessage.isAppRec()) {
             handleApplicationReceipt(onBehalfOf, incomingMessage);
         } else {
             handleDialogmelding(onBehalfOf, incomingMessage);
-        }
-
-        conversationService.findConversation(incomingMessage.getBusinessDocumentId())
-            .ifPresent(conversation -> {
-                conversation.setExternalSystemReference(incomingMessage.getId());
-                conversationService.save(conversation);
-            });
-
-        dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
-
-        if (!incomingMessage.isAppRec() && !properties.getFeature().isEnableReceipts()) {
-            log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
-
-            dphClientService.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
-                .setSenderHerId(incomingMessage.getReceiverHerId())
-                .setPayload(new DialogmeldingKvitteringMessage()
-                    .setRelatedToMessageId(incomingMessage.getId())
-                    .setStatus(DialogmeldingKvitteringStatus.OK)
-                )
-            );
         }
     }
 
@@ -92,20 +134,16 @@ public class DefaultDphPolling implements DphPolling {
         StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
             NhnIdentifier.herId(incomingMessage.getSenderHerId()),
             NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-            Optional.ofNullable(response.getConversationId())
-                .flatMap(conversationService::findConversationByExternalSystemReference)
-                .map(Conversation::getConversationId)
-                .orElse(response.getMessageId()),
-            response.getMessageId(),
+            response.getConversationId(),
+            incomingMessage.getBusinessDocumentId(),
             properties.getDph().getNhnProcess(),
             properties.getDph().getDialogmeldingDocumentType(),
             response.getPayload()
         );
 
         Optional.ofNullable(response.getParentId())
-            .flatMap(conversationService::findConversationByExternalSystemReference)
-            .map(Conversation::getMessageId)
-            .ifPresent(parentId -> sbd.getScopes().add(ScopeFactory.fromParentId(parentId)));
+            .map(ScopeFactory::fromParentId)
+            .ifPresent(sbd::addScope);
 
         nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
     }
@@ -114,33 +152,34 @@ public class DefaultDphPolling implements DphPolling {
         ApplicationReceiptResponse response = dphClientService.receiveApplicationReceipt(onBehalfOf, incomingMessage.getId());
         DialogmeldingKvitteringMessage message = response.getPayload();
 
-        conversationService.findConversation(message.getRelatedToMessageId()).ifPresentOrElse(conversation -> {
-            String messageId = conversation.getMessageId();
+        String relatedToMessageId = message.getRelatedToMessageId();
 
+        Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId);
+
+        conversation.ifPresent(c -> {
             switch (message.getStatus()) {
                 case DialogmeldingKvitteringStatus.OK ->
-                    conversationService.registerStatus(messageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", response.getRawReceipt());
+                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", response.getRawReceipt());
                 case DialogmeldingKvitteringStatus.REJECTED, DialogmeldingKvitteringStatus.OK_ERROR_IN_MESSAGE_PART ->
-                    conversationService.registerStatus(messageId, ReceiptStatus.FEIL, "Message has been rejected by the application", response.getRawReceipt());
+                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.FEIL, "Message has been rejected by the application", response.getRawReceipt());
             }
+        });
 
-            if (properties.getFeature().isEnableReceipts()) {
-                StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
-                    NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-                    NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-                    conversation.getConversationId(),
-                    response.getMessageId(),
-                    properties.getDph().getReceiptProcess(),
-                    properties.getDph().getReceiptDocumentType(),
-                    message
-                );
+        if (properties.getFeature().isEnableReceipts()) {
+            StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
+                NhnIdentifier.herId(incomingMessage.getSenderHerId()),
+                NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
+                conversation.map(Conversation::getConversationId).orElseGet(incomingMessage::getBusinessDocumentId),
+                incomingMessage.getBusinessDocumentId(),
+                properties.getDph().getReceiptProcess(),
+                properties.getDph().getReceiptDocumentType(),
+                message
+            );
 
-                message.setRelatedToMessageId(conversation.getMessageId());
-                nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
-            } else {
-                log.info("Skipping ApplicationReceipt since difi.move.feature.enable-receipts=false");
-            }
-        }, () -> log.warn("Conversation not found for relatedToMessageId = {}", message.getRelatedToMessageId()));
+            nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+        } else {
+            log.info("Skipping ApplicationReceipt since difi.move.feature.enable-receipts=false");
+        }
     }
 }
 

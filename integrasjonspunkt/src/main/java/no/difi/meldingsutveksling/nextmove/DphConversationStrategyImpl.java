@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
-import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
@@ -21,7 +20,6 @@ import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.core.io.Resource;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
@@ -70,10 +68,8 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
                 SendBusinessDocumentInput input = new SendBusinessDocumentInput()
                     .setSenderHerId(sender.getHerId())
                     .setReceiverHerId(infoRecordReceiver.getHerId())
-                    .setConversationId(conversationService.getExternalSystemReference(message.getConversationId()).orElse(null))
-                    .setParentId(Optional.ofNullable(message.getSbd().getParentId())
-                        .flatMap(conversationService::getExternalSystemReference)
-                        .orElse(null))
+                    .setConversationId(message.getConversationId())
+                    .setParentId(message.getSbd().getParentId())
                     .setMessageId(message.getMessageId())
                     .setPayload(dialogmelding)
                     .setEncryptedAsic(encryptedAsic);
@@ -83,28 +79,25 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
 
                 log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
 
-                conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
-                    c.setExternalSystemReference(nhnMessageId.toString());
-                    conversationService.save(c);
-                });
+                storeExternalSystemReference(message, nhnMessageId);
             }
             case DialogmeldingKvitteringMessage kvittering -> {
-                kvittering.setRelatedToMessageId(conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId())
-                    .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(kvittering.getRelatedToMessageId()))
-                );
-
                 UUID nhnMessageId = dphClientService.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
                     .setSenderHerId(sender.getHerId())
                     .setPayload(kvittering)
                 );
 
-                conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
-                    c.setExternalSystemReference(nhnMessageId.toString());
-                    conversationService.save(c);
-                });
+                storeExternalSystemReference(message, nhnMessageId);
             }
             default ->
                 throw new IllegalArgumentException("Unknown message type: " + businessMessage.getClass().getName());
         }
+    }
+
+    private void storeExternalSystemReference(NextMoveOutMessage message, UUID nhnMessageId) {
+        conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
+            c.setExternalSystemReference(nhnMessageId.toString());
+            conversationService.save(c);
+        });
     }
 }

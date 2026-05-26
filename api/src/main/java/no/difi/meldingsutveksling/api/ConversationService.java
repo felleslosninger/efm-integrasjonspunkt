@@ -31,8 +31,4 @@ public interface ConversationService {
     Optional<Conversation> findConversation(String messageId);
 
     Optional<Conversation> findConversation(String conversationId, ConversationDirection direction);
-
-    Optional<String> getExternalSystemReference(String messageId);
-
-    Optional<Conversation> findConversationByExternalSystemReference(String externalSystemReference);
 }

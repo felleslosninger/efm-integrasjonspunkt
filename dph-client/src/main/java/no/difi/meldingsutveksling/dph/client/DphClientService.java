@@ -6,10 +6,10 @@ import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
-import no.difi.meldingsutveksling.dph.client.internal.WrappedPackage;
 import no.difi.meldingsutveksling.dph.client.internal.DphClient;
 import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
+import no.difi.meldingsutveksling.dph.client.internal.WrappedPackage;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingApplicationReceipt;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingBusinessDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
@@ -66,6 +66,7 @@ public class DphClientService {
 
     public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
         WrappedPackage wrappedPackage = dphClient.receiveBusinessDocument(onBehalfOf, id);
+
         String json = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
         IncomingBusinessDocument businessDocument = KxJson.decode(json, IncomingBusinessDocument.Companion.serializer());
 

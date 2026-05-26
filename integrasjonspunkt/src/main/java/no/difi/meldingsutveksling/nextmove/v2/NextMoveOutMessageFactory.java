@@ -17,7 +17,7 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
@@ -147,12 +147,12 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDphDefaults(StandardBusinessDocument sbd) {
-        Optional.ofNullable(sbd.getConversationId()).ifPresent(p -> conversationService.getExternalSystemReference(p)
-            .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(p))
-        );
-        Optional.ofNullable(sbd.getParentId()).ifPresent(p -> conversationService.getExternalSystemReference(p)
-            .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(p))
-        );
+        Optional.ofNullable(sbd.getConversationId())
+            .map(conversationService::findConversation)
+            .orElseThrow(() -> new ConversationNotFoundException(sbd.getConversationId()));
+        Optional.ofNullable(sbd.getParentId())
+            .map(conversationService::findConversation)
+            .orElseThrow(() -> new ConversationNotFoundException(sbd.getParentId()));
         // For DPH - The ConversationId should be equal to the first message in a conversation.
         sbd.getScope(ScopeType.CONVERSATION_ID)
             .filter(p -> p.getInstanceIdentifier() == null)

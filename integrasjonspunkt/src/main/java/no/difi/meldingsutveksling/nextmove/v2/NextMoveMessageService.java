@@ -37,8 +37,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -169,7 +171,13 @@ public class NextMoveMessageService {
     }
 
     public List<Document> getDocuments(NextMoveMessage msg) {
-        return msg.getFiles().stream()
+        Set<BusinessMessageFile> files = msg.getFiles();
+
+        if(files == null) {
+            return Collections.emptyList();
+        }
+
+        return files.stream()
             .sorted((a, b) -> {
                 if (Boolean.TRUE.equals(a.getPrimaryDocument())) return -1;
                 if (Boolean.TRUE.equals(b.getPrimaryDocument())) return 1;

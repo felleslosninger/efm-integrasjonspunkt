@@ -18,12 +18,13 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationMissingExternalSystemReferenceException;
+import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ForsendelseTypeNotFoundException;
 import no.difi.meldingsutveksling.exceptions.InvalidCertificateException;
 import no.difi.meldingsutveksling.exceptions.InvalidContentTypeException;
+import no.difi.meldingsutveksling.exceptions.InvalidDocumentException;
 import no.difi.meldingsutveksling.exceptions.MessageAlreadyExistsException;
 import no.difi.meldingsutveksling.exceptions.MessageChannelInvalidException;
 import no.difi.meldingsutveksling.exceptions.MessageTypeDoesNotFitDocumentTypeException;
@@ -56,6 +57,7 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.nhn.adapter.model.AttachmentNames;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.ApplicationReceiptDeserializer;
+import no.difi.meldingsutveksling.nhn.adapter.model.serialization.ApplicationReceiptException;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.DialogmeldingDeserializer;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
@@ -176,9 +178,8 @@ public class NextMoveValidator {
             }
 
             sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
-                .ifPresent(kvittering -> conversationService.getExternalSystemReference(kvittering.getRelatedToMessageId())
-                    .orElseThrow(() -> new ConversationMissingExternalSystemReferenceException(kvittering.getRelatedToMessageId()))
-                );
+                .ifPresent(kvittering -> conversationService.findConversation(kvittering.getRelatedToMessageId())
+                    .orElseThrow(() -> new ConversationNotFoundException(kvittering.getRelatedToMessageId())));
         }
     }
 
@@ -374,12 +375,16 @@ public class NextMoveValidator {
                 throw new InvalidContentTypeException("Invalid content type: " + file.getContentType());
             }
 
-            if (AttachmentNames.DIALOGMELDING.equals(file.getOriginalFilename())) {
-                String xml = ResourceUtils.toString(file.getResource(), StandardCharsets.UTF_8);
-                DialogmeldingDeserializer.deserializeDialogmelding(xml);
-            } else if (AttachmentNames.KVITTERING.equals(file.getOriginalFilename())) {
-                String xml = ResourceUtils.toString(file.getResource(), StandardCharsets.UTF_8);
-                ApplicationReceiptDeserializer.deserializeAppRec(xml);
+            try {
+                if (AttachmentNames.DIALOGMELDING.equals(file.getOriginalFilename())) {
+                    String xml = ResourceUtils.toString(file.getResource(), StandardCharsets.UTF_8);
+                    DialogmeldingDeserializer.deserializeDialogmelding(xml);
+                } else if (AttachmentNames.KVITTERING.equals(file.getOriginalFilename())) {
+                    String xml = ResourceUtils.toString(file.getResource(), StandardCharsets.UTF_8);
+                    ApplicationReceiptDeserializer.deserializeAppRec(xml);
+                }
+            } catch (ApplicationReceiptException ex) {
+                throw new InvalidDocumentException(ex.getMessage());
             }
         }
     }

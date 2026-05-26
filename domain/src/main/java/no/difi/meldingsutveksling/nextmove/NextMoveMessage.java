@@ -27,6 +27,7 @@ import org.hibernate.annotations.DiscriminatorOptions;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -49,6 +50,7 @@ public abstract class NextMoveMessage extends AbstractEntity<Long> implements Me
         this.senderIdentifier = senderIdentifier;
         this.serviceIdentifier = serviceIdentifier;
         this.sbd = sbd;
+        this.files = new LinkedHashSet<>();
     }
 
     @Column(length = 36)

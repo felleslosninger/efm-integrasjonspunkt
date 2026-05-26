@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dph.client.internal;
 import lombok.RequiredArgsConstructor;
 import no.difi.asic.SignatureMethod;
 import no.difi.meldingsutveksling.dph.client.DigdirBusinessCertificateSupplier;
+import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.CmsAlgorithm;
 import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
@@ -12,6 +13,8 @@ import no.difi.move.common.dokumentpakking.domain.AsicEAttachable;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.io.ResourceUtils;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.multipart.Part;
 
@@ -35,11 +38,19 @@ public class DphParcelService {
     }
 
     public String verify(String signed) {
-        return JavaWebToken.verify(signed, digdirBusinessCertificateSupplier.get());
+        try {
+            return JavaWebToken.verify(signed, digdirBusinessCertificateSupplier.get());
+        } catch (Exception e) {
+            throw new DphException(FeilmeldingForApplikasjonskvittering.SIGNATURFEIL);
+        }
     }
 
     public String decrypt(String jweToken) {
-        return JavaWebEncryption.decrypt(jweToken, keystoreHelper.loadPrivateKey());
+        try {
+            return JavaWebEncryption.decrypt(jweToken, keystoreHelper.loadPrivateKey());
+        } catch (Exception e) {
+            throw new DphException(FeilmeldingForApplikasjonskvittering.UGYLIG_SERTIFIKAT);
+        }
     }
 
     public InMemoryWithTempFileFallbackResource createAndEncryptAsic(Stream<? extends AsicEAttachable> attachments) {
@@ -51,6 +62,7 @@ public class DphParcelService {
                 .signatureMethod(SignatureMethod.CAdES)
                 .signatureHelper(keystoreHelper.getSignatureHelper())
                 .keyEncryptionScheme(CmsAlgorithm.RSAES_OAEP)
+                .cmsEncryptionAlgorithm(CMSAlgorithm.AES256_GCM)
                 .build(),
             resource
         );
