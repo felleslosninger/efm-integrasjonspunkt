@@ -17,6 +17,8 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
+import reactor.util.retry.RetrySpec;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,12 @@ public class DphClientImpl implements DphClient {
     private final DphParcelService parcelService;
     private final DphClientErrorHandler errorHandler;
     private final CreateMaskinportenToken createMaskinportenToken;
+    private final RetrySpec retrySpec = Retry.max(3).filter(e -> {
+        if (e instanceof DphException de) {
+            return de.getStatusCode() != null && de.getStatusCode() >= 500;
+        }
+        return false;
+    });
 
     @Override
     public List<MessageStatus> getStatus(Iso6523 onBehalfOf, String messageId) {
@@ -44,7 +52,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
             .map(json -> KxJson.decode(json, ListSerializer(MessageStatus.Companion.serializer())))
-            .retry(3)
+            .retryWhen(retrySpec)
             .block();
     }
 
@@ -91,7 +99,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
             .map(json -> KxJson.decode(json, ListSerializer(IncomingMessage.Companion.serializer())))
-            .retry(3)
+            .retryWhen(retrySpec)
             .block();
     }
 
@@ -105,7 +113,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
             })
-            .retry(3)
+            .retryWhen(retrySpec)
             .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
@@ -123,7 +131,7 @@ public class DphClientImpl implements DphClient {
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
             })
-            .retry(3)
+            .retryWhen(retrySpec)
             .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
@@ -142,7 +150,7 @@ public class DphClientImpl implements DphClient {
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .toBodilessEntity()
-            .retry(3)
+            .retryWhen(retrySpec)
             .block();
     }
 

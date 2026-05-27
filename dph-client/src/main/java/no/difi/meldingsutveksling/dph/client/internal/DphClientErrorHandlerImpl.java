@@ -14,8 +14,8 @@ public class DphClientErrorHandlerImpl implements DphClientErrorHandler {
                 ApiError apiError = ex.getResponseBodyAs(ApiError.class);
 
                 DphException exception = (apiError != null)
-                    ? new DphException(apiError.getErrorCode(), apiError.getMessage())
-                    : new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
+                    ? new DphException(apiError.getErrorCode(), apiError.getMessage(), response.statusCode().value())
+                    : new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi(), ex.getMessage(), response.statusCode().value());
 
                 return Mono.error(exception);
             });
