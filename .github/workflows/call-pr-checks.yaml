@@ -25,7 +25,7 @@ jobs:
       pull-request-allowed-prefixes: "MOVE-,Bump,PF-"
       enable-auto-merge-dependabot: false
       auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
-      enable-trivy-image-scan: true
+      enable-image-build: true
       module-name: integrasjonspunkt
       maven-lifecycle: 'verify'
     secrets: inherit
