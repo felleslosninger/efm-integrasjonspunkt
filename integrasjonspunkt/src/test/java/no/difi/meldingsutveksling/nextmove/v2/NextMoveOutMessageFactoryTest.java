@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -34,11 +33,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class NextMoveOutMessageFactoryTest {
 
-    @MockitoBean private Clock clock;
-    @MockitoBean private UUIDGenerator uuidGenerator;
-    @MockitoBean private ConversationService conversationService;
-    @MockitoBean private ServiceRecordProvider serviceRecordProvider;
-    @MockitoBean private IntegrasjonspunktProperties props;
+    @MockitoBean
+    private Clock clock;
+    @MockitoBean
+    private UUIDGenerator uuidGenerator;
+    @MockitoBean
+    private ServiceRecordProvider serviceRecordProvider;
+    @MockitoBean
+    private IntegrasjonspunktProperties props;
 
     private NextMoveOutMessageFactory factory;
 
@@ -46,7 +48,7 @@ class NextMoveOutMessageFactoryTest {
 
     @BeforeEach
     public void setup() {
-        factory = new NextMoveOutMessageFactory(clock, uuidGenerator, conversationService, serviceRecordProvider, props);
+        factory = new NextMoveOutMessageFactory(clock, uuidGenerator, serviceRecordProvider, props);
         srPostAddress = Mockito.mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.PostAddress.class);
         when(srPostAddress.getName()).thenReturn("Foo");
         when(srPostAddress.getPostalCode()).thenReturn("0468");

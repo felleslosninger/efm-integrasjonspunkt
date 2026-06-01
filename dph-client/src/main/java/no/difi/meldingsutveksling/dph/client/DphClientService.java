@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.dph.client;
 
+import com.nimbusds.jose.JWSObject;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
@@ -10,6 +11,7 @@ import no.difi.meldingsutveksling.dph.client.internal.DphClient;
 import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.meldingsutveksling.dph.client.internal.WrappedPackage;
+import no.difi.meldingsutveksling.nhn.adapter.model.GetDocumentInput;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingApplicationReceipt;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingBusinessDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
@@ -53,8 +55,10 @@ public class DphClientService {
     }
 
     public ApplicationReceiptResponse receiveApplicationReceipt(Iso6523 onBehalfOf, String id) {
-        WrappedPackage wrappedPackage = dphClient.receiveApplicationReceipt(onBehalfOf, id);
-        String json = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
+        String jweToken = parcelService.signAndEncrypt(KxJson.encode(new GetDocumentInput(id), GetDocumentInput.Companion.serializer()));
+        WrappedPackage wrappedPackage = dphClient.receiveApplicationReceipt(onBehalfOf, jweToken);
+        JWSObject jws = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
+        String json = jws.getPayload().toString();
         IncomingApplicationReceipt businessDocument = KxJson.decode(json, IncomingApplicationReceipt.Companion.serializer());
 
         return new ApplicationReceiptResponse()
@@ -65,9 +69,10 @@ public class DphClientService {
     }
 
     public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
-        WrappedPackage wrappedPackage = dphClient.receiveBusinessDocument(onBehalfOf, id);
-
-        String json = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
+        String jweToken = parcelService.signAndEncrypt(KxJson.encode(new GetDocumentInput(id), GetDocumentInput.Companion.serializer()));
+        WrappedPackage wrappedPackage = dphClient.receiveBusinessDocument(onBehalfOf, jweToken);
+        JWSObject jws = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
+        String json = jws.getPayload().toString();
         IncomingBusinessDocument businessDocument = KxJson.decode(json, IncomingBusinessDocument.Companion.serializer());
 
         return new BusinessDocumentResponse()

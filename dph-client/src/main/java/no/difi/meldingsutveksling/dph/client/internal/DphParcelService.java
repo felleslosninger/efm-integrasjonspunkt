@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.dph.client.internal;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSObject;
 import lombok.RequiredArgsConstructor;
 import no.difi.asic.SignatureMethod;
 import no.difi.meldingsutveksling.dph.client.DigdirBusinessCertificateSupplier;
@@ -7,8 +9,9 @@ import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.CmsAlgorithm;
 import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
-import no.difi.move.common.dokumentpakking.JavaWebEncryption;
-import no.difi.move.common.dokumentpakking.JavaWebToken;
+import no.difi.move.common.dokumentpakking.CreateSignedJWT;
+import no.difi.move.common.dokumentpakking.JsonWebEncryption;
+import no.difi.move.common.dokumentpakking.VerifyJWT;
 import no.difi.move.common.dokumentpakking.domain.AsicEAttachable;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
@@ -23,23 +26,29 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class DphParcelService {
 
+    private final VerifyJWT verifyJWT;
     private final KeystoreHelper keystoreHelper;
     private final CreateCMSEncryptedAsice createCmsEncryptedAsice;
     private final DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier;
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
 
     public String signAndEncrypt(String payload) {
-        String signed = JavaWebToken.sign(payload, keystoreHelper.loadPrivateKey());
-        return JavaWebEncryption.encrypt(signed, digdirBusinessCertificateSupplier.get());
+        String signed = CreateSignedJWT.createSignedJWT(CreateSignedJWT.Input.builder()
+            .payload(payload)
+            .privateKey(keystoreHelper.loadPrivateKey())
+            .algorithm(JWSAlgorithm.PS256)
+            .certificate(keystoreHelper.getX509Certificate())
+            .build());
+        return JsonWebEncryption.encrypt(signed, digdirBusinessCertificateSupplier.get());
     }
 
-    public String decryptAndVerify(String jweToken) {
+    public JWSObject decryptAndVerify(String jweToken) {
         return verify(decrypt(jweToken));
     }
 
-    public String verify(String signed) {
+    public JWSObject verify(String signed) {
         try {
-            return JavaWebToken.verify(signed, digdirBusinessCertificateSupplier.get());
+            return verifyJWT.verify(signed);
         } catch (Exception e) {
             throw new DphException(FeilmeldingForApplikasjonskvittering.SIGNATURFEIL);
         }
@@ -47,7 +56,7 @@ public class DphParcelService {
 
     public String decrypt(String jweToken) {
         try {
-            return JavaWebEncryption.decrypt(jweToken, keystoreHelper.loadPrivateKey());
+            return JsonWebEncryption.decrypt(jweToken, keystoreHelper.loadPrivateKey());
         } catch (Exception e) {
             throw new DphException(FeilmeldingForApplikasjonskvittering.UGYLIG_SERTIFIKAT);
         }

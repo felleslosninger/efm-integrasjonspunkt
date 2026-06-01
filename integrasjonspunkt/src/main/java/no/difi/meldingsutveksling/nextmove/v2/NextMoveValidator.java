@@ -18,7 +18,6 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
 import no.difi.meldingsutveksling.exceptions.ForsendelseTypeNotFoundException;
@@ -45,7 +44,6 @@ import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
 import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
-import no.difi.meldingsutveksling.nextmove.DialogmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DpfSettings;
 import no.difi.meldingsutveksling.nextmove.DpiDigitalMessage;
@@ -176,10 +174,6 @@ public class NextMoveValidator {
             if (!(sbd.getReceiverIdentifier() instanceof NhnIdentifier)) {
                 throw new ReceiverException("Receiver have to be a %s for DPH messages!".formatted(NHN_ACTORID));
             }
-
-            sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
-                .ifPresent(kvittering -> conversationService.findConversation(kvittering.getRelatedToMessageId())
-                    .orElseThrow(() -> new ConversationNotFoundException(kvittering.getRelatedToMessageId())));
         }
     }
 

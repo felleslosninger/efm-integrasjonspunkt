@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
@@ -17,7 +16,6 @@ import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.ConversationNotFoundException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
@@ -50,7 +48,6 @@ public class NextMoveOutMessageFactory {
 
     private final Clock clock;
     private final UUIDGenerator uuidGenerator;
-    private final ConversationService conversationService;
     private final ServiceRecordProvider serviceRecordProvider;
     private final IntegrasjonspunktProperties properties;
 
@@ -147,12 +144,6 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDphDefaults(StandardBusinessDocument sbd) {
-        Optional.ofNullable(sbd.getConversationId())
-            .map(conversationService::findConversation)
-            .orElseThrow(() -> new ConversationNotFoundException(sbd.getConversationId()));
-        Optional.ofNullable(sbd.getParentId())
-            .map(conversationService::findConversation)
-            .orElseThrow(() -> new ConversationNotFoundException(sbd.getParentId()));
         // For DPH - The ConversationId should be equal to the first message in a conversation.
         sbd.getScope(ScopeType.CONVERSATION_ID)
             .filter(p -> p.getInstanceIdentifier() == null)

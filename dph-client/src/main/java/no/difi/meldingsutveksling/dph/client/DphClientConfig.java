@@ -4,6 +4,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.certvalidator.BusinessCertificateValidator;
+import no.difi.certvalidator.BusinessCertificateValidatorFactory;
 import no.difi.meldingsutveksling.config.DphProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.dph.client.internal.CreateMaskinportenToken;
@@ -17,11 +19,13 @@ import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
+import no.difi.move.common.dokumentpakking.VerifyJWT;
 import no.difi.move.common.dokumentpakking.config.DokumentpakkingAutoConfig;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResourceFactory;
 import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -149,10 +153,18 @@ public class DphClientConfig {
 
     @Bean
     public DphParcelService dphParcelService(
+        VerifyJWT verifyJWT,
         KeystoreHelper dphKeystoreHelper,
         CreateCMSEncryptedAsice createCmsEncryptedAsice,
         DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier,
         InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
-        return new DphParcelService(dphKeystoreHelper, createCmsEncryptedAsice, digdirBusinessCertificateSupplier, resourceFactory);
+        return new DphParcelService(verifyJWT, dphKeystoreHelper, createCmsEncryptedAsice,
+            digdirBusinessCertificateSupplier, resourceFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BusinessCertificateValidator businessCertificateValidator() throws Exception {
+        return new BusinessCertificateValidatorFactory().createValidator(properties.getCertificate().getMode());
     }
 }

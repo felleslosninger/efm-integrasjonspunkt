@@ -104,11 +104,13 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String id) {
-        MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.get()
-            .uri("/messages/in/{id}/receipt", id)
+    public WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String jweToken) {
+        MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.post()
+            .uri("/messages/in/receipt")
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
+            .contentType(APPLICATION_JOSE)
             .accept(MediaType.MULTIPART_MIXED)
+            .bodyValue(jweToken)
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
@@ -122,11 +124,13 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
-        MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.get()
-            .uri("/messages/in/{id}", id)
+    public WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String jweToken) {
+        MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.post()
+            .uri("/messages/in")
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
+            .contentType(APPLICATION_JOSE)
             .accept(MediaType.MULTIPART_MIXED)
+            .bodyValue(jweToken)
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {

@@ -17,9 +17,9 @@ public interface DphClient {
 
     List<IncomingMessage> getMessages(Iso6523 onBehalfOf, Integer receiverHerId);
 
-    WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String id);
+    WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String jweToken);
 
-    WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String id);
+    WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String jweToken);
 
     void markAsRead(Iso6523 onBehalfOf, Integer receiverHerId, String messageId);
 

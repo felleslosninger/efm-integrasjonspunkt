@@ -51,6 +51,11 @@ public class DphProperties {
     @Valid
     @NotNull
     @NestedConfigurationProperty
+    private Certificate certificate;
+
+    @Valid
+    @NotNull
+    @NestedConfigurationProperty
     private Oidc oidc;
 
     @Valid
@@ -82,5 +87,12 @@ public class DphProperties {
         private int connect;
         private int read;
         private int write;
+    }
+
+    @Data
+    public static class Certificate {
+
+        @NotNull
+        private String mode;
     }
 }

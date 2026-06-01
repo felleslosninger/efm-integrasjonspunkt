@@ -34,18 +34,15 @@ public class InternalQueue {
     private final JmsTemplate jmsTemplate;
     private final NextMoveSender nextMoveSender;
     private final ObjectMapper objectMapper;
-    private final DocumentConverter documentConverter;
     private final DeadLetterQueueHandler deadLetterQueueHandler;
 
     public InternalQueue(JmsTemplate jmsTemplate,
                          NextMoveSender nextMoveSender,
                          ObjectMapper objectMapper,
-                         DocumentConverter documentConverter,
                          DeadLetterQueueHandler deadLetterQueueHandler) {
         this.jmsTemplate = jmsTemplate;
         this.nextMoveSender = nextMoveSender;
         this.objectMapper = objectMapper;
-        this.documentConverter = documentConverter;
         this.deadLetterQueueHandler = deadLetterQueueHandler;
     }
 

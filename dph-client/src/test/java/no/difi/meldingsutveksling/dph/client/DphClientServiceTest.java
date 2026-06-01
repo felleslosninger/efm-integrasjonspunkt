@@ -1,16 +1,25 @@
 package no.difi.meldingsutveksling.dph.client;
 
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.Payload;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
-import no.difi.meldingsutveksling.dph.client.internal.*;
+import no.difi.meldingsutveksling.dph.client.internal.DphClient;
+import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
+import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
+import no.difi.meldingsutveksling.dph.client.internal.WrappedPackage;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingKvitteringMessage;
 import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
-import no.difi.meldingsutveksling.nhn.adapter.model.*;
+import no.difi.meldingsutveksling.nhn.adapter.model.IncomingApplicationReceipt;
+import no.difi.meldingsutveksling.nhn.adapter.model.IncomingBusinessDocument;
+import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
+import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.OutgoingApplicationReceipt;
+import no.difi.meldingsutveksling.nhn.adapter.model.OutgoingBusinessDocument;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,9 +34,12 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DphClientServiceTest {
@@ -117,8 +129,11 @@ class DphClientServiceTest {
     void testReceiveApplicationReceipt() {
         String id = "msg-id";
         WrappedPackage wrappedPackage = new WrappedPackage("encrypted-json");
-        given(dphClient.receiveApplicationReceipt(onBehalfOf, id)).willReturn(wrappedPackage);
-        given(parcelService.decryptAndVerify("encrypted-json")).willReturn("decrypted-json");
+        given(parcelService.signAndEncrypt(any())).willReturn("mocked-token");
+        given(dphClient.receiveApplicationReceipt(onBehalfOf, "mocked-token")).willReturn(wrappedPackage);
+        JWSObject jwsObject = mock(JWSObject.class);
+        given(jwsObject.getPayload()).willReturn(new Payload("decrypted-json"));
+        given(parcelService.decryptAndVerify("encrypted-json")).willReturn(jwsObject);
 
         IncomingApplicationReceipt incomingAppReceipt = mock(IncomingApplicationReceipt.class);
         given(incomingAppReceipt.getId()).willReturn("msg-uuid");
@@ -127,7 +142,7 @@ class DphClientServiceTest {
 
         DialogmeldingKvitteringMessage internalPayload = mock(DialogmeldingKvitteringMessage.class);
         given(dphDocumentConverter.toInternal(any(no.difi.meldingsutveksling.nhn.adapter.model.DialogmeldingKvitteringMessage.class)))
-                .willReturn(internalPayload);
+            .willReturn(internalPayload);
 
         try (MockedStatic<KxJson> kxJsonMockedStatic = mockStatic(KxJson.class)) {
             kxJsonMockedStatic.when(() -> KxJson.decode(eq("decrypted-json"), any())).thenReturn(incomingAppReceipt);
@@ -145,8 +160,11 @@ class DphClientServiceTest {
         String id = "msg-id";
         ByteArrayResource asic = new ByteArrayResource("asic".getBytes());
         WrappedPackage wrappedPackage = new WrappedPackage("encrypted-json", asic);
-        given(dphClient.receiveBusinessDocument(onBehalfOf, id)).willReturn(wrappedPackage);
-        given(parcelService.decryptAndVerify("encrypted-json")).willReturn("decrypted-json");
+        given(parcelService.signAndEncrypt(any())).willReturn("mocked-token");
+        given(dphClient.receiveBusinessDocument(onBehalfOf, "mocked-token")).willReturn(wrappedPackage);
+        JWSObject jwsObject = mock(JWSObject.class);
+        given(jwsObject.getPayload()).willReturn(new Payload("decrypted-json"));
+        given(parcelService.decryptAndVerify("encrypted-json")).willReturn(jwsObject);
 
         IncomingBusinessDocument incomingDoc = mock(IncomingBusinessDocument.class);
         given(incomingDoc.getId()).willReturn("msg-uuid");
@@ -157,7 +175,7 @@ class DphClientServiceTest {
 
         DialogmeldingMessage internalPayload = mock(DialogmeldingMessage.class);
         given(dphDocumentConverter.toInternal(any(no.difi.meldingsutveksling.nhn.adapter.model.DialogmeldingMessage.class)))
-                .willReturn(internalPayload);
+            .willReturn(internalPayload);
 
         try (MockedStatic<KxJson> kxJsonMockedStatic = mockStatic(KxJson.class)) {
             kxJsonMockedStatic.when(() -> KxJson.decode(eq("decrypted-json"), any())).thenReturn(incomingDoc);
