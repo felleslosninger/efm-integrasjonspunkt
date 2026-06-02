@@ -27,7 +27,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import jakarta.xml.bind.JAXBException;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -179,4 +184,30 @@ class SvarInnNextMoveConverterTest {
         assertDoesNotThrow(() -> target.convert(svarInnPackage, reject));
     }
 
+    @Test
+    void convert_ValidEkstraMetadata_ShouldPass() {
+        svarInnPackage.getMetadataFraAvleverendeSystem().setEkstraMetadata(List.of(
+            Map.of("key", "eiendom", "value", "some value"),
+            Map.of("key", "bygning", "value", "another value")
+        ));
+        assertDoesNotThrow(() -> target.convert(svarInnPackage, reject));
+    }
+
+    @Test
+    void convert_EkstraMetadataMissingKey_ShouldThrow() {
+        svarInnPackage.getMetadataFraAvleverendeSystem().setEkstraMetadata(List.of(
+            Map.of("key_not_called_key", "va2", "value", "some value")
+        ));
+        var ex = assertThrows(NextMoveRuntimeException.class, () -> target.convert(svarInnPackage, reject));
+        assertEquals("Unable to build XML for virksomhetsspesifikkeMetadata, cant create key from ekstraMetadata value: null", ex.getMessage());
+    }
+
+    @Test
+    void convert_EkstraMetadataInvalidXmlKey_ShouldThrow() {
+        svarInnPackage.getMetadataFraAvleverendeSystem().setEkstraMetadata(List.of(
+            Map.of("key", "@va", "value", "some value")
+        ));
+        var ex = assertThrows(NextMoveRuntimeException.class, () -> target.convert(svarInnPackage, reject));
+        assertEquals("Unable to build XML for virksomhetsspesifikkeMetadata, cant create key from ekstraMetadata value: @va", ex.getMessage());
+    }
 }

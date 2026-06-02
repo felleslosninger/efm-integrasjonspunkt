@@ -121,7 +121,7 @@
         </p>
         <p>
         Verifiser din DPO konfigurasjon ved å benytte DPO sjekklisten :
-        <a class="btn btn-outline-primary" th:href="@{/onboarding}">DPO onboarding sjekkliste</a>
+        <a class="btn btn-outline-primary" th:href="@{/onboarding}">DPO onboarding sjekkliste</a><span> </span><button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#systemuserDialog" onclick="fetchSystemUsers('DPO')">Vis dine SystemBrukere i AltInn</button>
         </p>
         <p>
             Din konfigurasjon er oppsummert i tabellen nedenfor.
@@ -254,6 +254,32 @@
 </div>
 
 
+<!-- The SystemUser Dialog -->
+<div class="modal fade" id="systemuserDialog" tabindex="-1" aria-labelledby="systemuserDialogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="systemuserDialogLabel">Aktive SystemBrukere i AltInn</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="systemuserHeading"></p>
+                <ul id="systemuserList" class="list-group"></ul>
+                <br/>
+                <p id="systemuserMessage"></p>
+                <div class="alert alert-info d-flex align-items-center mt-3 mb-0" role="alert">
+                    <span class="me-2">⚠️</span>
+                    <small>Systembrukere som fremdeles venter på godkjenning vises ikke i listen.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- The Correspondence Dialog -->
 <div class="modal fade" id="correspondenceDialog" tabindex="-1" aria-labelledby="correspondenceDialogLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -293,6 +319,35 @@
             await navigator.clipboard.writeText(textToCopy);
         } catch (err) {
             alert('Failed to copy text.');
+        }
+    }
+
+    async function fetchSystemUsers(meldingstjeneste) {
+        const heading = document.getElementById('systemuserHeading');
+        const message = document.getElementById('systemuserMessage');
+        const list = document.getElementById('systemuserList');
+        if (heading) heading.innerText = '';
+        if (message) message.innerText = 'Laster...';
+        if (list) list.innerHTML = '';
+
+        try {
+            const resp = await fetch(`/onboarding/systemusers/${encodeURIComponent(meldingstjeneste)}`);
+            const text = await resp.text();
+            if (!resp.ok) throw new Error(text || resp.statusText);
+            const data = JSON.parse(text);
+            if (heading) heading.innerHTML = 'Oversikt over alle systembrukere på system <code>' + data.systemName + '</code> for virksomhet <code>' + data.orgNumber + '</code>.';
+            if (message) message.innerText = data.message;
+            if (list) {
+                list.innerHTML = '';
+                (data.systemUsers || []).forEach(user => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.innerText = user;
+                    list.appendChild(li);
+                });
+            }
+        } catch (e) {
+            if (message) message.innerText = 'Feil ved henting av systembrukere: ' + (e && e.message ? e.message : e);
         }
     }
 

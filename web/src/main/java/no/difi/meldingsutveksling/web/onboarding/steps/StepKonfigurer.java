@@ -55,13 +55,16 @@ public class StepKonfigurer implements Step {
             Restart integrasjonspunktet når du har gjort endringene.""".formatted(getSystemName(), getSystemOrgId(), getSystemUserName());
 
         return new StepInfo(
-                getName(),
-                "Konfigurer Integrasjonspunktet",
-                "Sørg for at konfigurasjon av Integrasjonspunktet inneholder systemnavn og systembrukerene du har opprettet.",
-                dialogText,
-                "Lukk",
-                isRequired(),
-                isCompleted()
+            getName(),
+            "Konfigurer Integrasjonspunktet",
+            "Sørg for at konfigurasjon av Integrasjonspunktet inneholder systemnavn og systembrukerene du har opprettet.",
+            dialogText,
+            "Lukk",
+            isRequired(),
+            isCompleted(),
+            false,
+            true,
+            false
         );
 
     }

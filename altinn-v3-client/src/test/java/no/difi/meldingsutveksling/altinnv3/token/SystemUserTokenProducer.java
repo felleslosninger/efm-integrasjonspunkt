@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -39,7 +38,7 @@ public class SystemUserTokenProducer implements TokenProducer {
         RSAKey rsaJWK = RSAKey.parse(new String(this.getClass().getResourceAsStream("/311780735-sterk-ulydig-hund-da.jwk").readAllBytes()));
 
         JWSSigner signer = new RSASSASigner(rsaJWK);
-        signer.supportedJWSAlgorithms().forEach(System.out::println);
+        // signer.supportedJWSAlgorithms().forEach(System.out::println);
 
         Map<String, Object> systemuserOrg = new HashMap<>();
         systemuserOrg.put("authority", "iso6523-actorid-upis");
@@ -74,13 +73,9 @@ public class SystemUserTokenProducer implements TokenProducer {
         // sign it with our private key rsa signer
         signedJWT.sign(signer);
 
-        // just decode and debug print the info
         String serializedJwt = signedJWT.serialize();
-        String[] chunks = serializedJwt.split("\\.");
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        String payload = new String(decoder.decode(chunks[1]));
-        System.out.println("Payload: " + payload);
-        System.out.println("SerializedJWT: " + serializedJwt);
+
+        // decodeAndDebugPrintTheJWT(serializedJwt);
 
         // https://docs.digdir.no/docs/Maskinporten/maskinporten_guide_apikonsument#registrere-klient-som-bruker-egen-nøkkel
         RestClient restClient = RestClient.create("https://test.maskinporten.no/token");
@@ -104,6 +99,14 @@ public class SystemUserTokenProducer implements TokenProducer {
         var token = objectMapper.readValue(jsonTokenResponse, Token.class);
 
         return token.access_token;
+    }
+
+    private static void decodeAndDebugPrintTheJWT(String serializedJwt) {
+        String[] chunks = serializedJwt.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String payload = new String(decoder.decode(chunks[1]));
+        System.out.println("Payload: " + payload);
+        System.out.println("SerializedJWT: " + serializedJwt);
     }
 
 }

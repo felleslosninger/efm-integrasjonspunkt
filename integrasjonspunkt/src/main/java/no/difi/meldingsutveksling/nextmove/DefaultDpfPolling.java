@@ -24,8 +24,13 @@ public class DefaultDpfPolling implements DpfPolling {
     @Override
     @Timed
     public void poll() {
-        svarInnService.getForsendelser().forEach(svarInnNextMoveForwarder);
+        svarInnService.getForsendelser().forEach(
+            forsendelse -> {
+                try {
+                    svarInnNextMoveForwarder.accept(forsendelse);
+                } catch (Exception e) {
+                    log.error("Failed to process forsendelse with id={}", forsendelse.getId(), e);
+                }
+            });
     }
-
 }
-

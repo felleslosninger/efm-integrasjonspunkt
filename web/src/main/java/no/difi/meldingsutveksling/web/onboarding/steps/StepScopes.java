@@ -74,7 +74,10 @@ public class StepScopes implements Step {
                 "Alt i orden, din maskinporten-klienten har alle nødvendige scopes",
                 "Lukk",
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                false,
+                true,
+                false
             );
         }
 
@@ -106,7 +109,10 @@ public class StepScopes implements Step {
                 dialogText,
                 "Lukk",
                 isRequired(),
-                isCompleted()
+                isCompleted(),
+                false,
+                true,
+                false
         );
 
     }
