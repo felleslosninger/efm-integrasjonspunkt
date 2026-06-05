@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,11 +16,12 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @XmlRootElement(name = "dialogmelding_kvittering", namespace = "urn:no:difi:meldingsutveksling:2.0")
-public class DialogmeldingKvitteringMessage extends BusinessMessageAsAttachment<DialogmeldingKvitteringMessage> {
+public class DialogmeldingKvitteringMessage implements BusinessMessage {
 
     private String relatedToMessageId;
     private DialogmeldingKvitteringStatus status;
     private Set<KvitteringStatusMessage> messages;
+    private String rawReceipt;
 
     @JsonIgnore
     public DialogmeldingKvitteringMessage addMessage(KvitteringStatusMessage message) {

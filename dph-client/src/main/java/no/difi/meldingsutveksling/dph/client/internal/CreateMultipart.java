@@ -19,8 +19,12 @@ public class CreateMultipart {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part(MultipartNames.FORRETNINGSMELDING, wrappedPackage.forretningsmelding(), APPLICATION_JOSE)
             .filename(MultipartFileNames.FORRETNINGSMELDING);
-        builder.part(MultipartNames.DOKUMENTPAKKE, wrappedPackage.encryptedAsic(), APPLICATION_ASICE)
-            .filename(MultipartFileNames.DOKUMENTPAKKE);
+
+        if (wrappedPackage.encryptedAsic() != null) {
+            builder.part(MultipartNames.DOKUMENTPAKKE, wrappedPackage.encryptedAsic(), APPLICATION_ASICE)
+                .filename(MultipartFileNames.DOKUMENTPAKKE);
+        }
+
         return builder.build();
     }
 }

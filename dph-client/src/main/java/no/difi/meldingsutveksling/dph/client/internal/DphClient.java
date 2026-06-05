@@ -13,11 +13,7 @@ public interface DphClient {
 
     UUID sendBusinessDocument(Iso6523 onBehalfOf, WrappedPackage wrappedPackage);
 
-    UUID sendApplicationReceipt(Iso6523 onBehalfOf, WrappedPackage wrappedPackage);
-
     List<IncomingMessage> getMessages(Iso6523 onBehalfOf, Integer receiverHerId);
-
-    WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String jweToken);
 
     WrappedPackage receiveBusinessDocument(Iso6523 onBehalfOf, String jweToken);
 

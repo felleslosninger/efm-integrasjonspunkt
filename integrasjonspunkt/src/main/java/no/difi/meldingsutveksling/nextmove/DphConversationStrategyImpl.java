@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DphConversationStrategy;
-import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.DphService;
 import no.difi.meldingsutveksling.dph.client.DphClientService;
-import no.difi.meldingsutveksling.dph.client.domain.SendApplicationReceiptInput;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -54,44 +53,27 @@ public class DphConversationStrategyImpl implements DphConversationStrategy {
         NhnIdentifier sender = message.getSender().as(NhnIdentifier.class).orElseThrow(() -> new IllegalArgumentException("Missing sender!"));
         NhnIdentifier receiver = message.getReceiver().as(NhnIdentifier.class).orElseThrow(() -> new IllegalArgumentException("Missing receiver!"));
 
-        InfoRecord infoRecordReceiver = dphService.getInfoRecord(receiver);
+        StandardBusinessDocument sbd = message.getSbd();
+
+        if (receiver.getType() == NhnIdentifier.Type.FASTLEGE_FOR) {
+            InfoRecord infoRecordReceiver = dphService.getInfoRecord(receiver);
+            sbd.setReceiverIdentifier(NhnIdentifier.herId(infoRecordReceiver.getHerId()));
+        }
 
         Iso6523 onBehalfOf = dphService.getOnBehalfOf(sender);
 
         List<Document> documents = nextMoveMessageService.getDocuments(message);
-        Resource encryptedAsic = dphParcelService.createAndEncryptAsic(documents.stream());
+        Resource encryptedAsic = documents.isEmpty() ? null : dphParcelService.createAndEncryptAsic(documents.stream());
 
-        BusinessMessage businessMessage = message.getBusinessMessage();
+        SendBusinessDocumentInput input = new SendBusinessDocumentInput()
+            .setSbd(sbd)
+            .setEncryptedAsic(encryptedAsic);
 
-        switch (businessMessage) {
-            case DialogmeldingMessage dialogmelding -> {
-                SendBusinessDocumentInput input = new SendBusinessDocumentInput()
-                    .setSenderHerId(sender.getHerId())
-                    .setReceiverHerId(infoRecordReceiver.getHerId())
-                    .setConversationId(message.getConversationId())
-                    .setParentId(message.getSbd().getParentId())
-                    .setMessageId(message.getMessageId())
-                    .setPayload(dialogmelding)
-                    .setEncryptedAsic(encryptedAsic);
-                log.debug("DPH Sending dialogmelding messageId={}, conversationId={}, input = {}", message.getMessageId(), message.getConversationId(), input);
+        log.debug("DPH Sending {} messageId={}, conversationId={}", sbd.getType(), message.getMessageId(), message.getConversationId());
+        UUID nhnMessageId = dphClientService.sendBusinessDocument(onBehalfOf, input);
+        log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
 
-                UUID nhnMessageId = dphClientService.sendBusinessDocument(onBehalfOf, input);
-
-                log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
-
-                storeExternalSystemReference(message, nhnMessageId);
-            }
-            case DialogmeldingKvitteringMessage kvittering -> {
-                UUID nhnMessageId = dphClientService.sendApplicationReceipt(onBehalfOf, new SendApplicationReceiptInput()
-                    .setSenderHerId(sender.getHerId())
-                    .setPayload(kvittering)
-                );
-
-                storeExternalSystemReference(message, nhnMessageId);
-            }
-            default ->
-                throw new IllegalArgumentException("Unknown message type: " + businessMessage.getClass().getName());
-        }
+        storeExternalSystemReference(message, nhnMessageId);
     }
 
     private void storeExternalSystemReference(NextMoveOutMessage message, UUID nhnMessageId) {

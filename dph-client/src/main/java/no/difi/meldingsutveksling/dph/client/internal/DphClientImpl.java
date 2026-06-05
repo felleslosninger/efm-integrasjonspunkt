@@ -9,7 +9,6 @@ import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.move.common.dokumentpakking.PartUtils;
 import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -72,22 +71,6 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public UUID sendApplicationReceipt(Iso6523 onBehalfOf, WrappedPackage wrappedPackage) {
-        return webClient.post()
-            .uri("/messages/out/receipt")
-            .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
-            .contentType(APPLICATION_JOSE)
-            .accept(MediaType.TEXT_PLAIN)
-            .bodyValue(wrappedPackage.forretningsmelding())
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, errorHandler)
-            .bodyToMono(String.class)
-            .map(UUID::fromString)
-            .block();
-    }
-
-
-    @Override
     public List<IncomingMessage> getMessages(Iso6523 onBehalfOf, Integer receiverHerId) {
         return webClient.get()
             .uri("/messages/in", builder -> builder
@@ -101,26 +84,6 @@ public class DphClientImpl implements DphClient {
             .map(json -> KxJson.decode(json, ListSerializer(IncomingMessage.Companion.serializer())))
             .retryWhen(retrySpec)
             .block();
-    }
-
-    @Override
-    public WrappedPackage receiveApplicationReceipt(Iso6523 onBehalfOf, String jweToken) {
-        MultiValueMap<String, Part> parts = Optional.ofNullable(webClient.post()
-            .uri("/messages/in/receipt")
-            .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
-            .contentType(APPLICATION_JOSE)
-            .accept(MediaType.MULTIPART_MIXED)
-            .bodyValue(jweToken)
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, errorHandler)
-            .bodyToMono(new ParameterizedTypeReference<MultiValueMap<String, Part>>() {
-            })
-            .retryWhen(retrySpec)
-            .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
-
-        return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
-            parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
-        );
     }
 
     @Override
@@ -138,8 +101,11 @@ public class DphClientImpl implements DphClient {
             .retryWhen(retrySpec)
             .block()).orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
-        return new WrappedPackage(PartUtils.toString(getPart(parts, MultipartNames.FORRETNINGSMELDING)),
-            parcelService.getEncryptedAsic(getPart(parts, MultipartNames.DOKUMENTPAKKE))
+        return new WrappedPackage(PartUtils.toString(Optional.ofNullable(parts.getFirst(MultipartNames.FORRETNINGSMELDING))
+            .orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL))),
+            Optional.ofNullable(parts.getFirst(MultipartNames.DOKUMENTPAKKE))
+                .map(parcelService::getEncryptedAsic)
+                .orElse(null)
         );
     }
 
@@ -161,10 +127,5 @@ public class DphClientImpl implements DphClient {
     @Override
     public String getMaskinportenToken(Iso6523 onBehalfOf) {
         return createMaskinportenToken.createMaskinportenToken(onBehalfOf);
-    }
-
-    private static @NonNull Part getPart(MultiValueMap<String, Part> parts, String key) {
-        return Optional.ofNullable(parts.getFirst(key))
-            .orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
     }
 }

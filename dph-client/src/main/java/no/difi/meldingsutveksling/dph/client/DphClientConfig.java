@@ -15,7 +15,6 @@ import no.difi.meldingsutveksling.dph.client.internal.CreateMultipart;
 import no.difi.meldingsutveksling.dph.client.internal.DphClient;
 import no.difi.meldingsutveksling.dph.client.internal.DphClientErrorHandlerImpl;
 import no.difi.meldingsutveksling.dph.client.internal.DphClientImpl;
-import no.difi.meldingsutveksling.dph.client.internal.DphDocumentConverter;
 import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
@@ -34,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -57,15 +57,8 @@ public class DphClientConfig {
     }
 
     @Bean
-    public DphDocumentConverter dphDocumentConverter() {
-        return new DphDocumentConverter();
-    }
-
-    @Bean
-    public DphClientService dphClientService(DphClient dphClient,
-                                             DphParcelService parcelService,
-                                             DphDocumentConverter dphDocumentConverter) {
-        return new DphClientService(dphClient, parcelService, dphDocumentConverter);
+    public DphClientService dphClientService(DphClient dphClient, DphParcelService parcelService) {
+        return new DphClientService(dphClient, parcelService);
     }
 
     @Bean
@@ -154,11 +147,12 @@ public class DphClientConfig {
     @Bean
     public DphParcelService dphParcelService(
         VerifyJWT verifyJWT,
+        Jackson2ObjectMapperBuilder builder,
         KeystoreHelper dphKeystoreHelper,
         CreateCMSEncryptedAsice createCmsEncryptedAsice,
         DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier,
         InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
-        return new DphParcelService(verifyJWT, dphKeystoreHelper, createCmsEncryptedAsice,
+        return new DphParcelService(verifyJWT, builder.build(), dphKeystoreHelper, createCmsEncryptedAsice,
             digdirBusinessCertificateSupplier, resourceFactory);
     }
 

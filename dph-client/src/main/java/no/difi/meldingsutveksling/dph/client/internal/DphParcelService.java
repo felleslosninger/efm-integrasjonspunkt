@@ -1,9 +1,12 @@
 package no.difi.meldingsutveksling.dph.client.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import lombok.RequiredArgsConstructor;
 import no.difi.asic.SignatureMethod;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.client.DigdirBusinessCertificateSupplier;
 import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -27,10 +30,27 @@ import java.util.stream.Stream;
 public class DphParcelService {
 
     private final VerifyJWT verifyJWT;
+    private final ObjectMapper objectMapper;
     private final KeystoreHelper keystoreHelper;
     private final CreateCMSEncryptedAsice createCmsEncryptedAsice;
     private final DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier;
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
+
+    public String toJSON(StandardBusinessDocument sbd) {
+        try {
+            return objectMapper.writeValueAsString(sbd);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Serializing SBD to JSON failed", e);
+        }
+    }
+
+    public StandardBusinessDocument toSBD(String json) {
+        try {
+            return objectMapper.readValue(json, StandardBusinessDocument.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Deserializing from JSON to SBD failed", e);
+        }
+    }
 
     public String signAndEncrypt(String payload) {
         String signed = CreateSignedJWT.createSignedJWT(CreateSignedJWT.Input.builder()

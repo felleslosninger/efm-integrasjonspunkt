@@ -15,16 +15,16 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.DphService;
 import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.DphException;
-import no.difi.meldingsutveksling.dph.client.domain.ApplicationReceiptResponse;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
-import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -119,64 +119,40 @@ public class DefaultDphPolling implements DphPolling {
     }
 
     private void enqueueBusinessDoucment(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        if (incomingMessage.isAppRec()) {
-            handleApplicationReceipt(onBehalfOf, incomingMessage);
-        } else {
-            handleDialogmelding(onBehalfOf, incomingMessage);
+        BusinessDocumentResponse response = dphClientService.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
+        StandardBusinessDocument sbd = response.getSbd();
+
+        log.debug("DPH {} received: incomingMessage={}, response={}", sbd.getType(), incomingMessage, response);
+
+        switch (BusinessMessageType.fromType(sbd.getType())) {
+            case DIALOGMELDING -> handleDialogmelding(sbd, response.getEncryptedAsic());
+            case DIALOGMELDING_KVITTERING -> handleApplicationReceipt(sbd);
+            default -> throw new DphException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT);
         }
     }
 
-    private void handleDialogmelding(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        BusinessDocumentResponse response = dphClientService.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
-
-        log.debug("DPH dialogmelding received: incomingMessage={}, response={}", incomingMessage, response);
-
-        StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
-            NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-            NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-            response.getConversationId(),
-            incomingMessage.getBusinessDocumentId(),
-            properties.getDph().getNhnProcess(),
-            properties.getDph().getDialogmeldingDocumentType(),
-            response.getPayload()
-        );
-
-        Optional.ofNullable(response.getParentId())
-            .map(ScopeFactory::fromParentId)
-            .ifPresent(sbd::addScope);
-
-        nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+    private void handleDialogmelding(StandardBusinessDocument sbd, Resource encryptedAsic) {
+        nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, encryptedAsic);
     }
 
-    private void handleApplicationReceipt(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        ApplicationReceiptResponse response = dphClientService.receiveApplicationReceipt(onBehalfOf, incomingMessage.getId());
-        DialogmeldingKvitteringMessage message = response.getPayload();
+    private void handleApplicationReceipt(StandardBusinessDocument sbd) {
+        DialogmeldingKvitteringMessage message = sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
+            .orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         String relatedToMessageId = message.getRelatedToMessageId();
-
         Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId);
 
         conversation.ifPresent(c -> {
             switch (message.getStatus()) {
                 case DialogmeldingKvitteringStatus.OK ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", response.getRawReceipt());
+                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", message.getRawReceipt());
                 case DialogmeldingKvitteringStatus.REJECTED, DialogmeldingKvitteringStatus.OK_ERROR_IN_MESSAGE_PART ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.FEIL, "Message has been rejected by the application", response.getRawReceipt());
+                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.FEIL, "Message has been rejected by the application", message.getRawReceipt());
             }
         });
 
         if (properties.getFeature().isEnableReceipts()) {
-            StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
-                NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-                NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-                conversation.map(Conversation::getConversationId).orElseGet(incomingMessage::getBusinessDocumentId),
-                incomingMessage.getBusinessDocumentId(),
-                properties.getDph().getReceiptProcess(),
-                properties.getDph().getReceiptDocumentType(),
-                message
-            );
-
-            nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+            nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH);
         } else {
             log.info("Skipping ApplicationReceipt since difi.move.feature.enable-receipts=false");
         }
