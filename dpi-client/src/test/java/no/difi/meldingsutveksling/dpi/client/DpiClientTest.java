@@ -17,9 +17,7 @@ import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dpi.client.domain.*;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.BusinessMessage;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Digital;
-import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.Utskrift;
+import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.*;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.*;
 import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
@@ -67,8 +65,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.paths;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.then;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -464,4 +461,26 @@ class DpiClientTest {
         assertThat(recordedRequest).isInstanceOf(HttpRequest.class);
         return (HttpRequest) recordedRequest;
     }
+
+    @Test
+    void verifyLombokChainingMagic() {
+
+        // Verify that Lombok's @Accessors(chain = true) works correctly on the BusinessMessage and its subclasses
+        // and that the setters return the correct type for chaining.  Since we don't have the @Accessors annotation
+        // this lombok feature is enabled using a global lombok.config file.
+
+        var d = new Digital();
+        assertThat(d).isInstanceOf(BusinessMessage.class);
+        assertThat(d).isInstanceOf(AvsenderHolder.class);
+        assertThat(d).isInstanceOf(PersonmottakerHolder.class);
+        assertThat(d).isInstanceOf(DokumentpakkefingeravtrykkHolder.class);
+        assertThat(d).isInstanceOf(MaskinportentokenHolder.class);
+
+        var bm = d.setMaskinportentoken("token");
+        assertThat(bm).isInstanceOf(Digital.class);
+        assertThat(bm).isInstanceOf(BusinessMessage.class);
+        assertThat(bm).isSameAs(d);
+
+    }
+
 }
