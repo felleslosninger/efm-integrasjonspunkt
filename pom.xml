@@ -75,7 +75,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <efm-common.version>2.1.0-RC4</efm-common.version>
-        <efm-nhn-adapter.version>DEV-SNAPSHOT</efm-nhn-adapter.version>
+        <efm-nhn-adapter.version>0.0.5</efm-nhn-adapter.version>
         <bouncycastle.version>1.83</bouncycastle.version>
     </properties>
 
