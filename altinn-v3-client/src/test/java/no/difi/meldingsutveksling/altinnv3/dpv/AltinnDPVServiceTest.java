@@ -9,10 +9,7 @@ import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
-import no.digdir.altinn3.correspondence.model.BaseCorrespondenceExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
-import no.digdir.altinn3.correspondence.model.InitializedCorrespondencesExt;
+import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,6 +88,47 @@ public class AltinnDPVServiceTest {
         });
 
         assertEquals("Missing correspondenceId in conversation reference for conversation abc", exception.getMessage());
+    }
+
+    @Test
+    public void getStatusHistoryInProgressConvertedFromOverview(){
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("019eca65-3f08-7007-83df-2cb0f31d4dd7");
+        conversation.setExternalSystemReference("019eca65-3ec9-78e0-ad1d-30c1326c6f31");
+
+         Mockito.when(correspondenceApiClient.getCorrespondenceOverview(Mockito.any())).thenReturn(
+             new CorrespondenceOverviewExt()
+                 .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
+                 .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
+         );
+
+        var history = altinnDPVService.getStatus(conversation);
+
+        assertEquals("Initialized", history.getFirst().getStatusText());
+        assertEquals(CorrespondenceStatusExt.PUBLISHED, history.getLast().getStatus());
+        assertEquals("Published", history.getLast().getStatusText());
+        assertEquals("2026-06-01T11:11:11Z", history.getLast().getStatusChanged().toString());
+    }
+
+    @Test
+    public void getStatusHistoryFinishedConvertedFromOverview(){
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("019eca65-3f08-7007-83df-2cb0f31d4dd7");
+        conversation.setExternalSystemReference("019eca65-3ec9-78e0-ad1d-30c1326c6f31");
+
+        Mockito.when(correspondenceApiClient.getCorrespondenceOverview(Mockito.any())).thenReturn(
+            new CorrespondenceOverviewExt()
+                .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
+                .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
+                .read(OffsetDateTime.parse("2026-06-01T12:12:12Z"))
+        );
+
+        var history = altinnDPVService.getStatus(conversation);
+
+        assertEquals("Initialized", history.getFirst().getStatusText());
+        assertEquals(CorrespondenceStatusExt.PUBLISHED, history.get(1).getStatus());
+        assertEquals(CorrespondenceStatusExt.READ, history.getLast().getStatus());
+        assertEquals("2026-06-01T12:12:12Z", history.getLast().getStatusChanged().toString());
     }
 
 }
