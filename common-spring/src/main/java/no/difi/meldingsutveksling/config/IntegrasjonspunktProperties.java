@@ -227,6 +227,12 @@ public class IntegrasjonspunktProperties {
 
         @NotNull
         private String filedir;
+        /**
+         * Directory for the transient on-disk cache used when streaming database BLOBs (db-persistence mode).
+         * Optional - defaults to the system temp directory when not set. In containers this should point at a
+         * sized, disk-backed (not tmpfs) volume.
+         */
+        private String blobCacheDir;
         @NotNull
         private Integer lockTimeoutMinutes;
         @NotNull

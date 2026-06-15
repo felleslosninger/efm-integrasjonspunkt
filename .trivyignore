@@ -19,3 +19,8 @@ CVE-2026-43515 # org.apache.tomcat.embed:tomcat-embed-core
 CVE-2026-41284 # org.apache.tomcat.embed:tomcat-embed-core
 CVE-2026-42498 # org.apache.tomcat.embed:tomcat-embed-core
 CVE-2026-43513 # org.apache.tomcat.embed:tomcat-embed-core
+
+CVE-2026-44249 # io.netty:netty-handler
+CVE-2026-45416 # io.netty:netty-handler
+CVE-2026-45674 # io.netty:netty-resolver-dns
+CVE-2026-47691 # io.netty:netty-resolver-dns
