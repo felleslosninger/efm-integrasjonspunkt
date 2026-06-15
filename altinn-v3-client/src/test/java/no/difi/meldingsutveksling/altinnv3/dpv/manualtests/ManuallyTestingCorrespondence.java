@@ -38,8 +38,8 @@ public class ManuallyTestingCorrespondence {
     @Inject
     CorrespondenceApiClient client;
 
-    String correspondenceId = "019980e6-e382-7eab-8c9d-60b9c7ccd116";
-    String attachmentId = "019980e6-e33a-7c11-9a04-22b864f31921";
+    String correspondenceId = "019eca65-3f08-7007-83df-2cb0f31d4dd7";
+    String attachmentId = "019eca65-3ec9-78e0-ad1d-30c1326c6f31";
 
     @Test
     public void upload() throws IOException {
@@ -89,6 +89,12 @@ public class ManuallyTestingCorrespondence {
     @Test
     public void getCorrespondenceDetails() {
         var res = client.getCorrespondenceDetails(UUID.fromString(correspondenceId));
+        System.out.println(res);
+    }
+
+    @Test
+    public void getCorrespondenceOverview() {
+        var res = client.getCorrespondenceOverview(UUID.fromString(correspondenceId));
         System.out.println(res);
     }
 

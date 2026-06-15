@@ -1976,7 +1976,6 @@
                     "created",
                     "recipient",
                     "resourceId",
-
                     "sendersReference"
                 ],
                 "type": "object",
@@ -1988,7 +1987,6 @@
                         "description": "The Resource Id associated with the correspondence service."
                     },
                     "sender": {
-
                         "type": "string",
                         "description": "The Sending organization of the correspondence.",
                         "nullable": true,
@@ -2001,7 +1999,7 @@
                         "description": "A reference used by senders and receivers to identify a specific Correspondence using external identification methods."
                     },
                     "messageSender": {
-                        "maxLength": 256,
+                        "maxLength": 255,
                         "minLength": 0,
                         "type": "string",
                         "description": "An alternative name for the sender of the correspondence. The name will be displayed instead of the organization name.",
@@ -2060,12 +2058,6 @@
                         "description": "Specifies whether the correspondence can override reservation against digital communication in KRR",
                         "nullable": true
                     },
-                    "published": {
-                        "type": "string",
-                        "description": "Is null until the correspondence is published.",
-                        "format": "date-time",
-                        "nullable": true
-                    },
                     "isConfirmationNeeded": {
                         "type": "boolean",
                         "description": "Specifies whether reading the correspondence needs to be confirmed by the recipient"
@@ -2114,6 +2106,18 @@
                         "type": "integer",
                         "description": "The identifier/reference from Altinn 2 for migrated correspondence. Will be null for correspondence created in Altinn 3.",
                         "format": "int32",
+                        "nullable": true
+                    },
+                    "published": {
+                        "type": "string",
+                        "description": "Is null until the correspondence is published.",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "read": {
+                        "type": "string",
+                        "description": "Timestamp for when the correspondence was first read by the recipient. Is null until the correspondence has been read.",
+                        "format": "date-time",
                         "nullable": true
                     }
                 },
