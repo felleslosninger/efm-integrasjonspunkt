@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove;
 import lombok.Data;
 import lombok.experimental.UtilityClass;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 
 import java.time.LocalDate;

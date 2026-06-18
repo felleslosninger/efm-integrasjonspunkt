@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.CryptoMessagePersister;
 import no.difi.meldingsutveksling.api.MessagePersister;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
-import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.nextmove.message.BugFix610;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.CreateCMSDocument;
+import no.difi.move.common.dokumentpakking.DecryptCMSDocument;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.core.io.Resource;
@@ -37,10 +37,10 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
         promiseMaker.promise(reject -> {
             try {
                 Resource encrypted = createCMSDocument.encrypt(CreateCMSDocument.Input.builder()
-                        .resource(possiblyApplyZipHeaderPatch(messageId, filename, input))
-                        .certificate(keystoreHelper.getX509Certificate())
-                        .keyEncryptionScheme(algorithmIdentifierSupplier.get())
-                        .build(), reject);
+                    .resource(possiblyApplyZipHeaderPatch(messageId, filename, input))
+                    .certificate(keystoreHelper.getX509Certificate())
+                    .keyEncryptionScheme(algorithmIdentifierSupplier.get())
+                    .build(), reject);
 
                 delegate.write(messageId, filename, encrypted);
                 return null;
@@ -66,9 +66,9 @@ public class CryptoMessagePersisterImpl implements CryptoMessagePersister {
 
     private DecryptCMSDocument.Input getDecryptInput(Resource encrypted) {
         return DecryptCMSDocument.Input.builder()
-                .keystoreHelper(keystoreHelper)
-                .resource(encrypted)
-                .build();
+            .keystoreHelper(keystoreHelper)
+            .resource(encrypted)
+            .build();
     }
 
     public void delete(String messageId) throws IOException {

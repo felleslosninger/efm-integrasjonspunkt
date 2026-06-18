@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.Data;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 
 import java.util.ArrayList;

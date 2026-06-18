@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @XmlType
-@XmlEnum(String.class)
+@XmlEnum
 @RequiredArgsConstructor
 @Getter
 public enum ServiceIdentifier {

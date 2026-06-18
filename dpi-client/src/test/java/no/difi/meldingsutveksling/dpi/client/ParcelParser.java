@@ -2,10 +2,10 @@ package no.difi.meldingsutveksling.dpi.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
-import no.difi.meldingsutveksling.dokumentpakking.domain.MetadataDocument;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
-import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
+import no.difi.move.common.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.MetadataDocument;
+import no.difi.move.common.dokumentpakking.domain.Parcel;
+import no.difi.move.common.dokumentpakking.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokument;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPDokumentData;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;

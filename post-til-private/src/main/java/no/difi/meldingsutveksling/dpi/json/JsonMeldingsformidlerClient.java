@@ -97,5 +97,4 @@ public class JsonMeldingsformidlerClient implements MeldingsformidlerClient {
             return ms;
         }
     }
-
 }

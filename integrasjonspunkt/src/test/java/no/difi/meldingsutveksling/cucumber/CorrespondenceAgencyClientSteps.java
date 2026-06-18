@@ -11,7 +11,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.core.io.ByteArrayResource;
 
 import java.io.IOException;

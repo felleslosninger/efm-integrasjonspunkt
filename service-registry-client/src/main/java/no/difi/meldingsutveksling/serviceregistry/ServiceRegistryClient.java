@@ -113,6 +113,6 @@ public class ServiceRegistryClient {
         }
 
         log.info("Loading locally persisted SAS key");
-        return key.get(0).saskey;
+        return key.getFirst().saskey;
     }
 }

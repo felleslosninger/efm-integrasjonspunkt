@@ -5,7 +5,11 @@ import lombok.Data;
 @Data
 public class InfoRecord {
     private String identifier;
+    private Integer parentHerId;
+    private String parentOrganizationName;
+    private Integer herId;
     private String organizationName;
+    private String organizationNumber;
     private EntityType entityType;
     private BrregPostadresse postadresse;
 
@@ -22,7 +26,9 @@ public class InfoRecord {
         this.postadresse = postadresse;
     }
 
-    /** Needed by gson **/
+    /**
+     * Needed by gson
+     **/
     public InfoRecord() {
     }
 

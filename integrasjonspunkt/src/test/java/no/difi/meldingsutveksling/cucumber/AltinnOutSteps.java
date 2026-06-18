@@ -10,7 +10,7 @@ import io.cucumber.java.en.Then;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.ResourceUtils;
 import no.digdir.altinn3.broker.model.FileTransferInitializeResponseExt;

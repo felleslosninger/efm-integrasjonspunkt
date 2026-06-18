@@ -2,23 +2,24 @@ package no.difi.meldingsutveksling.ks.mapping;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
-import no.difi.meldingsutveksling.nextmove.Dialogmelding;
+import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FiksMapperTest {
 
     @Test
     void kreverNiva4Innlogging_document_NotSupporting_HasSikkerhetsNivaa() {
-        // Dialogmelding støtter ikke HasSikkerhetsNivaa (og testen vil alltid returnere false)
-        var document = new Dialogmelding();
+        // DialogmeldingMessage støtter ikke HasSikkerhetsNivaa (og testen vil alltid returnere false)
+        var document = new DialogmeldingMessage();
         var sbd = new StandardBusinessDocument();
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertEquals(false, FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -29,7 +30,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertEquals(false, FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -41,7 +42,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertEquals(false, FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -53,7 +54,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertEquals(true, FiksMapper.kreverNiva4Innlogging(message));
+        assertTrue(FiksMapper.kreverNiva4Innlogging(message));
     }
 
 }

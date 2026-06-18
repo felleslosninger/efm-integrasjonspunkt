@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.ks.svarinn;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.DecryptCMSDocument;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +19,8 @@ public class SvarInnFileDecryptor {
 
     public Resource decrypt(Resource encrypted) {
         return decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
-                .resource(encrypted)
-                .keystoreHelper(keystoreHelper)
-                .build());
+            .resource(encrypted)
+            .keystoreHelper(keystoreHelper)
+            .build());
     }
 }

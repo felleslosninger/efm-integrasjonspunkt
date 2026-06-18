@@ -10,9 +10,6 @@ import jakarta.mail.util.SharedByteArrayInputStream;
 import lombok.SneakyThrows;
 import net.javacrumbs.jsonunit.core.Option;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.dokumentpakking.config.DokumentpakkingConfig;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
-import no.difi.meldingsutveksling.dokumentpakking.service.DecryptCMSDocument;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.sbdh.Authority;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
@@ -23,6 +20,9 @@ import no.difi.meldingsutveksling.dpi.client.internal.DpiMapper;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.UnpackStandardBusinessDocument;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.DecryptCMSDocument;
+import no.difi.move.common.dokumentpakking.config.DokumentpakkingAutoConfig;
+import no.difi.move.common.dokumentpakking.domain.Parcel;
 import no.difi.move.common.io.InMemoryWithTempFileFallbackResource;
 import no.difi.move.common.io.ResourceUtils;
 import no.difi.move.common.io.pipe.Plumber;
@@ -73,19 +73,21 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest(classes = {
-        DpiClientTestConfig.class,
-        DpiClientConfig.class,
-        DokumentpakkingConfig.class,
-        TaskExecutorConfig.class,
-        PromiseMaker.class,
-        Plumber.class
+    DpiClientTestConfig.class,
+    DpiClientConfig.class,
+    DokumentpakkingAutoConfig.class,
+    TaskExecutorConfig.class,
+    PromiseMaker.class,
+    Plumber.class
 })
 @ActiveProfiles("test")
 @MockServerSettings(ports = 8900)
 class DpiClientTest {
 
-    @MockitoBean private TransactionTemplate transactionTemplate;
-    @Mock private TransactionStatus transactionStatus;
+    @MockitoBean
+    private TransactionTemplate transactionTemplate;
+    @Mock
+    private TransactionStatus transactionStatus;
 
     @Autowired
     private DpiClient dpiClient;
@@ -141,16 +143,16 @@ class DpiClientTest {
     @BeforeEach
     public void beforeEach(MockServerClient client) {
         when(transactionTemplate.execute(any()))
-                .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
+            .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
 
         client.when(request()
-                        .withMethod("POST")
-                        .withPath("/token"))
-                .respond(response()
-                        .withStatusCode(200)
-                        .withContentType(MediaType.APPLICATION_JSON)
-                        .withBody("{ \"access_token\" : \"DummyMaskinportenToken\" }")
-                );
+                .withMethod("POST")
+                .withPath("/token"))
+            .respond(response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody("{ \"access_token\" : \"DummyMaskinportenToken\" }")
+            );
     }
 
     @AfterEach
@@ -165,87 +167,87 @@ class DpiClientTest {
 
     private DpiTestInput getDpiDigitalTestInput() {
         return createDpiTestInput(new Digital()
-                .setAvsender(new Avsender()
-                        .setVirksomhetsidentifikator(
-                                new Identifikator()
-                                        .setAuthority(Authority.ISO6523_ACTORID_UPIS)
-                                        .setValue("0192:999888999")
-                        ))
-                .setMottaker(new Personmottaker()
-                        .setPostkasseadresse("ola.nordmann#9YDT")
-                )
-                .setSikkerhetsnivaa(3)
-                .setVirkningsdato(LocalDate.parse("2021-01-01"))
-                .setVirkningstidspunkt(OffsetDateTime.parse("2021-01-01T08:00:00.000+01:00"))
-                .setAapningskvittering(false)
-                .setIkkesensitivtittel("ikkeSensitivTittel")
-                .setSpraak("NO")
-                .setVarsler(new Varsler()
-                        .setEpostvarsel(new Epostvarsel()
-                                .setEpostadresse("test@epost.no")
-                                .setVarslingstekst("Dette er en varslingstekst")
-                                .setRepetisjoner(Arrays.asList(1, 7)))
-                        .setSmsvarsel(new Smsvarsel()
-                                .setMobiltelefonnummer("12345678")
-                                .setVarslingstekst("Dette er en varslingstekst")
-                                .setRepetisjoner(Arrays.asList(1, 7)))
-                )
+            .setAvsender(new Avsender()
+                .setVirksomhetsidentifikator(
+                    new Identifikator()
+                        .setAuthority(Authority.ISO6523_ACTORID_UPIS)
+                        .setValue("0192:999888999")
+                ))
+            .setMottaker(new Personmottaker()
+                .setPostkasseadresse("ola.nordmann#9YDT")
+            )
+            .setSikkerhetsnivaa(3)
+            .setVirkningsdato(LocalDate.parse("2021-01-01"))
+            .setVirkningstidspunkt(OffsetDateTime.parse("2021-01-01T08:00:00.000+01:00"))
+            .setAapningskvittering(false)
+            .setIkkesensitivtittel("ikkeSensitivTittel")
+            .setSpraak("NO")
+            .setVarsler(new Varsler()
+                .setEpostvarsel(new Epostvarsel()
+                    .setEpostadresse("test@epost.no")
+                    .setVarslingstekst("Dette er en varslingstekst")
+                    .setRepetisjoner(Arrays.asList(1, 7)))
+                .setSmsvarsel(new Smsvarsel()
+                    .setMobiltelefonnummer("12345678")
+                    .setVarslingstekst("Dette er en varslingstekst")
+                    .setRepetisjoner(Arrays.asList(1, 7)))
+            )
         );
     }
 
     @Test
     void testSendFysisk(MockServerClient client) {
         testSend(client, createDpiTestInput(new Utskrift()
-                .setAvsender(new Avsender()
-                        .setVirksomhetsidentifikator(new Identifikator()
-                                .setAuthority(Authority.ISO6523_ACTORID_UPIS)
-                                .setValue("0192:999888999")))
+            .setAvsender(new Avsender()
+                .setVirksomhetsidentifikator(new Identifikator()
+                    .setAuthority(Authority.ISO6523_ACTORID_UPIS)
+                    .setValue("0192:999888999")))
+            .setMottaker(new AdresseInformasjon()
+                .setNavn("navn")
+                .setAdresselinje1("adresselinje1")
+                .setAdresselinje2("adresselinje2")
+                .setAdresselinje3("adresselinje3")
+                .setAdresselinje4("adresselinje4")
+                .setLand("land"))
+            .setUtskriftstype(Utskrift.Utskriftstype.SORT_HVIT)
+            .setPosttype(Utskrift.Posttype.B)
+            .setRetur(new Retur()
                 .setMottaker(new AdresseInformasjon()
-                        .setNavn("navn")
-                        .setAdresselinje1("adresselinje1")
-                        .setAdresselinje2("adresselinje2")
-                        .setAdresselinje3("adresselinje3")
-                        .setAdresselinje4("adresselinje4")
-                        .setLand("land"))
-                .setUtskriftstype(Utskrift.Utskriftstype.SORT_HVIT)
-                .setPosttype(Utskrift.Posttype.B)
-                .setRetur(new Retur()
-                        .setMottaker(new AdresseInformasjon()
-                                .setNavn("navn")
-                                .setAdresselinje1("adresselinje1")
-                                .setAdresselinje2("adresselinje2")
-                                .setAdresselinje3("adresselinje3")
-                                .setPostnummer("1234")
-                                .setPoststed("poststed"))
-                        .setReturposthaandtering(Retur.Returposthaandtering.DIREKTE_RETUR))
+                    .setNavn("navn")
+                    .setAdresselinje1("adresselinje1")
+                    .setAdresselinje2("adresselinje2")
+                    .setAdresselinje3("adresselinje3")
+                    .setPostnummer("1234")
+                    .setPoststed("poststed"))
+                .setReturposthaandtering(Retur.Returposthaandtering.DIREKTE_RETUR))
         ), utskriftReadyForSendSbd);
     }
 
     private DpiTestInput createDpiTestInput(BusinessMessage businessMessage) {
         return new DpiTestInput()
-                .setSender(Iso6523.parse("0192:987654321"))
-                .setReceiver(Iso6523.parse("0192:123456789"))
-                .setMessageId("ff88849c-e281-4809-8555-7cd54952b916")
-                .setConversationId("37efbd4c-413d-4e2c-bbc5-257ef4a65a45")
-                .setExpectedResponseDateTime(OffsetDateTime.parse("2021-04-21T15:29:58.753+02:00"))
-                .setBusinessMessage(businessMessage)
-                .setMainDocument(hoveddokument)
-                .setAttachments(Collections.singletonList(vedlegg))
-                .setMailbox("dummy")
-                .setReceiverCertificate(sertifikat);
+            .setSender(Iso6523.parse("0192:987654321"))
+            .setReceiver(Iso6523.parse("0192:123456789"))
+            .setMessageId("ff88849c-e281-4809-8555-7cd54952b916")
+            .setConversationId("37efbd4c-413d-4e2c-bbc5-257ef4a65a45")
+            .setExpectedResponseDateTime(OffsetDateTime.parse("2021-04-21T15:29:58.753+02:00"))
+            .setBusinessMessage(businessMessage)
+            .setMainDocument(hoveddokument)
+            .setAttachments(Collections.singletonList(vedlegg))
+            .setMailbox("dummy")
+            .setReceiverCertificate(sertifikat);
     }
 
     @Test
     void testSendWhenResponseError(MockServerClient client) {
         HttpResponse httpResponse = response()
-                .withBody("{}")
-                .withStatusCode(400);
+            .withBody("{}")
+            .withStatusCode(400);
 
         DpiTestInput input = getDpiDigitalTestInput();
 
         assertThatThrownBy(() -> send(client, input, httpResponse))
-                .isInstanceOf(DpiException.class)
-                .hasMessage("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}".formatted());
+            .isInstanceOf(DpiException.class)
+            .hasMessage("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}".formatted());
     }
 
     @Test
@@ -253,73 +255,73 @@ class DpiClientTest {
         UUID uuid = UUID.randomUUID();
 
         client.when(request()
-                        .withMethod("GET")
-                        .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)))
-                .respond(response()
-                        .withStatusCode(200)
-                        .withContentType(MediaType.APPLICATION_JSON)
-                        .withBody(ResourceUtils.toByteArray(messageStatusesResource))
-                );
+                .withMethod("GET")
+                .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)))
+            .respond(response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(ResourceUtils.toByteArray(messageStatusesResource))
+            );
 
         StepVerifier.create(dpiClient.getMessageStatuses(uuid))
-                .recordWith(ArrayList::new)
-                .thenConsumeWhile(x -> true)
-                .consumeRecordedWith(elements -> assertThat(elements)
-                        .containsExactly(
-                                new MessageStatus()
-                                        .setStatus(ReceiptStatus.OPPRETTET)
-                                        .setTimestamp(OffsetDateTime.parse("2021-06-29T05:49:47Z")),
-                                new MessageStatus()
-                                        .setStatus(ReceiptStatus.SENDT)
-                                        .setTimestamp(OffsetDateTime.parse("2021-06-29T07:12:40Z"))
-                        ))
-                .verifyComplete();
+            .recordWith(ArrayList::new)
+            .thenConsumeWhile(x -> true)
+            .consumeRecordedWith(elements -> assertThat(elements)
+                .containsExactly(
+                    new MessageStatus()
+                        .setStatus(ReceiptStatus.OPPRETTET)
+                        .setTimestamp(OffsetDateTime.parse("2021-06-29T05:49:47Z")),
+                    new MessageStatus()
+                        .setStatus(ReceiptStatus.SENDT)
+                        .setTimestamp(OffsetDateTime.parse("2021-06-29T07:12:40Z"))
+                ))
+            .verifyComplete();
 
         client.verify(request()
-                .withMethod("GET")
-                .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)));
+            .withMethod("GET")
+            .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)));
     }
 
     @Test
     @SneakyThrows
     void testGetMessages(MockServerClient client) {
         given(uuidGenerator.generate())
-                .willReturn("ff88849c-e281-4809-8555-7cd54952b916");
+            .willReturn("ff88849c-e281-4809-8555-7cd54952b916");
 
         String avsenderidentifikator = "123";
         String forretningsmelding = createReceiptJWT.createReceiptJWT(dpiMapper.readStandardBusinessDocument(digitalReadyForSendSbd), createLeveringskvittering);
         client.when(request()
-                        .withMethod("GET")
-                        .withPath("/dpi/messages/in")
-                        .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator)
-                )
-                .respond(response()
-                        .withStatusCode(200)
-                        .withContentType(MediaType.APPLICATION_JSON)
-                        .withBody(new ObjectMapper().writeValueAsString(new Message()
-                                .setForretningsmelding(forretningsmelding)
-                                .setDownloadurl(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"))
-                        ))
-                );
-
-        StepVerifier.create(dpiClient.getMessages(new GetMessagesInput()
-                        .setSenderId(avsenderidentifikator)
-                ))
-                .recordWith(ArrayList::new)
-                .thenConsumeWhile(x -> true)
-                .consumeRecordedWith(elements -> assertThat(elements).hasSize(1)
-                        .first()
-                        .satisfies(receivedMessage -> {
-                            assertThat(receivedMessage.getMessage().getForretningsmelding()).isEqualTo(forretningsmelding);
-                            assertThat(receivedMessage.getMessage().getDownloadurl()).isEqualTo(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"));
-                        })
-                )
-                .verifyComplete();
-
-        client.verify(request()
                 .withMethod("GET")
                 .withPath("/dpi/messages/in")
-                .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator));
+                .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator)
+            )
+            .respond(response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(new ObjectMapper().writeValueAsString(new Message()
+                    .setForretningsmelding(forretningsmelding)
+                    .setDownloadurl(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"))
+                ))
+            );
+
+        StepVerifier.create(dpiClient.getMessages(new GetMessagesInput()
+                .setSenderId(avsenderidentifikator)
+            ))
+            .recordWith(ArrayList::new)
+            .thenConsumeWhile(x -> true)
+            .consumeRecordedWith(elements -> assertThat(elements).hasSize(1)
+                .first()
+                .satisfies(receivedMessage -> {
+                    assertThat(receivedMessage.getMessage().getForretningsmelding()).isEqualTo(forretningsmelding);
+                    assertThat(receivedMessage.getMessage().getDownloadurl()).isEqualTo(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"));
+                })
+            )
+            .verifyComplete();
+
+        client.verify(request()
+            .withMethod("GET")
+            .withPath("/dpi/messages/in")
+            .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator));
     }
 
     @Test
@@ -330,13 +332,13 @@ class DpiClientTest {
         ThreadLocalRandom.current().nextBytes(bytes);
 
         client.when(request()
-                        .withMethod("GET")
-                        .withPath(path))
-                .respond(response()
-                        .withStatusCode(200)
-                        .withContentType(MediaType.APPLICATION_JSON)
-                        .withBody(bytes)
-                );
+                .withMethod("GET")
+                .withPath(path))
+            .respond(response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(bytes)
+            );
 
         InMemoryWithTempFileFallbackResource cmsEncryptedAsice = dpiClient.getCmsEncryptedAsice(URI.create("http://localhost:8900" + path));
 
@@ -344,8 +346,8 @@ class DpiClientTest {
         assertThat(ResourceUtils.toByteArray(cmsEncryptedAsice)).isEqualTo(bytes);
 
         client.verify(request()
-                .withMethod("GET")
-                .withPath(path));
+            .withMethod("GET")
+            .withPath(path));
     }
 
     @Test
@@ -354,24 +356,24 @@ class DpiClientTest {
         String path = "/dpi/messages/in/%s/read".formatted(uuid);
 
         client.when(request()
-                        .withMethod("POST")
-                        .withPath(path))
-                .respond(response()
-                        .withStatusCode(200)
-                        .withContentType(MediaType.APPLICATION_JSON)
-                );
+                .withMethod("POST")
+                .withPath(path))
+            .respond(response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+            );
 
         dpiClient.markAsRead(uuid);
 
         client.verify(request()
-                .withMethod("POST")
-                .withPath(path));
+            .withMethod("POST")
+            .withPath(path));
     }
 
     @SneakyThrows
     private void testSend(MockServerClient client, DpiTestInput input, Resource out) {
         MimeMultipart mimeMultipart = send(client, input, response()
-                .withStatusCode(200));
+            .withStatusCode(200));
         assertThat(mimeMultipart.getCount()).isEqualTo(2);
         StandardBusinessDocument standardBusinessDocument = assertThatStandardBusinessDocumentIsCorrect(mimeMultipart.getBodyPart(0), out);
         assertThatParcelIsCorrect(standardBusinessDocument, mimeMultipart.getBodyPart(1));
@@ -390,27 +392,27 @@ class DpiClientTest {
         String expected = IOUtils.toString(expectedSBD.getInputStream(), StandardCharsets.UTF_8);
 
         assertThatJson(payload.toString())
-                .when(paths("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue".formatted(standardBusinessDocument.getType())), then(Option.IGNORING_VALUES))
-                .isEqualTo(expected);
+            .when(paths("standardBusinessDocument.%s.dokumentpakkefingeravtrykk.digestValue".formatted(standardBusinessDocument.getType())), then(Option.IGNORING_VALUES))
+            .isEqualTo(expected);
 
         return standardBusinessDocument;
     }
 
     private MimeMultipart send(MockServerClient client, DpiTestInput input, HttpResponse httpResponse) throws MessagingException {
         HttpRequest requestDefinition = request()
-                .withMethod("POST")
-                .withPath("/dpi/messages/out");
+            .withMethod("POST")
+            .withPath("/dpi/messages/out");
 
         client.when(requestDefinition)
-                .respond(httpResponse);
+            .respond(httpResponse);
 
         Shipment shipment = shipmentFactory.getShipment(input);
 
         dpiClient.sendMessage(shipment);
 
         client.verify(request()
-                .withMethod("POST")
-                .withPath("/token"));
+            .withMethod("POST")
+            .withPath("/token"));
 
         client.verify(requestDefinition);
 
@@ -425,27 +427,27 @@ class DpiClientTest {
 
         SharedByteArrayInputStream content = (SharedByteArrayInputStream) cmsPart.getContent();
         Resource asic = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
-                .resource(new InputStreamResource(content))
-                .keystoreHelper(serverKeystoreHelper)
-                .build());
+            .resource(new InputStreamResource(content))
+            .keystoreHelper(serverKeystoreHelper)
+            .build());
 
         Parcel parcel = getParcel(standardBusinessDocument, asic);
         assertThat(parcel.getMainDocument().getFilename()).isEqualTo("svada.pdf");
         assertThat(parcel.getMainDocument().getMimeType()).isEqualTo(org.springframework.http.MediaType.APPLICATION_PDF);
         assertThat(ResourceUtils.toByteArray(parcel.getMainDocument().getResource()))
-                .isEqualTo(ResourceUtils.toByteArray(hoveddokument));
+            .isEqualTo(ResourceUtils.toByteArray(hoveddokument));
         assertThat(parcel.getAttachments()).hasSize(1);
         assertThat(parcel.getAttachments().get(0).getFilename()).isEqualTo("bilde.png");
         assertThat(parcel.getAttachments().get(0).getMimeType()).isEqualTo(org.springframework.http.MediaType.IMAGE_PNG);
         assertThat(ResourceUtils.toByteArray(parcel.getAttachments().get(0).getResource()))
-                .isEqualTo(ResourceUtils.toByteArray(vedlegg));
+            .isEqualTo(ResourceUtils.toByteArray(vedlegg));
     }
 
     @SneakyThrows
     private Parcel getParcel(StandardBusinessDocument standardBusinessDocument, Resource asic) {
         return parcelParser.parse(
-                standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
-                asic);
+            standardBusinessDocument.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier(),
+            asic);
     }
 
     private MimeMultipart getMimeMultipart(HttpRequest httpRequest) throws MessagingException {

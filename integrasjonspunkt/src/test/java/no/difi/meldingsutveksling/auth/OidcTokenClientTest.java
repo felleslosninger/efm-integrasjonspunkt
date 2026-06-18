@@ -20,8 +20,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -38,16 +38,16 @@ public class OidcTokenClientTest {
     private ObservationRestTemplateCustomizer metricsRestTemplateCustomizer = new NoOpMetricsRestTemplateCustomizer();
 
     private List<String> scopes = Arrays.asList(
-            "eformidling:dpo",
-            "eformidling:dpe",
-            "eformidling:dpv",
-            "eformidling:dpi",
-            "global/kontaktinformasjon.read",
-            "global/sikkerdigitalpost.read",
-            "global/varslingsstatus.read",
-            "global/sertifikat.read",
-            "global/navn.read",
-            "global/postadresse.read");
+        "eformidling:dpo",
+        "eformidling:dpe",
+        "eformidling:dpv",
+        "eformidling:dpi",
+        "global/kontaktinformasjon.read",
+        "global/sikkerdigitalpost.read",
+        "global/varslingsstatus.read",
+        "global/sertifikat.read",
+        "global/navn.read",
+        "global/postadresse.read");
 
     @BeforeEach
     @SneakyThrows
@@ -57,7 +57,7 @@ public class OidcTokenClientTest {
 
         props.setOidc(new IntegrasjonspunktProperties.Oidc());
         props.getOidc().setEnable(true);
-        props.getOidc().setUrl(new URL("https://test.maskinporten.no/token"));
+        props.getOidc().setUrl(URI.create("https://test.maskinporten.no/token").toURL());
         props.getOidc().setAudience("https://test.maskinporten.no/");
         props.getOidc().setClientId("test_move");
         props.getOidc().setKeystore(new KeystoreProperties());
@@ -67,7 +67,7 @@ public class OidcTokenClientTest {
         props.getOidc().getKeystore().setPath(new FileSystemResource("src/test/resources/kontaktinfo-client-test.jks"));
         props.setSign(new IntegrasjonspunktProperties.Sign());
         props.getSign().setEnable(true);
-        props.getSign().setJwkUrl(new URL(props.getServiceregistryEndpoint()+ "/jwk"));
+        props.getSign().setJwkUrl(URI.create(props.getServiceregistryEndpoint() + "/jwk").toURL());
 
         props.setFeature(new IntegrasjonspunktProperties.FeatureToggle());
         props.getFeature().setEnableDPO(true);
@@ -76,11 +76,11 @@ public class OidcTokenClientTest {
         props.getFeature().setEnableDPV(true);
 
         config = new JwtTokenConfig(
-                props.getOidc().getClientId(),
-                props.getOidc().getUrl().toString(),
-                props.getOidc().getAudience(),
-                scopes,
-                props.getOidc().getKeystore()
+            props.getOidc().getClientId(),
+            props.getOidc().getUrl().toString(),
+            props.getOidc().getAudience(),
+            scopes,
+            props.getOidc().getKeystore()
         );
 
     }
@@ -112,7 +112,7 @@ public class OidcTokenClientTest {
         //RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
         // FIXME rewrite this test to use Oauth2RestTemplateConfig and get a proper RestClient with oauth2 token
         RestClient restClient = null; // this will fail, rewrite
-        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), URI.create(props.getServiceregistryEndpoint()));
         String response = serviceRegistryRestClient.getResource("identifier/{identifier}", Collections.singletonMap("identifier", "06068700602"));
         System.out.println(response);
     }
@@ -125,7 +125,7 @@ public class OidcTokenClientTest {
         //RestOperations ops = config.oauthRestTemplate(oidcTokenClient);
         // FIXME rewrite this test to use Oauth2RestTemplateConfig and get a proper RestClient with oauth2 token
         RestClient restClient = null; // this will fail, rewrite
-        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), new URL(props.getServiceregistryEndpoint()).toURI());
+        ServiceRegistryRestClient serviceRegistryRestClient = new ServiceRegistryRestClient(props, restClient, new JWTDecoder(), URI.create(props.getServiceregistryEndpoint()));
         String response = serviceRegistryRestClient.getResource("sastoken");
         System.out.println(response);
     }

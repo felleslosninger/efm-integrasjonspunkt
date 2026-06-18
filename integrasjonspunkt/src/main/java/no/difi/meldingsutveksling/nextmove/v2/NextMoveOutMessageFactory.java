@@ -7,6 +7,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.CorrelationInformation;
 import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.Partner;
@@ -16,6 +17,7 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
+import no.difi.meldingsutveksling.nextmove.DialogmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.DpiPrintMessage;
 import no.difi.meldingsutveksling.nextmove.MailReturn;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
@@ -24,7 +26,6 @@ import no.difi.meldingsutveksling.nextmove.PostAddress;
 import no.difi.meldingsutveksling.nextmove.PostalCategory;
 import no.difi.meldingsutveksling.nextmove.PrintColor;
 import no.difi.meldingsutveksling.nextmove.ReturnHandling;
-import no.difi.meldingsutveksling.nextmove.nhn.HealthcareRoutingService;
 import no.difi.meldingsutveksling.sbd.ScopeFactory;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -45,11 +46,10 @@ import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 @RequiredArgsConstructor
 public class NextMoveOutMessageFactory {
 
-    private final IntegrasjonspunktProperties properties;
-    private final ServiceRecordProvider serviceRecordProvider;
-    private final UUIDGenerator uuidGenerator;
     private final Clock clock;
-    private final HealthcareRoutingService healthcareRoutingService;
+    private final UUIDGenerator uuidGenerator;
+    private final ServiceRecordProvider serviceRecordProvider;
+    private final IntegrasjonspunktProperties properties;
 
     NextMoveOutMessage getNextMoveOutMessage(StandardBusinessDocument sbd) {
         ServiceIdentifier serviceIdentifier = serviceRecordProvider.getServiceIdentifier(sbd);
@@ -69,11 +69,6 @@ public class NextMoveOutMessageFactory {
     }
 
     private void setDefaults(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        sbd.getScopes()
-            .stream()
-            .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
-            .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
-
         if (sbd.getSenderIdentifier() == null) {
             Iso6523 org = Iso6523.of(ICD.NO_ORG, properties.getOrg().getNumber());
             sbd.getStandardBusinessDocumentHeader().addSender(
@@ -111,6 +106,15 @@ public class NextMoveOutMessageFactory {
             }
         }
 
+        if (serviceIdentifier == DPH) {
+            setDphDefaults(sbd);
+        }
+
+        sbd.getScopes()
+            .stream()
+            .filter(p -> !StringUtils.hasText(p.getInstanceIdentifier()))
+            .forEach(p -> p.setInstanceIdentifier(uuidGenerator.generate()));
+
         if (serviceIdentifier == DPO && !isNullOrEmpty(properties.getDpo().getMessageChannel())) {
             Optional<Scope> mcScope = SBDUtil.getOptionalMessageChannel(sbd);
             if (mcScope.isEmpty()) {
@@ -124,27 +128,42 @@ public class NextMoveOutMessageFactory {
         if (serviceIdentifier == DPI) {
             setDpiDefaults(sbd);
         }
-        if (serviceIdentifier == DPH) {
-            healthcareRoutingService.validateAndApply(sbd);
-        }
     }
 
     private Integer getDefaultTtlHours(ServiceIdentifier serviceIdentifier) {
-        switch (serviceIdentifier) {
-            case DPO:
-                return properties.getDpo().getDefaultTtlHours();
-            case DPI:
-                return properties.getDpi().getDefaultTtlHours();
-            case DPE:
-                return properties.getNextmove().getServiceBus().getDefaultTtlHours();
-            case DPF:
-                return properties.getFiks().getUt().getDefaultTtlHours();
-            case DPV:
-                return properties.getDpv().getDefaultTtlHours();
-            case DPFIO:
-                return properties.getFiks().getIo().getDefaultTtlHours();
-            default:
-                return properties.getNextmove().getDefaultTtlHours();
+        return switch (serviceIdentifier) {
+            case DPO -> properties.getDpo().getDefaultTtlHours();
+            case DPI -> properties.getDpi().getDefaultTtlHours();
+            case DPE -> properties.getNextmove().getServiceBus().getDefaultTtlHours();
+            case DPF -> properties.getFiks().getUt().getDefaultTtlHours();
+            case DPV -> properties.getDpv().getDefaultTtlHours();
+            case DPH -> properties.getDph().getDefaultTtlHours();
+            case DPFIO -> properties.getFiks().getIo().getDefaultTtlHours();
+            default -> properties.getNextmove().getDefaultTtlHours();
+        };
+    }
+
+    private void setDphDefaults(StandardBusinessDocument sbd) {
+        // For DPH - The ConversationId should be equal to the first message in a conversation.
+        sbd.getScope(ScopeType.CONVERSATION_ID)
+            .filter(p -> p.getInstanceIdentifier() == null)
+            .ifPresent(s -> s.setInstanceIdentifier(sbd.getMessageId()));
+
+        MessageType messageType = MessageType.valueOfType(sbd.getType())
+            .orElseThrow(() -> new UnknownMessageTypeException(sbd.getType()));
+
+        if (messageType == MessageType.DIALOGMELDING) {
+            if (sbd.getReceiverIdentifier() instanceof NhnIdentifier nhnIdentifier) {
+                if (nhnIdentifier.getType() == NhnIdentifier.Type.FASTLEGE_FOR) {
+                    DialogmeldingMessage dialogmeldingMessage = sbd.getBusinessMessage(DialogmeldingMessage.class).orElseThrow();
+                    ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
+                    dialogmeldingMessage.setPasient(new DialogmeldingMessage.Pasient()
+                        .setFnr(serviceRecord.getPatient().fnr())
+                        .setFornavn(serviceRecord.getPatient().firstName())
+                        .setMellomnavn(serviceRecord.getPatient().middleName())
+                        .setEtternavn(serviceRecord.getPatient().lastName()));
+                }
+            }
         }
     }
 
@@ -172,7 +191,7 @@ public class NextMoveOutMessageFactory {
                         .setMottaker(new PostAddress())
                         .setReturhaandtering(ReturnHandling.DIREKTE_RETUR));
                 }
-                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd,Participant.RECEIVER);
+                ServiceRecord serviceRecord = serviceRecordProvider.getServiceRecord(sbd, Participant.RECEIVER);
                 setReceiverDefaults(dpiMessage.getMottaker(), serviceRecord.getPostAddress());
                 setReceiverDefaults(dpiMessage.getRetur().getMottaker(), serviceRecord.getReturnAddress());
             }

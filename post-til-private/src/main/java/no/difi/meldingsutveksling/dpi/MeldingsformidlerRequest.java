@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.dpi;
 
 import lombok.Builder;
 import lombok.Value;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Parcel;
+import no.difi.move.common.dokumentpakking.domain.Parcel;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.PersonIdentifier;
 import no.difi.meldingsutveksling.nextmove.PostAddress;

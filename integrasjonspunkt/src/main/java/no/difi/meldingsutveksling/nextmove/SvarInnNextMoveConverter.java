@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;

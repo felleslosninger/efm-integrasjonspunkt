@@ -11,5 +11,4 @@ public class NextMoveInMessageQueryInput {
     String senderIdentifier;
     String serviceIdentifier;
     String process;
-
 }
