@@ -192,6 +192,11 @@ public class IntegrasjonspunktProperties {
         private String clientIdPrefix;
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
+
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
     }
 
     /**
