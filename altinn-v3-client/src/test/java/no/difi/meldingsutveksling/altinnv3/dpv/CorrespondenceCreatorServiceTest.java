@@ -57,7 +57,7 @@ public class CorrespondenceCreatorServiceTest {
     }
 
     @Test
-    public void create_fromDigitalDpvMessage_with_missing_innhold_use_default_text() {
+    public void create_fromDigitalDpvMessage_with_null_innhold_falls_back_to_tittel() {
         DigitalDpvMessage digitalDpvMessage = new DigitalDpvMessage();
         NextMoveOutMessage message = new NextMoveOutMessage();
         StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
@@ -71,7 +71,43 @@ public class CorrespondenceCreatorServiceTest {
 
         correspondenceCreatorService.create(message, null, null);
 
-        verify(correspondenceFactory).create(message, "Digital Dpv", "Digitalt sammendrag", "Ingen innhold", null, null);
+        verify(correspondenceFactory).create(message, "Digital Dpv", "Digitalt sammendrag", "Digital Dpv", null, null);
+    }
+
+    @Test
+    public void create_fromDigitalDpvMessage_with_blank_innhold_falls_back_to_tittel() {
+        DigitalDpvMessage digitalDpvMessage = new DigitalDpvMessage();
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
+
+        digitalDpvMessage.setTittel("Digital Dpv");
+        digitalDpvMessage.setSammendrag("Digitalt sammendrag");
+        digitalDpvMessage.setInnhold("");
+
+        standardBusinessDocument.setAny(digitalDpvMessage);
+        message.setSbd(standardBusinessDocument);
+
+        correspondenceCreatorService.create(message, null, null);
+
+        verify(correspondenceFactory).create(message, "Digital Dpv", "Digitalt sammendrag", "Digital Dpv", null, null);
+    }
+
+    @Test
+    public void create_fromDigitalDpvMessage_with_blank_sammendrag_falls_back_to_tittel() {
+        DigitalDpvMessage digitalDpvMessage = new DigitalDpvMessage();
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
+
+        digitalDpvMessage.setTittel("Digital Dpv");
+        digitalDpvMessage.setSammendrag("");
+        digitalDpvMessage.setInnhold("Digitalt innhold");
+
+        standardBusinessDocument.setAny(digitalDpvMessage);
+        message.setSbd(standardBusinessDocument);
+
+        correspondenceCreatorService.create(message, null, null);
+
+        verify(correspondenceFactory).create(message, "Digital Dpv", "Digital Dpv", "Digitalt innhold", null, null);
     }
 
     @Test
