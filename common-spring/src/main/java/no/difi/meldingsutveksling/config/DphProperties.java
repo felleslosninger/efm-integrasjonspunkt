@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.config;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -19,8 +18,6 @@ public class DphProperties {
     @NotNull
     private Integer defaultTtlHours;
 
-    @NotNull
-    @NotEmpty
     private List<@NotNull Integer> herIds;
 
     @NotNull
@@ -59,7 +56,6 @@ public class DphProperties {
     private Oidc oidc;
 
     @Valid
-    @NotNull
     @NestedConfigurationProperty
     private KeystoreProperties keystore;
 
