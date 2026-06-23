@@ -40,7 +40,9 @@ public class CorrespondenceCreatorService {
     private InitializeCorrespondencesExt handleDigitalDpvMessage(NextMoveOutMessage message, List<UUID> existingAttachments, List<BusinessMessageFile> newAttachmentsMetaData) {
         DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
-        var innhold = msg.getInnhold() != null ? msg.getInnhold() : "Ingen innhold";
+        var rawInnhold = msg.getInnhold();
+
+        var innhold = (rawInnhold != null && !rawInnhold.isBlank()) ? rawInnhold : "Ingen innhold";
 
         return correspondenceFactory.create(message,
             msg.getTittel(),
