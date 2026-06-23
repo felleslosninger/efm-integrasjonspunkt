@@ -76,7 +76,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <efm-common.version>2.1.0-RC4</efm-common.version>
         <efm-nhn-adapter.version>0.0.6</efm-nhn-adapter.version>
-        <bouncycastle.version>1.83</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
     </properties>
 
     <modules>
