@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class NextMoveMessageInService {
         throw new NoContentException();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Resource popMessage(String messageId) throws AsicPersistenceException {
         NextMoveInMessage message = messageRepo.findByMessageId(messageId)
             .orElseThrow(() -> new MessageNotFoundException(messageId));
@@ -95,7 +96,8 @@ public class NextMoveMessageInService {
             }
             messageRepo.delete(message);
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL, errorMsg);
-            // throw checked AsicPersistanceException so that deletion transaction is not rolled back
+            // REQUIRES_NEW ensures this transaction commits before the controller's transaction
+            // can be rolled back by the FileNotFoundException it throws after catching this.
             throw new AsicPersistenceException();
         }
     }
