@@ -25,3 +25,6 @@ CVE-2026-45416 # io.netty:netty-handler
 CVE-2026-45674 # io.netty:netty-resolver-dns
 CVE-2026-47691 # io.netty:netty-resolver-dns
 CVE-2026-50010 # io.netty:netty-handler
+
+CVE-2026-54512 # com.fasterxml.jackson.core:jackson-databind, fiksa i 2.21.4 (Spring Boot-styrt versjon)
+CVE-2026-54513 # com.fasterxml.jackson.core:jackson-databind, fiksa i 2.21.4 (Spring Boot-styrt versjon)
