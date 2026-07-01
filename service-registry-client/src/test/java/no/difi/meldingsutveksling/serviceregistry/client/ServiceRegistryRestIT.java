@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 
 @ExtendWith(MockitoExtension.class)
-class ServiceRegistryRestClientTest {
+class ServiceRegistryRestIT {
 
     private static final String BODY = "{ \"content\": \"1 2 3\" }";
     private static final String SIGNED_BODY = "{ \"signed\": \"1 2 3\" }";

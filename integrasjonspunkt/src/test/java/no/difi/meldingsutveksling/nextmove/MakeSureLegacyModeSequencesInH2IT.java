@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @ActiveProfiles("test")
-public class MakeSureLegacyModeSequencesInH2Test {
+public class MakeSureLegacyModeSequencesInH2IT {
 
     @PersistenceContext
     private EntityManager entityManager;

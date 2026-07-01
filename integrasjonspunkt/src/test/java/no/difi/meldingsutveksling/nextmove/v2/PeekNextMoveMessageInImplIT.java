@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = JacksonTestConfig.class)
-class PeekNextMoveMessageInImplTest {
+class PeekNextMoveMessageInImplIT {
 
     @Autowired
     private Clock clock;

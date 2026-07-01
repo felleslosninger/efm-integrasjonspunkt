@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.webhooks.event.WebhookContentFactory;
 import no.difi.meldingsutveksling.webhooks.event.WebhookEvent;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WebhookPusher {
 
     private final SubscriptionRepository subscriptionRepository;
-    private final ObjectMapper objectMapper;
+    private final @Lazy ObjectMapper objectMapper;
     private final UrlPusher urlPusher;
     private final WebhookContentFactory webhookContentFactory;
     private final WebhookFilterParser webhookFilterParser;

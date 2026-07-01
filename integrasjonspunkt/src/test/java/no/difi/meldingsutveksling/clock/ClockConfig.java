@@ -10,11 +10,11 @@ import java.time.Instant;
 import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
-public class TestClockConfig {
+public class ClockConfig {
 
     @Bean
-    public TestClock testClock() {
+    @Primary
+    public Clock testClock() {
         return new TestClock(TestClock.fixed(Instant.parse("2019-03-25T11:38:23Z"), DEFAULT_ZONE_ID));
     }
-
 }

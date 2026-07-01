@@ -16,6 +16,7 @@ import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import no.difi.move.common.oauth.JWTDecoder;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -62,6 +63,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public Clock systemClock() {
         return Clock.system(DEFAULT_ZONE_ID);
     }

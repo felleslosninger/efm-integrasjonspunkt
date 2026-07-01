@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.validation;
 
 import jakarta.validation.Validator;
 import lombok.Value;
-import no.difi.meldingsutveksling.clock.FixedClockConfig;
+import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.ValidationConfig;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringJUnitConfig(classes = {
         ValidationConfig.class,
-        FixedClockConfig.class
+        ClockConfig.class
 })
 public class InServiceRegistryValidatorTest {
 
@@ -32,7 +32,7 @@ public class InServiceRegistryValidatorTest {
     private static class Foo {
 
         @InServiceRegistry
-        private final String identifier;
+        String identifier;
     }
 
     @Test

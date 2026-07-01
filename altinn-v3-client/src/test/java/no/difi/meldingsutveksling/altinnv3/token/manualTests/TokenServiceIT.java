@@ -8,8 +8,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import no.difi.meldingsutveksling.altinnv3.token.*;
-import org.junit.jupiter.api.*;
+import no.difi.meldingsutveksling.altinnv3.token.AltinnTokenExchangeService;
+import no.difi.meldingsutveksling.altinnv3.token.MaskinportenTokenService;
+import no.difi.meldingsutveksling.altinnv3.token.TokenConfig;
+import no.difi.meldingsutveksling.altinnv3.token.TokenExchangeService;
+import no.difi.meldingsutveksling.altinnv3.token.TokenService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
@@ -22,11 +30,9 @@ import java.util.Properties;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TokenServiceTest {
+class TokenServiceIT {
 
     private WireMockServer wireMockServer;
-    private TokenService tokenService;
-    private TokenExchangeService tokenExchangeService;
 
     private static String path = "read-from-application-properties";
     private static String alias = "read-from-application-properties";
@@ -34,7 +40,7 @@ class TokenServiceTest {
 
     @BeforeAll
     static void init() throws Exception {
-        try (InputStream inputStream = TokenServiceTest.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream inputStream = TokenServiceIT.class.getClassLoader().getResourceAsStream("application.properties")) {
             var props = new Properties();
             props.load(inputStream);
             path = (String) props.get("difi.move.org.keystore.path");
@@ -61,17 +67,17 @@ class TokenServiceTest {
 
         // mock the maskinporten token endpoint
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("""
-                                {
-                                    "access_token": "test-access-token",
-                                    "token_type": "Bearer",
-                                    "expires_in": 119,
-                                    "scope":"altinn:broker.write altinn:broker.read altinn:serviceowner"
-                                }
-                                """)));
+            .willReturn(WireMock.aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                    {
+                        "access_token": "test-access-token",
+                        "token_type": "Bearer",
+                        "expires_in": 119,
+                        "scope":"altinn:broker.write altinn:broker.read altinn:serviceowner"
+                    }
+                    """)));
 
         // mock the token exchange endpoint
         wireMockServer.stubFor(WireMock.get(WireMock.urlEqualTo("/exchange"))
@@ -80,8 +86,8 @@ class TokenServiceTest {
                 .withBody("exchanged-token")));
 
         // manually create services since we're not in a spring context
-        tokenService = new MaskinportenTokenService();
-        tokenExchangeService = new AltinnTokenExchangeService(RestClient.create());
+        TokenService tokenService = new MaskinportenTokenService();
+        TokenExchangeService tokenExchangeService = new AltinnTokenExchangeService(RestClient.create());
 
         // we need to customize the deserialization of Resource to handle file paths
         ObjectMapper objectMapper = new ObjectMapper();
@@ -104,7 +110,7 @@ class TokenServiceTest {
             }
             """.formatted(wireMockServer.baseUrl(), alias, password, path, wireMockServer.baseUrl()), TokenConfig.class);
 
-        var token = tokenService.fetchToken(tc, List.of("altinn:broker.read","altinn:broker.write","altinn:serviceowner"), null);
+        var token = tokenService.fetchToken(tc, List.of("altinn:broker.read", "altinn:broker.write", "altinn:serviceowner"), null);
         assertEquals("test-access-token", token, "Token should match the mocked access token");
 
         var exchangedToken = tokenExchangeService.exchangeToken(token, tc.exchangeUrl());
@@ -112,7 +118,7 @@ class TokenServiceTest {
 
     }
 
-    public class ResourceDeserializer extends JsonDeserializer<Resource> {
+    public static class ResourceDeserializer extends JsonDeserializer<Resource> {
         @Override
         public Resource deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             String path = p.getText().substring(5);
@@ -120,7 +126,7 @@ class TokenServiceTest {
         }
     }
 
-    public class MyModule extends SimpleModule {
+    public static class MyModule extends SimpleModule {
         public MyModule() {
             super("MyModule");
             addDeserializer(Resource.class, new ResourceDeserializer());

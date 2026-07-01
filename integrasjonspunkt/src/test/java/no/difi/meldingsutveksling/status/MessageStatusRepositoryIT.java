@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class MessageStatusRepositoryTest {
+class MessageStatusRepositoryIT {
 
     @Autowired
     private MessageStatusRepository messageStatusRepository;
