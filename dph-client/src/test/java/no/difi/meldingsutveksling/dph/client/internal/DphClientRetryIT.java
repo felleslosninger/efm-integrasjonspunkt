@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
-class DphClientRetryTest {
+class DphClientRetryIT {
 
     @RegisterExtension
     static WireMockExtension wireMockExtension = WireMockExtension.newInstance()

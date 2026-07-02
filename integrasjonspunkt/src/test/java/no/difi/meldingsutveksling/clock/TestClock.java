@@ -11,7 +11,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 public class TestClock extends Clock implements Serializable {
     @Serial
     private static final long serialVersionUID = -8207373320104896738L;
-    private Clock initial;
+    private final Clock initial;
     private Clock active;
 
     TestClock(Clock initial) {

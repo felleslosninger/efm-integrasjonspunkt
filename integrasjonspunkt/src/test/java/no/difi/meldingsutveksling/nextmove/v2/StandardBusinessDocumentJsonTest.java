@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import no.difi.meldingsutveksling.clock.FixedClockConfig;
+import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.sbdh.*;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 @ActiveProfiles("test")
-@Import({JacksonConfig.class, FixedClockConfig.class})
+@Import({JacksonConfig.class, ClockConfig.class})
 public class StandardBusinessDocumentJsonTest {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

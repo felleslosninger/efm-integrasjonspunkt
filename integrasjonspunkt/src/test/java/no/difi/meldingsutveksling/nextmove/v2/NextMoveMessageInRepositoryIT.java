@@ -26,10 +26,10 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 @Transactional(propagation = NOT_SUPPORTED) // we're going to handle transactions manually
 @ActiveProfiles("test")
 @Import({JacksonTestConfig.class})
-class NextMoveMessageInRepositoryTest {
+class NextMoveMessageInRepositoryIT {
 
     @Autowired
-    @Qualifier("fixedClock")
+    @Qualifier("testClock")
     private Clock clock;
 
     @Autowired

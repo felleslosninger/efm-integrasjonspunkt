@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import no.difi.meldingsutveksling.clock.FixedClockConfig;
+import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesController;
 import no.difi.meldingsutveksling.nextmove.v2.CapabilitiesFactory;
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -32,7 +31,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
+@Import({ClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest({Oauth2ClientSecurityConfig.class, CapabilitiesController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
