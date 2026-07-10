@@ -28,3 +28,6 @@ CVE-2026-50010 # io.netty:netty-handler
 
 CVE-2026-54512 # com.fasterxml.jackson.core:jackson-databind, fiksa i 2.21.4 (Spring Boot-styrt versjon)
 CVE-2026-54513 # com.fasterxml.jackson.core:jackson-databind, fiksa i 2.21.4 (Spring Boot-styrt versjon)
+
+CVE-2026-42588 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
+CVE-2026-45505 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
