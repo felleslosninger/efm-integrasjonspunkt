@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,7 +43,7 @@ public class ServiceBusInSteps {
 
     @And("^the ServiceBus has the message available$")
     public void theServiceBusHasTheMessageAvailable() throws IOException {
-        MultiValueMap<String, String> headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.add("BrokerProperties", "{ \"MessageId\" : \"1\", \"LockToken\" : \"T1\", \"SequenceNumber\" : \"S1\" }");
 
         Message message = messageInHolder.get();
