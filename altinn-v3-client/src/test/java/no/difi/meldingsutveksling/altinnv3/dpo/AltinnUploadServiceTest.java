@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -46,6 +47,9 @@ public class AltinnUploadServiceTest {
     private ZipUtils zipUtils;
 
     @Mock
+    private ObjectProvider<TransactionTemplate> transactionTemplateObjectProvider;
+
+    @Mock
     private TransactionTemplate transactionTemplate;
 
     @Mock
@@ -66,7 +70,7 @@ public class AltinnUploadServiceTest {
     @BeforeEach
     public void beforeEach() {
         altinnUploadService = new AltinnDPOUploadService(brokerApiClient,
-            new PromiseMaker(Runnable::run, transactionTemplate),
+            new PromiseMaker(Runnable::run, transactionTemplateObjectProvider),
             zipUtils,
             integrasjonspunktProperties,
             new UUIDGenerator()
@@ -85,6 +89,7 @@ public class AltinnUploadServiceTest {
 
         when(integrasjonspunktProperties.getDpo()).thenReturn(dpoSettings);
         Mockito.when(zipUtils.getAltinnZip(Mockito.any(), Mockito.any())).thenReturn(emptyResource);
+        when(transactionTemplateObjectProvider.getIfAvailable()).thenReturn(transactionTemplate);
         when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
 

@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import lombok.*;
-import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
-
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
+import no.difi.meldingsutveksling.validation.group.NextMoveValidationGroups;
 
 @Getter
 @Setter
@@ -12,10 +12,10 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 public abstract class BusinessMessageAsAttachment<T extends BusinessMessageAsAttachment<T>> implements DocumentAsAttachment<T>, BusinessMessage {
 
-
     @NotNull(groups = {
-            NextMoveValidationGroups.MessageType.Digital.class,
-            NextMoveValidationGroups.MessageType.Print.class
+        NextMoveValidationGroups.MessageType.Digital.class,
+        NextMoveValidationGroups.MessageType.Print.class,
+        NextMoveValidationGroups.MessageType.Dialogmelding.class
     })
     private String hoveddokument;
 
@@ -23,6 +23,4 @@ public abstract class BusinessMessageAsAttachment<T extends BusinessMessageAsAtt
         this.hoveddokument = hoveddokument;
         return (T) this;
     }
-
-
 }

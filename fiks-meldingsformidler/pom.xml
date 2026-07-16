@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.difi.meldingsutveksling</groupId>
+            <groupId>no.difi.move-common</groupId>
             <artifactId>dokumentpakking</artifactId>
         </dependency>
         <dependency>

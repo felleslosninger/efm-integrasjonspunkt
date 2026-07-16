@@ -4,17 +4,12 @@ import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.domain.NhnIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.IdentifierNotFoundException;
 import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
 import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
-import no.difi.meldingsutveksling.exceptions.UnsupportedOperationStatusException;
 import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa;
-import no.difi.meldingsutveksling.nextmove.BusinessMessage;
-import no.difi.meldingsutveksling.serviceregistry.NotFoundInServiceRegistryException;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
@@ -30,61 +25,17 @@ public class ServiceRecordProvider {
 
     private final ServiceRegistryLookup serviceRegistryLookup;
 
-    public ServiceRecord getServiceRecord(StandardBusinessDocument sbd,Participant participant) {
+    public ServiceRecord getServiceRecord(StandardBusinessDocument sbd, Participant participant) {
         return sbd.getBusinessMessage(BusinessMessage.class)
-                .map(p -> getServiceRecord(sbd,p,participant))
-                .orElseThrow(MissingMessageTypeException::new);
+            .map(p -> getServiceRecord(sbd, p, participant))
+            .orElseThrow(MissingMessageTypeException::new);
     }
 
     private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage businessMessage, Participant participant) {
         try {
-            String participantId;
-            MessageType messageType = MessageType.valueOfType(sbd.getType())
-                .orElseThrow(() -> new  UnknownMessageTypeException(sbd.getType()));
-
-            if (messageType == MessageType.DIALOGMELDING) {
-
-                if (participant == Participant.RECEIVER) {
-                    var herID2 = sbd.getScope(ScopeType.RECEIVER_HERID2);
-                    var reciever = (NhnIdentifier) sbd.getReceiverIdentifier();
-                    if (reciever.isFastlegeIdentifier()) {
-                        participantId = reciever.getIdentifier();
-                    }
-                    else if (herID2.isPresent()) {
-                        participantId = herID2.get().getInstanceIdentifier();
-                    } else {
-                        // If we decide not to use 404 RecieverDoesNotAcceptDocumentType
-                        throw new IdentifierNotFoundException("Missing valid identifier and HerID2 definition for DIALOGMELDING");
-                    }
-                }
-                else {
-                    var herID2 = sbd.getScope(ScopeType.SENDER_HERID2);
-                    if (herID2.isPresent()) {
-                        participantId = herID2.get().getInstanceIdentifier();
-                    }
-                    else {
-                        throw new UnsupportedOperationStatusException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
-                    }
-
-                }
-                return getServiceRecord(sbd,businessMessage,participantId);
-
-            }
-            else {
-                try {
-                    if (participant == Participant.SENDER)
-                        throw new UnsupportedOperationStatusException("Fetching service record of sender is only supported for DPH , when HerID2 is supplied");
-                    participantId = sbd.getReceiverIdentifier().getPrimaryIdentifier();
-                    return getServiceRecord(sbd, businessMessage, participantId);
-                } catch (ServiceRegistryLookupException e) {
-                    throw new ReceiverDoesNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
-                }
-
-            }
-        } catch (NotFoundInServiceRegistryException e) {
-            throw new IdentifierNotFoundException(e.getMessage());
-        }
-        catch (ServiceRegistryLookupException e) {
+            String participantId = (participant == Participant.RECEIVER ? sbd.getReceiverIdentifier() : sbd.getSenderIdentifier()).getPrimaryIdentifier();
+            return getServiceRecord(sbd, businessMessage, participantId);
+        } catch (ServiceRegistryLookupException e) {
             throw new ReceiverDoesNotAcceptProcessException(sbd.getProcess(), e.getLocalizedMessage());
         }
     }
@@ -118,6 +69,6 @@ public class ServiceRecordProvider {
             return UNKNOWN;
         }
 
-        return getServiceRecord(sbd,Participant.RECEIVER).getServiceIdentifier();
+        return getServiceRecord(sbd, Participant.RECEIVER).getServiceIdentifier();
     }
 }

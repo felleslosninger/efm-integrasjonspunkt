@@ -26,9 +26,7 @@ public class DpoTokenProducer {
         String maskinportenToken = tokenService.fetchToken(config, scopes, authorizationClaims);
 
         // altinn token har levetid på 1800 sekunder (30 min), vs 120 sekunder (2 min) for maskinporten token
-        var altinnToken = tokenExchangeService.exchangeToken(maskinportenToken, config.exchangeUrl());
-
-        return altinnToken;
+        return tokenExchangeService.exchangeToken(maskinportenToken, config.exchangeUrl());
     }
 
 }

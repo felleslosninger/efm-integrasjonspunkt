@@ -40,10 +40,14 @@ public class CorrespondenceCreatorService {
     private InitializeCorrespondencesExt handleDigitalDpvMessage(NextMoveOutMessage message, List<UUID> existingAttachments, List<BusinessMessageFile> newAttachmentsMetaData) {
         DigitalDpvMessage msg = (DigitalDpvMessage) message.getBusinessMessage();
 
+        var rawInnhold = msg.getInnhold();
+
+        var innhold = (rawInnhold != null && !rawInnhold.isBlank()) ? rawInnhold : "Ingen innhold";
+
         return correspondenceFactory.create(message,
             msg.getTittel(),
             msg.getSammendrag(),
-            msg.getInnhold(),
+            innhold,
             existingAttachments,
             newAttachmentsMetaData
         );
@@ -56,9 +60,11 @@ public class CorrespondenceCreatorService {
         Arkivmelding arkivmelding = dpvHelper.getArkivmelding(message, fileMap);
         Journalpost jp = arkivmeldingUtil.getJournalpost(arkivmelding);
 
+        var title = jp.getOffentligTittel() != null ? jp.getOffentligTittel() : jp.getTittel();
+
         return correspondenceFactory.create(message,
-            jp.getOffentligTittel(),
-            jp.getOffentligTittel(),
+            title,
+            title,
             jp.getTittel(),
             existingAttachments,
             newAttachmentsMetaData

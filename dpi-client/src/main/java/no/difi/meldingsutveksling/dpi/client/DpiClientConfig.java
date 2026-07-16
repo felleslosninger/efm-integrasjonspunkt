@@ -12,7 +12,7 @@ import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.certvalidator.BusinessCertificateValidatorFactory;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
+import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;

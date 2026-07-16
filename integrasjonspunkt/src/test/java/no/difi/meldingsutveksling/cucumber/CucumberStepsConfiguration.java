@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
-import no.difi.meldingsutveksling.clock.TestClock;
-import no.difi.meldingsutveksling.clock.TestClockConfig;
+import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -21,49 +19,51 @@ import no.difi.meldingsutveksling.nextmove.PrintService;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.AsicParser;
 import no.ks.fiks.io.client.FiksIOKlient;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
-import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.client.RestClient;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
 import java.io.File;
-import java.time.Clock;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {
-        IntegrasjonspunktApplication.class,
-        TestClockConfig.class,
-        CucumberStepsConfiguration.SpringConfiguration.class,
-        CucumberStepsConfiguration.SvarUtConfiguration.class
-}, loader = SpringBootContextLoader.class)
 @CucumberContextConfiguration
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = {
+        IntegrasjonspunktApplication.class,
+        ClockConfig.class,
+        CucumberStepsConfiguration.SpringConfiguration.class,
+        CucumberStepsConfiguration.SvarUtConfiguration.class
+    }
 )
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("cucumber")
 @AutoConfigureWebClient(registerRestTemplate = true)
 @Slf4j
 @TestPropertySource
+@MockitoSpyBean(types = {WebhookPusher.class, IntegrasjonspunktProperties.class})
 public class CucumberStepsConfiguration {
 
     @Configuration
@@ -86,8 +86,6 @@ public class CucumberStepsConfiguration {
     @Configuration
     @Profile("cucumber")
     @RequiredArgsConstructor
-    @SpyBean(WebhookPusher.class)
-    @SpyBean(IntegrasjonspunktProperties.class)
     public static class SpringConfiguration {
 
         @Primary
@@ -96,12 +94,6 @@ public class CucumberStepsConfiguration {
             UUIDGenerator uuidGenerator = mock(UUIDGenerator.class);
             when(uuidGenerator.generate()).thenReturn("ff88849c-e281-4809-8555-7cd54952b921");
             return uuidGenerator;
-        }
-
-        @Primary
-        @Bean
-        public Clock clock(TestClock testClock) {
-            return testClock;
         }
 
         @Bean
@@ -187,14 +179,21 @@ public class CucumberStepsConfiguration {
     @TempDir
     File temporaryFolder;
 
-    @MockitoBean public UUIDGenerator uuidGenerator;
-    @MockitoBean public InternalQueue internalQueue;
-    @MockitoBean public ServiceBusRestTemplate serviceBusRestTemplate;
-    @MockitoBean public SvarUtConnectionCheck svarUtConnectionCheck;
-    @MockitoBean public SvarInnConnectionCheck svarInnConnectionCheck;
-//    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
-    @MockitoBean public FiksIOKlient fiksIOKlient;
+    @MockitoBean
+    public UUIDGenerator uuidGenerator;
+    @MockitoBean
+    public InternalQueue internalQueue;
+    @MockitoBean
+    public ServiceBusRestTemplate serviceBusRestTemplate;
+    @MockitoBean
+    public SvarUtConnectionCheck svarUtConnectionCheck;
+    @MockitoBean
+    public SvarInnConnectionCheck svarInnConnectionCheck;
+    //    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
+    @MockitoBean
+    public FiksIOKlient fiksIOKlient;
 
-    @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS) public RestClient restClient;
+    @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
+    public RestClient restClient;
 
 }

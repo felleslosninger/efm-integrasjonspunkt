@@ -15,7 +15,7 @@ Feature: Receiving a FIKS IO message
     And FIKS IO has the message available for kontoId "47b0c75b-ddb5-447b-88d2-c4030d183fb3" with protocol "no.digdir.einnsyn.v1"
     And the FIKS IO subscriber is registered
 
-  Scenario: As a user I want to receive a DPE message
+  Scenario: As a user I want to receive a FIKS IO message
 
     Given I peek and lock a message
     And I pop the locked message

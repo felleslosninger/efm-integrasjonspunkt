@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusEventExt;
+import no.digdir.altinn3.correspondence.model.CorrespondenceStatusExt;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,15 +39,24 @@ public class AltinnDPVService {
         return result.getCorrespondences().getFirst().getCorrespondenceId();
     }
 
-    public List<CorrespondenceStatusEventExt> getStatus(Conversation conversation){
+    public List<CorrespondenceStatusEventExt> getStatus(Conversation conversation) {
         var correspondenceId = conversation.getExternalSystemReference();
 
-        if(correspondenceId == null || correspondenceId.isEmpty()) {
+        if (correspondenceId == null || correspondenceId.isEmpty()) {
             throw new InvalidConversationReferenceException("Missing correspondenceId in conversation reference for conversation " + conversation.getConversationId());
         }
 
-        return client.getCorrespondenceDetails(UUID.fromString(correspondenceId))
-            .getStatusHistory();
+        List<CorrespondenceStatusEventExt> statusEvents = new ArrayList<>();
+        var overview = client.getCorrespondenceOverview(UUID.fromString(correspondenceId));
+        statusEvents.add(createStatusEvent(CorrespondenceStatusExt.INITIALIZED, overview.getCreated()));
+        if (overview.getPublished() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.PUBLISHED, overview.getPublished()));
+        if (overview.getRead() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.READ, overview.getRead()));
+        return statusEvents;
+
+    }
+
+    private CorrespondenceStatusEventExt createStatusEvent(CorrespondenceStatusExt status, OffsetDateTime timestamp) {
+        return new CorrespondenceStatusEventExt().status(status).statusChanged(timestamp).statusText(status.getValue());
     }
 
 }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLockType;
@@ -38,7 +39,7 @@ public class NextMoveOutMessage extends NextMoveMessage {
 
 
     public static NextMoveOutMessage of(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        NextMoveOutMessage message = new NextMoveOutMessage(
+        return new NextMoveOutMessage(
                 sbd.getConversationId(),
                 sbd.getMessageId(),
                 sbd.getProcess(),
@@ -46,8 +47,6 @@ public class NextMoveOutMessage extends NextMoveMessage {
                 getPartOrPrimaryIdentifier(sbd.getSenderIdentifier()),
                 serviceIdentifier,
                 sbd);
-        message.setFiles(new HashSet<>());
-        return message;
     }
 
     public boolean isPrimaryDocument(String filename) {

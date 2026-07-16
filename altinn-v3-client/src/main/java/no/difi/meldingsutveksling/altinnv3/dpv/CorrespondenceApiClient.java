@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.digdir.altinn3.correspondence.model.AttachmentDetailsExt;
-import no.digdir.altinn3.correspondence.model.CorrespondenceDetailsExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
+import no.digdir.altinn3.correspondence.model.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpRequest;
@@ -83,15 +80,29 @@ public class CorrespondenceApiClient {
             ;
     }
 
+    // dette er en "tung" operasjon hos Altinn (påvirker Dialogporten og Notification også), bruk med måte
     public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
         String accessToken = tokenProducer.produceToken(scopes);
-
+        log.debug("Fetching details for correspondenceId {} from Altinn Correspondence API", correspondenceId);
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/details", correspondenceId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
             .body(CorrespondenceDetailsExt.class)
+            ;
+    }
+
+    // dette er en "rask" operasjon hos Altinn (benytt denne fremfor getCorrespondenceDetails der det er mulig)
+    public CorrespondenceOverviewExt getCorrespondenceOverview(UUID correspondenceId) {
+        String accessToken = tokenProducer.produceToken(scopes);
+        log.debug("Fetching overview for correspondenceId {} from Altinn Correspondence API", correspondenceId);
+        return restClient.get()
+            .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}", correspondenceId)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(CorrespondenceOverviewExt.class)
             ;
     }
 

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.cucumber;
 
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;

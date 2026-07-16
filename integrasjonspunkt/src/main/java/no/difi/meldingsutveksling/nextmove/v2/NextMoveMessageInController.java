@@ -1,5 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.asic.AsicUtils;
@@ -22,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,7 +37,7 @@ import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFr
 @RequiredArgsConstructor
 public class NextMoveMessageInController {
 
-    private static final MediaType MIMETYPE_ASICE = MediaType.parseMediaType(AsicUtils.MIMETYPE_ASICE);
+    public static final MediaType MIMETYPE_ASICE = MediaType.parseMediaType(AsicUtils.MIMETYPE_ASICE);
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     private static final String HEADER_FILENAME = "attachment; filename=";
 
@@ -46,15 +46,15 @@ public class NextMoveMessageInController {
     @GetMapping
     @Transactional
     public Page<StandardBusinessDocument> findMessages(
-            @Valid NextMoveInMessageQueryInput input,
-            @PageableDefault Pageable pageable) {
+        @Valid NextMoveInMessageQueryInput input,
+        @PageableDefault Pageable pageable) {
         return messageService.findMessages(input, pageable);
     }
 
     @GetMapping(value = "peek")
     public StandardBusinessDocument peek(@Valid NextMoveInMessageQueryInput input) {
         NextMoveInMessage message = messageService.peek(input)
-                .orElseThrow(NoContentException::new);
+            .orElseThrow(NoContentException::new);
         MDC.put(NextMoveConsts.CORRELATION_ID, message.getMessageId());
         Audit.info("Message [id=%s] locked until %s".formatted(message.getMessageId(), message.getLockTimeout()), markerFrom(message));
         return message.getSbd();

@@ -25,14 +25,16 @@ public enum MessageType {
     FIKSIO("fiksio"),
     DIGITAL("digital"),
     DIGITAL_DPV("digital_dpv"),
-    DIALOGMELDING("dialogmelding"),
     PRINT("print"),
+
+    DIALOGMELDING("dialogmelding"),
+    DIALOGMELDING_KVITTERING("dialogmelding_kvittering"),
 
     INNSYNSKRAV("innsynskrav"),
     PUBLISERING("publisering"),
     EINNSYN_KVITTERING("einnsyn_kvittering");
 
-    private static final Set<MessageType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING);
+    private static final Set<MessageType> RECEIPTS = EnumSet.of(ARKIVMELDING_KVITTERING, EINNSYN_KVITTERING, DIALOGMELDING_KVITTERING);
 
     private final String type;
 

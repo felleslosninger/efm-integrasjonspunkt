@@ -2,9 +2,8 @@ package no.difi.meldingsutveksling.nextmove;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.difi.meldingsutveksling.clock.FixedClockConfig;
+import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
-import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -16,11 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -33,8 +35,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.*;
-import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.*;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus1;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus2;
+import static no.difi.meldingsutveksling.nextmove.MessageStatusTestData.messageStatus3;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getDefaultHeaderDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.getPagingParameterDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.messageStatusDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageDescriptors;
+import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageableDescriptors;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,12 +53,18 @@ import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({FixedClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
+@Import({ClockConfig.class, JacksonConfig.class, JacksonMockitoConfig.class})
 @WebMvcTest({Oauth2ClientSecurityConfig.class, MessageStatusController.class})
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")
@@ -65,51 +79,48 @@ public class MessageStatusControllerTest {
     @MockitoBean
     private StatusQueue statusQueue;
 
-    @MockitoBean
-    private NhnAdapterClient nhnAdapterClient;
-
     @Test
     public void find() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<MessageStatus> content = Arrays.asList(messageStatus1(), messageStatus2());
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<MessageStatus> content = Arrays.asList(messageStatus1(), messageStatus2());
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
                 get("/api/statuses")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id", is(1)))
-                .andExpect(jsonPath("$.content[0].convId", is(2)))
-                .andExpect(jsonPath("$.content[0].lastUpdate", is("2019-11-05T12:04:34+02:00")))
-                .andExpect(jsonPath("$.content[0].status", is("MOTTATT")))
-                .andExpect(jsonPath("$.content[0].description", is("Mottatt")))
-                .andExpect(jsonPath("$.content[0].messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
-                .andExpect(jsonPath("$.content[0].conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
-                .andDo(document("statuses/find",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        queryParameters(
-                                parameterWithName("id").optional().description("Filter on the numeric message status ID"),
-                                parameterWithName("messageId").optional().description("Filter on messageId"),
-                                parameterWithName("conversationId").optional().description("Filter on conversationId"),
-                                parameterWithName("status").optional().description("Filter on status. Can be one of: %s".formatted(Arrays.stream(ReceiptStatus.values())
-                                        .map(Enum::name)
-                                        .collect(Collectors.joining(", "))))
-                        ).and(getPagingParameterDescriptors()),
-                        responseFields()
-                                .and(messageStatusDescriptors("content[]."))
-                                .and(pageDescriptors())
-                                .andWithPrefix("pageable.", pageableDescriptors())
-                        )
-                );
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id", is(1)))
+            .andExpect(jsonPath("$.content[0].convId", is(2)))
+            .andExpect(jsonPath("$.content[0].lastUpdate", is("2019-11-05T12:04:34+02:00")))
+            .andExpect(jsonPath("$.content[0].status", is("MOTTATT")))
+            .andExpect(jsonPath("$.content[0].description", is("Mottatt")))
+            .andExpect(jsonPath("$.content[0].messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
+            .andExpect(jsonPath("$.content[0].conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
+            .andDo(document("statuses/find",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    queryParameters(
+                        parameterWithName("id").optional().description("Filter on the numeric message status ID"),
+                        parameterWithName("messageId").optional().description("Filter on messageId"),
+                        parameterWithName("conversationId").optional().description("Filter on conversationId"),
+                        parameterWithName("status").optional().description("Filter on status. Can be one of: %s".formatted(Arrays.stream(ReceiptStatus.values())
+                            .map(Enum::name)
+                            .collect(Collectors.joining(", "))))
+                    ).and(getPagingParameterDescriptors()),
+                    responseFields()
+                        .and(messageStatusDescriptors("content[]."))
+                        .and(pageDescriptors())
+                        .andWithPrefix("pageable.", pageableDescriptors())
+                )
+            );
 
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
     }
@@ -117,21 +128,21 @@ public class MessageStatusControllerTest {
     @Test
     public void findSearch() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus1());
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<MessageStatus> content = Collections.singletonList(messageStatus1());
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
                 get("/api/statuses")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .param("messageId", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
-                        .param("status", "MOTTATT")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("statuses/find/search"));
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("messageId", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
+                    .param("status", "MOTTATT")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("statuses/find/search"));
 
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
     }
@@ -139,20 +150,20 @@ public class MessageStatusControllerTest {
     @Test
     public void findSorting() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<MessageStatus> content = Arrays.asList(messageStatus2(), messageStatus1());
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<MessageStatus> content = Arrays.asList(messageStatus2(), messageStatus1());
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
                 get("/api/statuses")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .param("sort", "lastUpdated,asc")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("statuses/find/sorting"));
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("sort", "lastUpdated,asc")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("statuses/find/sorting"));
 
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
     }
@@ -160,21 +171,21 @@ public class MessageStatusControllerTest {
     @Test
     public void findPaging() throws Exception {
         given(statusRepo.find(any(MessageStatusQueryInput.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus2());
-                    return new PageImpl<>(content, invocation.getArgument(1), 31L);
-                });
+            .willAnswer(invocation -> {
+                List<MessageStatus> content = Collections.singletonList(messageStatus2());
+                return new PageImpl<>(content, invocation.getArgument(1), 31L);
+            });
 
         mvc.perform(
                 get("/api/statuses")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .param("page", "3")
-                        .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("statuses/find/paging"));
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .param("page", "3")
+                    .param("size", "10")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andDo(document("statuses/find/paging"));
 
         verify(statusRepo).find(any(MessageStatusQueryInput.class), any(Pageable.class));
     }
@@ -185,27 +196,27 @@ public class MessageStatusControllerTest {
         OffsetDateTime toDateTime = OffsetDateTime.parse("2023-06-10T10:18:41.121+02:00");
 
         List<MessageStatus> mockData = Arrays.asList(
-                messageStatus1(),
-                messageStatus2(),
-                messageStatus3()
+            messageStatus1(),
+            messageStatus2(),
+            messageStatus3()
         );
 
         Pageable pageable = PageRequest.of(0, mockData.size(), Sort.unsorted());
         Page<MessageStatus> page = new PageImpl<>(mockData, pageable, mockData.size());
 
         when(statusRepo.find(
-                any(MessageStatusQueryInput.class),
-                any(Pageable.class)
+            any(MessageStatusQueryInput.class),
+            any(Pageable.class)
         )).thenReturn(page);
 
         MvcResult mvcResult = mvc.perform(get("/api/statuses")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .param("fromDateTime", fromDateTime.toString())
-                        .param("toDateTime", toDateTime.toString())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                .param("fromDateTime", fromDateTime.toString())
+                .param("toDateTime", toDateTime.toString())
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -218,40 +229,40 @@ public class MessageStatusControllerTest {
     @Test
     public void findByMessageId() throws Exception {
         given(statusRepo.findByConversationMessageId(any(String.class), any(Pageable.class)))
-                .willAnswer(invocation -> {
-                    List<MessageStatus> content = Collections.singletonList(messageStatus1());
-                    return new PageImpl<>(content, invocation.getArgument(1), content.size());
-                });
+            .willAnswer(invocation -> {
+                List<MessageStatus> content = Collections.singletonList(messageStatus1());
+                return new PageImpl<>(content, invocation.getArgument(1), content.size());
+            });
 
         mvc.perform(
                 get("/api/statuses/{messageId}", "1cc3fb67-b776-4730-b017-1028b86a8b8b")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id", is(1)))
-                .andExpect(jsonPath("$.content[0].convId", is(2)))
-                .andExpect(jsonPath("$.content[0].lastUpdate", is("2019-11-05T12:04:34+02:00")))
-                .andExpect(jsonPath("$.content[0].status", is("MOTTATT")))
-                .andExpect(jsonPath("$.content[0].description", is("Mottatt")))
-                .andExpect(jsonPath("$.content[0].messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
-                .andExpect(jsonPath("$.content[0].conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
-                .andDo(document("statuses/find-by-message-id",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        pathParameters(
-                                parameterWithName("messageId").description("The messageId")
-                        ).and(getPagingParameterDescriptors()),
-                        responseFields()
-                                .and(messageStatusDescriptors("content[]."))
-                                .and(pageDescriptors())
-                                .andWithPrefix("pageable.", pageableDescriptors())
-                        )
-                );
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id", is(1)))
+            .andExpect(jsonPath("$.content[0].convId", is(2)))
+            .andExpect(jsonPath("$.content[0].lastUpdate", is("2019-11-05T12:04:34+02:00")))
+            .andExpect(jsonPath("$.content[0].status", is("MOTTATT")))
+            .andExpect(jsonPath("$.content[0].description", is("Mottatt")))
+            .andExpect(jsonPath("$.content[0].messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
+            .andExpect(jsonPath("$.content[0].conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
+            .andDo(document("statuses/find-by-message-id",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    pathParameters(
+                        parameterWithName("messageId").description("The messageId")
+                    ).and(getPagingParameterDescriptors()),
+                    responseFields()
+                        .and(messageStatusDescriptors("content[]."))
+                        .and(pageDescriptors())
+                        .andWithPrefix("pageable.", pageableDescriptors())
+                )
+            );
 
         verify(statusRepo).findByConversationMessageId(eq("1cc3fb67-b776-4730-b017-1028b86a8b8b"), any(Pageable.class));
     }
@@ -264,26 +275,26 @@ public class MessageStatusControllerTest {
 
         mvc.perform(
                 get("/api/statuses/peek")
-                        .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
-                        .accept(MediaType.APPLICATION_JSON)
-        )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.convId", is(2)))
-                .andExpect(jsonPath("$.lastUpdate", is("2019-11-05T12:04:34+02:00")))
-                .andExpect(jsonPath("$.status", is("MOTTATT")))
-                .andExpect(jsonPath("$.description", is("Mottatt")))
-                .andExpect(jsonPath("$.messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
-                .andExpect(jsonPath("$.conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
-                .andDo(document("statuses/peek-latest",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        requestHeaders(
-                                getDefaultHeaderDescriptors()
-                        ),
-                        responseFields(messageStatusDescriptors(""))
-                        )
-                );
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(1)))
+            .andExpect(jsonPath("$.convId", is(2)))
+            .andExpect(jsonPath("$.lastUpdate", is("2019-11-05T12:04:34+02:00")))
+            .andExpect(jsonPath("$.status", is("MOTTATT")))
+            .andExpect(jsonPath("$.description", is("Mottatt")))
+            .andExpect(jsonPath("$.messageId", is("1cc3fb67-b776-4730-b017-1028b86a8b8b")))
+            .andExpect(jsonPath("$.conversationId", is("cc3740ec-c6c1-474f-a93d-7e73816ca34b")))
+            .andDo(document("statuses/peek-latest",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    requestHeaders(
+                        getDefaultHeaderDescriptors()
+                    ),
+                    responseFields(messageStatusDescriptors(""))
+                )
+            );
     }
 }

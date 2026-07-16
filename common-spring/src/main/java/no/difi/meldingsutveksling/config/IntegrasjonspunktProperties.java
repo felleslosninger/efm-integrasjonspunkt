@@ -1,6 +1,11 @@
 package no.difi.meldingsutveksling.config;
 
 import com.google.common.collect.Sets;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -11,13 +16,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import java.net.URL;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -58,7 +57,8 @@ public class IntegrasjonspunktProperties {
     private PostVirksomheter dpv;
 
     @Valid
-    private DphConfig dph;
+    @NestedConfigurationProperty
+    private DphProperties dph;
 
     @Valid
     @NestedConfigurationProperty
@@ -131,15 +131,6 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String defaultInnsynskravDocumentType;
         private String receiptProcess;
-
-    }
-
-    @Data
-    public static class DphConfig {
-        private List<String> whitelistOrgnum;
-        private Boolean allowMultitenancy;
-        private DataSize uploadSizeLimit;
-        private String adapterUrl;
     }
 
     @Data
@@ -147,7 +138,6 @@ public class IntegrasjonspunktProperties {
         @NotNull
         private String host;
         private boolean disable;
-
     }
 
     @Data
@@ -202,10 +192,15 @@ public class IntegrasjonspunktProperties {
         private String clientIdPrefix;
         @NestedConfigurationProperty
         private KeystoreProperties keystore;
+
+        @NotNull
+        private Integer connectTimeout;
+        @NotNull
+        private Integer readTimeout;
     }
 
     /**
-     * SR signing
+     * SR signingKeystore
      */
     @Data
     public static class Sign {
@@ -237,6 +232,12 @@ public class IntegrasjonspunktProperties {
 
         @NotNull
         private String filedir;
+        /**
+         * Directory for the transient on-disk cache used when streaming database BLOBs (db-persistence mode).
+         * Optional - defaults to the system temp directory when not set. In containers this should point at a
+         * sized, disk-backed (not tmpfs) volume.
+         */
+        private String blobCacheDir;
         @NotNull
         private Integer lockTimeoutMinutes;
         @NotNull
