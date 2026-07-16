@@ -3,11 +3,12 @@ package no.difi.meldingsutveksling.config;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.converter.MultipartFileToStandardBusinessDocumentConverter;
 import no.difi.meldingsutveksling.converter.StringToStandardBusinessDocumentConverter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -18,19 +19,20 @@ public class MvcConfiguration implements WebMvcConfigurer {
     private final StringToStandardBusinessDocumentConverter stringToStandardBusinessDocumentConverter;
     private final MultipartFileToStandardBusinessDocumentConverter multipartFileToStandardBusinessDocumentConverter;
 
-    @Value("${difi.move.feature.allowDeprecatedTrailingSlash:false}")
-    private boolean allowDeprecatedTrailingSlash;
-
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(stringToStandardBusinessDocumentConverter);
         registry.addConverter(multipartFileToStandardBusinessDocumentConverter);
     }
 
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        if (allowDeprecatedTrailingSlash) {
-            configurer.setUseTrailingSlashMatch(true);
-        }
+    /**
+     * Replaces PathMatchConfigurer.setUseTrailingSlashMatch(true), which is removed in
+     * Spring Framework 7. The filter transparently strips a trailing slash from incoming
+     * requests before handler mapping, preserving the deprecated trailing slash behaviour.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "difi.move.feature.allowDeprecatedTrailingSlash", havingValue = "true")
+    UrlHandlerFilter urlHandlerFilter() {
+        return UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
     }
 }
