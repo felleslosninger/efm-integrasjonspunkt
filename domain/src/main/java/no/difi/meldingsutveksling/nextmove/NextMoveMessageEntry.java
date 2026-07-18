@@ -29,7 +29,7 @@ public class NextMoveMessageEntry {
     private String filename;
 
     @Lob
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "LONGBLOB")
     @NonNull
     private Blob content;
 
