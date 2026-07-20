@@ -22,7 +22,6 @@ public enum MessageType {
 
     AVTALT("avtalt"),
 
-    FIKSIO("fiksio"),
     DIGITAL("digital"),
     DIGITAL_DPV("digital_dpv"),
     PRINT("print"),

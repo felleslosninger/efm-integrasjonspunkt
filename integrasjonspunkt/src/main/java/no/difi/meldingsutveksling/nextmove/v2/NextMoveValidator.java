@@ -84,7 +84,6 @@ import static no.difi.meldingsutveksling.MessageType.ARKIVMELDING;
 import static no.difi.meldingsutveksling.MessageType.DIALOGMELDING;
 import static no.difi.meldingsutveksling.MessageType.DIGITAL;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPFIO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPH;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
@@ -147,7 +146,7 @@ public class NextMoveValidator {
             validatePrintBusinessMessage(sbd);
         }
 
-        if (!messageType.fitsDocumentIdentifier(sbd.getDocumentType()) && serviceIdentifier != DPFIO) {
+        if (!messageType.fitsDocumentIdentifier(sbd.getDocumentType())) {
             throw new MessageTypeDoesNotFitDocumentTypeException(messageType, sbd.getDocumentType());
         }
 

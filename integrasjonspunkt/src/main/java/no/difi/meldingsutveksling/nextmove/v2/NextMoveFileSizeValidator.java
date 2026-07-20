@@ -44,9 +44,6 @@ public class NextMoveFileSizeValidator {
             case DPI:
                 limit = props.getDpi().getUploadSizeLimit();
                 break;
-            case DPFIO:
-                limit = props.getFiks().getIo().getUploadSizeLimit();
-                break;
             case DPH:
                 limit = props.getDph().getUploadSizeLimit();
                 break;

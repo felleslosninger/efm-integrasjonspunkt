@@ -36,9 +36,6 @@
     <li class="nav-item" role="presentation" th:if="${services.contains('DPF')}">
         <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab" aria-controls="tab5" aria-selected="false">DPF</button>
     </li>
-    <li class="nav-item" role="presentation" th:if="${services.contains('DPFIO')}">
-        <button class="nav-link" id="tab6-tab" data-bs-toggle="tab" data-bs-target="#tab6" type="button" role="tab" aria-controls="tab6" aria-selected="false">DPFIO</button>
-    </li>
     <li class="nav-item" role="presentation" th:if="${services.contains('DPE')}">
         <button class="nav-link" id="tab7-tab" data-bs-toggle="tab" data-bs-target="#tab7" type="button" role="tab" aria-controls="tab7" aria-selected="false">DPE</button>
     </li>
@@ -186,7 +183,6 @@
     </div>
 
     <div th:if="${services.contains('DPF')}" th:replace="~{fragments/tab :: service(id='tab5', type='DPF')}"></div>
-    <div th:if="${services.contains('DPFIO')}" th:replace="~{fragments/tab :: service(id='tab6', type='DPFIO')}"></div>
     <div th:if="${services.contains('DPE')}" th:replace="~{fragments/tab :: service(id='tab7', type='DPE')}"></div>
     <div th:if="${services.contains('DPH')}" th:replace="~{fragments/tab :: service(id='tab8', type='DPH')}"></div>
 

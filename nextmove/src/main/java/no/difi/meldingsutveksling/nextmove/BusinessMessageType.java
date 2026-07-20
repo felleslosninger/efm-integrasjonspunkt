@@ -17,7 +17,6 @@ public enum BusinessMessageType implements StandardBusinessDocumentType {
 
     AVTALT("avtalt", AvtaltMessage.class),
 
-    FIKSIO("fiksio", FiksIoMessage.class),
     DIGITAL("digital", DpiDigitalMessage.class),
     DIGITAL_DPV("digital_dpv", DigitalDpvMessage.class),
     PRINT("print", DpiPrintMessage.class),

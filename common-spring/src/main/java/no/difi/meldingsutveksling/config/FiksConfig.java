@@ -27,7 +27,6 @@ public class FiksConfig {
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();
-    FiksIO io = new FiksIO();
 
     @Data
     @ToString(exclude = "password")
@@ -36,20 +35,6 @@ public class FiksConfig {
         private String username;
         @NotEmpty
         private String password;
-    }
-
-    @Data
-    @ToString(exclude = "integrasjonsPassord")
-    public static class FiksIO {
-        private String senderOrgnr;
-        private String host;
-        private String apiHost;
-        private String kontoId;
-        private String integrasjonsId;
-        private String integrasjonsPassord;
-        private DataSize uploadSizeLimit;
-        @NotNull
-        private Integer defaultTtlHours;
     }
 
     @Data
