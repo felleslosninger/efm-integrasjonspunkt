@@ -6,9 +6,6 @@ public interface NextMoveValidationGroups {
 
     interface MessageType extends Default {
 
-        interface FiksIo extends MessageType {
-        }
-
         interface Arkivmelding extends MessageType {
         }
 
@@ -60,9 +57,6 @@ public interface NextMoveValidationGroups {
         }
 
         interface DPV extends ServiceIdentifier {
-        }
-
-        interface DPFIO extends ServiceIdentifier {
         }
 
         interface UNKNOWN extends ServiceIdentifier {

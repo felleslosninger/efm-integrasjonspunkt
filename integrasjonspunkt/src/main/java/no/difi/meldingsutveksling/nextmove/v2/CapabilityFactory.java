@@ -28,7 +28,7 @@ public class CapabilityFactory {
                         .stream()
                         .map(standard -> new DocumentType()
                                 .setStandard(standard)
-                                .setType(getType(standard, serviceRecord)))
+                                .setType(getType(standard)))
                         .collect(Collectors.toList()))
                 .setDigitalPostAddress(getDigitalPostAddress(serviceRecord));
     }
@@ -53,9 +53,9 @@ public class CapabilityFactory {
                 : null;
     }
 
-    String getType(String standard, ServiceRecord record) {
+    String getType(String standard) {
         return MessageType.valueOfDocumentType(standard)
                 .map(MessageType::getType)
-                .orElseGet(() -> record.getServiceIdentifier() == ServiceIdentifier.DPFIO ? MessageType.FIKSIO.getType() : null);
+                .orElse(null);
     }
 }

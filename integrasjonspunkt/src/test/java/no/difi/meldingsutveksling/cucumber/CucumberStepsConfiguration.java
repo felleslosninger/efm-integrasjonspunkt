@@ -20,7 +20,6 @@ import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.AsicParser;
-import no.ks.fiks.io.client.FiksIOKlient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -190,8 +189,6 @@ public class CucumberStepsConfiguration {
     @MockitoBean
     public SvarInnConnectionCheck svarInnConnectionCheck;
     //    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
-    @MockitoBean
-    public FiksIOKlient fiksIOKlient;
 
     @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
     public RestClient restClient;

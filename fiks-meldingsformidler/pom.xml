@@ -32,21 +32,6 @@
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.ks.fiks</groupId>
-            <artifactId>fiks-io-klient-java</artifactId>
-            <version>3.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-common</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <build>

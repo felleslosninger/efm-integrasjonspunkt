@@ -35,7 +35,6 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         if (props.getFeature().isEnableDPV()) channels.add("DPV");
         if (props.getFeature().isEnableDPI()) channels.add("DPI");
         if (props.getFeature().isEnableDPF()) channels.add("DPF");
-        if (props.getFeature().isEnableDPFIO()) channels.add("DPFIO");
         if (props.getFeature().isEnableDPE()) channels.add("DPE");
         // FIXME add the DPH channel later
         return channels;
