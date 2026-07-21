@@ -7,10 +7,10 @@ import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.logging.Audit;
 import no.difi.move.common.io.pipe.Reject;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -53,7 +53,7 @@ public class SvarInnService {
         }
     }
 
-    @NotNull
+    @NonNull
     private Iterator<Document> getDocumentIterator(Forsendelse forsendelse, InputStream inputStream) {
         Map<String, String> mimeTypeMap = forsendelse.getFilmetadata()
                 .stream()
@@ -112,9 +112,5 @@ public class SvarInnService {
 
     public void confirmMessage(Forsendelse forsendelse) {
         svarInnClient.confirmMessage(forsendelse);
-    }
-
-    public void setErrorStateForMessage(Forsendelse forsendelse, String errorMsg) {
-        svarInnClient.setErrorStateForMessage(forsendelse, errorMsg);
     }
 }

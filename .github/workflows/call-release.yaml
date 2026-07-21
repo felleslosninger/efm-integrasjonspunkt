@@ -10,8 +10,8 @@ concurrency:
 
 jobs:
   #builds and deploys libs to github packages
-  call-workflow-maven-install-deploy:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-install-deploy-lib.yml@main
+  call-workflow-ci-build-publish-lib:
+    uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-lib.yml@main
     permissions:
       contents: write
       repository-projects: read
@@ -21,12 +21,12 @@ jobs:
       deployment-repository: ${{ github.repository }}
       java-version: 21
       sbom-path: ./
-      application-path: integrasjonspunkt/
+      module-name: integrasjonspunkt
     secrets: inherit
 
   build-and-deploy-image:
     #builds and deploys docker image to Github Packages Container Registry
-    needs: call-workflow-maven-install-deploy
+    needs: call-workflow-ci-build-publish-lib
     uses: felleslosninger/github-workflows/.github/workflows/ci-build-publish-image.yml@main
     permissions:
       contents: write

@@ -8,8 +8,6 @@ public class ValidationGroupFactory {
 
     public static Class<?> toDocumentType(no.difi.meldingsutveksling.MessageType in) {
         switch (in) {
-            case FIKSIO:
-                return NextMoveValidationGroups.MessageType.FiksIo.class;
             case ARKIVMELDING:
                 return NextMoveValidationGroups.MessageType.Arkivmelding.class;
             case ARKIVMELDING_KVITTERING:
@@ -50,8 +48,6 @@ public class ValidationGroupFactory {
                 return NextMoveValidationGroups.ServiceIdentifier.DPH.class;
             case DPV:
                 return NextMoveValidationGroups.ServiceIdentifier.DPV.class;
-            case DPFIO:
-                return NextMoveValidationGroups.ServiceIdentifier.DPFIO.class;
             case UNKNOWN:
                 return NextMoveValidationGroups.ServiceIdentifier.UNKNOWN.class;
             default:

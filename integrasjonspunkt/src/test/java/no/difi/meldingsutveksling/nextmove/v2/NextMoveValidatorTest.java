@@ -210,16 +210,6 @@ class NextMoveValidatorTest {
     }
 
     @Test
-    void unknown_document_type_allowed_for_fiksio_message() {
-        when(sbd.getDocumentType()).thenReturn("foo::bar");
-        when(sbd.getType()).thenReturn("fiksio");
-        when(serviceRecordProvider.getServiceIdentifier(any())).thenReturn(ServiceIdentifier.DPFIO);
-        when(conversationStrategyFactory.isEnabled(ServiceIdentifier.DPFIO)).thenReturn(true);
-
-        nextMoveValidator.validate(sbd);
-    }
-
-    @Test
     void dpo_message_does_not_require_title() {
         String filename = "bar.txt";
         when(message.isPrimaryDocument(filename)).thenReturn(false);

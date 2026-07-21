@@ -138,7 +138,6 @@ public class NextMoveOutMessageFactory {
             case DPF -> properties.getFiks().getUt().getDefaultTtlHours();
             case DPV -> properties.getDpv().getDefaultTtlHours();
             case DPH -> properties.getDph().getDefaultTtlHours();
-            case DPFIO -> properties.getFiks().getIo().getDefaultTtlHours();
             default -> properties.getNextmove().getDefaultTtlHours();
         };
     }

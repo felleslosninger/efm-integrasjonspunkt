@@ -35,7 +35,6 @@ public class GetMaskinportenToken {
         if (props.getFeature().isEnableDPE()) scopeList.add("eformidling:dpe");
         if (props.getFeature().isEnableDPV()) scopeList.add("eformidling:dpv");
         if (props.getFeature().isEnableDPF()) scopeList.add("eformidling:dpf");
-        if (props.getFeature().isEnableDPFIO()) scopeList.add("ks:fiks");
         if (props.getFeature().isEnableDPI()) scopeList.addAll(List.of("eformidling:dpi",
             "digitalpostinnbygger:send",
             "global/kontaktinformasjon.read",

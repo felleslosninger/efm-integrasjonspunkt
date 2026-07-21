@@ -4,7 +4,6 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationStrategy;
 import no.difi.meldingsutveksling.api.DpeConversationStrategy;
 import no.difi.meldingsutveksling.api.DpfConversationStrategy;
-import no.difi.meldingsutveksling.api.DpfioConversationStrategy;
 import no.difi.meldingsutveksling.api.DphConversationStrategy;
 import no.difi.meldingsutveksling.api.DpiConversationStrategy;
 import no.difi.meldingsutveksling.api.DpoConversationStrategy;
@@ -19,7 +18,6 @@ import java.util.Optional;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPE;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPF;
-import static no.difi.meldingsutveksling.ServiceIdentifier.DPFIO;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPH;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPI;
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
@@ -36,7 +34,6 @@ public class ConversationStrategyFactory {
                                        ObjectProvider<DpeConversationStrategy> dpeStrat,
                                        ObjectProvider<DpvConversationStrategy> dpvStrat,
                                        ObjectProvider<DpiConversationStrategy> dpiStrat,
-                                       ObjectProvider<DpfioConversationStrategy> dpfioStrat,
                                        ObjectProvider<DphConversationStrategy> dphStrat) {
         strategies = new EnumMap<>(ServiceIdentifier.class);
         if (props.getFeature().isEnableDPO()) {
@@ -44,9 +41,6 @@ public class ConversationStrategyFactory {
         }
         if (props.getFeature().isEnableDPF()) {
             dpfStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPF, s));
-        }
-        if (props.getFeature().isEnableDPFIO()) {
-            dpfioStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPFIO, s));
         }
         if (props.getFeature().isEnableDPV()) {
             dpvStrat.orderedStream().findFirst().ifPresent(s -> strategies.put(DPV, s));

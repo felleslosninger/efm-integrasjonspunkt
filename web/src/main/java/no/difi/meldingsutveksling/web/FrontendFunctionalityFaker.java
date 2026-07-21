@@ -24,7 +24,7 @@ public class FrontendFunctionalityFaker implements FrontendFunctionality {
 
     @Override
     public List<String> getServicesEnabled() {
-        return List.of("DPO", "DPV", "DPI", "DPF", "DPFIO", "DPE", "DPH");
+        return List.of("DPO", "DPV", "DPI", "DPF", "DPE", "DPH");
     }
 
     @Override
