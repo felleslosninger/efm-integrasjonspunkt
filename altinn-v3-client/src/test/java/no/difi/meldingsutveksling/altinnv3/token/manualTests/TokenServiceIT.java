@@ -1,11 +1,10 @@
 package no.difi.meldingsutveksling.altinnv3.token.manualTests;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.difi.meldingsutveksling.altinnv3.token.AltinnTokenExchangeService;
@@ -22,7 +21,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
@@ -63,7 +61,7 @@ class TokenServiceIT {
 
     @Disabled
     @Test
-    void testFetchToken() throws JsonProcessingException {
+    void testFetchToken() {
 
         // mock the maskinporten token endpoint
         wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/token"))
@@ -90,8 +88,7 @@ class TokenServiceIT {
         TokenExchangeService tokenExchangeService = new AltinnTokenExchangeService(RestClient.create());
 
         // we need to customize the deserialization of Resource to handle file paths
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new MyModule());
+        JsonMapper objectMapper = JsonMapper.builder().addModule(new MyModule()).build();
 
         var tc = objectMapper.readValue("""
             {
@@ -118,10 +115,10 @@ class TokenServiceIT {
 
     }
 
-    public static class ResourceDeserializer extends JsonDeserializer<Resource> {
+    public static class ResourceDeserializer extends ValueDeserializer<Resource> {
         @Override
-        public Resource deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            String path = p.getText().substring(5);
+        public Resource deserialize(JsonParser p, DeserializationContext ctxt) {
+            String path = p.getString().substring(5);
             return new FileSystemResource(path);
         }
     }

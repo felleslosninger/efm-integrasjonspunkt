@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.cucumber.datatable.DataTable;
@@ -16,6 +15,7 @@ import no.difi.move.common.io.ResourceUtils;
 import no.digdir.altinn3.broker.model.FileTransferInitializeResponseExt;
 import org.springframework.boot.test.json.JsonContentAssert;
 import org.springframework.core.io.InputStreamResource;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -41,7 +41,6 @@ public class AltinnOutSteps {
     private final UUID fileTransferId = UUID.randomUUID();
 
     @Before
-    @SneakyThrows
     public void before() {
         wireMockServer.givenThat(get(urlEqualTo("/altinntoken"))
             .willReturn(aResponse()
@@ -60,7 +59,7 @@ public class AltinnOutSteps {
 
         FileTransferInitializeResponseExt initializeResponseExt = new FileTransferInitializeResponseExt();
         initializeResponseExt.setFileTransferId(fileTransferId);
-        var body = new ObjectMapper().writeValueAsString(initializeResponseExt);
+        var body = new JsonMapper().writeValueAsString(initializeResponseExt);
 
         wireMockServer.givenThat(post(urlEqualTo("/broker/api/v1/filetransfer/"))
             .willReturn(aResponse()

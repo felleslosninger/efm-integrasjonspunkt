@@ -2,13 +2,11 @@ package no.difi.meldingsutveksling.web;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
-import org.springframework.boot.web.servlet.error.ErrorAttributes;
-import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.boot.webmvc.error.ErrorAttributes;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -24,8 +22,7 @@ public class IntegrasjonspunktErrorController implements ErrorController {
 
     private final ErrorAttributes errorAttributes;
 
-    public IntegrasjonspunktErrorController(ErrorAttributes errorAttributes, ServerProperties serverProperties) {
-        Assert.notNull(serverProperties, "ServerProperties must not be null");
+    public IntegrasjonspunktErrorController(ErrorAttributes errorAttributes) {
         this.errorAttributes = errorAttributes;
     }
 

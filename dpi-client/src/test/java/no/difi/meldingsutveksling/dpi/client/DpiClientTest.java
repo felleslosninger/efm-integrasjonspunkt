@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.Payload;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
@@ -298,7 +298,7 @@ class DpiClientTest {
             .respond(response()
                 .withStatusCode(200)
                 .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(new ObjectMapper().writeValueAsString(new Message()
+                .withBody(new JsonMapper().writeValueAsString(new Message()
                     .setForretningsmelding(forretningsmelding)
                     .setDownloadurl(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"))
                 ))

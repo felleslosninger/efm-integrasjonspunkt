@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.token;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import no.difi.meldingsutveksling.config.AltinnSystemUser;
 import no.difi.move.common.oauth.JwtTokenAdditionalClaims;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +15,7 @@ public class ClaimsFactoryTest {
 
     @Test
     @DisplayName("Should create authorization claims from values set in properties")
-    void shouldReturnAuthorizationClaims() throws JsonProcessingException {
+    void shouldReturnAuthorizationClaims() {
         String expectedResultInJsonFormat = """
             {
               "claims" : {
@@ -39,7 +39,7 @@ public class ClaimsFactoryTest {
         assertNotNull(result, "Should get authorization claims");
         assertInstanceOf(JwtTokenAdditionalClaims.class, result, "Generated claims should be JwtTokenAdditionalClaims");
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new JsonMapper();
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
 
         assertThat(expectedResultInJsonFormat)

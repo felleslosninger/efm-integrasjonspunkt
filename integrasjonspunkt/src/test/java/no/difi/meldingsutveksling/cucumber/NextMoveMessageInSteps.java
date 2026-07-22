@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -16,7 +15,7 @@ import org.hamcrest.MatcherAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
@@ -25,6 +24,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.core.env.Environment;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;
 public class NextMoveMessageInSteps {
 
     private final TestRestTemplate testRestTemplate;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
     private final AsicParser asicParser;
     private final Holder<Message> messageInHolder;
     private final Holder<Message> messageReceivedHolder;

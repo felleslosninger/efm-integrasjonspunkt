@@ -25,7 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
+import org.springframework.boot.restclient.test.autoconfigure.AutoConfigureRestClient;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +60,9 @@ import static org.mockito.Mockito.when;
 )
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("cucumber")
-@AutoConfigureWebClient(registerRestTemplate = true)
+@AutoConfigureRestClient
+// Spring Boot 4: @SpringBootTest autokonfigurerer ikkje lenger TestRestTemplate
+@AutoConfigureTestRestTemplate
 @Slf4j
 @TestPropertySource
 @MockitoSpyBean(types = {WebhookPusher.class, IntegrasjonspunktProperties.class})

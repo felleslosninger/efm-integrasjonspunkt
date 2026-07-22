@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -16,7 +15,7 @@ import no.difi.meldingsutveksling.webhooks.event.MessageStatusContent;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,8 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -92,7 +91,7 @@ public class WebhooksSteps {
     }
 
     @Given("^the following message status is published:$")
-    public void theFollowingMessageStatusIsPublished(String body) throws IOException {
+    public void theFollowingMessageStatusIsPublished(String body) {
         MessageStatusContent event = objectMapper.readValue(body, MessageStatusContent.class);
         Conversation conversation = new Conversation()
             .setMessageId(event.getMessageId())

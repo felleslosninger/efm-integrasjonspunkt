@@ -20,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.core.io.Resource;
@@ -36,7 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+// MockitoExtension trengst frå Spring Boot 4: @Mock-felt vert ikkje lenger initialiserte av Boot sin test-listener
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SvarInnNextMoveConverterTest {
 
     @Mock

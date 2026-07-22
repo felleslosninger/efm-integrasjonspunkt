@@ -33,7 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -147,12 +147,12 @@ public class DphClientConfig {
     @Bean
     public DphParcelService dphParcelService(
         VerifyJWT verifyJWT,
-        Jackson2ObjectMapperBuilder builder,
+        ObjectMapper objectMapper,
         KeystoreHelper dphKeystoreHelper,
         CreateCMSEncryptedAsice createCmsEncryptedAsice,
         DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier,
         InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
-        return new DphParcelService(verifyJWT, builder.build(), dphKeystoreHelper, createCmsEncryptedAsice,
+        return new DphParcelService(verifyJWT, objectMapper, dphKeystoreHelper, createCmsEncryptedAsice,
             digdirBusinessCertificateSupplier, resourceFactory);
     }
 

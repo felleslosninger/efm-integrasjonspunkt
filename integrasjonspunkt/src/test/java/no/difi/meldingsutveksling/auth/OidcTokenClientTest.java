@@ -13,7 +13,7 @@ import no.difi.move.common.oauth.JwtTokenResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.metrics.web.client.ObservationRestTemplateCustomizer;
+import org.springframework.boot.restclient.observation.ObservationRestTemplateCustomizer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;

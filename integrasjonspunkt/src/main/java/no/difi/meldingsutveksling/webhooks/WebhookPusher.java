@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.webhooks;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -16,6 +14,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +79,7 @@ public class WebhookPusher {
     private String getJson(WebhookContent content) {
         try {
             return objectMapper.writeValueAsString(content);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Could not convert MessageStatus to JSON!", e);
             throw new MeldingsUtvekslingRuntimeException(e);
         }

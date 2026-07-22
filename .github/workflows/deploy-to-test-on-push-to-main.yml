@@ -27,7 +27,7 @@ jobs:
       packages: write
       id-token: write
     with:
-      java-version: 21
+      java-version: 25
       module-name: integrasjonspunkt
     secrets: inherit
 
