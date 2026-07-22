@@ -19,7 +19,7 @@ jobs:
     with:
       package-version: ${{ github.event.release.tag_name }}
       deployment-repository: ${{ github.repository }}
-      java-version: 21
+      java-version: 25
       sbom-path: ./
       module-name: integrasjonspunkt
     secrets: inherit
@@ -38,5 +38,5 @@ jobs:
       module-name: integrasjonspunkt
       cr-type: ghcr
       slack-channel-id: C05NLQCFR41
-      java-version: 21
+      java-version: 25
     secrets: inherit

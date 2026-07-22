@@ -20,7 +20,7 @@ jobs:
     uses: felleslosninger/github-workflows/.github/workflows/ci-pr-checks-image.yml@main
     with:
       application-type: spring-boot
-      java-version: 21
+      java-version: 25
       pull-request-title: ${{ github.event.pull_request.title }}
       pull-request-allowed-prefixes: "MOVE-,Bump,PF-"
       enable-auto-merge-dependabot: false
