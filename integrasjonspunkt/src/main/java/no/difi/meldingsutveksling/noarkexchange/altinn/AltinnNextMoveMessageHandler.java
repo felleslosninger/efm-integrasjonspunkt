@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.noarkexchange.altinn;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
@@ -14,6 +12,8 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import static no.difi.meldingsutveksling.ServiceIdentifier.DPO;
 
@@ -62,8 +62,8 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
 
     private String toRawReceipt(ArkivmeldingKvitteringMessage arkivmeldingKvittering) {
         try {
-            return new ObjectMapper().writeValueAsString(arkivmeldingKvittering);
-        } catch (JsonProcessingException e) {
+            return new JsonMapper().writeValueAsString(arkivmeldingKvittering);
+        } catch (JacksonException e) {
             return null;
         }
     }

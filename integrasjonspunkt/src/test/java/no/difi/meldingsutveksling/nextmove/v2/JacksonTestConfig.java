@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.json.JsonMapper;
 
 @Profile("!cucumber")
 @TestConfiguration
@@ -16,7 +16,7 @@ public class JacksonTestConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        return Jackson2ObjectMapperBuilder.json();
+    public JsonMapper jsonMapper() {
+        return JsonMapper.builder().build();
     }
 }

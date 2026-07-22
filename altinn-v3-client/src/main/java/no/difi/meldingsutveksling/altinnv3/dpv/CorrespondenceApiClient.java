@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -39,11 +39,12 @@ public class CorrespondenceApiClient {
     private final DotNotationFlattener jsonFlatter;
     private final IntegrasjonspunktProperties props;
 
-    private ObjectMapper objectMapper = new ObjectMapper()
+    private JsonMapper objectMapper = JsonMapper.builder()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .registerModule(new JavaTimeModule()
+        .addModule(new SimpleModule()
             .addDeserializer(OffsetDateTime.class, new AltinnOffsetDateTimeDeserializer()))
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .build();
 
     private RestClient restClient = RestClient.builder()
         .defaultStatusHandler(HttpStatusCode::isError, this::getCorrespondenceApiException)
@@ -148,11 +149,9 @@ public class CorrespondenceApiClient {
     }
 
     private void addJacksonAsConverter(List<HttpMessageConverter<?>> converters) {
-        for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
-                jacksonConverter.setObjectMapper(objectMapper);
-            }
-        }
+        converters.replaceAll(converter -> converter instanceof JacksonJsonHttpMessageConverter
+            ? new JacksonJsonHttpMessageConverter(objectMapper)
+            : converter);
     }
 
 }

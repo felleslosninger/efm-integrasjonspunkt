@@ -11,9 +11,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
 
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +61,7 @@ public class ServiceBusAmqpClient {
         ServiceBusPayload payload;
         try {
             payload = payloadConverter.convert(m.getBody().toBytes());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.error("Failed to convert servicebus message with id = %s, abandoning".formatted(m.getMessageId()), e);
             context.deadLetter();
             return;

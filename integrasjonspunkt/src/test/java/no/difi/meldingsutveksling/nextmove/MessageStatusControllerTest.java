@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
@@ -13,7 +11,7 @@ import no.difi.meldingsutveksling.status.MessageStatusRepository;
 import no.difi.meldingsutveksling.status.service.MessageStatusController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +25,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -219,7 +219,7 @@ public class MessageStatusControllerTest {
             .andReturn();
 
         String jsonResponse = mvcResult.getResponse().getContentAsString();
-        ObjectMapper objectMapper = new ObjectMapper();
+        JsonMapper objectMapper = new JsonMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonResponse);
 
         assertEquals(1, jsonNode.get("totalPages").asInt());

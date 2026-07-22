@@ -8,8 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.filter.UrlHandlerFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,6 +26,19 @@ public class MvcConfiguration implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(stringToStandardBusinessDocumentConverter);
         registry.addConverter(multipartFileToStandardBusinessDocumentConverter);
+    }
+
+    /**
+     * kotlinx-serialization is on the classpath (transitively via nhn-model), which makes
+     * Spring register KotlinSerializationJsonHttpMessageConverter. Its type check
+     * (KotlinDetector.hasSerializableAnnotation) recurses infinitely on self-referential
+     * generics such as WebhookEvent&lt;T extends WebhookContent&gt;, causing StackOverflowError.
+     * All JSON in this application is handled by Jackson, so the converter is removed.
+     */
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.removeIf(converter -> converter.getClass().getName()
+                .startsWith("org.springframework.http.converter.json.KotlinSerialization"));
     }
 
     /**

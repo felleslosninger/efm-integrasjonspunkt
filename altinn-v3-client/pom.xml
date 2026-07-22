@@ -12,6 +12,10 @@
     <artifactId>altinn-v3-client</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>

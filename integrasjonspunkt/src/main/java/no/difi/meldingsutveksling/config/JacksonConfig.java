@@ -1,20 +1,23 @@
 package no.difi.meldingsutveksling.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
 import no.difi.meldingsutveksling.jackson.PartnerIdentifierModule;
 import no.difi.meldingsutveksling.jackson.StandardBusinessDocumentModule;
 import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageType;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.ext.javatime.deser.InstantDeserializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -31,24 +34,29 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 public class JacksonConfig {
 
     @Bean
-    @SuppressWarnings("deprecation") // JsonReadFeature not yet supported by builder
-    public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer(Clock clock) {
+    public JsonMapperBuilderCustomizer jacksonCustomizer(Clock clock) {
 
         return builder ->
-            builder.modulesToInstall(new JavaTimeModule(), new StandardBusinessDocumentModule(BusinessMessageType::fromType), new PartnerIdentifierModule())
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
-                .deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer(clock))
-                .featuresToEnable(
-                    SerializationFeature.INDENT_OUTPUT,
-                    DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE,
-                    JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS,
-                    MapperFeature.DEFAULT_VIEW_INCLUSION)
-                .featuresToDisable(
-                    SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-                    SerializationFeature.CLOSE_CLOSEABLE,
-                    DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-                    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                    DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+            builder.addModules(new StandardBusinessDocumentModule(BusinessMessageType::fromType), new PartnerIdentifierModule())
+                .addModule(new SimpleModule("IsoDateTimeModule")
+                    .addDeserializer(OffsetDateTime.class, new IsoDateTimeDeserializer(clock)))
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                // Jackson 3 auto-detects multi-arg constructors via parameter names, which
+                // bypasses no-arg constructors that set default values (e.g. ServiceRecord,
+                // whose postAddress then ends up null instead of PostAddress.EMPTY).
+                // Creator visibility NONE restores the Jackson 2 behaviour: implicit creators
+                // are not used, only @JsonCreator-annotated ones. Records are unaffected
+                // (canonical record constructors are resolved through a separate path).
+                .changeDefaultVisibility(vc -> vc.withCreatorVisibility(JsonAutoDetect.Visibility.NONE))
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+                .enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
+                .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+                .disable(SerializationFeature.CLOSE_CLOSEABLE)
+                .disable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+                    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS,
+                    DateTimeFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
     }
 
     @SuppressWarnings("squid:MaximumInheritanceDepth")
@@ -62,7 +70,9 @@ public class JacksonConfig {
                 a -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId),
                 a -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction), a.zoneId),
                 (d, z) -> d.withOffsetSameInstant(z.getRules().getOffset(d.toLocalDateTime())),
-                true // yes, replace +0000 with Z
+                true, // yes, replace +0000 with Z
+                true, // normalizeZoneId
+                false // readNumericStringsAsTimestamp
             );
         }
 
@@ -79,7 +89,7 @@ public class JacksonConfig {
     }
 
     @Bean
-    public ObjectMapperHolder objectMapperHolder(Jackson2ObjectMapperBuilder objectMapperBuilder) {
-        return new ObjectMapperHolder(objectMapperBuilder.build());
+    public ObjectMapperHolder objectMapperHolder(JsonMapper jsonMapper) {
+        return new ObjectMapperHolder(jsonMapper);
     }
 }

@@ -15,9 +15,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageImpl;
@@ -62,6 +66,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     JacksonMockitoConfig.class,
     IntegrasjonspunktHandlerExceptionResolver.class,
     NextMoveMessageInController.class})
+// MockitoExtension trengst frå Spring Boot 4: @Mock-felt vert ikkje lenger initialiserte av Boot sin test-listener
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @WebMvcTest(NextMoveMessageInController.class)
 @AutoConfigureMoveRestDocs
 @ActiveProfiles("test")

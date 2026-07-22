@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.Session;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
@@ -11,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class InternalQueue {
         NextMoveOutMessage nextMoveMessage;
         try {
             nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
         try {
@@ -84,7 +85,7 @@ public class InternalQueue {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(nextmoveQueue, bos.toByteArray());
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new NextMoveRuntimeException("Unable to marshall NextMove message with id=%s".formatted(msg.getMessageId()), e);
         }
     }
