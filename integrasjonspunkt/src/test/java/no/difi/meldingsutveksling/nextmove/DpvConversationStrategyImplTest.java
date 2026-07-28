@@ -12,7 +12,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class DpvConversationStrategyImplTest {
@@ -36,7 +37,6 @@ public class DpvConversationStrategyImplTest {
         QueueInterruptException exception = assertThrows(QueueInterruptException.class, () -> target.send(message));
 
         assertEquals("Bad request", exception.getMessage());
-        assertTrue(exception.isClientError());
         Mockito.verifyNoInteractions(conversationService);
     }
 

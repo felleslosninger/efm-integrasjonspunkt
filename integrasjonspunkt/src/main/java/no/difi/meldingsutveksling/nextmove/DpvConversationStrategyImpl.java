@@ -48,7 +48,7 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
                     .execute(() -> altinnService.send(message));
         } catch (CorrespondenceApiException e) {
             if (e.getStatusCode() != null && e.getStatusCode().is4xxClientError()) {
-                throw new QueueInterruptException(e.getMessage(), true);
+                throw new QueueInterruptException(e.getMessage());
             }
             throw e;
         }
