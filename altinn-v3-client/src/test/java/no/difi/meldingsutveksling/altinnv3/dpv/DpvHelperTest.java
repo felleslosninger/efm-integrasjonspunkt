@@ -4,7 +4,10 @@ import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.config.PostVirksomheter;
+import no.difi.meldingsutveksling.domain.sbdh.BusinessScope;
+import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.*;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.Service;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
@@ -116,4 +119,49 @@ public class DpvHelperTest {
 
         assertEquals(isConfidential, res, description);
     }
+
+    @Test
+    public void isIgnoreReservation_trueForDigitalDpvMessageWithInfoProcess() {
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = sbdWithProcess("urn:no:difi:profile:digitalpost:info:ver1.0");
+        standardBusinessDocument.setAny(new DigitalDpvMessage());
+        message.setSbd(standardBusinessDocument);
+
+        assertTrue(dpvHelper.isIgnoreReservation(message));
+    }
+
+    @Test
+    public void isIgnoreReservation_falseForDigitalDpvMessageWithVedtakProcess() {
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = sbdWithProcess("urn:no:difi:profile:digitalpost:vedtak:ver1.0");
+        standardBusinessDocument.setAny(new DigitalDpvMessage());
+        message.setSbd(standardBusinessDocument);
+
+        assertFalse(dpvHelper.isIgnoreReservation(message));
+    }
+
+    @Test
+    public void isIgnoreReservation_falseForArkivmeldingMessageWithInfoProcess() {
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = sbdWithProcess("urn:no:difi:profile:digitalpost:info:ver1.0");
+        standardBusinessDocument.setAny(new ArkivmeldingMessage());
+        message.setSbd(standardBusinessDocument);
+
+        assertFalse(dpvHelper.isIgnoreReservation(message));
+    }
+
+    private static StandardBusinessDocument sbdWithProcess(String process) {
+        StandardBusinessDocument sbd = new StandardBusinessDocument();
+        sbd.setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+            .setBusinessScope(new BusinessScope()
+                .addScope(new Scope()
+                    .setType("ConversationId")
+                    .setIdentifier(process)
+                    .setInstanceIdentifier("97efbd4c-413d-4e2c-bbc5-257ef4a61212")
+                )
+            )
+        );
+        return sbd;
+    }
+
 }
