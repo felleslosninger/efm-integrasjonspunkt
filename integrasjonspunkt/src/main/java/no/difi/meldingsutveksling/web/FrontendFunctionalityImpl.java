@@ -46,7 +46,8 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         config.addAll(List.of(
             new Property("difi.move.org.number", props.getOrg().getNumber(), "Ditt organisasjonsnummer"),
-            new Property("difi.move.serviceregistryEndpoint", props.getServiceregistryEndpoint(), "Service Registry Endpoint")
+            new Property("difi.move.serviceregistryEndpoint", props.getServiceregistryEndpoint(), "Service Registry Endpoint"),
+            new Property("difi.move.nextmove.statusPollingCron", props.getNextmove().getStatusPollingCron(), "CRON for status oppdateringer")
         ));
 
         var arkivmelding = props.getArkivmelding();

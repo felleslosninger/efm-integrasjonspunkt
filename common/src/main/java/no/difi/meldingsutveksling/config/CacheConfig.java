@@ -38,50 +38,62 @@ public class CacheConfig extends CachingConfigurerSupport {
                 new CaffeineCache(CACHE_GET_SAS_KEY,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.DAYS)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache(CACHE_FORSENDELSEID,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.DAYS)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache(CACHE_LOAD_IDENTIFIER_RESOURCE,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(5, TimeUnit.MINUTES)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache(CACHE_SR_VIRKSERT,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(5, TimeUnit.MINUTES)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache(CACHE_KRR_PRINT,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(5, TimeUnit.MINUTES)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache(SVARUT_FORSENDELSETYPER,
                         Caffeine.newBuilder()
                                 .expireAfterWrite(1, TimeUnit.HOURS)
+                                .recordStats()
                                 .build()),
                 new CaffeineCache("dpiClient.getMaskinportenToken",
                         Caffeine.newBuilder()
                                 .expireAfterWrite(90, TimeUnit.SECONDS)
+                                .recordStats()
                                 .build()),
             new CaffeineCache("dphClient.getMaskinportenToken",
                 Caffeine.newBuilder()
                     .expireAfterWrite(90, TimeUnit.SECONDS)
+                    .recordStats()
                     .build()),
             new CaffeineCache("MaskinportenTokenInterceptor.getMaskinportenToken",
                 Caffeine.newBuilder()
                     .expireAfterWrite(90, TimeUnit.SECONDS)
+                    .recordStats()
                     .build()),
                  new CaffeineCache("altinn.getSystemToken",
                         Caffeine.newBuilder()
                             .expireAfterWrite(25, TimeUnit.MINUTES)
+                            .recordStats()
                             .build()),
                 new CaffeineCache("altinn.getDpoToken",
                         Caffeine.newBuilder()
                             .expireAfterWrite(25, TimeUnit.MINUTES)
+                            .recordStats()
                             .build()),
                 new CaffeineCache("altinn.getDpvToken",
                     Caffeine.newBuilder()
                         .expireAfterWrite(25, TimeUnit.MINUTES)
+                        .recordStats()
                         .build())
         ));
         return cacheManager;
