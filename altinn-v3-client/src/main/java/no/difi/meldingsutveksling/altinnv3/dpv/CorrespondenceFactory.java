@@ -72,6 +72,7 @@ public class CorrespondenceFactory {
         correspondence.setSendersReference(message.getMessageId());
         correspondence.setIsConfidential(dpvHelper.isConfidential(message));
         correspondence.setPropertyList(getPropertyList(message));
+        correspondence.setIgnoreReservation(dpvHelper.isIgnoreReservation(message));
 
         return correspondence;
     }

@@ -20,6 +20,8 @@ import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 @RequiredArgsConstructor
 public class DpvHelper {
 
+    private static final String PROCESS_DIGITAL_DPV_INFO = "urn:no:difi:profile:digitalpost:info:ver1.0";
+
     private final IntegrasjonspunktProperties props;
     private final ServiceRegistryHelper serviceRegistryHelper;
     private final OptionalCryptoMessagePersister optionalCryptoMessagePersister;
@@ -56,6 +58,11 @@ public class DpvHelper {
         String sensitiveResource = props.getDpv().getSensitiveResource();
 
         return sensitiveResource.equals(resource);
+    }
+
+    public boolean isIgnoreReservation(NextMoveOutMessage message) {
+        return message.getBusinessMessage() instanceof DigitalDpvMessage
+            && PROCESS_DIGITAL_DPV_INFO.equals(message.getSbd().getProcess());
     }
 
 }
