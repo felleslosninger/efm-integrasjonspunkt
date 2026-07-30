@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -32,30 +33,44 @@ public class StatusPolling {
     private final StatusStrategyFactory statusStrategyFactory;
     private final ConversationStrategyFactory conversationStrategyFactory;
 
+    // Cron scheduling does not wait for the previous run to finish before firing the next one. Without this guard,
+    // a run that takes longer than the cron interval (e.g. a slow external channel) would overlap with the next run,
+    // both processing the same pollable conversations concurrently - risking duplicate receipts, e.g. duplicate
+    // arkivmelding-kvitteringer being enqueued for the same conversation.
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
     @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
     public void checkReceiptStatus() {
         if (!props.getFeature().isEnableReceipts()) {
             return;
         }
-        int pageSize = props.getNextmove().getStatusPollingPageSize();
-        int pageIndex = 0;
+        if (!isRunning.compareAndSet(false, true)) {
+            log.warn("Skipping receipt status polling run - previous run has not finished yet");
+            return;
+        }
+        try {
+            int pageSize = props.getNextmove().getStatusPollingPageSize();
+            int pageIndex = 0;
 
-        Page<Long> page;
-        do {
-            // Uses paging for limiting memory footprint when polling for statuses for large batches of messages.
-            // Works around JPA limitation in combining paging and entity graph by making separate queries for page and
-            // entity graph. Ref "HHH000104: firstResult/maxResults specified with collection fetch; applying in
-            // memory!"
-            page = conversationRepository.findIdsForPollableConversations(PageRequest.of(pageIndex, pageSize));
-            Iterable<Conversation> conversations = conversationRepository.findAllById(page.getContent());
+            Page<Long> page;
+            do {
+                // Uses paging for limiting memory footprint when polling for statuses for large batches of messages.
+                // Works around JPA limitation in combining paging and entity graph by making separate queries for page and
+                // entity graph. Ref "HHH000104: firstResult/maxResults specified with collection fetch; applying in
+                // memory!"
+                page = conversationRepository.findIdsForPollableConversations(PageRequest.of(pageIndex, pageSize));
+                Iterable<Conversation> conversations = conversationRepository.findAllById(page.getContent());
 
-            StreamSupport.stream(conversations.spliterator(), false)
-                    .filter(c -> conversationStrategyFactory.isEnabled(c.getServiceIdentifier()))
-                    .collect(groupingBy(Conversation::getServiceIdentifier, toSet()))
-                    .forEach(this::checkReceiptForType);
+                StreamSupport.stream(conversations.spliterator(), false)
+                        .filter(c -> conversationStrategyFactory.isEnabled(c.getServiceIdentifier()))
+                        .collect(groupingBy(Conversation::getServiceIdentifier, toSet()))
+                        .forEach(this::checkReceiptForType);
 
-            pageIndex++;
-        } while (page.hasNext());
+                pageIndex++;
+            } while (page.hasNext());
+        } finally {
+            isRunning.set(false);
+        }
     }
 
     private void checkReceiptForType(ServiceIdentifier si, Set<Conversation> conversations) {
@@ -71,4 +86,5 @@ public class StatusPolling {
             MDC.clear();
         }
     }
+
 }
