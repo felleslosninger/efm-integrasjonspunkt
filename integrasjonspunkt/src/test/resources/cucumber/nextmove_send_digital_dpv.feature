@@ -109,7 +109,8 @@ Feature: Sending a Next Move Digital DPV message
         "correspondence.notification.emailSubject" : "Melding mottatt i Altinn",
         "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn",
         "correspondence.resourceId": "eformidling-dpv-administrasjon",
-        "correspondence.propertyList.senderOrgNumber": "910077473"
+        "correspondence.propertyList.senderOrgNumber": "910077473",
+        "correspondence.ignoreReservation": "true"
 
     }
     """
