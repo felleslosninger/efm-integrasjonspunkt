@@ -34,3 +34,15 @@ CVE-2026-54291 # org.postgresql:postgresql, fiksa i 42.7.12 (Spring Boot-styrt v
 
 CVE-2026-42588 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
 CVE-2026-45505 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
+
+# io.netty:netty-codec / netty-codec-http
+CVE-2026-59901 # netty-codec-compression: infinite loop in bzip2 decoder (DoS)
+CVE-2026-55831 # netty-codec-http: DoS via SPDY SETTINGS frame processing
+CVE-2026-55833 # netty-codec-http: DoS via SPDY header decompression amplification
+CVE-2026-56745 # netty-codec-http: unbounded pooled ByteBuf allocation via SPDY-to-HTTP codec
+
+# org.postgresql:postgresql
+CVE-2026-54291 # pgjdbc: man-in-the-middle protection bypass via SCRAM-SHA-256-PLUS downgrade
+
+# com.fasterxml.jackson.core:jackson-core / tools.jackson.core:jackson-core
+GHSA-r7wm-3cxj-wff9 # jackson-core: async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)

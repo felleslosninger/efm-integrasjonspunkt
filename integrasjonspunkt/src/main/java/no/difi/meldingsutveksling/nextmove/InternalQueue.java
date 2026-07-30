@@ -28,7 +28,6 @@ import java.io.IOException;
 @Slf4j
 public class InternalQueue {
 
-
     @Value("${difi.move.queue.nextmove-name}")
     private String nextmoveQueue;
 

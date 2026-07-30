@@ -3,7 +3,10 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
+import no.difi.meldingsutveksling.altinnv3.dpv.WithLogstashMarker;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DpvConversationStrategy;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
@@ -12,7 +15,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import no.difi.meldingsutveksling.altinnv3.dpv.WithLogstashMarker;
 
 import java.util.UUID;
 
@@ -40,8 +42,16 @@ public class DpvConversationStrategyImpl implements DpvConversationStrategy {
             return;
         }
 
-        UUID correspondenceid = WithLogstashMarker.withLogstashMarker(markerFrom(message))
-                .execute(() -> altinnService.send(message));
+        UUID correspondenceid;
+        try {
+            correspondenceid = WithLogstashMarker.withLogstashMarker(markerFrom(message))
+                    .execute(() -> altinnService.send(message));
+        } catch (CorrespondenceApiException e) {
+            if (e.getStatusCode() != null && e.getStatusCode().is4xxClientError()) {
+                throw new QueueInterruptException(e.getMessage());
+            }
+            throw e;
+        }
 
         conversationService.findConversation(message.getMessageId())
             .ifPresent(conversation -> conversationService.save(conversation
