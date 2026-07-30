@@ -37,6 +37,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.Security;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -107,7 +108,8 @@ public class DpiClientConfig {
                 createMaskinportenToken,
                 createMultipart,
                 resourceFactory,
-                properties.getPageSize());
+                properties.getPageSize(),
+                Duration.ofMillis(properties.getTimeout().getRead()));
 
     }
 
