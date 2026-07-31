@@ -46,3 +46,8 @@ CVE-2026-54291 # pgjdbc: man-in-the-middle protection bypass via SCRAM-SHA-256-P
 
 # com.fasterxml.jackson.core:jackson-core / tools.jackson.core:jackson-core
 GHSA-r7wm-3cxj-wff9 # jackson-core: async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)
+
+# org.springframework: Spring Framework 6.2.18
+CVE-2026-41850 # spring-expression
+CVE-2026-41842 # spring-webmvc
+CVE-2026-41845 # xss
