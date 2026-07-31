@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
@@ -51,12 +50,6 @@ public class StatusPolling {
     // single instant, which a missed run (the isRunning guard tripping, a slow scheduler, or statusPollingCron
     // simply not being per-minute) could step straight over. null until the first run since startup.
     private final AtomicReference<OffsetDateTime> lastRunAt = new AtomicReference<>();
-
-    // Cron scheduling does not wait for the previous run to finish before firing the next one. Without this guard,
-    // a run that takes longer than the cron interval (e.g. a slow external channel) would overlap with the next run,
-    // both processing the same pollable conversations concurrently - risking duplicate receipts, e.g. duplicate
-    // arkivmelding-kvitteringer being enqueued for the same conversation.
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
     public void checkReceiptStatus() {
