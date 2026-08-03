@@ -1,9 +1,5 @@
 package no.difi.meldingsutveksling.status;
 
-import lombok.RequiredArgsConstructor;
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.OffsetDateTime;
 
@@ -11,11 +7,15 @@ import java.time.OffsetDateTime;
  * Decides whether a conversation is due for a status poll, backing off linearly the longer a conversation has
  * gone without an update.
  */
-@Component
-@RequiredArgsConstructor
-class LinearInterpolationPolling {
+public class LinearInterpolationPolling {
 
-    private final IntegrasjonspunktProperties props;
+    private final int thresholdDays;
+    private final long maxIntervalMinutes;
+
+    public LinearInterpolationPolling(int thresholdDays, long maxIntervalMinutes) {
+        this.thresholdDays = thresholdDays;
+        this.maxIntervalMinutes = maxIntervalMinutes;
+    }
 
     /**
      * Conversations that haven't received a status update in a while are polled less often, ramping linearly
@@ -55,8 +55,7 @@ class LinearInterpolationPolling {
      * at 60 minutes.
      */
     long pollIntervalMinutes(long ageMinutes) {
-        long thresholdMinutes = props.getNextmove().getStatusPollingBackoffThresholdDays() * 24L * 60L;
-        long maxIntervalMinutes = props.getNextmove().getStatusPollingBackoffMaxIntervalMinutes();
+        long thresholdMinutes = thresholdDays * 24L * 60L;
         // Once fully stale, skip the interpolation and pin the interval at its ceiling.
         if (ageMinutes >= thresholdMinutes) {
             return maxIntervalMinutes;

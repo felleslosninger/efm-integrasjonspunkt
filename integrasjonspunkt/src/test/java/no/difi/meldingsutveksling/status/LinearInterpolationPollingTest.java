@@ -1,11 +1,7 @@
 package no.difi.meldingsutveksling.status;
 
-import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -13,26 +9,16 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.lenient;
 
-@ExtendWith(MockitoExtension.class)
 class LinearInterpolationPollingTest {
 
     private static final OffsetDateTime NOW = OffsetDateTime.of(2026, 7, 31, 12, 0, 0, 0, ZoneOffset.UTC);
 
     private LinearInterpolationPolling linearInterpolationPolling;
-    @Mock
-    private IntegrasjonspunktProperties props;
-    @Mock
-    private IntegrasjonspunktProperties.NextMove nextMove;
 
     @BeforeEach
     void setUp() {
-        linearInterpolationPolling = new LinearInterpolationPolling(props);
-        // lenient: firstRunSincePreviousRunIsUnknownIsAlwaysDue short-circuits before these are read
-        lenient().when(props.getNextmove()).thenReturn(nextMove);
-        lenient().when(nextMove.getStatusPollingBackoffThresholdDays()).thenReturn(30);
-        lenient().when(nextMove.getStatusPollingBackoffMaxIntervalMinutes()).thenReturn(60);
+        linearInterpolationPolling = new LinearInterpolationPolling(30, 60);
     }
 
     @Test
