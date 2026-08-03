@@ -14,7 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +36,7 @@ public class StatusPolling {
     private final StatusStrategyFactory statusStrategyFactory;
     private final ConversationStrategyFactory conversationStrategyFactory;
     private final Clock clock;
+    private final LinearInterpolationPolling linearInterpolationPolling;
 
     // Cron scheduling does not wait for the previous run to finish before firing the next one. Without this guard,
     // a run that takes longer than the cron interval (e.g. a slow external channel) would overlap with the next run,
@@ -44,11 +44,12 @@ public class StatusPolling {
     // arkivmelding-kvitteringer being enqueued for the same conversation.
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    // Timestamp of the last time checkReceiptStatus() actually executed. isDueForPoll compares a conversation's
-    // age now against its age as of this timestamp, so it detects a poll interval boundary being crossed anywhere
-    // in the gap between two runs - rather than checking whether age is exactly divisible by the interval at this
-    // single instant, which a missed run (the isRunning guard tripping, a slow scheduler, or statusPollingCron
-    // simply not being per-minute) could step straight over. null until the first run since startup.
+    // Timestamp of the last time checkReceiptStatus() actually executed. LinearInterpolationPolling.isDueForPoll
+    // compares a conversation's age now against its age as of this timestamp, so it detects a poll interval
+    // boundary being crossed anywhere in the gap between two runs - rather than checking whether age is exactly
+    // divisible by the interval at this single instant, which a missed run (the isRunning guard tripping, a slow
+    // scheduler, or statusPollingCron simply not being per-minute) could step straight over. null until the first
+    // run since startup.
     private final AtomicReference<OffsetDateTime> lastRunAt = new AtomicReference<>();
 
     @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
@@ -80,7 +81,7 @@ public class StatusPolling {
 
                 StreamSupport.stream(conversations.spliterator(), false)
                         .filter(c -> conversationStrategyFactory.isEnabled(c.getServiceIdentifier()))
-                        .filter(c -> isDueForPoll(c, now, previousRunAt))
+                        .filter(c -> linearInterpolationPolling.isDueForPoll(c.getLastUpdate(), now, previousRunAt))
                         .collect(groupingBy(Conversation::getServiceIdentifier, toSet()))
                         .forEach(this::checkReceiptForType);
 
@@ -89,53 +90,6 @@ public class StatusPolling {
         } finally {
             isRunning.set(false);
         }
-    }
-
-    /**
-     * Conversations that haven't received a status update in a while are polled less often, ramping linearly
-     * from every tick up to statusPollingBackoffMaxIntervalMinutes once statusPollingBackoffThresholdDays has
-     * passed since the conversation's last update. This spares the external channels from being hammered for
-     * conversations that are effectively stuck, while still polling active conversations at full frequency.
-     * The interval is anchored to lastUpdate rather than tracked separately, so different conversations naturally
-     * land on different ticks instead of all firing on the same minute.
-     * <p>
-     * Edge-triggered: due when the conversation's age has moved into a new interval-sized "bucket" since the
-     * previous run, i.e. floor(ageNow / interval) &gt; floor(ageAtPreviousRun / interval). This is equivalent to
-     * "age is a multiple of interval" when runs are exactly interval-spaced, but unlike a single-instant check it
-     * also catches the boundary when a run was skipped and the gap between runs was irregular or wider than one
-     * interval - the crossing is detected wherever inside the gap it happened, not just at an exact instant that
-     * this run might not land on. previousRunAt is null on the very first run since startup, which is always due.
-     */
-    boolean isDueForPoll(Conversation conversation, OffsetDateTime now, OffsetDateTime previousRunAt) {
-        if (previousRunAt == null) {
-            return true;
-        }
-        long ageMinutes = Duration.between(conversation.getLastUpdate(), now).toMinutes();
-        long intervalMinutes = pollIntervalMinutes(ageMinutes);
-        long ageAtPreviousRun = Duration.between(conversation.getLastUpdate(), previousRunAt).toMinutes();
-        return ageMinutes / intervalMinutes > ageAtPreviousRun / intervalMinutes;
-    }
-
-    /**
-     * Linearly interpolates the poll interval between 1 minute at ageMinutes=0 and
-     * statusPollingBackoffMaxIntervalMinutes at ageMinutes=statusPollingBackoffThresholdDays, then holds flat at
-     * the max beyond that. E.g. with the defaults (30 days, 60 minutes): a conversation updated 15 days ago (half
-     * of the threshold) gets roughly half of the max interval, ~30 minutes; one updated 30+ days ago is capped
-     * at 60 minutes.
-     */
-    long pollIntervalMinutes(long ageMinutes) {
-        long thresholdMinutes = props.getNextmove().getStatusPollingBackoffThresholdDays() * 24L * 60L;
-        long maxIntervalMinutes = props.getNextmove().getStatusPollingBackoffMaxIntervalMinutes();
-        // Once fully stale, skip the interpolation and pin the interval at its ceiling.
-        if (ageMinutes >= thresholdMinutes) {
-            return maxIntervalMinutes;
-        }
-        // Interpolate on the [0, thresholdMinutes] -> [1, maxIntervalMinutes] line: the "+1" and "-1" shift both
-        // ends so the interval starts at 1 (poll every tick) rather than 0 (which would divide by zero in
-        // isDueForPoll). Integer division rounds the ramp down to whole minutes, which is fine since this is a
-        // best-effort backoff, not an exact schedule.
-        long interval = 1 + (ageMinutes * (maxIntervalMinutes - 1)) / thresholdMinutes;
-        return Math.max(interval, 1);
     }
 
     private void checkReceiptForType(ServiceIdentifier si, Set<Conversation> conversations) {

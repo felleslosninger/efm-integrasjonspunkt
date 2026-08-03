@@ -1,16 +1,12 @@
 package no.difi.meldingsutveksling.status;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
-import no.difi.meldingsutveksling.receipt.StatusStrategyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
@@ -20,17 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
-class StatusPollingTest {
+class LinearInterpolationPollingTest {
 
     private static final OffsetDateTime NOW = OffsetDateTime.of(2026, 7, 31, 12, 0, 0, 0, ZoneOffset.UTC);
 
-    private StatusPolling statusPolling;
-    @Mock
-    private ConversationRepository conversationRepository;
-    @Mock
-    private StatusStrategyFactory statusStrategyFactory;
-    @Mock
-    private ConversationStrategyFactory conversationStrategyFactory;
+    private LinearInterpolationPolling linearInterpolationPolling;
     @Mock
     private IntegrasjonspunktProperties props;
     @Mock
@@ -38,8 +28,7 @@ class StatusPollingTest {
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.fixed(NOW.toInstant(), ZoneOffset.UTC);
-        statusPolling = new StatusPolling(props, conversationRepository, statusStrategyFactory, conversationStrategyFactory, clock);
+        linearInterpolationPolling = new LinearInterpolationPolling(props);
         // lenient: firstRunSincePreviousRunIsUnknownIsAlwaysDue short-circuits before these are read
         lenient().when(props.getNextmove()).thenReturn(nextMove);
         lenient().when(nextMove.getStatusPollingBackoffThresholdDays()).thenReturn(30);
@@ -48,38 +37,38 @@ class StatusPollingTest {
 
     @Test
     void freshConversationIsPolledEveryTick() {
-        assertEquals(1, statusPolling.pollIntervalMinutes(0));
+        assertEquals(1, linearInterpolationPolling.pollIntervalMinutes(0));
     }
 
     @Test
     void intervalRampsBetweenMinAndMax() {
-        long midway = statusPolling.pollIntervalMinutes(15L * 24 * 60);
+        long midway = linearInterpolationPolling.pollIntervalMinutes(15L * 24 * 60);
         assertTrue(midway > 1 && midway < 60, "expected interval between 1 and 60, was " + midway);
     }
 
     @Test
     void conversationPastThresholdIsCappedAtMaxInterval() {
-        assertEquals(60, statusPolling.pollIntervalMinutes(45L * 24 * 60));
+        assertEquals(60, linearInterpolationPolling.pollIntervalMinutes(45L * 24 * 60));
     }
 
     @Test
     void firstRunSincePreviousRunIsUnknownIsAlwaysDue() {
-        Conversation conversation = conversationWithAge(60L * 24 * 60);
-        assertTrue(statusPolling.isDueForPoll(conversation, NOW, null));
+        OffsetDateTime lastUpdate = lastUpdatedMinutesAgo(60L * 24 * 60);
+        assertTrue(linearInterpolationPolling.isDueForPoll(lastUpdate, NOW, null));
     }
 
     @Test
     void staleConversationIsDueOnceItsIntervalBoundaryIsReached() {
-        Conversation conversation = conversationWithAge(60L * 24 * 60);
+        OffsetDateTime lastUpdate = lastUpdatedMinutesAgo(60L * 24 * 60);
         OffsetDateTime previousRunAt = NOW.minusMinutes(1);
-        assertTrue(statusPolling.isDueForPoll(conversation, NOW, previousRunAt));
+        assertTrue(linearInterpolationPolling.isDueForPoll(lastUpdate, NOW, previousRunAt));
     }
 
     @Test
     void staleConversationIsNotDueBeforeItsIntervalBoundaryIsReached() {
-        Conversation conversation = conversationWithAge(60L * 24 * 60 - 1);
+        OffsetDateTime lastUpdate = lastUpdatedMinutesAgo(60L * 24 * 60 - 1);
         OffsetDateTime previousRunAt = NOW.minusMinutes(1);
-        assertFalse(statusPolling.isDueForPoll(conversation, NOW, previousRunAt));
+        assertFalse(linearInterpolationPolling.isDueForPoll(lastUpdate, NOW, previousRunAt));
     }
 
     /**
@@ -90,29 +79,20 @@ class StatusPollingTest {
      */
     @Test
     void missedTicksStillDetectIntervalBoundaryCrossedDuringTheGap() {
-        Conversation conversation = conversationWithAge(60L * 24 * 60 + 2);
+        OffsetDateTime lastUpdate = lastUpdatedMinutesAgo(60L * 24 * 60 + 2);
         OffsetDateTime previousRunAt = NOW.minusMinutes(3);
-        assertTrue(statusPolling.isDueForPoll(conversation, NOW, previousRunAt));
+        assertTrue(linearInterpolationPolling.isDueForPoll(lastUpdate, NOW, previousRunAt));
     }
 
     @Test
     void noIntervalBoundaryCrossedDuringTheGapIsNotDue() {
-        Conversation conversation = conversationWithAge(60L * 24 * 60 - 5);
+        OffsetDateTime lastUpdate = lastUpdatedMinutesAgo(60L * 24 * 60 - 5);
         OffsetDateTime previousRunAt = NOW.minusMinutes(3);
-        assertFalse(statusPolling.isDueForPoll(conversation, NOW, previousRunAt));
+        assertFalse(linearInterpolationPolling.isDueForPoll(lastUpdate, NOW, previousRunAt));
     }
 
-    private Conversation conversationWithAge(long ageMinutes) {
-        Conversation conversation = new Conversation();
-        // lastUpdate is Hibernate-managed (@UpdateTimestamp, private setter) - set via reflection for the test.
-        try {
-            Field field = Conversation.class.getDeclaredField("lastUpdate");
-            field.setAccessible(true);
-            field.set(conversation, NOW.minusMinutes(ageMinutes));
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        return conversation;
+    private OffsetDateTime lastUpdatedMinutesAgo(long ageMinutes) {
+        return NOW.minusMinutes(ageMinutes);
     }
 
 }
