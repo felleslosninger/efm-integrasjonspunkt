@@ -46,10 +46,7 @@ public class StatusPolling {
 
     // Timestamp of the last time checkReceiptStatus() actually executed. LinearInterpolationPolling.isDueForPoll
     // compares a conversation's age now against its age as of this timestamp, so it detects a poll interval
-    // boundary being crossed anywhere in the gap between two runs - rather than checking whether age is exactly
-    // divisible by the interval at this single instant, which a missed run (the isRunning guard tripping, a slow
-    // scheduler, or statusPollingCron simply not being per-minute) could step straight over. null until the first
-    // run since startup.
+    // boundary being crossed anywhere in the gap between two runs.
     private final AtomicReference<OffsetDateTime> lastRunAt = new AtomicReference<>();
 
     @Scheduled(cron = "${difi.move.nextmove.statusPollingCron}")
@@ -79,6 +76,7 @@ public class StatusPolling {
                 page = conversationRepository.findIdsForPollableConversations(PageRequest.of(pageIndex, pageSize));
                 Iterable<Conversation> conversations = conversationRepository.findAllById(page.getContent());
 
+                // See MOVE-5130 for attachment testing and verifying the linearInterpolationPolling
                 StreamSupport.stream(conversations.spliterator(), false)
                         .filter(c -> conversationStrategyFactory.isEnabled(c.getServiceIdentifier()))
                         .filter(c -> linearInterpolationPolling.isDueForPoll(c.getLastUpdate(), now, previousRunAt))
@@ -104,6 +102,7 @@ public class StatusPolling {
         } finally {
             MDC.clear();
         }
+
     }
 
 }

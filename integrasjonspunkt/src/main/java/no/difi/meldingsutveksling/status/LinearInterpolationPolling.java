@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 
 /**
- * Decides whether a conversation is due for a status poll, backing off linearly the longer a conversation has
+ * Decides whether a message is due for a status poll, backing off linearly the longer a conversation has
  * gone without an update.
  */
 public class LinearInterpolationPolling {
@@ -19,32 +19,45 @@ public class LinearInterpolationPolling {
 
     /**
      * Conversations that haven't received a status update in a while are polled less often, ramping linearly
-     * from every tick up to statusPollingBackoffMaxIntervalMinutes once statusPollingBackoffThresholdDays has
-     * passed since the conversation's last update. This spares the external channels from being hammered for
-     * conversations that are effectively stuck, while still polling active conversations at full frequency.
-     * The interval is anchored to lastUpdate rather than tracked separately, so different conversations naturally
+     * from every tick up to statusPollingBackoffMaxIntervalMinutes after statusPollingBackoffThresholdDays
+     * <p>
+     * This spares the external channels from being hammered for conversations that are effectively stuck,
+     * while still polling active conversations at full frequency.  We use timstamp lastUpdate (when the
+     * status was last updated) to calculate the age, this also mean that different conversations naturally
      * land on different ticks instead of all firing on the same minute.
      * <p>
-     * Edge-triggered: due when the conversation's age has moved into a new interval-sized "bucket" since the
+     * Edge-triggered: Due when the conversation's age has moved into a new interval-sized "bucket" since the
      * previous run, i.e. floor(ageNow / interval) &gt; floor(ageAtPreviousRun / interval). This is equivalent to
      * "age is a multiple of interval" when runs are exactly interval-spaced, but unlike a single-instant check it
      * also catches the boundary when a run was skipped and the gap between runs was irregular or wider than one
      * interval - the crossing is detected wherever inside the gap it happened, not just at an exact instant that
      * this run might not land on. previousRunAt is null on the very first run since startup, which is always due.
      *
-     * @param lastUpdate the conversation's {@code lastUpdate} timestamp, i.e. when it was last updated
+     * @param lastUpdate the conversation's {@code lastUpdate} timestamp, i.e. when message status was last updated
+     * @param now the time this polling CRON job was started
+     * @param previousRunAt the time last polling CRON job was started
      */
     boolean isDueForPoll(OffsetDateTime lastUpdate, OffsetDateTime now, OffsetDateTime previousRunAt) {
+
+        // we always trigger poll on first run
         if (previousRunAt == null) {
             return true;
         }
+
+        // find age this cron run and the age at previous cron run
         long ageNowMinutes = Duration.between(lastUpdate, now).toMinutes();
         long ageAtPreviousRunMinutes = Duration.between(lastUpdate, previousRunAt).toMinutes();
+
+        // find the length of the poll interval for a message of this age
         long intervalMinutes = pollIntervalMinutes(ageNowMinutes);
 
+        // divide the current and previous age into "buckets"
         long currentBucket = ageNowMinutes / intervalMinutes;
         long previousBucket = ageAtPreviousRunMinutes / intervalMinutes;
+
+        // if message lands in a new bucket it needs to be polled
         return currentBucket > previousBucket;
+
     }
 
     /**
