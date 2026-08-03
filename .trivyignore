@@ -26,6 +26,7 @@ CVE-2026-45674 # io.netty:netty-resolver-dns
 CVE-2026-47691 # io.netty:netty-resolver-dns
 CVE-2026-50010 # io.netty:netty-handler
 CVE-2026-56816 # io.netty:netty-codec-http3, fiksa i 4.2.16.Final (Spring Boot-styrt versjon)
+CVE-2026-56819 # io.netty:netty-codec-http2, fiksa i 4.2.16.Final (Spring Boot-styrt versjon)
 
 CVE-2026-42588 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
 CVE-2026-45505 # org.apache.activemq:activemq-broker (Spring Boot-styrt versjon)
