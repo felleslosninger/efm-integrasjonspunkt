@@ -85,7 +85,7 @@ public class DpvStatusStrategy implements StatusStrategy {
                             e.getStatusCode().value(), conversation.getMessageId(), conversation.getConversationId());
 
                     conversation.setPollable(false);
-                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ANNET));
+                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ANNET, "Melding slettet i Altinn, stopper polling."));
                 } else {
                     log.error("Error during status check for " + conversation.getConversationId(), e);
                 }

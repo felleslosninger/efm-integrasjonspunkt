@@ -72,7 +72,7 @@ class DpvStatusStrategyTest {
         MessageStatus annetStatus = MessageStatus.of(ANNET, null, null);
         Mockito.when(altinnService.getStatus(conversation))
                 .thenThrow(new CorrespondenceApiException("not found", HttpStatus.valueOf(statusCode)));
-        Mockito.when(messageStatusFactory.getMessageStatus(ANNET)).thenReturn(annetStatus);
+        Mockito.when(messageStatusFactory.getMessageStatus(eq(ANNET), Mockito.anyString())).thenReturn(annetStatus);
 
         dpvStatusStrategy.checkStatus(Set.of(conversation));
 
