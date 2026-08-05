@@ -1,19 +1,23 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
+import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.altinnv3.dpv.InvalidConversationReferenceException;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.nextmove.ConversationDirection;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
+import no.digdir.altinn3.correspondence.model.CorrespondenceStatusEventExt;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusExt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,7 +25,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -92,6 +98,30 @@ class DpvStatusStrategyTest {
 
         assertTrue(conversation.isPollable(), "The conversation should still be pollable for non 404/410 errors");
         Mockito.verify(conversationService, Mockito.never()).registerStatus(eq(conversation), Mockito.any(MessageStatus.class));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CorrespondenceStatusExt.class, names = {"PURGED_BY_RECIPIENT", "PURGED_BY_ALTINN"})
+    void whenPurgedStopPollingAndRegisterAnnet(CorrespondenceStatusExt purgedStatus) {
+        Conversation conversation = new Conversation();
+        conversation.setPollable(true);
+        conversation.setServiceIdentifier(ServiceIdentifier.DPV);
+        conversation.setDirection(ConversationDirection.OUTGOING);
+        conversation.setMessageStatuses(new HashSet<>());
+
+        CorrespondenceStatusEventExt purgedEvent = new CorrespondenceStatusEventExt()
+                .status(purgedStatus)
+                .statusChanged(OffsetDateTime.now());
+
+        MessageStatus annetStatus = MessageStatus.of(ANNET, null, null);
+        Mockito.when(altinnService.getStatus(conversation)).thenReturn(List.of(purgedEvent));
+        Mockito.when(messageStatusFactory.getMessageStatus(ANNET)).thenReturn(annetStatus);
+
+        dpvStatusStrategy.checkStatus(Set.of(conversation));
+
+        assertFalse(conversation.isPollable(), "Polling should stop when the message has been purged");
+        Mockito.verify(conversationService, Mockito.times(1)).save(conversation);
+        Mockito.verify(conversationService, Mockito.times(1)).registerStatus(conversation, annetStatus);
     }
 
     @Test

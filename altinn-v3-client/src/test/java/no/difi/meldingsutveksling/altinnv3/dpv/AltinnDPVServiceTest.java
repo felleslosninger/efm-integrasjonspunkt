@@ -12,6 +12,8 @@ import no.difi.meldingsutveksling.status.Conversation;
 import no.digdir.altinn3.correspondence.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,7 +24,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,6 +133,55 @@ public class AltinnDPVServiceTest {
         assertEquals(CorrespondenceStatusExt.PUBLISHED, history.get(1).getStatus());
         assertEquals(CorrespondenceStatusExt.READ, history.getLast().getStatus());
         assertEquals("2026-06-01T12:12:12Z", history.getLast().getStatusChanged().toString());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CorrespondenceStatusExt.class, names = {"PURGED_BY_RECIPIENT", "PURGED_BY_ALTINN"})
+    public void getStatusIncludesPurgedStatusFromOverview(CorrespondenceStatusExt purgedStatus) {
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("019eca65-3f08-7007-83df-2cb0f31d4dd7");
+        conversation.setExternalSystemReference("019eca65-3ec9-78e0-ad1d-30c1326c6f31");
+
+        Mockito.when(correspondenceApiClient.getCorrespondenceOverview(Mockito.any())).thenReturn(
+            new CorrespondenceOverviewExt()
+                .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
+                .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
+                .read(OffsetDateTime.parse("2026-06-01T12:12:12Z"))
+                .status(purgedStatus)
+                .statusChanged(OffsetDateTime.parse("2026-06-01T13:13:13Z"))
+        );
+
+        var history = altinnDPVService.getStatus(conversation);
+
+        assertEquals(purgedStatus, history.getLast().getStatus());
+        assertEquals("2026-06-01T13:13:13Z", history.getLast().getStatusChanged().toString());
+    }
+
+    @Test
+    public void getStatusDoesNotIncludeOverviewStatusWhenNotPurged() {
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("019eca65-3f08-7007-83df-2cb0f31d4dd7");
+        conversation.setExternalSystemReference("019eca65-3ec9-78e0-ad1d-30c1326c6f31");
+
+        Mockito.when(correspondenceApiClient.getCorrespondenceOverview(Mockito.any())).thenReturn(
+            new CorrespondenceOverviewExt()
+                .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
+                .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
+                .status(CorrespondenceStatusExt.PUBLISHED)
+        );
+
+        var history = altinnDPVService.getStatus(conversation);
+
+        assertEquals(2, history.size());
+        assertEquals(CorrespondenceStatusExt.PUBLISHED, history.getLast().getStatus());
+    }
+
+    @Test
+    public void isPurgedReturnsTrueOnlyForPurgedStatuses() {
+        assertTrue(AltinnDPVService.isPurged(CorrespondenceStatusExt.PURGED_BY_RECIPIENT));
+        assertTrue(AltinnDPVService.isPurged(CorrespondenceStatusExt.PURGED_BY_ALTINN));
+        assertFalse(AltinnDPVService.isPurged(CorrespondenceStatusExt.PUBLISHED));
+        assertFalse(AltinnDPVService.isPurged(null));
     }
 
 }

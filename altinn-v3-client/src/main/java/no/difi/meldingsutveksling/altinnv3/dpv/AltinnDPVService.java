@@ -51,8 +51,14 @@ public class AltinnDPVService {
         statusEvents.add(createStatusEvent(CorrespondenceStatusExt.INITIALIZED, overview.getCreated()));
         if (overview.getPublished() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.PUBLISHED, overview.getPublished()));
         if (overview.getRead() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.READ, overview.getRead()));
+        if (isPurged(overview.getStatus())) statusEvents.add(createStatusEvent(overview.getStatus(), overview.getStatusChanged()));
         return statusEvents;
 
+    }
+
+    public static boolean isPurged(CorrespondenceStatusExt status) {
+        return CorrespondenceStatusExt.PURGED_BY_RECIPIENT.equals(status)
+                || CorrespondenceStatusExt.PURGED_BY_ALTINN.equals(status);
     }
 
     private CorrespondenceStatusEventExt createStatusEvent(CorrespondenceStatusExt status, OffsetDateTime timestamp) {
