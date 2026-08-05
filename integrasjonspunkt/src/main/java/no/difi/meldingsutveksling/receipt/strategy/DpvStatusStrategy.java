@@ -106,6 +106,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 c.getMessageId(), c.getConversationId());
 
         for (CorrespondenceStatusEventExt event : status) {
+            if (AltinnDPVService.isPurged(event.getStatus())) {
+                handlePurged(c, event.getStatus());
+            }
+
             ReceiptStatus mappedStatus = mapCorrespondenceStatusToReceiptStatus(event.getStatus());
             if (mappedStatus == null) {
                 // status was not mapped, we log it as ignored
@@ -130,6 +134,17 @@ public class DpvStatusStrategy implements StatusStrategy {
         }
     }
 
+    private void handlePurged(Conversation c, CorrespondenceStatusExt status) {
+        log.warn(ConversationMarker.markerFrom(c),
+                "Message [id={}, conversationId={}] was purged ({}), stopping polling.",
+                c.getMessageId(), c.getConversationId(), status);
+
+        if (c.isPollable()) {
+            c.setPollable(false);
+            conversationService.save(c);
+        }
+    }
+
     @Nullable
     static ReceiptStatus mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt status) {
         ReceiptStatus mappedStatus;
@@ -141,9 +156,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status) ||
                 CorrespondenceStatusExt.INITIALIZED.equals(status) ||
                 CorrespondenceStatusExt.FETCHED.equals(status) ||
-                CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED.equals(status))
-        {
+                CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED.equals(status)) {
             mappedStatus = null; // do not map this, just ignore it
+        } else if (AltinnDPVService.isPurged(status)) {
+            mappedStatus = ANNET;
         } else {
             log.info("Unknown correspondence status [{}]", status);
             mappedStatus = ANNET;
