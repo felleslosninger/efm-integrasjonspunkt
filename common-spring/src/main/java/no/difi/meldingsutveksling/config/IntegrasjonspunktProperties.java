@@ -254,6 +254,21 @@ public class IntegrasjonspunktProperties {
         private String statusPollingCron;
         @NotNull
         private Integer statusPollingPageSize;
+        /**
+         * Age (days since a conversation's last status update) at which polling frequency has backed off to
+         * statusPollingBackoffMaxIntervalMinutes. Conversations younger than this are polled with a frequency
+         * that ramps linearly from every tick up to that max interval.
+         */
+        @NotNull
+        @Positive
+        private Integer statusPollingBackoffThresholdDays;
+        /**
+         * Maximum minutes between polls for a conversation once it has reached statusPollingBackoffThresholdDays
+         * without a status update.
+         */
+        @NotNull
+        @Positive
+        private Integer statusPollingBackoffMaxIntervalMinutes;
         @NotNull
         private Boolean useDbPersistence;
     }

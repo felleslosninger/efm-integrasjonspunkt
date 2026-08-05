@@ -47,3 +47,7 @@ GHSA-r7wm-3cxj-wff9 # jackson-core: async parser maxNumberLength bypass via chun
 CVE-2026-41850 # spring-expression
 CVE-2026-41842 # spring-webmvc
 CVE-2026-41845 # xss
+
+# lar disse stå, vi har starks Spring Boot 4.x release klar
+CVE-2026-56819 # io.netty:netty-codec-http2
+CVE-2026-41695 # spring-data-commons
