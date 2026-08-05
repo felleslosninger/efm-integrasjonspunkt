@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.altinnv3.dpv.InvalidConversationReferenceException;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -20,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -76,10 +79,25 @@ public class DpvStatusStrategy implements StatusStrategy {
 
                 conversationService.save(conversation);
 
+            } catch (CorrespondenceApiException e) {
+                if (isMessageDeleted(e.getStatusCode())) {
+                    log.warn("Correspondence api responded with status {} for message [messageId={}, conversationId={}], the message is probably deleted. Stopping polling for this message.",
+                            e.getStatusCode().value(), conversation.getMessageId(), conversation.getConversationId());
+
+                    conversation.setPollable(false);
+                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ANNET));
+                } else {
+                    log.error("Error during status check for " + conversation.getConversationId(), e);
+                }
             } catch (Exception e) {
                 log.error("Error during status check for " + conversation.getConversationId(), e);
             }
         }
+    }
+
+    private static boolean isMessageDeleted(@Nullable HttpStatusCode statusCode) {
+        return statusCode != null
+                && (statusCode.value() == HttpStatus.NOT_FOUND.value() || statusCode.value() == HttpStatus.GONE.value());
     }
 
     private void updateStatus(Conversation c, List<CorrespondenceStatusEventExt> status) {

@@ -1,20 +1,25 @@
 package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.altinnv3.dpv.InvalidConversationReferenceException;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.digdir.altinn3.correspondence.model.CorrespondenceStatusExt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,9 +27,8 @@ import java.util.Set;
 
 import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
 import static no.difi.meldingsutveksling.receipt.strategy.DpvStatusStrategy.mapCorrespondenceStatusToReceiptStatus;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class DpvStatusStrategyTest {
@@ -59,6 +63,37 @@ class DpvStatusStrategyTest {
         Mockito.verify(conversationService, Mockito.times(1)).save(conversation);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {404, 410})
+    void whenMessageNotFoundOrGoneStopPollingAndRegisterAnnet(int statusCode) {
+        Conversation conversation = new Conversation();
+        conversation.setPollable(true);
+
+        MessageStatus annetStatus = MessageStatus.of(ANNET, null, null);
+        Mockito.when(altinnService.getStatus(conversation))
+                .thenThrow(new CorrespondenceApiException("not found", HttpStatus.valueOf(statusCode)));
+        Mockito.when(messageStatusFactory.getMessageStatus(ANNET)).thenReturn(annetStatus);
+
+        dpvStatusStrategy.checkStatus(Set.of(conversation));
+
+        assertFalse(conversation.isPollable(), "The conversation should not be pollable when the message is deleted");
+        Mockito.verify(conversationService, Mockito.times(1)).registerStatus(conversation, annetStatus);
+    }
+
+    @Test
+    void whenOtherCorrespondenceApiExceptionDoesNotStopPolling() {
+        Conversation conversation = new Conversation();
+        conversation.setPollable(true);
+
+        Mockito.when(altinnService.getStatus(conversation))
+                .thenThrow(new CorrespondenceApiException("server error", HttpStatus.INTERNAL_SERVER_ERROR));
+
+        dpvStatusStrategy.checkStatus(Set.of(conversation));
+
+        assertTrue(conversation.isPollable(), "The conversation should still be pollable for non 404/410 errors");
+        Mockito.verify(conversationService, Mockito.never()).registerStatus(eq(conversation), Mockito.any(MessageStatus.class));
+    }
+
     @Test
     void verifyMappings() {
 
@@ -66,7 +101,7 @@ class DpvStatusStrategyTest {
         assertEquals(ANNET, mapCorrespondenceStatusToReceiptStatus(null));
         assertEquals(LEVERT, mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt.PUBLISHED));
         assertEquals(LEST, mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt.READ));
-        assertEquals(null, mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt.READY_FOR_PUBLISH));
+        assertNull(mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt.READY_FOR_PUBLISH));
 
         // all except the following list should be mapped to ANNET
         var mappedStatuses = List.of(
