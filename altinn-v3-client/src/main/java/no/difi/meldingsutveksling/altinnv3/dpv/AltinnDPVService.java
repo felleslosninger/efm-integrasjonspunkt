@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,10 +34,25 @@ public class AltinnDPVService {
             null,
             files.stream().map(FileUploadRequest::getBusinessMessageFile).collect(Collectors.toList()));
 
+        // selv om den er String i koden skal den inneholde en UUID (ingen andre steder i kodebasen wrapper
+        // tilsvarende UUID.fromString-kall i try/catch, alle stoler på den samme oppstrøms bean-valideringen)
+        correspondence.setIdempotentKey(UUID.fromString(message.getMessageId()));
+
         var result = client.upload(correspondence, files);
 
         if (result == null || result.getCorrespondences() == null) { throw new CorrespondenceApiException("Error when sending message to Altinn, response was null");}
         return result.getCorrespondences().getFirst().getCorrespondenceId();
+    }
+
+    // brukes til å finne igjen correspondenceId etter en 409-konflikt på upload (idempotentKey allerede kjent
+    // hos Altinn), siden sendersReference alltid settes til messageId ved opplasting, se CorrespondenceFactory
+    public Optional<UUID> findExistingCorrespondenceId(String messageId) {
+        var correspondences = client.findCorrespondences(messageId);
+
+        if (correspondences == null || correspondences.getIds() == null || correspondences.getIds().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(correspondences.getIds().getFirst());
     }
 
     public List<CorrespondenceStatusEventExt> getStatus(Conversation conversation) {

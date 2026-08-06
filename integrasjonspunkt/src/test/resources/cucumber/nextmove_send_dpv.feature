@@ -192,7 +192,8 @@ Feature: Sending a Next Move DPV message
         "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn",
         "correspondence.resourceId": "eformidling-dpv-administrasjon",
         "correspondence.propertyList.senderOrgNumber": "910077473",
-        "correspondence.ignoreReservation": "false"
+        "correspondence.ignoreReservation": "false",
+        "idempotentKey" : "abc8849c-e281-4809-8555-7cd54952b926"
     }
     """
     And the sent message contains the following files:
