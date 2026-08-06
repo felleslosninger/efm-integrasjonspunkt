@@ -107,6 +107,20 @@ public class CorrespondenceApiClient {
             ;
     }
 
+    // brukes til å finne igjen en correspondence etter en 409-konflikt (idempotentKey allerede kjent),
+    // siden sendersReference alltid settes til vår egen messageId ved opplasting
+    public CorrespondencesExt findCorrespondences(String sendersReference) {
+        String accessToken = tokenProducer.produceToken(scopes);
+
+        return restClient.get()
+            .uri(correspondenceServiceUrl + "/correspondence?sendersReference={sendersReference}", sendersReference)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(CorrespondencesExt.class)
+            ;
+    }
+
     public byte[] downloadAttachment(UUID correspondenceId, UUID attachmentId) {
         String accessToken = tokenProducer.produceToken(scopes);
 

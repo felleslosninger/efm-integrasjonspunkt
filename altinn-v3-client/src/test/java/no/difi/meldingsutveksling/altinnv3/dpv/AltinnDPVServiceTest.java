@@ -23,10 +23,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +58,7 @@ public class AltinnDPVServiceTest {
         response2.setCorrespondences(List.of(response));
 
         NextMoveOutMessage message = new NextMoveOutMessage();
+        message.setMessageId(UUID.randomUUID().toString());
         StandardBusinessDocument sbd = new StandardBusinessDocument()
             .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
                 .setSenderIdentifier(SENDER)

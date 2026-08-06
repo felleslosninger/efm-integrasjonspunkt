@@ -4,6 +4,7 @@ import no.difi.meldingsutveksling.QueueInterruptException;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.api.ConversationService;
+import no.difi.meldingsutveksling.status.Conversation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,8 +13,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DpvConversationStrategyImplTest {
@@ -51,6 +54,57 @@ public class DpvConversationStrategyImplTest {
 
         assertEquals(serverError, exception);
         Mockito.verifyNoInteractions(conversationService);
+    }
+
+    @Test
+    public void send_setsExternalSystemReference_whenConflictResolvedViaSendersReferenceLookup() {
+        NextMoveOutMessage message = StandardBusinessDocumentTestData.DIGITAL_DPV_MESSAGE;
+        CorrespondenceApiException conflict = new CorrespondenceApiException("Conflict", HttpStatus.CONFLICT);
+        UUID existingCorrespondenceId = UUID.randomUUID();
+        Conversation conversation = new Conversation();
+
+        Mockito.when(altinnService.send(message)).thenThrow(conflict);
+        Mockito.when(altinnService.findExistingCorrespondenceId(message.getMessageId())).thenReturn(Optional.of(existingCorrespondenceId));
+        Mockito.when(conversationService.findConversation(message.getMessageId())).thenReturn(Optional.of(conversation));
+
+        assertDoesNotThrow(() -> target.send(message));
+
+        assertEquals(existingCorrespondenceId.toString(), conversation.getExternalSystemReference());
+        Mockito.verify(conversationService).save(conversation);
+    }
+
+    @Test
+    public void send_disablesPolling_whenSendersReferenceLookupFindsNoCorrespondence() {
+        NextMoveOutMessage message = StandardBusinessDocumentTestData.DIGITAL_DPV_MESSAGE;
+        CorrespondenceApiException conflict = new CorrespondenceApiException("Conflict", HttpStatus.CONFLICT);
+        Conversation conversation = new Conversation();
+
+        Mockito.when(altinnService.send(message)).thenThrow(conflict);
+        Mockito.when(altinnService.findExistingCorrespondenceId(message.getMessageId())).thenReturn(Optional.empty());
+        Mockito.when(conversationService.findConversation(message.getMessageId())).thenReturn(Optional.of(conversation));
+
+        assertDoesNotThrow(() -> target.send(message));
+
+        assertFalse(conversation.isPollable());
+        assertTrue(conversation.isFinished());
+        Mockito.verify(conversationService).save(conversation);
+    }
+
+    @Test
+    public void send_disablesPolling_whenSendersReferenceLookupThrows() {
+        NextMoveOutMessage message = StandardBusinessDocumentTestData.DIGITAL_DPV_MESSAGE;
+        CorrespondenceApiException conflict = new CorrespondenceApiException("Conflict", HttpStatus.CONFLICT);
+        Conversation conversation = new Conversation();
+
+        Mockito.when(altinnService.send(message)).thenThrow(conflict);
+        Mockito.when(altinnService.findExistingCorrespondenceId(message.getMessageId())).thenThrow(new RuntimeException("lookup boom"));
+        Mockito.when(conversationService.findConversation(message.getMessageId())).thenReturn(Optional.of(conversation));
+
+        assertDoesNotThrow(() -> target.send(message));
+
+        assertFalse(conversation.isPollable());
+        assertTrue(conversation.isFinished());
+        Mockito.verify(conversationService).save(conversation);
     }
 
 }
