@@ -2,17 +2,19 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -20,9 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// Shares its Spring context (and embedded H2 database) with other @DataJpaTest classes that
+// resolve to the same effective configuration; @ResourceLock keeps them from running concurrently
+// under junit-platform.properties' junit.jupiter.execution.parallel.mode.classes.default=concurrent.
+@ResourceLock("nextmove-jackson-datajpatest")
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({JacksonTestConfig.class})
+@ContextConfiguration(classes = JacksonTestConfig.class)
 class PeekNextMoveMessageInImplIT {
 
     @Autowired
@@ -141,10 +147,10 @@ class PeekNextMoveMessageInImplIT {
     private NextMoveInMessage getNextMoveMessage() {
         NextMoveInMessage message = new NextMoveInMessage();
         message.setSbd(
-            new StandardBusinessDocument()
-                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader())
-                .setAny(new ArkivmeldingMessage()));
+                new StandardBusinessDocument()
+                        .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                                .setDocumentIdentification(new DocumentIdentification().setType("arkivmelding")))
+                        .setAny(new ArkivmeldingMessage()));
         return message;
     }
-
 }
