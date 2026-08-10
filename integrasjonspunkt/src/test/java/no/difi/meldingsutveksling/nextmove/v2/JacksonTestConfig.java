@@ -17,6 +17,7 @@ public class JacksonTestConfig {
     @Bean
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        return Jackson2ObjectMapperBuilder.json();
+        return new Jackson2ObjectMapperBuilder();
     }
+
 }
