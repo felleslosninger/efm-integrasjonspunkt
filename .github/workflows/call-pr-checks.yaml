@@ -27,5 +27,6 @@ jobs:
       auto-merge-types: "version-update:semver-patch;version-update:semver-minor"
       module-name: integrasjonspunkt
       maven-lifecycle: 'verify'
+      maven-skip-tests: false
     secrets: inherit
 
