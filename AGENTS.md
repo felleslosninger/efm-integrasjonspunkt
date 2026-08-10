@@ -28,8 +28,11 @@ Multi-module Maven build (`no.difi.meldingsutveksling`, version `DEV-SNAPSHOT`):
 | `common/`, `common-spring/` | Utilities; `common-spring` holds `IntegrasjonspunktProperties` — the typed view of all `difi.move.*` config — and its validator |
 | `dpi-client/`, `dph-client/`, `altinn-v3-client/`, `fiks-meldingsformidler/`, `post-til-private/` | Channel-specific transport clients |
 | `service-registry-client/` | Lookup of receiver capabilities/certificates |
-| `validation/`, `dokumentpakking/` | Payload validation; ASiC-E packaging/signing |
+| `validation/` | Payload validation |
 | `web/` | Admin UI (Thymeleaf). Runs standalone: `ThymeleafApplication` |
+
+> [!NOTE]
+> The ASiC-E packaging/signing have been moved from this repo to the external `move-common` library (`no.difi.move-common:dokumentpakking` dependency).
 
 ## Setup gotcha (read first)
 
