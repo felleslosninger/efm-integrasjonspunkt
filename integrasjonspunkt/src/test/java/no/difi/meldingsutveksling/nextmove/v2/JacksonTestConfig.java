@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -15,8 +16,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 public class JacksonTestConfig {
 
     @Bean
+    @Primary
     @ConditionalOnMissingBean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        return Jackson2ObjectMapperBuilder.json();
+        return new Jackson2ObjectMapperBuilder();
     }
+
 }
