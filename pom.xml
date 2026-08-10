@@ -558,6 +558,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <parallel>none</parallel>
+                </configuration>
             </plugin>
         </plugins>
     </build>
