@@ -2,11 +2,14 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -19,6 +22,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// Shares its Spring context (and embedded H2 database) with other @DataJpaTest classes that
+// resolve to the same effective configuration; @ResourceLock keeps them from running concurrently
+// under junit-platform.properties' junit.jupiter.execution.parallel.mode.classes.default=concurrent.
+@ResourceLock("nextmove-jackson-datajpatest")
 @DataJpaTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = JacksonTestConfig.class)
@@ -139,7 +146,11 @@ class PeekNextMoveMessageInImplIT {
 
     private NextMoveInMessage getNextMoveMessage() {
         NextMoveInMessage message = new NextMoveInMessage();
-        message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessage()));
+        message.setSbd(
+                new StandardBusinessDocument()
+                        .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                                .setDocumentIdentification(new DocumentIdentification().setType("arkivmelding")))
+                        .setAny(new ArkivmeldingMessage()));
         return message;
     }
 }

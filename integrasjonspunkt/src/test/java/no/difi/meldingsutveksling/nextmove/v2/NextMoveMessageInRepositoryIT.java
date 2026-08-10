@@ -1,10 +1,13 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
+import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -22,6 +25,10 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
+// Shares its Spring context (and embedded H2 database) with other @DataJpaTest classes that
+// resolve to the same effective configuration; @ResourceLock keeps them from running concurrently
+// under junit-platform.properties' junit.jupiter.execution.parallel.mode.classes.default=concurrent.
+@ResourceLock("nextmove-jackson-datajpatest")
 @DataJpaTest
 @Transactional(propagation = NOT_SUPPORTED) // we're going to handle transactions manually
 @ActiveProfiles("test")
@@ -116,7 +123,11 @@ class NextMoveMessageInRepositoryIT {
 
     private NextMoveInMessage getNextMoveMessage() {
         NextMoveInMessage message = new NextMoveInMessage();
-        message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessage()));
+        message.setSbd(
+                new StandardBusinessDocument()
+                        .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                                .setDocumentIdentification(new DocumentIdentification().setType("arkivmelding")))
+                        .setAny(new ArkivmeldingMessage()));
         return message;
     }
 
