@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import org.junit.jupiter.api.AfterEach;
@@ -139,7 +140,11 @@ class PeekNextMoveMessageInImplIT {
 
     private NextMoveInMessage getNextMoveMessage() {
         NextMoveInMessage message = new NextMoveInMessage();
-        message.setSbd(new StandardBusinessDocument().setAny(new ArkivmeldingMessage()));
+        message.setSbd(
+            new StandardBusinessDocument()
+                .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader())
+                .setAny(new ArkivmeldingMessage()));
         return message;
     }
+
 }
