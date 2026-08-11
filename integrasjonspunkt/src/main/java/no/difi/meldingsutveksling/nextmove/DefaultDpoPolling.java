@@ -51,15 +51,13 @@ public class DefaultDpoPolling implements DpoPolling {
     @Timed
     public void poll() {
         systemUsers.forEach(system -> {
-            log.debug("Polling messages for " + system.getOrgId());
+            log.debug("Polling messages for {}", system.getOrgId());
             try {
                 UUID[] fileTransferIds = altinnDownloadService.getAvailableFiles(system);
                 if (fileTransferIds.length > 0) log.debug("New DPO message(s) detected for {}", system.getOrgId());
-                Arrays.stream(fileTransferIds).forEach(fileTransferId -> {
-                    handleFileReference(system, fileTransferId);
-                });
+                Arrays.stream(fileTransferIds).forEach(fileTransferId -> handleFileReference(system, fileTransferId));
             } catch (Exception e) {
-                log.error("Could not check for available files from Altinn: " + e.getMessage(), e);
+                log.error("Could not check for available files from Altinn: {}", e.getMessage(), e);
             }
         });
     }
@@ -68,8 +66,17 @@ public class DefaultDpoPolling implements DpoPolling {
         try {
             String orgNumber = systemUser.getOrgId().substring(5);
             final DownloadRequest request = new DownloadRequest(fileTransferId, orgNumber);
-            log.debug("Downloading message with altinnId={}", fileTransferId);
-            AltinnPackage altinnPackage = altinnDownloadService.download(systemUser, request);
+
+            AltinnPackage altinnPackage;
+            try {
+                log.debug("Downloading message with altinnId={}", fileTransferId);
+                altinnPackage = altinnDownloadService.download(systemUser, request);
+            } catch (IllegalArgumentException e) {
+                log.error("Could not parse message with altinnId={} - discarding message.", fileTransferId, e);
+                altinnDownloadService.confirmDownload(systemUser, request);
+                return;
+            }
+
             StandardBusinessDocument sbd = altinnPackage.getSbd();
             MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
             LogstashMarker logstashMarkers = SBDUtil.getMessageInfo(sbd).createLogstashMarkers();
@@ -88,7 +95,7 @@ public class DefaultDpoPolling implements DpoPolling {
             altinnDownloadService.confirmDownload(systemUser, request);
             log.debug(markerFrom("altinn-reference-value", fileTransferId).and(logstashMarkers), "Message confirmed downloaded");
         } catch (Exception e) {
-            log.error("Error during Altinn message polling, message altinnId=%s".formatted(fileTransferId), e);
+            log.error("Error during Altinn message polling, message altinnId={}", fileTransferId, e);
         }
     }
 }

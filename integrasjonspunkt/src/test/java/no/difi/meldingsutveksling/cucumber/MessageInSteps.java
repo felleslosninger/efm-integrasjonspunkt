@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.ServiceIdentifier;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
@@ -47,6 +48,25 @@ public class MessageInSteps {
                     .mimeType(MediaType.APPLICATION_JSON_VALUE)
                     .resource(new ByteArrayResource(body.getBytes()))
                     .build()
+            );
+        }
+
+        messageInHolder.set(message);
+    }
+
+    @And("^(\\w+) prepares a message with the following SBDH:$")
+    public void altinnPreparesAMessageWithTheFollowingSBDH(String who, String body) throws IOException {
+        StandardBusinessDocumentHeader sbdh = objectMapper.readValue(body, StandardBusinessDocumentHeader.class);
+        Message message = new Message()
+            .setServiceIdentifier(ServiceIdentifier.DPO)
+            .setSbd(new StandardBusinessDocument().setStandardBusinessDocumentHeader(sbdh));
+
+        if ("Altinn".equals(who)) {
+            message.attachment(Document.builder()
+                .filename(SBD_FILE)
+                .mimeType(MediaType.APPLICATION_JSON_VALUE)
+                .resource(new ByteArrayResource(body.getBytes()))
+                .build()
             );
         }
 
