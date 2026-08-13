@@ -7,10 +7,10 @@ automatisk når du starter en av de forhåndsdefinerte maven-profilene.
 
 ```bash
 mvn clean package
-java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt-DEV-SNAPSHOT.jar
 
 # eller overstyr konfigurasjon med en lokal fil
-java -Dspring.config.additional-location=file:integrasjonspunkt-minimal-dpo.properties -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+java -Dspring.config.additional-location=file:integrasjonspunkt-minimal-dpo.properties -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt-DEV-SNAPSHOT.jar
 ```
 
 Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
