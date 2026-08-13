@@ -52,6 +52,7 @@ CVE-2026-41845 # xss
 CVE-2026-56819 # io.netty:netty-codec-http2
 CVE-2026-41695 # spring-data-commons
 CVE-2026-50645
+CVE-2026-54399
 
 # io.micrometer:micrometer-core
 CVE-2026-40983
