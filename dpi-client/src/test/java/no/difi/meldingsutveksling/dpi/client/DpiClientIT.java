@@ -82,10 +82,11 @@ import static org.mockserver.model.HttpResponse.response;
 })
 @ActiveProfiles("test")
 @MockServerSettings(ports = 8900)
-class DpiClientTest {
+class DpiClientIT {
 
     @MockitoBean
     private TransactionTemplate transactionTemplate;
+
     @Mock
     private TransactionStatus transactionStatus;
 

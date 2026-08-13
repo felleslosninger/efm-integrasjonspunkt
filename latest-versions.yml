@@ -6,14 +6,14 @@
 integrasjonspunkt:
   environments:
     dev:
-      latest: v4.0.7
-      earlybird: v4.0.7
+      latest: v4.0.8
+      earlybird: v4.0.8
     itest:
-      latest: v4.0.7
-      earlybird: v4.0.7
+      latest: v4.0.8
+      earlybird: v4.0.8
     staging:
-      latest: v4.0.7
-      earlybird: v4.0.7
+      latest: v4.0.8
+      earlybird: v4.0.8
     production:
-      latest: v4.0.7
-      earlybird: v4.0.7
+      latest: v4.0.8
+      earlybird: v4.0.8

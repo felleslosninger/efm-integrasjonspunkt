@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.status;
 import io.vavr.collection.List;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,10 @@ import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// Shares its Spring context (and embedded H2 database) with other @DataJpaTest classes that
+// resolve to the same effective configuration; @ResourceLock keeps them from running concurrently
+// under junit-platform.properties' junit.jupiter.execution.parallel.mode.classes.default=concurrent.
+@ResourceLock("nextmove-plain-datajpatest")
 @DataJpaTest
 @ActiveProfiles("test")
 class MessageStatusRepositoryIT {

@@ -3,11 +3,16 @@ package no.difi.meldingsutveksling.nextmove;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// Shares its Spring context (and embedded H2 database) with other @DataJpaTest classes that
+// resolve to the same effective configuration; @ResourceLock keeps them from running concurrently
+// under junit-platform.properties' junit.jupiter.execution.parallel.mode.classes.default=concurrent.
+@ResourceLock("nextmove-plain-datajpatest")
 @DataJpaTest
 @ActiveProfiles("test")
 public class MakeSureLegacyModeSequencesInH2IT {
