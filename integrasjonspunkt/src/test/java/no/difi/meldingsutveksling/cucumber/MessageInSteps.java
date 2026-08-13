@@ -14,6 +14,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.io.IOException;
+
 import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 
 @RequiredArgsConstructor
