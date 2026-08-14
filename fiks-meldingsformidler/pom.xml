@@ -36,12 +36,6 @@
             <groupId>no.ks.fiks</groupId>
             <artifactId>fiks-svarut-klient</artifactId>
             <version>4.8.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>maskinporten-client</artifactId>
-                    <groupId>no.ks.fiks</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
