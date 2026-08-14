@@ -67,6 +67,12 @@
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
             <artifactId>fiks-meldingsformidler</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>maskinporten-client</artifactId>
+                    <groupId>no.ks.fiks</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
