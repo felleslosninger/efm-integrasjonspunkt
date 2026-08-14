@@ -7,7 +7,11 @@ import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -19,6 +23,16 @@ public class DateTimeUtil {
 
     public static OffsetDateTime toOffsetDateTime(LocalDateTime localDateTime) {
         return OffsetDateTime.ofInstant(localDateTime.atZone(DEFAULT_ZONE_ID).toInstant(), DEFAULT_ZONE_ID);
+    }
+
+    public static OffsetDateTime toOffsetDateTime(XMLGregorianCalendar xmlCal) {
+        if (xmlCal == null) {
+            return null;
+        }
+
+        GregorianCalendar gregorianCalendar = xmlCal.toGregorianCalendar();
+        ZonedDateTime zonedDateTime = gregorianCalendar.toZonedDateTime();
+        return zonedDateTime.toOffsetDateTime();
     }
 
     public static XMLGregorianCalendar atStartOfDay(XMLGregorianCalendar in) {

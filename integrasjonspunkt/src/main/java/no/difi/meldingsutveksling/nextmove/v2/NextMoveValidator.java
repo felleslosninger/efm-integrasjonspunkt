@@ -223,7 +223,7 @@ public class NextMoveValidator {
                 }
                 String forsendelseType = dpfSettings.getForsendelseType();
                 if (!isNullOrEmpty(forsendelseType)) {
-                    List<String> validTypes = svarUtService.getObject()
+                    Collection<String> validTypes = svarUtService.getObject()
                         .retreiveForsendelseTyper(getPartOrPrimaryIdentifier(sbd.getSenderIdentifier()));
                     if (!validTypes.contains(forsendelseType)) {
                         throw new ForsendelseTypeNotFoundException(forsendelseType, String.join(",", validTypes));

@@ -1,13 +1,10 @@
-package no.difi.meldingsutveksling.ks.svarut;
+package no.difi.meldingsutveksling.ks.svarut.ws;
 
+import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.marker.LogstashMarker;
 import net.logstash.logback.marker.Markers;
 import no.difi.meldingsutveksling.QueueInterruptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.ws.client.WebServiceClientException;
-import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.context.MessageContext;
 
 import javax.xml.transform.Source;
@@ -17,10 +14,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
-@Component
-public class SvarUtFaultInterceptor implements ClientInterceptor {
-
-    private static final Logger log = LoggerFactory.getLogger(SvarUtFaultInterceptor.class);
+@Slf4j
+class SvarUtFaultInterceptor implements SvarUtWebServiceInterceptor {
 
     @Override
     public boolean handleFault(MessageContext messageContext) throws WebServiceClientException {
@@ -74,8 +69,13 @@ public class SvarUtFaultInterceptor implements ClientInterceptor {
     }
 
     static class SoapFaultException extends WebServiceClientException {
-        public SoapFaultException(String msg, Throwable t) { super(msg, t); }
-        public SoapFaultException(String msg) { super(msg); }
+        public SoapFaultException(String msg, Throwable t) {
+            super(msg, t);
+        }
+
+        public SoapFaultException(String msg) {
+            super(msg);
+        }
     }
 
 }
