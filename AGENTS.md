@@ -5,7 +5,7 @@ https://docs.digdir.no/docs/eFormidling/.
 
 ## What this is
 
-**eFormidling Integrasjonspunkt** (Digdir): a Spring Boot 3.5 / Java 21 message
+**eFormidling Integrasjonspunkt** (Digdir): a Spring Boot 4.1 / Java 21 message
 exchange point for the Norwegian public sector. Clients send/receive messages
 through its REST API ("NextMove API"); the application routes them over transport
 channels — DPO (Altinn), DPV, DPI (digital post), DPF/DPFIO (Fiks), DPE (eInnsyn),
