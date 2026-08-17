@@ -102,7 +102,6 @@ class FiksRestMapper {
             .sikkerhetsniva(getSikkerhetsniva(message))
             .konteringskode(properties.getFiks().getUt().getKonteringsKode())
             .kryptert(properties.getFiks().isKryptert())
-            .avgivendeSystem("")
             .utskriftskonfigurasjon(getUtskriftskonfigurasjon())
             .mottaker(getMottaker(message))
             .svarSendesTil(getSvarSendesTil(message, journalpost))
@@ -285,12 +284,12 @@ class FiksRestMapper {
         }
     }
 
-    private int toInt(BigInteger x) {
-        return x == null ? 0 : x.intValueExact();
+    private Integer toInt(BigInteger x) {
+        return x == null ? null : x.intValueExact();
     }
 
-    private long toLong(BigInteger x) {
-        return x == null ? 0L : x.longValueExact();
+    private Long toLong(BigInteger x) {
+        return x == null ? null : x.longValueExact();
     }
 
     private SvarSendesTil svarSendesTil(Korrespondansepart kp, String orgnr) {
@@ -298,7 +297,6 @@ class FiksRestMapper {
             .adresselinje1(String.join(" ", kp.getPostadresse()))
             .postnummer(kp.getPostnummer())
             .poststed(kp.getPoststed())
-            .landkode(kp.getLand())
             .build()
         );
     }
@@ -317,12 +315,10 @@ class FiksRestMapper {
         if (infoRecord.getPostadresse() != null) {
             builder.adresselinje1(infoRecord.getPostadresse().getAdresse())
                 .postnummer(infoRecord.getPostadresse().getPostnummer())
-                .poststed(infoRecord.getPostadresse().getPoststed())
-                .landkode(infoRecord.getPostadresse().getLand());
+                .poststed(infoRecord.getPostadresse().getPoststed());
         } else {
             builder.poststed("0192")
-                .postnummer("Oslo")
-                .landkode("Norge");
+                .postnummer("Oslo");
         }
 
         return builder.build();

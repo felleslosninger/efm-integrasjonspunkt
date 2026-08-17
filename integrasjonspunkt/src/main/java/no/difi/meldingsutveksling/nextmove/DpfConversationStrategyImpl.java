@@ -14,7 +14,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEVERT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.SENDT;
 
 @Component
 @ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
@@ -31,7 +33,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
     public void send(@NotNull NextMoveOutMessage message) throws NextMoveException {
 
         if (SBDUtil.isReceipt(message.getSbd())) {
-            log.info("Message [%s] is a receipt - not supported by DPF. Discarding message.".formatted(message.getMessageId()));
+            log.info("Message [{}] is a receipt - not supported by DPF. Discarding message.", message.getMessageId());
             conversationService.registerStatus(message.getMessageId(), SENDT, LEVERT, LEST);
             return;
         }
@@ -43,7 +45,7 @@ public class DpfConversationStrategyImpl implements DpfConversationStrategy {
 
         Audit.info("Message [id=%s, serviceIdentifier=%s] sent to SvarUt".formatted(
                 message.getMessageId(), message.getServiceIdentifier()),
-                markerFrom(message));
+            markerFrom(message));
     }
 
 }

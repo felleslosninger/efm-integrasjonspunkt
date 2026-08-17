@@ -32,7 +32,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "fiks.ut.type", havingValue = "ws", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "difi.move.fiks.ut", name = "type", havingValue = "ws", matchIfMissing = true)
 @ConditionalOnBooleanProperty(name = "difi.move.feature.enableDPF")
 public class SvarUtWebServiceConfiguration {
 

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 
 @Configuration
-@ConditionalOnProperty(name = "fiks.ut.type", havingValue = "rest")
+@ConditionalOnProperty(prefix = "difi.move.fiks.ut", name = "type", havingValue = "rest")
 @ConditionalOnBooleanProperty(name = "difi.move.feature.enableDPF")
 public class SvarUtRestConfiguration {
 
