@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.ks.svarut.ws.SvarUtWebServiceInterceptor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import java.util.List;
 @Component
 @Profile("cucumber")
 @RequiredArgsConstructor
-public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter {
+public class RequestCaptureClientInterceptor extends ClientInterceptorAdapter implements SvarUtWebServiceInterceptor {
 
     private final TransformerHelper transformerHelper = new TransformerHelper();
     private final Holder<List<String>> webServicePayloadHolder;

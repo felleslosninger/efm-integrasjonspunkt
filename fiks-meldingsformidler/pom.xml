@@ -32,6 +32,11 @@
             <groupId>no.difi.move-common</groupId>
             <artifactId>webservice-tools</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.ks.fiks</groupId>
+            <artifactId>fiks-svarut-klient</artifactId>
+            <version>4.8.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,7 +63,7 @@
                     <schemaIncludes>
                         <include>*.wsdl</include>
                     </schemaIncludes>
-                    <generatePackage>no.difi.meldingsutveksling.ks.svarut</generatePackage>
+                    <generatePackage>no.difi.meldingsutveksling.ks.svarut.ws</generatePackage>
                     <strict>true</strict>
                     <verbose>true</verbose>
                     <extension>true</extension>

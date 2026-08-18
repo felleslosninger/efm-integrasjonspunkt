@@ -1,29 +1,37 @@
-package no.difi.meldingsutveksling.ks.mapping;
+package no.difi.meldingsutveksling.ks.svarut.ws;
 
 import jakarta.activation.DataHandler;
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import no.arkivverket.standarder.noark5.arkivmelding.*;
+import no.arkivverket.standarder.noark5.arkivmelding.Arkivmelding;
+import no.arkivverket.standarder.noark5.arkivmelding.Dokumentbeskrivelse;
+import no.arkivverket.standarder.noark5.arkivmelding.Journalpost;
+import no.arkivverket.standarder.noark5.arkivmelding.Korrespondansepart;
+import no.arkivverket.standarder.noark5.arkivmelding.Saksmappe;
 import no.arkivverket.standarder.noark5.metadatakatalog.Korrespondanseparttype;
 import no.arkivverket.standarder.noark5.metadatakatalog.TilknyttetRegistreringSom;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.move.common.dokumentpakking.CreateCMSDocument;
 import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalstatusMapper;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
-import no.difi.meldingsutveksling.ks.svarut.*;
-import no.difi.meldingsutveksling.nextmove.*;
+import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.DpfSettings;
+import no.difi.meldingsutveksling.nextmove.HasSikkerhetsNivaa;
+import no.difi.meldingsutveksling.nextmove.NextMoveException;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.move.common.dokumentpakking.CreateCMSDocument;
 import no.difi.move.common.io.ResourceDataSource;
 import no.difi.move.common.io.pipe.Reject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,8 +52,7 @@ import java.util.stream.Stream;
 import static no.difi.meldingsutveksling.NextMoveConsts.ARKIVMELDING_FILE;
 
 @Slf4j
-@Component
-public class FiksMapper {
+class FiksWebServiceMapper {
 
     private final IntegrasjonspunktProperties properties;
     private final ServiceRegistryLookup serviceRegistry;
@@ -54,12 +61,12 @@ public class FiksMapper {
     private final ArkivmeldingUtil arkivmeldingUtil;
     private final Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier;
 
-    public FiksMapper(IntegrasjonspunktProperties properties,
-                      ServiceRegistryLookup serviceRegistry,
-                      OptionalCryptoMessagePersister optionalCryptoMessagePersister,
-                      CreateCMSDocument createCMSDocument,
-                      ArkivmeldingUtil arkivmeldingUtil,
-                      Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier) {
+    public FiksWebServiceMapper(IntegrasjonspunktProperties properties,
+                                ServiceRegistryLookup serviceRegistry,
+                                OptionalCryptoMessagePersister optionalCryptoMessagePersister,
+                                CreateCMSDocument createCMSDocument,
+                                ArkivmeldingUtil arkivmeldingUtil,
+                                Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier) {
         this.properties = properties;
         this.serviceRegistry = serviceRegistry;
         this.optionalCryptoMessagePersister = optionalCryptoMessagePersister;
@@ -68,18 +75,7 @@ public class FiksMapper {
         this.arkivmeldingUtil = arkivmeldingUtil;
     }
 
-    public SendForsendelseMedId mapFrom(NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
-        Optional<String> senderRef = SBDUtil.getOptionalSenderRef(message.getSbd());
-        // Confirm that SenderRef is a valid UUID, else use messageId
-        if (senderRef.isPresent()) {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                UUID.fromString(senderRef.get());
-            } catch (IllegalArgumentException e) {
-                senderRef = Optional.empty();
-            }
-        }
-        String forsendelsesid = senderRef.orElse(message.getMessageId());
+    public SendForsendelseMedId mapFrom(String forsendelsesid, NextMoveOutMessage message, X509Certificate certificate, Reject reject) throws NextMoveException {
         return SendForsendelseMedId.builder()
             .withForsendelse(getForsendelse(message, certificate, reject))
             .withForsendelsesid(forsendelsesid)
@@ -162,7 +158,7 @@ public class FiksMapper {
         if (businessMessage instanceof HasSikkerhetsNivaa<?> e) {
             return Integer.valueOf(4).equals(e.getSikkerhetsnivaa());
         }
-       return false;
+        return false;
     }
 
     private List<Dokumentbeskrivelse> getDokumentbeskrivelser(Journalpost journalpost) {
@@ -346,7 +342,7 @@ public class FiksMapper {
     }
 
     private boolean validVirksomhetsspesifikkeMetadata(Node node) {
-        if(node.getChildNodes().getLength() != 1){
+        if (node.getChildNodes().getLength() != 1) {
             log.warn("Only simple sub elements of virksomhetsspesifikkeMetadata can be transferred to SvarUt");
             return false;
         }
