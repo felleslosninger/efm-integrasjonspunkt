@@ -21,6 +21,7 @@ import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -180,11 +181,13 @@ public class DpiClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public BusinessCertificateValidator businessCertificateValidator() throws Exception {
         return new BusinessCertificateValidatorFactory().createValidator(properties.getCertificate().getMode());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
                 .threshold(properties.getTemporaryFileThreshold())

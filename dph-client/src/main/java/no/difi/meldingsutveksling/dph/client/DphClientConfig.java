@@ -57,13 +57,13 @@ public class DphClientConfig {
     }
 
     @Bean
-    public DphClientService dphClientService(DphClient dphClient, DphParcelService parcelService) {
-        return new DphClientService(dphClient, parcelService);
+    public DphClientService dphClientService(DphClient dphClient, DphParcelService dphParcelService) {
+        return new DphClientService(dphClient, dphParcelService);
     }
 
     @Bean
     public DphClient dphClient(DphParcelService dphParcelService,
-                               CreateMaskinportenToken createMaskinportenToken) {
+                               CreateMaskinportenToken dphCreateMaskinportenToken) {
         return new DphClientImpl(
             WebClient.builder()
                 .baseUrl(properties.getUri())
@@ -79,7 +79,7 @@ public class DphClientConfig {
                         connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
                     })))
                 .build(),
-            new CreateMultipart(), dphParcelService, new DphClientErrorHandlerImpl(), createMaskinportenToken);
+            new CreateMultipart(), dphParcelService, new DphClientErrorHandlerImpl(), dphCreateMaskinportenToken);
     }
 
     private static ExchangeFilterFunction logRequest() {
@@ -109,13 +109,13 @@ public class DphClientConfig {
 
     @Bean
     @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dph", havingValue = "false")
-    public CreateMaskinportenToken createMaskinportenTokenMock() {
+    public CreateMaskinportenToken dphCreateMaskinportenTokenMock() {
         return new CreateMaskinportenTokenMock(properties.getOidc().getMock().getToken());
     }
 
     @Bean
     @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dph", havingValue = "true")
-    public CreateMaskinportenToken createMaskinportenTokenImpl() {
+    public CreateMaskinportenToken dphCreateMaskinportenTokenImpl() {
         return new CreateMaskinportenTokenImpl(
             jwtTokenClient());
     }
@@ -131,6 +131,7 @@ public class DphClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
             .threshold((int) properties.getTemporaryFileThreshold().toBytes())
@@ -151,9 +152,9 @@ public class DphClientConfig {
         KeystoreHelper dphKeystoreHelper,
         CreateCMSEncryptedAsice createCmsEncryptedAsice,
         DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier,
-        InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
+        InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory) {
         return new DphParcelService(verifyJWT, builder.build(), dphKeystoreHelper, createCmsEncryptedAsice,
-            digdirBusinessCertificateSupplier, resourceFactory);
+            digdirBusinessCertificateSupplier, inMemoryWithTempFileFallbackResourceFactory);
     }
 
     @Bean
