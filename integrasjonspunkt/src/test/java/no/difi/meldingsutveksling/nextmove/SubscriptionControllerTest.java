@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
 import no.difi.meldingsutveksling.domain.webhooks.Subscription;
@@ -11,7 +10,7 @@ import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionController;
 import no.difi.meldingsutveksling.webhooks.subscription.SubscriptionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
@@ -22,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.Collections;

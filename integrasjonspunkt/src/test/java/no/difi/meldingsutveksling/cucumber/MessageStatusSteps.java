@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;

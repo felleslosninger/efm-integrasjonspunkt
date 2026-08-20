@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.jpa;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class ObjectMapperHolder {
 

@@ -1,25 +1,24 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Clock;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 @Configuration
 public class JacksonMockitoConfig {
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jacksonMockitoCustomizer() {
+    public JsonMapperBuilderCustomizer jacksonMockitoCustomizer() {
 
         return builder ->
                 builder.annotationIntrospector(new JacksonAnnotationIntrospector() {
 
                     @Override
-                    public boolean hasIgnoreMarker(final AnnotatedMember m) {
-                        return super.hasIgnoreMarker(m) || m.getName().contains("Mockito");
+                    public boolean hasIgnoreMarker(MapperConfig<?> config, final AnnotatedMember m) {
+                        return super.hasIgnoreMarker(config, m) || m.getName().contains("Mockito");
                     }
                 });
     }

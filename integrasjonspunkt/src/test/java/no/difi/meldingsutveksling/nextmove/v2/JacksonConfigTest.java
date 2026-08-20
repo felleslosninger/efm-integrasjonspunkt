@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.clock.TestClock;
 import no.difi.meldingsutveksling.config.JacksonConfig;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 

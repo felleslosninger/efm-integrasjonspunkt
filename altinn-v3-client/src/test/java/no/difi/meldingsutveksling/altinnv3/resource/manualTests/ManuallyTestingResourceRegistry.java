@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.resource.manualTests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.inject.Inject;
 import no.difi.meldingsutveksling.altinnv3.UseFullTestConfiguration;
 import no.difi.meldingsutveksling.altinnv3.resource.ResourceApiClient;
@@ -92,8 +92,9 @@ public class ManuallyTestingResourceRegistry {
         String list = client.showAccesslistMembers("eformidling-meldingsteneste-test-tilgangsliste");
         assertNotNull(list, "List should not be null");
         System.out.println(list);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonMapper mapper = JsonMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build();
         var accessList = mapper.readValue(list, AccessList.class);
         System.out.println(accessList);
         List<String> organizationNumbers = accessList.data.stream().map(it -> it.identifiers().organizationNumber()).toList();

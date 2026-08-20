@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.TmpFile;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -73,8 +73,7 @@ public class AltinnPackage {
             if (sbd.getAny() instanceof BusinessMessageAsAttachment) {
                 zipOutputStream.putNextEntry(new ZipEntry(SBD_FILE));
                 ObjectMapper om = context.getBean(ObjectMapper.class);
-                om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-                om.writeValue(zipOutputStream, sbd);
+                om.writer().without(StreamWriteFeature.AUTO_CLOSE_TARGET).writeValue(zipOutputStream, sbd);
                 zipOutputStream.closeEntry();
 
                 if (this.asic != null) {
@@ -102,7 +101,6 @@ public class AltinnPackage {
                 switch (zipEntry.getName()) {
                     case SBD_FILE:
                         ObjectMapper om = context.getBean(ObjectMapper.class);
-                        om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
                         sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
                         break;
                     case CONTENT_XML:

@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.logging.Audit;
@@ -11,8 +10,8 @@ import no.difi.meldingsutveksling.status.MessageStatus;
 import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import static no.difi.meldingsutveksling.logging.MessageMarkerFactory.markerFrom;
 
@@ -58,7 +57,7 @@ public class DeadLetterQueueHandler {
             messageId = nextMoveMessage.getMessageId();
             Audit.error(errorMsg, NextMoveMessageMarkers.markerFrom(nextMoveMessage));
             messageService.deleteMessage(messageId);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             // NOOP
         }
 

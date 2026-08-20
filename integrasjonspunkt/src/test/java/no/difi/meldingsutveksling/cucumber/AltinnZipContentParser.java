@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
@@ -13,6 +12,7 @@ import no.difi.move.common.cert.KeystoreHelper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;

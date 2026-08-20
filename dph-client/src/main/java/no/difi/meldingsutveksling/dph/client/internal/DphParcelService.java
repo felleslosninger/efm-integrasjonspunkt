@@ -1,7 +1,5 @@
 package no.difi.meldingsutveksling.dph.client.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +21,8 @@ import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.multipart.Part;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.stream.Stream;
 
@@ -39,7 +39,7 @@ public class DphParcelService {
     public String toJSON(StandardBusinessDocument sbd) {
         try {
             return objectMapper.writeValueAsString(sbd);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Serializing SBD to JSON failed", e);
         }
     }
@@ -47,7 +47,7 @@ public class DphParcelService {
     public StandardBusinessDocument toSBD(String json) {
         try {
             return objectMapper.readValue(json, StandardBusinessDocument.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Deserializing from JSON to SBD failed", e);
         }
     }
