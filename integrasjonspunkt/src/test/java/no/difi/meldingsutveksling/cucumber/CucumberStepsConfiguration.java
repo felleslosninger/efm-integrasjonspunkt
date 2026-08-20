@@ -2,7 +2,6 @@ package no.difi.meldingsutveksling.cucumber;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.spring.CucumberContextConfiguration;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
@@ -10,9 +9,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtClientHolder;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
-import no.difi.meldingsutveksling.ks.svarut.SvarUtWebServiceClientImpl;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
 import no.difi.meldingsutveksling.nextmove.KrrPrintResponse;
 import no.difi.meldingsutveksling.nextmove.PrintService;
@@ -20,7 +17,6 @@ import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import no.difi.meldingsutveksling.webhooks.WebhookPusher;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.AsicParser;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
@@ -54,8 +50,7 @@ import static org.mockito.Mockito.when;
     classes = {
         IntegrasjonspunktApplication.class,
         ClockConfig.class,
-        CucumberStepsConfiguration.SpringConfiguration.class,
-        CucumberStepsConfiguration.SvarUtConfiguration.class
+        CucumberStepsConfiguration.SpringConfiguration.class
     }
 )
 @ExtendWith(MockitoExtension.class)
@@ -67,23 +62,6 @@ import static org.mockito.Mockito.when;
 @TestPropertySource
 @MockitoSpyBean(types = {WebhookPusher.class, IntegrasjonspunktProperties.class})
 public class CucumberStepsConfiguration {
-
-    @Configuration
-    @Profile("cucumber")
-    @RequiredArgsConstructor
-    public static class SvarUtConfiguration {
-
-        private final SvarUtClientHolder svarUtClientHolder;
-        private final RequestCaptureClientInterceptor requestCaptureClientInterceptor;
-        private final IntegrasjonspunktProperties properties;
-
-        @PostConstruct
-        public void configureSvarUtClient() {
-            SvarUtWebServiceClientImpl client = svarUtClientHolder.getClient(properties.getOrg().getNumber());
-            client.setInterceptors(ArrayUtils.add(client.getInterceptors(), requestCaptureClientInterceptor));
-        }
-
-    }
 
     @Configuration
     @Profile("cucumber")
@@ -191,7 +169,6 @@ public class CucumberStepsConfiguration {
     public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockitoBean
     public SvarInnConnectionCheck svarInnConnectionCheck;
-    //    @MockitoBean public CorrespondenceAgencyConnectionCheck correspondenceAgencyConnectionCheck;
 
     @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
     public RestClient restClient;

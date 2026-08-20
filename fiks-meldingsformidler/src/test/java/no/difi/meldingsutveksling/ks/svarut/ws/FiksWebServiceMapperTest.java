@@ -1,4 +1,4 @@
-package no.difi.meldingsutveksling.ks.mapping;
+package no.difi.meldingsutveksling.ks.svarut.ws;
 
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FiksMapperTest {
+class FiksWebServiceMapperTest {
 
     @Test
     void kreverNiva4Innlogging_document_NotSupporting_HasSikkerhetsNivaa() {
@@ -19,7 +19,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksWebServiceMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -30,7 +30,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksWebServiceMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -42,7 +42,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertFalse(FiksMapper.kreverNiva4Innlogging(message));
+        assertFalse(FiksWebServiceMapper.kreverNiva4Innlogging(message));
     }
 
     @Test
@@ -54,7 +54,7 @@ class FiksMapperTest {
         sbd.setAny(document);
         var message = new NextMoveOutMessage();
         message.setSbd(sbd);
-        assertTrue(FiksMapper.kreverNiva4Innlogging(message));
+        assertTrue(FiksWebServiceMapper.kreverNiva4Innlogging(message));
     }
 
 }

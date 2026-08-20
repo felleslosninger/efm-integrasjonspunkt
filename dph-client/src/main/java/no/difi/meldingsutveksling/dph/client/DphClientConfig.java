@@ -33,11 +33,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.TimeUnit;
 
@@ -57,13 +57,13 @@ public class DphClientConfig {
     }
 
     @Bean
-    public DphClientService dphClientService(DphClient dphClient, DphParcelService parcelService) {
-        return new DphClientService(dphClient, parcelService);
+    public DphClientService dphClientService(DphClient dphClient, DphParcelService dphParcelService) {
+        return new DphClientService(dphClient, dphParcelService);
     }
 
     @Bean
     public DphClient dphClient(DphParcelService dphParcelService,
-                               CreateMaskinportenToken createMaskinportenToken) {
+                               CreateMaskinportenToken dphCreateMaskinportenToken) {
         return new DphClientImpl(
             WebClient.builder()
                 .baseUrl(properties.getUri())
@@ -79,7 +79,7 @@ public class DphClientConfig {
                         connection.addHandlerLast(new WriteTimeoutHandler(properties.getTimeout().getWrite(), TimeUnit.MILLISECONDS));
                     })))
                 .build(),
-            new CreateMultipart(), dphParcelService, new DphClientErrorHandlerImpl(), createMaskinportenToken);
+            new CreateMultipart(), dphParcelService, new DphClientErrorHandlerImpl(), dphCreateMaskinportenToken);
     }
 
     private static ExchangeFilterFunction logRequest() {
@@ -109,13 +109,13 @@ public class DphClientConfig {
 
     @Bean
     @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dph", havingValue = "false")
-    public CreateMaskinportenToken createMaskinportenTokenMock() {
+    public CreateMaskinportenToken dphCreateMaskinportenTokenMock() {
         return new CreateMaskinportenTokenMock(properties.getOidc().getMock().getToken());
     }
 
     @Bean
     @ConditionalOnProperty(name = "oidc.enable", prefix = "difi.move.dph", havingValue = "true")
-    public CreateMaskinportenToken createMaskinportenTokenImpl() {
+    public CreateMaskinportenToken dphCreateMaskinportenTokenImpl() {
         return new CreateMaskinportenTokenImpl(
             jwtTokenClient());
     }
@@ -131,6 +131,7 @@ public class DphClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
             .threshold((int) properties.getTemporaryFileThreshold().toBytes())
@@ -151,9 +152,9 @@ public class DphClientConfig {
         KeystoreHelper dphKeystoreHelper,
         CreateCMSEncryptedAsice createCmsEncryptedAsice,
         DigdirBusinessCertificateSupplier digdirBusinessCertificateSupplier,
-        InMemoryWithTempFileFallbackResourceFactory resourceFactory) {
+        InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory) {
         return new DphParcelService(verifyJWT, objectMapper, dphKeystoreHelper, createCmsEncryptedAsice,
-            digdirBusinessCertificateSupplier, resourceFactory);
+            digdirBusinessCertificateSupplier, inMemoryWithTempFileFallbackResourceFactory);
     }
 
     @Bean

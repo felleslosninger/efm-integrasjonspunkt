@@ -75,6 +75,11 @@ public class CacheConfig extends CachingConfigurerSupport {
                     .expireAfterWrite(90, TimeUnit.SECONDS)
                     .recordStats()
                     .build()),
+            new CaffeineCache("svarUt.getMaskinportenToken",
+                Caffeine.newBuilder()
+                    .expireAfterWrite(90, TimeUnit.SECONDS)
+                    .recordStats()
+                    .build()),
             new CaffeineCache("MaskinportenTokenInterceptor.getMaskinportenToken",
                 Caffeine.newBuilder()
                     .expireAfterWrite(90, TimeUnit.SECONDS)

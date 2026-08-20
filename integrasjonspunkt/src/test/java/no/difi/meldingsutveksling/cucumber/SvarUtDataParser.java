@@ -3,12 +3,12 @@ package no.difi.meldingsutveksling.cucumber;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.move.common.dokumentpakking.domain.Document;
-import no.difi.move.common.dokumentpakking.DecryptCMSDocument;
-import no.difi.meldingsutveksling.ks.svarut.Dokument;
-import no.difi.meldingsutveksling.ks.svarut.OrganisasjonDigitalAdresse;
-import no.difi.meldingsutveksling.ks.svarut.SendForsendelseMedId;
+import no.difi.meldingsutveksling.ks.svarut.ws.Dokument;
+import no.difi.meldingsutveksling.ks.svarut.ws.OrganisasjonDigitalAdresse;
+import no.difi.meldingsutveksling.ks.svarut.ws.SendForsendelseMedId;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.DecryptCMSDocument;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.util.Lists;
 import org.springframework.context.annotation.Profile;
@@ -38,23 +38,23 @@ public class SvarUtDataParser {
             org.springframework.ws.mime.Attachment attachment = soapAttachments.next();
             Resource encrypted = new ByteArrayResource(IOUtils.toByteArray(attachment.getInputStream()));
             Resource decrypted = decryptCMSDocument.decrypt(DecryptCMSDocument.Input.builder()
-                    .resource(encrypted)
-                    .keystoreHelper(keystoreHelper)
-                    .alias(digitalAdresse.getOrgnr())
-                    .build());
+                .resource(encrypted)
+                .keystoreHelper(keystoreHelper)
+                .alias(digitalAdresse.getOrgnr())
+                .build());
 
-            Dokument dokument = forsendelseMedId.getForsendelse().getDokumenter().get(0);
+            Dokument dokument = forsendelseMedId.getForsendelse().getDokumenter().getFirst();
             attachments.add(Document.builder()
-                    .resource(decrypted)
-                    .mimeType(dokument.getMimetype())
-                    .filename(dokument.getFilnavn())
-                    .build()
+                .resource(decrypted)
+                .mimeType(dokument.getMimetype())
+                .filename(dokument.getFilnavn())
+                .build()
             );
         }
 
         return new Message()
-                .setServiceIdentifier(ServiceIdentifier.DPF)
-                .setAttachments(attachments);
+            .setServiceIdentifier(ServiceIdentifier.DPF)
+            .setAttachments(attachments);
     }
 
 }
