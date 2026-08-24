@@ -40,7 +40,16 @@ Feature: Receiving a Next Move DPF message
               "dokumentetsDato": 1458514800000,
               "tittel": "Test4 - liten fil - 22.04.16",
               "saksBehandler": null,
-              "ekstraMetadata": []
+              "ekstraMetadata": [
+                  {
+                      "key": "eiendom",
+                      "value": "200501"
+                  },
+                  {
+                      "key": "Key med mellomrom",
+                      "value": "some value"
+                  }
+              ]
           },
           "metadataForImport": {
               "sakssekvensnummer": 0,
@@ -170,6 +179,10 @@ Feature: Receiving a Next Move DPF message
                 </dokumentbeskrivelse>
                 <tittel>Test4 - liten fil - 22.04.16</tittel>
                 <offentligTittel>Test4 - liten fil - 22.04.16</offentligTittel>
+                <virksomhetsspesifikkeMetadata>
+                    <eiendom xmlns="">200501</eiendom>
+                    <Key_med_mellomrom xmlns="">some value</Key_med_mellomrom>
+                </virksomhetsspesifikkeMetadata>
                 <journalaar>2016</journalaar>
                 <journalsekvensnummer>25</journalsekvensnummer>
                 <journalpostnummer>13</journalpostnummer>

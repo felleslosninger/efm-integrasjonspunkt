@@ -194,6 +194,14 @@ class SvarInnNextMoveConverterTest {
     }
 
     @Test
+    void convert_EkstraMetadataWithSpaceInKey_ShouldPass() {
+        svarInnPackage.getMetadataFraAvleverendeSystem().setEkstraMetadata(List.of(
+            Map.of("key", "Key med mellomrom", "value", "some value")
+        ));
+        assertDoesNotThrow(() -> target.convert(svarInnPackage, reject));
+    }
+
+    @Test
     void convert_EkstraMetadataMissingKey_ShouldThrow() {
         svarInnPackage.getMetadataFraAvleverendeSystem().setEkstraMetadata(List.of(
             Map.of("key_not_called_key", "va2", "value", "some value")
