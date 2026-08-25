@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.nextmove.servicebus;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -12,10 +11,11 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -101,10 +101,10 @@ public class ServiceBusRestClient {
                 log.debug(String.format("Received message on queue=%s with messageId=%s", serviceBusUtil.getLocalQueuePath(),
                         payload.getSbd().getMessageId()));
                 return Optional.of(sbmBuilder.build());
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.error("Error extracting ServiceBusPayload from message id=%s".formatted(messageId), e);
             }
-        } catch (ResourceAccessException | IOException e) {
+        } catch (ResourceAccessException | JacksonException e) {
             log.error("Polling of DPE messages failed with: {}", e.getLocalizedMessage());
             return Optional.empty();
         }
@@ -136,7 +136,7 @@ public class ServiceBusRestClient {
         }
     }
 
-    private BrokerProperties getBrokerProperties(ResponseEntity<String> response) throws IOException {
+    private BrokerProperties getBrokerProperties(ResponseEntity<String> response) {
         String brokerPropertiesJson = response.getHeaders().getFirst("BrokerProperties");
         return objectMapper.readValue(brokerPropertiesJson, BrokerProperties.class);
     }

@@ -1,8 +1,8 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,9 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AltinnTimestampDeserializerTest {
 
-    ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule()
-            .addDeserializer(OffsetDateTime.class, new AltinnOffsetDateTimeDeserializer()));
+    ObjectMapper objectMapper = JsonMapper.builder()
+        .addModule(new SimpleModule()
+            .addDeserializer(OffsetDateTime.class, new AltinnOffsetDateTimeDeserializer()))
+        .build();
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -24,7 +25,7 @@ public class AltinnTimestampDeserializerTest {
         "2023-01-01T00:00:00Z",
         "2020-02-29T23:59:59-05:00",
     })
-    public void handlesStandardValues(String date) throws JsonProcessingException {
+    public void handlesStandardValues(String date) {
 
         OffsetDateTime offsetDateTime = objectMapper.readValue("\"" + date + "\"", OffsetDateTime.class);
 
@@ -44,7 +45,7 @@ public class AltinnTimestampDeserializerTest {
         "2025-10-06T08:04:49.2, 2025-10-06T08:04:49.2Z",
 
     })
-    public void handlesAltinnValue(String date, String expectedDate) throws JsonProcessingException {
+    public void handlesAltinnValue(String date, String expectedDate) {
 
         OffsetDateTime offsetDateTime = objectMapper.readValue("\"" + date + "\"", OffsetDateTime.class);
 

@@ -11,7 +11,7 @@ import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestClient;
 import no.difi.meldingsutveksling.nextmove.servicebus.ServiceBusRestTemplate;
 import org.mockito.Mockito;
-import org.springframework.boot.test.web.client.MockServerRestTemplateCustomizer;
+import org.springframework.boot.restclient.test.MockServerRestTemplateCustomizer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

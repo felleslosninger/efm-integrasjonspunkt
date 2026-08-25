@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.CacheConfig;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClient;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class ServiceRegistryClient {
 
         try {
             return objectMapper.readValue(identifierResourceString, IdentifierResource.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new ServiceRegistryLookupException(
                     "Parsing response as a IdentifierResource JSON object failed. Content is: %s".formatted(identifierResourceString)
                     , e);
@@ -61,7 +61,7 @@ public class ServiceRegistryClient {
 
                 throw new ServiceRegistryLookupException(String.format("Caught exception when looking up service record with parameter %s, http status %s (%s): %s",
                         parameter, httpException.getStatusCode(), httpException.getStatusText(), error.getErrorDescription()), httpException);
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.warn("Could not parse error response from service registry");
                 throw new ServiceRegistryLookupException("Caught exception when looking up service record with parameter %s, http status: %s (%s)".formatted(
                         parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);

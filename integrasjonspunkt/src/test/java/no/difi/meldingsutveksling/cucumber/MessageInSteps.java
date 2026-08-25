@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -13,6 +12,7 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import static no.difi.meldingsutveksling.NextMoveConsts.SBD_FILE;
 public class MessageInSteps {
 
     private final Holder<Message> messageInHolder;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     @Before
     public void before() {
@@ -36,7 +36,7 @@ public class MessageInSteps {
     }
 
     @And("^(\\w+) prepares a message with the following SBD:$")
-    public void altinnPreparesAMessageWithTheFollowingSBD(String who, String body) throws IOException {
+    public void altinnPreparesAMessageWithTheFollowingSBD(String who, String body) {
         StandardBusinessDocument sbd = objectMapper.readValue(body, StandardBusinessDocument.class);
         Message message = new Message()
                 .setServiceIdentifier(ServiceIdentifier.DPO)

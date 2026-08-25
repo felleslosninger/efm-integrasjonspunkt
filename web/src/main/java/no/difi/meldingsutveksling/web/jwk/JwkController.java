@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.web.jwk;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,7 +113,7 @@ public class JwkController {
     }
 
     private static String toPrettyJson(Map<String, Object> map) throws Exception {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = new JsonMapper();
         return om.writerWithDefaultPrettyPrinter().writeValueAsString(map);
     }
 

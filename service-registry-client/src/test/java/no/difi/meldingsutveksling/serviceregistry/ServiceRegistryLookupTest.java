@@ -1,8 +1,9 @@
 package no.difi.meldingsutveksling.serviceregistry;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.proc.BadJWSException;
 import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.config.CacheConfig;
@@ -60,8 +61,9 @@ public class ServiceRegistryLookupTest {
 
         @Bean
         ObjectMapper objectMapper() {
-            return new ObjectMapper()
-                .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
+            return JsonMapper.builder()
+                .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+                .build();
         }
     }
 
@@ -204,8 +206,8 @@ public class ServiceRegistryLookupTest {
                 .setServiceRecords(serviceRecord == null ? Collections.emptyList() : Collections.singletonList(this.serviceRecord));
 
             try {
-                return new ObjectMapper().writeValueAsString(resource);
-            } catch (JsonProcessingException e) {
+                return new JsonMapper().writeValueAsString(resource);
+            } catch (JacksonException e) {
                 throw new RuntimeException(e);
             }
         }

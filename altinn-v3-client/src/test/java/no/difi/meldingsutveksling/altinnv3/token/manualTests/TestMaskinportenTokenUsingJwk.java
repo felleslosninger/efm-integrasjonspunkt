@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3.token.manualTests;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -156,7 +156,7 @@ public class TestMaskinportenTokenUsingJwk {
         */
 
         record Token(String access_token, String token_type, int expires_in, String scope) { }
-        var objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        var objectMapper = JsonMapper.builder().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).build();
         var token = objectMapper.readValue(jsonTokenResponse, Token.class);
 
         return token.access_token;

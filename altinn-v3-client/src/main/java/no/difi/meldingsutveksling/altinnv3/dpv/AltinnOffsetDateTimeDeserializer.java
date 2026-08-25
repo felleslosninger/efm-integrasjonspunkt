@@ -1,21 +1,20 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 
 
-public class AltinnOffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
+public class AltinnOffsetDateTimeDeserializer extends ValueDeserializer<OffsetDateTime> {
 
     String regex = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{1,6}$";
 
     @Override
-    public OffsetDateTime deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public OffsetDateTime deserialize(JsonParser parser, DeserializationContext ctxt) {
 
-        var value = parser.getText();
+        var value = parser.getString();
 
         if (value.matches(regex)) value = AddSuffix(value);
 

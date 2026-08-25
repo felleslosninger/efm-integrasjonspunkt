@@ -1,12 +1,13 @@
 package no.difi.meldingsutveksling.nextmove.servicebus;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.nextmove.NextMoveException;
 import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class ServiceBusService {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             om.writeValue(bos, payload);
             serviceBusRestClient.sendMessage(bos.toByteArray(), serviceBusUtil.getReceiverQueue(message));
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new NextMoveException("Error creating servicebus payload", e);
         }
     }
