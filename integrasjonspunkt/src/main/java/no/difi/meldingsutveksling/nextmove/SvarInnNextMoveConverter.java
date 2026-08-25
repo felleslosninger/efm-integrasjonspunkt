@@ -120,7 +120,8 @@ public class SvarInnNextMoveConverter {
                     String key = data.get("key");
 
                     try {
-                        el = document.createElement(key);
+                        String tagName = key != null ? key.replaceAll("\\s", "_") : null;
+                        el = document.createElement(tagName);
                     } catch (DOMException e) {
                         throw new NextMoveRuntimeException("Unable to build XML for virksomhetsspesifikkeMetadata, " +
                             "cant create key from ekstraMetadata value: " + key, e);
