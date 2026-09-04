@@ -59,7 +59,13 @@ CVE-2026-54428
 CVE-2026-40983
 CVE-2026-40984
 
-CVE-2026-50627  # org.apache.cxf
-CVE-2026-50628  # org.apache.cxf
-CVE-2026-50629  # org.apache.cxf
-CVE-2026-50631  # org.apache.cxf
+# org.apache.cxf
+CVE-2026-50627
+CVE-2026-50628
+CVE-2026-50629
+CVE-2026-50631
+
+# org.apache.tomcat.embed:tomcat-embed-core
+CVE-2026-65182
+CVE-2026-65905
+CVE-2026-68525
