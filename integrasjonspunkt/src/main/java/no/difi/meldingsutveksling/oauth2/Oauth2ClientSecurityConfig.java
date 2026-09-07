@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oauth2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.StringUtils;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -42,18 +44,24 @@ public class Oauth2ClientSecurityConfig {
     @Bean
     @Order(1)
     @ConditionalOnProperty(name = "difi.move.feature.enable-auth", havingValue = "true")
-    public SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http, WebEndpointProperties webEndpointProperties) {
+    public SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http, @Value("${management.endpoints.web.base-path:/manage}") String basePath) {
+
+        basePath = cleanBasePath(basePath);
 
         // egen kjede for de åpne endepunktene, uten httpBasic
         http.securityMatcher(
-            webEndpointProperties.getBasePath() + "/health/**",
-            webEndpointProperties.getBasePath() + "/info",
+            basePath + "/health/**",
+            basePath + "/info",
             "/error");
 
         commonConfig(http);
         http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 
         return http.build();
+    }
+
+    private String cleanBasePath(String basePath) {
+        return StringUtils.hasText(basePath) && basePath.endsWith("/") ? basePath.substring(0, basePath.length() - 1) : basePath;
     }
 
     @Bean
