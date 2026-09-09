@@ -1,6 +1,6 @@
-## License
-
-This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
+    ## License
+    
+    This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
 
 ## Bygg og kjør lokalt
 Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
