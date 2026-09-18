@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
@@ -32,6 +33,7 @@ public class AltinnDPOUploadService {
     private final ZipUtils zipUtils;
     private final IntegrasjonspunktProperties props;
     private static final String FILE_NAME = "sbd.zip";
+    private static final String STATUS_MESSAGE_PROPERTY = "statusMessage";
     private final UUIDGenerator uuidGenerator;
 
     public void send(final StandardBusinessDocument sbd){
@@ -91,9 +93,19 @@ public class AltinnDPOUploadService {
         fileTransferInitalizeExt.setResourceId(props.getDpo().getResource());
         fileTransferInitalizeExt.setSender(sbd.getSenderIdentifier().getIdentifier());
         fileTransferInitalizeExt.setSendersFileTransferReference(sendersReference);
-        fileTransferInitalizeExt.setPropertyList(emptyMap());
+        fileTransferInitalizeExt.setPropertyList(getPropertyList(sbd));
 
         return fileTransferInitalizeExt;
+    }
+
+    /**
+     * Altinn skiller statusmeldinger (kvitteringer) fra vanlige meldinger på propertyList.statusMessage.
+     */
+    private Map<String, String> getPropertyList(StandardBusinessDocument sbd) {
+        if (SBDUtil.isReceipt(sbd) || SBDUtil.isStatus(sbd)) {
+            return Map.of(STATUS_MESSAGE_PROPERTY, "true");
+        }
+        return emptyMap();
     }
 
     private String getSendersReference(StandardBusinessDocument sbd) {

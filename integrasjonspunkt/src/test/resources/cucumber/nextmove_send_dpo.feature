@@ -4,6 +4,7 @@ Feature: Sending a Next Move DPO message
     Given a "GET" request to "http://localhost:9099/identifier/910075918" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918.json"
     And a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?securityLevel=3&conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a56" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
     And a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:administrasjon:ver1.0?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a56" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-administrasjon.json"
+    And a "GET" request to "http://localhost:9099/identifier/910075918/process/urn:no:difi:profile:arkivmelding:response:ver1.0?conversationId=37efbd4c-413d-4e2c-bbc5-257ef4a65a57" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910075918-arkivmelding_response.json"
     And a "GET" request to "http://localhost:9099/identifier/910077473?securityLevel=3" will respond with status "200" and the following "application/json" in "/restmocks/identifier/910077473.json"
     And a "GET" request to "http://localhost:9099/virksert/910077473" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
 
@@ -456,3 +457,71 @@ Feature: Sending a Next Move DPO message
       "empty" : false
     }
   """
+
+  Scenario: As a user I want to send a DPO arkivmelding_kvittering marked as a status message
+    Given I POST the following message:
+    """
+    {
+        "standardBusinessDocumentHeader": {
+            "businessScope": {
+                "scope": [
+                    {
+                        "scopeInformation": [
+                            {
+                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
+                            }
+                        ],
+                        "identifier": "urn:no:difi:profile:arkivmelding:response:ver1.0",
+                        "instanceIdentifier": "37efbd4c-413d-4e2c-bbc5-257ef4a65a57",
+                        "type": "ConversationId"
+                    }
+                ]
+            },
+            "documentIdentification": {
+                "creationDateAndTime": "2019-03-25T11:35:00+01:00",
+                "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b925",
+                "standard": "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering",
+                "type": "arkivmelding_kvittering",
+                "typeVersion": "2.0"
+            },
+            "headerVersion": "1.0",
+            "receiver": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910075918"
+                    }
+                }
+            ],
+            "sender": [
+                {
+                    "identifier": {
+                        "authority": "iso6523-actorid-upis",
+                        "value": "0192:910077473"
+                    }
+                }
+            ]
+        },
+        "arkivmelding_kvittering": {
+          "receiptType": "levering",
+          "relatedToMessageId": "ff88849c-e281-4809-8555-7cd54952b916"
+        }
+    }
+    """
+    And the response status is "OK"
+    And I send the message
+    Then an upload to Altinn is initiated with:
+    """
+        {
+          "fileName" : "sbd.zip",
+          "resourceId" : "eformidling-dpo-meldingsutveksling",
+          "sendersFileTransferReference" : "19efbd4c-413d-4e2c-bbc5-257ef4a65b38",
+          "sender" : "0192:910077473",
+          "recipients" : [ "0192:910075918" ],
+          "propertyList" : {
+            "statusMessage" : "true"
+          },
+          "checksum" : null,
+          "disableVirusScan" : null
+        }
+    """
