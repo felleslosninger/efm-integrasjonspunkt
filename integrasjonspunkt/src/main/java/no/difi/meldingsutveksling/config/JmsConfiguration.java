@@ -8,6 +8,7 @@ import org.springframework.boot.activemq.autoconfigure.ActiveMQProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
@@ -23,9 +24,12 @@ import jakarta.jms.Session;
 @EnableConfigurationProperties({ActiveMQProperties.class, IntegrasjonspunktProperties.class})
 public class JmsConfiguration {
 
-
+    /**
+     * The raw, uncached connection factory. The listener containers use this directly (see
+     * {@link #myJmsContainerFactory}); the producer side wraps it in {@link #myJmsConnectionFactory}.
+     */
     @Bean
-    ConnectionFactory myJmsConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
+    ActiveMQConnectionFactory activeMqConnectionFactory(ActiveMQProperties activeMQProps, IntegrasjonspunktProperties props) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(activeMQProps.getBrokerUrl());
         if (StringUtils.hasText(activeMQProps.getUser())) {
             connectionFactory.setUserName(activeMQProps.getUser());
@@ -39,7 +43,27 @@ public class JmsConfiguration {
         connectionFactory.setUseAsyncSend(true);
         connectionFactory.setPrefetchPolicy(getActiveMQPrefetchPolicy());
 
-        return new CachingConnectionFactory(connectionFactory);
+        return connectionFactory;
+    }
+
+    /**
+     * Caching connection factory for the producer side only. It is {@link Primary} so that the auto configured
+     * {@link org.springframework.jms.core.JmsTemplate} picks it over {@link #activeMqConnectionFactory}.
+     * <p>
+     * It must not be handed to a listener container: {@code CachingConnectionFactory} keeps a
+     * {@code MessageConsumer} registered on the broker after the listener container has released it, and it
+     * reference counts {@code start()} / {@code stop()} across every user of the single shared connection. Either
+     * one leaves messages dispatched to a consumer that nobody polls - they are never acknowledged and never
+     * rolled back, so outgoing NextMove messages stay in status OPPRETTET until their time to live expires.
+     * Consumer caching is disabled here as well, so that a stray injection of this bean into a listener container
+     * cannot reintroduce the first problem.
+     */
+    @Bean
+    @Primary
+    ConnectionFactory myJmsConnectionFactory(ActiveMQConnectionFactory activeMqConnectionFactory) {
+        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(activeMqConnectionFactory);
+        cachingConnectionFactory.setCacheConsumers(false);
+        return cachingConnectionFactory;
     }
 
     private ActiveMQPrefetchPolicy getActiveMQPrefetchPolicy() {
@@ -61,13 +85,26 @@ public class JmsConfiguration {
         return redeliveryPolicy;
     }
 
-    @Bean
-    DefaultJmsListenerContainerFactory myJmsContainerFactory(ConnectionFactory myJmsConnectionFactory, IntegrasjonspunktProperties props) {
+    /**
+     * Listener container factory on the uncached {@link #activeMqConnectionFactory}.
+     * <p>
+     * Also registered under the name {@code jmsListenerContainerFactory} so that listeners without an explicit
+     * {@code containerFactory} - the dead letter queue listener in {@code InternalQueue} - get this factory
+     * instead of the auto configured one, which would be built on the primary, caching connection factory.
+     * Those listeners therefore also get client acknowledge and {@code difi.move.queue.concurrency} consumers.
+     */
+    @Bean(name = {"jmsListenerContainerFactory", "myJmsContainerFactory"})
+    DefaultJmsListenerContainerFactory myJmsContainerFactory(ActiveMQConnectionFactory activeMqConnectionFactory, IntegrasjonspunktProperties props) {
+        int consumers = Math.max(1, props.getQueue().getConcurrency());
+
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-        factory.setConnectionFactory(myJmsConnectionFactory);
+        factory.setConnectionFactory(activeMqConnectionFactory);
         factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(false));
-        factory.setConcurrency(String.valueOf(props.getQueue().getConcurrency()));
+        // A bare number means "1 to N", i.e. dynamic scaling that creates and releases consumers at runtime. Spring
+        // warns against combining that with a CachingConnectionFactory; keep the number of consumers fixed so
+        // consumers are never released, even if caching ever finds its way back under the listener.
+        factory.setConcurrency(consumers + "-" + consumers);
         return factory;
     }
 }
