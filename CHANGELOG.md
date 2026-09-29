@@ -20,6 +20,7 @@ DPO
 - Går over til Broker REST API fra Altinn 3 istedenfor SOAP på Altinn 2
 - Nytt oppsett for onboarding av kunder (kunden må opprette system og systebruker i Altinn 3)
 - Onboaring web-ui innebygget i Integrasjonspunktet forenkler onboarding for kunden (kan opprette system og systebruker i Altinn 3)
+- Kvitteringer (arkivmelding_kvittering) markeres med `propertyList.statusMessage=true` mot Broker API, slik at Altinn kan skille dem fra vanlige meldinger, ref [MOVE-5140](https://digdir.atlassian.net/browse/MOVE-5140)
 
 DPO og DPV
 - Går fra service rights registry (SRR) til ressursregisteret (RRR)
