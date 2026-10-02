@@ -1,18 +1,30 @@
 package no.difi.meldingsutveksling.nextmove.v2;
 
-import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.OptionalCryptoMessagePersister;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
+import no.difi.meldingsutveksling.config.AltinnFormidlingsTjenestenConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.sbdh.SBDService;
 import no.difi.meldingsutveksling.domain.sbdh.SBDUtil;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
-import no.difi.meldingsutveksling.exceptions.*;
+import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
+import no.difi.meldingsutveksling.exceptions.FilenameTooLongException;
+import no.difi.meldingsutveksling.exceptions.FilenameTooShortException;
+import no.difi.meldingsutveksling.exceptions.MessageAlreadyExistsException;
+import no.difi.meldingsutveksling.exceptions.MessageChannelInvalidException;
+import no.difi.meldingsutveksling.exceptions.MessageTypeDoesNotFitDocumentTypeException;
+import no.difi.meldingsutveksling.exceptions.MissingFileException;
+import no.difi.meldingsutveksling.exceptions.MissingFileTitleException;
+import no.difi.meldingsutveksling.exceptions.MissingFilenameException;
+import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
+import no.difi.meldingsutveksling.exceptions.UnknownMessageTypeException;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtService;
-import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
+import no.difi.meldingsutveksling.nextmove.BusinessMessageFile;
+import no.difi.meldingsutveksling.nextmove.ConversationStrategyFactory;
+import no.difi.meldingsutveksling.nextmove.NextMoveOutMessage;
+import no.difi.meldingsutveksling.nextmove.TimeToLiveHelper;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.validation.Asserter;
 import no.difi.meldingsutveksling.validation.IntegrasjonspunktCertificateValidator;
@@ -28,8 +40,11 @@ import org.springframework.beans.factory.ObjectProvider;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NextMoveValidatorTest {
@@ -70,38 +85,32 @@ class NextMoveValidatorTest {
     private NextMoveOutMessage message;
     @Mock
     private StandardBusinessDocument sbd;
-    @Mock
-    private ServiceRecord serviceRecord;
 
     private MockedStatic<SBDUtil> sbdUtilMock;
 
     private BusinessMessageFile bmf;
 
-    private ArkivmeldingMessage businessMessage;
-
     @BeforeEach
     void before() {
         nextMoveValidator = new NextMoveValidator(
-                serviceRecordProvider,
-                nextMoveMessageOutRepository,
-                conversationStrategyFactory,
-                asserter,
-                optionalCryptoMessagePersister,
-                timeToLiveHelper,
-                sbdService,
-                conversationService,
-                arkivmeldingUtil,
-                nextMoveFileSizeValidator,
-                props,
-                certValidator,
-                svarUtServiceProvider
+            serviceRecordProvider,
+            nextMoveMessageOutRepository,
+            conversationStrategyFactory,
+            asserter,
+            optionalCryptoMessagePersister,
+            timeToLiveHelper,
+            sbdService,
+            conversationService,
+            arkivmeldingUtil,
+            nextMoveFileSizeValidator,
+            props,
+            certValidator,
+            svarUtServiceProvider
         );
 
         bmf = new BusinessMessageFile()
-                .setFilename("foo.txt")
-                .setPrimaryDocument(true);
-
-        businessMessage = new ArkivmeldingMessage().setHoveddokument("foo.txt");
+            .setFilename("foo.txt")
+            .setPrimaryDocument(true);
 
         sbdUtilMock = mockStatic(SBDUtil.class);
     }
@@ -234,7 +243,7 @@ class NextMoveValidatorTest {
 
         when(sbd.getType()).thenReturn("arkivmelding");
         sbdUtilMock.when(() -> SBDUtil.getOptionalMessageChannel(sbd)).thenReturn(
-                Optional.of(new no.difi.meldingsutveksling.domain.sbdh.Scope().setIdentifier("foo-43"))
+            Optional.of(new no.difi.meldingsutveksling.domain.sbdh.Scope().setIdentifier("foo-43"))
         );
 
         doAnswer(inv -> {
@@ -253,5 +262,35 @@ class NextMoveValidatorTest {
         sbdUtilMock.when(() -> SBDUtil.isFileRequired(sbd)).thenReturn(true);
 
         assertThrows(MessageChannelInvalidException.class, () -> nextMoveValidator.validate(sbd));
+    }
+
+    @Test
+    void dpi_file_ok() {
+        String filename = "bar.txt";
+        when(message.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPI);
+        when(message.isPrimaryDocument(filename)).thenReturn(false);
+        BasicNextMoveFile file = BasicNextMoveFile.of("BAR", "bar.txt", "text", "foo".getBytes());
+        nextMoveValidator.validateFile(message, file);
+    }
+
+    @Test
+    void dpi_file_requires_original_filename() {
+        when(message.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPI);
+        BasicNextMoveFile file = BasicNextMoveFile.of("BAR", null, "text", "foo".getBytes());
+        assertThrows(MissingFilenameException.class, () -> nextMoveValidator.validateFile(message, file));
+    }
+
+    @Test
+    void dpi_original_filename_is_to_short() {
+        when(message.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPI);
+        BasicNextMoveFile file = BasicNextMoveFile.of("BAR", "a.t", "text", "foo".getBytes());
+        assertThrows(FilenameTooShortException.class, () -> nextMoveValidator.validateFile(message, file));
+    }
+
+    @Test
+    void dpi_original_filename_is_to_long() {
+        when(message.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPI);
+        BasicNextMoveFile file = BasicNextMoveFile.of("BAR", "a".repeat(97) + ".txt", "text", "foo".getBytes());
+        assertThrows(FilenameTooLongException.class, () -> nextMoveValidator.validateFile(message, file));
     }
 }

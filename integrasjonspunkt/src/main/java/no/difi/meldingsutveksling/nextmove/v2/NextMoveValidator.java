@@ -20,6 +20,8 @@ import no.difi.meldingsutveksling.domain.sbdh.Scope;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.exceptions.DuplicateFilenameException;
 import no.difi.meldingsutveksling.exceptions.FileNotFoundException;
+import no.difi.meldingsutveksling.exceptions.FilenameTooLongException;
+import no.difi.meldingsutveksling.exceptions.FilenameTooShortException;
 import no.difi.meldingsutveksling.exceptions.ForsendelseTypeNotFoundException;
 import no.difi.meldingsutveksling.exceptions.InvalidCertificateException;
 import no.difi.meldingsutveksling.exceptions.InvalidContentTypeException;
@@ -32,6 +34,7 @@ import no.difi.meldingsutveksling.exceptions.MissingArkivmeldingException;
 import no.difi.meldingsutveksling.exceptions.MissingArkivmeldingFileException;
 import no.difi.meldingsutveksling.exceptions.MissingFileException;
 import no.difi.meldingsutveksling.exceptions.MissingFileTitleException;
+import no.difi.meldingsutveksling.exceptions.MissingFilenameException;
 import no.difi.meldingsutveksling.exceptions.MissingPrimaryDocumentException;
 import no.difi.meldingsutveksling.exceptions.MissingSvarUtCredentialsException;
 import no.difi.meldingsutveksling.exceptions.MultiplePrimaryDocumentsNotAllowedException;
@@ -351,12 +354,27 @@ public class NextMoveValidator {
             throw new MissingFileTitleException(DPV.toString());
         }
 
-        if (message.getServiceIdentifier() == DPI
-            && !StringUtils.hasText(file.getName())
-            && !message.isPrimaryDocument(file.getOriginalFilename())) {
-            message.getBusinessMessage(DpiDigitalMessage.class)
-                .filter(p -> p.getMetadataFiler().containsValue(file.getOriginalFilename()))
-                .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
+        if (message.getServiceIdentifier() == DPI) {
+            String originalFilename = file.getOriginalFilename();
+
+            if (originalFilename == null) {
+                throw new MissingFilenameException();
+            }
+
+            if (originalFilename.length() < 4) {
+                throw new FilenameTooShortException(originalFilename, 4);
+            }
+
+            if (originalFilename.length() > 100) {
+                throw new FilenameTooLongException(originalFilename, 100);
+            }
+
+            if (!StringUtils.hasText(file.getName())
+                && !message.isPrimaryDocument(originalFilename)) {
+                message.getBusinessMessage(DpiDigitalMessage.class)
+                    .filter(p -> p.getMetadataFiler().containsValue(originalFilename))
+                    .orElseThrow(() -> new MissingFileTitleException(DPI.toString()));
+            }
         }
 
         if (message.getServiceIdentifier() == DPH && !message.isPrimaryDocument(file.getOriginalFilename())) {
