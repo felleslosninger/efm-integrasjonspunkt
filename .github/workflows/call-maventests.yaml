@@ -12,13 +12,14 @@ permissions:
   contents: write
   packages: read
   pull-requests: write
+  repository-projects: read
 
 jobs:
   call-workflow-maven-build:
     uses: felleslosninger/github-workflows/.github/workflows/ci-pr-checks-lib.yml@main
     with:
       java-version: 21
-      application-path: integrasjonspunkt/
+      module-name: integrasjonspunkt
       maven-lifecycle: 'verify'
     secrets: inherit
 
