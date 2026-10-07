@@ -19,7 +19,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,15 +88,16 @@ class NextMoveMessageInRepositoryIT {
 
     @Test
     void testMultiThreadedPeek() {
-        Set<NextMoveInMessage> messages = IntStream.range(0, 100)
-                .mapToObj(p -> target.save(getNextMoveMessage()))
-                .collect(Collectors.toSet());
+        Set<NextMoveInMessage> messages = ConcurrentHashMap.newKeySet();
+        messages.addAll(IntStream.range(0, 100)
+            .mapToObj(p -> target.save(getNextMoveMessage()))
+            .toList());
 
         IntStream.range(0, 100)
-                .parallel()
-                .mapToObj(this::peekLock)
-                .flatMap(Optional::stream)
-                .forEach(message -> assertThat(messages.remove(message)).isTrue());
+            .parallel()
+            .mapToObj(this::peekLock)
+            .flatMap(Optional::stream)
+            .forEach(message -> assertThat(messages.remove(message)).isTrue());
 
         assertThat(messages.size()).isLessThan(50);
     }
