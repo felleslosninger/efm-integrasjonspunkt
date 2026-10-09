@@ -170,7 +170,6 @@ Feature: Sending a Next Move DPV message
         "correspondence.notification.reminderEmailBody" : "$correspondenceRecipientName$: Du har mottatt en melding fra TEST - C4.",
         "correspondence.sender" : "0192:910077473",
         "correspondence.requestedPublishTime" : "2019-03-25T12:38:23+01:00",
-        "correspondence.notification.requestedSendTime" : "2019-03-25T12:43:23+01:00",
         "correspondence.isConfirmationNeeded" : "false",
         "correspondence.content.language" : "nb",
         "correspondence.notification.emailContentType" : "Plain",
