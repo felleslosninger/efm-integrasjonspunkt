@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.4",
   "info": {
     "title": "Altinn3.Broker",
     "version": "1.1.0",
@@ -11,160 +11,6 @@
       "description": "TT02"
     }
   ],
-  "webhooks": {
-    "no.altinn.broker.filetransferinitialized": {
-      "post": {
-        "requestBody": {
-          "description": "Information about a new file transfer",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      },
-      "no.altinn.broker.filepurged": {
-        "post": {
-          "requestBody": {
-            "description": "The file has been purged from Broker",
-            "content": {
-              "application/cloudevents+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloudEvent"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Ok"
-            }
-          }
-        }
-      },
-      "no.altinn.broker.fileneverconfirmeddownloaded": {
-        "post": {
-          "requestBody": {
-            "description": "File was never confirmed downloaded by a recipient",
-            "content": {
-              "application/cloudevents+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloudEvent"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Ok"
-            }
-          }
-        }
-      }
-    },
-    "no.altinn.broker.uploadprocessing": {
-      "post": {
-        "requestBody": {
-          "description": "File has been uploaded and is being processed",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      }
-    },
-    "no.altinn.broker.published": {
-      "post": {
-        "requestBody": {
-          "description": "File has finished processing and is ready for download",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      }
-    },
-    "no.altinn.broker.uploadfailed": {
-      "post": {
-        "requestBody": {
-          "description": "An upload failed either during upload or processing",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      }
-    },
-    "no.altinn.broker.downloadconfirmed": {
-      "post": {
-        "requestBody": {
-          "description": "A recipient confirmed their download",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      }
-    },
-    "no.altinn.broker.allconfirmeddownloaded": {
-      "post": {
-        "requestBody": {
-          "description": "All recipients have confirmed the download",
-          "content": {
-            "application/cloudevents+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloudEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ok"
-          }
-        }
-      }
-    }
-  },
   "paths": {
     "/broker/api/v1/filetransfer": {
       "post": {
@@ -224,7 +70,14 @@
             }
           },
           "503": {
-            "description": "Storage provider is not ready yet. Please try again later"
+            "description": "Storage provider is not ready yet. Please try again later",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       },
@@ -233,7 +86,7 @@
           "FileTransfer"
         ],
         "summary": "Get files that can be accessed by the caller according to specified filters",
-        "description": "One of the scopes: \r\n\r\n- altinn:broker.read \r\n\r\n- altinn:broker.write \r\n\r\nResult is limited to 100 files. If your query returns more than 100 files, you will only receive the 100 last created.",
+        "description": "One of the scopes: \r\n\r\n- altinn:broker.read \r\n\r\n- altinn:broker.write \r\n\r\nDate filtering behavior: \r\n\r\n- If `status` is included, `from` and `to` filter on when the file transfer changed to that status. \r\n\r\n- If `status` is not included, `from` and `to` filter on file transfer `created` time. \r\n\r\nResult is limited to 100 files. If your query returns more than 100 files, only the 100 newest in the active timeline are returned.",
         "parameters": [
           {
             "name": "resourceId",
@@ -246,14 +99,14 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FileTransferStatusExtNullable"
+              "$ref": "#/components/schemas/FileTransferStatusExt"
             }
           },
           {
             "name": "recipientStatus",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/RecipientFileTransferStatusExtNullable"
+              "$ref": "#/components/schemas/RecipientFileTransferStatusExt"
             }
           },
           {
@@ -270,6 +123,20 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "orderAscending",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RoleExt"
             }
           }
         ],
@@ -317,7 +184,7 @@
           "FileTransfer"
         ],
         "summary": "Upload to an initialized file using a binary stream.",
-        "description": "One of the scopes: \r\n\r\n- altinn:broker.write",
+        "description": "For large files that may exceed reverse-proxy connection timeouts, use the resumable TUS endpoint instead:\r\nPOST/PATCH `/broker/api/v1/filetransfer/upload/tus/{fileTransferId}` (TUS protocol).\r\nOne of the scopes: \r\n\r\n- altinn:broker.write",
         "parameters": [
           {
             "name": "fileTransferId",
@@ -329,6 +196,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Returns the id of the uploaded File transfer",
@@ -391,7 +269,14 @@
             }
           },
           "503": {
-            "description": "Storage provider is not ready yet. Please try again later"
+            "description": "Storage provider is not ready yet. Please try again later",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -435,7 +320,7 @@
                     "description": "Used by senders and receivers to identify specific file using external identification methods."
                   },
                   "Metadata.Sender": {
-                    "pattern": "^\\d{4}:\\d{9}$",
+                    "pattern": "^(?:\\d{4}:\\d{9}|urn:altinn:organization:identifier-no:\\d{9})$",
                     "type": "string",
                     "description": "The sender organization of the file"
                   },
@@ -457,7 +342,7 @@
                           "maxLength": 300,
                           "type": "string"
                         }
-                      },
+                  },
                     "description": "User-defined properties related to the file"
                   },
                   "Metadata.Checksum": {
@@ -513,7 +398,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/FileTransferInitializeResponseExt"
                 }
               }
             }
@@ -549,7 +434,14 @@
             }
           },
           "503": {
-            "description": "Storage provider is not ready yet. Please try again later"
+            "description": "Storage provider is not ready yet. Please try again later",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -691,7 +583,7 @@
           "400": {
             "description": "<ul>\r\n  <li>No file uploaded yet</li>\r\n  <li>Service owner needs to be configured to use the broker API</li>\r\n</ul>",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
@@ -701,7 +593,7 @@
           "401": {
             "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
@@ -711,7 +603,7 @@
           "403": {
             "description": "<ul>\r\n  <li>The requested file transfer's file is not ready for download. See file transfer status</li>\r\n  <li>\"The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner</li>\r\n</ul>",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
@@ -721,7 +613,7 @@
           "404": {
             "description": "The requested file transfer was not found",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
@@ -750,8 +642,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Returns the file"
+          "204": {
+            "description": "The download has been confirmed"
           },
           "400": {
             "description": "<ul>\r\n  <li>Cannot confirm before the files have been downloaded</li>\r\n  <li>No file uploaded yet</li>\r\n  <li>The requested file transfer's file is not ready for download. See file transfer status</li>\r\n</ul>",
@@ -836,7 +728,7 @@
             "description": "Resource configured successfully"
           },
           "400": {
-            "description": "<ul>\r\n  <li>Invalid grace period format. Should follow ISO8601 standard for duration. Example: 'PT2H' for 2 hours</li>\r\n  <li>Grace period cannot exceed 24 hours</li>\r\n  <li>Max file transfer size cannot be negative</li>\r\n  <li>Max file transfer size cannot be zero</li>\r\n  <li>Max file transfer size cannot be set higher than the 2GB in production unless the resource has been pre-approved for disabled virus scan. Contact us @ Slack</li>\r\n  <li>Max file transfer size cannot be set higher than 100GB in production because it has not yet been tested for it. Contact us @ Slack if you need it</li>\r\n  <li>Invalid file transfer time to live format. Should follow ISO8601 standard for duration. Example: 'P30D' for 30 days</li>\r\n  <li>Time to live cannot exceed 365 days</li>\r\n</ul>",
+            "description": "<ul>\r\n  <li>Invalid grace period format. Should follow ISO8601 standard for duration. Example: 'PT2H' for 2 hours</li>\r\n  <li>Grace period cannot exceed 24 hours</li>\r\n  <li>Max file transfer size cannot be negative</li>\r\n  <li>Max file transfer size cannot be zero</li>\r\n  <li>Max file transfer size cannot be set higher than 50GB in production unless the resource has been pre-approved for disabled virus scan. Contact us @ Slack</li>\r\n  <li>Max file transfer size cannot be set higher than 100GB in production because it has not yet been tested for it. Contact us @ Slack if you need it</li>\r\n  <li>Invalid file transfer time to live format. Should follow ISO8601 standard for duration. Example: 'P30D' for 30 days</li>\r\n  <li>Time to live cannot exceed 365 days</li>\r\n</ul>",
             "content": {
               "application/json": {
                 "schema": {
@@ -979,58 +871,472 @@
           }
         }
       }
+    },
+    "/broker/api/v1/filetransfer/upload/tus/{fileTransferId}": {
+      "options": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Discover TUS server capabilities",
+        "description": "Returns supported TUS protocol version and extensions. Call this before starting a resumable upload. The <c>Tus-Extension</c> response header includes <c>concatenation</c> for parallel partial uploads. See https://tus.io/protocols/resumable-upload.html<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusUploadOptions",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Server capabilities returned in Tus-* response headers"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Create a resumable upload",
+        "description": "Creates a TUS upload resource for an initialized file transfer. <br/><br/><b>Single-file upload</b>: send <c>Upload-Length</c> only. Continue uploading with <c>PATCH</c> and <c>HEAD</c> on this same URL. <br/><br/><b>Concatenation partial</b>: send <c>Upload-Concat: partial</c> and <c>Upload-Length</c> for each file segment. The response <c>Location</c> is <c>/broker/api/v1/filetransfer/upload/tus/{fileTransferId}/partial/{partialUploadId}</c>. <br/><br/><b>Concatenation final</b>: after all partials are complete, send <c>Upload-Concat: final;&lt;partial-location-1&gt; &lt;partial-location-2&gt; ...</c> using the <c>Location</c> URLs from partial creates. Do not send <c>Upload-Length</c> on the final request. Upload-Defer-Length is not supported.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusUploadCreate",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          },
+          {
+            "name": "Upload-Length",
+            "in": "header",
+            "description": "Total upload size in bytes. Required for single-file and partial uploads. Omit on final concatenation requests.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Upload-Concat",
+            "in": "header",
+            "description": "Concatenation mode. Use <c>partial</c> when creating a segment upload, or <c>final;&lt;partial-location-1&gt; &lt;partial-location-2&gt; ...</c> to finalize.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Upload created. For partial uploads, continue with PATCH on the returned Location URL."
+          },
+          "400": {
+            "description": "Service owner needs to be configured, file size exceeds maximum, checksum mismatch, or invalid TUS request"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          },
+          "409": {
+            "description": "A file transfer has already been, or attempted to be, created. Create a new file transfer resource to try again."
+          },
+          "413": {
+            "description": "File size exceeds maximum"
+          },
+          "503": {
+            "description": "Storage provider is not ready yet. Please try again later"
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Get current upload offset",
+        "description": "Returns how many bytes have been uploaded so far via the <c>Upload-Offset</c> response header. Use this to resume an interrupted single-file upload on this URL. For concatenation partial uploads, use the two-segment partial URL instead.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusUploadHead",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current offset returned in Upload-Offset header"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Upload the next chunk",
+        "description": "Appends a chunk of file data at the offset given in the <c>Upload-Offset</c> request header. Repeat until the server offset equals <c>Upload-Length</c>. On completion the file is finalized and the file transfer status is updated. For concatenation partial uploads, use the two-segment partial URL instead.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusUploadPatch",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          },
+          {
+            "name": "Upload-Offset",
+            "in": "header",
+            "description": "Byte offset at which this chunk should be appended.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/offset+octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Chunk accepted. New offset returned in Upload-Offset header."
+          },
+          "400": {
+            "description": "Service owner needs to be configured, file size exceeds maximum, checksum mismatch, or invalid TUS request"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          },
+          "409": {
+            "description": "Upload-Offset does not match server offset"
+          },
+          "503": {
+            "description": "Storage provider is not ready yet. Please try again later"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Terminate an incomplete upload",
+        "description": "Deletes an in-progress TUS upload. Supported when the termination extension is enabled.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusUploadDelete",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Upload terminated"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          }
+        }
+      }
+    },
+    "/broker/api/v1/filetransfer/upload/tus/{fileTransferId}/partial/{partialUploadId}": {
+      "head": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Get current partial upload offset",
+        "description": "Returns the current byte offset for a concatenation partial upload via the <c>Upload-Offset</c> response header. Use the <c>Location</c> URL returned when creating the partial upload.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusPartialUploadHead",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "partialUploadId",
+            "in": "path",
+            "description": "The partial upload id returned in the Location header when creating a partial upload.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current offset and Upload-Length returned in response headers"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Upload the next chunk to a partial upload",
+        "description": "Appends a chunk to a concatenation partial upload at the offset given in the <c>Upload-Offset</c> request header. Repeat until the server offset equals the partial <c>Upload-Length</c>.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusPartialUploadPatch",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "partialUploadId",
+            "in": "path",
+            "description": "The partial upload id returned in the Location header when creating a partial upload.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          },
+          {
+            "name": "Upload-Offset",
+            "in": "header",
+            "description": "Byte offset at which this chunk should be appended.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/offset+octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Chunk accepted. New offset returned in Upload-Offset header."
+          },
+          "400": {
+            "description": "Service owner needs to be configured, file size exceeds maximum, checksum mismatch, or invalid TUS request"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          },
+          "409": {
+            "description": "Upload-Offset does not match server offset"
+          },
+          "503": {
+            "description": "Storage provider is not ready yet. Please try again later"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "FileTransfer"
+        ],
+        "summary": "Terminate an incomplete partial upload",
+        "description": "Deletes an in-progress concatenation partial upload.<br/><br/>One of the scopes:<br/>- altinn:broker.write<br/><br/>Requires the <c>Tus-Resumable: 1.0.0</c> header on every request except OPTIONS.",
+        "operationId": "TusPartialUploadDelete",
+        "parameters": [
+          {
+            "name": "fileTransferId",
+            "in": "path",
+            "description": "The file transfer id returned from initialize.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "partialUploadId",
+            "in": "path",
+            "description": "The partial upload id returned in the Location header when creating a partial upload.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Tus-Resumable",
+            "in": "header",
+            "description": "TUS protocol version. Must be 1.0.0.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1.0.0"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Partial upload terminated"
+          },
+          "401": {
+            "description": "You must use a bearer token that represents a system user with access to the resource in the Resource Rights Registry"
+          },
+          "403": {
+            "description": "The resource needs to be registered as an Altinn 3 resource and it has to be associated with a service owner"
+          },
+          "404": {
+            "description": "The requested file transfer was not found"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "AccessLevel": {
-        "enum": [
-          "Read",
-          "Write"
-        ],
-        "type": "string"
-      },
-      "CloudEvent": {
-        "type": "object",
-        "properties": {
-          "specversion": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "time": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resource": {
-            "type": "string"
-          },
-          "resourceinstance": {
-            "type": "string",
-            "nullable": true
-          },
-          "source": {
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "additionalProperties": true,
-        "examples": [
-          {
-            "specversion": "1.0",
-            "id": "0b75b5da-7f19-4ab7-9711-ec0f6108d48c",
-            "type": "no.altinn.broker.filetransferinitialized",
-            "time": "2024-04-03T08:59:37.8552029Z",
-            "resource": "urn:altinn:resource:altinapp.ttd.apps-test",
-            "resourceinstance": "0850124f-6ae9-4821-b4f9-8ee7c937ecfc",
-            "source": "https://platform.tt02.altinn.no/broker/api/v1/file"
-          }
-        ]
-      },
       "DeploymentStatusExt": {
         "enum": [
           "NotStarted",
@@ -1038,7 +1344,7 @@
           "Ready"
         ],
         "type": "string",
-        "description": "In the context of Azure deployment, \"Prepared\" corresponds to resource group deployed and \"Ready\" corresponds to all resources ready"
+        "description": "The status of deployment of Azure resources for storage providers"
       },
       "FileTransferInitalizeExt": {
         "required": [
@@ -1070,7 +1376,7 @@
           },
           "sender": {
             "minLength": 1,
-            "pattern": "^\\d{4}:\\d{9}$",
+            "pattern": "^(?:\\d{4}:\\d{9}|urn:altinn:organization:identifier-no:\\d{9})$",
             "type": "string",
             "description": "The sender organization of the file"
           },
@@ -1206,7 +1512,13 @@
                 "type": "string"
               }
             },
-            "description": "Up to ten arbitrary key value pairs"
+           "description": "Up to ten arbitrary key value pairs"
+          },
+          "published": {
+            "type": "string",
+            "description": "Date/Time for when the file transfer was published (ready for download).\r\nNull if not yet published.",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -1348,21 +1660,6 @@
         ],
         "type": "string"
       },
-      "FileTransferStatusExtNullable": {
-        "enum": [
-          "Initialized",
-          "UploadStarted",
-          "UploadProcessing",
-          "Published",
-          "Cancelled",
-          "AllConfirmedDownloaded",
-          "Purged",
-          "Failed",
-          null
-        ],
-        "type": "string",
-        "nullable": true
-      },
       "FileTransferUploadResponseExt": {
         "type": "object",
         "properties": {
@@ -1460,16 +1757,6 @@
         ],
         "type": "string"
       },
-      "RecipientFileTransferStatusExtNullable": {
-        "enum": [
-          "Initialized",
-          "DownloadStarted",
-          "DownloadConfirmed",
-          null
-        ],
-        "type": "string",
-        "nullable": true
-      },
       "ResourceExt": {
         "type": "object",
         "properties": {
@@ -1509,14 +1796,25 @@
             "description": "The external service edition code used in Altinn 2 for the broker service",
             "format": "int32",
             "nullable": true
+          },
+          "requiredParty": {
+            "type": "boolean",
+            "description": "If the resource requires the service owner party to be subject of the file transfer.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
         "description": "A model representing the extended resource properties unique for the broker service."
       },
+      "RoleExt": {
+        "enum": [
+          "Recipient",
+          "Sender"
+        ],
+        "type": "string"
+      },
       "ServiceOwnerInitializeExt": {
         "required": [
-          "deletionTime",
           "name"
         ],
         "type": "object",
@@ -1524,11 +1822,6 @@
           "name": {
             "type": "string",
             "description": "The name of the service owner.",
-            "nullable": true
-          },
-          "deletionTime": {
-            "type": "string",
-            "description": "How long the service owner should keep files before they are deleted. \r\n\r\nMust be in ISO8601 Duration",
             "nullable": true
           }
         },
@@ -1588,7 +1881,7 @@
           "AltinnAzureWithoutVirusScan"
         ],
         "type": "string",
-        "description": "Represents the deployment status of a storage provider."
+        "description": "Represents the storage provider type."
       }
     }
   }

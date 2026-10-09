@@ -73,7 +73,7 @@ docker run --rm --name integrasjonspunkt \
   -e SPRING_PROFILES_ACTIVE=staging \
   -e LOGGING_FILE_NAME="" \
   -e DIFI_DATASOURCE_URL=jdbc:h2:file:/workspace/h2-data/integrasjonspunkt \
-ghcr.io/felleslosninger/efm-integrasjonspunkt:v4.0.7
+ghcr.io/felleslosninger/efm-integrasjonspunkt:v4.2.0
 ```
 
 
@@ -132,15 +132,15 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.3`, det er best practice for github releases)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha *liten* bokstav v som prefix `v4.2.0`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse med endrings loggen
 - Velg "Publish release" (det trigger workflows som generer pakker og container image, *ikke* bruk "Save draft" den vil ikke trigge bygg)
 - Etter at pakker har blitt bygget og publisert må stegene nedenfor utføres manuelt
 - Last opp artifacts i release (disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
-  - Last opp jar filen (eks `integrasjonspunkt-v4.0.3.jar`)
-  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.3.jar.sha1`)
-  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.3.jar.asc`)
+  - Last opp jar filen (eks `integrasjonspunkt-v4.2.0.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.2.0.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.2.0.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
-  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.3` begge steder som vist i filnavna ovenfor)
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.2.0` begge steder som vist i filnavna ovenfor)
   - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
 - Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)

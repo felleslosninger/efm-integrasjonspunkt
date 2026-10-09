@@ -20,6 +20,7 @@ public class DotNotationFlattenerTest {
     public void flatten() {
         Map<String, String> expected = Map.of(
             "correspondence.content.messageTitle", "title",
+            "correspondence.content.language", "nb",
             "correspondence.resourceId", "resourceId",
             "correspondence.isConfidential", "true",
             "correspondence.dueDateTime", "2025-06-01T10:38:23+02:00",

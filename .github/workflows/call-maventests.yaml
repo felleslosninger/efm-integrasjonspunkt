@@ -9,15 +9,16 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   packages: read
+  pull-requests: write
+  repository-projects: read
 
 jobs:
   call-workflow-maven-build:
-    uses: felleslosninger/github-workflows/.github/workflows/ci-maven-build.yml@main
+    uses: felleslosninger/github-workflows/.github/workflows/ci-pr-checks-lib.yml@main
     with:
       java-version: 21
-      application-path: integrasjonspunkt/
       maven-lifecycle: 'verify'
     secrets: inherit
 
