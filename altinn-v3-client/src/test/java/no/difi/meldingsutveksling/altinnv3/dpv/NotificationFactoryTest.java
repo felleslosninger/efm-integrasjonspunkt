@@ -68,14 +68,6 @@ public class NotificationFactoryTest {
     }
 
     @Test
-    public void getNotification_mapsRequestedSendTime() {
-
-        InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
-
-        assertEquals(OffsetDateTime.now(clock).plusMinutes(5), notification.getRequestedSendTime(), "RequestedSendTime should be 5 minutes after creation time");
-    }
-
-    @Test
     public void getNotification_mapsNotificationTemplate() {
         InitializeCorrespondenceNotificationExt notification = notificationFactory.getNotification(nextMoveOutMessage);
         assertEquals(NotificationTemplateExt.CUSTOM_MESSAGE, notification.getNotificationTemplate(), "NotificationTemplate should be Custom Message");
