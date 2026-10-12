@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.zip.ZipException;
 
 @Service
 @ConditionalOnProperty(name = "difi.move.feature.enableDPO", havingValue = "true")
@@ -43,8 +44,14 @@ public class AltinnDPODownloadService {
     public AltinnPackage download(AltinnSystemUser systemUser, DownloadRequest request) {
         byte[] bytes = brokerApiClient.downloadFile(systemUser, request.getFileReference());
 
+        if (bytes == null || bytes.length == 0) {
+            throw new InvalidAltinnPackageException("Downloaded file with reference %s is empty (0 bytes)".formatted(request.getFileReference()));
+        }
+
         try {
             return zipUtils.getAltinnPackage(bytes);
+        } catch (ZipException e) {
+            throw new InvalidAltinnPackageException("Downloaded file with reference %s (%d bytes) is not a valid zip file".formatted(request.getFileReference(), bytes.length), e);
         } catch (IOException | JAXBException e) {
             throw new BrokerApiException("Error when downloading file with reference %s".formatted(request.getFileReference()), e);
         }

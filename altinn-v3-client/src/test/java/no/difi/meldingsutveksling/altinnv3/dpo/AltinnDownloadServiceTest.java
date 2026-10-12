@@ -18,10 +18,13 @@ import org.mockito.quality.Strictness;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.zip.ZipException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,13 +66,13 @@ public class AltinnDownloadServiceTest {
         Mockito.when(brokerApiClient.getDetails(any(), eq(fileWithMessageChannelAsSomethingElse.toString()))).thenReturn(file3);
 
         Mockito.when(brokerApiClient.getAvailableFiles(any())).thenReturn(
-            new UUID[] {fileWithRandomMessageChannel, fileWithMessageChannelAsMessageChannel, fileWithMessageChannelAsSomethingElse});
+            new UUID[]{fileWithRandomMessageChannel, fileWithMessageChannelAsMessageChannel, fileWithMessageChannelAsSomethingElse});
 
         Mockito.when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig());
     }
 
     @Test
-    public void getOnlyMessagesWithSameMessageChannelAsConfiguration(){
+    public void getOnlyMessagesWithSameMessageChannelAsConfiguration() {
         Mockito.when(integrasjonspunktProperties.getDpo()).thenReturn(new AltinnFormidlingsTjenestenConfig().setMessageChannel("messageChannel"));
 
         UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
@@ -80,7 +83,7 @@ public class AltinnDownloadServiceTest {
     }
 
     @Test
-    public void getOnlyMessagesWithNoSpecifiedMessageChannel(){
+    public void getOnlyMessagesWithNoSpecifiedMessageChannel() {
         UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
 
         assertThat(result)
@@ -115,7 +118,59 @@ public class AltinnDownloadServiceTest {
     }
 
     @Test
-    public void confirmDownloadShouldCallBrokerApiClient(){
+    public void downloadOfEmptyFileShouldThrowInvalidAltinnPackageException() throws JAXBException, IOException {
+        UUID uuid = UUID.randomUUID();
+
+        Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(new byte[0]);
+
+        assertThatThrownBy(() -> altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser(),
+            new DownloadRequest(uuid, "123")))
+            .isInstanceOf(InvalidAltinnPackageException.class)
+            .hasMessageContaining("empty");
+
+        verify(zipUtils, never()).getAltinnPackage(any());
+    }
+
+    @Test
+    public void downloadOfMissingFileContentShouldThrowInvalidAltinnPackageException() {
+        UUID uuid = UUID.randomUUID();
+
+        Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(null);
+
+        assertThatThrownBy(() -> altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser(),
+            new DownloadRequest(uuid, "123")))
+            .isInstanceOf(InvalidAltinnPackageException.class);
+    }
+
+    @Test
+    public void downloadOfInvalidZipShouldThrowInvalidAltinnPackageException() throws JAXBException, IOException {
+        UUID uuid = UUID.randomUUID();
+        byte[] bytes = "Hello world".getBytes();
+
+        Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(bytes);
+        Mockito.when(zipUtils.getAltinnPackage(bytes)).thenThrow(new ZipException("zip END header not found"));
+
+        assertThatThrownBy(() -> altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser(),
+            new DownloadRequest(uuid, "123")))
+            .isInstanceOf(InvalidAltinnPackageException.class)
+            .hasCauseInstanceOf(ZipException.class);
+    }
+
+    @Test
+    public void downloadWithOtherIOExceptionShouldThrowBrokerApiException() throws JAXBException, IOException {
+        UUID uuid = UUID.randomUUID();
+        byte[] bytes = "Hello world".getBytes();
+
+        Mockito.when(brokerApiClient.downloadFile(any(), eq(uuid))).thenReturn(bytes);
+        Mockito.when(zipUtils.getAltinnPackage(bytes)).thenThrow(new IOException("No space left on device"));
+
+        assertThatThrownBy(() -> altinnDownloadService.download(integrasjonspunktProperties.getDpo().getSystemUser(),
+            new DownloadRequest(uuid, "123")))
+            .isExactlyInstanceOf(BrokerApiException.class);
+    }
+
+    @Test
+    public void confirmDownloadShouldCallBrokerApiClient() {
         UUID uuid = UUID.randomUUID();
 
         altinnDownloadService.confirmDownload(integrasjonspunktProperties.getDpo().getSystemUser(),
@@ -126,7 +181,7 @@ public class AltinnDownloadServiceTest {
     }
 
     @Test
-    public void shouldSortListReturnedFromAltinn(){
+    public void shouldSortListReturnedFromAltinn() {
         UUID uuidFirst = UUID.fromString("7e2b1a2c-8c3a-4e2a-9f1a-2b6e4c8d9a1b");
         UUID uuidSecond = UUID.fromString("3c5f2d4e-1b7a-4c8e-8f2a-7d9e1b2c3a4f");
         UUID uuidThird = UUID.fromString("9a8b7c6d-5e4f-3a2b-1c0d-8e7f6a5b4c3d");
@@ -147,16 +202,16 @@ public class AltinnDownloadServiceTest {
         third.setSendersFileTransferReference(UUID.randomUUID().toString());
 
 
-        Mockito.when(brokerApiClient.getAvailableFiles(any())).thenReturn(new UUID[] {uuidThird, uuidFirst, uuidSecond}); // return list in random order
+        Mockito.when(brokerApiClient.getAvailableFiles(any())).thenReturn(new UUID[]{uuidThird, uuidFirst, uuidSecond}); // return list in random order
         Mockito.when(brokerApiClient.getDetails(any(), eq(uuidFirst.toString()))).thenReturn(first);
         Mockito.when(brokerApiClient.getDetails(any(), eq(uuidSecond.toString()))).thenReturn(second);
         Mockito.when(brokerApiClient.getDetails(any(), eq(uuidThird.toString()))).thenReturn(third);
 
         UUID[] result = altinnDownloadService.getAvailableFiles(integrasjonspunktProperties.getDpo().getSystemUser());
 
-        var expected = new UUID[] {uuidFirst, uuidSecond, uuidThird};
+        var expected = new UUID[]{uuidFirst, uuidSecond, uuidThird};
 
         assertThat(result).isEqualTo(expected)
-            .as("Should order the list returned from altinn based upon created date, oldest first");;
+            .as("Should order the list returned from altinn based upon created date, oldest first");
     }
 }
