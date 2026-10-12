@@ -9,6 +9,7 @@ import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.altinnv3.dpo.AltinnDPODownloadService;
 import no.difi.meldingsutveksling.altinnv3.dpo.DownloadRequest;
+import no.difi.meldingsutveksling.altinnv3.dpo.InvalidAltinnPackageException;
 import no.difi.meldingsutveksling.altinnv3.dpo.payload.AltinnPackage;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import no.difi.meldingsutveksling.config.AltinnSystemUser;
@@ -73,6 +74,11 @@ public class DefaultDpoPolling implements DpoPolling {
                 altinnPackage = altinnDownloadService.download(systemUser, request);
             } catch (IllegalArgumentException e) {
                 log.error("Could not parse message with altinnId={} - discarding message.", fileTransferId, e);
+                altinnDownloadService.confirmDownload(systemUser, request);
+                return;
+            } catch (InvalidAltinnPackageException e) {
+                // Retrying will never succeed and would block the polling, so mark it as downloaded in Altinn
+                log.error("Invalid Altinn package with altinnId={} for {} - discarding message: {}", fileTransferId, systemUser.getOrgId(), e.getMessage(), e);
                 altinnDownloadService.confirmDownload(systemUser, request);
                 return;
             }
