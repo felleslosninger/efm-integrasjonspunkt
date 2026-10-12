@@ -1,0 +1,25 @@
+{
+  "infoRecord": {
+    "identifier": "her-id:8143541",
+    "herId": 8143541,
+    "organizationName": "TEST - Legekontor",
+    "organizationNumber": "910075935",
+    "entityType": {
+      "name": "ORGL"
+    }
+  },
+  "serviceRecords": [
+    {
+      "organisationNumber": "910075935",
+      "process": "urn:no:difi:profile:helse:helse:ver1.0",
+      "herIdLevel1": "8143541",
+      "documentTypes": [
+        "urn:no:difi:helse:xsd:schema::dialogmelding"
+      ],
+      "service": {
+        "identifier": "DPH",
+        "endpointUrl": "http://localhost:9800/nhn-adapter/api"
+      }
+    }
+  ]
+}
