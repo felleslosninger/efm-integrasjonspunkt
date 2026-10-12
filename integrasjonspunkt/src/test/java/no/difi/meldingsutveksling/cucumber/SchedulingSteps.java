@@ -5,6 +5,7 @@ import io.cucumber.java.en.Given;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.nextmove.DefaultDpePolling;
 import no.difi.meldingsutveksling.nextmove.DefaultDpfPolling;
+import no.difi.meldingsutveksling.nextmove.DefaultDphPolling;
 import no.difi.meldingsutveksling.nextmove.DefaultDpoPolling;
 
 @RequiredArgsConstructor
@@ -13,6 +14,7 @@ public class SchedulingSteps {
     private final DefaultDpoPolling dpoPolling;
     private final DefaultDpePolling dpePolling;
     private final DefaultDpfPolling dpfPolling;
+    private final DefaultDphPolling dphPolling;
 
     @Given("^the application checks for new DPO messages$")
     public void theApplicationChecksForNewNextMoveDPOMessages() {
@@ -27,5 +29,10 @@ public class SchedulingSteps {
     @And("^the application checks for new DPE messages$")
     public void theApplicationChecksForNewNextMoveDPEMessages() {
         dpePolling.poll();
+    }
+
+    @And("^the application checks for new DPH messages$")
+    public void theApplicationChecksForNewNextMoveDPHMessages() {
+        dphPolling.poll();
     }
 }
