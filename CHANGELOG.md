@@ -6,6 +6,7 @@
 - Kotlin er konvertert til Java (kode, bygg, dependencies, test)
 - For produksjon er loggene sikret med klient sertifikat
 - Innebygget web-ui som bla støtter onboarding av DPO
+- Utgående meldinger kunne bli hengende i status OPPRETTET (CachingConnectionFactory er fjernet fra JMS-lytterne)
 
 DPV
 - Størrelsesgrense for DPV er økt til 250 mb.
