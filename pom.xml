@@ -477,7 +477,7 @@
                             <path>
                                 <groupId>io.github.openfeign.querydsl</groupId>
                                 <artifactId>querydsl-apt</artifactId>
-                                <version>7.1</version>
+                                <version>7.7</version>
                                 <classifier>jpa</classifier>
                             </path>
                         </annotationProcessorPaths>
