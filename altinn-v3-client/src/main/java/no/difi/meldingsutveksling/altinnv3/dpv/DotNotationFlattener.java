@@ -1,9 +1,9 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +12,9 @@ import java.util.Map;
 
 @Component
 public class DotNotationFlattener {
-    private final ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private final ObjectMapper objectMapper = JsonMapper.builder()
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .build();
 
     public Map<String, String> flatten(InitializeCorrespondencesExt request) {
         JsonNode json = objectMapper.valueToTree(request);
@@ -32,7 +32,7 @@ public class DotNotationFlattener {
 
     private static void flattenRecursively(String prefix, JsonNode node, Map<String, String> values) {
         if (node.isObject()) {
-            node.fieldNames().forEachRemaining(field -> {
+            node.propertyNames().forEach(field -> {
                 String newPrefix = prefix.isEmpty() ? field : prefix + "." + field;
                 flattenRecursively(newPrefix, node.get(field), values);
             });
@@ -45,7 +45,7 @@ public class DotNotationFlattener {
             }
         }
         else {
-            if (!node.isNull()) values.put(prefix, node.asText());
+            if (!node.isNull()) values.put(prefix, node.asString());
         }
     }
 }

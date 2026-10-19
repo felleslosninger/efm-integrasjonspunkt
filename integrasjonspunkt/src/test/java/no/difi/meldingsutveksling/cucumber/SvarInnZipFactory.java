@@ -2,9 +2,9 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSDocument;
+import no.difi.move.common.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.CmsAlgorithm;
+import no.difi.move.common.dokumentpakking.CreateCMSDocument;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.io.ResourceUtils;
 import no.difi.move.common.io.WritableByteArrayResource;

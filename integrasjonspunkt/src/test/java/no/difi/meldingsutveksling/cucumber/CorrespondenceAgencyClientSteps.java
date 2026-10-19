@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
@@ -11,8 +10,9 @@ import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MimeTypeExtensionMapper;
 import no.difi.meldingsutveksling.ServiceIdentifier;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.core.io.ByteArrayResource;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -42,7 +42,7 @@ public class CorrespondenceAgencyClientSteps {
 
         getValuesAndAttachmentsFromMultipart(values, attachments, multipart);
 
-        var expected = new ObjectMapper().readValue(expectedPayload, HashMap.class);
+        var expected = new JsonMapper().readValue(expectedPayload, HashMap.class);
         assertEquals(expected, values);
 
         messageSentHolder.set(new Message()

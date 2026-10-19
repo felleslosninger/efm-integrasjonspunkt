@@ -1,137 +1,85 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.ConversationService;
-import no.difi.meldingsutveksling.api.ConversationStrategy;
-import no.difi.meldingsutveksling.api.CryptoMessagePersister;
+import no.difi.meldingsutveksling.api.DphConversationStrategy;
+import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
-import no.difi.meldingsutveksling.domain.sbdh.ScopeType;
-import no.difi.meldingsutveksling.jpa.ObjectMapperHolder;
-import no.difi.meldingsutveksling.nextmove.nhn.DPHMessageOut;
-import no.difi.meldingsutveksling.nextmove.nhn.NhnAdapterClient;
-import no.difi.meldingsutveksling.nextmove.nhn.Receiver;
-import no.difi.meldingsutveksling.nextmove.nhn.Sender;
-import no.difi.meldingsutveksling.serviceregistry.SRParameter;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.Patient;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
-import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.dph.DphService;
+import no.difi.meldingsutveksling.dph.client.DphClientService;
+import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
+import no.difi.meldingsutveksling.dph.client.internal.DphParcelService;
+import no.difi.meldingsutveksling.logging.Audit;
+import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
+import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
+
+import static no.difi.meldingsutveksling.logging.NextMoveMessageMarkers.markerFrom;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
-public class DphConversationStrategyImpl implements ConversationStrategy {
+public class DphConversationStrategyImpl implements DphConversationStrategy {
 
-
-    private final NhnAdapterClient adapterClient;
-    private final ServiceRegistryLookup serviceRegistryLookup;
+    private final DphService dphService;
+    private final DphClientService dphClientService;
+    private final DphParcelService dphParcelService;
     private final ConversationService conversationService;
-    private final CryptoMessagePersister fileRepository;
-
-
-    private String getHerID(NextMoveOutMessage message, ScopeType scopeType, String errorMessage) {
-        return message.getSbd().getScope(scopeType).orElseThrow(() -> new NextMoveRuntimeException(errorMessage)).getInstanceIdentifier();
-    }
+    private final NextMoveMessageService nextMoveMessageService;
 
     @Override
     @Timed
     public void send(NextMoveOutMessage message) throws NextMoveException {
+
         try {
-            var filename = message.getFiles().stream().findFirst().map(BusinessMessageFile::getIdentifier).orElseThrow(()->new NextMoveException("Filename can not be null. "));
-            byte vedlegInnehold[];
-            String base64EncodedVedleg;
-
-            try {
-                Resource vedlegg = fileRepository.read(message.getMessageId(), filename);
-                vedlegInnehold = vedlegg.getContentAsByteArray();
-            } catch (IOException e) {
-                throw new NextMoveException("Can not postprocess file.",e);
-            } catch (Exception e) {
-                throw new NextMoveException("Can not read file " + filename, e);
-            }
-
-
-
-            base64EncodedVedleg = Base64.getEncoder().encodeToString(vedlegInnehold);
-
-
-            log.info("Attempt to send dialogmelding to nhn-adapter {}", message.getMessageId());
-            String senderHerId1 = getHerID(message, ScopeType.SENDER_HERID1, "Sender HERID1 is not available");
-            String senderHerId2 = getHerID(message, ScopeType.SENDER_HERID2, "Sender HERID2 is not available");
-            String receiverHerId1 = getHerID(message, ScopeType.RECEIVER_HERID1, "Receiver HERID1 is not available");
-            String receiverHerId2 = getHerID(message, ScopeType.RECEIVER_HERID2, "Receiver HERID2 is not available");
-            ServiceRecord receiverServiceRecord;
-            var reciever = (NhnIdentifier) message.getReceiver();
-            Dialogmelding dialogmelding = message.getBusinessMessage(Dialogmelding.class).orElseThrow();
-            DialogmeldingOut.DialogmeldingOutBuilder outMessageBuilder = DialogmeldingOut.builder()
-                .notat(dialogmelding.getNotat())
-                .vedleggBeskrivelse(dialogmelding.getVedleggBeskrivelse())
-                .responsibleHealthcareProfessionalId(reciever.getHerId2());
-            try {
-
-                if (reciever.isFastlegeIdentifier()) {
-                    receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(message.getReceiver().getIdentifier())
-                        .conversationId(message.getSbd().getConversationId())
-                        .process(message.getSbd().getProcess())
-                        .build(), message.getSbd().getDocumentType());
-
-
-                    Person patient = new Person(receiverServiceRecord.getPatient().fnr(), receiverServiceRecord.getPatient().firstName(), receiverServiceRecord.getPatient().middleName(), receiverServiceRecord.getPatient().lastName(), "88888");
-                    outMessageBuilder
-                        .patient(patient);
-
-                } else {
-                    //@TODO If the message is NHN we should validate the patient in the validation phase.
-                    // vi trenger å sikre at sånn fødselsnummer eksisterer.
-
-                    receiverServiceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(dialogmelding.getPatientFnr())
-                        .conversationId(message.getSbd().getConversationId())
-                        .process(message.getSbd().getProcess())
-                        .build(), message.getSbd().getDocumentType());
-                    Patient pat = receiverServiceRecord.getPatient();
-                    if (dialogmelding.getResponsibleHealthcareProfessionalId() == null) {
-                        outMessageBuilder.responsibleHealthcareProfessionalId(reciever.getHerId2());
-                    }
-                    outMessageBuilder.patient(new Person(pat.fnr(), pat.firstName(), pat.middleName(), pat.lastName(), ""));
-
-
-                }
-
-            } catch (Exception e) {
-                log.error("Not able to get information about Person {} for {}", e.getMessage(), message.getMessageId(), e);
-                throw new NextMoveException("Not able to get information about Person " + e.getMessage(), e);
-            }
-            String fagmelding = "";
-
-            try {
-                fagmelding = ObjectMapperHolder.get().writeValueAsString(outMessageBuilder.build());
-            } catch (JsonProcessingException e) {
-                throw new NextMoveException(e);
-            }
-
-            Conversation conversation = conversationService.findConversation(message.getMessageId()).orElseThrow(() -> new NextMoveRuntimeException("Conversation not found for message " + message.getMessageId()));
-            NhnIdentifier nhnIdentifier = (NhnIdentifier) message.getReceiver();
-
-            DPHMessageOut messageOut = new DPHMessageOut(message.getMessageId(), message.getConversationId(), message.getSender().getIdentifier(),
-                new Sender(senderHerId1, senderHerId2, "To Do"), new Receiver(receiverHerId1, receiverHerId2, nhnIdentifier.isFastlegeIdentifier() ? nhnIdentifier.getIdentifier() : null), fagmelding, base64EncodedVedleg);
-            var messageReference = adapterClient.messageOut(messageOut);
-            conversation.setMessageReference(messageReference);
-            conversationService.save(conversation);
-        }
-        catch (NextMoveException e) {
+            sendInternal(message);
+        } catch (Exception e) {
+            Audit.error("Error sending message with messageId=%s to Norsk Helsenett".formatted(message.getMessageId()), markerFrom(message), e);
             throw e;
         }
-        catch(Exception e) {
-            log.error("Error during conversation for message {}", message.getMessageId(), e);
-            throw new NextMoveException("Not able to send in melding over nhn for " + message.getMessageId(),e);
+
+        Audit.info("Message [id=%s, serviceIdentifier=%s] sent to Norsk Helsenett".formatted(
+                message.getMessageId(), message.getServiceIdentifier()),
+            markerFrom(message));
+    }
+
+    private void sendInternal(NextMoveOutMessage message) {
+        NhnIdentifier sender = message.getSender().as(NhnIdentifier.class).orElseThrow(() -> new IllegalArgumentException("Missing sender!"));
+        NhnIdentifier receiver = message.getReceiver().as(NhnIdentifier.class).orElseThrow(() -> new IllegalArgumentException("Missing receiver!"));
+
+        StandardBusinessDocument sbd = message.getSbd();
+
+        if (receiver.getType() == NhnIdentifier.Type.FASTLEGE_FOR) {
+            InfoRecord infoRecordReceiver = dphService.getInfoRecord(receiver);
+            sbd.setReceiverIdentifier(NhnIdentifier.herId(infoRecordReceiver.getHerId()));
         }
+
+        Iso6523 onBehalfOf = dphService.getOnBehalfOf(sender);
+
+        List<Document> documents = nextMoveMessageService.getDocuments(message);
+        Resource encryptedAsic = documents.isEmpty() ? null : dphParcelService.createAndEncryptAsic(documents.stream());
+
+        SendBusinessDocumentInput input = new SendBusinessDocumentInput()
+            .setSbd(sbd)
+            .setEncryptedAsic(encryptedAsic);
+
+        log.debug("DPH Sending {} messageId={}, conversationId={}", sbd.getType(), message.getMessageId(), message.getConversationId());
+        UUID nhnMessageId = dphClientService.sendBusinessDocument(onBehalfOf, input);
+        log.info("DPH message sent: messageId={}, externalSystemReference={}", message.getMessageId(), nhnMessageId);
+
+        storeExternalSystemReference(message, nhnMessageId);
+    }
+
+    private void storeExternalSystemReference(NextMoveOutMessage message, UUID nhnMessageId) {
+        conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
+            c.setExternalSystemReference(nhnMessageId.toString());
+            conversationService.save(c);
+        });
     }
 }

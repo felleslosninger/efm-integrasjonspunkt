@@ -1,7 +1,6 @@
 package no.difi.meldingsutveksling.sbd;
 
 import no.difi.meldingsutveksling.DateTimeUtil;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
@@ -11,7 +10,6 @@ import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.ArkivmeldingMessage;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,9 +26,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SbdFactoryTest {
-
-    @Mock
-    private ServiceRegistryLookup serviceRegistryLookup;
 
     @Mock
     private IntegrasjonspunktProperties props;
@@ -66,7 +61,7 @@ class SbdFactoryTest {
 
     @BeforeEach
     void before() {
-        sbdFactory = new SBDFactory(serviceRegistryLookup, clock, props, uuidGenerator);
+        sbdFactory = new SBDFactory(clock, props, uuidGenerator);
         sbdUtilMock = mockStatic(SBDUtil.class);
         sbdUtilMock.when(() -> SBDUtil.getOptionalMessageChannel(sbd)).thenReturn(Optional.empty());
     }
@@ -125,14 +120,6 @@ class SbdFactoryTest {
 
     @Test
     void test_message_type_validation() {
-        var serviceRecord = mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.class);
-        when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPO);
-        try {
-            doReturn(serviceRecord).when(serviceRegistryLookup).getServiceRecord(any(), any());
-        } catch (no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException e) {
-            fail(e);
-        }
-
         assertThrows(MeldingsUtvekslingRuntimeException.class, () ->
                 sbdFactory.createNextMoveSBD(
                         sender,
@@ -142,29 +129,6 @@ class SbdFactoryTest {
                         "foo::bar",
                         mock(ArkivmeldingMessage.class)
                 )
-        );
-    }
-
-    @Test
-    void unknown_document_type_allowed_for_fiksio_message_type() {
-        var serviceRecord = mock(no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord.class);
-        when(serviceRecord.getServiceIdentifier()).thenReturn(ServiceIdentifier.DPFIO);
-        when(props.getNextmove()).thenReturn(nextMoveProps);
-        when(nextMoveProps.getDefaultTtlHours()).thenReturn(24);
-
-        try {
-            doReturn(serviceRecord).when(serviceRegistryLookup).getServiceRecord(any(), any());
-        } catch (no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException e) {
-            fail(e);
-        }
-
-        sbdFactory.createNextMoveSBD(
-                sender,
-                receiver,
-                convId, msgId,
-                arkivmeldingProcess,
-                "foo::bar",
-                mock(ArkivmeldingMessage.class)
         );
     }
 }

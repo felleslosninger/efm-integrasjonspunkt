@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.sbd;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.MessageType;
-import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
@@ -14,10 +13,6 @@ import no.difi.meldingsutveksling.nextmove.ArkivmeldingKvitteringType;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.meldingsutveksling.nextmove.StatusMessage;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
-import no.difi.meldingsutveksling.serviceregistry.SRParameter;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
-import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookupException;
-import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import no.difi.meldingsutveksling.status.Conversation;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +28,6 @@ public class SBDFactory {
     private static final String HEADER_VERSION = "1.0";
     private static final String TYPE_VERSION_2 = "2.0";
 
-    private final ServiceRegistryLookup serviceRegistryLookup;
     private final Clock clock;
     private final IntegrasjonspunktProperties props;
     private final UUIDGenerator uuidGenerator;
@@ -46,17 +40,6 @@ public class SBDFactory {
                                                       String documentType,
                                                       Object any) {
         Optional<MessageType> type = MessageType.valueOfDocumentType(documentType);
-        if (type.isEmpty()) {
-            try {
-                ServiceRecord serviceRecord = serviceRegistryLookup.getServiceRecord(SRParameter.builder(mottaker.getOrganizationIdentifier())
-                        .process(process).conversationId(conversationId).build(), documentType);
-                if (serviceRecord.getServiceIdentifier() == ServiceIdentifier.DPFIO) {
-                    type = Optional.of(MessageType.FIKSIO);
-                }
-            } catch (ServiceRegistryLookupException e) {
-                throw new MeldingsUtvekslingRuntimeException("Error looking up service record for %s".formatted(mottaker), e);
-            }
-        }
         MessageType messageType = type.orElseThrow(() -> new MeldingsUtvekslingRuntimeException("No valid messageType for documentType: " + documentType));
         return createNextMoveSBD(avsender, mottaker, conversationId, messageId, process, documentType, messageType, any);
     }

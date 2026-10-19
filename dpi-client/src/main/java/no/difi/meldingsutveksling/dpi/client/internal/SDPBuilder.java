@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.PersonmottakerHolder;
 import no.difi.meldingsutveksling.dpi.client.domain.sbd.Avsender;

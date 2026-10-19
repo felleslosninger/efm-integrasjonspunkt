@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.AsicEAttachable;
+import no.difi.move.common.dokumentpakking.domain.AsicEAttachable;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.manifest.xml.*;
 import org.springframework.core.io.ByteArrayResource;
@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream;
 @Component
 public class ManifestFactory {
 
-    public no.difi.meldingsutveksling.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, AsicEAttachable mainDocument) {
+    public no.difi.move.common.dokumentpakking.domain.Manifest createManifest(NextMoveMessage message, AsicEAttachable mainDocument) {
 
         Avsender avsender = new Avsender(new Organisasjon(message.getSender().cast(Iso6523.class)));
         Mottaker mottaker = new Mottaker(new Organisasjon(message.getReceiver().cast(Iso6523.class)));
@@ -27,7 +27,7 @@ public class ManifestFactory {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MarshalManifest.marshal(xmlManifest, os);
-        return no.difi.meldingsutveksling.dokumentpakking.domain.Manifest.builder()
+        return no.difi.move.common.dokumentpakking.domain.Manifest.builder()
                 .resource(new ByteArrayResource(os.toByteArray()))
                 .mimeType(MediaType.APPLICATION_XML)
                 .build();

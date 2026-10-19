@@ -1,19 +1,23 @@
 package no.difi.meldingsutveksling.ks.svarut;
 
+import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.ks.mapping.FiksMapper;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
+import no.difi.move.common.io.pipe.PromiseMaker;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@ConditionalOnProperty(name = "difi.move.feature.enableDPF", havingValue = "true")
 @Configuration
+@RequiredArgsConstructor
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
-@ComponentScan(basePackageClasses = {
-        FiksMapper.class
-})
+@ConditionalOnBooleanProperty(name = "difi.move.feature.enableDPF")
 public class SvarUtConfiguration {
 
+    @Bean
+    public SvarUtService svarUtService(SvarUtClient svarUtClient, PromiseMaker promiseMaker, ServiceRegistryLookup serviceRegistry, ForsendelseIdRepository forsendelseIdRepository) {
+        return new SvarUtService(svarUtClient, promiseMaker, serviceRegistry, forsendelseIdRepository);
+    }
 }

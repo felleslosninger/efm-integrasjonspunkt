@@ -7,10 +7,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class StepSystembruker implements Step {
 
-    private final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
+    private static final String REQUIRED_ACCESS_PACKAGE = "urn:altinn:accesspackage:informasjon-og-kommunikasjon";
 
     private boolean STEP_COMPLETED = false;
     private String acceptSystemUserURL = null;
+    private int actionsAfterCompletion = 0;
 
     @Inject
     FrontendFunctionality ff;
@@ -33,7 +34,10 @@ public class StepSystembruker implements Step {
     @Override
     public void executeAction(ActionType action) {
 
-        if (STEP_COMPLETED) return;
+        if (STEP_COMPLETED) {
+            actionsAfterCompletion++;
+            return;
+        }
 
         // confirm action means verify should try to create a system user
         if (ActionType.CONFIRM.equals(action)) {
@@ -95,15 +99,23 @@ public class StepSystembruker implements Step {
         if (acceptSystemUserURL != null) buttonText = "Godkjenn i Altinn";
 
         return new StepInfo(
-                getName(),
-                "Opprett systembruker",
-                "Registrer systembrukere i Altinn for alle de organisasjoner og virksomheter du vil sende og motta meldinger for.",
-                dialog,
-                buttonText,
-                isRequired(),
-                isCompleted()
+            getName(),
+            "Opprett systembruker",
+            "Registrer en systembruker i Altinn for å sende og motta meldinger for din virksomhet.",
+            dialog,
+            buttonText,
+            isRequired(),
+            isCompleted(),
+            false,
+            true,
+            showInformationAfterCompletion()
         );
 
+    }
+
+    public boolean showInformationAfterCompletion() {
+        // we only need to show information after first successful action
+        return actionsAfterCompletion < 2;
     }
 
     private String getSystemName() {

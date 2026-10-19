@@ -7,4 +7,5 @@ public class Varslingfeiletkvittering extends AbstractKvittering {
 
     private Varslingskanal varslingskanal;
     private String beskrivelse;
+
 }

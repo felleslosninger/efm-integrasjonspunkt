@@ -2,7 +2,7 @@ package no.difi.meldingsutveksling.cucumber;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.asic.SignatureMethod;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
+import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.nextmove.ManifestFactory;
 import no.difi.meldingsutveksling.nextmove.NextMoveInMessage;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -36,7 +36,7 @@ public class CreateAsic {
     private CreateCMSEncryptedAsice.Input getInput(Message message) {
         return CreateCMSEncryptedAsice.Input.builder()
                 .manifest(manifestFactory.createManifest(NextMoveInMessage.of(message.getSbd(), message.getServiceIdentifier()),
-                        message.getAttachments().get(0)))
+                        message.getAttachments().getFirst()))
                 .documents(message.getAttachments().stream())
                 .certificate(keystoreHelper.getX509Certificate())
                 .signatureMethod(SignatureMethod.CAdES)

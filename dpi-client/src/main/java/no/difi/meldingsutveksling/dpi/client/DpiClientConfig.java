@@ -12,7 +12,7 @@ import net.jimblackler.jsonschemafriend.Validator;
 import no.difi.certvalidator.BusinessCertificateValidator;
 import no.difi.certvalidator.BusinessCertificateValidatorFactory;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
-import no.difi.meldingsutveksling.dokumentpakking.service.CreateCMSEncryptedAsice;
+import no.difi.move.common.dokumentpakking.CreateCMSEncryptedAsice;
 import no.difi.meldingsutveksling.dpi.client.domain.messagetypes.DpiMessageType;
 import no.difi.meldingsutveksling.dpi.client.internal.*;
 import no.difi.move.common.cert.KeystoreHelper;
@@ -21,6 +21,7 @@ import no.difi.move.common.oauth.JwtTokenClient;
 import no.difi.move.common.oauth.JwtTokenConfig;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.Security;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -107,7 +109,8 @@ public class DpiClientConfig {
                 createMaskinportenToken,
                 createMultipart,
                 resourceFactory,
-                properties.getPageSize());
+                properties.getPageSize(),
+                Duration.ofMillis(properties.getTimeout().getRead()));
 
     }
 
@@ -178,11 +181,13 @@ public class DpiClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public BusinessCertificateValidator businessCertificateValidator() throws Exception {
         return new BusinessCertificateValidatorFactory().createValidator(properties.getCertificate().getMode());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public InMemoryWithTempFileFallbackResourceFactory inMemoryWithTempFileFallbackResourceFactory() {
         return InMemoryWithTempFileFallbackResourceFactory.builder()
                 .threshold(properties.getTemporaryFileThreshold())

@@ -88,7 +88,6 @@ Feature: Sending a Next Move Digital DPV message
         "correspondence.notification.reminderEmailBody" : "$correspondenceRecipientName$: Du har mottatt en melding fra TEST - C4.",
         "correspondence.sender" : "0192:910077473",
         "correspondence.requestedPublishTime" : "2019-03-25T12:38:23+01:00",
-        "correspondence.notification.requestedSendTime" : "2019-03-25T12:43:23+01:00",
         "correspondence.isConfirmationNeeded" : "false",
         "correspondence.content.language" : "nb",
         "correspondence.notification.emailContentType" : "Plain",
@@ -109,7 +108,9 @@ Feature: Sending a Next Move Digital DPV message
         "correspondence.notification.emailSubject" : "Melding mottatt i Altinn",
         "correspondence.notification.reminderEmailSubject" : "Melding mottatt i Altinn",
         "correspondence.resourceId": "eformidling-dpv-administrasjon",
-        "correspondence.propertyList.senderOrgNumber": "910077473"
+        "correspondence.propertyList.senderOrgNumber": "910077473",
+        "correspondence.ignoreReservation": "true",
+        "idempotentKey" : "ff88849c-e281-4809-8555-7cd54952b922"
 
     }
     """

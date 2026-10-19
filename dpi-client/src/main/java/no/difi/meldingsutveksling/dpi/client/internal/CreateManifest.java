@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.dpi.client.internal;
 
 import lombok.extern.slf4j.Slf4j;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Manifest;
+import no.difi.move.common.dokumentpakking.domain.Manifest;
 import no.difi.meldingsutveksling.dpi.client.domain.Shipment;
 import no.difi.meldingsutveksling.dpi.client.sdp.SDPManifest;
 import org.springframework.core.io.ByteArrayResource;

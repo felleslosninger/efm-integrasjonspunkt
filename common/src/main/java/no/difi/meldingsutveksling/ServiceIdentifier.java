@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @XmlType
-@XmlEnum(String.class)
+@XmlEnum
 @RequiredArgsConstructor
 @Getter
 public enum ServiceIdentifier {
@@ -17,7 +17,6 @@ public enum ServiceIdentifier {
     @XmlEnumValue("DPV") DPV("DPV"),
     @XmlEnumValue("DPI") DPI("DPI"),
     @XmlEnumValue("DPF") DPF("DPF"),
-    @XmlEnumValue("DPFIO") DPFIO("DPFIO"),
     @XmlEnumValue("DPE") DPE("DPE"),
     @XmlEnumValue("DPH") DPH("DPH"),
     @JsonEnumDefaultValue UNKNOWN("UNKNOWN");

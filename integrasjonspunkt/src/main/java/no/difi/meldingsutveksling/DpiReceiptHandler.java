@@ -45,7 +45,7 @@ public class DpiReceiptHandler {
             if (ReceiptStatus.valueOf(status.getStatus()) == MOTTATT) {
                 if (conversation.get().getMessageStatuses().stream().noneMatch(ms -> ms.getStatus().equals("MOTTATT"))) {
                     conversationService.registerStatus(conversation.get(), status);
-                    log.debug(externalReceipt.logMarkers(), "Updated receipt (DPI)");
+                    log.debug(externalReceipt.logMarkers(), "Adjusted receipt (DPI)");
                 }
             } else {
                 conversationService.registerStatus(conversation.get(), status);

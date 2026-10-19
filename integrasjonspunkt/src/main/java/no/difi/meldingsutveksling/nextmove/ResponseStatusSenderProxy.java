@@ -25,9 +25,7 @@ public class ResponseStatusSenderProxy {
         StandardBusinessDocument statusDoc = sbdFactory.createStatusFrom(sbd, status);
         if (statusDoc != null) {
             NextMoveOutMessage out = NextMoveOutMessage.of(statusDoc, si);
-            if (out != null) {
-                internalQueue.enqueueNextMove(out);
-            }
+            internalQueue.enqueueNextMove(out);
         }
     }
 

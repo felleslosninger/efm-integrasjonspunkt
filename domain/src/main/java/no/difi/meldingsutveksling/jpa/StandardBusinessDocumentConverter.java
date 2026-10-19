@@ -1,14 +1,13 @@
 package no.difi.meldingsutveksling.jpa;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import java.io.IOException;
 
 @Converter
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class StandardBusinessDocumentConverter implements AttributeConverter<Sta
 
         try {
             return getObjectMapper().writeValueAsString(sbd);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new NextMoveRuntimeException("Couldn't convert SBD to String", e);
         }
     }
@@ -35,7 +34,7 @@ public class StandardBusinessDocumentConverter implements AttributeConverter<Sta
 
         try {
             return getObjectMapper().readValue(dbData, StandardBusinessDocument.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new NextMoveRuntimeException("Couldn't convert String to SBD: %s".formatted(dbData), e);
         }
     }

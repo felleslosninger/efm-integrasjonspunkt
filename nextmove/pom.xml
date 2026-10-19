@@ -59,7 +59,7 @@
         <dependency>
             <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-jpa-spring</artifactId>
-            <version>7.1</version>
+            <version>7.7</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.antlr</groupId>
@@ -71,7 +71,7 @@
 
     <build>
         <plugins>
-            <plugin>
+              <plugin>
                 <groupId>org.jvnet.jaxb</groupId>
                 <artifactId>jaxb-maven-plugin</artifactId>
                 <executions>

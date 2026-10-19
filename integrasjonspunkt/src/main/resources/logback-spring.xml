@@ -14,36 +14,35 @@
     <springProperty name="enableLogstash" source="app.logger.enableLogstash"/>
     <springProperty name="secureLogstash" source="app.logger.secureLogstash"/>
 
-    <if condition='property("enableLogstash").contains("true")'>
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>enableLogstash</key>
+        <value>true</value>
+    </condition>
+    <if>
         <then>
             <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
                 <destination>${destination}</destination>
                 <droppedWarnFrequency>5</droppedWarnFrequency>
 
                 <!-- enable SSL/TLS for TCP appender -->
-                <if condition='property("secureLogstash").contains("true")'>
-                    <then>
-                        <ssl>
+                <ssl>
+                    <enabled>${secureLogstash:-false}</enabled>
 
-                            <enabled>true</enabled>
+                    <!-- Path to client certificate and key in a PKCS#12 bundle -->
+                    <keyStore>
+                        <location>classpath:logstash/client.p12</location>
+                        <password>changeit</password>
+                        <type>PKCS12</type>
+                    </keyStore>
 
-                            <!-- Path to client certificate and key in a PKCS#12 bundle -->
-                            <keyStore>
-                                <location>classpath:logstash/client.p12</location>
-                                <password>changeit</password>
-                                <type>PKCS12</type>
-                            </keyStore>
+                    <!-- Truststore containing the CA certificate that signed the Logstash server cert -->
+                    <trustStore>
+                        <location>classpath:logstash/truststore.jks</location>
+                        <password>changeit</password>
+                        <type>JKS</type>
+                    </trustStore>
 
-                            <!-- Truststore containing the CA certificate that signed the Logstash server cert -->
-                            <trustStore>
-                                <location>classpath:logstash/truststore.jks</location>
-                                <password>changeit</password>
-                                <type>JKS</type>
-                            </trustStore>
-
-                        </ssl>
-                    </then>
-                </if>
+                </ssl>
 
                 <!-- encoder is required -->
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -63,7 +62,11 @@
                     </provider>
                 </encoder>
             </appender>
-            <if condition='isDefined("destination2")'>
+
+            <condition class="ch.qos.logback.core.boolex.IsPropertyDefinedCondition">
+                <key>destination2</key>
+            </condition>
+            <if>
                 <then>
                     <appender name="stash2" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
                         <destination>${destination2}</destination>
@@ -112,10 +115,18 @@
         </encoder>
     </appender>
 
-    <if condition='property("enableLogstash").contains("true")'>
-        <!-- <if> elements cannot be nested within an <appender>, <logger> or <root> element -->
+    <!-- select root log level and which appenders to enable -->
+
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>enableLogstash</key>
+        <value>true</value>
+    </condition>
+    <if>
         <then>
-            <if condition='isDefined("destination2")'>
+            <condition class="ch.qos.logback.core.boolex.IsPropertyDefinedCondition">
+                <key>destination2</key>
+            </condition>
+            <if>
                 <then>
                     <root level="INFO">
                         <appender-ref ref="${stdoutAppender:-CONSOLE}"/>

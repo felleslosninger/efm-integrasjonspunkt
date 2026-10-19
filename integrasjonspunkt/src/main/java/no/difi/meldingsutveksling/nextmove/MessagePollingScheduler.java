@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.api.DpePolling;
 import no.difi.meldingsutveksling.api.DpfPolling;
+import no.difi.meldingsutveksling.api.DphPolling;
 import no.difi.meldingsutveksling.api.DpoPolling;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +20,7 @@ public class MessagePollingScheduler {
     private final ObjectProvider<DpePolling> dpePolling;
     private final ObjectProvider<DpfPolling> dpfPolling;
     private final ObjectProvider<DpoPolling> dpoPolling;
+    private final ObjectProvider<DphPolling> dphPolling;
 
     @Scheduled(fixedDelayString = "${difi.move.nextmove.serviceBus.pollingrate}")
     public void checkForNewEinnsynMessages() {
@@ -33,5 +35,10 @@ public class MessagePollingScheduler {
     @Scheduled(fixedDelay = 15000)
     public void checkForNewAltinnMessages() {
         dpoPolling.orderedStream().findFirst().ifPresent(DpoPolling::poll);
+    }
+
+    @Scheduled(fixedDelayString = "${difi.move.dph.pollingrate}")
+    public void checkForNewHealthcareMessages() {
+        dphPolling.orderedStream().findFirst().ifPresent(DphPolling::poll);
     }
 }

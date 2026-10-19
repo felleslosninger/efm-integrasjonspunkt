@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.oauth2;
 
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.observability.MetricsRestClientInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -22,41 +23,34 @@ public class Oauth2RestTemplateConfig {
 
     @Bean
     @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "false")
-    public RestClient restTemplate() {
+    public RestClient restTemplate(IntegrasjonspunktProperties properties) {
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(5000);
-        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout(properties.getOidc().getConnectTimeout());
+        requestFactory.setReadTimeout(properties.getOidc().getReadTimeout());
 
         RestTemplate rt = new RestTemplate(requestFactory);
 
-        var rc = RestClient
+        return RestClient
             .builder(rt)
             .requestInterceptor(metricsRestClientInterceptor)
             .build();
-
-        return rc;
-
     }
 
     @Bean(name = "restTemplate")
     @ConditionalOnProperty(value = "difi.move.oidc.enable", havingValue = "true")
-    public RestClient oauthRestTemplate() {
+    public RestClient oauthRestTemplate(IntegrasjonspunktProperties properties) {
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(5000);
-        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout(properties.getOidc().getConnectTimeout());
+        requestFactory.setReadTimeout(properties.getOidc().getReadTimeout());
 
         RestTemplate rt = new RestTemplate(requestFactory);
 
-        var rc = RestClient
+        return RestClient
             .builder(rt)
             .requestInterceptor(metricsRestClientInterceptor)
             .requestInterceptor(maskinportenTokenInterceptor)
             .build();
-
-        return rc;
-
     }
-
 }

@@ -11,14 +11,17 @@ import no.difi.meldingsutveksling.domain.sbdh.DocumentIdentification;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocumentHeader;
 import no.difi.move.common.io.pipe.PromiseMaker;
+import no.digdir.altinn3.broker.model.FileTransferInitalizeExt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -26,6 +29,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashSet;
+import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,6 +52,9 @@ public class AltinnUploadServiceTest {
     private ZipUtils zipUtils;
 
     @Mock
+    private ObjectProvider<TransactionTemplate> transactionTemplateObjectProvider;
+
+    @Mock
     private TransactionTemplate transactionTemplate;
 
     @Mock
@@ -62,11 +71,13 @@ public class AltinnUploadServiceTest {
     private StandardBusinessDocument sbdFraSystemOwner; //
     private StandardBusinessDocument sbdFraReportee;
     private StandardBusinessDocument sbdFraUkjentAvsender;
+    private StandardBusinessDocument sbdArkivmelding;
+    private StandardBusinessDocument sbdArkivmeldingKvittering;
 
     @BeforeEach
     public void beforeEach() {
         altinnUploadService = new AltinnDPOUploadService(brokerApiClient,
-            new PromiseMaker(Runnable::run, transactionTemplate),
+            new PromiseMaker(Runnable::run, transactionTemplateObjectProvider),
             zipUtils,
             integrasjonspunktProperties,
             new UUIDGenerator()
@@ -85,6 +96,7 @@ public class AltinnUploadServiceTest {
 
         when(integrasjonspunktProperties.getDpo()).thenReturn(dpoSettings);
         Mockito.when(zipUtils.getAltinnZip(Mockito.any(), Mockito.any())).thenReturn(emptyResource);
+        when(transactionTemplateObjectProvider.getIfAvailable()).thenReturn(transactionTemplate);
         when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
 
@@ -115,6 +127,24 @@ public class AltinnUploadServiceTest {
                 )
             );
 
+        sbdArkivmelding = new StandardBusinessDocument()
+            .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                .setSenderIdentifier(SENDER_IS_SYSTEOWNER)
+                .setReceiverIdentifier(RECEIVER)
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue").setType("arkivmelding")
+                )
+            );
+
+        sbdArkivmeldingKvittering = new StandardBusinessDocument()
+            .setStandardBusinessDocumentHeader(new StandardBusinessDocumentHeader()
+                .setSenderIdentifier(SENDER_IS_SYSTEOWNER)
+                .setReceiverIdentifier(RECEIVER)
+                .setDocumentIdentification(
+                    new DocumentIdentification().setStandard("DummyValue").setType("arkivmelding_kvittering")
+                )
+            );
+
     }
 
     @Test
@@ -141,6 +171,24 @@ public class AltinnUploadServiceTest {
             altinnUploadService.send(sbdFraUkjentAvsender)
         );
         assertEquals("Sender 0192:333333333 fra SBD matcher ikke konfigurerte systembrukere", exception.getMessage());
+    }
+
+    @Test
+    public void arkivmeldingSkalIkkeMarkeresSomStatusmelding() {
+        altinnUploadService.send(sbdArkivmelding);
+        assertEquals(emptyMap(), capturedFileTransfer().getPropertyList());
+    }
+
+    @Test
+    public void arkivmeldingKvitteringSkalMarkeresSomStatusmelding() {
+        altinnUploadService.send(sbdArkivmeldingKvittering);
+        assertEquals(Map.of("statusMessage", "true"), capturedFileTransfer().getPropertyList());
+    }
+
+    private FileTransferInitalizeExt capturedFileTransfer() {
+        ArgumentCaptor<FileTransferInitalizeExt> captor = ArgumentCaptor.forClass(FileTransferInitalizeExt.class);
+        verify(brokerApiClient).send(Mockito.any(), captor.capture(), Mockito.any());
+        return captor.getValue();
     }
 
 }

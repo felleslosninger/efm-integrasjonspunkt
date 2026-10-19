@@ -5,12 +5,12 @@ import lombok.SneakyThrows;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.config.DigitalPostInnbyggerConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.config.DokumentpakkingConfig;
-import no.difi.meldingsutveksling.dokumentpakking.service.AsicParser;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.CreateStandardBusinessDocumentJWT;
 import no.difi.meldingsutveksling.dpi.client.internal.StandBusinessDocumentJsonFinalizer;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.config.DokumentpakkingAutoConfig;
+import no.difi.move.common.dokumentpakking.AsicParser;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import java.time.ZoneId;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(IntegrasjonspunktProperties.class)
-@Import({UUIDGenerator.class, DokumentpakkingConfig.class})
+@Import({UUIDGenerator.class, DokumentpakkingAutoConfig.class})
 public class DpiClientTestConfig {
 
     @Bean
@@ -69,9 +69,9 @@ public class DpiClientTestConfig {
 
     @Bean
     public ParcelParser parcelParser(
-            AsicParser asicParser,
-            ManifestParser manifestParser,
-            DocumentStorage documentStorage) {
+        AsicParser asicParser,
+        ManifestParser manifestParser,
+        DocumentStorage documentStorage) {
         return new ParcelParser(asicParser, manifestParser, documentStorage);
     }
 

@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class Corner2ClientImpl implements Corner2Client {
     private final CreateMultipart createMultipart;
     private final InMemoryWithTempFileFallbackResourceFactory resourceFactory;
     private final int pageSize;
+    private final Duration responseTimeout;
 
     @Override
     public void sendMessage(SendMessageInput input) {
@@ -51,6 +53,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
                 .toBodilessEntity()
+                .timeout(responseTimeout)
                 .block();
     }
 
@@ -61,7 +64,8 @@ public class Corner2ClientImpl implements Corner2Client {
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
-                .bodyToFlux(MessageStatus.class);
+                .bodyToFlux(MessageStatus.class)
+                .timeout(responseTimeout);
     }
 
     @Override
@@ -77,7 +81,8 @@ public class Corner2ClientImpl implements Corner2Client {
                 .headers(h -> h.setBearerAuth(createMaskinportenToken.createMaskinportenTokenForReceiving()))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this.dpiClientErrorHandler)
-                .bodyToFlux(Message.class);
+                .bodyToFlux(Message.class)
+                .timeout(responseTimeout);
     }
 
     @Override
@@ -92,7 +97,7 @@ public class Corner2ClientImpl implements Corner2Client {
 
         try (OutputStream outputStream = cms.getOutputStream()) {
             DataBufferUtils.write(dataBuffer, outputStream)
-                    .share().blockLast();
+                    .share().blockLast(responseTimeout);
         } catch (IOException e) {
             throw new DpiException(
                     "Downloading CMS encrypted archive failed for URL: %s".formatted(downloadurl),
@@ -113,6 +118,7 @@ public class Corner2ClientImpl implements Corner2Client {
                 .onStatus(HttpStatusCode::is5xxServerError, this.dpiClientErrorHandler)
                 .toBodilessEntity()
                 .onErrorResume(WebClientResponseException.NotFound.class, notFound -> Mono.empty())
+                .timeout(responseTimeout)
                 .block();
     }
 

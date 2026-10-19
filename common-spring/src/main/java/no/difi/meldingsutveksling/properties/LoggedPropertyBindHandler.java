@@ -1,9 +1,11 @@
 package no.difi.meldingsutveksling.properties;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.boot.context.properties.bind.AbstractBindHandler;
 import org.springframework.boot.context.properties.bind.BindContext;
 import org.springframework.boot.context.properties.bind.BindHandler;
@@ -17,14 +19,17 @@ public class LoggedPropertyBindHandler extends AbstractBindHandler {
 
     public LoggedPropertyBindHandler(BindHandler parent) {
         super(parent);
-        om = new ObjectMapper();
-        om.setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
-            @Override
-            protected boolean _isIgnorable(Annotated a) {
-                return a.getName().toLowerCase().contains("token") ||
-                    a.getName().toLowerCase().contains("password");
-            }
-        });
+        // Jackson 3: ObjectMapper er immutable, konfigurasjon skjer via builder
+        om = JsonMapper.builder()
+                .annotationIntrospector(new JacksonAnnotationIntrospector() {
+                    @Override
+                    public boolean hasIgnoreMarker(MapperConfig<?> config, AnnotatedMember m) {
+                        return super.hasIgnoreMarker(config, m) ||
+                            m.getName().toLowerCase().contains("token") ||
+                            m.getName().toLowerCase().contains("password");
+                    }
+                })
+                .build();
     }
 
     @Override

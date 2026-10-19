@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.receipt.strategy;
 
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.altinnv3.dpv.AltinnDPVService;
+import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiException;
 import no.difi.meldingsutveksling.altinnv3.dpv.InvalidConversationReferenceException;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
@@ -20,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -76,10 +79,25 @@ public class DpvStatusStrategy implements StatusStrategy {
 
                 conversationService.save(conversation);
 
+            } catch (CorrespondenceApiException e) {
+                if (isMessageDeleted(e.getStatusCode())) {
+                    log.warn("Correspondence api responded with status {} for message [messageId={}, conversationId={}], the message is probably deleted. Stopping polling for this message.",
+                            e.getStatusCode().value(), conversation.getMessageId(), conversation.getConversationId());
+
+                    conversation.setPollable(false);
+                    conversationService.registerStatus(conversation, messageStatusFactory.getMessageStatus(ANNET, "Melding slettet i Altinn, stopper polling."));
+                } else {
+                    log.error("Error during status check for " + conversation.getConversationId(), e);
+                }
             } catch (Exception e) {
                 log.error("Error during status check for " + conversation.getConversationId(), e);
             }
         }
+    }
+
+    private static boolean isMessageDeleted(@Nullable HttpStatusCode statusCode) {
+        return statusCode != null
+                && (statusCode.value() == HttpStatus.NOT_FOUND.value() || statusCode.value() == HttpStatus.GONE.value());
     }
 
     private void updateStatus(Conversation c, List<CorrespondenceStatusEventExt> status) {
@@ -88,6 +106,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 c.getMessageId(), c.getConversationId());
 
         for (CorrespondenceStatusEventExt event : status) {
+            if (AltinnDPVService.isPurged(event.getStatus())) {
+                handlePurged(c, event.getStatus());
+            }
+
             ReceiptStatus mappedStatus = mapCorrespondenceStatusToReceiptStatus(event.getStatus());
             if (mappedStatus == null) {
                 // status was not mapped, we log it as ignored
@@ -112,6 +134,17 @@ public class DpvStatusStrategy implements StatusStrategy {
         }
     }
 
+    private void handlePurged(Conversation c, CorrespondenceStatusExt status) {
+        log.warn(ConversationMarker.markerFrom(c),
+                "Message [id={}, conversationId={}] was purged ({}), stopping polling.",
+                c.getMessageId(), c.getConversationId(), status);
+
+        if (c.isPollable()) {
+            c.setPollable(false);
+            conversationService.save(c);
+        }
+    }
+
     @Nullable
     static ReceiptStatus mapCorrespondenceStatusToReceiptStatus(CorrespondenceStatusExt status) {
         ReceiptStatus mappedStatus;
@@ -123,9 +156,10 @@ public class DpvStatusStrategy implements StatusStrategy {
                 CorrespondenceStatusExt.READY_FOR_PUBLISH.equals(status) ||
                 CorrespondenceStatusExt.INITIALIZED.equals(status) ||
                 CorrespondenceStatusExt.FETCHED.equals(status) ||
-                CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED.equals(status))
-        {
+                CorrespondenceStatusExt.ATTACHMENTS_DOWNLOADED.equals(status)) {
             mappedStatus = null; // do not map this, just ignore it
+        } else if (AltinnDPVService.isPurged(status)) {
+            mappedStatus = ANNET;
         } else {
             log.info("Unknown correspondence status [{}]", status);
             mappedStatus = ANNET;

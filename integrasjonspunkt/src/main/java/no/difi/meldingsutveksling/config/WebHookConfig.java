@@ -3,13 +3,15 @@ package no.difi.meldingsutveksling.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.webhooks.UrlPusher;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 
 @Slf4j
@@ -29,7 +31,7 @@ public class WebHookConfig {
                 .readTimeout(Duration.ofMillis(webHooks.getReadTimeout()))
                 .errorHandler(new DefaultResponseErrorHandler() {
                     @Override
-                    public void handleError(ClientHttpResponse response) throws IOException {
+                    public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
                         log.info("Webhook push failed with: {} {}", response.getStatusCode(), response.getStatusText());
                     }
                 })

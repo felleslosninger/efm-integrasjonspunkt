@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.en.And;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 
@@ -43,8 +41,8 @@ public class ServiceBusInSteps {
     }
 
     @And("^the ServiceBus has the message available$")
-    public void theServiceBusHasTheMessageAvailable() throws IOException {
-        MultiValueMap<String, String> headers = new HttpHeaders();
+    public void theServiceBusHasTheMessageAvailable() {
+        HttpHeaders headers = new HttpHeaders();
         headers.add("BrokerProperties", "{ \"MessageId\" : \"1\", \"LockToken\" : \"T1\", \"SequenceNumber\" : \"S1\" }");
 
         Message message = messageInHolder.get();

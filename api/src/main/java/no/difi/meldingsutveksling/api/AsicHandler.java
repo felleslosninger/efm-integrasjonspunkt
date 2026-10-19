@@ -1,6 +1,6 @@
 package no.difi.meldingsutveksling.api;
 
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.nextmove.NextMoveMessage;
 import no.difi.move.common.io.pipe.Reject;
 import org.springframework.core.io.Resource;

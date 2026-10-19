@@ -13,14 +13,22 @@ import java.util.Optional;
 public interface ConversationService {
 
     Optional<Conversation> registerStatus(String messageId, MessageStatus status);
-    Optional<Conversation> registerStatus(String messageId, ReceiptStatus... status);
-    Optional<Conversation> registerStatus(String messageId, ReceiptStatus status, String description);
-    Optional<Conversation> registerStatus(String messageId, ReceiptStatus status, String description, String rawReceipt);
-    Conversation registerStatus(Conversation conversation, MessageStatus status);
-    Conversation save(Conversation conversation);
-    Conversation registerConversation(MessageInformable message, ReceiptStatus... statuses);
-    Conversation registerConversation(StandardBusinessDocument sbd, ServiceIdentifier si, ConversationDirection direction, ReceiptStatus... statuses);
-    Optional<Conversation> findConversation(String messageId);
-    Optional<Conversation> findConversation(String conversationId, ConversationDirection direction);
 
+    Optional<Conversation> registerStatus(String messageId, ReceiptStatus... status);
+
+    Optional<Conversation> registerStatus(String messageId, ReceiptStatus status, String description);
+
+    Optional<Conversation> registerStatus(String messageId, ReceiptStatus status, String description, String rawReceipt);
+
+    Conversation registerStatus(Conversation conversation, MessageStatus status);
+
+    Conversation save(Conversation conversation);
+
+    Conversation registerConversation(MessageInformable message, ReceiptStatus... statuses);
+
+    Conversation registerConversation(StandardBusinessDocument sbd, ServiceIdentifier si, ConversationDirection direction, ReceiptStatus... statuses);
+
+    Optional<Conversation> findConversation(String messageId);
+
+    Optional<Conversation> findConversation(String conversationId, ConversationDirection direction);
 }

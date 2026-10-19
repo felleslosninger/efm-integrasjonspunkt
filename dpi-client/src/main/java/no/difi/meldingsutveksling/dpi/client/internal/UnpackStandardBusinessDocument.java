@@ -16,4 +16,5 @@ public class UnpackStandardBusinessDocument {
         jsonDigitalPostSchemaValidator.validate(payload.toJSONObject(), type);
         return standardBusinessDocument;
     }
+
 }

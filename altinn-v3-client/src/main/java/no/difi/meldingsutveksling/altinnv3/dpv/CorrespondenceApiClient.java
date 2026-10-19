@@ -1,19 +1,16 @@
 package no.difi.meldingsutveksling.altinnv3.dpv;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.altinnv3.ProblemDetailsParser;
 import no.difi.meldingsutveksling.altinnv3.token.TokenProducer;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.digdir.altinn3.correspondence.model.AttachmentDetailsExt;
-import no.digdir.altinn3.correspondence.model.CorrespondenceDetailsExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesExt;
-import no.digdir.altinn3.correspondence.model.InitializeCorrespondencesResponseExt;
+import no.digdir.altinn3.correspondence.model.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpRequest;
@@ -22,10 +19,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +40,12 @@ public class CorrespondenceApiClient {
     private final DotNotationFlattener jsonFlatter;
     private final IntegrasjonspunktProperties props;
 
-    private ObjectMapper objectMapper = new ObjectMapper()
+    private JsonMapper objectMapper = JsonMapper.builder()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .registerModule(new JavaTimeModule()
+        .addModule(new SimpleModule()
             .addDeserializer(OffsetDateTime.class, new AltinnOffsetDateTimeDeserializer()))
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .build();
 
     private RestClient restClient = RestClient.builder()
         .defaultStatusHandler(HttpStatusCode::isError, this::getCorrespondenceApiException)
@@ -83,15 +82,43 @@ public class CorrespondenceApiClient {
             ;
     }
 
+    // dette er en "tung" operasjon hos Altinn (påvirker Dialogporten og Notification også), bruk med måte
     public CorrespondenceDetailsExt getCorrespondenceDetails(UUID correspondenceId) {
         String accessToken = tokenProducer.produceToken(scopes);
-
+        log.debug("Fetching details for correspondenceId {} from Altinn Correspondence API", correspondenceId);
         return restClient.get()
             .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}/details", correspondenceId)
             .header("Authorization", "Bearer " + accessToken)
             .header("Accept", "application/json")
             .retrieve()
             .body(CorrespondenceDetailsExt.class)
+            ;
+    }
+
+    // dette er en "rask" operasjon hos Altinn (benytt denne fremfor getCorrespondenceDetails der det er mulig)
+    public CorrespondenceOverviewExt getCorrespondenceOverview(UUID correspondenceId) {
+        String accessToken = tokenProducer.produceToken(scopes);
+        log.debug("Fetching overview for correspondenceId {} from Altinn Correspondence API", correspondenceId);
+        return restClient.get()
+            .uri(correspondenceServiceUrl + "/correspondence/{correspondenceId}", correspondenceId)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(CorrespondenceOverviewExt.class)
+            ;
+    }
+
+    // brukes til å finne igjen en correspondence etter en 409-konflikt (idempotentKey allerede kjent),
+    // siden sendersReference alltid settes til vår egen messageId ved opplasting
+    public CorrespondencesExt findCorrespondences(String sendersReference) {
+        String accessToken = tokenProducer.produceToken(scopes);
+
+        return restClient.get()
+            .uri(correspondenceServiceUrl + "/correspondence?sendersReference={sendersReference}", sendersReference)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Accept", "application/json")
+            .retrieve()
+            .body(CorrespondencesExt.class)
             ;
     }
 
@@ -130,18 +157,16 @@ public class CorrespondenceApiClient {
             ;
     }
 
-    private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) {
+    private void getCorrespondenceApiException(HttpRequest request, ClientHttpResponse response) throws IOException {
         var prefix = "Correspondence api error: %s [%s]".formatted(request.getURI(), request.getURI().getPath());
         var details = ProblemDetailsParser.parseClientHttpResponse(prefix, response);
-        throw new CorrespondenceApiException(details);
+        throw new CorrespondenceApiException(details, response.getStatusCode());
     }
 
     private void addJacksonAsConverter(List<HttpMessageConverter<?>> converters) {
-        for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
-                jacksonConverter.setObjectMapper(objectMapper);
-            }
-        }
+        converters.replaceAll(converter -> converter instanceof JacksonJsonHttpMessageConverter
+            ? new JacksonJsonHttpMessageConverter(objectMapper)
+            : converter);
     }
 
 }

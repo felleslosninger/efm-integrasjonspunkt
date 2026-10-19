@@ -33,7 +33,11 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING;
-import static no.difi.meldingsutveksling.receipt.ReceiptStatus.*;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.FEIL;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.INNKOMMENDE_LEVERT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEST;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEVERT;
+import static no.difi.meldingsutveksling.receipt.ReceiptStatus.LEVETID_UTLOPT;
 
 
 @Component
@@ -49,13 +53,14 @@ public class DefaultConversationService implements ConversationService {
     private final Clock clock;
     private final StatusQueue statusQueue;
     private final ObjectProvider<StatusStrategy> statusStrategyProvider;
-    @Getter(lazy = true) private final Map<ServiceIdentifier, StatusStrategy> statusStrategyMap = createStatusStrategyMap();
+    @Getter(lazy = true)
+    private final Map<ServiceIdentifier, StatusStrategy> statusStrategyMap = createStatusStrategyMap();
 
     private static final Set<ReceiptStatus> COMPLETABLES = Sets.newHashSet(LEST, FEIL, LEVETID_UTLOPT, INNKOMMENDE_LEVERT);
 
     private Map<ServiceIdentifier, StatusStrategy> createStatusStrategyMap() {
         return statusStrategyProvider.stream().collect(
-                Collectors.toConcurrentMap(StatusStrategy::getServiceIdentifier, Function.identity())
+            Collectors.toConcurrentMap(StatusStrategy::getServiceIdentifier, Function.identity())
         );
     }
 
@@ -108,29 +113,29 @@ public class DefaultConversationService implements ConversationService {
         conversation.addMessageStatus(status);
 
         getStatusStrategy(status)
-                .ifPresent(statusStrategy -> {
-                    if (statusStrategy.isStartPolling(status)) {
-                        conversation.setPollable(true);
-                    } else if (statusStrategy.isStopPolling(status)) {
-                        conversation.setPollable(false);
-                    }
-                });
+            .ifPresent(statusStrategy -> {
+                if (statusStrategy.isStartPolling(status)) {
+                    conversation.setPollable(true);
+                } else if (statusStrategy.isStopPolling(status)) {
+                    conversation.setPollable(false);
+                }
+            });
 
         if (ReceiptStatus.valueOf(status.getStatus()) == LEVERT) {
             conversation.setFinished(true);
         }
         if (ReceiptStatus.valueOf(status.getStatus()) == FEIL &&
-                props.getFeature().isMailErrorStatus()) {
+            props.getFeature().isMailErrorStatus()) {
             trySendMail(conversation);
         }
         if (COMPLETABLES.contains(ReceiptStatus.valueOf(status.getStatus()))) {
             conversation.setFinished(true)
-                    .setPollable(false);
+                .setPollable(false);
         }
 
         log.debug("Added status '%s' to conversation[id=%s]".formatted(status.getStatus(),
                 conversation.getMessageId()),
-                MessageStatusMarker.from(status));
+            MessageStatusMarker.from(status));
         Conversation c = save(conversation);
         webhookPublisher.publish(c, status);
         statusQueue.enqueueStatus(status, c);
@@ -145,7 +150,7 @@ public class DefaultConversationService implements ConversationService {
             String direction = conversation.getDirection() == INCOMING ? "Innkommende" : "Utgående";
             String messageRef = (isNullOrEmpty(conversation.getMessageReference())) ? "" : "og messageReference %s ".formatted(conversation.getMessageReference());
             String body = "%s forsendelse med conversationId %s (messageId %s) %shar registrert status '%s'. Se statusgrensesnitt for detaljer.".formatted(
-                    direction, conversation.getConversationId(), conversation.getMessageId(), messageRef, FEIL.toString());
+                direction, conversation.getConversationId(), conversation.getMessageId(), messageRef, FEIL.toString());
             ipMailSender.send(title, body);
         } catch (Exception e) {
             log.error("Error sending status mail for messageId %s".formatted(conversation.getMessageId()), e);
@@ -189,7 +194,7 @@ public class DefaultConversationService implements ConversationService {
                                              @NotNull ConversationDirection conversationDirection,
                                              @NotNull ReceiptStatus... statuses) {
         OffsetDateTime ttl = sbd.getExpectedResponseDateTime()
-                .orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
+            .orElse(OffsetDateTime.now(clock).plusHours(props.getNextmove().getDefaultTtlHours()));
 
         return registerConversation(new MessageInformable() {
             @Override
@@ -256,7 +261,7 @@ public class DefaultConversationService implements ConversationService {
     @NotNull
     @Override
     public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection
-            direction) {
+        direction) {
         return repo.findByConversationIdAndDirection(conversationId, direction);
     }
 }

@@ -14,4 +14,5 @@ public abstract class AbstractKvittering implements Kvittering {
     private Virksomhetmottaker mottaker;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private OffsetDateTime tidspunkt;
+
 }

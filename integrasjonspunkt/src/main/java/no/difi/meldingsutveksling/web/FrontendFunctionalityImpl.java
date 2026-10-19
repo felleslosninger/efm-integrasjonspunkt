@@ -25,7 +25,7 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
     @Override
     public Version getIntegrasjonspunktVersion() {
-        return new Version("4.0.3", "DEV-SNAPSHOT", false);
+        return new Version("4.2.0", "DEV-SNAPSHOT", false);
     }
 
     @Override
@@ -35,7 +35,6 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
         if (props.getFeature().isEnableDPV()) channels.add("DPV");
         if (props.getFeature().isEnableDPI()) channels.add("DPI");
         if (props.getFeature().isEnableDPF()) channels.add("DPF");
-        if (props.getFeature().isEnableDPFIO()) channels.add("DPFIO");
         if (props.getFeature().isEnableDPE()) channels.add("DPE");
         // FIXME add the DPH channel later
         return channels;
@@ -47,7 +46,8 @@ public class FrontendFunctionalityImpl implements FrontendFunctionality {
 
         config.addAll(List.of(
             new Property("difi.move.org.number", props.getOrg().getNumber(), "Ditt organisasjonsnummer"),
-            new Property("difi.move.serviceregistryEndpoint", props.getServiceregistryEndpoint(), "Service Registry Endpoint")
+            new Property("difi.move.serviceregistryEndpoint", props.getServiceregistryEndpoint(), "Service Registry Endpoint"),
+            new Property("difi.move.nextmove.statusPollingCron", props.getNextmove().getStatusPollingCron(), "CRON for status oppdateringer")
         ));
 
         var arkivmelding = props.getArkivmelding();

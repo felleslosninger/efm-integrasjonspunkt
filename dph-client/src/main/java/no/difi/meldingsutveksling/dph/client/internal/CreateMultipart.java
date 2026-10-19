@@ -1,0 +1,30 @@
+package no.difi.meldingsutveksling.dph.client.internal;
+
+import lombok.SneakyThrows;
+import no.difi.meldingsutveksling.nhn.adapter.model.ContentTypes;
+import no.difi.meldingsutveksling.nhn.adapter.model.MultipartFileNames;
+import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.util.MultiValueMap;
+
+public class CreateMultipart {
+
+    public static final MediaType APPLICATION_JOSE = MediaType.parseMediaType(ContentTypes.APPLICATION_JOSE);
+    public static final MediaType APPLICATION_ASICE = MediaType.parseMediaType(ContentTypes.APPLICATION_ASICE);
+
+    @SneakyThrows
+    public MultiValueMap<String, HttpEntity<?>> createMultipart(WrappedPackage wrappedPackage) {
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part(MultipartNames.FORRETNINGSMELDING, wrappedPackage.forretningsmelding(), APPLICATION_JOSE)
+            .filename(MultipartFileNames.FORRETNINGSMELDING);
+
+        if (wrappedPackage.encryptedAsic() != null) {
+            builder.part(MultipartNames.DOKUMENTPAKKE, wrappedPackage.encryptedAsic(), APPLICATION_ASICE)
+                .filename(MultipartFileNames.DOKUMENTPAKKE);
+        }
+
+        return builder.build();
+    }
+}

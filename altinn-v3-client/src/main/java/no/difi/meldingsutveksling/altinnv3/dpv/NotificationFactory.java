@@ -29,7 +29,6 @@ public class NotificationFactory {
         InitializeCorrespondenceNotificationExt notification = new InitializeCorrespondenceNotificationExt();
 
         notification.setNotificationChannel(getChannel(message));
-        notification.setRequestedSendTime(OffsetDateTime.now(clock).plusMinutes(5));
         notification.setNotificationTemplate(NotificationTemplateExt.CUSTOM_MESSAGE);
         notification.setEmailBody(getNotificationText(message));
         notification.setSmsBody(getNotificationText(message));

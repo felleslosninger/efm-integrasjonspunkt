@@ -1,14 +1,24 @@
 # blir som regel oppdatert via neste spring boot patch
-CVE-2025-59250 #JDBC Driver for SQL Server has improper input validation
-CVE-2026-42583 #Netty Lz4FrameDecoder is vulnerable to resource exhaustion
-CVE-2026-42579 #Netty has a DNS Codec Input Validation Bypass
-CVE-2026-42584 #Netty has HttpClientCodec response desynchronization
-CVE-2026-42587 #Netty: HttpContentDecompressor maxAllocation bypass
-CVE-2026-42577 #Netty epoll transport denial of service via RST
-CVE-2026-34197 #org.apache.activemq/activemq-broker
-CVE-2026-39304 # org.apache.activemq:activemq-client
-CVE-2026-40466 # org.apache.activemq/activemq-all
-CVE-2026-41044 # org.apache.activemq/activemq-broker
-CVE-2026-39304 # Apache ActiveMQ Client: Apache ActiveMQ Broker: Apache
-CVE-2026-5598 # bouncycastle: BC-JAVA: private key leakage via non-constant
-CVE-2026-42198 # jdbc.postgresql.org: pgjdbc: Client-side Denial of Service
+# Ryddet 2026-09-22: kun CVE-er som framleis blir rapporterte av trivy er att.
+
+# org.apache.tomcat.embed:tomcat-embed-core (11.0.24, fiksa i 11.0.25)
+CVE-2026-65182
+CVE-2026-65905
+CVE-2026-68525
+
+# org.apache.cxf:cxf-core (4.2.0, fiksa i 4.2.2)
+CVE-2026-50645
+CVE-2026-49875
+
+# org.apache.cxf:cxf-rt-rs-security-oauth2 (4.2.0, fiksa i 4.2.2)
+CVE-2026-50627
+CVE-2026-50628
+CVE-2026-50629
+CVE-2026-50631
+
+# org.bouncycastle:bcprov-jdk18on (1.84, fiksa i 1.85)
+CVE-2026-8763
+CVE-2026-13506
+
+# org.jsoup:jsoup (1.18.1, fiksa i 1.23.2)
+CVE-2026-75140

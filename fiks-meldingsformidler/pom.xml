@@ -14,6 +14,14 @@
     <dependencies>
         <dependency>
             <groupId>no.difi.meldingsutveksling</groupId>
+            <artifactId>common-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.difi.move-common</groupId>
             <artifactId>dokumentpakking</artifactId>
         </dependency>
         <dependency>
@@ -34,18 +42,8 @@
         </dependency>
         <dependency>
             <groupId>no.ks.fiks</groupId>
-            <artifactId>fiks-io-klient-java</artifactId>
-            <version>3.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-common</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>fiks-svarut-klient</artifactId>
+            <version>4.8.0</version>
         </dependency>
     </dependencies>
 
@@ -73,7 +71,7 @@
                     <schemaIncludes>
                         <include>*.wsdl</include>
                     </schemaIncludes>
-                    <generatePackage>no.difi.meldingsutveksling.ks.svarut</generatePackage>
+                    <generatePackage>no.difi.meldingsutveksling.ks.svarut.ws</generatePackage>
                     <strict>true</strict>
                     <verbose>true</verbose>
                     <extension>true</extension>

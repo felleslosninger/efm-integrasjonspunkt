@@ -1,18 +1,18 @@
 package no.difi.meldingsutveksling.nextmove;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.jms.Session;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.NextMoveConsts;
 import no.difi.meldingsutveksling.QueueInterruptException;
-import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.move.common.io.pipe.PromiseRuntimeException;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
-import jakarta.jms.Session;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -28,25 +28,21 @@ import java.io.IOException;
 @Slf4j
 public class InternalQueue {
 
-
     @Value("${difi.move.queue.nextmove-name}")
     private String nextmoveQueue;
 
     private final JmsTemplate jmsTemplate;
     private final NextMoveSender nextMoveSender;
     private final ObjectMapper objectMapper;
-    private final DocumentConverter documentConverter;
     private final DeadLetterQueueHandler deadLetterQueueHandler;
 
     public InternalQueue(JmsTemplate jmsTemplate,
                          NextMoveSender nextMoveSender,
                          ObjectMapper objectMapper,
-                         DocumentConverter documentConverter,
                          DeadLetterQueueHandler deadLetterQueueHandler) {
         this.jmsTemplate = jmsTemplate;
         this.nextMoveSender = nextMoveSender;
         this.objectMapper = objectMapper;
-        this.documentConverter = documentConverter;
         this.deadLetterQueueHandler = deadLetterQueueHandler;
     }
 
@@ -55,7 +51,7 @@ public class InternalQueue {
         NextMoveOutMessage nextMoveMessage;
         try {
             nextMoveMessage = objectMapper.readValue(message, NextMoveOutMessage.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new NextMoveRuntimeException("Unable to unmarshall NextMove message from queue", e);
         }
         try {
@@ -88,7 +84,7 @@ public class InternalQueue {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             objectMapper.writeValue(bos, msg);
             jmsTemplate.convertAndSend(nextmoveQueue, bos.toByteArray());
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new NextMoveRuntimeException("Unable to marshall NextMove message with id=%s".formatted(msg.getMessageId()), e);
         }
     }

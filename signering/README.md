@@ -52,13 +52,28 @@ Det er denne filen med signatur som skal lastes opp til GitHub releasen sammen m
 
 Forlengar utløpsdatoen til kodesigneringsnøkkelen med 5 år og eksporterer ny og oppdaterte offentlege nøkkelen.
 
+Sjekk utløpsdato slik :
+```bash
+gpg --show-keys --keyid-format LONG kodesignering-eformidling-public.key
+# pub   rsa4096/CA5643393753ECE3 2021-04-20 [SC] [expires: 2031-04-28]
+ 
+gpg --show-keys --keyid-format LONG kodesignering-eformidling-private.key
+# sec#  rsa4096/CA5643393753ECE3 2021-04-20 [SC] [expires: 2031-04-28] 
+```
+
 Den nye offentlege nøkkelen vil kunne validere både tidligere og nye signaturer, og
 det er *ikke* nødvendig å oppdatere den private nøkkelen når man forlenger på denne måten. 
 
 **Krev:** `kodesignering-eformidling-private.key` og miljøvariabelen `GPG_PASSPHRASE`.
 
 ```bash
-GPG_PASSPHRASE="privat-nøkkel-passord" ./extend.sh sti/til/oppdatert-offentleg.key
+GPG_PASSPHRASE="privat-nøkkel-passord" ./extend.sh sti/til/oppdatert-offentleg-nokkel
 ```
 
-Skriv den oppdaterte offentlege nøkkelen (med ny utløpsdato) til den oppgjevne utdatastien.
+Skriv den oppdaterte offentlege og private nøkkelen (med ny utløpsdato) til den oppgjevne utdatastien, slik : 
+```bash 
+./sti/til/oppdatert-offentleg-nokkel.public.key
+./sti/til/oppdatert-offentleg-nokkel.private.key
+```
+
+Husk å oppdatere offentlig nøkkel på docs.digdir.no og public + private key på Teams område.

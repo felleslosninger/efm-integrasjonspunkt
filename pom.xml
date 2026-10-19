@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>4.1.1</version>
         <relativePath />
     </parent>
 
@@ -25,8 +25,9 @@
 
     <licenses>
         <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>BSD 3-Clause License</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
 
@@ -71,21 +72,30 @@
     </repositories>
 
     <properties>
+        <!-- Held på target 21 slik at kundane slepp å oppgradere Java-runtime
+             (Spring Boot 4 krev berre Java 17+). Bygget er verifisert med JDK 25. -->
         <java.version>21</java.version>
-        <efm-common.version>2.0.10</efm-common.version>
-        <bouncycastle.version>1.83</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Skal alltid matche versjonen til spring-boot-starter-parent over -->
+        <spring-boot.version>4.1.1</spring-boot.version>
+        <efm-common.version>3.2.0</efm-common.version>
+        <efm-nhn-adapter.version>0.0.6</efm-nhn-adapter.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
+
+        <!-- CVE-2026-89407 -->
+        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
     </properties>
 
     <modules>
         <module>common</module>
         <module>validation</module>
-        <module>dokumentpakking</module>
         <module>nextmove</module>
         <module>common-spring</module>
         <module>api</module>
         <module>dpi-client</module>
+        <module>dph-client</module>
         <module>post-til-private</module>
         <module>service-registry-client</module>
         <module>domain</module>
@@ -98,10 +108,43 @@
     <dependencyManagement>
         <dependencies>
 
+            <!-- Jackson BOMs must be imported before spring-boot-dependencies, otherwise the versions it imports win over the overrides above -->
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson-2-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Må importerast FØR move-common-bom: den har eldre spring-boot-starter-parent
+                 som parent, og importerte BOM-ar vinn over parent-arva versjonar i Maven.
+                 Utan denne kan move-common-bom stille nedgradere Boot-styrte avhengigheiter
+                 (t.d. ActiveMQ 6.2.6 -> 6.1.8). -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
-                <version>7.23.0</version>
+                <version>8.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.move-common</groupId>
+                <artifactId>move-common-bom</artifactId>
+                <version>${efm-common.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -130,17 +173,17 @@
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
-                <artifactId>dokumentpakking</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling</groupId>
                 <artifactId>dpi-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.difi.meldingsutveksling</groupId>
+                <artifactId>dph-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -219,8 +262,27 @@
                 <artifactId>commons-asic</artifactId>
                 <version>1.0.1</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.difi.meldingsutveksling.nhn-adapter</groupId>
+                <artifactId>nhn-model</artifactId>
+                <version>${efm-nhn-adapter.version}</version>
+            </dependency>
             <!-- versjonsstyring av dependencies -->
+
+            <!-- Spring Boot 4 versjonsstyrer ikkje lenger spring-retry
+                 (Spring Framework 7 har eigen retry-støtte, sjå MOVE-5115) -->
+            <dependency>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>2.0.13</version>
+            </dependency>
+
+            <!-- CVE-2026-42402 -->
+            <dependency>
+                <groupId>org.apache.neethi</groupId>
+                <artifactId>neethi</artifactId>
+                <version>3.2.2</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.santuario</groupId>
@@ -298,12 +360,6 @@
                 <version>3.1.1</version>
             </dependency>
             <dependency>
-                <groupId>jakarta.persistence</groupId>
-                <artifactId>jakarta.persistence-api</artifactId>
-                <!-- FIXME version 3.2.0 breaks cucumber tests -->
-                <version>3.1.0</version>
-            </dependency>
-            <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>3.2.3</version>
@@ -349,12 +405,6 @@
                 <version>1.5.4</version>
             </dependency>
 
-            <!-- overstyring av versjoner med CVE sårbarheter -->
-            <dependency>
-                <groupId>tools.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>3.1.1</version>
-            </dependency>
 
             <!-- versjonsstyring av test dependencies -->
 
@@ -379,7 +429,7 @@
             <dependency>
                 <groupId>net.javacrumbs.json-unit</groupId>
                 <artifactId>json-unit-assertj</artifactId>
-                <version>5.1.0</version>
+                <version>6.3.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -418,23 +468,37 @@
                     <version>3.15.0</version>
                     <configuration>
                         <release>${java.version}</release>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>io.github.openfeign.querydsl</groupId>
+                                <artifactId>querydsl-apt</artifactId>
+                                <version>7.7</version>
+                                <classifier>jpa</classifier>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <groupId>org.jvnet.jaxb</groupId>
                     <artifactId>jaxb-maven-plugin</artifactId>
-                    <version>4.0.12</version>
+                    <version>4.0.16</version>
                     <configuration>
                         <plugins>
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
                                 <artifactId>jaxb-plugins</artifactId>
-                                <version>4.0.12</version>
+                                <version>4.0.16</version>
                             </plugin>
                             <plugin>
                                 <groupId>org.jvnet.jaxb</groupId>
                                 <artifactId>jaxb-plugin-annotate</artifactId>
-                                <version>4.0.12</version>
+                                <version>4.0.16</version>
                             </plugin>
                             <plugin>
                                 <groupId>net.codesup.util</groupId>
@@ -447,7 +511,7 @@
                 <plugin>
                     <groupId>com.sun.xml.ws</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
-                    <version>4.0.3</version>
+                    <version>4.0.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -493,6 +557,22 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

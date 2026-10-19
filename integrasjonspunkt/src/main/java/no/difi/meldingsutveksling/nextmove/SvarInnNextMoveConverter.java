@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.api.AsicHandler;
 import no.difi.meldingsutveksling.arkivmelding.ArkivmeldingUtil;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.dokumentpakking.domain.Document;
+import no.difi.move.common.dokumentpakking.domain.Document;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.arkivmelding.JournalposttypeMapper;
@@ -31,6 +31,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -115,7 +116,17 @@ public class SvarInnNextMoveConverter {
             ekstraMetadata.forEach(
                 data ->
                 {
-                    Element el = document.createElement(data.get("key"));
+                    Element el;
+                    String key = data.get("key");
+
+                    try {
+                        String tagName = key != null ? key.replaceAll("\\s", "_") : null;
+                        el = document.createElement(tagName);
+                    } catch (DOMException e) {
+                        throw new NextMoveRuntimeException("Unable to build XML for virksomhetsspesifikkeMetadata, " +
+                            "cant create key from ekstraMetadata value: " + key, e);
+                    }
+
                     el.setTextContent(data.get("value"));
                     root.appendChild(el);
                 });

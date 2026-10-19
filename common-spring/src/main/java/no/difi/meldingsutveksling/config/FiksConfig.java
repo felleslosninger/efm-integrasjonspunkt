@@ -2,17 +2,18 @@ package no.difi.meldingsutveksling.config;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.ToString;
 import no.difi.move.common.config.KeystoreProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.unit.DataSize;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +28,6 @@ public class FiksConfig {
 
     SvarUt ut = new SvarUt();
     SvarInn inn = new SvarInn();
-    FiksIO io = new FiksIO();
 
     @Data
     @ToString(exclude = "password")
@@ -36,20 +36,6 @@ public class FiksConfig {
         private String username;
         @NotEmpty
         private String password;
-    }
-
-    @Data
-    @ToString(exclude = "integrasjonsPassord")
-    public static class FiksIO {
-        private String senderOrgnr;
-        private String host;
-        private String apiHost;
-        private String kontoId;
-        private String integrasjonsId;
-        private String integrasjonsPassord;
-        private DataSize uploadSizeLimit;
-        @NotNull
-        private Integer defaultTtlHours;
     }
 
     @Data
@@ -67,6 +53,40 @@ public class FiksConfig {
         private Map<String, FiksCredentials> paaVegneAv = Maps.newHashMap();
         @NotNull
         private Integer defaultTtlHours;
+
+        private WebService ws = new WebService();
+        private REST rest = new REST();
+
+        @Data
+        public static class WebService {
+
+            private URL endpointUrl;
+        }
+
+        @Data
+        public static class REST {
+
+            private URL endpointUrl;
+            private String kontoId;
+            private String integrasjonId;
+            private String integrasjonPassord;
+            private int idleTimeout = 16 * 60 * 1000;
+
+            @Valid
+            @NotNull
+            @NestedConfigurationProperty
+            private Maskinporten maskinporten;
+        }
+
+
+        @Data
+        public static class Maskinporten {
+
+            private String clientId;
+            private String tokenUri;
+            private String audience;
+            private List<String> scopes;
+        }
     }
 
     @Data

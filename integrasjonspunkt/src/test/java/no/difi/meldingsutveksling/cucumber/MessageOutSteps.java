@@ -1,6 +1,5 @@
 package no.difi.meldingsutveksling.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -13,6 +12,7 @@ import no.difi.move.common.io.ResourceUtils;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.xmlunit.matchers.CompareMatcher;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class MessageOutSteps {
 
     private final Holder<Message> messageOutHolder;
     private final Holder<Message> messageSentHolder;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     private JacksonTester<StandardBusinessDocument> json;
 

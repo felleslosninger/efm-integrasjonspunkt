@@ -57,6 +57,42 @@ public class CorrespondenceCreatorServiceTest {
     }
 
     @Test
+    public void create_fromDigitalDpvMessage_with_missing_innhold_use_default_text() {
+        DigitalDpvMessage digitalDpvMessage = new DigitalDpvMessage();
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
+
+        digitalDpvMessage.setTittel("Digital Dpv");
+        digitalDpvMessage.setSammendrag("Digitalt sammendrag");
+        digitalDpvMessage.setInnhold(null);
+
+        standardBusinessDocument.setAny(digitalDpvMessage);
+        message.setSbd(standardBusinessDocument);
+
+        correspondenceCreatorService.create(message, null, null);
+
+        verify(correspondenceFactory).create(message, "Digital Dpv", "Digitalt sammendrag", "Ingen innhold", null, null);
+    }
+
+    @Test
+    public void create_fromDigitalDpvMessage_with_empty_string_as_innhold_use_default_text() {
+        DigitalDpvMessage digitalDpvMessage = new DigitalDpvMessage();
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
+
+        digitalDpvMessage.setTittel("Digital Dpv");
+        digitalDpvMessage.setSammendrag("Digitalt sammendrag");
+        digitalDpvMessage.setInnhold("");
+
+        standardBusinessDocument.setAny(digitalDpvMessage);
+        message.setSbd(standardBusinessDocument);
+
+        correspondenceCreatorService.create(message, null, null);
+
+        verify(correspondenceFactory).create(message, "Digital Dpv", "Digitalt sammendrag", "Ingen innhold", null, null);
+    }
+
+    @Test
     public void create_fromArkivmeldingMessage() {
         ArkivmeldingMessage arkivmeldingMessage = new ArkivmeldingMessage();
         Arkivmelding arkivmelding = new Arkivmelding();
@@ -78,6 +114,30 @@ public class CorrespondenceCreatorServiceTest {
         correspondenceCreatorService.create(message, null, null);
 
         verify(correspondenceFactory).create(message, "Journalpost", "Journalpost", "Journalpost tittel", null, null);
+    }
+
+    @Test
+    public void create_fromArkivmeldingMessage_when_offentligtittel_is_missing_use_tittel_instead() {
+        ArkivmeldingMessage arkivmeldingMessage = new ArkivmeldingMessage();
+        Arkivmelding arkivmelding = new Arkivmelding();
+        Journalpost journalpost = new Journalpost();
+        NextMoveOutMessage message = new NextMoveOutMessage();
+        StandardBusinessDocument standardBusinessDocument = new StandardBusinessDocument();
+
+        journalpost.setOffentligTittel(null);
+        journalpost.setTittel("Journalpost tittel");
+
+        standardBusinessDocument.setAny(arkivmeldingMessage);
+        message.setSbd(standardBusinessDocument);
+        message.setFiles(new HashSet<>());
+
+        when(dpvHelper.getArkivmelding(Mockito.any(), Mockito.any())).thenReturn(arkivmelding);
+        when(arkivmeldingUtil.getJournalpost(arkivmelding)).thenReturn(journalpost);
+
+
+        correspondenceCreatorService.create(message, null, null);
+
+        verify(correspondenceFactory).create(message, "Journalpost tittel", "Journalpost tittel", "Journalpost tittel", null, null);
     }
 
     @Test

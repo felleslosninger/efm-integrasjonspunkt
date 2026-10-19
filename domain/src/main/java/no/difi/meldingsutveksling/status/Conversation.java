@@ -2,6 +2,15 @@ package no.difi.meldingsutveksling.status;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,12 +21,12 @@ import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.nextmove.AbstractEntity;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
+import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,10 +40,10 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @Entity
 @Slf4j
 @Table(name = "conversation",
-        indexes = {
-                @Index(columnList = "conversation_id"),
-                @Index(columnList = "message_id")
-        })
+    indexes = {
+        @Index(columnList = "conversation_id"),
+        @Index(columnList = "message_id")
+    })
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate
 public class Conversation extends AbstractEntity<Long> {
@@ -120,9 +129,9 @@ public class Conversation extends AbstractEntity<Long> {
 
     public static Conversation of(MessageInformable msg, OffsetDateTime lastUpdate, MessageStatus... statuses) {
         return new Conversation(msg.getConversationId(), msg.getMessageId(), msg.getConversationId(),
-                msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(), msg.getDocumentIdentifier(),
-                msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
-                .addMessageStatuses(statuses);
+            msg.getSender(), msg.getReceiver(), msg.getProcessIdentifier(), msg.getDocumentIdentifier(),
+            msg.getDirection(), "", msg.getServiceIdentifier(), msg.getExpiry(), lastUpdate)
+            .addMessageStatuses(statuses);
     }
 
     Conversation addMessageStatus(MessageStatus status) {
@@ -130,7 +139,7 @@ public class Conversation extends AbstractEntity<Long> {
         this.messageStatuses.add(status);
         if (statusLogger.isInfoEnabled()) {
             statusLogger.info(markerFrom(this).and(markerFrom(status)), String.format("Message [id=%s] updated with status \"%s\"",
-                    this.getMessageId(), status.getStatus()));
+                this.getMessageId(), status.getStatus()));
         }
         return this;
     }
@@ -138,7 +147,14 @@ public class Conversation extends AbstractEntity<Long> {
     @JsonIgnore
     public boolean hasStatus(MessageStatus status) {
         return getMessageStatuses().stream()
-                .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
+            .anyMatch(ms -> ms.getStatus().equals(status.getStatus()));
     }
 
+    @JsonIgnore
+    public MessageStatus findStatus(ReceiptStatus status) {
+        return getMessageStatuses().stream()
+            .filter(ms -> ms.getStatus().equals(status.name()))
+            .findAny()
+            .orElse(null);
+    }
 }

@@ -69,4 +69,23 @@ public class BugFix610 {
         message[14] = -118;
         message[15] = 33;
     }
+
+    // TODO denne fiksen er antagelig ikke aktuell lenger, mulig det var eFormidlig 1.0 og et
+    // behov for å hotfix av noen Altinn ZIP filer.  Men lar koden ligge inntil videre, siden
+    // den uansett er deaktivert som default.
+    //
+    // Fiksen enables med : difi.move.nextmove.apply-zip-header-patch=true
+    // Informasjon av hva/hvorfor er "tynn" : https://digdir.atlassian.net/browse/MOVE-610
+    //
+    // Hardkodingen over i hex : 50 4B 03 04 0A 00 00 08 00 00 D5 68 67 4C 8A 21
+    //
+    // Det ser ut som en standard ZIP header med følgende informasjon hardkodet :
+    //
+    // 50 4B 03 04   Local file header signature: PK\x03\x04
+    // 0A 00         Version needed to extract: 10 = ZIP spec 1.0
+    // 00 08         General purpose bit flag: 0x0800 = UTF-8 filename/comment encoding
+    // 00 00         Compression method: 0 = stored, no compression
+    // D5 68         Last modified time: DOS time 13:06:42
+    // 67 4C         Last modified date: DOS date 2018-03-07
+
 }

@@ -283,6 +283,16 @@ public class CorrespondenceFactoryTest {
         assertEquals(confidential, result.getCorrespondence().getIsConfidential(), "If resource is confidential, it should be mapped correctly on correspondence");
     }
 
+    @ParameterizedTest(name = "When ignoreReservation = {0}, then map ignoreReservation = {0} on correspondence")
+    @ValueSource(booleans = {true, false})
+    public void create_mapsIgnoreReservation(boolean ignoreReservation) {
+        when(dpvHelper.isIgnoreReservation(Mockito.any())).thenReturn(ignoreReservation);
+
+        var result = correspondenceFactory.create(message, MESSAGE_TITLE, MESSAGE_SUMMARY, MESSAGE_BODY, null, null);
+
+        assertEquals(ignoreReservation, result.getCorrespondence().getIgnoreReservation(), "ignoreReservation should be mapped from DpvHelper onto correspondence");
+    }
+
     @Test
     public void throw_error_when_resource_is_null(){
         ServiceRecord serviceRecord = new ServiceRecord();

@@ -1,7 +1,7 @@
 package no.difi.meldingsutveksling.altinnv3;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 import no.digdir.altinn3.correspondence.model.ProblemDetails;
 import org.springframework.http.client.ClientHttpResponse;
 

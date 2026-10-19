@@ -1,13 +1,15 @@
 package no.difi.meldingsutveksling.altinnv3.dpo.payload;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.TmpFile;
+import no.difi.meldingsutveksling.altinnv3.dpo.InvalidAltinnPackageException;
+import no.difi.meldingsutveksling.altinnv3.dpo.UploadRequest;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.nextmove.BusinessMessageAsAttachment;
-import no.difi.meldingsutveksling.altinnv3.dpo.UploadRequest;
 import no.difi.move.common.io.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -17,10 +19,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 import org.springframework.util.StreamUtils;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.ObjectMapper;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -45,7 +46,7 @@ public class AltinnPackage {
 
     static {
         try {
-            ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class}, new HashMap());
+            ctx = JAXBContextFactory.createContext(new Class[]{StandardBusinessDocument.class}, new HashMap<>());
         } catch (JAXBException e) {
             throw new MeldingsUtvekslingRuntimeException("Could not create JAXBContext", e);
         }
@@ -73,8 +74,7 @@ public class AltinnPackage {
             if (sbd.getAny() instanceof BusinessMessageAsAttachment) {
                 zipOutputStream.putNextEntry(new ZipEntry(SBD_FILE));
                 ObjectMapper om = context.getBean(ObjectMapper.class);
-                om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-                om.writeValue(zipOutputStream, sbd);
+                om.writer().without(StreamWriteFeature.AUTO_CLOSE_TARGET).writeValue(zipOutputStream, sbd);
                 zipOutputStream.closeEntry();
 
                 if (this.asic != null) {
@@ -102,7 +102,6 @@ public class AltinnPackage {
                 switch (zipEntry.getName()) {
                     case SBD_FILE:
                         ObjectMapper om = context.getBean(ObjectMapper.class);
-                        om.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
                         sbd = om.readValue(zipFile.getInputStream(zipEntry), StandardBusinessDocument.class);
                         break;
                     case CONTENT_XML:
@@ -119,7 +118,10 @@ public class AltinnPackage {
             }
 
             if (sbd == null) {
-                throw new MeldingsUtvekslingRuntimeException("Altinn zip does not contain BestEdu document, cannot proceed");
+                if (tmpAsicFile != null) {
+                    tmpAsicFile.delete();
+                }
+                throw new InvalidAltinnPackageException("Altinn zip does not contain BestEdu document, cannot proceed");
             }
             return new AltinnPackage(sbd, asic, tmpAsicFile);
         }

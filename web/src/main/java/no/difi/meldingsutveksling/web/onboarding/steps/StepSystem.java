@@ -82,13 +82,16 @@ public class StepSystem implements Step {
         if (systemExists && missingRequiredAccessPackage) dialog = dialogTextMissingAccessPackage;
 
         return new StepInfo(
-                getName(),
-                "Opprett system",
-                "Registrer ett system for Integrasionspunktet i Altinn's System Register, med nødvendige tilgangspakke.",
-                dialog,
-                isCompleted() ? "Lukk" : "Opprett system",
-                isRequired(),
-                isCompleted()
+            getName(),
+            "Opprett system",
+            "Registrer ett system for Integrasionspunktet i Altinn's System Register, med nødvendige tilgangspakke.",
+            dialog,
+            isCompleted() ? "Lukk" : "Opprett system",
+            isRequired(),
+            isCompleted(),
+            false,
+            true,
+            false
         );
 
     }

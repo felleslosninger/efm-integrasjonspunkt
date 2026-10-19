@@ -3,7 +3,6 @@ package no.difi.meldingsutveksling.config;
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceAgencyConnectionCheck;
 import no.difi.meldingsutveksling.altinnv3.dpv.CorrespondenceApiClient;
 import no.difi.meldingsutveksling.altinnv3.systemregister.SystemregisterApiClient;
-import no.difi.meldingsutveksling.dokumentpakking.service.CmsAlgorithm;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnClient;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
@@ -12,10 +11,12 @@ import no.difi.meldingsutveksling.serviceregistry.client.ServiceRegistryRestClie
 import no.difi.meldingsutveksling.web.FrontendFunctionality;
 import no.difi.meldingsutveksling.web.FrontendFunctionalityImpl;
 import no.difi.move.common.cert.KeystoreHelper;
+import no.difi.move.common.dokumentpakking.CmsAlgorithm;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import no.difi.move.common.oauth.JWTDecoder;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,7 @@ import static no.difi.meldingsutveksling.DateTimeUtil.DEFAULT_ZONE_ID;
 
 @Configuration
 @EnableConfigurationProperties({IntegrasjonspunktProperties.class})
-@Import({DpiConfig.class, Plumber.class, PromiseMaker.class})
+@Import({DpiConfig.class, Plumber.class, PromiseMaker.class, DphConfig.class})
 public class IntegrasjonspunktBeans {
 
     @Bean
@@ -50,7 +51,7 @@ public class IntegrasjonspunktBeans {
     @Bean
     public Supplier<AlgorithmIdentifier> algorithmIdentifierSupplier(IntegrasjonspunktProperties props) {
         if (props.getOrg().getKeystore().getType().toLowerCase().startsWith("windows") ||
-                Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
+            Boolean.TRUE.equals(props.getOrg().getKeystore().getLockProvider())) {
             return () -> null;
         }
         return () -> CmsAlgorithm.RSAES_OAEP;
@@ -62,6 +63,7 @@ public class IntegrasjonspunktBeans {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public Clock systemClock() {
         return Clock.system(DEFAULT_ZONE_ID);
     }

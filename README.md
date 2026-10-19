@@ -1,3 +1,7 @@
+    ## License
+    
+    This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
+
 ## Bygg og kjør lokalt
 Testet og bygget med OpenJDK 21.0.9 og Maven 3.9.12.
 
@@ -7,10 +11,10 @@ automatisk når du starter en av de forhåndsdefinerte maven-profilene.
 
 ```bash
 mvn clean package
-java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+java -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt-DEV-SNAPSHOT.jar
 
 # eller overstyr konfigurasjon med en lokal fil
-java -Dspring.config.additional-location=file:integrasjonspunkt-minimal-dpo.properties -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt.jar
+java -Dspring.config.additional-location=file:integrasjonspunkt-minimal-dpo.properties -Dspring.profiles.active=staging -jar integrasjonspunkt/target/integrasjonspunkt-DEV-SNAPSHOT.jar
 ```
 
 Når man starter med `dev | staging | yt | production` profil så kan properties overstyres fra
@@ -37,9 +41,40 @@ mvn spring-boot:build-image --file integrasjonspunkt/pom.xml -Dspring-boot.build
 ## Kjøre dockerbilde bygget lokalt eller lastet ned fra [GitHub Container Registry](https://github.com/felleslosninger/efm-integrasjonspunkt/pkgs/container/efm-integrasjonspunkt)
 - Docker-bildet er bygget med maven spring boot plugin, og bruker paketo-base-tiny som builder. Dette er et sterkt herdet base-bilde som blir vedlikeholdt av Paketo Buildpacks. 
 - Se docker-compose-TEMPLATE.yaml for hvordan starte opp lokalt med docker compose, ekstern ActiveMQ og Postgres, MariaDB, MYSQL og MSSQL.
-- Man _må_ bruke ekstern activemq ved bruk av dockerimage
-- Mount opp certs mot /workspace-mappen
-- Mount opp logger mot /workspace/integrasjonspunkt-logs
+- Mount opp kataloger og filer du trenger under `/workspace`-mappen (som er standard arbeidskatalog i docker containeren)
+  - lokal konfigurasjonsfil (`/workspace/integrasjonspunkt-local.properties`)  
+  - sertifkater som trengs og som refereres i konfigurasjonsfilen (f.eks. `/workspace/certs/...`)
+  - skrivbar katalog for logger dersom du ønsker å benytte logging til fil (f.eks. `/workspace/integrasjonspunkt-logs`)
+
+```bash
+# Utgangspunkt :
+# I katalogen jeg kjører dette har jeg en tom katalog `tmp` som activemq og h2 kan skrive til,
+# en `certs` katalog med nødvendige sertifikater og en `integrasjonspunkt-min-egen-konfig.properties`
+# som inneholder nødvendig konfig for å starte opp integrasjonspunktet.
+#
+# Forklaring på mounts :
+# Konfigfilen mountes som /workspace/integrasjonspunkt-local.properties og blir dermed lest automatisk 
+# Sertifikat katalogen mountes som read-only og kan refereres i konfigfilen (f.eks. `file:/workspace/certs/keystore.jks`)
+# Skrivbar katalog for H2 database mountes som /workspace/h2-data og refereres direkte med DIFI_DATASOURCE_URL
+# Skrivbar katalog for ActiveMQ mountes som /workspace/activemq-data og benyttes default av ActiveMQ for å lagre data
+#
+# Forklaring på miljøvariabler :
+# SPRING_PROFILES_ACTIVE=staging : starter opp med staging profil (som er vår testmiljø profil)
+# LOGGING_FILE_NAME="" : triks for å disable logging til fil (kun logging til console)
+# DIFI_DATASOURCE_URL : peker h2 til en skrivbar katalog vi mountet inn
+#
+# open http://localhost:9093/ i nettleser for å se at integrasjonspunktet starter opp korrekt
+docker run --rm --name integrasjonspunkt \
+  -p 9093:9093 \
+  -v $(pwd)/integrasjonspunkt-min-egen-konfig.properties:/workspace/integrasjonspunkt-local.properties:ro \
+  -v $(pwd)/certs:/workspace/certs:ro \
+  -v $(pwd)/tmp:/workspace/h2-data:rw \
+  -v $(pwd)/tmp:/workspace/activemq-data:rw \
+  -e SPRING_PROFILES_ACTIVE=staging \
+  -e LOGGING_FILE_NAME="" \
+  -e DIFI_DATASOURCE_URL=jdbc:h2:file:/workspace/h2-data/integrasjonspunkt \
+ghcr.io/felleslosninger/efm-integrasjonspunkt:v4.2.0
+```
 
 
 ## Utvikle nye web sider
@@ -97,14 +132,15 @@ Linker til logger, config og alt annet :
 Release av ny versjon gjerast via GitHub GUI
 - Gå til "Releases" i GitHub repo
 - Klikk på "Draft a new release"
-- Velg tag (ny eller eksisterande, tag skal være semantisk og ha bokstav v som prefix `v4.0.3`, det er best practice for github releases)
+- Velg tag (ny eller eksisterande, tag skal være semantisk og ha *liten* bokstav v som prefix `v4.2.0`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse med endrings loggen
 - Velg "Publish release" (det trigger workflows som generer pakker og container image, *ikke* bruk "Save draft" den vil ikke trigge bygg)
 - Etter at pakker har blitt bygget og publisert må stegene nedenfor utføres manuelt
 - Last opp artifacts i release (disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
-  - Last opp jar filen (eks `integrasjonspunkt-v4.0.3.jar`)
-  - Last opp sha1 filen (eks `integrasjonspunkt-v4.0.3.jar.sha1`)
-  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.0.3.jar.asc`)
+  - Last opp jar filen (eks `integrasjonspunkt-v4.2.0.jar`)
+  - Last opp sha1 filen (eks `integrasjonspunkt-v4.2.0.jar.sha1`)
+  - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.2.0.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
-  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.0.3` begge steder som vist i filnavna ovenfor)
-  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md` og `_docs/eFormidling/Oppgradering/endringslogg.md`
+  - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.2.0` begge steder som vist i filnavna ovenfor)
+  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
+- Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)

@@ -125,3 +125,4 @@ integrasjonspunkt/docker-compose-local.yml
 
 *.key
 *.jar.*
+/.junie/
