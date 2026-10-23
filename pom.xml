@@ -85,7 +85,7 @@
 
         <!-- CVE-2026-89407 -->
         <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
-        <jackson-bom.version>3.1.7</jackson-bom.version>
+        <jackson-bom.version>3.2.4</jackson-bom.version>
     </properties>
 
     <modules>
