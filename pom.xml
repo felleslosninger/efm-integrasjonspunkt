@@ -292,7 +292,7 @@
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-rt</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
