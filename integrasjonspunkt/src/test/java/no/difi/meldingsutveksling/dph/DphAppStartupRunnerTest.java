@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.config.DphProperties;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dph.client.DphClientService;
+import no.difi.meldingsutveksling.dph.client.DphException;
 import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryLookup;
 import no.difi.meldingsutveksling.serviceregistry.externalmodel.InfoRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -89,6 +91,17 @@ public class DphAppStartupRunnerTest {
 
         assertTrue(reason.contains("400"), reason);
         assertTrue(reason.contains("MP-250"), reason);
+    }
+
+    @Test
+    public void reason_includes_adapter_error_response() {
+        WebClientResponseException response = WebClientResponseException.create(403, "Forbidden", HttpHeaders.EMPTY,
+            "{\"errorCode\":\"FORBIDDEN\",\"message\":\"No access to HER-id\"}".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+
+        String reason = DphAppStartupRunner.getReason(new DphException("FORBIDDEN", "No access to HER-id", 403, response));
+
+        assertTrue(reason.contains("403"), reason);
+        assertTrue(reason.contains("No access to HER-id"), reason);
     }
 
     @Test

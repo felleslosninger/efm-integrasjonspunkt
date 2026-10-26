@@ -2,6 +2,8 @@ package no.difi.meldingsutveksling.dph.client.internal;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.dph.client.DphException;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -9,12 +11,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -68,6 +72,44 @@ class DphClientRetryIT {
             .isThrownBy(() -> dphClient.getStatus(onBehalfOf, messageId));
 
         wireMockExtension.verify(1, getRequestedFor(urlEqualTo("/messages/out/" + messageId + "/statuses")));
+    }
+
+    @Test
+    void shouldKeepHttpResponseAsCauseOfDphException() {
+        wireMockExtension.stubFor(get(urlEqualTo("/messages/in?receiverHerId=1111"))
+            .willReturn(aResponse()
+                .withStatus(403)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                    {"status": 403, "reason": "Forbidden", "errorCode": "FORBIDDEN", "message": "No access to HER-id",
+                     "path": "/messages/in", "requestId": "req-1", "timestamp": "2026-10-26T10:00:00Z"}""")));
+
+        assertThatExceptionOfType(DphException.class)
+            .isThrownBy(() -> dphClient.getMessages(onBehalfOf, 1111))
+            .satisfies(e -> {
+                assertThat(e.getStatusCode()).isEqualTo(403);
+                assertThat(e.getErrorCode()).isEqualTo("FORBIDDEN");
+                assertThat(e.getCause()).isInstanceOfSatisfying(WebClientResponseException.class,
+                    cause -> assertThat(cause.getResponseBodyAsString()).contains("No access to HER-id"));
+            });
+    }
+
+    @Test
+    void shouldThrowDphExceptionWhenErrorBodyIsNotApiError() {
+        wireMockExtension.stubFor(get(urlEqualTo("/messages/in?receiverHerId=1111"))
+            .willReturn(aResponse()
+                .withStatus(403)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"error\": \"No access to HER-id\"}")));
+
+        assertThatExceptionOfType(DphException.class)
+            .isThrownBy(() -> dphClient.getMessages(onBehalfOf, 1111))
+            .satisfies(e -> {
+                assertThat(e.getStatusCode()).isEqualTo(403);
+                assertThat(e.getErrorCode()).isEqualTo(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi());
+                assertThat(e.getCause()).isInstanceOfSatisfying(WebClientResponseException.class,
+                    cause -> assertThat(cause.getResponseBodyAsString()).contains("No access to HER-id"));
+            });
     }
 
     @Test
