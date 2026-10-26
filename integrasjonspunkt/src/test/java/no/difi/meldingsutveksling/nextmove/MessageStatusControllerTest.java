@@ -1,7 +1,9 @@
 package no.difi.meldingsutveksling.nextmove;
 
+import jakarta.servlet.ServletException;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.JacksonConfig;
+import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.receipt.StatusQueue;
@@ -45,6 +47,8 @@ import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageDe
 import static no.difi.meldingsutveksling.nextmove.RestDocumentationCommon.pageableDescriptors;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -296,5 +300,40 @@ public class MessageStatusControllerTest {
                     responseFields(messageStatusDescriptors(""))
                 )
             );
+    }
+
+    @Test
+    public void peekLatestSkipsAndRemovesStatusMissingInDb() throws Exception {
+        MessageStatus messageStatus = messageStatus1();
+        given(statusQueue.receiveStatus()).willReturn(Optional.of(99L), Optional.of(1L));
+        given(statusRepo.findById(99L)).willReturn(Optional.empty());
+        given(statusRepo.findById(1L)).willReturn(Optional.of(messageStatus));
+        given(statusQueue.removeStatus(99L)).willReturn(true);
+
+        mvc.perform(
+                get("/api/statuses/peek")
+                    .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(1)));
+
+        verify(statusQueue).removeStatus(99L);
+    }
+
+    @Test
+    public void peekLatestReturnsNoContentWhenOnlyStatusMissingInDb() throws Exception {
+        given(statusQueue.receiveStatus()).willReturn(Optional.of(99L), Optional.empty());
+        given(statusRepo.findById(99L)).willReturn(Optional.empty());
+        given(statusQueue.removeStatus(99L)).willReturn(true);
+
+        ServletException e = assertThrows(ServletException.class, () -> mvc.perform(
+            get("/api/statuses/peek")
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("testuser", "testpassword"))
+                .accept(MediaType.APPLICATION_JSON)
+        ));
+
+        assertInstanceOf(NoContentException.class, e.getCause());
+        verify(statusQueue).removeStatus(99L);
     }
 }
