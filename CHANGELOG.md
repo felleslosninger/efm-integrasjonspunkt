@@ -32,6 +32,9 @@ DPO og DPV
   - Siden man ikkje har virksomhetssertifikat for syntetiske testbrukere kan JWK benyttes mot maskinporten
   - Man må fortsatt benytte digdirs virksomhetssertifikat for signering av ASIC pakken.
 
+DPH
+- Ny property `difi.move.dph.startup.onfail=stop|log` styrer om IP skal stoppe (default) eller bare logge feil dersom oppstartsjekken for en HER-id feiler. Feilen logges som error med HER-id og årsak (f.eks. MP-250 fra Maskinporten), ref [MOVE-5287](https://digdir.atlassian.net/browse/MOVE-5287)
+
 ## Changelog V2 to V3:
 
 - Java 21+ oppgradering (some code require 17+)

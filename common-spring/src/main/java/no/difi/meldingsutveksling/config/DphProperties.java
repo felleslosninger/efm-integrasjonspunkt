@@ -59,6 +59,27 @@ public class DphProperties {
     @NestedConfigurationProperty
     private KeystoreProperties keystore;
 
+    @Valid
+    @NotNull
+    @NestedConfigurationProperty
+    private Startup startup = new Startup();
+
+    @Data
+    public static class Startup {
+
+        /**
+         * What to do if the DPH startup verification of a HER-id fails:
+         * STOP the application (default), or only LOG the error and continue startup.
+         */
+        @NotNull
+        private OnFail onfail = OnFail.STOP;
+
+        public enum OnFail {
+            STOP,
+            LOG
+        }
+    }
+
     @Data
     public static class Oidc {
 
