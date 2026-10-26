@@ -34,6 +34,7 @@ DPO og DPV
 
 DPH
 - Ny property `difi.move.dph.startup.onfail=stop|log` styrer om IP skal stoppe (default) eller bare logge feil dersom oppstartsjekken for en HER-id feiler. Feilen logges som error med HER-id og årsak (f.eks. MP-250 fra Maskinporten), ref [MOVE-5287](https://digdir.atlassian.net/browse/MOVE-5287)
+- Feil ved mottak av en DPH-melding stopper ikke lenger pollingen av påfølgende meldinger og HER-id-er. Feilen logges, og avsender får en applikasjonskvittering (AppRec) med status avvist og feilkode. Ved uventede feil sendes bare den generelle feilkoden (ANNEN_FEIL), mens detaljene logges. Det sendes aldri AppRec som svar på en AppRec. Kan ikke AppRec sendes, blir meldingen stående som ulest og forsøkes på nytt ved neste polling, ref [MOVE-5289](https://digdir.atlassian.net/browse/MOVE-5289)
 
 ## Changelog V2 to V3:
 
