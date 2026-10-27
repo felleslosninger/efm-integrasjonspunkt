@@ -1,6 +1,10 @@
 package no.difi.meldingsutveksling.dpi.client;
 
 import tools.jackson.databind.json.JsonMapper;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.nimbusds.jose.Payload;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
@@ -28,23 +32,17 @@ import no.difi.move.common.io.ResourceUtils;
 import no.difi.move.common.io.pipe.Plumber;
 import no.difi.move.common.io.pipe.PromiseMaker;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.entity.ContentType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.jupiter.MockServerSettings;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
-import org.mockserver.model.MediaType;
-import org.mockserver.model.RequestDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionStatus;
@@ -59,9 +57,12 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.paths;
 import static net.javacrumbs.jsonunit.core.ConfigurationWhen.then;
@@ -69,8 +70,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest(classes = {
     DpiClientTestConfig.class,
@@ -81,8 +80,13 @@ import static org.mockserver.model.HttpResponse.response;
     Plumber.class
 })
 @ActiveProfiles("test")
-@MockServerSettings(ports = 8900)
 class DpiClientIT {
+
+    // Fixed port, matching the DPI and Maskinporten URLs in src/test/resources/application.yml
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+        .options(wireMockConfig().port(8900))
+        .build();
 
     @MockitoBean
     private TransactionTemplate transactionTemplate;
@@ -142,28 +146,21 @@ class DpiClientIT {
     private Resource messageStatusesResource;
 
     @BeforeEach
-    public void beforeEach(MockServerClient client) {
+    public void beforeEach() {
         when(transactionTemplate.execute(any()))
             .thenAnswer(invocation -> invocation.<TransactionCallback<Boolean>>getArgument(0).doInTransaction(transactionStatus));
 
-        client.when(request()
-                .withMethod("POST")
-                .withPath("/token"))
-            .respond(response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
+        wireMock.stubFor(post(urlPathEqualTo("/token"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("{ \"access_token\" : \"DummyMaskinportenToken\" }")
-            );
-    }
-
-    @AfterEach
-    public void afterEach(MockServerClient client) {
-        client.reset();
+            ));
     }
 
     @Test
-    void testSendDigital(MockServerClient client) {
-        testSend(client, getDpiDigitalTestInput(), digitalReadyForSendSbd);
+    void testSendDigital() {
+        testSend(getDpiDigitalTestInput(), digitalReadyForSendSbd);
     }
 
     private DpiTestInput getDpiDigitalTestInput() {
@@ -197,8 +194,8 @@ class DpiClientIT {
     }
 
     @Test
-    void testSendFysisk(MockServerClient client) {
-        testSend(client, createDpiTestInput(new Utskrift()
+    void testSendFysisk() {
+        testSend(createDpiTestInput(new Utskrift()
             .setAvsender(new Avsender()
                 .setVirksomhetsidentifikator(new Identifikator()
                     .setAuthority(Authority.ISO6523_ACTORID_UPIS)
@@ -239,30 +236,28 @@ class DpiClientIT {
     }
 
     @Test
-    void testSendWhenResponseError(MockServerClient client) {
-        HttpResponse httpResponse = response()
+    void testSendWhenResponseError() {
+        ResponseDefinitionBuilder httpResponse = aResponse()
             .withBody("{}")
-            .withStatusCode(400);
+            .withStatus(400);
 
         DpiTestInput input = getDpiDigitalTestInput();
 
-        assertThatThrownBy(() -> send(client, input, httpResponse))
+        assertThatThrownBy(() -> send(input, httpResponse))
             .isInstanceOf(DpiException.class)
             .hasMessage("400 Bad Request from POST http://localhost:8900/dpi/messages/out:%n{}".formatted());
     }
 
     @Test
-    void testGetMessageStatuses(MockServerClient client) {
+    void testGetMessageStatuses() {
         UUID uuid = UUID.randomUUID();
 
-        client.when(request()
-                .withMethod("GET")
-                .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)))
-            .respond(response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
+        wireMock.stubFor(get(urlPathEqualTo("/dpi/messages/out/%s/statuses".formatted(uuid)))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(ResourceUtils.toByteArray(messageStatusesResource))
-            );
+            ));
 
         StepVerifier.create(dpiClient.getMessageStatuses(uuid))
             .recordWith(ArrayList::new)
@@ -278,32 +273,27 @@ class DpiClientIT {
                 ))
             .verifyComplete();
 
-        client.verify(request()
-            .withMethod("GET")
-            .withPath("/dpi/messages/out/%s/statuses".formatted(uuid)));
+        wireMock.verify(getRequestedFor(urlPathEqualTo("/dpi/messages/out/%s/statuses".formatted(uuid))));
     }
 
     @Test
     @SneakyThrows
-    void testGetMessages(MockServerClient client) {
+    void testGetMessages() {
         given(uuidGenerator.generate())
             .willReturn("ff88849c-e281-4809-8555-7cd54952b916");
 
         String avsenderidentifikator = "123";
         String forretningsmelding = createReceiptJWT.createReceiptJWT(dpiMapper.readStandardBusinessDocument(digitalReadyForSendSbd), createLeveringskvittering);
-        client.when(request()
-                .withMethod("GET")
-                .withPath("/dpi/messages/in")
-                .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator)
-            )
-            .respond(response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
+        wireMock.stubFor(get(urlPathEqualTo("/dpi/messages/in"))
+            .withQueryParam("avsenderidentifikator", equalTo(avsenderidentifikator))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(new JsonMapper().writeValueAsString(new Message()
                     .setForretningsmelding(forretningsmelding)
                     .setDownloadurl(URI.create("http://localhost:8900/dpi/downloadmessage/a9bc8498-13b1-4cef-9cf9-4873a03b484d"))
                 ))
-            );
+            ));
 
         StepVerifier.create(dpiClient.getMessages(new GetMessagesInput()
                 .setSenderId(avsenderidentifikator)
@@ -319,62 +309,52 @@ class DpiClientIT {
             )
             .verifyComplete();
 
-        client.verify(request()
-            .withMethod("GET")
-            .withPath("/dpi/messages/in")
-            .withQueryStringParameter("avsenderidentifikator", avsenderidentifikator));
+        wireMock.verify(getRequestedFor(urlPathEqualTo("/dpi/messages/in"))
+            .withQueryParam("avsenderidentifikator", equalTo(avsenderidentifikator)));
     }
 
     @Test
-    void testGetCmsEncryptedAsice(MockServerClient client) {
+    void testGetCmsEncryptedAsice() {
         UUID uuid = UUID.randomUUID();
         String path = "/dpi/downloadmessage/%s".formatted(uuid);
         byte[] bytes = new byte[1024 * 100];
         ThreadLocalRandom.current().nextBytes(bytes);
 
-        client.when(request()
-                .withMethod("GET")
-                .withPath(path))
-            .respond(response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
+        wireMock.stubFor(get(urlPathEqualTo(path))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(bytes)
-            );
+            ));
 
         InMemoryWithTempFileFallbackResource cmsEncryptedAsice = dpiClient.getCmsEncryptedAsice(URI.create("http://localhost:8900" + path));
 
         assertThat(cmsEncryptedAsice.contentLength()).isEqualTo(1024 * 100);
         assertThat(ResourceUtils.toByteArray(cmsEncryptedAsice)).isEqualTo(bytes);
 
-        client.verify(request()
-            .withMethod("GET")
-            .withPath(path));
+        wireMock.verify(getRequestedFor(urlPathEqualTo(path)));
     }
 
     @Test
-    void testMarkAsRead(MockServerClient client) {
+    void testMarkAsRead() {
         UUID uuid = UUID.randomUUID();
         String path = "/dpi/messages/in/%s/read".formatted(uuid);
 
-        client.when(request()
-                .withMethod("POST")
-                .withPath(path))
-            .respond(response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-            );
+        wireMock.stubFor(post(urlPathEqualTo(path))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            ));
 
         dpiClient.markAsRead(uuid);
 
-        client.verify(request()
-            .withMethod("POST")
-            .withPath(path));
+        wireMock.verify(postRequestedFor(urlPathEqualTo(path)));
     }
 
     @SneakyThrows
-    private void testSend(MockServerClient client, DpiTestInput input, Resource out) {
-        MimeMultipart mimeMultipart = send(client, input, response()
-            .withStatusCode(200));
+    private void testSend(DpiTestInput input, Resource out) {
+        MimeMultipart mimeMultipart = send(input, aResponse()
+            .withStatus(200));
         assertThat(mimeMultipart.getCount()).isEqualTo(2);
         StandardBusinessDocument standardBusinessDocument = assertThatStandardBusinessDocumentIsCorrect(mimeMultipart.getBodyPart(0), out);
         assertThatParcelIsCorrect(standardBusinessDocument, mimeMultipart.getBodyPart(1));
@@ -399,26 +379,21 @@ class DpiClientIT {
         return standardBusinessDocument;
     }
 
-    private MimeMultipart send(MockServerClient client, DpiTestInput input, HttpResponse httpResponse) throws MessagingException {
-        HttpRequest requestDefinition = request()
-            .withMethod("POST")
-            .withPath("/dpi/messages/out");
-
-        client.when(requestDefinition)
-            .respond(httpResponse);
+    private MimeMultipart send(DpiTestInput input, ResponseDefinitionBuilder httpResponse) throws MessagingException {
+        wireMock.stubFor(post(urlPathEqualTo("/dpi/messages/out"))
+            .willReturn(httpResponse));
 
         Shipment shipment = shipmentFactory.getShipment(input);
 
         dpiClient.sendMessage(shipment);
 
-        client.verify(request()
-            .withMethod("POST")
-            .withPath("/token"));
+        wireMock.verify(postRequestedFor(urlPathEqualTo("/token")));
 
-        client.verify(requestDefinition);
+        RequestPatternBuilder requestPattern = postRequestedFor(urlPathEqualTo("/dpi/messages/out"));
+        wireMock.verify(requestPattern);
 
-        HttpRequest httpRequest = getRecordedRequest(client, requestDefinition);
-        return getMimeMultipart(httpRequest);
+        LoggedRequest loggedRequest = getRecordedRequest(requestPattern);
+        return getMimeMultipart(loggedRequest);
     }
 
     @SneakyThrows
@@ -434,12 +409,12 @@ class DpiClientIT {
 
         Parcel parcel = getParcel(standardBusinessDocument, asic);
         assertThat(parcel.getMainDocument().getFilename()).isEqualTo("svada.pdf");
-        assertThat(parcel.getMainDocument().getMimeType()).isEqualTo(org.springframework.http.MediaType.APPLICATION_PDF);
+        assertThat(parcel.getMainDocument().getMimeType()).isEqualTo(MediaType.APPLICATION_PDF);
         assertThat(ResourceUtils.toByteArray(parcel.getMainDocument().getResource()))
             .isEqualTo(ResourceUtils.toByteArray(hoveddokument));
         assertThat(parcel.getAttachments()).hasSize(1);
         assertThat(parcel.getAttachments().get(0).getFilename()).isEqualTo("bilde.png");
-        assertThat(parcel.getAttachments().get(0).getMimeType()).isEqualTo(org.springframework.http.MediaType.IMAGE_PNG);
+        assertThat(parcel.getAttachments().get(0).getMimeType()).isEqualTo(MediaType.IMAGE_PNG);
         assertThat(ResourceUtils.toByteArray(parcel.getAttachments().get(0).getResource()))
             .isEqualTo(ResourceUtils.toByteArray(vedlegg));
     }
@@ -451,18 +426,16 @@ class DpiClientIT {
             asic);
     }
 
-    private MimeMultipart getMimeMultipart(HttpRequest httpRequest) throws MessagingException {
-        String contentTypeValue = httpRequest.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-        ContentType contentType = ContentType.parse(contentTypeValue);
-        return new MimeMultipart(new ByteArrayDataSource(httpRequest.getBodyAsRawBytes(), contentType.getMimeType()));
+    private MimeMultipart getMimeMultipart(LoggedRequest loggedRequest) throws MessagingException {
+        String contentTypeValue = loggedRequest.getHeader(HttpHeaders.CONTENT_TYPE);
+        MediaType contentType = MediaType.parseMediaType(contentTypeValue);
+        return new MimeMultipart(new ByteArrayDataSource(loggedRequest.getBody(), contentType.getType() + "/" + contentType.getSubtype()));
     }
 
-    private HttpRequest getRecordedRequest(MockServerClient client, HttpRequest requestDefinition) {
-        RequestDefinition[] recordedRequests = client.retrieveRecordedRequests(requestDefinition);
+    private LoggedRequest getRecordedRequest(RequestPatternBuilder requestPattern) {
+        List<LoggedRequest> recordedRequests = wireMock.findAll(requestPattern);
         assertThat(recordedRequests).hasSize(1);
-        RequestDefinition recordedRequest = recordedRequests[0];
-        assertThat(recordedRequest).isInstanceOf(HttpRequest.class);
-        return (HttpRequest) recordedRequest;
+        return recordedRequests.get(0);
     }
 
     @Test
