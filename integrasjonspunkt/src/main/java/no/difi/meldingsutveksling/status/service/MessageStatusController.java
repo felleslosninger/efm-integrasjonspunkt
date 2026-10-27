@@ -65,10 +65,20 @@ public class MessageStatusController {
     @JsonView(Views.MessageStatus.class)
     @Transactional
     public MessageStatus peekLatest() {
-        Optional<Long> statusId = statusQueue.receiveStatus();
-        return statusId.map(s -> statusRepo.findById(s)
-                .orElseThrow(() -> new NextMoveRuntimeException("MessageStatus with id=%s not found in DB".formatted(s))))
-            .orElseThrow(NoContentException::new);
+        Optional<Long> statusId;
+        while ((statusId = statusQueue.receiveStatus()).isPresent()) {
+            Long id = statusId.get();
+            Optional<MessageStatus> status = statusRepo.findById(id);
+            if (status.isPresent()) {
+                return status.get();
+            }
+            // An id without a matching DB row would otherwise block the queue for all subsequent statuses
+            log.warn("MessageStatus with id={} not found in DB, removing it from status queue", id);
+            if (!statusQueue.removeStatus(id)) {
+                throw new NextMoveRuntimeException("MessageStatus with id=%s not found in DB and could not be removed from status queue".formatted(id));
+            }
+        }
+        throw new NoContentException();
     }
 
     @DeleteMapping("/{id}")
