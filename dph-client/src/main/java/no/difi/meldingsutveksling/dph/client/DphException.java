@@ -14,7 +14,11 @@ public class DphException extends RuntimeException {
     }
 
     public DphException(String errorCode, String message, Integer statusCode) {
-        super(message);
+        this(errorCode, message, statusCode, null);
+    }
+
+    public DphException(String errorCode, String message, Integer statusCode, Throwable cause) {
+        super(message, cause);
         this.errorCode = errorCode;
         this.statusCode = statusCode;
     }

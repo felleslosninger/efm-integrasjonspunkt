@@ -32,6 +32,15 @@ DPO og DPV
   - Siden man ikkje har virksomhetssertifikat for syntetiske testbrukere kan JWK benyttes mot maskinporten
   - Man må fortsatt benytte digdirs virksomhetssertifikat for signering av ASIC pakken.
 
+DPH
+- Ny property `difi.move.dph.startup.onfail=stop|log` styrer om IP skal stoppe (default) eller bare logge feil dersom oppstartsjekken for en HER-id feiler. Feilen logges som error med HER-id og årsak (f.eks. MP-250 fra Maskinporten), ref [MOVE-5287](https://digdir.atlassian.net/browse/MOVE-5287)
+- Feil ved mottak av en DPH-melding stopper ikke lenger pollingen av påfølgende meldinger og HER-id-er. Feilen logges, og avsender får en applikasjonskvittering (AppRec) med status avvist og feilkode. Ved uventede feil sendes bare den generelle feilkoden (ANNEN_FEIL), mens detaljene logges. Det sendes aldri AppRec som svar på en AppRec. Kan ikke AppRec sendes, blir meldingen stående som ulest og forsøkes på nytt ved neste polling, ref [MOVE-5289](https://digdir.atlassian.net/browse/MOVE-5289)
+
+Statuskø (`/api/statuses/peek`)
+- Statuser legges på statuskøen først etter at databasetransaksjonen er committet. Tidligere kunne en rollback (f.eks. ved deadlock-retry) etterlate en status-id på køen som ikke fantes i databasen
+- `GET /api/statuses/peek` fjerner og hopper over status-id-er som ikke finnes i databasen (logges som warning), istedenfor å feile og blokkere resten av køen
+- Webhooks for statuser sendes først etter at databasetransaksjonen er committet, slik at abonnenter ikke varsles om statuser som rulles tilbake eller ennå ikke er synlige i API-et, ref [MOVE-5290](https://digdir.atlassian.net/browse/MOVE-5290)
+
 ## Changelog V2 to V3:
 
 - Java 21+ oppgradering (some code require 17+)

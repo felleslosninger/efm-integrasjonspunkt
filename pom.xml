@@ -260,7 +260,7 @@
             <dependency>
                 <groupId>no.difi.commons</groupId>
                 <artifactId>commons-asic</artifactId>
-                <version>1.0.1</version>
+                <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling.nhn-adapter</groupId>
@@ -292,7 +292,7 @@
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-rt</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
@@ -302,12 +302,12 @@
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>4.0.9</version>
+                <version>5.0.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
-                <version>3.12.0</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
@@ -317,7 +317,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.21.0</version>
+                <version>2.22.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -362,12 +362,12 @@
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
-                <version>3.2.3</version>
+                <version>3.3.1</version>
             </dependency>
             <dependency>
                 <groupId>com.jayway.jsonpath</groupId>
                 <artifactId>json-path</artifactId>
-                <version>2.10.0</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.jms</groupId>
@@ -387,7 +387,7 @@
             <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>
-                <version>0.11.0</version>
+                <version>1.1.0</version>
             </dependency>
             <dependency>
                 <groupId>net.logstash.logback</groupId>
@@ -435,7 +435,7 @@
             <dependency>
                 <groupId>io.mockk</groupId>
                 <artifactId>mockk-jvm</artifactId>
-                <version>1.14.9</version>
+                <version>1.14.11</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

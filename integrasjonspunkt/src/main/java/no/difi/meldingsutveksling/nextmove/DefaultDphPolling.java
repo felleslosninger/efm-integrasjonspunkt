@@ -48,7 +48,13 @@ public class DefaultDphPolling implements DphPolling {
     @Override
     @Timed
     public void poll() {
-        properties.getDph().getHerIds().forEach(this::pollForHerId);
+        for (Integer herId : properties.getDph().getHerIds()) {
+            try {
+                pollForHerId(herId);
+            } catch (Exception e) {
+                log.error("DPH - Polling for messages failed for HER-id = {}", herId, e);
+            }
+        }
     }
 
     private void pollForHerId(@NotNull Integer herId) {
@@ -61,56 +67,84 @@ public class DefaultDphPolling implements DphPolling {
         log.info("DPH message received: incomingMessage={}", incomingMessage);
 
         try {
-            enqueueBusinessDoucment(onBehalfOf, incomingMessage);
+            receiveMessage(onBehalfOf, incomingMessage);
+        } catch (Exception e) {
+            rejectMessage(onBehalfOf, incomingMessage, e);
+            return;
+        }
 
-            conversationService.findConversation(incomingMessage.getBusinessDocumentId())
-                .ifPresent(conversation -> {
-                    conversation.setExternalSystemReference(incomingMessage.getId());
-                    conversationService.save(conversation);
-                });
-
+        try {
             if (!incomingMessage.isAppRec() && !properties.getFeature().isEnableReceipts()) {
                 log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
 
-                sendMessage(sbdFactory.createNextMoveSBD(
-                    NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-                    NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-                    incomingMessage.getBusinessDocumentId(),
-                    null,
-                    properties.getDph().getReceiptProcess(),
-                    properties.getDph().getReceiptDocumentType(),
-                    new DialogmeldingKvitteringMessage()
-                        .setRelatedToMessageId(incomingMessage.getId())
-                        .setStatus(DialogmeldingKvitteringStatus.OK)
-                ));
+                sendApplicationReceipt(incomingMessage, new DialogmeldingKvitteringMessage()
+                    .setRelatedToMessageId(incomingMessage.getId())
+                    .setStatus(DialogmeldingKvitteringStatus.OK));
             }
 
             dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
-        } catch (DphException e) {
-            DialogmeldingKvitteringMessage message = new DialogmeldingKvitteringMessage()
-                .setRelatedToMessageId(incomingMessage.getId())
-                .setStatus(DialogmeldingKvitteringStatus.REJECTED)
-                .addMessage(new KvitteringStatusMessage()
-                    .setCode(e.getErrorCode())
-                    .setText(e.getMessage())
-                );
+        } catch (Exception e) {
+            log.error("DPH message was received, but sending ApplicationReceipt or marking it as read failed. " +
+                "The message will be retried on the next poll: incomingMessage = {}", incomingMessage, e);
+        }
+    }
 
-            log.warn("Client error while attempting to fetch business document for incomingMessage = {} - Sending automatic ApplicationReceipt: {}", incomingMessage, message);
+    private void receiveMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
+        enqueueBusinessDoucment(onBehalfOf, incomingMessage);
 
-            StandardBusinessDocument sbd = sbdFactory.createNextMoveSBD(
-                NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
-                NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-                incomingMessage.getBusinessDocumentId(),
-                null,
-                properties.getDph().getReceiptProcess(),
-                properties.getDph().getReceiptDocumentType(),
-                message
-            );
+        conversationService.findConversation(incomingMessage.getBusinessDocumentId())
+            .ifPresent(conversation -> {
+                conversation.setExternalSystemReference(incomingMessage.getId());
+                conversationService.save(conversation);
+            });
+    }
 
-            sendMessage(sbd);
+    private void rejectMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage, Exception e) {
+        KvitteringStatusMessage error;
+        if (e instanceof DphException de) {
+            log.warn("Client error while attempting to fetch business document for incomingMessage = {}", incomingMessage, e);
+            error = new KvitteringStatusMessage()
+                .setCode(de.getErrorCode())
+                .setText(de.getMessage());
+        } else {
+            // Details of unexpected errors are only logged, since they may reveal internal information to the sender
+            log.error("Unexpected error while receiving DPH message: incomingMessage = {}", incomingMessage, e);
+            error = new KvitteringStatusMessage()
+                .setCode(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi())
+                .setText(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getNavn());
+        }
+
+        try {
+            if (incomingMessage.isAppRec()) {
+                // An ApplicationReceipt is never answered with another ApplicationReceipt, to avoid loops between the parties
+                log.warn("Not sending ApplicationReceipt in response to rejected ApplicationReceipt: incomingMessage = {}, error = {}", incomingMessage, error);
+            } else {
+                DialogmeldingKvitteringMessage message = new DialogmeldingKvitteringMessage()
+                    .setRelatedToMessageId(incomingMessage.getId())
+                    .setStatus(DialogmeldingKvitteringStatus.REJECTED)
+                    .addMessage(error);
+
+                log.warn("Sending automatic ApplicationReceipt for rejected incomingMessage = {}: {}", incomingMessage, message);
+
+                sendApplicationReceipt(incomingMessage, message);
+            }
 
             dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
+        } catch (Exception ex) {
+            log.error("Failed to reject DPH message. The message will be retried on the next poll: incomingMessage = {}", incomingMessage, ex);
         }
+    }
+
+    private void sendApplicationReceipt(IncomingMessage incomingMessage, DialogmeldingKvitteringMessage message) {
+        sendMessage(sbdFactory.createNextMoveSBD(
+            NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
+            NhnIdentifier.herId(incomingMessage.getSenderHerId()),
+            incomingMessage.getBusinessDocumentId(),
+            null,
+            properties.getDph().getReceiptProcess(),
+            properties.getDph().getReceiptDocumentType(),
+            message
+        ));
     }
 
     private void sendMessage(StandardBusinessDocument sbd) {
