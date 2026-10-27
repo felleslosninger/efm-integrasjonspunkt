@@ -122,7 +122,8 @@ public class AltinnDPVServiceTest {
             new CorrespondenceOverviewExt()
                 .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
                 .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
-                .read(OffsetDateTime.parse("2026-06-01T12:12:12Z"))
+                .status(CorrespondenceStatusExt.READ)
+                .statusChanged(OffsetDateTime.parse("2026-06-01T12:12:12Z"))
         );
 
         var history = altinnDPVService.getStatus(conversation);
@@ -144,7 +145,6 @@ public class AltinnDPVServiceTest {
             new CorrespondenceOverviewExt()
                 .created(OffsetDateTime.parse("2026-06-01T10:10:10Z"))
                 .published(OffsetDateTime.parse("2026-06-01T11:11:11Z"))
-                .read(OffsetDateTime.parse("2026-06-01T12:12:12Z"))
                 .status(purgedStatus)
                 .statusChanged(OffsetDateTime.parse("2026-06-01T13:13:13Z"))
         );

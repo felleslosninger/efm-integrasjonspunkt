@@ -8,6 +8,7 @@ import no.difi.meldingsutveksling.IntegrasjonspunktApplication;
 import no.difi.meldingsutveksling.UUIDGenerator;
 import no.difi.meldingsutveksling.clock.ClockConfig;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.dph.DphAppStartupRunner;
 import no.difi.meldingsutveksling.ks.svarinn.SvarInnConnectionCheck;
 import no.difi.meldingsutveksling.ks.svarut.SvarUtConnectionCheck;
 import no.difi.meldingsutveksling.nextmove.InternalQueue;
@@ -169,6 +170,8 @@ public class CucumberStepsConfiguration {
     public SvarUtConnectionCheck svarUtConnectionCheck;
     @MockitoBean
     public SvarInnConnectionCheck svarInnConnectionCheck;
+    @MockitoBean
+    public DphAppStartupRunner dphAppStartupRunner;
 
     @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
     public RestClient restClient;

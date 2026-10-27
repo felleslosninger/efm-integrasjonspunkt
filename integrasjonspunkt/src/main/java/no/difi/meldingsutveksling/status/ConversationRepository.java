@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -29,9 +30,9 @@ import java.util.Optional;
 
 @Profile("!test")
 public interface ConversationRepository extends PagingAndSortingRepository<Conversation, Long>,
-        CrudRepository<Conversation, Long>,
-        QuerydslPredicateExecutor<Conversation>,
-        QuerydslBinderCustomizer<QConversation> {
+    CrudRepository<Conversation, Long>,
+    QuerydslPredicateExecutor<Conversation>,
+    QuerydslBinderCustomizer<QConversation> {
 
     @EntityGraph(value = "Conversation.messageStatuses")
     default Page<Conversation> findWithMessageStatuses(ConversationQueryInput input, Pageable pageable) {
@@ -89,14 +90,19 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     Long countByPollable(boolean pollable);
 
+    @Modifying
+    @Transactional
+    @Query("update Conversation c set c.serviceIdentifier = :serviceIdentifier where c.id = :id")
+    void updateServiceIdentifier(Long id, ServiceIdentifier serviceIdentifier);
+
     @Override
     default void customize(QuerydslBindings bindings, QConversation root) {
         bindings.bind(root.messageStatuses).first(
-                (path, value) -> {
-                    BooleanBuilder predicate = new BooleanBuilder();
-                    value.forEach(o -> predicate.or(path.any().status.equalsIgnoreCase(o.getStatus())));
-                    return predicate;
-                });
+            (path, value) -> {
+                BooleanBuilder predicate = new BooleanBuilder();
+                value.forEach(o -> predicate.or(path.any().status.equalsIgnoreCase(o.getStatus())));
+                return predicate;
+            });
     }
 
     default Page<Conversation> find(ConversationQueryInput input, Pageable pageable) {
@@ -118,22 +124,22 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
         if (Strings.isNullOrEmpty(input)) return builder;
 
         builder.andAnyOf(Arrays.stream(input.split("\\|\\|"))
-                .map(s -> ExpressionUtils.allOf(Arrays.stream(s.trim().split("&&"))
-                        .map(String::trim)
-                        .map(sa -> {
-                            Predicate p = ExpressionUtils.anyOf(conversation.conversationId.containsIgnoreCase(sa),
-                                    conversation.messageId.containsIgnoreCase(sa),
-                                    conversation.receiverIdentifier.eq(sa),
-                                    conversation.messageReference.eq(sa),
-                                    conversation.messageTitle.containsIgnoreCase(sa),
-                                    conversation.messageStatuses.any().status.containsIgnoreCase(sa));
-                            try {
-                                return ExpressionUtils.anyOf(p, conversation.serviceIdentifier.eq(ServiceIdentifier.valueOf(sa.toUpperCase())));
-                            } catch (IllegalArgumentException e) {
-                            }
-                            return p;
-                        }).toArray(Predicate[]::new)))
-                .toArray(Predicate[]::new)
+            .map(s -> ExpressionUtils.allOf(Arrays.stream(s.trim().split("&&"))
+                .map(String::trim)
+                .map(sa -> {
+                    Predicate p = ExpressionUtils.anyOf(conversation.conversationId.containsIgnoreCase(sa),
+                        conversation.messageId.containsIgnoreCase(sa),
+                        conversation.receiverIdentifier.eq(sa),
+                        conversation.messageReference.eq(sa),
+                        conversation.messageTitle.containsIgnoreCase(sa),
+                        conversation.messageStatuses.any().status.containsIgnoreCase(sa));
+                    try {
+                        return ExpressionUtils.anyOf(p, conversation.serviceIdentifier.eq(ServiceIdentifier.valueOf(sa.toUpperCase())));
+                    } catch (IllegalArgumentException e) {
+                    }
+                    return p;
+                }).toArray(Predicate[]::new)))
+            .toArray(Predicate[]::new)
         );
         return builder;
     }
@@ -203,5 +209,4 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
         return builder;
     }
-
 }

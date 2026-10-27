@@ -66,7 +66,7 @@ public class AltinnDPVService {
         var overview = client.getCorrespondenceOverview(UUID.fromString(correspondenceId));
         statusEvents.add(createStatusEvent(CorrespondenceStatusExt.INITIALIZED, overview.getCreated()));
         if (overview.getPublished() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.PUBLISHED, overview.getPublished()));
-        if (overview.getRead() != null) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.READ, overview.getRead()));
+        if (CorrespondenceStatusExt.READ.equals(overview.getStatus())) statusEvents.add(createStatusEvent(CorrespondenceStatusExt.READ, overview.getStatusChanged()));
         if (isPurged(overview.getStatus())) statusEvents.add(createStatusEvent(overview.getStatus(), overview.getStatusChanged()));
         return statusEvents;
 

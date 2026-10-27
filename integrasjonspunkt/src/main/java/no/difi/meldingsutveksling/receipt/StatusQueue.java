@@ -6,8 +6,11 @@ import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Optional;
 
@@ -33,11 +36,34 @@ public class StatusQueue {
                     .filter(ms -> ms.getStatus().equals(status.getStatus()))
                     .findFirst()
                     .map(MessageStatus::getId)
-                    .ifPresent(id -> jmsTemplate.send(queueName, c -> {
-                        TextMessage m = c.createTextMessage(id.toString());
-                        m.setJMSCorrelationID(id.toString());
-                        return m;
-                    }));
+                    .ifPresent(this::sendAfterCommit);
+        }
+    }
+
+    // The JMS send is not part of the database transaction. Sending before commit would leave the id on the queue
+    // if the transaction is rolled back (e.g. deadlock retry), pointing to a status that never made it to the DB.
+    private void sendAfterCommit(Long id) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    send(id);
+                }
+            });
+        } else {
+            send(id);
+        }
+    }
+
+    private void send(Long id) {
+        try {
+            jmsTemplate.send(queueName, c -> {
+                TextMessage m = c.createTextMessage(id.toString());
+                m.setJMSCorrelationID(id.toString());
+                return m;
+            });
+        } catch (JmsException e) {
+            log.error("Failed to put MessageStatus with id={} on status queue, it is still available through /api/statuses", id, e);
         }
     }
 

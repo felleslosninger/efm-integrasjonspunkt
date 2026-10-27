@@ -8,6 +8,7 @@ CVE-2026-68525
 
 # org.apache.cxf:cxf-core (4.2.0, fiksa i 4.2.2)
 CVE-2026-50645
+CVE-2026-49875
 
 # org.apache.cxf:cxf-rt-rs-security-oauth2 (4.2.0, fiksa i 4.2.2)
 CVE-2026-50627
@@ -18,3 +19,6 @@ CVE-2026-50631
 # org.bouncycastle:bcprov-jdk18on (1.84, fiksa i 1.85)
 CVE-2026-8763
 CVE-2026-13506
+
+# org.jsoup:jsoup (1.18.1, fiksa i 1.23.2)
+CVE-2026-75140
