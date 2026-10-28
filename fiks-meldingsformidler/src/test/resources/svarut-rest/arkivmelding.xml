@@ -64,8 +64,8 @@
             <journalpostnummer>4</journalpostnummer>
             <journalposttype>Utgående dokument</journalposttype>
             <journalstatus>Journalført</journalstatus>
-            <journaldato>2017-05-23</journaldato>
-            <dokumentetsDato>2017-05-22</dokumentetsDato>
+            <journaldato>2017-05-23+02:00</journaldato>
+            <dokumentetsDato>2017-05-22+02:00</dokumentetsDato>
             <korrespondansepart>
                 <korrespondanseparttype>Avsender</korrespondanseparttype>
                 <korrespondansepartNavn>Oslo kommune</korrespondansepartNavn>
