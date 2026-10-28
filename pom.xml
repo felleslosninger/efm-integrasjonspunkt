@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
         <relativePath />
     </parent>
 
@@ -78,14 +78,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Skal alltid matche versjonen til spring-boot-starter-parent over -->
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-boot.version>4.1.2</spring-boot.version>
         <efm-common.version>3.2.0</efm-common.version>
         <efm-nhn-adapter.version>0.0.6</efm-nhn-adapter.version>
         <bouncycastle.version>1.86</bouncycastle.version>
-
-        <!-- CVE-2026-89407 -->
-        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
-        <jackson-bom.version>3.1.7</jackson-bom.version>
     </properties>
 
     <modules>
@@ -108,21 +104,6 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- Jackson BOMs must be imported before spring-boot-dependencies, otherwise the versions it imports win over the overrides above -->
-            <dependency>
-                <groupId>tools.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson-2-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <!-- Må importerast FØR move-common-bom: den har eldre spring-boot-starter-parent
                  som parent, og importerte BOM-ar vinn over parent-arva versjonar i Maven.
                  Utan denne kan move-common-bom stille nedgradere Boot-styrte avhengigheiter
@@ -342,7 +323,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.5.0-jre</version>
+                <version>33.7.2-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -412,12 +393,6 @@
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>3.13.2</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mock-server</groupId>
-                <artifactId>mockserver-junit-jupiter</artifactId>
-                <version>5.15.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -537,7 +512,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>12.2.0</version>
+                <version>13.0.0</version>
                 <configuration>
                     <format>ALL</format>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
