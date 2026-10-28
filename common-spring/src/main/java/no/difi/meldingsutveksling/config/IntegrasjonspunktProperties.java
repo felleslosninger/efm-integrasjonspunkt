@@ -144,6 +144,9 @@ public class IntegrasjonspunktProperties {
     public static class Queue {
         @NotNull
         private Integer maximumRetryHours;
+        /**
+         * Fixed number of concurrent consumers per JMS listener (the NextMove queue and the dead letter queue).
+         */
         @NotNull
         private Integer concurrency;
         @NotNull
