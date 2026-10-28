@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<arkivmelding xmlns="http://www.arkivverket.no/standarder/noark5/arkivmelding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <system>LandLord</system>
+    <meldingId>3380ed76-5d4c-43e7-aa70-8ed8d97e4835</meldingId>
+    <tidspunkt>2017-05-23T12:46:00</tidspunkt>
+    <antallFiler>2</antallFiler>
+    <mappe xsi:type="saksmappe">
+        <systemID>43fbe161-7aac-4c9f-a888-d8167aab4144</systemID>
+        <tittel>Nye lysrør Hauketo Skole</tittel>
+        <opprettetDato>2017-06-01T10:10:12.000+01:00</opprettetDato>
+        <opprettetAv/>
+        <basisregistrering xsi:type="journalpost">
+            <systemID>430a6710-a3d4-4863-8bd0-5eb1021bee45</systemID>
+            <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+            <opprettetAv>LandLord</opprettetAv>
+            <arkivertDato>2012-02-17T21:56:12.000+01:00</arkivertDato>
+            <arkivertAv>LandLord</arkivertAv>
+            <dokumentbeskrivelse>
+                <systemID>9b3e4c8f-0d0d-4c55-9a51-3b8f3b1f0c11</systemID>
+                <dokumenttype>Vedlegg</dokumenttype>
+                <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                <tittel>Vedlegg</tittel>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Landlord</opprettetAv>
+                <tilknyttetRegistreringSom>Vedlegg</tilknyttetRegistreringSom>
+                <dokumentnummer>2</dokumentnummer>
+                <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                <tilknyttetAv>Landlord</tilknyttetAv>
+                <dokumentobjekt>
+                    <versjonsnummer>1</versjonsnummer>
+                    <variantformat>Produksjonsformat</variantformat>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <referanseDokumentfil>vedlegg.txt</referanseDokumentfil>
+                </dokumentobjekt>
+            </dokumentbeskrivelse>
+            <dokumentbeskrivelse>
+                <systemID>3e518e5b-a361-42c7-8668-bcbb9eecf18d</systemID>
+                <dokumenttype>Bestilling</dokumenttype>
+                <dokumentstatus>Dokumentet er ferdigstilt</dokumentstatus>
+                <tittel>Bestilling - nye lysrør</tittel>
+                <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                <opprettetAv>Landlord</opprettetAv>
+                <tilknyttetRegistreringSom>Hoveddokument</tilknyttetRegistreringSom>
+                <dokumentnummer>1</dokumentnummer>
+                <tilknyttetDato>2012-02-17T21:56:12.000+01:00</tilknyttetDato>
+                <tilknyttetAv>Landlord</tilknyttetAv>
+                <dokumentobjekt>
+                    <versjonsnummer>1</versjonsnummer>
+                    <variantformat>Produksjonsformat</variantformat>
+                    <opprettetDato>2012-02-17T21:56:12.000+01:00</opprettetDato>
+                    <opprettetAv>Landlord</opprettetAv>
+                    <referanseDokumentfil>hoveddokument.pdf</referanseDokumentfil>
+                </dokumentobjekt>
+            </dokumentbeskrivelse>
+            <tittel>Nye lysrør</tittel>
+            <offentligTittel>Nye lysrør</offentligTittel>
+            <virksomhetsspesifikkeMetadata>
+                <forvaltningsnummer>20050</forvaltningsnummer>
+                <objektnavn>Hauketo Skole</objektnavn>
+            </virksomhetsspesifikkeMetadata>
+            <journalaar>2017</journalaar>
+            <journalsekvensnummer>123</journalsekvensnummer>
+            <journalpostnummer>4</journalpostnummer>
+            <journalposttype>Utgående dokument</journalposttype>
+            <journalstatus>Journalført</journalstatus>
+            <journaldato>2017-05-23</journaldato>
+            <dokumentetsDato>2017-05-22</dokumentetsDato>
+            <korrespondansepart>
+                <korrespondanseparttype>Avsender</korrespondanseparttype>
+                <korrespondansepartNavn>Oslo kommune</korrespondansepartNavn>
+                <postadresse>Rådhuset</postadresse>
+                <postnummer>0037</postnummer>
+                <poststed>Oslo</poststed>
+                <saksbehandler>Knut Hansen</saksbehandler>
+            </korrespondansepart>
+        </basisregistrering>
+        <saksaar>2017</saksaar>
+        <sakssekvensnummer>42</sakssekvensnummer>
+        <saksdato>2017-06-01</saksdato>
+        <administrativEnhet>Blah</administrativEnhet>
+        <saksansvarlig>KNUTKÅRE</saksansvarlig>
+        <saksstatus>Avsluttet</saksstatus>
+    </mappe>
+</arkivmelding>

@@ -1,0 +1,93 @@
+{
+  "tittel": "Nye lysrør",
+  "mottaker": {
+    "navn": "Mottaker kommune",
+    "digitalId": "910076787",
+    "adresse": {
+      "adresselinje1": "Mottakervegen 1",
+      "poststed": "Bergen",
+      "adresselinje2": null,
+      "adresselinje3": null,
+      "postnummer": "5000",
+      "landkode": null
+    }
+  },
+  "eksponertFor": null,
+  "avgivendeSystem": null,
+  "avgivendeSystemAktor": null,
+  "konteringskode": "kontering",
+  "kunDigitalLevering": false,
+  "kryptert": true,
+  "utskriftskonfigurasjon": {
+    "tosidig": true
+  },
+  "sikkerhetsniva": "HOYESTE",
+  "metadataFraAvleverendeSystem": {
+    "mappeId": null,
+    "mappeSystemId": null,
+    "saksaar": 2017,
+    "sakssekvensnummer": 42,
+    "systemId": null,
+    "registreringsId": null,
+    "journalpostnummer": 4,
+    "journalaar": 2017,
+    "journalsekvensnummer": 123,
+    "journalposttype": "U",
+    "journalstatus": "J",
+    "journaldato": "2017-05-23T00:00:00+02:00",
+    "dokumentetsDato": "2017-05-22T00:00:00+02:00",
+    "tittel": "Nye lysrør",
+    "saksbehandler": "Knut Hansen",
+    "ekstraMetadata": [
+      {
+        "key": "forvaltningsnummer",
+        "value": "20050"
+      },
+      {
+        "key": "objektnavn",
+        "value": "Hauketo Skole"
+      }
+    ]
+  },
+  "metadataForImport": null,
+  "svarSendesTil": {
+    "navn": "Oslo kommune",
+    "type": "ORGANISASJON",
+    "digitalId": "910075918",
+    "adresse": {
+      "adresselinje1": "Rådhuset",
+      "poststed": "Oslo",
+      "adresselinje2": null,
+      "adresselinje3": null,
+      "postnummer": "0037",
+      "landkode": null
+    }
+  },
+  "svarPaForsendelseId": null,
+  "dokumenter": [
+    {
+      "filnavn": "hoveddokument.pdf",
+      "mimeType": "application/pdf",
+      "dokumentType": null,
+      "giroarkSide": null,
+      "skalEkskluderesFraUtskrift": false,
+      "ekstraMetadata": null,
+      "inneholderPersonsensitivInformasjon": null
+    },
+    {
+      "filnavn": "vedlegg.txt",
+      "mimeType": "text/plain",
+      "dokumentType": null,
+      "giroarkSide": null,
+      "skalEkskluderesFraUtskrift": true,
+      "ekstraMetadata": null,
+      "inneholderPersonsensitivInformasjon": null
+    }
+  ],
+  "lenker": null,
+  "forsendelsestype": "Byggesak",
+  "eksternReferanse": "0b6bb8f1-5f3f-4d6b-9b0e-2b8a5d3c1e7a",
+  "korrelasjonsid": null,
+  "kanSvareViaEdialog": false,
+  "taushetsbelagtPost": false
+}
