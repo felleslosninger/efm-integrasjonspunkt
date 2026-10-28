@@ -43,7 +43,12 @@
         <dependency>
             <groupId>no.ks.fiks</groupId>
             <artifactId>fiks-svarut-klient</artifactId>
-            <version>4.8.0</version>
+            <version>6.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
