@@ -38,7 +38,7 @@ public class MeldingsformidlerRequestFactory {
     private final MpcIdHolder mpcIdHolder;
 
     public MeldingsformidlerRequest getMeldingsformidlerRequest(NextMoveMessage nextMoveMessage, ServiceRecord serviceRecord, Reject reject) {
-        MeldingsformidlerRequest.Builder builder = MeldingsformidlerRequest.builder()
+        MeldingsformidlerRequest.MeldingsformidlerRequestBuilder builder = MeldingsformidlerRequest.builder()
             .parcel(getParcel(nextMoveMessage))
             .sender(nextMoveMessage.getSender().cast(Iso6523.class).toMainOrganization())
             .onBehalfOf(SBDUtil.getPartIdentifier(nextMoveMessage.getSbd()).orElse(null))

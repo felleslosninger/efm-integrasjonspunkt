@@ -13,7 +13,7 @@ import no.difi.meldingsutveksling.nextmove.ReturnHandling;
 import java.time.OffsetDateTime;
 
 @Value
-@Builder(builderClassName = "Builder")
+@Builder
 public class MeldingsformidlerRequest {
 
     Parcel parcel;

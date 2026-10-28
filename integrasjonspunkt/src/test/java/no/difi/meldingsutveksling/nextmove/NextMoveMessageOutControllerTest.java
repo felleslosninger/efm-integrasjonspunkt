@@ -383,7 +383,7 @@ class NextMoveMessageOutControllerTest {
                                         .and(standardBusinessDocumentHeaderDescriptors("content[].standardBusinessDocumentHeader."))
                                         .and(subsectionWithPath("content[].arkivmelding").description("The DPO business message").optional())
                                         .and(arkivmeldingMessageDescriptors("content[].arkivmelding."))
-                                        .and(subsectionWithPath("content[].digital.").description("The digital DPI business message").optional())
+                                        .and(subsectionWithPath("content[].digital").description("The digital DPI business message").optional())
                                         .and(dpiDigitalMessageDescriptors("content[].digital."))
                                         .and(pageDescriptors())
                                         .andWithPrefix("pageable.", pageableDescriptors())
