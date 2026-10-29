@@ -45,6 +45,12 @@ class SvarInnClientTest {
     }
 
     @Test
+    void encodedCharactersThatAreNotDotSegmentsAreAccepted() {
+        String url = BASE_URL + "/forsendelse/fil%2Ezip?navn=a%20b";
+        assertThat(client.toDownloadUri(forsendelse(url))).isEqualTo(URI.create(url));
+    }
+
+    @Test
     void relativeDownloadUrlIsResolvedAgainstBaseUrl() {
         assertThat(client.toDownloadUri(forsendelse("/mottaker/forsendelse/81264cfa")))
                 .isEqualTo(URI.create(BASE_URL + "/mottaker/forsendelse/81264cfa"));
@@ -59,6 +65,14 @@ class SvarInnClientTest {
             "https://svarut.ks.no@evil.example.com/tjenester/svarinn/forsendelse/1",
             "https://user@svarut.ks.no/tjenester/svarinn/forsendelse/1",
             "https://svarut.ks.no/tjenester/svarinn/../admin",
+            "https://svarut.ks.no/tjenester/svarinn/%2e%2e/admin",
+            "https://svarut.ks.no/tjenester/svarinn/%2E%2E/admin",
+            "https://svarut.ks.no/tjenester/svarinn/.%2e/admin",
+            "https://svarut.ks.no/tjenester/svarinn/%2e%2e%2fadmin",
+            "https://svarut.ks.no/tjenester/svarinn/%2e/forsendelse/1",
+            "https://svarut.ks.no/tjenester/svarinn/%5c..%5cadmin",
+            "https://svarut.ks.no/tjenester/svarinn%2fadmin",
+            "/mottaker/%2e%2e/%2e%2e/admin",
             "https://svarut.ks.no/tjenester/svarinnX/forsendelse/1",
             "https://svarut.ks.no/annet",
             "//evil.example.com/forsendelse/1",

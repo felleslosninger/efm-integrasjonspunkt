@@ -131,11 +131,17 @@ public class SvarInnClient {
                 && base.getPort() == uri.getPort()
                 && uri.getRawUserInfo() == null
                 && uri.getRawPath() != null
-                && uri.getRawPath().startsWith(base.getRawPath() + "/")) {
+                && uri.getRawPath().startsWith(base.getRawPath() + "/")
+                && !hasDotSegmentOrBackslash(uri.getPath())) {
             return uri;
         }
 
         throw new SvarInnForsendelseException("Forsendelse %s has downloadUrl outside of %s: %s".formatted(forsendelse.getId(), rootUri, downloadUrl));
+    }
+
+    // normalize() leaves encoded dot segments (%2e%2e) intact, so check the decoded path as well
+    private static boolean hasDotSegmentOrBackslash(String path) {
+        return path.contains("\\") || Arrays.stream(path.split("/")).anyMatch(s -> s.equals(".") || s.equals(".."));
     }
 
     void confirmMessage(Forsendelse forsendelse) {
