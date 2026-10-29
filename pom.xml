@@ -80,7 +80,7 @@
         <!-- Skal alltid matche versjonen til spring-boot-starter-parent over -->
         <spring-boot.version>4.1.2</spring-boot.version>
         <efm-common.version>3.2.0</efm-common.version>
-        <efm-nhn-adapter.version>0.0.6</efm-nhn-adapter.version>
+        <efm-nhn-adapter.version>0.1.0</efm-nhn-adapter.version>
         <bouncycastle.version>1.86</bouncycastle.version>
     </properties>
 
