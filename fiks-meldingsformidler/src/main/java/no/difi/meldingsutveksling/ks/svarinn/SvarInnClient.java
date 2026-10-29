@@ -127,7 +127,7 @@ public class SvarInnClient {
 
         if (uri.isAbsolute()
                 && base.getScheme().equalsIgnoreCase(uri.getScheme())
-                && base.getHost().equals(uri.getHost())
+                && base.getHost().equalsIgnoreCase(uri.getHost())
                 && base.getPort() == uri.getPort()
                 && uri.getRawUserInfo() == null
                 && uri.getRawPath() != null

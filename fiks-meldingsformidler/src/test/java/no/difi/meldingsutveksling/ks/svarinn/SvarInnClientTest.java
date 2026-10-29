@@ -45,6 +45,12 @@ class SvarInnClientTest {
     }
 
     @Test
+    void hostIsComparedCaseInsensitively() {
+        String url = "https://SvarUt.KS.no/tjenester/svarinn/forsendelse/1";
+        assertThat(client.toDownloadUri(forsendelse(url))).isEqualTo(URI.create(url));
+    }
+
+    @Test
     void encodedCharactersThatAreNotDotSegmentsAreAccepted() {
         String url = BASE_URL + "/forsendelse/fil%2Ezip?navn=a%20b";
         assertThat(client.toDownloadUri(forsendelse(url))).isEqualTo(URI.create(url));
