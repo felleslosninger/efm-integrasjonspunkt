@@ -19,6 +19,8 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Base64;
@@ -78,8 +80,9 @@ public class SvarInnClient {
     }
 
     InputStreamResource downloadZipFile(Forsendelse forsendelse, Reject reject) {
+        URI downloadUri = toDownloadUri(forsendelse);
         return new InputStreamResource(plumber.pipe("downloading zip file", inlet ->
-                restTemplate.execute(forsendelse.getDownloadUrl(),
+                restTemplate.execute(downloadUri,
                         HttpMethod.GET,
                         request -> {
                             if (props.getFiks().getInn().getPaaVegneAv().containsKey(forsendelse.getMottaker().getOrgnr())) {
@@ -97,6 +100,48 @@ public class SvarInnClient {
                             return null;
                         }), reject
         ).outlet());
+    }
+
+    /**
+     * downloadUrl comes from the SvarInn response and is used with our Fiks credentials,
+     * so it must point to the configured SvarInn base URL (relative URLs are resolved against it).
+     */
+    URI toDownloadUri(Forsendelse forsendelse) {
+        String downloadUrl = forsendelse.getDownloadUrl();
+        if (downloadUrl == null) {
+            throw new SvarInnForsendelseException("Forsendelse %s has no downloadUrl".formatted(forsendelse.getId()));
+        }
+
+        String root = rootUri.endsWith("/") ? rootUri.substring(0, rootUri.length() - 1) : rootUri;
+        URI base = URI.create(root);
+        URI uri;
+        try {
+            uri = new URI(downloadUrl);
+            if (!uri.isAbsolute() && downloadUrl.startsWith("/") && !downloadUrl.startsWith("//")) {
+                uri = new URI(root + downloadUrl);
+            }
+        } catch (URISyntaxException e) {
+            throw new SvarInnForsendelseException("Forsendelse %s has invalid downloadUrl: %s".formatted(forsendelse.getId(), downloadUrl));
+        }
+        uri = uri.normalize();
+
+        if (uri.isAbsolute()
+                && base.getScheme().equalsIgnoreCase(uri.getScheme())
+                && base.getHost().equalsIgnoreCase(uri.getHost())
+                && base.getPort() == uri.getPort()
+                && uri.getRawUserInfo() == null
+                && uri.getRawPath() != null
+                && uri.getRawPath().startsWith(base.getRawPath() + "/")
+                && !hasDotSegmentOrBackslash(uri.getPath())) {
+            return uri;
+        }
+
+        throw new SvarInnForsendelseException("Forsendelse %s has downloadUrl outside of %s: %s".formatted(forsendelse.getId(), rootUri, downloadUrl));
+    }
+
+    // normalize() leaves encoded dot segments (%2e%2e) intact, so check the decoded path as well
+    private static boolean hasDotSegmentOrBackslash(String path) {
+        return path.contains("\\") || Arrays.stream(path.split("/")).anyMatch(s -> s.equals(".") || s.equals(".."));
     }
 
     void confirmMessage(Forsendelse forsendelse) {

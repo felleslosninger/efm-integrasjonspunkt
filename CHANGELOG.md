@@ -37,6 +37,9 @@ DPH
 - Ny property `difi.move.dph.startup.onfail=stop|log` styrer om IP skal stoppe (default) eller bare logge feil dersom oppstartsjekken for en HER-id feiler. Feilen logges som error med HER-id og årsak (f.eks. MP-250 fra Maskinporten), ref [MOVE-5287](https://digdir.atlassian.net/browse/MOVE-5287)
 - Feil ved mottak av en DPH-melding stopper ikke lenger pollingen av påfølgende meldinger og HER-id-er. Feilen logges, og avsender får en applikasjonskvittering (AppRec) med status avvist og feilkode. Ved uventede feil sendes bare den generelle feilkoden (ANNEN_FEIL), mens detaljene logges. Det sendes aldri AppRec som svar på en AppRec. Kan ikke AppRec sendes, blir meldingen stående som ulest og forsøkes på nytt ved neste polling, ref [MOVE-5289](https://digdir.atlassian.net/browse/MOVE-5289)
 
+DPF
+- `downloadUrl` fra SvarInn valideres før nedlasting: den må peke til konfigurert `difi.move.fiks.inn.baseUrl` (samme scheme, vert og port, og under base-stien). Relative URL-er løses mot base-URL-en. Ugyldige URL-er avvises uten at Fiks-credentials sendes, og forsendelsen blir ikke kvittert som mottatt, ref [MOVE-5326](https://digdir.atlassian.net/browse/MOVE-5326)
+
 Statuskø (`/api/statuses/peek`)
 - Statuser legges på statuskøen først etter at databasetransaksjonen er committet. Tidligere kunne en rollback (f.eks. ved deadlock-retry) etterlate en status-id på køen som ikke fantes i databasen
 - `GET /api/statuses/peek` fjerner og hopper over status-id-er som ikke finnes i databasen (logges som warning), istedenfor å feile og blokkere resten av køen
