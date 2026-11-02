@@ -120,12 +120,15 @@ Linker til observability :
 - http://localhost:9093/manage/metrics
 - http://localhost:9093/manage/prometheus
 
-Linker til logger, config og alt annet :
+Linker til logger og annet :
 - http://localhost:9093/manage/logfile
+- http://localhost:9093/manage/loggers
+- http://localhost:9093/manage/caches
 - `curl http://localhost:9093/manage | jq` (lister over alle observability endpoints)
-- `curl http://localhost:9093/manage/configprops | jq`
-- `curl http://localhost:9093/manage/env | jq` (lister over alle properties og env settings)
-- `curl http://localhost:9093/manage/configprops/difi.move | jq` (kun `difi.move` konfig)
+
+Kun endepunktene i `management.endpoints.web.exposure.include` er eksponert (hviteliste).
+Med `difi.move.feature.enable-auth=true` (default) er `/manage/health/**` og `/manage/info` åpne,
+resten krever basic auth. Health-detaljer vises kun til autentiserte kall.
 
 ## Release (for interne)
 

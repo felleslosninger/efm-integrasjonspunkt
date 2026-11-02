@@ -48,14 +48,16 @@ public class Oauth2ClientSecurityConfig {
 
         basePath = cleanBasePath(basePath);
 
-        // egen kjede for de åpne endepunktene, uten httpBasic
+        // egen kjede for de åpne endepunktene, httpBasic er valgfritt slik at
+        // autentiserte kall får se health-detaljer (show-details=when-authorized)
         http.securityMatcher(
             basePath + "/health/**",
             basePath + "/info",
             "/error");
 
         commonConfig(http);
-        http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
+        http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
+            .httpBasic(withDefaults());
 
         return http.build();
     }
