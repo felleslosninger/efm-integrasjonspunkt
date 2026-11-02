@@ -241,7 +241,7 @@
             <dependency>
                 <groupId>no.difi.commons</groupId>
                 <artifactId>commons-asic</artifactId>
-                <version>1.0.2</version>
+                <version>1.0.3</version>
             </dependency>
             <dependency>
                 <groupId>no.difi.meldingsutveksling.nhn-adapter</groupId>
