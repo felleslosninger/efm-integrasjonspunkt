@@ -7,6 +7,11 @@
 - For produksjon er loggene sikret med klient sertifikat
 - Innebygget web-ui som bla støtter onboarding av DPO
 - Utgående meldinger kunne bli hengende i status OPPRETTET (CachingConnectionFactory er fjernet fra JMS-lytterne)
+- **Potensielt brytende:** Actuator-endepunktene på `/manage` er strammet inn, ref [MOVE-5138](https://digdir.atlassian.net/browse/MOVE-5138)
+  - Kun `health`, `info`, `metrics`, `prometheus`, `caches`, `logfile` og `loggers` er eksponert (hviteliste istedenfor `*`)
+  - `configprops`, `env`, `heapdump`, `threaddump`, `beans`, `mappings`, `conditions`, `scheduledtasks` m.fl. er ikke lenger tilgjengelige over http
+  - `/manage/health` viser kun detaljer (database, disk, sertifikater) til kall med basic auth (`show-details=when-authorized`), status og liveness/readiness er fortsatt åpne
+  - Overvåking som bruker andre endepunkt kan overstyre med `management.endpoints.web.exposure.include`
 
 DPV
 - Størrelsesgrense for DPV er økt til 250 mb.
