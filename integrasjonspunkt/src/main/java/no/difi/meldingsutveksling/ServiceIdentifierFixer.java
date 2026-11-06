@@ -2,20 +2,15 @@ package no.difi.meldingsutveksling;
 
 import lombok.extern.slf4j.Slf4j;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
-import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.ConversationRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Order(1)
@@ -36,42 +31,28 @@ public class ServiceIdentifierFixer implements CommandLineRunner {
         map.put(properties.getEinnsyn().getDefaultInnsynskravProcess(), ServiceIdentifier.DPE);
         map.put(properties.getDph().getNhnProcess(), ServiceIdentifier.DPH);
         map.put(properties.getDph().getReceiptProcess(), ServiceIdentifier.DPH);
+        map.remove(null);
         return Collections.unmodifiableMap(map);
     }
 
     @Override
-    public void run(String @NonNull ... args) throws ParseException {
+    public void run(String @NonNull ... args) {
         log.info("Looking for pollable conversations with wrong ServiceIdentifier");
 
         try {
-            fixServiceIdentifiers();
+            processToServiceIdentifierMap.forEach(this::fixServiceIdentifiers);
+        } catch (Exception e) {
+            // A failure in this one-off data fix must never prevent the application from starting
+            log.error("Failed to fix ServiceIdentifier for pollable conversations", e);
         } finally {
             log.info("Finished looking for pollable conversations with wrong ServiceIdentifier");
         }
     }
 
-    private void fixServiceIdentifiers() {
-        int pageSize = 10000;
-        int pageIndex = 0;
-
-        Page<Long> page;
-        do {
-            page = conversationRepository.findIdsForPollableConversations(PageRequest.of(pageIndex, pageSize));
-            Iterable<Conversation> conversations = conversationRepository.findAllById(page.getContent());
-
-            StreamSupport.stream(conversations.spliterator(), false)
-                .forEach(this::fixServiceIdentifierIfNotCorrect);
-
-            pageIndex++;
-        } while (page.hasNext());
-    }
-
-    private void fixServiceIdentifierIfNotCorrect(Conversation conversation) {
-        ServiceIdentifier serviceIdentifier = processToServiceIdentifierMap.get(conversation.getProcessIdentifier());
-
-        if (serviceIdentifier != null && serviceIdentifier != conversation.getServiceIdentifier()) {
-            log.warn("Fixing ServiceIdentifier for conversation {}: {} -> {}", conversation, conversation.getServiceIdentifier(), serviceIdentifier);
-            conversationRepository.updateServiceIdentifier(conversation.getId(), serviceIdentifier);
+    private void fixServiceIdentifiers(String processIdentifier, ServiceIdentifier serviceIdentifier) {
+        int updated = conversationRepository.updateServiceIdentifierForPollableConversations(processIdentifier, serviceIdentifier);
+        if (updated > 0) {
+            log.warn("Fixed ServiceIdentifier -> {} for {} pollable conversation(s) with process {}", serviceIdentifier, updated, processIdentifier);
         }
     }
 }

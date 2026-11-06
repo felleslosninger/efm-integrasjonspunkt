@@ -33,21 +33,39 @@ class ConversationRepositoryIT {
     }
 
     @Test
-    void testUpdateServiceIdentifier() {
-        Conversation conversation = new Conversation();
-        conversation.setConversationId("conv-1");
-        conversation.setMessageId("msg-1");
-        conversation.setServiceIdentifier(ServiceIdentifier.DPO);
-        conversation.setPollable(true);
-        conversation = conversationRepository.save(conversation);
-        Long id = conversation.getId();
+    void testUpdateServiceIdentifierForPollableConversations() {
+        String process = "urn:no:difi:profile:einnsyn:journal:ver1.0";
+        Long wrong = saveConversation("conv-1", process, ServiceIdentifier.DPO, true);
+        Long missing = saveConversation("conv-2", process, null, true);
+        Long correct = saveConversation("conv-3", process, ServiceIdentifier.DPE, true);
+        Long notPollable = saveConversation("conv-4", process, ServiceIdentifier.DPO, false);
+        Long otherProcess = saveConversation("conv-5", "urn:no:difi:profile:arkivmelding:administrasjon:ver1.0", ServiceIdentifier.DPO, true);
 
-        conversationRepository.updateServiceIdentifier(id, ServiceIdentifier.DPE);
+        int updated = conversationRepository.updateServiceIdentifierForPollableConversations(process, ServiceIdentifier.DPE);
         entityManager.clear();
 
-        Optional<Conversation> updated = conversationRepository.findById(id);
-        assertThat(updated).isPresent();
-        assertThat(updated.get().getServiceIdentifier()).isEqualTo(ServiceIdentifier.DPE);
+        assertThat(updated).isEqualTo(2);
+        assertThat(serviceIdentifierOf(wrong)).isEqualTo(ServiceIdentifier.DPE);
+        assertThat(serviceIdentifierOf(missing)).isEqualTo(ServiceIdentifier.DPE);
+        assertThat(serviceIdentifierOf(correct)).isEqualTo(ServiceIdentifier.DPE);
+        assertThat(serviceIdentifierOf(notPollable)).isEqualTo(ServiceIdentifier.DPO);
+        assertThat(serviceIdentifierOf(otherProcess)).isEqualTo(ServiceIdentifier.DPO);
+    }
+
+    private Long saveConversation(String conversationId, String processIdentifier, ServiceIdentifier serviceIdentifier, boolean pollable) {
+        Conversation conversation = new Conversation();
+        conversation.setConversationId(conversationId);
+        conversation.setMessageId("msg-" + conversationId);
+        conversation.setProcessIdentifier(processIdentifier);
+        conversation.setServiceIdentifier(serviceIdentifier);
+        conversation.setPollable(pollable);
+        return conversationRepository.save(conversation).getId();
+    }
+
+    private ServiceIdentifier serviceIdentifierOf(Long id) {
+        Optional<Conversation> conversation = conversationRepository.findById(id);
+        assertThat(conversation).isPresent();
+        return conversation.get().getServiceIdentifier();
     }
 
     @Test
