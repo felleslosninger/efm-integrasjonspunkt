@@ -90,10 +90,17 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     Long countByPollable(boolean pollable);
 
+    /**
+     * Bulk update without an IN-list of ids, so the number of bind parameters stays constant regardless of how many
+     * conversations are affected (MS SQL Server rejects statements with more than 2100 parameters).
+     */
     @Modifying
     @Transactional
-    @Query("update Conversation c set c.serviceIdentifier = :serviceIdentifier where c.id = :id")
-    void updateServiceIdentifier(Long id, ServiceIdentifier serviceIdentifier);
+    @Query("update Conversation c set c.serviceIdentifier = :serviceIdentifier " +
+        "where c.pollable = true and c.processIdentifier = :processIdentifier " +
+        "and (c.serviceIdentifier is null or c.serviceIdentifier <> :serviceIdentifier)")
+    int updateServiceIdentifierForPollableConversations(@Param("processIdentifier") String processIdentifier,
+                                                        @Param("serviceIdentifier") ServiceIdentifier serviceIdentifier);
 
     @Override
     default void customize(QuerydslBindings bindings, QConversation root) {

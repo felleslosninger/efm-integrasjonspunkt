@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import com.google.common.collect.Sets;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -255,7 +256,13 @@ public class IntegrasjonspunktProperties {
         private String statusDocumentType;
         @NotNull
         private String statusPollingCron;
+        /**
+         * Number of conversations loaded per page during status polling. Each page is fetched with one bind
+         * parameter per conversation id, so it is capped below MS SQL Server's limit of 2100 parameters per statement.
+         */
         @NotNull
+        @Positive
+        @Max(2000)
         private Integer statusPollingPageSize;
         /**
          * Age (days since a conversation's last status update) at which polling frequency has backed off to
