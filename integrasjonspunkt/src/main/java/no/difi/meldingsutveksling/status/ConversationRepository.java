@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.LockModeType;
 import no.difi.meldingsutveksling.DateTimeUtil;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.nextmove.ConversationDirection;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -56,6 +58,23 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
 
     @EntityGraph(value = "Conversation.messageStatuses")
     Optional<Conversation> findByConversationIdAndDirection(String conversationId, ConversationDirection direction);
+
+    /**
+     * Loads the conversation with a row lock held until the surrounding transaction ends. Must be the first load of
+     * the conversation in the transaction: an instance already in the persistence context is returned as-is, without
+     * re-reading its state. Statuses committed by a concurrent transaction are then visible once the lock is acquired.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Conversation c WHERE c.id = :id")
+    Optional<Conversation> findByIdForUpdate(@Param("id") Long id);
+
+    /**
+     * Same as {@link #findByIdForUpdate(Long)}, but looked up by conversationId and direction.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Conversation c WHERE c.conversationId = :conversationId AND c.direction = :direction")
+    Optional<Conversation> findByConversationIdAndDirectionForUpdate(@Param("conversationId") String conversationId,
+                                                                     @Param("direction") ConversationDirection direction);
 
     @EntityGraph(value = "Conversation.messageStatuses")
     List<Conversation> findByMessageId(String messageId);
