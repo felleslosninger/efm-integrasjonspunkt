@@ -138,12 +138,30 @@ Release av ny versjon gjerast via GitHub GUI
 - Velg tag (ny eller eksisterande, tag skal være semantisk og ha *liten* bokstav v som prefix `v4.2.0`, det er best practice for github releases)
 - Fyll inn tittel og beskrivelse med endrings loggen
 - Velg "Publish release" (det trigger workflows som generer pakker og container image, *ikke* bruk "Save draft" den vil ikke trigge bygg)
-- Etter at pakker har blitt bygget og publisert må stegene nedenfor utføres manuelt
+- Release-workflowen ([call-release.yaml](.github/workflows/call-release.yaml)) gjør resten automatisk:
+  - Bygger og publiserer jar til GitHub Packages og container image til GitHub Container Registry
+  - Jobben `sign-and-attach-jar` henter den publiserte jar filen og sha1 filen fra GitHub Packages, sjekker sha1,
+    signerer jar filen med eFormidling sin kodesigneringsnøkkel (org-secrets `EFM_GPG_PRIVATE_KEY` og `EFM_GPG_PASSPHRASE`)
+    og verifiserer signaturen mot [publisert offentlig nøkkel på docs.digdir.no](https://docs.digdir.no/resources/eformidling/public_keys/eformidling-key.asc)
+  - Til slutt lastes de 3 filene Kosmos trenger for å laste ned en spesifikk versjon opp til releasen
+    (eks `integrasjonspunkt-v4.2.0.jar`, `integrasjonspunkt-v4.2.0.jar.sha1` og `integrasjonspunkt-v4.2.0.jar.asc`)
+- Sjekk at workflowen er grønn under "Actions", og at de 3 filene ligger på releasen
+- Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
+- Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)
+
+Feiler signeringen (f.eks. utløpt nøkkel eller endrede secrets) kan secrets testes uten å lage en ny release
+med workflowen [test-signing-secrets.yaml](.github/workflows/test-signing-secrets.yaml)
+(Actions → "Test signing secrets" → "Run workflow", eller `gh workflow run test-signing-secrets.yaml`).
+Når feilen er rettet kan den feilede jobben kjøres på nytt med "Re-run failed jobs".
+
+### Manuell signering og opplasting (reserveløsning)
+
+Dette var måten release ble gjort på før signeringen ble automatisert, og brukes nå kun hvis
+den automatiske jobben ikke kan brukes. Stegene utføres etter at pakker har blitt bygget og publisert.
+
 - Last opp artifacts i release (disse 3 filene er nødvendig for at Kosmos skal kunne laste ned en spesifik versjon fra github releases) 
   - Last opp jar filen (eks `integrasjonspunkt-v4.2.0.jar`)
   - Last opp sha1 filen (eks `integrasjonspunkt-v4.2.0.jar.sha1`)
   - [Signer jar filen manuelt](signering/README.md) og last opp ASC signaturfilen (eks `integrasjonspunkt-v4.2.0.jar.asc`)
   - Det er viktig at SHA1 og ASC filen heter nøyaktig det samme som jar filen (bare med ulike filendelse som vist i filnavna ovenfor)
   - Det er viktig at versjonsnummer på jar filen er identisk med tagget versjon (eks `v4.2.0` begge steder som vist i filnavna ovenfor)
-  - Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
-- Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)

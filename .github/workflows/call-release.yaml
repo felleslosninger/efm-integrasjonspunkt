@@ -40,3 +40,97 @@ jobs:
       slack-channel-id: C05NLQCFR41
       java-version: 21
     secrets: inherit
+
+  sign-and-attach-jar:
+    #signs the published jar with the eFormidling code signing key and attaches it to the release
+    needs: call-workflow-ci-build-publish-lib
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    env:
+      VERSION: ${{ github.event.release.tag_name }}
+      JAR: integrasjonspunkt-${{ github.event.release.tag_name }}.jar
+      # Fingeravtrykket til kodesigneringsnøkkelen for eFormidling (samme som i efm-kosmos).
+      # Hardkodet her siden det ikke er hemmelig (det står i hver signaturverifisering),
+      # og som GitHub secret ville det blitt maskert (***) i logger, noe som gjør feilsøking vanskeligere.
+      # Fingeravtrykket endres ikke når utløpsdatoen forlenges, bare om nøkkelen byttes ut.
+      SIGNING_KEY_FINGERPRINT: AEF27AA6948A3856932AF98ECA5643393753ECE3
+    steps:
+      - name: Check signing secrets
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.EFM_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.EFM_GPG_PASSPHRASE }}
+        run: |
+          for v in GPG_PRIVATE_KEY GPG_PASSPHRASE; do
+            [ -n "${!v}" ] || { echo "::error::$v is empty"; exit 1; }
+          done
+
+      # Hent nøyaktig den JAR-fila (og .sha1) som ble publisert til GitHub Packages
+      - name: Download published JAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_URL: https://maven.pkg.github.com/${{ github.repository }}/no/difi/meldingsutveksling/integrasjonspunkt
+        run: |
+          for f in "$JAR" "$JAR.sha1"; do
+            curl --fail --silent --show-error --location \
+              -u "${{ github.actor }}:${GH_TOKEN}" \
+              -o "$f" \
+              "${BASE_URL}/${VERSION}/${f}"
+          done
+          ls -l "$JAR" "$JAR.sha1"
+          EXPECTED=$(tr -d '[:space:]' < "$JAR.sha1")
+          ACTUAL=$(sha1sum "$JAR" | cut -d' ' -f1)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::SHA-1 stemmer ikke: forventet $EXPECTED, men nedlastet JAR har $ACTUAL"
+            exit 1
+          fi
+
+      - name: Sign JAR
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.EFM_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.EFM_GPG_PASSPHRASE }}
+        run: |
+          export GNUPGHOME=$(mktemp -d)
+          chmod 700 "$GNUPGHOME"
+          trap 'rm -rf "$GNUPGHOME"' EXIT
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --yes \
+            --pinentry-mode loopback \
+            --passphrase "$GPG_PASSPHRASE" \
+            --local-user "$SIGNING_KEY_FINGERPRINT" \
+            --detach-sign --armor \
+            "$JAR"
+
+      # Vi laster ned den offentlige nøkkelen fra docs.digdir.no og verifiserer
+      # signaturen mot den, for å være sikre på at brukerne opplever det samme
+      # når de verifiserer JAR-fila med den publiserte nøkkelen.
+      # Feiler dersom publisert nøkkel mangler, er utløpt eller ikke har rett fingeravtrykk.
+      - name: Verify signature against published public key
+        env:
+          PUBLIC_KEY_URL: https://docs.digdir.no/resources/eformidling/public_keys/eformidling-key.asc
+        run: |
+          # Uten pipefail ville exit-koden til gpg blitt skjult av tee
+          set -o pipefail
+          export GNUPGHOME=$(mktemp -d)
+          chmod 700 "$GNUPGHOME"
+          trap 'rm -rf "$GNUPGHOME"' EXIT
+          curl --fail --silent --show-error --location -o eformidling-key.asc "$PUBLIC_KEY_URL"
+          gpg --batch --import eformidling-key.asc
+          gpg --batch --status-fd 1 --verify "$JAR.asc" "$JAR" | tee verify.out
+          if ! grep -q "^\[GNUPG:\] GOODSIG " verify.out; then
+            echo "::error::Signaturen er ikke gyldig mot publisert nøkkel (mangler, er utløpt eller ugyldig signatur)"
+            exit 1
+          fi
+          ACTUAL_FINGERPRINT=$(awk '$2 == "VALIDSIG" {print $3}' verify.out)
+          if [ "$ACTUAL_FINGERPRINT" != "$SIGNING_KEY_FINGERPRINT" ]; then
+            echo "::error::Feil fingeravtrykk: forventet $SIGNING_KEY_FINGERPRINT, men signaturen er laget med '${ACTUAL_FINGERPRINT}'"
+            exit 1
+          fi
+          echo "Signaturen er gyldig og laget med nøkkelen $ACTUAL_FINGERPRINT"
+
+      - name: Attach JAR, signature and checksum to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$VERSION" "$JAR" "$JAR.asc" "$JAR.sha1" --clobber

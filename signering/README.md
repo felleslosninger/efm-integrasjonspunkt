@@ -3,6 +3,13 @@
 Desse skripti handterer GPG-signering og verifisering av eFormidling-artifaktar.
 Kvart skript opprettar ein isolert mellombels GPG-heimekatalog og ryddar opp etter seg.
 
+> [!NOTE]
+> Ved release blir JAR-fila no signert automatisk av jobben `sign-and-attach-jar` i
+> [call-release.yaml](../.github/workflows/call-release.yaml), som brukar org-secrets
+> `EFM_GPG_PRIVATE_KEY` og `EFM_GPG_PASSPHRASE` og lastar opp `.jar`, `.sha1` og `.asc` til releasen.
+> Sjå [README.md](../README.md#release-for-interne). `sign.sh` er reserveløysinga dersom den automatiske
+> signeringa ikkje kan brukast, medan `verify.sh` og `extend.sh` framleis er i bruk.
+
 ## Føresetnader
 
 - `gpg` må vere installert (testet med `gpg (GnuPG/MacGPG2) 2.2.41 libgcrypt 1.8.10`)
@@ -46,7 +53,8 @@ GPG_PASSPHRASE="privat-nøkkel-passord" ./sign.sh sti/til/fil
 
 Produserer `sti/til/fil.asc` som inneheld den frittståande signaturen og som kan verifiserast med `./verify.sh`.
 
-Det er denne filen med signatur som skal lastes opp til GitHub releasen sammen med den nye versjonen av artifakta.
+Ved manuell signering er det denne filen med signatur som skal lastes opp til GitHub releasen sammen med den nye versjonen av artifakta.
+Normalt skjer dette automatisk i release-workflowen.
 
 ### extend.sh
 
@@ -77,3 +85,7 @@ Skriv den oppdaterte offentlege og private nøkkelen (med ny utløpsdato) til de
 ```
 
 Husk å oppdatere offentlig nøkkel på docs.digdir.no og public + private key på Teams område.
+
+Hugs også å oppdatere org-secret `EFM_GPG_PRIVATE_KEY` med den forlenga private nøkkelen, sidan den automatiske
+signeringa elles feilar med "Unusable secret key" når den gamle utløpsdatoen er passert.
+Set secret frå fil (ikkje lim inn) og test etterpå med workflowen `test-signing-secrets.yaml` (sjå [README.md](../README.md#release-for-interne)).
