@@ -8,6 +8,7 @@
 - Innebygget web-ui som bla støtter onboarding av DPO
 - Utgående meldinger kunne bli hengende i status OPPRETTET (CachingConnectionFactory er fjernet fra JMS-lytterne)
 - Oppstart feilet på MS SQL Server med over 2100 pollbare meldinger ("The server supports a maximum of 2100 parameters"). Rettingen av feil ServiceIdentifier ved oppstart gjøres nå som én oppdatering per prosess, og stopper ikke lenger oppstarten om den feiler. `difi.move.nextmove.statusPollingPageSize` kan ikke settes høyere enn 2000.
+- Release-JAR med GPG-signatur (`.asc`) og `.sha1` legges nå automatisk ved GitHub-releasen. Signaturen kan verifiseres mot eFormidling sin offentlige nøkkel på [docs.digdir.no](https://docs.digdir.no/resources/eformidling/public_keys/eformidling-key.asc).
 - DPI: status MOTTATT kunne bli registrert to ganger når statuspolling og kvitteringspolling behandlet samme melding samtidig, eller når flere instanser deler database. Meldingen låses nå mens status registreres.
 - **Potensielt brytende:** Actuator-endepunktene på `/manage` er strammet inn, ref [MOVE-5138](https://digdir.atlassian.net/browse/MOVE-5138)
   - Kun `health`, `info`, `metrics`, `prometheus`, `caches`, `logfile` og `loggers` er eksponert (hviteliste istedenfor `*`)
