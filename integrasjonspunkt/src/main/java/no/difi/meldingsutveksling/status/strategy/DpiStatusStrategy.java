@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -34,9 +35,13 @@ public class DpiStatusStrategy implements StatusStrategy {
     }
 
     private void checkStatus(Conversation conversation) {
-        meldingsformidlerClient.hentMeldingStatusListe(conversation.getMessageId())
+        List<MessageStatus> statuses = meldingsformidlerClient.hentMeldingStatusListe(conversation.getMessageId())
                 .map(messageStatus -> messageStatusDecorator.apply(conversation, messageStatus))
-                .forEach(messageStatus -> conversationService.registerStatus(conversation, messageStatus));
+                .toList();
+        // The conversation was loaded at the start of the polling run and may be stale by now, e.g. DpiReceiptHandler
+        // may have registered MOTTATT and LEVERT in the meantime. Registering against a locked, fresh copy prevents
+        // duplicate statuses.
+        conversationService.registerStatusesWithLock(conversation, statuses);
     }
 
     @NotNull

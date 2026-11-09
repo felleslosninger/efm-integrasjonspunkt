@@ -28,7 +28,9 @@ public class DpiReceiptHandler {
         externalReceipt.confirmReceipt();
 
         final String conversationId = externalReceipt.getConversationId();
-        Optional<Conversation> conversation = conversationService.findConversation(conversationId, ConversationDirection.OUTGOING);
+        // Locked so DpiStatusStrategy (status polling) cannot register MOTTATT concurrently, which would lead to
+        // duplicate MOTTATT when combined with the MOTTATT this handler adds before LEVERT.
+        Optional<Conversation> conversation = conversationService.findConversationForUpdate(conversationId, ConversationDirection.OUTGOING);
 
         if (conversation.isPresent()) {
             MessageStatus status = externalReceipt.toMessageStatus();

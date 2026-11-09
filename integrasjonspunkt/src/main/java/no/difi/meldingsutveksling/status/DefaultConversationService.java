@@ -21,10 +21,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -141,6 +143,22 @@ public class DefaultConversationService implements ConversationService {
         statusQueue.enqueueStatus(status, c);
 
         return conversation;
+    }
+
+    @NotNull
+    @Override
+    @Transactional
+    public Conversation registerStatusesWithLock(@NotNull Conversation conversation, @NotNull Collection<MessageStatus> statuses) {
+        if (statuses.isEmpty()) {
+            return conversation;
+        }
+        Optional<Conversation> locked = repo.findByIdForUpdate(conversation.getId());
+        if (locked.isEmpty()) {
+            log.warn("Conversation with messageId={} no longer exists, cannot register statuses", conversation.getMessageId());
+            return conversation;
+        }
+        statuses.forEach(status -> registerStatus(locked.get(), status));
+        return locked.get();
     }
 
     private void trySendMail(Conversation conversation) {
@@ -263,5 +281,12 @@ public class DefaultConversationService implements ConversationService {
     public Optional<Conversation> findConversation(@NotNull String conversationId, @NotNull ConversationDirection
         direction) {
         return repo.findByConversationIdAndDirection(conversationId, direction);
+    }
+
+    @NotNull
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<Conversation> findConversationForUpdate(@NotNull String conversationId, @NotNull ConversationDirection direction) {
+        return repo.findByConversationIdAndDirectionForUpdate(conversationId, direction);
     }
 }
