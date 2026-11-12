@@ -21,11 +21,14 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
 import org.springframework.test.web.client.UnorderedRequestExpectationManager;
 import org.springframework.test.web.client.response.DefaultResponseCreator;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.mockito.Mockito.when;
@@ -146,6 +149,17 @@ public class MockServerRestSteps {
     public void aRestClientRequestToWillRespondWithStatusAndTheFollowingIn(String method, String url, int statusCode, String contentType, String path) throws IOException {
         var response = new String(new ClassPathResource(path).getInputStream().readAllBytes());
         when(restClient.get().uri(URI.create(url)).retrieve().toEntity(String.class).getBody()).thenReturn(response);
+    }
+
+    @And("^a \"([^\"]*)\" request to \"([^\"]*)\" will fail with status \"(\\d+)\"$")
+    public void aRestClientRequestToWillFailWithStatus(String method, String url, int statusCode) {
+        HttpStatus status = HttpStatus.valueOf(statusCode);
+        byte[] body = """
+            {"error":"%s","error_description":"%s"}""".formatted(status.name(), status.getReasonPhrase()).getBytes(StandardCharsets.UTF_8);
+        RuntimeException exception = status.is5xxServerError()
+            ? HttpServerErrorException.create(status, status.getReasonPhrase(), HttpHeaders.EMPTY, body, StandardCharsets.UTF_8)
+            : HttpClientErrorException.create(status, status.getReasonPhrase(), HttpHeaders.EMPTY, body, StandardCharsets.UTF_8);
+        when(restClient.get().uri(URI.create(url)).retrieve().toEntity(String.class)).thenThrow(exception);
     }
 
     @And("^a CorrespondenceClient request to \"([^\"]*)\" will respond with the following payload:$")

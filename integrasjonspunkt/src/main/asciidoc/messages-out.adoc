@@ -387,6 +387,22 @@ include::{snippets}/messages/out/create/constraint-violation/http-response.adoc[
 include::{snippets}/messages/out/create/constraint-violation/response-fields.adoc[]
 --
 
+=== Example 9 - ServiceRegistry temporarily unavailable
+
+If ServiceRegistry, or a service it depends on, is temporarily unavailable, the service responds with `503 Service Unavailable`.
+This is a temporary condition, and the request can be retried later.
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/messages/out/create/service-registry-unavailable/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/messages/out/create/service-registry-unavailable/response-fields.adoc[]
+--
+
 
 [#messages-out-upload]
 == Upload attachment

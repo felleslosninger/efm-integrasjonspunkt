@@ -1,5 +1,6 @@
 package no.difi.meldingsutveksling.cucumber;
 
+import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -159,6 +160,12 @@ public class NextMoveMessageOutSteps {
         assertThat(response.getStatusCode())
             .withFailMessage(response.getBody())
             .isEqualTo(HttpStatus.valueOf(expectedStatusName));
+    }
+
+    @Then("^the response error message is \"([^\"]*)\"$")
+    public void thenTheResponseErrorMessageIs(String expectedMessage) {
+        assertThat(JsonPath.<String>read(response.getBody(), "$.message"))
+            .isEqualTo(expectedMessage);
     }
 
     @Given("^I upload a file named \"([^\"]+)\" with mimetype \"([^\"]+)\" and title \"([^\"]+)\"$")
