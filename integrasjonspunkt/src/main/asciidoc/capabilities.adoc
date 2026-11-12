@@ -89,6 +89,23 @@ include::{snippets}/capabilities/dpi/process/http-request.adoc[]
 .Response
 include::{snippets}/capabilities/dpi/process/http-response.adoc[]
 
+=== Example 7 - ServiceRegistry temporarily unavailable
+
+If ServiceRegistry, or a service it depends on, is temporarily unavailable, the service responds with `503 Service Unavailable`.
+This is a temporary condition, and the request can be retried later.
+If the receiver is not found in ServiceRegistry, the service responds with `404 Not Found`.
+
+[source,http,role="primary"]
+.Response
+include::{snippets}/capabilities/service-registry-unavailable/http-response.adoc[]
+
+[role="primary"]
+.Response fields
+[.response-fields]
+--
+include::{snippets}/capabilities/service-registry-unavailable/response-fields.adoc[]
+--
+
 === About the service
 [role="primary"]
 .Request parameters

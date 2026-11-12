@@ -16,6 +16,8 @@ import no.difi.meldingsutveksling.serviceregistry.externalmodel.ServiceRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -23,10 +25,12 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -73,6 +77,9 @@ public class ServiceRegistryLookupTest {
     @Autowired
     private ServiceRegistryLookup service;
 
+    @Autowired
+    private ServiceRegistryClient serviceRegistryClient;
+
     @MockitoBean
     private IntegrasjonspunktProperties properties;
 
@@ -117,6 +124,31 @@ public class ServiceRegistryLookupTest {
         when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         assertThrows(ServiceRegistryLookupException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).build()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus.class, names = {"BAD_GATEWAY", "SERVICE_UNAVAILABLE", "GATEWAY_TIMEOUT"})
+    public void serviceRecordLookupWhenServiceRegistryIsTemporarilyUnavailable(HttpStatus status) throws BadJWSException {
+        when(client.getResource(anyString(), anyMap())).thenThrow(HttpServerErrorException.create(status, status.getReasonPhrase(), HttpHeaders.EMPTY, null, null));
+
+        assertThrows(ServiceRegistryUnavailableException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).build()));
+        assertThrows(ServiceRegistryUnavailableException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).process(DEFAULT_PROCESS).build(), DEFAULT_DOCTYPE));
+        assertThrows(ServiceRegistryUnavailableException.class, () -> this.service.getServiceRecords(SRParameter.builder(ORGNR).build()));
+        assertThrows(ServiceRegistryUnavailableException.class, () -> this.service.getInfoRecord(ORGNR));
+    }
+
+    @Test
+    public void serviceRecordLookupWhenServiceRegistryFailsWithInternalServerError() throws BadJWSException {
+        when(client.getResource(eq("identifier/{identifier}"), anyMap())).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+
+        assertThrows(HttpServerErrorException.class, () -> this.service.getServiceRecord(SRParameter.builder(ORGNR).build()));
+    }
+
+    @Test
+    public void certificateLookupWhenServiceRegistryIsTemporarilyUnavailable() throws BadJWSException {
+        when(client.getResource(eq("virksert/{identifier}"), anyMap())).thenThrow(new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE));
+
+        assertThrows(ServiceRegistryUnavailableException.class, () -> serviceRegistryClient.getCertificate(ORGNR));
     }
 
     @Test

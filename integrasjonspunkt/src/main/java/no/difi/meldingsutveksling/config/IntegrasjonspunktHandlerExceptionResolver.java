@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.config;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.exceptions.HttpStatusCodeException;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryUnavailableException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,8 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
             } else if (ex instanceof ConstraintViolationException exception) {
                 return handleConstraintViolationException(
                         exception, response);
+            } else if (isServiceRegistryUnavailable(ex)) {
+                return handleServiceRegistryUnavailable(request, response);
             }
         } catch (EOFException e) {
             if (logger.isWarnEnabled()) {
@@ -52,6 +55,10 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
             if (logger.isTraceEnabled()) {
                 logger.trace(buildLogMessage(ex, request));
             }
+        } else if (isServiceRegistryUnavailable(ex)) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(buildLogMessage(ex, request));
+            }
         } else {
             super.logException(ex, request);
         }
@@ -59,6 +66,22 @@ public class IntegrasjonspunktHandlerExceptionResolver extends DefaultHandlerExc
 
     private ModelAndView handleConstraintViolationException(ConstraintViolationException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getLocalizedMessage());
+        return new ModelAndView();
+    }
+
+    private boolean isServiceRegistryUnavailable(Exception ex) {
+        for (Throwable t = ex; t != null; t = t.getCause()) {
+            if (t instanceof ServiceRegistryUnavailableException) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ModelAndView handleServiceRegistryUnavailable(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String message = messageSource.getMessage(ServiceRegistryUnavailableException.class.getName(), null,
+                "ServiceRegistry is temporarily unavailable. Please try again later.", request.getLocale());
+        response.sendError(HttpStatus.SERVICE_UNAVAILABLE.value(), message);
         return new ModelAndView();
     }
 

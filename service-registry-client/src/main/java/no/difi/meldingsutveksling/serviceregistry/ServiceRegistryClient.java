@@ -16,15 +16,20 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ServiceRegistryClient {
+
+    private static final Set<Integer> TEMPORARILY_UNAVAILABLE = Set.of(
+            HttpStatus.BAD_GATEWAY.value(), HttpStatus.SERVICE_UNAVAILABLE.value(), HttpStatus.GATEWAY_TIMEOUT.value());
 
     private final ServiceRegistryRestClient client;
     private final SasKeyRepository sasKeyRepository;
@@ -66,6 +71,8 @@ public class ServiceRegistryClient {
                 throw new ServiceRegistryLookupException("Caught exception when looking up service record with parameter %s, http status: %s (%s)".formatted(
                         parameter, httpException.getStatusCode(), httpException.getStatusText()), httpException);
             }
+        } catch (HttpServerErrorException httpException) {
+            throw unavailableOrRethrow(httpException, "Service Registry is temporarily unavailable when looking up service record with parameter %s".formatted(parameter));
         } catch (BadJWSException e) {
             log.error("Bad signature in service record response", e);
             throw new ServiceRegistryLookupException("Bad signature in response from service registry", e);
@@ -85,9 +92,23 @@ public class ServiceRegistryClient {
                 throw new ServiceRegistryLookupException(errorDescription);
             }
             throw new NextMoveRuntimeException("Error looking up certificate in service registry for identifier " + identifier, e);
+        } catch (HttpServerErrorException e) {
+            throw unavailableOrRethrow(e, "Service Registry is temporarily unavailable when looking up certificate for identifier %s".formatted(identifier));
         } catch (BadJWSException e) {
             throw new NextMoveRuntimeException("Bad signature in response from service registry", e);
         }
+    }
+
+    /**
+     * 502, 503 and 504 mean that Service Registry, or something it depends on (e.g. KRR or BRREG), is temporarily
+     * unavailable. Other 5xx responses are rethrown unchanged.
+     */
+    private static RuntimeException unavailableOrRethrow(HttpServerErrorException e, String message) {
+        if (TEMPORARILY_UNAVAILABLE.contains(e.getStatusCode().value())) {
+            log.warn("{}: http status {}", message, e.getStatusCode());
+            return new ServiceRegistryUnavailableException(message, e);
+        }
+        return e;
     }
 
     @Cacheable(value = CacheConfig.CACHE_GET_SAS_KEY, sync = true)

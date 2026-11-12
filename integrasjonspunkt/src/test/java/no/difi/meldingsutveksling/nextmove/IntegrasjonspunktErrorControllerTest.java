@@ -17,6 +17,7 @@ import no.difi.meldingsutveksling.exceptions.NoContentException;
 import no.difi.meldingsutveksling.exceptions.ServiceNotEnabledException;
 import no.difi.meldingsutveksling.exceptions.SubscriptionNotFoundException;
 import no.difi.meldingsutveksling.oauth2.Oauth2ClientSecurityConfig;
+import no.difi.meldingsutveksling.serviceregistry.ServiceRegistryUnavailableException;
 import no.difi.meldingsutveksling.web.IntegrasjonspunktErrorController;
 import no.difi.meldingsutveksling.webhooks.filter.WebhookFilterParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,11 +27,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.boot.webmvc.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.Set;
 
@@ -63,6 +66,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IntegrasjonspunktErrorControllerTest {
 
     private static final String ERROR_ATTRIBUTE = DefaultErrorAttributes.class.getName() + ".ERROR";
+    private static final String SERVICE_REGISTRY_UNAVAILABLE_MESSAGE = "ServiceRegistry is temporarily unavailable. Please try again later.";
 
     @Autowired private MockMvc mvc;
     @Autowired private Validator validator;
@@ -188,6 +192,52 @@ public class IntegrasjonspunktErrorControllerTest {
                         }\
                         """))
                 .andDo(document("messages/out/create/service-not-enabled",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                getDefaultHeaderDescriptors()
+                        ),
+                        responseFields(
+                                errorFieldDescriptors(false)
+                        )
+                        )
+                );
+    }
+
+    @Test
+    public void createMessageServiceRegistryUnavailable() throws Exception {
+        serviceRegistryUnavailable("/api/messages/out", "messages/out/create/service-registry-unavailable");
+    }
+
+    @Test
+    public void capabilitiesServiceRegistryUnavailable() throws Exception {
+        serviceRegistryUnavailable("/api/capabilities/910077473", "capabilities/service-registry-unavailable");
+    }
+
+    private void serviceRegistryUnavailable(String path, String identifier) throws Exception {
+        mvc.perform(
+                get("/error")
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 503)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, path)
+                        .requestAttr(RequestDispatcher.ERROR_MESSAGE, SERVICE_REGISTRY_UNAVAILABLE_MESSAGE)
+                        .requestAttr(ERROR_ATTRIBUTE, new ServiceRegistryUnavailableException(
+                                "Service Registry is temporarily unavailable",
+                                new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE)))
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().json("""
+                        {
+                          "timestamp" : "2019-03-25T12:38:23+01:00",
+                          "status" : 503,
+                          "error" : "Service Unavailable",
+                          "exception" : "no.difi.meldingsutveksling.serviceregistry.ServiceRegistryUnavailableException",
+                          "message" : "%s",
+                          "path" : "%s"
+                        }\
+                        """.formatted(SERVICE_REGISTRY_UNAVAILABLE_MESSAGE, path)))
+                .andDo(document(identifier,
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
