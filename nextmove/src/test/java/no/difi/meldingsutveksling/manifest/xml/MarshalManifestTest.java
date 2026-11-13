@@ -19,8 +19,8 @@ class MarshalManifestTest {
     @Test
     void testMarshalling() throws JAXBException {
         Manifest original = new Manifest(
-                new Mottaker(new Organisasjon(Iso6523.parse("0192:12345678"))),
-                new Avsender(new Organisasjon(Iso6523.parse("0192:12345678"))),
+                new Mottaker(new Organisasjon(Iso6523.parse("0192:123456789"))),
+                new Avsender(new Organisasjon(Iso6523.parse("0192:123456789"))),
                 new HovedDokument("lol.pdf", "application/pdf", "Hoveddokument", "no"));
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
