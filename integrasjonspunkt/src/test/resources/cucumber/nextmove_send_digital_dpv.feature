@@ -50,7 +50,7 @@ Feature: Sending a Next Move Digital DPV message
                 {
                     "identifier": {
                         "authority": "iso6523-actorid-upis",
-                        "value": "0192:17912099997"
+                        "value": "17912099997"
                     }
                 }
             ],
