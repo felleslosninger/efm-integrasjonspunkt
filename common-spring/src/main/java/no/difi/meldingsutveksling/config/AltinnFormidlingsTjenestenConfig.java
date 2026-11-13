@@ -51,7 +51,6 @@ public class AltinnFormidlingsTjenestenConfig {
     /**
      * Altinn liste av ekstra systembrukere (reportees) som det også skal behandles meldinger for
      */
-    @Valid
-    private Set<AltinnSystemUser> reportees = Sets.newHashSet();
+    private Set<@Valid AltinnSystemUser> reportees = Sets.newHashSet();
 
 }

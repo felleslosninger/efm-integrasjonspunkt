@@ -11,6 +11,7 @@
 - Release-JAR med GPG-signatur (`.asc`) og `.sha1` legges nå automatisk ved GitHub-releasen. Signaturen kan verifiseres mot eFormidling sin offentlige nøkkel på [docs.digdir.no](https://docs.digdir.no/resources/eformidling/public_keys/eformidling-key.asc).
 - DPI: status MOTTATT kunne bli registrert to ganger når statuspolling og kvitteringspolling behandlet samme melding samtidig, eller når flere instanser deler database. Meldingen låses nå mens status registreres.
 - Når ServiceRegistry er midlertidig utilgjengelig (svarer 502, 503 eller 504) svarer `GET /api/capabilities/{receiverIdentifier}`, opprettelse av melding og `GET /servicerecord/{identifier}` nå med `503 Service Unavailable` istedenfor `500`, slik at klienten kan prøve på nytt senere, ref [MOVE-5387](https://digdir.atlassian.net/browse/MOVE-5387). Meldinger i køen blir fortsatt forsøkt sendt på nytt.
+- Oppstartsloggen inneholder ikke lenger advarselen `HV000271` om utfaset `@Valid` på `difi.move.dpo.reportees`. Valideringen av reportees (påkrevd `orgId` og `name`) virker som før, ref [MOVE-5418](https://digdir.atlassian.net/browse/MOVE-5418).
 - **Potensielt brytende:** Actuator-endepunktene på `/manage` er strammet inn, ref [MOVE-5138](https://digdir.atlassian.net/browse/MOVE-5138)
   - Kun `health`, `info`, `metrics`, `prometheus`, `caches`, `logfile` og `loggers` er eksponert (hviteliste istedenfor `*`)
   - `configprops`, `env`, `heapdump`, `threaddump`, `beans`, `mappings`, `conditions`, `scheduledtasks` m.fl. er ikke lenger tilgjengelige over http
