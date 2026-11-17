@@ -132,8 +132,10 @@ public class SvarInnClient {
                 && uri.getRawUserInfo() == null
                 && uri.getRawPath() != null
                 && uri.getRawPath().startsWith(base.getRawPath() + "/")
-                && !hasDotSegmentOrBackslash(uri.getPath())) {
-            // Rebuild from the configured base URL so only the validated path and query come from the response
+                && !isUnsafePath(uri.getPath())) {
+            // Rebuild from the configured base URL so only the validated path and query come from the response.
+            // Keep the literal "/" directly before the response parts: CodeQL (java/ssrf) recognises that
+            // concatenation as a sanitizer, a String.format or UriComponentsBuilder rewrite would bring the alert back.
             String relativePath = uri.getRawPath().substring(base.getRawPath().length() + 1);
             String query = uri.getRawQuery() == null ? "" : "?" + uri.getRawQuery();
             return URI.create(root + "/" + relativePath + query);
@@ -142,9 +144,11 @@ public class SvarInnClient {
         throw new SvarInnForsendelseException("Forsendelse %s has downloadUrl outside of %s: %s".formatted(forsendelse.getId(), rootUri, downloadUrl));
     }
 
-    // normalize() leaves encoded dot segments (%2e%2e) intact, so check the decoded path as well
-    private static boolean hasDotSegmentOrBackslash(String path) {
-        return path.contains("\\") || Arrays.stream(path.split("/")).anyMatch(s -> s.equals(".") || s.equals(".."));
+    // normalize() leaves encoded dot segments (%2e%2e) intact, so check the decoded path as well.
+    // Path parameters (;) are rejected since servers like Tomcat strip them before resolving "..;" segments.
+    private static boolean isUnsafePath(String path) {
+        return path.contains("\\") || path.contains(";")
+                || Arrays.stream(path.split("/")).anyMatch(s -> s.equals(".") || s.equals(".."));
     }
 
     void confirmMessage(Forsendelse forsendelse) {
