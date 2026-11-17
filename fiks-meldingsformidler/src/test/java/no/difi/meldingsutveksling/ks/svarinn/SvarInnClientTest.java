@@ -47,7 +47,15 @@ class SvarInnClientTest {
     @Test
     void hostIsComparedCaseInsensitively() {
         String url = "https://SvarUt.KS.no/tjenester/svarinn/forsendelse/1";
-        assertThat(client.toDownloadUri(forsendelse(url))).isEqualTo(URI.create(url));
+        assertThat(client.toDownloadUri(forsendelse(url)))
+                .hasToString(BASE_URL + "/forsendelse/1");
+    }
+
+    @Test
+    void downloadUriIsBuiltFromBaseUrlAndDropsFragment() {
+        String url = BASE_URL + "/forsendelse/1?a=b#frag";
+        assertThat(client.toDownloadUri(forsendelse(url)))
+                .hasToString(BASE_URL + "/forsendelse/1?a=b");
     }
 
     @Test
@@ -78,6 +86,10 @@ class SvarInnClientTest {
             "https://svarut.ks.no/tjenester/svarinn/%2e/forsendelse/1",
             "https://svarut.ks.no/tjenester/svarinn/%5c..%5cadmin",
             "https://svarut.ks.no/tjenester/svarinn%2fadmin",
+            "https://svarut.ks.no/tjenester/svarinn/..;/admin",
+            "https://svarut.ks.no/tjenester/svarinn/%2e%2e;/admin",
+            "https://svarut.ks.no/tjenester/svarinn/..%3b/admin",
+            "https://svarut.ks.no/tjenester/svarinn/forsendelse;jsessionid=1/1",
             "/mottaker/%2e%2e/%2e%2e/admin",
             "https://svarut.ks.no/tjenester/svarinnX/forsendelse/1",
             "https://svarut.ks.no/annet",
