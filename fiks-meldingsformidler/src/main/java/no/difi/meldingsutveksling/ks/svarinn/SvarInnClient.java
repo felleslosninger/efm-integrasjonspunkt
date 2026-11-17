@@ -133,7 +133,10 @@ public class SvarInnClient {
                 && uri.getRawPath() != null
                 && uri.getRawPath().startsWith(base.getRawPath() + "/")
                 && !hasDotSegmentOrBackslash(uri.getPath())) {
-            return uri;
+            // Rebuild from the configured base URL so only the validated path and query come from the response
+            String relativePath = uri.getRawPath().substring(base.getRawPath().length() + 1);
+            String query = uri.getRawQuery() == null ? "" : "?" + uri.getRawQuery();
+            return URI.create(root + "/" + relativePath + query);
         }
 
         throw new SvarInnForsendelseException("Forsendelse %s has downloadUrl outside of %s: %s".formatted(forsendelse.getId(), rootUri, downloadUrl));
