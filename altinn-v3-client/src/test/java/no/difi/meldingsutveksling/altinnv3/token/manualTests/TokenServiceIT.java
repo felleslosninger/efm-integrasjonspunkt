@@ -13,7 +13,6 @@ import no.difi.meldingsutveksling.altinnv3.token.TokenConfig;
 import no.difi.meldingsutveksling.altinnv3.token.TokenExchangeService;
 import no.difi.meldingsutveksling.altinnv3.token.TokenService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -21,9 +20,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,20 +29,10 @@ class TokenServiceIT {
 
     private WireMockServer wireMockServer;
 
-    private static String path = "read-from-application-properties";
-    private static String alias = "read-from-application-properties";
-    private static String password = "read-from-application-properties";
-
-    @BeforeAll
-    static void init() throws Exception {
-        try (InputStream inputStream = TokenServiceIT.class.getClassLoader().getResourceAsStream("application.properties")) {
-            var props = new Properties();
-            props.load(inputStream);
-            path = (String) props.get("difi.move.org.keystore.path");
-            alias = (String) props.get("difi.move.org.keystore.alias");
-            password = (String) props.get("difi.move.org.keystore.password");
-        }
-    }
+    // set as environment variables when running the test manually, see test application.properties
+    private static final String path = System.getenv("DIFI_MOVE_ORG_KEYSTORE_PATH");
+    private static final String alias = System.getenv("DIFI_MOVE_ORG_KEYSTORE_ALIAS");
+    private static final String password = System.getenv("DIFI_MOVE_ORG_KEYSTORE_PASSWORD");
 
     @BeforeEach
     void setUp() {
