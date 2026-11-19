@@ -20,7 +20,11 @@
     </condition>
     <if>
         <then>
-            <!-- <ssl> has no "enabled" switch and <if> cannot be nested within <appender>, hence two variants of the appender -->
+            <!--
+                <ssl> has no "enabled" switch and <if> cannot be nested within <appender>, hence two variants of the "stash" appender.
+                The encoder block is repeated in both variants and in "stash2" - keep the three copies identical
+                (they mask personal identity numbers).
+            -->
             <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
                 <key>secureLogstash</key>
                 <value>true</value>
@@ -98,6 +102,7 @@
             </condition>
             <if>
                 <then>
+                    <!-- NB: stash2 never uses SSL/TLS, regardless of secureLogstash -->
                     <appender name="stash2" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
                         <destination>${destination2}</destination>
                         <droppedWarnFrequency>5</droppedWarnFrequency>
