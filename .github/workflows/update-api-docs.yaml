@@ -11,6 +11,9 @@ name: Update API docs
 # Dokumentasjonen viser versjonen uten v-prefiks (v4.2.3 -> "Version 4.2.3").
 
 on:
+  # MIDLERTIDIG (fjernes før merge): kjører workflowen ved push til branchen, for testing
+  push:
+    branches: [MOVE-5464-automatiser-api-dokumentasjon]
   workflow_call:
     inputs:
       tag:
@@ -33,7 +36,8 @@ jobs:
       contents: read
       packages: read
     env:
-      TAG: ${{ inputs.tag }}
+      # MIDLERTIDIG (fjernes før merge): fast tag når workflowen trigges av push
+      TAG: ${{ inputs.tag || 'v4.2.3' }}
       DOCS_REPO: felleslosninger/docs
       DOCS_FILE: _docs/eFormidling/Utvikling/integrasjonspunkt_eformidling2_api_restdocs.html
       GENERATED_FILE: integrasjonspunkt/target/generated-docs/restdocs.html
@@ -50,10 +54,10 @@ jobs:
           fi
           echo "VERSION=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
 
-      - name: Checkout ${{ inputs.tag }}
+      - name: Checkout ${{ env.TAG }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v7.0.1
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ env.TAG }}
 
       - name: Setup Maven environment
         uses: felleslosninger/github-workflows/.github/actions/setup-maven-env@main
@@ -139,9 +143,9 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           path: docs-repo
           add-paths: ${{ env.DOCS_FILE }}
-          branch: ip-restdocs-${{ inputs.tag }}
-          title: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ inputs.tag }}"
-          commit-message: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ inputs.tag }}"
+          branch: ip-restdocs-${{ env.TAG }}
+          title: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ env.TAG }}"
+          commit-message: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ env.TAG }}"
           body-path: ${{ runner.temp }}/pr-body.md
 
       - name: Write result to summary
