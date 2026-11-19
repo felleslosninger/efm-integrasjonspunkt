@@ -39,7 +39,9 @@ jobs:
       # MIDLERTIDIG (fjernes før merge): fast tag når workflowen trigges av push
       TAG: ${{ inputs.tag || 'v4.2.3' }}
       DOCS_REPO: felleslosninger/docs
+      DOCS_DIR: _docs/eFormidling/Utvikling
       DOCS_FILE: _docs/eFormidling/Utvikling/integrasjonspunkt_eformidling2_api_restdocs.html
+      GENERATED_DIR: integrasjonspunkt/target/generated-docs
       GENERATED_FILE: integrasjonspunkt/target/generated-docs/restdocs.html
     steps:
       # Taggen brukes videre som git-ref og branch-navn, så den må være en ren versjonsstreng:
@@ -120,20 +122,39 @@ jobs:
           }
           PUBLISHED="docs-repo/$DOCS_FILE"
           PUBLISHED_VERSION=$(sed -n -E 's|.*<p>Version ([^<]*)</p>.*|\1|p' "$PUBLISHED" | head -1)
+          if diff -q <(normalize "$PUBLISHED") <(normalize "$GENERATED_FILE") > /dev/null; then
+            API_CHANGED=false
+          else
+            API_CHANGED=true
+          fi
+
+          # Dette repoet er kilden for stilark, script, logoer og diagrammer som HTML-fila bruker,
+          # så de kopieres også. Uendrede filer gir ingen diff og blir dermed ikke med i PR-en.
+          cp "$GENERATED_FILE" "$PUBLISHED"
+          mkdir -p "docs-repo/$DOCS_DIR/assets" "docs-repo/$DOCS_DIR/images/eformidling"
+          cp -R "$GENERATED_DIR/assets/." "docs-repo/$DOCS_DIR/assets/"
+          cp "$GENERATED_DIR"/images/eformidling/*.png "docs-repo/$DOCS_DIR/images/eformidling/"
+          CHANGED_ASSETS=$(git -C docs-repo status --porcelain -- "$DOCS_DIR/assets" "$DOCS_DIR/images/eformidling" | cut -c4-)
+
           {
             echo "Oppdaterer API-dokumentasjonen for integrasjonspunktet til **$VERSION** (publisert versjon: ${PUBLISHED_VERSION:-ukjent})."
             echo
-            if diff -q <(normalize "$PUBLISHED") <(normalize "$GENERATED_FILE") > /dev/null; then
+            if [ "$API_CHANGED" = false ]; then
               echo "**API-beskrivelsen er uendret** siden publisert versjon. Diffen består bare av versjonsnummeret og tilfeldige verdier i eksemplene (UUID-er og binært innhold)."
               echo "Merge PR-en for at docs.digdir.no skal vise siste versjon, eller lukk den dersom det ikke er ønskelig."
             else
               echo "**API-beskrivelsen er endret** siden publisert versjon, se diffen for detaljer."
             fi
+            if [ -n "$CHANGED_ASSETS" ]; then
+              echo
+              echo "Disse tilhørende filene (stilark, script, logoer, diagrammer) er også endret:"
+              echo
+              echo "$CHANGED_ASSETS" | sed 's|^|- `|; s|$|`|'
+            fi
             echo
             echo "Generert automatisk av [$GITHUB_WORKFLOW]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) fra [$TAG]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG)."
           } > "$RUNNER_TEMP/pr-body.md"
           cat "$RUNNER_TEMP/pr-body.md" >> "$GITHUB_STEP_SUMMARY"
-          cp "$GENERATED_FILE" "$PUBLISHED"
 
       # Samme branch per tag, så en ny kjøring oppdaterer eksisterende PR i stedet for å lage en ny
       - name: Create pull request in docs repo
@@ -142,7 +163,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           path: docs-repo
-          add-paths: ${{ env.DOCS_FILE }}
+          add-paths: |
+            ${{ env.DOCS_FILE }}
+            ${{ env.DOCS_DIR }}/assets
+            ${{ env.DOCS_DIR }}/images/eformidling
           branch: ip-restdocs-${{ env.TAG }}
           title: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ env.TAG }}"
           commit-message: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ env.TAG }}"
