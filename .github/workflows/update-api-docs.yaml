@@ -1,0 +1,159 @@
+name: Update API docs
+
+# Bygger REST API-dokumentasjonen (Spring REST Docs) for en gitt release-tag og
+# oppretter en PR i felleslosninger/docs som oppdaterer siden på docs.digdir.no.
+#
+# Kalles fra call-release.yaml når en release er ferdig publisert, og kan startes
+# manuelt (workflow_dispatch) for å lage dokumentasjonen på nytt for en tag.
+#
+# Format på taggen: v4.2.3 eller 4.2.3, altså kun major.minor.patch med valgfri v foran.
+# Tagger med suffiks (f.eks. v4.3.0-rc1) avvises, og pre-releaser hoppes over i call-release.yaml.
+# Dokumentasjonen viser versjonen uten v-prefiks (v4.2.3 -> "Version 4.2.3").
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release-tag på formen v4.2.3 eller 4.2.3 (kun major.minor.patch, ikke suffiks som -rc1)"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release-tag på formen v4.2.3 eller 4.2.3 (kun major.minor.patch, ikke suffiks som -rc1)"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  update-api-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      TAG: ${{ inputs.tag }}
+      DOCS_REPO: felleslosninger/docs
+      DOCS_FILE: _docs/eFormidling/Utvikling/integrasjonspunkt_eformidling2_api_restdocs.html
+      GENERATED_FILE: integrasjonspunkt/target/generated-docs/restdocs.html
+    steps:
+      # Taggen brukes videre som git-ref og branch-navn, så den må være en ren versjonsstreng:
+      # v4.2.3 eller 4.2.3 (kun major.minor.patch). Suffiks som -rc1 avvises fordi parse-version
+      # ville kuttet det bort, slik at en pre-release ble vist som den ordinære versjonen.
+      # Versjonen som vises i dokumentasjonen er taggen uten v-prefiks (v4.2.3 -> 4.2.3).
+      - name: Validate tag and derive version
+        run: |
+          if ! [[ "$TAG" =~ ^[vV]?([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Ugyldig tag '$TAG', forventet formen v4.2.3 eller 4.2.3 (kun major.minor.patch, ikke suffiks som -rc1)"
+            exit 1
+          fi
+          echo "VERSION=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Checkout ${{ inputs.tag }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup Maven environment
+        uses: felleslosninger/github-workflows/.github/actions/setup-maven-env@main
+        with:
+          java-version: 21
+          server-username: ${{ secrets.GH_PACKAGES_READ_USER }}
+          server-password: ${{ secrets.GH_PACKAGES_READ_PAT }}
+
+      # Versjonen i dokumentasjonen hentes fra pom-versjonen (parsedVersion), som er DEV-SNAPSHOT i git.
+      # Den må settes uten v-prefiks, ellers klarer ikke parse-version å tolke den og gir 0.0.0.
+      - name: Set version
+        run: mvn -B versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+
+      # Snippets til REST Docs genereres av testene, så testene må kjøres
+      - name: Build API docs
+        uses: felleslosninger/github-workflows/.github/actions/maven-run@main
+        with:
+          goals: package
+          module-name: integrasjonspunkt
+          maven-profile: restdocs
+
+      # Sikrer at vi aldri publiserer dokumentasjon med feil versjonsnummer
+      - name: Verify version in generated docs
+        run: |
+          if ! grep -qF "<p>Version $VERSION</p>" "$GENERATED_FILE"; then
+            echo "::error::Generert dokumentasjon viser ikke 'Version $VERSION'"
+            grep -n "<p>Version " "$GENERATED_FILE" || true
+            exit 1
+          fi
+
+      - name: Generate token for docs repo
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # pin@v3.3.0
+        with:
+          client-id: ${{ secrets.DIGDIR_PLATFORM_CI_APP_ID }}
+          private-key: ${{ secrets.DIGDIR_PLATFORM_CI_APP_PRIVATE_KEY }}
+          owner: felleslosninger
+          repositories: docs
+
+      - name: Checkout docs repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v7.0.1
+        with:
+          repository: ${{ env.DOCS_REPO }}
+          token: ${{ steps.token.outputs.token }}
+          path: docs-repo
+
+      # Sammenligner ny og publisert dokumentasjon, og skriver PR-teksten ut fra om selve
+      # API-beskrivelsen er endret eller ikke. Det som alltid er ulikt mellom to bygg av samme
+      # kode holdes utenfor: versjonslinja, "Last updated", tilfeldige UUID-er i eksemplene og
+      # den binære ASiC-responsen (zip, starter med PK) i eksempelet for nedlasting av melding.
+      - name: Compare with published docs
+        run: |
+          normalize() {
+            LC_ALL=C sed -E \
+              -e 's|<p>Version [^<]*</p>|<p>Version</p>|' \
+              -e '/^Last updated /d' \
+              -e 's/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/UUID/g' \
+              -e '/^PK/,/<\/code><\/pre>/d' \
+              "$1"
+          }
+          PUBLISHED="docs-repo/$DOCS_FILE"
+          PUBLISHED_VERSION=$(sed -n -E 's|.*<p>Version ([^<]*)</p>.*|\1|p' "$PUBLISHED" | head -1)
+          {
+            echo "Oppdaterer API-dokumentasjonen for integrasjonspunktet til **$VERSION** (publisert versjon: ${PUBLISHED_VERSION:-ukjent})."
+            echo
+            if diff -q <(normalize "$PUBLISHED") <(normalize "$GENERATED_FILE") > /dev/null; then
+              echo "**API-beskrivelsen er uendret** siden publisert versjon. Diffen består bare av versjonsnummeret og tilfeldige verdier i eksemplene (UUID-er og binært innhold)."
+              echo "Merge PR-en for at docs.digdir.no skal vise siste versjon, eller lukk den dersom det ikke er ønskelig."
+            else
+              echo "**API-beskrivelsen er endret** siden publisert versjon, se diffen for detaljer."
+            fi
+            echo
+            echo "Generert automatisk av [$GITHUB_WORKFLOW]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) fra [$TAG]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG)."
+          } > "$RUNNER_TEMP/pr-body.md"
+          cat "$RUNNER_TEMP/pr-body.md" >> "$GITHUB_STEP_SUMMARY"
+          cp "$GENERATED_FILE" "$PUBLISHED"
+
+      # Samme branch per tag, så en ny kjøring oppdaterer eksisterende PR i stedet for å lage en ny
+      - name: Create pull request in docs repo
+        id: pr
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # pin@v8.1.3
+        with:
+          token: ${{ steps.token.outputs.token }}
+          path: docs-repo
+          add-paths: ${{ env.DOCS_FILE }}
+          branch: ip-restdocs-${{ inputs.tag }}
+          title: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ inputs.tag }}"
+          commit-message: "docs: Oppdater API-dokumentasjon for integrasjonspunkt til ${{ inputs.tag }}"
+          body-path: ${{ runner.temp }}/pr-body.md
+
+      - name: Write result to summary
+        env:
+          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
+          PR_OPERATION: ${{ steps.pr.outputs.pull-request-operation }}
+        run: |
+          {
+            echo
+            if [ -n "$PR_URL" ]; then
+              echo "PR ($PR_OPERATION): $PR_URL"
+            else
+              echo "Ingen PR opprettet: generert dokumentasjon er identisk med den publiserte."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

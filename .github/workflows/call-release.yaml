@@ -41,6 +41,20 @@ jobs:
       java-version: 21
     secrets: inherit
 
+  update-api-docs:
+    #oppretter PR i felleslosninger/docs med API-dokumentasjonen for denne releasen
+    #ingen andre jobber avhenger av denne, så en feil her stopper ikke selve releasen
+    #pre-releaser hoppes over, docs.digdir.no skal vise siste ordinære release
+    needs: [build-and-deploy-image, sign-and-attach-jar]
+    if: ${{ !github.event.release.prerelease }}
+    uses: ./.github/workflows/update-api-docs.yaml
+    permissions:
+      contents: read
+      packages: read
+    with:
+      tag: ${{ github.event.release.tag_name }}
+    secrets: inherit
+
   sign-and-attach-jar:
     #signs the published jar with the eFormidling code signing key and attaches it to the release
     needs: call-workflow-ci-build-publish-lib
