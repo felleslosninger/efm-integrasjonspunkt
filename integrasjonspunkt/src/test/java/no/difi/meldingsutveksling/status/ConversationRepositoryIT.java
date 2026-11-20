@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class ConversationRepositoryIT {
 
+    private static final String SVARINN_DOCUMENT_TYPE = "urn:no:difi:arkivmelding:xsd::arkivmelding";
+
     @Autowired
     private ConversationRepository conversationRepository;
 
@@ -118,9 +120,36 @@ class ConversationRepositoryIT {
         finishedExpired.setFinished(true);
         conversationRepository.save(finishedExpired);
 
-        Iterable<Long> expiredIds = conversationRepository.findIdsForExpiredConversations(now);
+        Iterable<Long> expiredIds = conversationRepository.findIdsForExpiredConversations(now, SVARINN_DOCUMENT_TYPE);
 
         assertThat(expiredIds).containsExactly(expired.getId());
+    }
+
+    @Test
+    void testFindIdsForExpiredConversationsSkipsMessagesReceivedFromSvarInn() {
+        OffsetDateTime expiry = OffsetDateTime.now().minusHours(1);
+        String receiptDocumentType = "urn:no:difi:arkivmelding:xsd::arkivmelding_kvittering";
+
+        saveExpired("svarinn", ConversationDirection.INCOMING, ServiceIdentifier.DPF, SVARINN_DOCUMENT_TYPE, expiry);
+        Long dpfReceipt = saveExpired("dpf-receipt", ConversationDirection.INCOMING, ServiceIdentifier.DPF, receiptDocumentType, expiry);
+        Long dpfOutgoing = saveExpired("dpf-out", ConversationDirection.OUTGOING, ServiceIdentifier.DPF, SVARINN_DOCUMENT_TYPE, expiry);
+        Long dpoIncoming = saveExpired("dpo-in", ConversationDirection.INCOMING, ServiceIdentifier.DPO, SVARINN_DOCUMENT_TYPE, expiry);
+
+        Iterable<Long> expiredIds = conversationRepository.findIdsForExpiredConversations(OffsetDateTime.now(), SVARINN_DOCUMENT_TYPE);
+
+        assertThat(expiredIds).containsExactlyInAnyOrder(dpfReceipt, dpfOutgoing, dpoIncoming);
+    }
+
+    private Long saveExpired(String id, ConversationDirection direction, ServiceIdentifier serviceIdentifier, String documentIdentifier, OffsetDateTime expiry) {
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("conv-" + id);
+        conversation.setMessageId("msg-" + id);
+        conversation.setDirection(direction);
+        conversation.setServiceIdentifier(serviceIdentifier);
+        conversation.setDocumentIdentifier(documentIdentifier);
+        conversation.setExpiry(expiry);
+        conversation.setFinished(false);
+        return conversationRepository.save(conversation).getId();
     }
 
     @Test

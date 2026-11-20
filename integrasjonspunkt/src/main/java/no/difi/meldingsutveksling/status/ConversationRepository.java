@@ -104,8 +104,15 @@ public interface ConversationRepository extends PagingAndSortingRepository<Conve
     Page<Long> findIdsForPollableConversations(Pageable pageable);
 
     @Transactional(readOnly = true)
-    @Query("SELECT id FROM Conversation WHERE expiry < :time AND finished = false")
-    Iterable<Long> findIdsForExpiredConversations(@Param("time") OffsetDateTime time);
+    // Messages received from SvarInn are excluded: receipt is confirmed to SvarInn as soon as the message is
+    // stored locally, so SvarInn will not deliver it again. Expiring (and thereby deleting) such a message
+    // before the end user system has fetched it would lose it.
+    @Query("SELECT id FROM Conversation WHERE expiry < :time AND finished = false" +
+        " AND (direction IS NULL OR direction <> no.difi.meldingsutveksling.nextmove.ConversationDirection.INCOMING" +
+        " OR serviceIdentifier IS NULL OR serviceIdentifier <> no.difi.meldingsutveksling.ServiceIdentifier.DPF" +
+        " OR documentIdentifier IS NULL OR documentIdentifier <> :svarInnDocumentType)")
+    Iterable<Long> findIdsForExpiredConversations(@Param("time") OffsetDateTime time,
+                                                  @Param("svarInnDocumentType") String svarInnDocumentType);
 
     Long countByPollable(boolean pollable);
 
