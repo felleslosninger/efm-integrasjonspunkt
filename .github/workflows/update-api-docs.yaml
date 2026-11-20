@@ -90,12 +90,13 @@ jobs:
             exit 1
           fi
 
+      # Egen GitHub-app som bare er installert på felleslosninger/docs (Contents og Pull requests: write)
       - name: Generate token for docs repo
         id: token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # pin@v3.3.0
         with:
-          client-id: ${{ secrets.DIGDIR_PLATFORM_CI_APP_ID }}
-          private-key: ${{ secrets.DIGDIR_PLATFORM_CI_APP_PRIVATE_KEY }}
+          client-id: ${{ vars.EFM_DOCS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.EFM_DOCS_APP_PRIVATE_KEY }}
           owner: felleslosninger
           repositories: docs
 
