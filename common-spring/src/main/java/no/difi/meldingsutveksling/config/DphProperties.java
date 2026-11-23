@@ -39,9 +39,10 @@ public class DphProperties {
     private long pollingrate = 30000;
 
     /**
-     * How long a notification that cannot be handled is retried, counted from when MSH created it. Until then, a
-     * message that is not found or cannot be fetched because of a temporary error is retried on every poll. After
-     * that, a message that cannot be fetched is rejected, and a notification that still cannot be handled is deleted.
+     * How long a notification that cannot be handled is retried, counted from when this instance first failed to
+     * handle it. Until then, a message that is not found, or cannot be received because of an error that is not in
+     * the message itself, is retried on every poll. After that, the notification is deleted and the error is logged,
+     * without rejecting the message. Must be between zero and 365 days.
      */
     @NotNull
     private Duration notificationRetryPeriod = Duration.ofHours(24);

@@ -3,6 +3,7 @@ package no.difi.meldingsutveksling.dph.client;
 import com.nimbusds.jose.JWSObject;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
+import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.dph.client.domain.SendBusinessDocumentInput;
 import no.difi.meldingsutveksling.dph.client.internal.DphClient;
@@ -13,6 +14,8 @@ import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.Notification;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
+import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
+import org.springframework.core.io.Resource;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,15 +58,46 @@ public class DphClientService {
         return dphClient.getMessage(onBehalfOf, receiverHerId, messageId);
     }
 
+    /**
+     * The business document of the message, with its encrypted ASiC, if any. The caller closes the ASiC, which may be
+     * backed by a temporary file. If the business document cannot be read, the ASiC is closed here.
+     *
+     * @throws InvalidBusinessDocumentException if the business document cannot be deserialized
+     * @throws DphException without status code if the response from the adapter cannot be decrypted or verified,
+     *                      which is a fault between the integrasjonspunkt and the adapter, not in the message
+     */
     public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
         String jweToken = parcelService.signAndEncrypt(KxJson.encode(new GetDocumentInput(id), GetDocumentInput.Companion.serializer()));
         WrappedPackage wrappedPackage = dphClient.receiveBusinessDocument(onBehalfOf, jweToken);
-        JWSObject jws = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
-        String json = jws.getPayload().toString();
+        try {
+            JWSObject jws = parcelService.decryptAndVerify(wrappedPackage.forretningsmelding());
+            String json = jws.getPayload().toString();
 
-        return new BusinessDocumentResponse()
-            .setSbd(parcelService.toSBD(json))
-            .setEncryptedAsic(wrappedPackage.encryptedAsic());
+            return new BusinessDocumentResponse()
+                .setSbd(toSBD(json))
+                .setEncryptedAsic(wrappedPackage.encryptedAsic());
+        } catch (RuntimeException e) {
+            close(wrappedPackage.encryptedAsic(), e);
+            throw e;
+        }
+    }
+
+    private StandardBusinessDocument toSBD(String json) {
+        try {
+            return parcelService.toSBD(json);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL, e);
+        }
+    }
+
+    private static void close(Resource asic, RuntimeException failure) {
+        if (asic instanceof AutoCloseable closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                failure.addSuppressed(e);
+            }
+        }
     }
 
     /**

@@ -22,6 +22,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 @Component
 public class NextMoveQueueImpl implements NextMoveQueue {
 
@@ -53,52 +57,74 @@ public class NextMoveQueueImpl implements NextMoveQueue {
     }
 
     @Override
-    public void enqueueIncomingMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
-        enqueueIncomingMessage(sbd, serviceIdentifier, null);
+    @Transactional
+    public EnqueueResult enqueueIncomingMessage(StandardBusinessDocument sbd, ServiceIdentifier serviceIdentifier) {
+        return enqueueIncomingMessage(sbd, serviceIdentifier, null);
     }
 
     @Override
     @Transactional
-    public void enqueueIncomingMessage(StandardBusinessDocument sbd,
-                                       ServiceIdentifier serviceIdentifier,
-                                       Resource asic) {
+    public EnqueueResult enqueueIncomingMessage(StandardBusinessDocument sbd,
+                                                ServiceIdentifier serviceIdentifier,
+                                                Resource asic) {
         MDC.put(NextMoveConsts.CORRELATION_ID, sbd.getMessageId());
         if (!(sbd.getAny() instanceof BusinessMessage)) {
             throw new MeldingsUtvekslingRuntimeException("SBD payload not of a known type");
         } else if (sbdService.isExpired(sbd)) {
             timeToLiveHelper.registerErrorStatusAndMessage(sbd, serviceIdentifier, ConversationDirection.INCOMING);
-            return;
+            discard(sbd.getMessageId(), asic);
+            return EnqueueResult.EXPIRED;
         } else if (SBDUtil.isStatus(sbd)) {
             log.debug("Message with id={} is a receipt", sbd.getMessageId());
             conversationService.registerStatus(sbd.getMessageId(), ((StatusMessage) sbd.getAny()).getStatus());
-            return;
+            discard(sbd.getMessageId(), asic);
+            return EnqueueResult.STATUS;
+        }
+
+        if (messageRepo.findByMessageId(sbd.getMessageId()).isPresent()) {
+            // The ASiC of the message already on the queue is left alone, since the fagsystem may be reading it
+            log.warn("Received duplicate message with id={}, message discarded.", sbd.getMessageId());
+            discard(sbd.getMessageId(), asic);
+            return EnqueueResult.DUPLICATE;
         }
 
         if (asic != null) {
             try {
                 messagePersister.write(sbd.getMessageId(), NextMoveConsts.ASIC_FILE, asic);
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 throw new MeldingsUtvekslingRuntimeException("Failed to persist ASIC for message " + sbd.getMessageId(), e);
             }
         }
 
-        if (messageRepo.findByMessageId(sbd.getMessageId()).isEmpty()) {
-            NextMoveInMessage message = messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier));
+        NextMoveInMessage message = messageRepo.save(NextMoveInMessage.of(sbd, serviceIdentifier));
 
-            SBDUtil.getOptionalMessageChannel(sbd).ifPresent(mc ->
-                    messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), mc.getIdentifier()))
-            );
-            conversationService.registerConversation(
-                    sbd,
-                    serviceIdentifier,
-                    ConversationDirection.INCOMING,
-                    ReceiptStatus.INNKOMMENDE_MOTTATT
-            );
-            statusSender.queue(message.getSbd(), serviceIdentifier, ReceiptStatus.MOTTATT);
-            log.info(NextMoveMessageMarkers.markerFrom(message),
-                    "Message [id={}, serviceIdentifier={}] put on local queue", message.getMessageId(), serviceIdentifier);
-        } else {
-            log.warn("Received duplicate message with id={}, message discarded.", sbd.getMessageId());
+        SBDUtil.getOptionalMessageChannel(sbd).ifPresent(mc ->
+                messageChannelRepository.save(new MessageChannelEntry(sbd.getMessageId(), mc.getIdentifier()))
+        );
+        conversationService.registerConversation(
+                sbd,
+                serviceIdentifier,
+                ConversationDirection.INCOMING,
+                ReceiptStatus.INNKOMMENDE_MOTTATT
+        );
+        statusSender.queue(message.getSbd(), serviceIdentifier, ReceiptStatus.MOTTATT);
+        log.info(NextMoveMessageMarkers.markerFrom(message),
+                "Message [id={}, serviceIdentifier={}] put on local queue", message.getMessageId(), serviceIdentifier);
+        return EnqueueResult.ENQUEUED;
+    }
+
+    /**
+     * Reads the ASiC of a message that is not put on the queue to the end. An ASiC may be streamed while it is created, e.g. from Fiks
+     * SvarInn, and the threads creating it would wait forever for it to be read.
+     */
+    private void discard(String messageId, Resource asic) {
+        if (asic == null) {
+            return;
+        }
+        try (InputStream inputStream = asic.getInputStream()) {
+            inputStream.transferTo(OutputStream.nullOutputStream());
+        } catch (IOException e) {
+            log.warn("Reading the ASiC of message with id={} to the end failed", messageId, e);
         }
     }
 

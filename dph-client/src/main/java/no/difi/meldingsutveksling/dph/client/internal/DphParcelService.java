@@ -70,7 +70,7 @@ public class DphParcelService {
         try {
             return verifyJWT.verify(signed);
         } catch (Exception e) {
-            throw new DphException(FeilmeldingForApplikasjonskvittering.SIGNATURFEIL);
+            throw new DphException(FeilmeldingForApplikasjonskvittering.SIGNATURFEIL, e);
         }
     }
 
@@ -78,7 +78,7 @@ public class DphParcelService {
         try {
             return JsonWebEncryption.decrypt(jweToken, keystoreHelper.loadPrivateKey());
         } catch (Exception e) {
-            throw new DphException(FeilmeldingForApplikasjonskvittering.UGYLIG_SERTIFIKAT);
+            throw new DphException(FeilmeldingForApplikasjonskvittering.UGYLIG_SERTIFIKAT, e);
         }
     }
 
@@ -99,9 +99,22 @@ public class DphParcelService {
         return resource;
     }
 
+    /**
+     * Copies the ASiC to a resource that is backed by a temporary file when it is large. The caller closes it, which
+     * deletes the file. If copying fails, e.g. because the connection is lost, the resource is closed here.
+     */
     public Resource getEncryptedAsic(Part part) {
         InMemoryWithTempFileFallbackResource resource = resourceFactory.getResource("dph-", ".asic.cms");
-        ResourceUtils.copy(part.content(), resource);
+        try {
+            ResourceUtils.copy(part.content(), resource);
+        } catch (RuntimeException e) {
+            try {
+                resource.close();
+            } catch (RuntimeException closeFailure) {
+                e.addSuppressed(closeFailure);
+            }
+            throw e;
+        }
         return resource;
     }
 }

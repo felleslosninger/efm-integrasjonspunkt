@@ -24,7 +24,11 @@ public class DphException extends RuntimeException {
     }
 
     public DphException(FeilmeldingForApplikasjonskvittering feilmelding) {
-        super(feilmelding.getNavn());
+        this(feilmelding, null);
+    }
+
+    public DphException(FeilmeldingForApplikasjonskvittering feilmelding, Throwable cause) {
+        super(feilmelding.getNavn(), cause);
         this.errorCode = feilmelding.getVerdi();
         this.statusCode = null;
     }
