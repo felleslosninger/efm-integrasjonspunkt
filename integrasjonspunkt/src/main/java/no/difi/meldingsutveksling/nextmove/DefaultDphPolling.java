@@ -29,6 +29,8 @@ import no.difi.meldingsutveksling.nhn.adapter.model.NotificationType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
@@ -118,6 +120,7 @@ public class DefaultDphPolling implements DphPolling {
     private final ConversationService conversationService;
     private final NextMoveMessageService nextMoveMessageService;
     private final IntegrasjonspunktProperties properties;
+    private final MessageStatusFactory messageStatusFactory;
 
     /**
      * The messages that have been received or rejected, but whose notifications have not been deleted yet, by HER-id
@@ -381,6 +384,7 @@ public class DefaultDphPolling implements DphPolling {
             HandledMessage rejected = new HandledMessage(herId, incomingMessage,
                 getApplicationReceiptForRejected(incomingMessage, applicationReceipt, error), now());
             rejected.rejectionError = error;
+            rejected.applicationReceipt = applicationReceipt;
             rejected.sbd = response != null ? response.getSbd() : null;
             return Optional.of(rejected);
         } finally {
@@ -436,8 +440,15 @@ public class DefaultDphPolling implements DphPolling {
             if (existing.isPresent() && existing.get().getDirection() != ConversationDirection.INCOMING) {
                 return;
             }
+            if (existing.isPresent() && !handled.rejectionRegistrationAttempted) {
+                // Another instance rejected the message since this instance found it not handled, and answers it
+                log.info("DPH message has just been rejected by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+                handled.pendingApplicationReceipt = null;
+                return;
+            }
             // An incoming conversation exists if registering the status failed before
             if (existing.isEmpty()) {
+                handled.rejectionRegistrationAttempted = true;
                 Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
                 if (conversation != null) {
                     conversation.setExternalSystemReference(incomingMessage.getId());
@@ -460,7 +471,7 @@ public class DefaultDphPolling implements DphPolling {
         IncomingMessage incomingMessage = handled.message;
         String messageId = incomingMessage.getBusinessDocumentId();
         StandardBusinessDocument sbd = handled.sbd;
-        String defaultDocumentType = incomingMessage.isAppRec()
+        String defaultDocumentType = handled.applicationReceipt
             ? properties.getDph().getReceiptDocumentType()
             : properties.getDph().getDialogmeldingDocumentType();
         // The business document of a rejected message may lack any of these
@@ -844,12 +855,15 @@ public class DefaultDphPolling implements DphPolling {
         Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId);
 
         conversation.ifPresent(c -> {
-            switch (message.getStatus()) {
+            MessageStatus status = switch (message.getStatus()) {
                 case DialogmeldingKvitteringStatus.OK ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", message.getRawReceipt());
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Application receipt has been recieved.");
                 case DialogmeldingKvitteringStatus.REJECTED, DialogmeldingKvitteringStatus.OK_ERROR_IN_MESSAGE_PART ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.FEIL, "Message has been rejected by the application", message.getRawReceipt());
-            }
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Message has been rejected by the application");
+            };
+            status.setRawReceipt(message.getRawReceipt());
+            // Locked, so that instances receiving the ApplicationReceipt at the same time register the status once
+            conversationService.registerStatusesWithLock(c, List.of(status));
         });
 
         if (properties.getFeature().isEnableReceipts()) {
@@ -885,6 +899,15 @@ public class DefaultDphPolling implements DphPolling {
          */
         private StandardBusinessDocument sbd;
         private boolean rejectionRegistered;
+        /**
+         * Whether the rejected message is an ApplicationReceipt.
+         */
+        private boolean applicationReceipt;
+        /**
+         * Whether registering the rejection has been attempted, so that a conversation found later may be from this
+         * instance.
+         */
+        private boolean rejectionRegistrationAttempted;
         /**
          * Whether completing the message after its notification was deleted has failed and been logged.
          */

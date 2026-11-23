@@ -24,6 +24,7 @@ import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
 import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,7 @@ class DefaultDphPollingTest {
     @BeforeEach
     void setUp() {
         target = new DefaultDphPolling(clock, dphService, sbdFactory, nextMoveQueue, dphClientService,
-            conversationService, nextMoveMessageService, properties);
+            conversationService, nextMoveMessageService, properties, new MessageStatusFactory(clock));
 
         lenient().when(properties.getDph().getHerIds()).thenReturn(List.of(HER_ID));
         lenient().when(properties.getDph().getNotificationRetryPeriod()).thenReturn(RETRY_PERIOD);
@@ -1068,6 +1069,64 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_does_not_answer_message_that_another_instance_rejected_after_it_was_found_not_handled() {
+        IncomingMessage incomingMessage = incomingMessage("failing", false);
+        givenNotifications(newMessage("failing"));
+        givenMessage(incomingMessage);
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "failing")).thenThrow(invalidDocument());
+        when(conversationService.findConversation(incomingMessage.getBusinessDocumentId()))
+            .thenReturn(Optional.empty(), Optional.of(new Conversation().setDirection(ConversationDirection.INCOMING)));
+
+        target.poll();
+
+        verifyNoApplicationReceipt();
+        verify(conversationService, never()).registerConversation(any(MessageInformable.class));
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "failing");
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-failing"));
+    }
+
+    @Test
+    void poll_registers_invalid_application_receipt_with_the_document_type_of_application_receipts() {
+        givenNotifications(newMessage("invalid-apprec"));
+        givenMessage(incomingMessage("invalid-apprec", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "invalid-apprec")).thenThrow(adapterFindsInvalid(
+            FeilmeldingForApplikasjonskvittering.VALIDERINGSFEIL_XML, DphException.INVALID_APPLICATION_RECEIPT));
+        when(properties.getDph().getReceiptDocumentType()).thenReturn("urn:no:difi:helse:xsd::dialogmelding_kvittering");
+
+        target.poll();
+
+        ArgumentCaptor<MessageInformable> captor = ArgumentCaptor.forClass(MessageInformable.class);
+        verify(conversationService).registerConversation(captor.capture());
+        assertThat(captor.getValue().getDocumentIdentifier()).isEqualTo("urn:no:difi:helse:xsd::dialogmelding_kvittering");
+    }
+
+    @Test
+    void poll_registers_the_status_of_received_application_receipt_on_the_sent_conversation_with_a_lock() {
+        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+        givenNotifications(newMessage("apprec"));
+        givenMessage(incomingMessage("apprec", true));
+        StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
+        when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING_KVITTERING.getType());
+        when(sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)).thenReturn(Optional.of(new DialogmeldingKvitteringMessage()
+            .setRelatedToMessageId("sent").setStatus(DialogmeldingKvitteringStatus.OK).setRawReceipt("<AppRec/>")));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "apprec")).thenReturn(new BusinessDocumentResponse().setSbd(sbd));
+        Conversation sent = outgoingConversation(ReceiptStatus.SENDT);
+        // The conversation of the incoming ApplicationReceipt is looked up first, and not found
+        lenient().when(conversationService.findConversation("sent")).thenReturn(Optional.of(sent));
+
+        target.poll();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.Collection<MessageStatus>> captor = ArgumentCaptor.forClass(java.util.Collection.class);
+        verify(conversationService).registerStatusesWithLock(eq(sent), captor.capture());
+        assertThat(captor.getValue()).singleElement().satisfies(status -> {
+            assertThat(status.getStatus()).isEqualTo(ReceiptStatus.LEVERT.name());
+            assertThat(status.getRawReceipt()).isEqualTo("<AppRec/>");
+        });
+        verifyNoApplicationReceipt();
+    }
+
+    @Test
     void poll_only_marks_as_downloaded_message_sent_again_with_the_id_of_a_business_document_received_before() {
         IncomingMessage resent = incomingMessage("resent", false);
         givenNotifications(newMessage("resent"));
@@ -1080,21 +1139,6 @@ class DefaultDphPollingTest {
         verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
         verifyNoApplicationReceipt();
         verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "resent");
-    }
-
-    @Test
-    void poll_only_marks_as_downloaded_message_handled_before_with_the_same_nhn_message_id() {
-        IncomingMessage incomingMessage = incomingMessage("received", false);
-        givenNotifications(newMessage("received"));
-        givenMessage(incomingMessage);
-        when(conversationService.findConversation(incomingMessage.getBusinessDocumentId())).thenReturn(Optional.of(
-            new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("received")));
-
-        target.poll();
-
-        verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
-        verifyNoApplicationReceipt();
-        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "received");
     }
 
     @Test
