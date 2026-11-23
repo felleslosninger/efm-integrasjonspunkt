@@ -119,12 +119,12 @@ class DefaultDphPollingTest {
         Iso6523 otherOnBehalfOf = Iso6523.of(ICD.NO_ORG, "910077473");
         when(properties.getDph().getHerIds()).thenReturn(List.of(HER_ID, otherHerId));
         when(dphService.getOnBehalfOf(NhnIdentifier.herId(otherHerId))).thenReturn(otherOnBehalfOf);
-        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID)).thenThrow(new IllegalStateException("Adapter unavailable"));
-        when(dphClientService.getUnreadNotifications(otherOnBehalfOf, otherHerId)).thenReturn(List.of());
+        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH)).thenThrow(new IllegalStateException("Adapter unavailable"));
+        when(dphClientService.getUnreadNotifications(otherOnBehalfOf, otherHerId, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH)).thenReturn(List.of());
 
         assertThatNoException().isThrownBy(() -> target.poll());
 
-        verify(dphClientService).getUnreadNotifications(otherOnBehalfOf, otherHerId);
+        verify(dphClientService).getUnreadNotifications(otherOnBehalfOf, otherHerId, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH);
     }
 
     @Test
@@ -185,7 +185,7 @@ class DefaultDphPollingTest {
 
     @Test
     void poll_gives_up_message_on_unexpected_error_after_the_retry_period_without_rejecting_it_and_continues_with_next_message() {
-        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID))
+        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH))
             .thenReturn(List.of(newMessage("failing"), newMessage("ok")), List.of(newMessage("failing")));
         givenMessage(incomingMessage("failing", false));
         givenMessage(incomingMessage("ok", false));
@@ -676,7 +676,7 @@ class DefaultDphPollingTest {
         when(properties.getDph().getHerIds()).thenReturn(List.of(HER_ID, otherHerId));
         when(dphService.getOnBehalfOf(NhnIdentifier.herId(otherHerId))).thenReturn(otherOnBehalfOf);
         givenNotifications(newMessage("shared"));
-        when(dphClientService.getUnreadNotifications(otherOnBehalfOf, otherHerId)).thenReturn(List.of(
+        when(dphClientService.getUnreadNotifications(otherOnBehalfOf, otherHerId, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH)).thenReturn(List.of(
             new Notification("notification-other", "shared", NotificationType.NEW_MESSAGE, otherHerId, SENDER_HER_ID, null, RECENT)));
         givenMessage(toHerId);
         when(dphClientService.getMessage(otherOnBehalfOf, otherHerId, "shared")).thenReturn(toOtherHerId);
@@ -1045,7 +1045,7 @@ class DefaultDphPollingTest {
     @Test
     void poll_sends_pending_application_receipt_after_another_instance_deleted_the_notification() {
         when(properties.getFeature().isEnableReceipts()).thenReturn(false);
-        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID)).thenReturn(List.of(newMessage("ok")), List.of());
+        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH)).thenReturn(List.of(newMessage("ok")), List.of());
         givenMessage(incomingMessage("ok", false));
         givenDialogmelding("ok");
         StandardBusinessDocument appRecSbd = mock(StandardBusinessDocument.class);
@@ -1068,75 +1068,18 @@ class DefaultDphPollingTest {
     }
 
     @Test
-    void poll_receives_and_answers_new_message_with_the_id_of_a_message_received_before() {
-        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+    void poll_only_marks_as_downloaded_message_sent_again_with_the_id_of_a_business_document_received_before() {
         IncomingMessage resent = incomingMessage("resent", false);
         givenNotifications(newMessage("resent"));
         givenMessage(resent);
-        givenDialogmelding("resent");
         when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(
             new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("earlier-nhn-message")));
 
         target.poll();
 
-        verify(nextMoveQueue).enqueueIncomingMessage(any(), eq(ServiceIdentifier.DPH), any());
-        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.OK);
+        verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
+        verifyNoApplicationReceipt();
         verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "resent");
-    }
-
-    @Test
-    void poll_answers_resent_message_without_delivering_it_again_while_the_earlier_one_is_still_on_the_queue() {
-        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
-        IncomingMessage resent = incomingMessage("resent", false);
-        givenNotifications(newMessage("resent"));
-        givenMessage(resent);
-        givenDialogmelding("resent");
-        Conversation conversation = new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("earlier-nhn-message");
-        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(conversation));
-        when(nextMoveQueue.enqueueIncomingMessage(any(), eq(ServiceIdentifier.DPH), any())).thenReturn(EnqueueResult.DUPLICATE);
-
-        target.poll();
-
-        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.OK);
-        assertThat(conversation.getExternalSystemReference()).isEqualTo("resent");
-        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "resent");
-    }
-
-    @Test
-    void poll_saves_the_nhn_message_id_of_rejected_resent_message_on_the_existing_conversation() {
-        IncomingMessage resent = incomingMessage("resent", false);
-        givenNotifications(newMessage("resent"));
-        givenMessage(resent);
-        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "resent")).thenThrow(invalidDocument());
-        Conversation conversation = outgoingConversation(ReceiptStatus.FEIL)
-            .setDirection(ConversationDirection.INCOMING)
-            .setExternalSystemReference("earlier-nhn-message");
-        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(conversation));
-
-        target.poll();
-
-        verify(conversationService, never()).registerConversation(any(MessageInformable.class));
-        verify(conversationService).save(conversation);
-        assertThat(conversation.getExternalSystemReference()).isEqualTo("resent");
-        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
-    }
-
-    @Test
-    void poll_does_not_register_rejected_resent_message_as_failed_on_the_conversation_of_a_delivered_message() {
-        IncomingMessage resent = incomingMessage("resent", false);
-        givenNotifications(newMessage("resent"));
-        givenMessage(resent);
-        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "resent")).thenThrow(invalidDocument());
-        Conversation delivered = outgoingConversation(ReceiptStatus.INNKOMMENDE_MOTTATT)
-            .setDirection(ConversationDirection.INCOMING)
-            .setExternalSystemReference("earlier-nhn-message");
-        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(delivered));
-
-        target.poll();
-
-        verify(conversationService, never()).registerStatus(eq(resent.getBusinessDocumentId()), eq(ReceiptStatus.FEIL), anyString());
-        assertThat(delivered.getExternalSystemReference()).isEqualTo("resent");
-        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
     }
 
     @Test
@@ -1307,7 +1250,7 @@ class DefaultDphPollingTest {
     }
 
     private void givenNotifications(Notification... notifications) {
-        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID)).thenReturn(List.of(notifications));
+        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID, DefaultDphPolling.MAX_NOTIFICATIONS_TO_FETCH)).thenReturn(List.of(notifications));
     }
 
     private void givenMessage(IncomingMessage incomingMessage) {

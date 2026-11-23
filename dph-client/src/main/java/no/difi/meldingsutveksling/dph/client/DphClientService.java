@@ -36,14 +36,9 @@ public class DphClientService {
     }
 
     /**
-     * The unread notifications of {@code herId}, at most as many as the adapter's default. A notification stays
-     * unread until it is deleted with {@link #deleteNotifications(Iso6523, List)}.
-     */
-    public List<Notification> getUnreadNotifications(Iso6523 onBehalfOf, Integer herId) {
-        return dphClient.getUnreadNotifications(onBehalfOf, herId, null);
-    }
-
-    /**
+     * The unread notifications of {@code herId}. A notification stays unread until it is deleted with
+     * {@link #deleteNotifications(Iso6523, List)}.
+     *
      * @param notificationsToFetch at most this many notifications (1-1000)
      */
     public List<Notification> getUnreadNotifications(Iso6523 onBehalfOf, Integer herId, int notificationsToFetch) {

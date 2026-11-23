@@ -64,7 +64,8 @@ import java.util.function.Supplier;
  * a notification that has been handled or given up is only deleted again. A message that has been put on the local
  * queue is also recognized by its conversation, or by the local queue when another instance received it at the same
  * time, so it is never received or answered again. A rejected message gets an incoming conversation with the status
- * FEIL before it is answered, so it is recognized the same way.
+ * FEIL before it is answered, so it is recognized the same way. A message is recognized by the id of its business
+ * document, so a message that the sender sends again with the same id is only marked as downloaded, and not answered.
  * <p>
  * Some handled messages leave no conversation of their own, so they are not recognized after a restart or on another
  * instance: a message rejected by two instances at the same time, a rejected message sent from this
@@ -92,7 +93,7 @@ public class DefaultDphPolling implements DphPolling {
     static final int MAX_NOTIFICATIONS_TO_DELETE = 1000;
 
     /**
-     * The most unread notifications the adapter returns, which is its default.
+     * The most unread notifications fetched in one request, which is also the most the adapter and MSH return.
      */
     static final int MAX_NOTIFICATIONS_TO_FETCH = 1000;
 
@@ -176,7 +177,7 @@ public class DefaultDphPolling implements DphPolling {
 
     private void pollForHerId(@NotNull Integer herId) {
         Iso6523 onBehalfOf = dphService.getOnBehalfOf(NhnIdentifier.herId(herId));
-        List<Notification> notifications = dphClientService.getUnreadNotifications(onBehalfOf, herId);
+        List<Notification> notifications = dphClientService.getUnreadNotifications(onBehalfOf, herId, MAX_NOTIFICATIONS_TO_FETCH);
 
         List<Notification> handled = new ArrayList<>();
         int newlyFinished = 0;
@@ -206,7 +207,7 @@ public class DefaultDphPolling implements DphPolling {
     }
 
     /**
-     * The adapter returns at most {@link #MAX_NOTIFICATIONS_TO_FETCH} unread notifications. If none of a full page can
+     * At most {@link #MAX_NOTIFICATIONS_TO_FETCH} unread notifications are fetched. If none of a full page can
      * be finished, e.g. because they are retried or cannot be deleted, newer notifications may not be fetched at all.
      */
     private void warnIfStuck(Integer herId, int fetched, int newlyFinished) {
@@ -342,13 +343,10 @@ public class DefaultDphPolling implements DphPolling {
             log.info("DPH message received: incomingMessage={}", incomingMessage);
         }
 
-        Optional<Conversation> conversation = conversationService.findConversation(incomingMessage.getBusinessDocumentId());
-        if (isAlreadyHandled(conversation, incomingMessage)) {
+        if (isAlreadyHandled(incomingMessage)) {
             log.info("DPH message has already been received or rejected, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
             return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
         }
-        // An incoming conversation of another NHN message with the same business document id
-        boolean resent = conversation.filter(c -> c.getDirection() == ConversationDirection.INCOMING).isPresent();
 
         BusinessDocumentResponse response = null;
         EnqueueResult result;
@@ -391,14 +389,9 @@ public class DefaultDphPolling implements DphPolling {
 
         warnIfIdsDiffer(incomingMessage, response.getSbd());
         if (result == EnqueueResult.DUPLICATE) {
-            if (!resent) {
-                // Another instance received the message at the same time, and answers it
-                log.info("DPH message has just been received by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
-                return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
-            }
-            // The fagsystem has not fetched the earlier message yet, so this one is not delivered again, but answered
-            log.info("DPH message has been sent again while the earlier message is still on the local queue. " +
-                "It is not delivered again, but it is answered: incomingMessage = {}", incomingMessage);
+            // Another instance received the message at the same time, and answers it
+            log.info("DPH message has just been received by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+            return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
         }
 
         // The message is received, so nothing that fails from here on may reject it
@@ -443,16 +436,13 @@ public class DefaultDphPolling implements DphPolling {
             if (existing.isPresent() && existing.get().getDirection() != ConversationDirection.INCOMING) {
                 return;
             }
-            // An incoming conversation exists if registering the status failed before, or if the message was sent
-            // again with the id of a business document that has been received or rejected before
-            Conversation conversation = existing.orElseGet(() -> conversationService.registerConversation(rejectedMessage(handled)));
-            if (conversation != null && !incomingMessage.getId().equals(conversation.getExternalSystemReference())) {
-                conversation.setExternalSystemReference(incomingMessage.getId());
-                conversationService.save(conversation);
-            }
-            // The message received before with this business document id has been delivered, so it did not fail
-            if (conversation != null && hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT)) {
-                return;
+            // An incoming conversation exists if registering the status failed before
+            if (existing.isEmpty()) {
+                Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
+                if (conversation != null) {
+                    conversation.setExternalSystemReference(incomingMessage.getId());
+                    conversationService.save(conversation);
+                }
             }
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL,
                 "Message was rejected when received: " + handled.rejectionError.getText());
@@ -512,24 +502,14 @@ public class DefaultDphPolling implements DphPolling {
      * INNKOMMENDE_MOTTATT when the message is received. A rejected message gets an incoming conversation too.
      * <p>
      * A message to several HER-ids on this integrasjonspunkt has one business document, so it is only received once.
+     * So is a message that the sender sends again with the id of a business document that has been received or
+     * rejected before, e.g. because it got no ApplicationReceipt: it is only marked as downloaded, and not answered.
      */
-    private static boolean isAlreadyHandled(Optional<Conversation> businessDocumentConversation, IncomingMessage incomingMessage) {
-        return businessDocumentConversation
+    private boolean isAlreadyHandled(IncomingMessage incomingMessage) {
+        return conversationService.findConversation(incomingMessage.getBusinessDocumentId())
             .filter(conversation -> conversation.getDirection() == ConversationDirection.INCOMING
-                ? isSameMshMessage(conversation, incomingMessage)
-                : hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
+                || hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
             .isPresent();
-    }
-
-    /**
-     * A sender may send a new message with the id of a business document that has already been received, e.g. when
-     * it got no ApplicationReceipt. It is another message in MSH, which is received and answered like any other. The
-     * NHN message id is saved on the conversation when the message is received or rejected; without it, the message
-     * is taken to be the same.
-     */
-    private static boolean isSameMshMessage(Conversation conversation, IncomingMessage incomingMessage) {
-        String handledMessageId = conversation.getExternalSystemReference();
-        return handledMessageId == null || handledMessageId.isBlank() || handledMessageId.equals(incomingMessage.getId());
     }
 
     private static boolean hasStatus(Conversation conversation, ReceiptStatus status) {
