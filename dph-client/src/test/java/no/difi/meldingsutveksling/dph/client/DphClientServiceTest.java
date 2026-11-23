@@ -57,15 +57,16 @@ class DphClientServiceTest {
     }
 
     @Test
-    void receiveBusinessDocument_rejects_business_document_that_cannot_be_deserialized_and_closes_the_asic() throws Exception {
+    void receiveBusinessDocument_does_not_blame_the_message_for_business_document_that_cannot_be_deserialized_and_closes_the_asic() throws Exception {
         JWSObject jws = mock(JWSObject.class);
         when(jws.getPayload()).thenReturn(new Payload("{}"));
         when(parcelService.decryptAndVerify("forretningsmelding")).thenReturn(jws);
         when(parcelService.toSBD("{}")).thenThrow(new IllegalArgumentException("Deserializing from JSON to SBD failed"));
 
-        assertThatExceptionOfType(InvalidBusinessDocumentException.class)
+        assertThatExceptionOfType(DphException.class)
             .isThrownBy(() -> target.receiveBusinessDocument(ON_BEHALF_OF, "message"))
             .satisfies(e -> {
+                assertThat(e).isNotInstanceOf(InvalidBusinessDocumentException.class);
                 assertThat(e.getErrorCode()).isEqualTo(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi());
                 assertThat(e.getStatusCode()).isNull();
             });

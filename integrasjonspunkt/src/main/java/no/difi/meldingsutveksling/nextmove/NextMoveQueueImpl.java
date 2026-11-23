@@ -115,7 +115,8 @@ public class NextMoveQueueImpl implements NextMoveQueue {
 
     /**
      * Reads the ASiC of a message that is not put on the queue to the end. An ASiC may be streamed while it is created, e.g. from Fiks
-     * SvarInn, and the threads creating it would wait forever for it to be read.
+     * SvarInn, and the threads creating it would wait forever for it to be read. The message is not put on the queue
+     * anyway, so a failure to read it is only logged.
      */
     private void discard(String messageId, Resource asic) {
         if (asic == null) {
@@ -123,7 +124,7 @@ public class NextMoveQueueImpl implements NextMoveQueue {
         }
         try (InputStream inputStream = asic.getInputStream()) {
             inputStream.transferTo(OutputStream.nullOutputStream());
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Reading the ASiC of message with id={} to the end failed", messageId, e);
         }
     }

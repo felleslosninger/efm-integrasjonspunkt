@@ -62,9 +62,9 @@ public class DphClientService {
      * The business document of the message, with its encrypted ASiC, if any. The caller closes the ASiC, which may be
      * backed by a temporary file. If the business document cannot be read, the ASiC is closed here.
      *
-     * @throws InvalidBusinessDocumentException if the business document cannot be deserialized
-     * @throws DphException without status code if the response from the adapter cannot be decrypted or verified,
-     *                      which is a fault between the integrasjonspunkt and the adapter, not in the message
+     * @throws DphException without status code if the response from the adapter cannot be decrypted, verified or
+     *                      deserialized, which is a fault between the integrasjonspunkt and the adapter, not in the
+     *                      message: the adapter writes the business document
      */
     public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
         String jweToken = parcelService.signAndEncrypt(KxJson.encode(new GetDocumentInput(id), GetDocumentInput.Companion.serializer()));
@@ -86,7 +86,8 @@ public class DphClientService {
         try {
             return parcelService.toSBD(json);
         } catch (IllegalArgumentException e) {
-            throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL, e);
+            // The adapter writes the JSON, not the sender: the integrasjonspunkt and the adapter disagree on the model
+            throw new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL, e);
         }
     }
 

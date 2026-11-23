@@ -71,8 +71,8 @@ import java.util.function.Supplier;
  * {@code difi.move.feature.enable-receipts=false}. If the notification of such a message comes back, the message may
  * be rejected again, or its business document is not found and the notification is given up.
  * <p>
- * A message is rejected only for a fault in the message itself, at once: its business document cannot be
- * deserialized, has an unknown type, or lacks its content. Any other error says nothing about the message, so it is
+ * A message is rejected only for a fault in the message itself, at once: its business document is missing, has an
+ * unknown type, or lacks its content. Any other error says nothing about the message, so it is
  * retried, like a message that is not found, until {@code difi.move.dph.notification-retry-period} has passed since
  * this instance first failed to handle the notification. After that, the notification is deleted and the error is
  * logged, but the message is neither rejected nor marked as downloaded.
@@ -88,6 +88,11 @@ public class DefaultDphPolling implements DphPolling {
      * The most notifications the adapter deletes in one request.
      */
     static final int MAX_NOTIFICATIONS_TO_DELETE = 1000;
+
+    /**
+     * The most unread notifications the adapter returns, which is its default.
+     */
+    static final int MAX_NOTIFICATIONS_TO_FETCH = 1000;
 
     /**
      * The shortest time handled messages and failing notifications are remembered, even if the retry period is
@@ -135,6 +140,11 @@ public class DefaultDphPolling implements DphPolling {
     private final Set<Integer> herIdsFailingToPoll = ConcurrentHashMap.newKeySet();
 
     /**
+     * The HER-ids whose full page of unread notifications could not be handled or deleted on the last poll.
+     */
+    private final Set<Integer> herIdsWithStuckNotifications = ConcurrentHashMap.newKeySet();
+
+    /**
      * The notifications that have been handled or given up, but not deleted yet, with when they were last seen, by
      * notification id. A notification that comes back is only deleted again, so that it is neither handled nor logged
      * again on every poll.
@@ -167,6 +177,7 @@ public class DefaultDphPolling implements DphPolling {
         List<Notification> notifications = dphClientService.getUnreadNotifications(onBehalfOf, herId);
 
         List<Notification> handled = new ArrayList<>();
+        int newlyFinished = 0;
         for (Notification notification : notifications) {
             if (finishedNotifications.replace(notification.getNotificationId(), now()) != null) {
                 log.debug("DPH - Deleting notification that has been handled or given up again: notification = {}", notification);
@@ -177,16 +188,34 @@ public class DefaultDphPolling implements DphPolling {
                 handleNotification(onBehalfOf, herId, notification);
                 finishedNotifications.put(notification.getNotificationId(), now());
                 handled.add(notification);
+                newlyFinished++;
             } catch (Exception e) {
                 if (isGivenUp(notification, e)) {
                     finishedNotifications.put(notification.getNotificationId(), now());
                     handled.add(notification);
+                    newlyFinished++;
                 }
             }
         }
+        warnIfStuck(herId, notifications.size(), newlyFinished);
 
         completeMessagesWhoseNotificationsAreGone(onBehalfOf, herId, notifications);
         deleteNotifications(onBehalfOf, herId, handled);
+    }
+
+    /**
+     * The adapter returns at most {@link #MAX_NOTIFICATIONS_TO_FETCH} unread notifications. If none of a full page can
+     * be finished, e.g. because they are retried or cannot be deleted, newer notifications may not be fetched at all.
+     */
+    private void warnIfStuck(Integer herId, int fetched, int newlyFinished) {
+        if (fetched >= MAX_NOTIFICATIONS_TO_FETCH && newlyFinished == 0) {
+            if (herIdsWithStuckNotifications.add(herId)) {
+                log.warn("DPH - None of the {} unread notifications of HER-id = {} could be handled or deleted. " +
+                    "Newer notifications may not be fetched until they are: see the errors logged for them", fetched, herId);
+            }
+        } else if (herIdsWithStuckNotifications.remove(herId)) {
+            log.info("DPH - Notifications of HER-id = {} are handled again", herId);
+        }
     }
 
     /**
@@ -311,10 +340,13 @@ public class DefaultDphPolling implements DphPolling {
             log.info("DPH message received: incomingMessage={}", incomingMessage);
         }
 
-        if (isAlreadyHandled(incomingMessage)) {
+        Optional<Conversation> conversation = conversationService.findConversation(incomingMessage.getBusinessDocumentId());
+        if (isAlreadyHandled(conversation, incomingMessage)) {
             log.info("DPH message has already been received or rejected, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
             return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
         }
+        // An incoming conversation of another NHN message with the same business document id
+        boolean resent = conversation.filter(c -> c.getDirection() == ConversationDirection.INCOMING).isPresent();
 
         BusinessDocumentResponse response = null;
         EnqueueResult result;
@@ -355,9 +387,14 @@ public class DefaultDphPolling implements DphPolling {
 
         warnIfIdsDiffer(incomingMessage, response.getSbd());
         if (result == EnqueueResult.DUPLICATE) {
-            // Another instance received the message at the same time, and answers it
-            log.info("DPH message has just been received by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
-            return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
+            if (!resent) {
+                // Another instance received the message at the same time, and answers it
+                log.info("DPH message has just been received by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+                return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
+            }
+            // The fagsystem has not fetched the earlier message yet, so this one is not delivered again, but answered
+            log.info("DPH message has been sent again while the earlier message is still on the local queue. " +
+                "It is not delivered again, but it is answered: incomingMessage = {}", incomingMessage);
         }
 
         // The message is received, so nothing that fails from here on may reject it
@@ -402,13 +439,16 @@ public class DefaultDphPolling implements DphPolling {
             if (existing.isPresent() && existing.get().getDirection() != ConversationDirection.INCOMING) {
                 return;
             }
-            // An incoming conversation exists if registering the status failed before
-            if (existing.isEmpty()) {
-                Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
-                if (conversation != null) {
-                    conversation.setExternalSystemReference(incomingMessage.getId());
-                    conversationService.save(conversation);
-                }
+            // An incoming conversation exists if registering the status failed before, or if the message was sent
+            // again with the id of a business document that has been received or rejected before
+            Conversation conversation = existing.orElseGet(() -> conversationService.registerConversation(rejectedMessage(handled)));
+            if (conversation != null && !incomingMessage.getId().equals(conversation.getExternalSystemReference())) {
+                conversation.setExternalSystemReference(incomingMessage.getId());
+                conversationService.save(conversation);
+            }
+            // The message received before with this business document id has been delivered, so it did not fail
+            if (conversation != null && hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT)) {
+                return;
             }
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL,
                 "Message was rejected when received: " + handled.rejectionError.getText());
@@ -469,8 +509,8 @@ public class DefaultDphPolling implements DphPolling {
      * <p>
      * A message to several HER-ids on this integrasjonspunkt has one business document, so it is only received once.
      */
-    private boolean isAlreadyHandled(IncomingMessage incomingMessage) {
-        return conversationService.findConversation(incomingMessage.getBusinessDocumentId())
+    private static boolean isAlreadyHandled(Optional<Conversation> businessDocumentConversation, IncomingMessage incomingMessage) {
+        return businessDocumentConversation
             .filter(conversation -> conversation.getDirection() == ConversationDirection.INCOMING
                 ? isSameMshMessage(conversation, incomingMessage)
                 : hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
@@ -558,11 +598,12 @@ public class DefaultDphPolling implements DphPolling {
 
     /**
      * Whether the error is a fault in the message itself, so that the message is rejected at once: its business
-     * document has been fetched, but cannot be deserialized, has an unknown type, or lacks its content.
+     * document has been fetched, but is missing, has an unknown type, or lacks its content.
      * <p>
      * Any other error is not about the message, and retrying may help: errors from the adapter, which answers 5xx
      * when MSH is unavailable or answers with data it cannot read, errors on the connection to the adapter, e.g. when
-     * the integrasjonspunkt and the adapter do not trust each other's certificates, and database errors, e.g. a
+     * the integrasjonspunkt and the adapter do not trust each other's certificates or disagree on the model of the
+     * business document, which the adapter writes,, and database errors, e.g. a
      * conflict when another instance received the same message at the same time.
      */
     static boolean isFaultInMessage(Throwable e) {
@@ -689,6 +730,9 @@ public class DefaultDphPolling implements DphPolling {
                 log.error("DPH - Giving up the ApplicationReceipt of the message, which could not be sent within {}. " +
                     "The sender is not answered: incomingMessage = {}, applicationReceipt = {}",
                     getMemoryPeriod(), handled.message, handled.pendingApplicationReceipt);
+            } else if (!handled.downloaded) {
+                log.error("DPH - Giving up marking the message as downloaded, which failed within {}. " +
+                    "It is left in MSH: incomingMessage = {}", getMemoryPeriod(), handled.message);
             }
             return true;
         });

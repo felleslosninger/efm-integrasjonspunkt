@@ -88,6 +88,17 @@ class NextMoveQueueImplTest {
     }
 
     @Test
+    void expired_message_is_not_enqueued_even_if_its_asic_cannot_be_read() throws Exception {
+        when(sbdService.isExpired(sbd)).thenReturn(true);
+        Resource asic = mock(Resource.class);
+        when(asic.getInputStream()).thenThrow(new IllegalStateException("Decryption failed"));
+
+        EnqueueResult result = target.enqueueIncomingMessage(sbd, ServiceIdentifier.DPO, asic);
+
+        assertThat(result).isEqualTo(EnqueueResult.EXPIRED);
+    }
+
+    @Test
     void status_is_registered_on_its_conversation_and_not_enqueued() {
         when(sbd.getType()).thenReturn("status");
         when(sbd.getAny()).thenReturn(new StatusMessage(ReceiptStatus.LEVERT));

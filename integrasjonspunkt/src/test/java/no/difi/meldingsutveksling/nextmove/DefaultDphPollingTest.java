@@ -1085,6 +1085,61 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_answers_resent_message_without_delivering_it_again_while_the_earlier_one_is_still_on_the_queue() {
+        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+        IncomingMessage resent = incomingMessage("resent", false);
+        givenNotifications(newMessage("resent"));
+        givenMessage(resent);
+        givenDialogmelding("resent");
+        Conversation conversation = new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("earlier-nhn-message");
+        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(conversation));
+        when(nextMoveQueue.enqueueIncomingMessage(any(), eq(ServiceIdentifier.DPH), any())).thenReturn(EnqueueResult.DUPLICATE);
+
+        target.poll();
+
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.OK);
+        assertThat(conversation.getExternalSystemReference()).isEqualTo("resent");
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "resent");
+    }
+
+    @Test
+    void poll_saves_the_nhn_message_id_of_rejected_resent_message_on_the_existing_conversation() {
+        IncomingMessage resent = incomingMessage("resent", false);
+        givenNotifications(newMessage("resent"));
+        givenMessage(resent);
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "resent")).thenThrow(invalidDocument());
+        Conversation conversation = outgoingConversation(ReceiptStatus.FEIL)
+            .setDirection(ConversationDirection.INCOMING)
+            .setExternalSystemReference("earlier-nhn-message");
+        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(conversation));
+
+        target.poll();
+
+        verify(conversationService, never()).registerConversation(any(MessageInformable.class));
+        verify(conversationService).save(conversation);
+        assertThat(conversation.getExternalSystemReference()).isEqualTo("resent");
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+    }
+
+    @Test
+    void poll_does_not_register_rejected_resent_message_as_failed_on_the_conversation_of_a_delivered_message() {
+        IncomingMessage resent = incomingMessage("resent", false);
+        givenNotifications(newMessage("resent"));
+        givenMessage(resent);
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "resent")).thenThrow(invalidDocument());
+        Conversation delivered = outgoingConversation(ReceiptStatus.INNKOMMENDE_MOTTATT)
+            .setDirection(ConversationDirection.INCOMING)
+            .setExternalSystemReference("earlier-nhn-message");
+        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(delivered));
+
+        target.poll();
+
+        verify(conversationService, never()).registerStatus(eq(resent.getBusinessDocumentId()), eq(ReceiptStatus.FEIL), anyString());
+        assertThat(delivered.getExternalSystemReference()).isEqualTo("resent");
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+    }
+
+    @Test
     void poll_only_marks_as_downloaded_message_handled_before_with_the_same_nhn_message_id() {
         IncomingMessage incomingMessage = incomingMessage("received", false);
         givenNotifications(newMessage("received"));
