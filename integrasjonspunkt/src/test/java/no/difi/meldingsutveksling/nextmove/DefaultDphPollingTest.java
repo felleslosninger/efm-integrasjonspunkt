@@ -1075,7 +1075,7 @@ class DefaultDphPollingTest {
         givenMessage(incomingMessage);
         when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "failing")).thenThrow(invalidDocument());
         when(conversationService.findConversation(incomingMessage.getBusinessDocumentId()))
-            .thenReturn(Optional.empty(), Optional.of(new Conversation().setDirection(ConversationDirection.INCOMING)));
+            .thenReturn(Optional.empty(), Optional.of(outgoingConversation(ReceiptStatus.FEIL).setDirection(ConversationDirection.INCOMING)));
 
         target.poll();
 
@@ -1083,6 +1083,42 @@ class DefaultDphPollingTest {
         verify(conversationService, never()).registerConversation(any(MessageInformable.class));
         verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "failing");
         verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-failing"));
+    }
+
+    @Test
+    void poll_finishes_and_answers_rejection_that_another_instance_began_but_did_not_finish() {
+        IncomingMessage incomingMessage = incomingMessage("failing", false);
+        givenNotifications(newMessage("failing"));
+        givenMessage(incomingMessage);
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "failing")).thenThrow(invalidDocument());
+        when(conversationService.findConversation(incomingMessage.getBusinessDocumentId()))
+            .thenReturn(Optional.empty(), Optional.of(new Conversation().setDirection(ConversationDirection.INCOMING)));
+
+        target.poll();
+
+        verify(conversationService, never()).registerConversation(any(MessageInformable.class));
+        verify(conversationService).registerStatus(eq(incomingMessage.getBusinessDocumentId()), eq(ReceiptStatus.FEIL), anyString());
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "failing");
+    }
+
+    @Test
+    void poll_does_not_register_the_status_of_application_receipt_on_the_conversation_of_a_received_message() {
+        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+        givenNotifications(newMessage("apprec"));
+        givenMessage(incomingMessage("apprec", true));
+        StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
+        when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING_KVITTERING.getType());
+        when(sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)).thenReturn(Optional.of(new DialogmeldingKvitteringMessage()
+            .setRelatedToMessageId("received").setStatus(DialogmeldingKvitteringStatus.OK)));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "apprec")).thenReturn(new BusinessDocumentResponse().setSbd(sbd));
+        lenient().when(conversationService.findConversation("received"))
+            .thenReturn(Optional.of(new Conversation().setDirection(ConversationDirection.INCOMING)));
+
+        target.poll();
+
+        verify(conversationService, never()).registerStatusesWithLock(any(), any());
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "apprec");
     }
 
     @Test
@@ -1189,12 +1225,14 @@ class DefaultDphPollingTest {
         when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING_KVITTERING.getType());
         when(sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)).thenReturn(Optional.of(
             new DialogmeldingKvitteringMessage().setRelatedToMessageId("sent")));
+        // The sent message the ApplicationReceipt answers, whose status must not be registered
+        lenient().when(conversationService.findConversation("sent")).thenReturn(Optional.of(outgoingConversation(ReceiptStatus.SENDT)));
         when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "apprec")).thenReturn(new BusinessDocumentResponse().setSbd(sbd));
 
         target.poll();
 
         verifyNoApplicationReceipt();
-        verify(conversationService, never()).registerStatus(eq("sent"), any(ReceiptStatus.class), anyString(), any());
+        verify(conversationService, never()).registerStatusesWithLock(any(), any());
         verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "apprec");
     }
 

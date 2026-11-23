@@ -441,13 +441,22 @@ public class DefaultDphPolling implements DphPolling {
                 return;
             }
             if (existing.isPresent() && !handled.rejectionRegistrationAttempted) {
-                // Another instance rejected the message since this instance found it not handled, and answers it
-                log.info("DPH message has just been rejected by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
-                handled.pendingApplicationReceipt = null;
-                return;
+                Conversation other = existing.get();
+                if (hasStatus(other, ReceiptStatus.FEIL) || hasStatus(other, ReceiptStatus.INNKOMMENDE_MOTTATT)) {
+                    // Another instance rejected or received the message since this instance found it not handled
+                    log.info("DPH message has just been handled by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+                    handled.pendingApplicationReceipt = null;
+                    return;
+                }
+                // Another instance began to reject the message, but has not finished, e.g. because it stopped: the
+                // rejection is finished and answered here, in case nobody else does
+                log.info("DPH message is being rejected by another instance, which has not finished. It is rejected here too: incomingMessage = {}", incomingMessage);
             }
             // An incoming conversation exists if registering the status failed before
             if (existing.isEmpty()) {
+                // Set before the conversation is created, so that it is taken as this instance's on the next try. If
+                // creating it fails without creating it, and another instance rejects the message before then, both
+                // answer it: like two instances rejecting it at the same time.
                 handled.rejectionRegistrationAttempted = true;
                 Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
                 if (conversation != null) {
@@ -852,7 +861,9 @@ public class DefaultDphPolling implements DphPolling {
             .orElseThrow(() -> new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         String relatedToMessageId = message.getRelatedToMessageId();
-        Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId);
+        // An ApplicationReceipt answers a message that was sent, not one that was received
+        Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId)
+            .filter(c -> c.getDirection() == ConversationDirection.OUTGOING);
 
         conversation.ifPresent(c -> {
             MessageStatus status = switch (message.getStatus()) {
