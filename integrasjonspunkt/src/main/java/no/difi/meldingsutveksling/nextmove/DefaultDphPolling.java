@@ -42,6 +42,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +72,9 @@ import java.util.function.Supplier;
  * {@code difi.move.feature.enable-receipts=false}. If the notification of such a message comes back, the message may
  * be rejected again, or its business document is not found and the notification is given up.
  * <p>
- * A message is rejected only for a fault in the message itself, at once: its business document is missing, has an
- * unknown type, or lacks its content. Any other error says nothing about the message, so it is
+ * A message is rejected only for a fault in the message itself, at once, with the error code the adapter tells, e.g.
+ * for invalid XML or a missing patient, or because its business document is missing, has an unknown type, or lacks
+ * its content. An invalid ApplicationReceipt is not answered. Any other error says nothing about the message, so it is
  * retried, like a message that is not found, until {@code difi.move.dph.notification-retry-period} has passed since
  * this instance first failed to handle the notification. After that, the notification is deleted and the error is
  * logged, but the message is neither rejected nor marked as downloaded.
@@ -376,8 +378,10 @@ public class DefaultDphPolling implements DphPolling {
                 return Optional.empty();
             }
             KvitteringStatusMessage error = getError(incomingMessage, e);
+            // The adapter tells an invalid ApplicationReceipt, which MSH may not have flagged as one
+            boolean applicationReceipt = isApplicationReceipt(incomingMessage, response) || findFault(e).isInvalidApplicationReceipt();
             HandledMessage rejected = new HandledMessage(herId, incomingMessage,
-                getApplicationReceiptForRejected(incomingMessage, isApplicationReceipt(incomingMessage, response), error), now());
+                getApplicationReceiptForRejected(incomingMessage, applicationReceipt, error), now());
             rejected.rejectionError = error;
             rejected.sbd = response != null ? response.getSbd() : null;
             return Optional.of(rejected);
@@ -573,10 +577,19 @@ public class DefaultDphPolling implements DphPolling {
      */
     private static KvitteringStatusMessage getError(IncomingMessage incomingMessage, Exception e) {
         log.warn("DPH message is invalid, and is rejected: incomingMessage = {}", incomingMessage, e);
-        InvalidBusinessDocumentException invalid = findCause(e, InvalidBusinessDocumentException.class);
+        // The adapter only tells the name of the error code, never content from the message
+        DphException fault = findFault(e);
+        Optional<FeilmeldingForApplikasjonskvittering> known = Arrays.stream(FeilmeldingForApplikasjonskvittering.values())
+            .filter(error -> error.getVerdi().equals(fault.getErrorCode()))
+            .findFirst();
+        if (known.isEmpty()) {
+            log.warn("DPH - Unknown error code {} for the ApplicationReceipt, {} is used instead: incomingMessage = {}",
+                fault.getErrorCode(), FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi(), incomingMessage);
+        }
+        FeilmeldingForApplikasjonskvittering error = known.orElse(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
         return new KvitteringStatusMessage()
-            .setCode(invalid.getErrorCode())
-            .setText(invalid.getMessage());
+            .setCode(error.getVerdi())
+            .setText(known.isPresent() && fault.getMessage() != null ? fault.getMessage() : error.getNavn());
     }
 
     /**
@@ -597,17 +610,31 @@ public class DefaultDphPolling implements DphPolling {
     }
 
     /**
-     * Whether the error is a fault in the message itself, so that the message is rejected at once: its business
-     * document has been fetched, but is missing, has an unknown type, or lacks its content.
+     * Whether the error is a fault in the message itself, so that the message is rejected at once: the adapter answers
+     * 422 with {@link DphException#INVALID_MESSAGE} or {@link DphException#INVALID_APPLICATION_RECEIPT}, e.g. for
+     * invalid XML or a missing patient, or the business document is missing, has an unknown type, or lacks its
+     * content.
      * <p>
-     * Any other error is not about the message, and retrying may help: errors from the adapter, which answers 5xx
-     * when MSH is unavailable or answers with data it cannot read, errors on the connection to the adapter, e.g. when
-     * the integrasjonspunkt and the adapter do not trust each other's certificates or disagree on the model of the
-     * business document, which the adapter writes,, and database errors, e.g. a
-     * conflict when another instance received the same message at the same time.
+     * Any other error is not about the message, and retrying may help: other errors from the adapter, which answers
+     * 5xx when MSH is unavailable or answers with data it cannot read, errors on the connection to the adapter, e.g.
+     * when the integrasjonspunkt and the adapter do not trust each other's certificates or disagree on the model of
+     * the business document, which the adapter writes, and database errors, e.g. a conflict when another instance
+     * received the same message at the same time.
      */
     static boolean isFaultInMessage(Throwable e) {
-        return findCause(e, InvalidBusinessDocumentException.class) != null;
+        return findFault(e) != null;
+    }
+
+    /**
+     * @return the error that tells the fault in the message, if any
+     */
+    private static DphException findFault(Throwable e) {
+        InvalidBusinessDocumentException invalid = findCause(e, InvalidBusinessDocumentException.class);
+        if (invalid != null) {
+            return invalid;
+        }
+        DphException dphException = findCause(e, DphException.class);
+        return dphException != null && dphException.isInvalidMessage() ? dphException : null;
     }
 
     /**

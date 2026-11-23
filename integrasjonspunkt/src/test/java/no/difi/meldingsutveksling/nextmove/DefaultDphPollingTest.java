@@ -1212,7 +1212,77 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_rejects_message_that_the_adapter_finds_invalid_with_the_error_code_of_the_adapter() {
+        givenNotifications(newMessage("invalid"));
+        givenMessage(incomingMessage("invalid", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "invalid")).thenThrow(adapterFindsInvalid(
+            FeilmeldingForApplikasjonskvittering.UGYLDIG_XML, DphException.INVALID_MESSAGE));
+
+        target.poll();
+
+        DialogmeldingKvitteringMessage appRec = captureApplicationReceipt();
+        assertThat(appRec.getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+        assertThat(appRec.getMessages()).singleElement().satisfies(m -> {
+            assertThat(m.getCode()).isEqualTo(FeilmeldingForApplikasjonskvittering.UGYLDIG_XML.getVerdi());
+            assertThat(m.getText()).isEqualTo(FeilmeldingForApplikasjonskvittering.UGYLDIG_XML.getNavn());
+        });
+        verify(conversationService).registerStatus(eq("business-document-invalid"), eq(ReceiptStatus.FEIL), anyString());
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "invalid");
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-invalid"));
+    }
+
+    @Test
+    void poll_does_not_answer_application_receipt_that_the_adapter_finds_invalid_but_marks_it_as_downloaded() {
+        givenNotifications(newMessage("invalid-apprec"));
+        // MSH does not tell that it is an ApplicationReceipt, the adapter does
+        givenMessage(incomingMessage("invalid-apprec", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "invalid-apprec")).thenThrow(adapterFindsInvalid(
+            FeilmeldingForApplikasjonskvittering.VALIDERINGSFEIL_XML, DphException.INVALID_APPLICATION_RECEIPT));
+
+        target.poll();
+
+        verifyNoApplicationReceipt();
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "invalid-apprec");
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-invalid-apprec"));
+    }
+
+    @Test
+    void poll_rejects_invalid_message_with_annen_feil_when_the_adapter_tells_an_unknown_error_code() {
+        givenNotifications(newMessage("invalid"));
+        givenMessage(incomingMessage("invalid", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "invalid"))
+            .thenThrow(new DphException("NOT-A-CODE", "Something", 422, DphException.INVALID_MESSAGE, null));
+
+        target.poll();
+
+        assertThat(captureApplicationReceipt().getMessages()).singleElement().satisfies(m -> {
+            assertThat(m.getCode()).isEqualTo(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi());
+            assertThat(m.getText()).isEqualTo(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getNavn());
+        });
+    }
+
+    @Test
+    void poll_does_not_reject_message_on_422_without_technical_code() {
+        givenNotifications(newMessage("unprocessable"));
+        givenMessage(incomingMessage("unprocessable", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "unprocessable"))
+            .thenThrow(new DphException("X99", "The request was rejected by MSH", 422, null, null));
+
+        target.poll();
+
+        verifyNoApplicationReceipt();
+        verify(dphClientService, never()).markAsDownloaded(any(), anyInt(), anyString());
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+    }
+
+    @Test
     void isFaultInMessage_tells_faults_in_the_message_from_other_errors() {
+        assertThat(DefaultDphPolling.isFaultInMessage(adapterFindsInvalid(
+            FeilmeldingForApplikasjonskvittering.UGYLDIG_XML, DphException.INVALID_MESSAGE))).isTrue();
+        assertThat(DefaultDphPolling.isFaultInMessage(adapterFindsInvalid(
+            FeilmeldingForApplikasjonskvittering.VALIDERINGSFEIL_XML, DphException.INVALID_APPLICATION_RECEIPT))).isTrue();
+        assertThat(DefaultDphPolling.isFaultInMessage(new DphException("X99", "Rejected by MSH", 422, null, null))).isFalse();
+        assertThat(DefaultDphPolling.isFaultInMessage(new DphException("E21", "Bad gateway", 502, DphException.INVALID_MESSAGE, null))).isFalse();
         assertThat(DefaultDphPolling.isFaultInMessage(invalidDocument())).isTrue();
         assertThat(DefaultDphPolling.isFaultInMessage(new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL,
             new IllegalArgumentException("Deserializing from JSON to SBD failed")))).isTrue();
@@ -1292,6 +1362,10 @@ class DefaultDphPollingTest {
 
     private static DphException notFound() {
         return new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi(), "The request was rejected by MSH", 404);
+    }
+
+    private static DphException adapterFindsInvalid(FeilmeldingForApplikasjonskvittering error, String technicalCode) {
+        return new DphException(error.getVerdi(), error.getNavn(), 422, technicalCode, null);
     }
 
     private static InvalidBusinessDocumentException invalidDocument() {

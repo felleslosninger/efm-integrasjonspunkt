@@ -136,6 +136,30 @@ class DphClientImplIT {
     }
 
     @Test
+    void receiveBusinessDocument_reports_invalid_message_with_the_technical_code() {
+        wireMockExtension.stubFor(post(urlEqualTo("/messages/in"))
+            .willReturn(aResponse()
+                .withStatus(422)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                    {"status": 422, "reason": "Unprocessable Content", "errorCode": "invalid-xml-code", "message": "Ugyldig XML",
+                     "technicalCode": "E7782", "path": "/api/messages/in", "requestId": "req-1",
+                     "timestamp": "2026-11-23T10:00:00Z"}""")));
+
+        assertThatExceptionOfType(DphException.class)
+            .isThrownBy(() -> dphClient.receiveBusinessDocument(onBehalfOf, "jwe-token"))
+            .satisfies(e -> {
+                assertThat(e.getStatusCode()).isEqualTo(422);
+                assertThat(e.getErrorCode()).isEqualTo("invalid-xml-code");
+                assertThat(e.getTechnicalCode()).isEqualTo(DphException.INVALID_MESSAGE);
+                assertThat(e.isInvalidMessage()).isTrue();
+                assertThat(e.isInvalidApplicationReceipt()).isFalse();
+            });
+        // A client error is not retried
+        wireMockExtension.verify(1, postRequestedFor(urlEqualTo("/messages/in")));
+    }
+
+    @Test
     void markAsDownloaded_posts_to_downloaded() {
         wireMockExtension.stubFor(post(urlEqualTo("/messages/in/m-1/downloaded?receiverHerId=1111"))
             .willReturn(aResponse().withStatus(200)));
