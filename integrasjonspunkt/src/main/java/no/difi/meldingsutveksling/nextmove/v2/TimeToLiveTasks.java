@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
 import no.difi.meldingsutveksling.status.ConversationRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,10 +17,11 @@ public class TimeToLiveTasks {
     private final ConversationRepository repo;
     private final Clock clock;
     private final TimeToLiveExpiredHandler timeToLiveExpiredHandler;
+    private final IntegrasjonspunktProperties props;
 
     @Scheduled(fixedRateString = "${difi.move.nextmove.ttlPollingrate}")
     public void checkExpiredMessages() {
-        repo.findIdsForExpiredConversations(OffsetDateTime.now(clock))
+        repo.findIdsForExpiredConversations(OffsetDateTime.now(clock), props.getFiks().getInn().getDocumentType())
                 .forEach(timeToLiveExpiredHandler::setExpired);
     }
 }
