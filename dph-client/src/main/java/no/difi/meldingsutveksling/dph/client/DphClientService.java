@@ -11,6 +11,7 @@ import no.difi.meldingsutveksling.dph.client.internal.WrappedPackage;
 import no.difi.meldingsutveksling.nhn.adapter.model.GetDocumentInput;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
+import no.difi.meldingsutveksling.nhn.adapter.model.Notification;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 
 import java.util.List;
@@ -31,8 +32,27 @@ public class DphClientService {
         return dphClient.sendBusinessDocument(onBehalfOf, new WrappedPackage(foretningsmelding, input.getEncryptedAsic()));
     }
 
-    public List<IncomingMessage> getMessages(Iso6523 onBehalfOf, Integer receiverHerId) {
-        return dphClient.getMessages(onBehalfOf, receiverHerId);
+    /**
+     * The unread notifications of {@code herId}, at most as many as the adapter's default. A notification stays
+     * unread until it is deleted with {@link #deleteNotifications(Iso6523, List)}.
+     */
+    public List<Notification> getUnreadNotifications(Iso6523 onBehalfOf, Integer herId) {
+        return dphClient.getUnreadNotifications(onBehalfOf, herId, null);
+    }
+
+    /**
+     * @param notificationsToFetch at most this many notifications (1-1000)
+     */
+    public List<Notification> getUnreadNotifications(Iso6523 onBehalfOf, Integer herId, int notificationsToFetch) {
+        return dphClient.getUnreadNotifications(onBehalfOf, herId, notificationsToFetch);
+    }
+
+    public void deleteNotifications(Iso6523 onBehalfOf, List<String> notificationIds) {
+        dphClient.deleteNotifications(onBehalfOf, notificationIds);
+    }
+
+    public IncomingMessage getMessage(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
+        return dphClient.getMessage(onBehalfOf, receiverHerId, messageId);
     }
 
     public BusinessDocumentResponse receiveBusinessDocument(Iso6523 onBehalfOf, String id) {
@@ -46,8 +66,12 @@ public class DphClientService {
             .setEncryptedAsic(wrappedPackage.encryptedAsic());
     }
 
-    public void markAsRead(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
-        dphClient.markAsRead(onBehalfOf, receiverHerId, messageId);
+    /**
+     * Marks the message as downloaded, which deletes its business document in MSH. Its notification must be deleted
+     * separately.
+     */
+    public void markAsDownloaded(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
+        dphClient.markAsDownloaded(onBehalfOf, receiverHerId, messageId);
     }
 
     public String getMaskinportenToken(Iso6523 onBehalfOf) {

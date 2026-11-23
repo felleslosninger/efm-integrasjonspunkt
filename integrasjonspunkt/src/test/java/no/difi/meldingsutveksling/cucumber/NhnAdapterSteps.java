@@ -16,6 +16,8 @@ import no.difi.meldingsutveksling.nhn.adapter.model.ContentTypes;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MultipartFileNames;
 import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
+import no.difi.meldingsutveksling.nhn.adapter.model.Notification;
+import no.difi.meldingsutveksling.nhn.adapter.model.NotificationType;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.move.common.cert.KeystoreHelper;
 import no.difi.move.common.dokumentpakking.AsicParser;
@@ -42,6 +44,8 @@ public class NhnAdapterSteps {
 
     private static final String MESSAGES_OUT = "/nhn-adapter/api/messages/out";
     private static final String MESSAGES_IN = "/nhn-adapter/api/messages/in";
+    private static final String UNREAD_NOTIFICATIONS = "/nhn-adapter/api/notifications/unread";
+    private static final String DELETE_NOTIFICATIONS = "/nhn-adapter/api/notifications/delete";
     private static final String NHN_MESSAGE_ID = "4a8e3c1f-6b2d-4e9a-8c7b-1d2e3f4a5b6c";
     private static final String BOUNDARY = "nhn-adapter-boundary";
 
@@ -63,7 +67,13 @@ public class NhnAdapterSteps {
             )
         );
 
-        wireMockServer.givenThat(post(urlPathMatching(MESSAGES_IN + "/[^/]+/read"))
+        wireMockServer.givenThat(post(urlPathMatching(MESSAGES_IN + "/[^/]+/downloaded"))
+            .willReturn(aResponse()
+                .withStatus(200)
+            )
+        );
+
+        wireMockServer.givenThat(post(urlEqualTo(DELETE_NOTIFICATIONS))
             .willReturn(aResponse()
                 .withStatus(200)
             )
@@ -84,12 +94,30 @@ public class NhnAdapterSteps {
             sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getCreationDateAndTime(),
             false);
 
-        wireMockServer.givenThat(get(urlPathEqualTo(MESSAGES_IN))
+        Notification notification = new Notification(
+            notificationId(nhnMessageId),
+            nhnMessageId,
+            NotificationType.NEW_MESSAGE,
+            receiverHerId,
+            incomingMessage.getSenderHerId(),
+            null,
+            null);
+
+        wireMockServer.givenThat(get(urlPathEqualTo(UNREAD_NOTIFICATIONS))
+            .withQueryParam("herId", equalTo(Integer.toString(receiverHerId)))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .withBody(KxJson.encode(List.of(notification), ListSerializer(Notification.Companion.serializer())))
+            )
+        );
+
+        wireMockServer.givenThat(get(urlPathEqualTo(MESSAGES_IN + "/" + nhnMessageId))
             .withQueryParam("receiverHerId", equalTo(Integer.toString(receiverHerId)))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody(KxJson.encode(List.of(incomingMessage), ListSerializer(IncomingMessage.Companion.serializer())))
+                .withBody(KxJson.encode(incomingMessage, IncomingMessage.Companion.serializer()))
             )
         );
 
@@ -114,9 +142,19 @@ public class NhnAdapterSteps {
         messageSentHolder.set(parse(loggedRequest));
     }
 
-    @Then("^the NHN adapter message with id \"([^\"]*)\" is marked as read$")
-    public void theNhnAdapterMessageWithIdIsMarkedAsRead(String nhnMessageId) {
-        wireMockServer.verify(1, postRequestedFor(urlPathEqualTo(MESSAGES_IN + "/" + nhnMessageId + "/read")));
+    @Then("^the NHN adapter message with id \"([^\"]*)\" is marked as downloaded$")
+    public void theNhnAdapterMessageWithIdIsMarkedAsDownloaded(String nhnMessageId) {
+        wireMockServer.verify(1, postRequestedFor(urlPathEqualTo(MESSAGES_IN + "/" + nhnMessageId + "/downloaded")));
+    }
+
+    @Then("^the NHN adapter notification for the message with id \"([^\"]*)\" is deleted$")
+    public void theNhnAdapterNotificationForTheMessageWithIdIsDeleted(String nhnMessageId) {
+        wireMockServer.verify(1, postRequestedFor(urlEqualTo(DELETE_NOTIFICATIONS))
+            .withRequestBody(equalToJson("{\"notificationIds\": [\"" + notificationId(nhnMessageId) + "\"]}")));
+    }
+
+    private static String notificationId(String nhnMessageId) {
+        return "notification-" + nhnMessageId;
     }
 
     private Message parse(LoggedRequest loggedRequest) {

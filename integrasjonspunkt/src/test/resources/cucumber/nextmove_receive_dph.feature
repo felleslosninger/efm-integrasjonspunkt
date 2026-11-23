@@ -90,7 +90,8 @@ Feature: Receiving a Next Move DPH message
         </Notat>
     </Dialogmelding>
     """
-    And the NHN adapter message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is marked as read
+    And the NHN adapter message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is marked as downloaded
+    And the NHN adapter notification for the message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is deleted
     And a DPH message is sent to the NHN adapter
     And the sent message's SBD is:
     """

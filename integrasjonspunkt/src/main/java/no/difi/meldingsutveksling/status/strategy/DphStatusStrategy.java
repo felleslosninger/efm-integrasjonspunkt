@@ -51,6 +51,9 @@ public class DphStatusStrategy implements StatusStrategy {
         switch (status.getTransportStatus()) {
             case TransportStatus.REJECTED ->
                 registerStatus(conversation, ReceiptStatus.FEIL, "Message rejected in transport");
+            // MSH gave up on the message after resending it without getting a transport receipt
+            case TransportStatus.ABANDONED ->
+                registerStatus(conversation, ReceiptStatus.FEIL, "Message abandoned in transport (no transport receipt after resend)");
             case TransportStatus.ACKNOWLEDGED ->
                 registerStatus(conversation, ReceiptStatus.MOTTATT, "Transport acknowledge received");
         }

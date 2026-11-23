@@ -28,4 +28,12 @@ public class DphException extends RuntimeException {
         this.errorCode = feilmelding.getVerdi();
         this.statusCode = null;
     }
+
+    /**
+     * Whether the adapter answered that the resource does not exist (any more), e.g. a business document that has
+     * already been downloaded.
+     */
+    public boolean isNotFound() {
+        return statusCode != null && (statusCode == 404 || statusCode == 410);
+    }
 }
