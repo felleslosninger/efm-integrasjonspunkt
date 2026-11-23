@@ -12,6 +12,7 @@ import no.difi.meldingsutveksling.api.DphPolling;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.api.NextMoveQueue.EnqueueResult;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
 import no.difi.meldingsutveksling.domain.PartnerIdentifier;
@@ -184,7 +185,40 @@ public class DefaultDphPolling implements DphPolling {
             }
         }
 
+        completeMessagesWhoseNotificationsAreGone(onBehalfOf, herId, notifications);
         deleteNotifications(onBehalfOf, herId, handled);
+    }
+
+    /**
+     * Completes the handled messages of the HER-id whose notifications did not come back, e.g. because another
+     * instance found the message handled, marked it as downloaded and deleted its notification. Otherwise an
+     * ApplicationReceipt that this instance has not sent yet would never be sent.
+     */
+    private void completeMessagesWhoseNotificationsAreGone(Iso6523 onBehalfOf, Integer herId, List<Notification> notifications) {
+        Set<String> comeBack = new HashSet<>();
+        for (Notification notification : notifications) {
+            if (notification.getType() == NotificationType.NEW_MESSAGE && notification.getRelatedMessageId() != null) {
+                comeBack.add(handledMessageKey(herId, notification.getRelatedMessageId()));
+            }
+        }
+        handledMessages.forEach((key, handled) -> {
+            if (!handled.herId.equals(herId) || comeBack.contains(key)) {
+                return;
+            }
+            try {
+                complete(onBehalfOf, handled);
+                handledMessages.remove(key);
+                log.debug("DPH message completed after its notification was deleted: incomingMessage = {}", handled.message);
+            } catch (Exception e) {
+                if (handled.completionFailureLogged) {
+                    log.debug("DPH - Completing message failed again, it is retried on the next poll: incomingMessage = {}", handled.message);
+                } else {
+                    handled.completionFailureLogged = true;
+                    log.warn("DPH - Completing message whose notification has been deleted failed. It is retried on every poll " +
+                        "for up to {}: incomingMessage = {}", getMemoryPeriod(), handled.message, e);
+                }
+            }
+        });
     }
 
     /**
@@ -370,7 +404,11 @@ public class DefaultDphPolling implements DphPolling {
             }
             // An incoming conversation exists if registering the status failed before
             if (existing.isEmpty()) {
-                conversationService.registerConversation(rejectedMessage(handled));
+                Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
+                if (conversation != null) {
+                    conversation.setExternalSystemReference(incomingMessage.getId());
+                    conversationService.save(conversation);
+                }
             }
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL,
                 "Message was rejected when received: " + handled.rejectionError.getText());
@@ -434,8 +472,20 @@ public class DefaultDphPolling implements DphPolling {
     private boolean isAlreadyHandled(IncomingMessage incomingMessage) {
         return conversationService.findConversation(incomingMessage.getBusinessDocumentId())
             .filter(conversation -> conversation.getDirection() == ConversationDirection.INCOMING
-                || hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
+                ? isSameMshMessage(conversation, incomingMessage)
+                : hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
             .isPresent();
+    }
+
+    /**
+     * A sender may send a new message with the id of a business document that has already been received, e.g. when
+     * it got no ApplicationReceipt. It is another message in MSH, which is received and answered like any other. The
+     * NHN message id is saved on the conversation when the message is received or rejected; without it, the message
+     * is taken to be the same.
+     */
+    private static boolean isSameMshMessage(Conversation conversation, IncomingMessage incomingMessage) {
+        String handledMessageId = conversation.getExternalSystemReference();
+        return handledMessageId == null || handledMessageId.isBlank() || handledMessageId.equals(incomingMessage.getId());
     }
 
     private static boolean hasStatus(Conversation conversation, ReceiptStatus status) {
@@ -630,14 +680,25 @@ public class DefaultDphPolling implements DphPolling {
      * anyway.
      */
     private void forgetWhatIsTooOldToMatter() {
-        Duration memoryPeriod = getRetryPeriod().multipliedBy(2);
-        if (memoryPeriod.compareTo(MIN_MEMORY_PERIOD) < 0) {
-            memoryPeriod = MIN_MEMORY_PERIOD;
-        }
-        OffsetDateTime limit = now().minus(memoryPeriod);
-        handledMessages.values().removeIf(handled -> handled.lastSeenAt.isBefore(limit));
+        OffsetDateTime limit = now().minus(getMemoryPeriod());
+        handledMessages.values().removeIf(handled -> {
+            if (!handled.lastSeenAt.isBefore(limit)) {
+                return false;
+            }
+            if (handled.pendingApplicationReceipt != null) {
+                log.error("DPH - Giving up the ApplicationReceipt of the message, which could not be sent within {}. " +
+                    "The sender is not answered: incomingMessage = {}, applicationReceipt = {}",
+                    getMemoryPeriod(), handled.message, handled.pendingApplicationReceipt);
+            }
+            return true;
+        });
         finishedNotifications.values().removeIf(lastSeenAt -> lastSeenAt.isBefore(limit));
         failingSince.values().removeIf(since -> since.isBefore(limit));
+    }
+
+    private Duration getMemoryPeriod() {
+        Duration memoryPeriod = getRetryPeriod().multipliedBy(2);
+        return memoryPeriod.compareTo(MIN_MEMORY_PERIOD) < 0 ? MIN_MEMORY_PERIOD : memoryPeriod;
     }
 
     /**
@@ -699,17 +760,25 @@ public class DefaultDphPolling implements DphPolling {
 
     private EnqueueResult enqueueBusinessDocument(IncomingMessage incomingMessage, BusinessDocumentResponse response) {
         StandardBusinessDocument sbd = response.getSbd();
-
-        log.debug("DPH {} received: incomingMessage={}, response={}", sbd.getType(), incomingMessage, response);
+        if (sbd == null) {
+            throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
+        }
 
         BusinessMessageType type;
         try {
             type = BusinessMessageType.fromType(sbd.getType());
-        } catch (IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT, e);
         }
+        log.debug("DPH {} received: incomingMessage={}, response={}", type, incomingMessage, response);
+
         return switch (type) {
-            case DIALOGMELDING -> nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+            case DIALOGMELDING -> {
+                if (!(sbd.getAny() instanceof BusinessMessage)) {
+                    throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
+                }
+                yield nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+            }
             case DIALOGMELDING_KVITTERING -> handleApplicationReceipt(sbd);
             default -> throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT);
         };
@@ -717,6 +786,7 @@ public class DefaultDphPolling implements DphPolling {
 
     private EnqueueResult handleApplicationReceipt(StandardBusinessDocument sbd) {
         DialogmeldingKvitteringMessage message = sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
+            .filter(m -> m.getStatus() != null)
             .orElseThrow(() -> new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         String relatedToMessageId = message.getRelatedToMessageId();
@@ -764,6 +834,10 @@ public class DefaultDphPolling implements DphPolling {
          */
         private StandardBusinessDocument sbd;
         private boolean rejectionRegistered;
+        /**
+         * Whether completing the message after its notification was deleted has failed and been logged.
+         */
+        private boolean completionFailureLogged;
 
         private HandledMessage(Integer herId, IncomingMessage message, DialogmeldingKvitteringMessage pendingApplicationReceipt, OffsetDateTime handledAt) {
             this.herId = herId;

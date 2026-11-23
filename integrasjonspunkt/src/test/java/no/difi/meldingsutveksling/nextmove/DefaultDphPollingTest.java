@@ -6,6 +6,7 @@ import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
 import no.difi.meldingsutveksling.api.NextMoveQueue.EnqueueResult;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.ICD;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
@@ -1042,6 +1043,120 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_sends_pending_application_receipt_after_another_instance_deleted_the_notification() {
+        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+        when(dphClientService.getUnreadNotifications(ON_BEHALF_OF, HER_ID)).thenReturn(List.of(newMessage("ok")), List.of());
+        givenMessage(incomingMessage("ok", false));
+        givenDialogmelding("ok");
+        StandardBusinessDocument appRecSbd = mock(StandardBusinessDocument.class);
+        when(sbdFactory.createNextMoveSBD(any(), any(), any(), any(), any(), any(), any()))
+            .thenThrow(new IllegalStateException("Service registry unavailable"))
+            .thenReturn(appRecSbd);
+        // The other instance has marked the message as downloaded
+        doThrow(notFound()).when(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "ok");
+
+        target.poll();
+        verify(nextMoveMessageService, never()).createMessage(any(StandardBusinessDocument.class));
+
+        target.poll();
+        target.poll();
+
+        verify(nextMoveMessageService, times(1)).createMessage(appRecSbd);
+        verify(dphClientService, times(1)).markAsDownloaded(ON_BEHALF_OF, HER_ID, "ok");
+        verify(dphClientService, times(1)).getMessage(ON_BEHALF_OF, HER_ID, "ok");
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+    }
+
+    @Test
+    void poll_receives_and_answers_new_message_with_the_id_of_a_message_received_before() {
+        when(properties.getFeature().isEnableReceipts()).thenReturn(false);
+        IncomingMessage resent = incomingMessage("resent", false);
+        givenNotifications(newMessage("resent"));
+        givenMessage(resent);
+        givenDialogmelding("resent");
+        when(conversationService.findConversation(resent.getBusinessDocumentId())).thenReturn(Optional.of(
+            new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("earlier-nhn-message")));
+
+        target.poll();
+
+        verify(nextMoveQueue).enqueueIncomingMessage(any(), eq(ServiceIdentifier.DPH), any());
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.OK);
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "resent");
+    }
+
+    @Test
+    void poll_only_marks_as_downloaded_message_handled_before_with_the_same_nhn_message_id() {
+        IncomingMessage incomingMessage = incomingMessage("received", false);
+        givenNotifications(newMessage("received"));
+        givenMessage(incomingMessage);
+        when(conversationService.findConversation(incomingMessage.getBusinessDocumentId())).thenReturn(Optional.of(
+            new Conversation().setDirection(ConversationDirection.INCOMING).setExternalSystemReference("received")));
+
+        target.poll();
+
+        verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
+        verifyNoApplicationReceipt();
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "received");
+    }
+
+    @Test
+    void poll_saves_the_nhn_message_id_on_the_conversation_of_rejected_message() {
+        givenNotifications(newMessage("failing"));
+        givenMessage(incomingMessage("failing", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "failing")).thenThrow(invalidDocument());
+        Conversation conversation = new Conversation().setDirection(ConversationDirection.INCOMING);
+        when(conversationService.registerConversation(any(MessageInformable.class))).thenReturn(conversation);
+
+        target.poll();
+
+        verify(conversationService).save(conversation);
+        assertThat(conversation.getExternalSystemReference()).isEqualTo("failing");
+    }
+
+    @Test
+    void poll_rejects_dialogmelding_without_content_at_once() {
+        givenNotifications(newMessage("empty"));
+        givenMessage(incomingMessage("empty", false));
+        StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
+        when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING.getType());
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "empty")).thenReturn(new BusinessDocumentResponse().setSbd(sbd));
+
+        target.poll();
+
+        verify(nextMoveQueue, never()).enqueueIncomingMessage(any(), any(), any());
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "empty");
+    }
+
+    @Test
+    void poll_rejects_business_document_that_is_missing_at_once() {
+        givenNotifications(newMessage("missing"));
+        givenMessage(incomingMessage("missing", false));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "missing")).thenReturn(new BusinessDocumentResponse());
+
+        target.poll();
+
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+    }
+
+    @Test
+    void poll_does_not_answer_application_receipt_without_status_but_marks_it_as_downloaded() {
+        givenNotifications(newMessage("apprec"));
+        givenMessage(incomingMessage("apprec", false));
+        StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
+        when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING_KVITTERING.getType());
+        when(sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)).thenReturn(Optional.of(
+            new DialogmeldingKvitteringMessage().setRelatedToMessageId("sent")));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "apprec")).thenReturn(new BusinessDocumentResponse().setSbd(sbd));
+
+        target.poll();
+
+        verifyNoApplicationReceipt();
+        verify(conversationService, never()).registerStatus(eq("sent"), any(ReceiptStatus.class), anyString(), any());
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "apprec");
+    }
+
+    @Test
     void isFaultInMessage_tells_faults_in_the_message_from_other_errors() {
         assertThat(DefaultDphPolling.isFaultInMessage(invalidDocument())).isTrue();
         assertThat(DefaultDphPolling.isFaultInMessage(new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL,
@@ -1135,6 +1250,7 @@ class DefaultDphPollingTest {
     private static BusinessDocumentResponse dialogmelding() {
         StandardBusinessDocument sbd = mock(StandardBusinessDocument.class);
         when(sbd.getType()).thenReturn(BusinessMessageType.DIALOGMELDING.getType());
+        lenient().when(sbd.getAny()).thenReturn(mock(BusinessMessage.class));
         return new BusinessDocumentResponse().setSbd(sbd);
     }
 
