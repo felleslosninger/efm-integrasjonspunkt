@@ -123,6 +123,22 @@ public class NextMoveMessageInSteps {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Then("^there are no incoming messages$")
+    public void thereAreNoIncomingMessages() {
+        String username = env.getProperty("spring.security.user.name");
+        String password = env.getProperty("spring.security.user.password");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(username, password);
+        ResponseEntity<String> response = testRestTemplate.exchange(
+                "/api/messages/in/peek",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
     @Then("^the converted SBD is:$")
     public void theReceivedSBDMatchesTheIncomingSBD(String expectedSBD) throws IOException {
         JsonContent<StandardBusinessDocument> actual = json.write(messageReceivedHolder.get().getSbd());

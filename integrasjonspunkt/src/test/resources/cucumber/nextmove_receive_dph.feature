@@ -186,3 +186,7 @@ Feature: Receiving a Next Move DPH message
       "empty" : false
     }
     """
+    # The notification comes back, e.g. after deleting it failed: the message is not received or answered again
+    When the application checks for new DPH messages
+    Then there are no incoming messages
+    And a DPH message is sent to the NHN adapter

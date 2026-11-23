@@ -10,6 +10,7 @@ import org.springframework.util.unit.DataSize;
 
 import java.io.File;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 
 @Data
@@ -36,6 +37,14 @@ public class DphProperties {
 
     @Positive
     private long pollingrate = 30000;
+
+    /**
+     * How long a notification that cannot be handled is retried, counted from when MSH created it. Until then, a
+     * message that is not found or cannot be fetched because of a temporary error is retried on every poll. After
+     * that, a message that cannot be fetched is rejected, and a notification that still cannot be handled is deleted.
+     */
+    @NotNull
+    private Duration notificationRetryPeriod = Duration.ofHours(24);
 
     @NotNull
     private String uri;
