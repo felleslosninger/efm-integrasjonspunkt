@@ -14,7 +14,7 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
 
 @Component
-@Profile("{!(test | cucumber)}")
+@Profile("!(test | cucumber)")
 public class IntegrasjonspunktCertificateValidator {
 
     private final KeystoreHelper keystoreHelper;
