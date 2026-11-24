@@ -294,6 +294,51 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_only_marks_as_downloaded_and_deletes_notification_whose_nhn_message_id_is_on_an_incoming_conversation() {
+        givenNotifications(newMessage("old"));
+        when(conversationService.hasConversationWithExternalSystemReference("old", ConversationDirection.INCOMING)).thenReturn(true);
+
+        target.poll();
+
+        verify(dphClientService, never()).getMessage(any(), anyInt(), anyString());
+        verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
+        verifyNoApplicationReceipt();
+        verify(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "old");
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-old"));
+    }
+
+    @Test
+    void poll_deletes_notification_whose_nhn_message_id_is_on_an_incoming_conversation_when_the_message_is_gone() {
+        givenNotifications(newMessage("old"));
+        when(conversationService.hasConversationWithExternalSystemReference("old", ConversationDirection.INCOMING)).thenReturn(true);
+        doThrow(notFound()).when(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "old");
+
+        target.poll();
+
+        verify(dphClientService, never()).getMessage(any(), anyInt(), anyString());
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-old"));
+    }
+
+    @Test
+    void poll_retries_marking_as_downloaded_message_whose_nhn_message_id_is_on_an_incoming_conversation() {
+        givenNotifications(newMessage("old"));
+        when(conversationService.hasConversationWithExternalSystemReference("old", ConversationDirection.INCOMING)).thenReturn(true);
+        doThrow(new DphException("E21", "Bad gateway", 502))
+            .doNothing()
+            .when(dphClientService).markAsDownloaded(ON_BEHALF_OF, HER_ID, "old");
+
+        target.poll();
+
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+
+        target.poll();
+
+        verify(dphClientService, never()).getMessage(any(), anyInt(), anyString());
+        verify(dphClientService, times(2)).markAsDownloaded(ON_BEHALF_OF, HER_ID, "old");
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-old"));
+    }
+
+    @Test
     void poll_recognizes_message_received_on_the_conversation_of_a_message_sent_from_this_integrasjonspunkt() {
         IncomingMessage incomingMessage = incomingMessage("received", false);
         givenNotifications(newMessage("received"));

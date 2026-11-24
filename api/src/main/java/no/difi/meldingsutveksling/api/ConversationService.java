@@ -40,6 +40,11 @@ public interface ConversationService {
     Optional<Conversation> findConversation(String conversationId, ConversationDirection direction);
 
     /**
+     * Whether a conversation in the direction has the reference, e.g. the NHN message id of a DPH message.
+     */
+    boolean hasConversationWithExternalSystemReference(String externalSystemReference, ConversationDirection direction);
+
+    /**
      * Like {@link #findConversation(String, ConversationDirection)}, but row-locks the conversation until the
      * surrounding transaction ends. Must be called inside a transaction, before the conversation is loaded in it.
      */

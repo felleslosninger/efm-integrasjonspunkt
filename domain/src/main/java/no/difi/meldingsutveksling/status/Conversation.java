@@ -42,7 +42,8 @@ import static no.difi.meldingsutveksling.status.ConversationMarker.markerFrom;
 @Table(name = "conversation",
     indexes = {
         @Index(columnList = "conversation_id"),
-        @Index(columnList = "message_id")
+        @Index(columnList = "message_id"),
+        @Index(columnList = "external_system_reference")
     })
 @NamedEntityGraph(name = "Conversation.messageStatuses", attributeNodes = @NamedAttributeNode("messageStatuses"))
 @DynamicUpdate

@@ -68,6 +68,9 @@ import java.util.function.Supplier;
  * time, so it is never received or answered again. A rejected message gets an incoming conversation with the status
  * FEIL before it is answered, so it is recognized the same way. A message is recognized by the id of its business
  * document, so a message that the sender sends again with the same id is only marked as downloaded, and not answered.
+ * MSH may send old notifications again days later, e.g. when the HER-id gets a new MSH configuration, when it may no
+ * longer have their messages. So a message whose NHN message id is on an incoming conversation is only marked as
+ * downloaded, without being fetched.
  * <p>
  * Some handled messages leave no conversation of their own, so they are not recognized after a restart or on another
  * instance: a message rejected by two instances at the same time, a rejected message sent from this
@@ -304,6 +307,15 @@ public class DefaultDphPolling implements DphPolling {
         String key = handledMessageKey(herId, messageId);
         HandledMessage handled = handledMessages.get(key);
         if (handled == null) {
+            if (conversationService.hasConversationWithExternalSystemReference(messageId, ConversationDirection.INCOMING)) {
+                // E.g. a notification that MSH sends again, up to days later, when the HER-id gets a new MSH
+                // configuration: the message has been received or rejected, also by an earlier version or another
+                // instance, so MSH is not asked for it, which may no longer have it. It is marked as downloaded, in
+                // case that failed before.
+                log.info("DPH message has already been received or rejected, and is only marked as downloaded: notification = {}", notification);
+                markAsDownloaded(onBehalfOf, herId, messageId, notification);
+                return;
+            }
             Optional<HandledMessage> received = receiveOrReject(onBehalfOf, herId, notification, messageId);
             if (received.isEmpty()) {
                 return;
@@ -679,13 +691,20 @@ public class DefaultDphPolling implements DphPolling {
      * message is left in MSH.
      */
     private void markAsDownloaded(Iso6523 onBehalfOf, HandledMessage handled) {
+        markAsDownloaded(onBehalfOf, handled.herId, handled.message.getId(), handled.message);
+    }
+
+    /**
+     * @param message the message or notification, which is logged
+     */
+    private void markAsDownloaded(Iso6523 onBehalfOf, Integer herId, String messageId, Object message) {
         try {
-            dphClientService.markAsDownloaded(onBehalfOf, handled.herId, handled.message.getId());
+            dphClientService.markAsDownloaded(onBehalfOf, herId, messageId);
         } catch (DphException e) {
             if (e.isNotFound()) {
-                log.info("DPH message has already been marked as downloaded: incomingMessage = {}", handled.message);
+                log.info("DPH message has already been marked as downloaded: {}", message);
             } else if (isRefusedByAdapter(e)) {
-                log.warn("DPH message cannot be marked as downloaded, and is left in MSH: incomingMessage = {}", handled.message, e);
+                log.warn("DPH message cannot be marked as downloaded, and is left in MSH: {}", message, e);
             } else {
                 throw e;
             }
