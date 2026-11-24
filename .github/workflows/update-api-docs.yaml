@@ -89,7 +89,7 @@ jobs:
       # Egen GitHub-app som bare er installert på felleslosninger/docs (Contents og Pull requests: write)
       - name: Generate token for docs repo
         id: token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # pin@v3.3.0
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # pin@v3.4.0
         with:
           client-id: ${{ vars.EFM_DOCS_APP_CLIENT_ID }}
           private-key: ${{ secrets.EFM_DOCS_APP_PRIVATE_KEY }}
