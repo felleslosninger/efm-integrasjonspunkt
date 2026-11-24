@@ -21,7 +21,7 @@ Feature: Receiving a Next Move DPH message
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "f3b8d2e1-5c4a-4b7e-8d9f-0a1b2c3d4e71",
-                "standard": "urn:no:difi:helse:xsd:schema::dialogmelding",
+                "standard": "urn:no:difi:helse:xsd::dialogmelding",
                 "type": "dialogmelding",
                 "typeVersion": "1.0"
             },
