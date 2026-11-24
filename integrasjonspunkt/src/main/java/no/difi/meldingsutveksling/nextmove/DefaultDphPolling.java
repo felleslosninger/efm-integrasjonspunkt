@@ -83,7 +83,9 @@ import java.util.function.Supplier;
  * its content. An invalid ApplicationReceipt is not answered. Any other error says nothing about the message, so it is
  * retried, like a message that is not found, until {@code difi.move.dph.notification-retry-period} has passed since
  * this instance first failed to handle the notification. After that, the notification is deleted and the error is
- * logged, but the message is neither rejected nor marked as downloaded.
+ * logged, but the message is neither rejected nor marked as downloaded. A message or business document that is not
+ * found in MSH is retried the same way, but given up once its notification is more than an hour old, since MSH only
+ * announces a message shortly before it can be read.
  */
 @Slf4j
 @Order
@@ -107,6 +109,12 @@ public class DefaultDphPolling implements DphPolling {
      * shorter, so that a message is not rejected again just because its notification comes back on the next poll.
      */
     static final Duration MIN_MEMORY_PERIOD = Duration.ofHours(1);
+
+    /**
+     * How long after its notification was created a message or business document that is not found in MSH may still
+     * turn up.
+     */
+    static final Duration MAX_TIME_UNTIL_READABLE = Duration.ofHours(1);
 
     static final String EXPIRED_TEXT = "Meldingen var utløpt da den ble mottatt, og er ikke levert til mottakers fagsystem";
 
@@ -348,12 +356,11 @@ public class DefaultDphPolling implements DphPolling {
             if (!e.isNotFound()) {
                 throw e;
             }
-            // MSH may announce a message before it can be read, so it is not given up at once
-            if (!isRetryPeriodOver(notification)) {
+            if (mayBecomeReadable(notification)) {
                 throw new RetryLaterException("The message of the notification is not found in MSH.", e);
             }
-            log.warn("DPH - The message of the notification has not been found in MSH within the retry period of {}. " +
-                "It has probably been received already, so the notification is deleted: notification = {}", getRetryPeriod(), notification);
+            log.warn("DPH - The message of the notification has not been found in MSH. It has probably been received " +
+                "already, so the notification is deleted: notification = {}", notification);
             return Optional.empty();
         }
         if (failingSince.containsKey(notification.getNotificationId())) {
@@ -375,10 +382,16 @@ public class DefaultDphPolling implements DphPolling {
         } catch (Exception e) {
             if (e instanceof DphException de && de.isNotFound()) {
                 // Like the message, its business document may not be readable yet
-                if (!isRetryPeriodOver(notification)) {
+                if (mayBecomeReadable(notification)) {
                     throw new RetryLaterException("The business document of the message is not found in MSH.", e);
                 }
                 // Rejecting the message now would answer a message we may already have received
+                if (!isRetryPeriodOver(notification)) {
+                    log.warn("DPH - The business document of the message has not been found in MSH, and the notification " +
+                        "is old. The message has probably been received already, so it is not rejected, and the notification " +
+                        "is deleted: incomingMessage = {}", incomingMessage);
+                    return Optional.empty();
+                }
                 log.error("DPH - The business document has not been found in MSH within the retry period of {}. " +
                     "The message is not rejected, and the notification is deleted: incomingMessage = {}", getRetryPeriod(), incomingMessage, e);
                 return Optional.empty();
@@ -670,6 +683,23 @@ public class DefaultDphPolling implements DphPolling {
             }
         }
         return null;
+    }
+
+    /**
+     * Whether a message or business document that is not found in MSH may still turn up, so that it is retried. MSH
+     * may announce a message shortly before it can be read. A notification that is older than that, e.g. one that MSH
+     * sends again days later when the HER-id gets a new MSH configuration, is about a message that has probably been
+     * received already, so it is given up on the next try. Every notification is retried at least once.
+     */
+    private boolean mayBecomeReadable(Notification notification) {
+        if (!failingSince.containsKey(notification.getNotificationId())) {
+            return true;
+        }
+        if (isRetryPeriodOver(notification)) {
+            return false;
+        }
+        OffsetDateTime createdAt = notification.getCreatedAt();
+        return createdAt == null || createdAt.plus(MAX_TIME_UNTIL_READABLE).isAfter(now());
     }
 
     private boolean isRetryPeriodOver(Notification notification) {

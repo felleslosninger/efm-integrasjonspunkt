@@ -413,6 +413,58 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_gives_up_message_that_is_not_found_on_the_next_try_when_its_notification_is_old() {
+        OffsetDateTime daysAgo = OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).minusDays(3);
+        givenNotifications(notification("old", NotificationType.NEW_MESSAGE, "old", daysAgo));
+        when(dphClientService.getMessage(ON_BEHALF_OF, HER_ID, "old")).thenThrow(notFound());
+
+        target.poll();
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+
+        clock.advance(Duration.ofMinutes(1));
+        target.poll();
+
+        verify(dphClientService, never()).receiveBusinessDocument(any(), anyString());
+        verify(dphClientService, never()).markAsDownloaded(any(), anyInt(), anyString());
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-old"));
+    }
+
+    @Test
+    void poll_retries_message_that_is_not_found_until_its_notification_is_an_hour_old() {
+        givenNotifications(newMessage("new"));
+        when(dphClientService.getMessage(ON_BEHALF_OF, HER_ID, "new")).thenThrow(notFound());
+
+        target.poll();
+        clock.advance(Duration.ofMinutes(30));
+        target.poll();
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+
+        // The notification was created five minutes before the first poll
+        clock.advance(Duration.ofMinutes(30));
+        target.poll();
+
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-new"));
+    }
+
+    @Test
+    void poll_does_not_reject_message_whose_business_document_is_not_found_and_gives_it_up_on_the_next_try_when_its_notification_is_old() {
+        OffsetDateTime daysAgo = OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).minusDays(3);
+        givenNotifications(notification("old", NotificationType.NEW_MESSAGE, "old", daysAgo));
+        givenMessage(incomingMessage("old", true));
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "old")).thenThrow(notFound());
+
+        target.poll();
+        verify(dphClientService, never()).deleteNotifications(any(), anyList());
+
+        clock.advance(Duration.ofMinutes(1));
+        target.poll();
+
+        verifyNoApplicationReceipt();
+        verify(dphClientService, never()).markAsDownloaded(any(), anyInt(), anyString());
+        verify(dphClientService).deleteNotifications(ON_BEHALF_OF, List.of("notification-old"));
+    }
+
+    @Test
     void poll_counts_the_retry_period_from_the_first_failure_and_not_from_when_the_notification_was_created() {
         OffsetDateTime createdLongAgo = OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).minus(RETRY_PERIOD.multipliedBy(3));
         givenNotifications(notification("failing", NotificationType.NEW_MESSAGE, "failing", createdLongAgo));
