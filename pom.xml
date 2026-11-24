@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.2</version>
+        <version>4.2.0</version>
         <relativePath />
     </parent>
 
@@ -78,8 +78,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Skal alltid matche versjonen til spring-boot-starter-parent over -->
-        <spring-boot.version>4.1.2</spring-boot.version>
-        <efm-common.version>5.0.1</efm-common.version>
+        <spring-boot.version>4.2.0</spring-boot.version>
+        <efm-common.version>5.1.0</efm-common.version>
         <efm-nhn-adapter.version>0.2.0</efm-nhn-adapter.version>
         <bouncycastle.version>1.87</bouncycastle.version>
     </properties>
@@ -442,10 +442,6 @@
                     <groupId>com.vaadin.external.google</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
 
