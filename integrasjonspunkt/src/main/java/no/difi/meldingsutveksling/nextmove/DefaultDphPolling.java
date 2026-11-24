@@ -112,7 +112,8 @@ public class DefaultDphPolling implements DphPolling {
 
     /**
      * How long after its notification was created a message or business document that is not found in MSH may still
-     * turn up.
+     * turn up. The creation time is set by MSH and compared with the local clock, so a local clock that is ahead by
+     * about this much may give up a message that MSH has just announced.
      */
     static final Duration MAX_TIME_UNTIL_READABLE = Duration.ofHours(1);
 
@@ -283,7 +284,11 @@ public class DefaultDphPolling implements DphPolling {
                 "Giving up, the notification is deleted: notification = {}", getRetryPeriod(), notification, error);
             return true;
         }
-        if (firstFailure) {
+        if (firstFailure && error instanceof DphException de && de.isNotFound() && !isNew(notification)) {
+            // E.g. one of many old notifications that MSH sends again: the message has probably been received already
+            log.info("DPH - Handling notification failed: {} The notification is more than {} old, so it is given up " +
+                "on the next poll: notification = {}", e.getMessage(), MAX_TIME_UNTIL_READABLE, notification);
+        } else if (firstFailure) {
             log.warn("DPH - Handling notification failed: {} It is retried on every poll for up to {}: notification = {}",
                 e.getMessage(), getRetryPeriod(), notification, error);
         } else {
@@ -698,6 +703,13 @@ public class DefaultDphPolling implements DphPolling {
         if (isRetryPeriodOver(notification)) {
             return false;
         }
+        return isNew(notification);
+    }
+
+    /**
+     * Whether the notification is younger than {@link #MAX_TIME_UNTIL_READABLE}, or has no creation time.
+     */
+    private boolean isNew(Notification notification) {
         OffsetDateTime createdAt = notification.getCreatedAt();
         return createdAt == null || createdAt.plus(MAX_TIME_UNTIL_READABLE).isAfter(now());
     }

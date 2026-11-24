@@ -40,9 +40,10 @@ public class DphProperties {
 
     /**
      * How long a notification that cannot be handled is retried, counted from when this instance first failed to
-     * handle it. Until then, a message that is not found, or cannot be received because of an error that is not in
-     * the message itself, is retried on every poll. After that, the notification is deleted and the error is logged,
-     * without rejecting the message. Must be between zero and 365 days.
+     * handle it. Until then, a message that cannot be received because of an error that is not in the message itself
+     * is retried on every poll. After that, the notification is deleted and the error is logged, without rejecting the
+     * message. A message that is not found in MSH is retried at least once, and then only until its notification is
+     * an hour old, but never beyond this period. Must be between zero and 365 days.
      */
     @NotNull
     private Duration notificationRetryPeriod = Duration.ofHours(24);
