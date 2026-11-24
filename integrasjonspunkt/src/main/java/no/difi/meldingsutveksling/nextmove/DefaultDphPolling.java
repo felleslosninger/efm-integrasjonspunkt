@@ -312,7 +312,11 @@ public class DefaultDphPolling implements DphPolling {
                 // configuration: the message has been received or rejected, also by an earlier version or another
                 // instance, so MSH is not asked for it, which may no longer have it. It is marked as downloaded, in
                 // case that failed before.
-                log.info("DPH message has already been received or rejected, and is only marked as downloaded: notification = {}", notification);
+                if (failingSince.containsKey(notification.getNotificationId())) {
+                    log.debug("DPH message has already been received or rejected, marking it as downloaded again: notification = {}", notification);
+                } else {
+                    log.info("DPH message has already been received or rejected, and is only marked as downloaded: notification = {}", notification);
+                }
                 markAsDownloaded(onBehalfOf, herId, messageId, notification);
                 return;
             }
