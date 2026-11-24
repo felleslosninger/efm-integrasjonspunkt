@@ -1289,6 +1289,32 @@ class DefaultDphPollingTest {
     }
 
     @Test
+    void poll_saves_the_nhn_message_id_of_rejected_message_on_the_next_try_when_saving_it_failed() {
+        IncomingMessage incomingMessage = incomingMessage("failing", false);
+        givenNotifications(newMessage("failing"));
+        givenMessage(incomingMessage);
+        when(dphClientService.receiveBusinessDocument(ON_BEHALF_OF, "failing")).thenThrow(invalidDocument());
+        Conversation registered = new Conversation().setDirection(ConversationDirection.INCOMING);
+        // As read from the database on the next try, without the NHN message id that was not saved
+        Conversation reloaded = new Conversation().setDirection(ConversationDirection.INCOMING);
+        when(conversationService.findConversation(incomingMessage.getBusinessDocumentId()))
+            .thenReturn(Optional.empty(), Optional.empty(), Optional.of(reloaded));
+        when(conversationService.registerConversation(any(MessageInformable.class))).thenReturn(registered);
+        when(conversationService.save(registered)).thenThrow(new DataAccessResourceFailureException("Database unavailable"));
+
+        target.poll();
+        verifyNoApplicationReceipt();
+
+        clock.advance(Duration.ofMinutes(1));
+        target.poll();
+
+        verify(conversationService, times(1)).registerConversation(any(MessageInformable.class));
+        verify(conversationService).save(reloaded);
+        assertThat(reloaded.getExternalSystemReference()).isEqualTo("failing");
+        assertThat(captureApplicationReceipt().getStatus()).isEqualTo(DialogmeldingKvitteringStatus.REJECTED);
+    }
+
+    @Test
     void poll_rejects_dialogmelding_without_content_at_once() {
         givenNotifications(newMessage("empty"));
         givenMessage(incomingMessage("empty", false));

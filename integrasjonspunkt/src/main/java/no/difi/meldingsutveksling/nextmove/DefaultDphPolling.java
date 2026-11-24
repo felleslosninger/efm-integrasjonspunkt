@@ -284,7 +284,7 @@ public class DefaultDphPolling implements DphPolling {
                 "Giving up, the notification is deleted: notification = {}", getRetryPeriod(), notification, error);
             return true;
         }
-        if (firstFailure && error instanceof DphException de && de.isNotFound() && !isNew(notification)) {
+        if (firstFailure && e instanceof RetryLaterException && error instanceof DphException de && de.isNotFound() && !isNew(notification)) {
             // E.g. one of many old notifications that MSH sends again: the message has probably been received already
             log.info("DPH - Handling notification failed: {} The notification is more than {} old, so it is given up " +
                 "on the next poll: notification = {}", e.getMessage(), MAX_TIME_UNTIL_READABLE, notification);
@@ -486,17 +486,18 @@ public class DefaultDphPolling implements DphPolling {
                 // rejection is finished and answered here, in case nobody else does
                 log.info("DPH message is being rejected by another instance, which has not finished. It is rejected here too: incomingMessage = {}", incomingMessage);
             }
-            // An incoming conversation exists if registering the status failed before
-            if (existing.isEmpty()) {
+            // An incoming conversation exists if saving the NHN message id or registering the status failed before
+            Conversation conversation = existing.orElse(null);
+            if (conversation == null) {
                 // Set before the conversation is created, so that it is taken as this instance's on the next try. If
                 // creating it fails without creating it, and another instance rejects the message before then, both
                 // answer it: like two instances rejecting it at the same time.
                 handled.rejectionRegistrationAttempted = true;
-                Conversation conversation = conversationService.registerConversation(rejectedMessage(handled));
-                if (conversation != null) {
-                    conversation.setExternalSystemReference(incomingMessage.getId());
-                    conversationService.save(conversation);
-                }
+                conversation = conversationService.registerConversation(rejectedMessage(handled));
+            }
+            if (conversation != null && conversation.getExternalSystemReference() == null) {
+                conversation.setExternalSystemReference(incomingMessage.getId());
+                conversationService.save(conversation);
             }
             conversationService.registerStatus(messageId, ReceiptStatus.FEIL,
                 "Message was rejected when received: " + handled.rejectionError.getText());
