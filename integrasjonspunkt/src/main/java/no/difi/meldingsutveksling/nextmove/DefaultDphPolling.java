@@ -307,6 +307,9 @@ public class DefaultDphPolling implements DphPolling {
             // The statuses of sent messages are fetched by DphStatusStrategy, so these are only acknowledged
             case MESSAGE_SENT_STATE_UPDATED, MESSAGE_APPREC_INFO_UPDATED, MESSAGE_DELIVERY_STATE_UPDATED ->
                 log.debug("DPH - Status of a sent message updated: notification = {}", notification);
+            // E.g. UNKNOWN, a type from a newer MSH that the adapter or this version does not know
+            default ->
+                log.warn("DPH - Unknown notification type, the notification is deleted: notification = {}", notification);
         }
     }
 
