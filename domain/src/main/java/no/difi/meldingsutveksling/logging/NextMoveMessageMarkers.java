@@ -32,7 +32,7 @@ public class NextMoveMessageMarkers {
     }
 
     public static LogstashMarker senderMarker(String sender) {
-        return Markers.append("sender", sender);
+        return Markers.append("sender", Strings.isNullOrEmpty(sender) ? sender : IdentifierHasher.hashIfPersonnr(sender));
     }
 
     public static LogstashMarker receiverMarker(String receiver) {
