@@ -11,6 +11,7 @@ import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Guards the connection factory wiring. A shared/cached connection factory under a listener container leaves
@@ -38,6 +39,20 @@ class JmsConfigurationTest {
 
         assertThat(container.getConcurrentConsumers()).isEqualTo(CONCURRENCY);
         assertThat(container.getMaxConcurrentConsumers()).isEqualTo(CONCURRENCY);
+    }
+
+    /**
+     * A listener exception that escapes the error handler makes the container close and reopen the connection shared
+     * by all consumers, and every message the other consumers are processing is redelivered - also those already sent.
+     * The failed message itself is redelivered through Session.recover() regardless.
+     */
+    @Test
+    void listenerExceptionsAreNotPropagatedToTheContainer() {
+        DefaultMessageListenerContainer container = createListenerContainer();
+
+        assertThat(container.getErrorHandler()).isNotNull();
+        assertThatCode(() -> container.getErrorHandler().handleError(new RuntimeException("listener failed")))
+                .doesNotThrowAnyException();
     }
 
     @Test

@@ -92,6 +92,14 @@ public class JmsConfiguration {
      * {@code containerFactory} - the dead letter queue listener in {@code InternalQueue} - get this factory
      * instead of the auto configured one, which would be built on the primary, caching connection factory.
      * Those listeners therefore also get client acknowledge and {@code difi.move.queue.concurrency} consumers.
+     * <p>
+     * The error handler only logs listener exceptions, it must not propagate them. The container has already
+     * called {@code Session.recover()} for the failed message by then, so ActiveMQ redelivers it according to the
+     * redelivery policy. A propagated exception is instead treated as an infrastructure failure: the container
+     * closes and reopens the connection shared by all consumers. On the uncached connection factory that really
+     * closes the ActiveMQ connection, and every message the other consumers are processing at that moment is
+     * redelivered - even if it has already been sent and its files deleted. Those redeliveries then fail, which
+     * closes the connection again, and so on.
      */
     @Bean(name = {"jmsListenerContainerFactory", "myJmsContainerFactory"})
     DefaultJmsListenerContainerFactory myJmsContainerFactory(ActiveMQConnectionFactory activeMqConnectionFactory, IntegrasjonspunktProperties props) {
@@ -100,7 +108,8 @@ public class JmsConfiguration {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(activeMqConnectionFactory);
-        factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(false));
+        // true = log and suppress. false would be log and propagate, see above.
+        factory.setErrorHandler(TaskUtils.getDefaultErrorHandler(true));
         // A bare number means "1 to N", i.e. dynamic scaling that creates and releases consumers at runtime. Spring
         // warns against combining that with a CachingConnectionFactory; keep the number of consumers fixed so
         // consumers are never released, even if caching ever finds its way back under the listener.
