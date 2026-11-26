@@ -146,7 +146,8 @@ Release av ny versjon gjerast via GitHub GUI
   - Til slutt lastes de 3 filene Kosmos trenger for å laste ned en spesifikk versjon opp til releasen
     (eks `integrasjonspunkt-v4.2.0.jar`, `integrasjonspunkt-v4.2.0.jar.sha1` og `integrasjonspunkt-v4.2.0.jar.asc`)
 - Sjekk at workflowen er grønn under "Actions", og at de 3 filene ligger på releasen
-- Oppdater Digdir Docs `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
+- Oppdater Digdir Docs `_docs/eFormidling/installasjon/automatisk_oppgradering.md`, `_docs/eFormidling/Introduksjon/last_ned.md`, `_docs/eFormidling/Oppgradering/endringslogg.md` og evt `_docs/eFormidling/installasjon/Eksempel/installasjon_aks.md`
+- OBS! For linken til docker container - Finn riktig docker tag [her](https://github.com/felleslosninger/efm-integrasjonspunkt/pkgs/container/efm-integrasjonspunkt/versions) 
 - Oppdater [Kosmos konfigurasjonen med siste versjoner](latest-versions.yml)
 
 Feiler signeringen (f.eks. utløpt nøkkel eller endrede secrets) kan secrets testes uten å lage en ny release
