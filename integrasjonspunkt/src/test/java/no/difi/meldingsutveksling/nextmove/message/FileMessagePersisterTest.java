@@ -1,6 +1,7 @@
 package no.difi.meldingsutveksling.nextmove.message;
 
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,12 +15,15 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +47,13 @@ class FileMessagePersisterTest {
     void setUp() {
         when(props.getNextmove()).thenReturn(nextMove);
         when(nextMove.getFiledir()).thenReturn(tempDir.toString());
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     // --- write ---
@@ -165,6 +176,60 @@ class FileMessagePersisterTest {
         assertThatThrownBy(() -> persister.delete(messageId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("illegal characters");
+    }
+
+    @Test
+    void delete_inTransaction_removesMessageDirectoryOnlyAfterCommit() throws IOException {
+        Path messageDir = createMessageDir("msg-123");
+        TransactionSynchronizationManager.initSynchronization();
+
+        persister.delete("msg-123");
+        assertThat(messageDir.toFile()).exists();
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+        assertThat(messageDir.toFile()).doesNotExist();
+    }
+
+    @Test
+    void delete_inTransaction_keepsMessageDirectoryOnRollback() throws IOException {
+        Path messageDir = createMessageDir("msg-123");
+        TransactionSynchronizationManager.initSynchronization();
+
+        persister.delete("msg-123");
+        TransactionSynchronizationManager.getSynchronizations()
+                .forEach(s -> s.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK));
+
+        assertThat(messageDir.toFile()).exists();
+        assertThat(messageDir.resolve("file.txt")).hasContent("content");
+    }
+
+    @Test
+    void delete_inTransaction_validatesMessageIdImmediately() {
+        TransactionSynchronizationManager.initSynchronization();
+
+        assertThatThrownBy(() -> persister.delete("../evil"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+    }
+
+    @Test
+    void delete_inTransaction_failureAfterCommitIsNotPropagated() throws IOException {
+        // A plain file where the message directory should be makes FileUtils.deleteDirectory throw.
+        Files.write(tempDir.resolve("msg-123"), "not a directory".getBytes());
+        TransactionSynchronizationManager.initSynchronization();
+
+        persister.delete("msg-123");
+
+        assertThatCode(() -> TransactionSynchronizationManager.getSynchronizations()
+                .forEach(TransactionSynchronization::afterCommit))
+                .doesNotThrowAnyException();
+    }
+
+    private Path createMessageDir(String messageId) throws IOException {
+        Path messageDir = tempDir.resolve(messageId);
+        Files.createDirectory(messageDir);
+        Files.write(messageDir.resolve("file.txt"), "content".getBytes());
+        return messageDir;
     }
 
 }
