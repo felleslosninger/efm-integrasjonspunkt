@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -52,10 +54,31 @@ public class FileMessagePersister implements MessagePersister {
         return new FileSystemResource(file);
     }
 
+    // Deleting files is not part of the database transaction. Callers delete the message row in the same
+    // transaction; deleting the files before commit would leave a row without files if that transaction is
+    // rolled back, and the next read of the message would fail. Inside a transaction the files are therefore
+    // deleted after commit, where an IOException can only be logged.
     @Override
     public void delete(String messageId) throws IOException {
         preventUncontrolledDataInPath(messageId);
         File dir = new File(getMessageFiledirPath(messageId));
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        deleteDirectory(dir, messageId);
+                    } catch (IOException e) {
+                        log.warn("Error deleting directory {} after commit for message[id={}]", dir.getAbsolutePath(), messageId, e);
+                    }
+                }
+            });
+        } else {
+            deleteDirectory(dir, messageId);
+        }
+    }
+
+    private void deleteDirectory(File dir, String messageId) throws IOException {
         log.debug("Deleting directory {} for message[id={}]", dir.getAbsolutePath(), messageId);
         FileUtils.deleteDirectory(dir);
     }
