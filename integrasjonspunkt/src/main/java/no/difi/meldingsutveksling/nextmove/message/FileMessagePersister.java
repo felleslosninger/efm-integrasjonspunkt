@@ -57,7 +57,8 @@ public class FileMessagePersister implements MessagePersister {
     // Deleting files is not part of the database transaction. Callers delete the message row in the same
     // transaction; deleting the files before commit would leave a row without files if that transaction is
     // rolled back, and the next read of the message would fail. Inside a transaction the files are therefore
-    // deleted after commit, where an IOException can only be logged.
+    // deleted after commit. Any exception there is only logged: thrown from afterCommit it would reach the caller
+    // after a successful commit and skip the remaining synchronizations (e.g. the status queue).
     @Override
     public void delete(String messageId) throws IOException {
         preventUncontrolledDataInPath(messageId);
@@ -68,7 +69,7 @@ public class FileMessagePersister implements MessagePersister {
                 public void afterCommit() {
                     try {
                         deleteDirectory(dir, messageId);
-                    } catch (IOException e) {
+                    } catch (IOException | RuntimeException e) {
                         log.warn("Error deleting directory {} after commit for message[id={}]", dir.getAbsolutePath(), messageId, e);
                     }
                 }

@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -209,6 +210,19 @@ class FileMessagePersisterTest {
         assertThatThrownBy(() -> persister.delete("../evil"))
                 .isInstanceOf(IllegalArgumentException.class);
         assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+    }
+
+    @Test
+    void delete_inTransaction_failureAfterCommitIsNotPropagated() throws IOException {
+        // A plain file where the message directory should be makes FileUtils.deleteDirectory throw.
+        Files.write(tempDir.resolve("msg-123"), "not a directory".getBytes());
+        TransactionSynchronizationManager.initSynchronization();
+
+        persister.delete("msg-123");
+
+        assertThatCode(() -> TransactionSynchronizationManager.getSynchronizations()
+                .forEach(TransactionSynchronization::afterCommit))
+                .doesNotThrowAnyException();
     }
 
     private Path createMessageDir(String messageId) throws IOException {
