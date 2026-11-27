@@ -14,7 +14,7 @@
       "process": "urn:no:difi:profile:helse:helse:ver1.0",
       "herIdLevel1": "8143541",
       "documentTypes": [
-        "urn:no:difi:helse:xsd:schema::dialogmelding"
+        "urn:no:difi:helse:xsd::dialogmelding"
       ],
       "service": {
         "identifier": "DPH",

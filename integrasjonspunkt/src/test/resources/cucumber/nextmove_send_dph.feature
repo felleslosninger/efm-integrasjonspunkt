@@ -27,7 +27,7 @@ Feature: Sending a Next Move DPH message
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "e7c2a9b4-3d1f-4e8a-b6c5-2f9d8e7a6b52",
-                "standard": "urn:no:difi:helse:xsd:schema::dialogmelding",
+                "standard": "urn:no:difi:helse:xsd::dialogmelding",
                 "type": "dialogmelding",
                 "typeVersion": "1.0"
             },
@@ -101,7 +101,7 @@ Feature: Sending a Next Move DPH message
           }
         } ],
         "documentIdentification" : {
-          "standard" : "urn:no:difi:helse:xsd:schema::dialogmelding",
+          "standard" : "urn:no:difi:helse:xsd::dialogmelding",
           "typeVersion" : "1.0",
           "instanceIdentifier" : "e7c2a9b4-3d1f-4e8a-b6c5-2f9d8e7a6b52",
           "type" : "dialogmelding",

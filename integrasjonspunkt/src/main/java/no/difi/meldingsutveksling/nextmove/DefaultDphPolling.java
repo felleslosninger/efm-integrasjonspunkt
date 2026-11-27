@@ -3,33 +3,90 @@ package no.difi.meldingsutveksling.nextmove;
 import io.micrometer.core.annotation.Timed;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.meldingsutveksling.MessageInformable;
 import no.difi.meldingsutveksling.ServiceIdentifier;
 import no.difi.meldingsutveksling.api.ConversationService;
 import no.difi.meldingsutveksling.api.DphPolling;
 import no.difi.meldingsutveksling.api.NextMoveQueue;
+import no.difi.meldingsutveksling.api.NextMoveQueue.EnqueueResult;
 import no.difi.meldingsutveksling.config.IntegrasjonspunktProperties;
+import no.difi.meldingsutveksling.domain.BusinessMessage;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.domain.NhnIdentifier;
+import no.difi.meldingsutveksling.domain.PartnerIdentifier;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
 import no.difi.meldingsutveksling.dph.DphService;
 import no.difi.meldingsutveksling.dph.client.DphClientService;
 import no.difi.meldingsutveksling.dph.client.DphException;
+import no.difi.meldingsutveksling.dph.client.InvalidBusinessDocumentException;
 import no.difi.meldingsutveksling.dph.client.domain.BusinessDocumentResponse;
 import no.difi.meldingsutveksling.nextmove.v2.NextMoveMessageService;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
+import no.difi.meldingsutveksling.nhn.adapter.model.Notification;
+import no.difi.meldingsutveksling.nhn.adapter.model.NotificationType;
 import no.difi.meldingsutveksling.receipt.ReceiptStatus;
 import no.difi.meldingsutveksling.sbd.SBDFactory;
 import no.difi.meldingsutveksling.status.Conversation;
+import no.difi.meldingsutveksling.status.MessageStatus;
+import no.difi.meldingsutveksling.status.MessageStatusFactory;
 import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.io.Resource;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.CannotCreateTransactionException;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
+/**
+ * Receives DPH messages by polling the NHN adapter for the unread notifications of each HER-id.
+ * <p>
+ * A NewMessage notification refers to a message whose business document is fetched and put on the local queue. An
+ * automatic ApplicationReceipt is sent if needed, the message is marked as downloaded, which deletes the business
+ * document in MSH, and finally the notification is deleted. A notification stays unread until it is deleted, so a
+ * notification that could not be handled is retried on the next poll.
+ * <p>
+ * Since these are separate steps, a notification may come back for a message that has already been handled. Within
+ * the lifetime of this instance, the steps that are done are remembered, so only the remaining steps are retried, and
+ * a notification that has been handled or given up is only deleted again. A message that has been put on the local
+ * queue is also recognized by its conversation, or by the local queue when another instance received it at the same
+ * time, so it is never received or answered again. A rejected message gets an incoming conversation with the status
+ * FEIL before it is answered, so it is recognized the same way. A message is recognized by the id of its business
+ * document, so a message that the sender sends again with the same id is only marked as downloaded, and not answered.
+ * MSH may send old notifications again days later, e.g. when the HER-id gets a new MSH configuration, when it may no
+ * longer have their messages. So a message whose NHN message id is on an incoming conversation is only marked as
+ * downloaded, without being fetched.
+ * <p>
+ * Some handled messages leave no conversation of their own, so they are not recognized after a restart or on another
+ * instance: a message rejected by two instances at the same time, a rejected message sent from this
+ * integrasjonspunkt, whose conversation is the one of the sent message, and an ApplicationReceipt received while
+ * {@code difi.move.feature.enable-receipts=false}. If the notification of such a message comes back, the message may
+ * be rejected again, or its business document is not found and the notification is given up.
+ * <p>
+ * A message is rejected only for a fault in the message itself, at once, with the error code the adapter tells, e.g.
+ * for invalid XML or a missing patient, or because its business document is missing, has an unknown type, or lacks
+ * its content. An invalid ApplicationReceipt is not answered. Any other error says nothing about the message, so it is
+ * retried, like a message that is not found, until {@code difi.move.dph.notification-retry-period} has passed since
+ * this instance first failed to handle the notification. After that, the notification is deleted and the error is
+ * logged, but the message is neither rejected nor marked as downloaded. A message or business document that is not
+ * found in MSH is retried the same way, but given up once its notification is more than an hour old, since MSH only
+ * announces a message shortly before it can be read.
+ */
 @Slf4j
 @Order
 @Component
@@ -37,6 +94,37 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DefaultDphPolling implements DphPolling {
 
+    /**
+     * The most notifications the adapter deletes in one request.
+     */
+    static final int MAX_NOTIFICATIONS_TO_DELETE = 1000;
+
+    /**
+     * The most unread notifications fetched in one request, which is also the most the adapter and MSH return.
+     */
+    static final int MAX_NOTIFICATIONS_TO_FETCH = 1000;
+
+    /**
+     * The shortest time handled messages and failing notifications are remembered, even if the retry period is
+     * shorter, so that a message is not rejected again just because its notification comes back on the next poll.
+     */
+    static final Duration MIN_MEMORY_PERIOD = Duration.ofHours(1);
+
+    /**
+     * How long after its notification was created a message or business document that is not found in MSH may still
+     * turn up. The creation time is set by MSH and compared with the local clock, so a local clock that is ahead by
+     * about this much may give up a message that MSH has just announced.
+     */
+    static final Duration MAX_TIME_UNTIL_READABLE = Duration.ofHours(1);
+
+    static final String EXPIRED_TEXT = "Meldingen var utløpt da den ble mottatt, og er ikke levert til mottakers fagsystem";
+
+    /**
+     * Client errors that may go away by themselves: authorization that is not in place yet, timeouts and throttling.
+     */
+    private static final Set<Integer> TEMPORARY_CLIENT_ERRORS = Set.of(401, 403, 408, 429);
+
+    private final Clock clock;
     private final DphService dphService;
     private final SBDFactory sbdFactory;
     private final NextMoveQueue nextMoveQueue;
@@ -44,152 +132,897 @@ public class DefaultDphPolling implements DphPolling {
     private final ConversationService conversationService;
     private final NextMoveMessageService nextMoveMessageService;
     private final IntegrasjonspunktProperties properties;
+    private final MessageStatusFactory messageStatusFactory;
+
+    /**
+     * The messages that have been received or rejected, but whose notifications have not been deleted yet, by HER-id
+     * and NHN message id.
+     */
+    private final Map<String, HandledMessage> handledMessages = new ConcurrentHashMap<>();
+
+    /**
+     * When this instance first failed to handle a notification that is not handled yet, by notification id.
+     */
+    private final Map<String, OffsetDateTime> failingSince = new ConcurrentHashMap<>();
+
+    /**
+     * The HER-ids whose notifications could not be deleted on the last poll, so that the failure is logged in full only
+     * once.
+     */
+    private final Set<Integer> herIdsFailingToDeleteNotifications = ConcurrentHashMap.newKeySet();
+
+    /**
+     * The HER-ids whose notifications could not be fetched on the last poll, so that the failure is logged in full only
+     * once.
+     */
+    private final Set<Integer> herIdsFailingToPoll = ConcurrentHashMap.newKeySet();
+
+    /**
+     * The HER-ids whose full page of unread notifications could not be handled or deleted on the last poll.
+     */
+    private final Set<Integer> herIdsWithStuckNotifications = ConcurrentHashMap.newKeySet();
+
+    /**
+     * The notifications that have been handled or given up, but not deleted yet, with when they were last seen, by
+     * notification id. A notification that comes back is only deleted again, so that it is neither handled nor logged
+     * again on every poll.
+     */
+    private final Map<String, OffsetDateTime> finishedNotifications = new ConcurrentHashMap<>();
 
     @Override
     @Timed
     public void poll() {
+        forgetWhatIsTooOldToMatter();
+
         for (Integer herId : properties.getDph().getHerIds()) {
             try {
                 pollForHerId(herId);
+                if (herIdsFailingToPoll.remove(herId)) {
+                    log.info("DPH - Polling for notifications works again for HER-id = {}", herId);
+                }
             } catch (Exception e) {
-                log.error("DPH - Polling for messages failed for HER-id = {}", herId, e);
+                if (herIdsFailingToPoll.add(herId)) {
+                    log.error("DPH - Polling for notifications failed for HER-id = {}", herId, e);
+                } else {
+                    log.debug("DPH - Polling for notifications failed again for HER-id = {}: {}", herId, e.getMessage());
+                }
             }
         }
     }
 
     private void pollForHerId(@NotNull Integer herId) {
         Iso6523 onBehalfOf = dphService.getOnBehalfOf(NhnIdentifier.herId(herId));
-        List<IncomingMessage> messages = dphClientService.getMessages(onBehalfOf, herId);
-        messages.forEach(message -> handleMessage(onBehalfOf, message));
+        List<Notification> notifications = dphClientService.getUnreadNotifications(onBehalfOf, herId, MAX_NOTIFICATIONS_TO_FETCH);
+
+        List<Notification> handled = new ArrayList<>();
+        int newlyFinished = 0;
+        for (Notification notification : notifications) {
+            if (finishedNotifications.replace(notification.getNotificationId(), now()) != null) {
+                log.debug("DPH - Deleting notification that has been handled or given up again: notification = {}", notification);
+                handled.add(notification);
+                continue;
+            }
+            try {
+                handleNotification(onBehalfOf, herId, notification);
+                finishedNotifications.put(notification.getNotificationId(), now());
+                handled.add(notification);
+                newlyFinished++;
+            } catch (Exception e) {
+                if (isGivenUp(notification, e)) {
+                    finishedNotifications.put(notification.getNotificationId(), now());
+                    handled.add(notification);
+                    newlyFinished++;
+                }
+            }
+        }
+        warnIfStuck(herId, notifications.size(), newlyFinished);
+
+        completeMessagesWhoseNotificationsAreGone(onBehalfOf, herId, notifications);
+        deleteNotifications(onBehalfOf, herId, handled);
     }
 
-    private void handleMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        log.info("DPH message received: incomingMessage={}", incomingMessage);
+    /**
+     * At most {@link #MAX_NOTIFICATIONS_TO_FETCH} unread notifications are fetched. If none of a full page can
+     * be finished, e.g. because they are retried or cannot be deleted, newer notifications may not be fetched at all.
+     */
+    private void warnIfStuck(Integer herId, int fetched, int newlyFinished) {
+        if (fetched >= MAX_NOTIFICATIONS_TO_FETCH && newlyFinished == 0) {
+            if (herIdsWithStuckNotifications.add(herId)) {
+                log.warn("DPH - None of the {} unread notifications of HER-id = {} could be handled or deleted. " +
+                    "Newer notifications may not be fetched until they are: see the errors logged for them", fetched, herId);
+            }
+        } else if (herIdsWithStuckNotifications.remove(herId)) {
+            log.info("DPH - Notifications of HER-id = {} are handled again", herId);
+        }
+    }
 
-        try {
-            receiveMessage(onBehalfOf, incomingMessage);
-        } catch (Exception e) {
-            rejectMessage(onBehalfOf, incomingMessage, e);
+    /**
+     * Completes the handled messages of the HER-id whose notifications did not come back, e.g. because another
+     * instance found the message handled, marked it as downloaded and deleted its notification. Otherwise an
+     * ApplicationReceipt that this instance has not sent yet would never be sent.
+     */
+    private void completeMessagesWhoseNotificationsAreGone(Iso6523 onBehalfOf, Integer herId, List<Notification> notifications) {
+        Set<String> comeBack = new HashSet<>();
+        for (Notification notification : notifications) {
+            if (notification.getType() == NotificationType.NEW_MESSAGE && notification.getRelatedMessageId() != null) {
+                comeBack.add(handledMessageKey(herId, notification.getRelatedMessageId()));
+            }
+        }
+        handledMessages.forEach((key, handled) -> {
+            if (!handled.herId.equals(herId) || comeBack.contains(key)) {
+                return;
+            }
+            try {
+                complete(onBehalfOf, handled);
+                handledMessages.remove(key);
+                log.debug("DPH message completed after its notification was deleted: incomingMessage = {}", handled.message);
+            } catch (Exception e) {
+                if (handled.completionFailureLogged) {
+                    log.debug("DPH - Completing message failed again, it is retried on the next poll: incomingMessage = {}", handled.message);
+                } else {
+                    handled.completionFailureLogged = true;
+                    log.warn("DPH - Completing message whose notification has been deleted failed. It is retried on every poll " +
+                        "for up to {}: incomingMessage = {}", getMemoryPeriod(), handled.message, e);
+                }
+            }
+        });
+    }
+
+    /**
+     * Logs the failure in full the first time and when giving up, so that a notification that fails on every poll does
+     * not flood the log. A notification is always retried at least once, and a notification that is to be retried
+     * later is not given up here, since that has been decided already.
+     *
+     * @return whether the retry period is over, so that the notification is given up and deleted
+     */
+    private boolean isGivenUp(Notification notification, Exception e) {
+        boolean firstFailure = failingSince.putIfAbsent(notification.getNotificationId(), now()) == null;
+        Throwable error = e instanceof RetryLaterException ? e.getCause() : e;
+
+        if (!firstFailure && !(e instanceof RetryLaterException) && isRetryPeriodOver(notification)) {
+            log.error("DPH - Handling notification failed, and the retry period of {} is over. " +
+                "Giving up, the notification is deleted: notification = {}", getRetryPeriod(), notification, error);
+            return true;
+        }
+        if (firstFailure && e instanceof RetryLaterException && error instanceof DphException de && de.isNotFound() && !isNew(notification)) {
+            // E.g. one of many old notifications that MSH sends again: the message has probably been received already
+            log.info("DPH - Handling notification failed: {} The notification is more than {} old, so it is given up " +
+                "on the next poll: notification = {}", e.getMessage(), MAX_TIME_UNTIL_READABLE, notification);
+        } else if (firstFailure) {
+            log.warn("DPH - Handling notification failed: {} It is retried on every poll for up to {}: notification = {}",
+                e.getMessage(), getRetryPeriod(), notification, error);
+        } else {
+            log.debug("DPH - Handling notification failed again: {} It is retried on the next poll: notification = {}",
+                e.getMessage(), notification);
+        }
+        return false;
+    }
+
+    private void handleNotification(Iso6523 onBehalfOf, Integer herId, Notification notification) {
+        switch (notification.getType()) {
+            case NEW_MESSAGE -> handleNewMessage(onBehalfOf, herId, notification);
+            // MSH refused the message before it reached us, so there is no business document to fetch or answer
+            case REFUSED_MESSAGE ->
+                log.warn("DPH - MSH refused a message to HER-id = {}: notification = {}", herId, notification);
+            // The statuses of sent messages are fetched by DphStatusStrategy, so these are only acknowledged
+            case MESSAGE_SENT_STATE_UPDATED, MESSAGE_APPREC_INFO_UPDATED, MESSAGE_DELIVERY_STATE_UPDATED ->
+                log.debug("DPH - Status of a sent message updated: notification = {}", notification);
+            // E.g. UNKNOWN, a type from a newer MSH that the adapter or this version does not know
+            default ->
+                log.warn("DPH - Unknown notification type, the notification is deleted: notification = {}", notification);
+        }
+    }
+
+    private void handleNewMessage(Iso6523 onBehalfOf, Integer herId, Notification notification) {
+        String messageId = notification.getRelatedMessageId();
+        if (messageId == null) {
+            log.warn("DPH - Ignoring NewMessage notification without message id: notification = {}", notification);
             return;
         }
 
-        try {
-            if (!incomingMessage.isAppRec() && !properties.getFeature().isEnableReceipts()) {
-                log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
-
-                sendApplicationReceipt(incomingMessage, new DialogmeldingKvitteringMessage()
-                    .setRelatedToMessageId(incomingMessage.getId())
-                    .setStatus(DialogmeldingKvitteringStatus.OK));
+        String key = handledMessageKey(herId, messageId);
+        HandledMessage handled = handledMessages.get(key);
+        if (handled == null) {
+            if (conversationService.hasConversationWithExternalSystemReference(messageId, ConversationDirection.INCOMING)) {
+                // E.g. a notification that MSH sends again, up to days later, when the HER-id gets a new MSH
+                // configuration: the message has been received or rejected, also by an earlier version or another
+                // instance, so MSH is not asked for it, which may no longer have it. It is marked as downloaded, in
+                // case that failed before.
+                if (failingSince.containsKey(notification.getNotificationId())) {
+                    log.debug("DPH message has already been received or rejected, marking it as downloaded again: notification = {}", notification);
+                } else {
+                    log.info("DPH message has already been received or rejected, and is only marked as downloaded: notification = {}", notification);
+                }
+                markAsDownloaded(onBehalfOf, herId, messageId, notification);
+                return;
             }
+            Optional<HandledMessage> received = receiveOrReject(onBehalfOf, herId, notification, messageId);
+            if (received.isEmpty()) {
+                return;
+            }
+            handled = received.get();
+            handledMessages.put(key, handled);
+            // The remaining steps get a retry period of their own
+            failingSince.remove(notification.getNotificationId());
+        } else {
+            // Remembered for as long as the notification keeps coming back
+            handled.lastSeenAt = now();
+            log.debug("DPH message has already been handled, only the remaining steps are retried: incomingMessage = {}", handled.message);
+        }
 
-            dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
+        complete(onBehalfOf, handled);
+    }
+
+    /**
+     * @return the received or rejected message, or nothing if there is no message to complete
+     */
+    private Optional<HandledMessage> receiveOrReject(Iso6523 onBehalfOf, Integer herId, Notification notification, String messageId) {
+        IncomingMessage incomingMessage;
+        try {
+            incomingMessage = dphClientService.getMessage(onBehalfOf, herId, messageId);
+        } catch (DphException e) {
+            if (!e.isNotFound()) {
+                throw e;
+            }
+            if (mayBecomeReadable(notification)) {
+                throw new RetryLaterException("The message of the notification is not found in MSH.", e);
+            }
+            log.warn("DPH - The message of the notification has not been found in MSH. It has probably been received " +
+                "already, so the notification is deleted: notification = {}", notification);
+            return Optional.empty();
+        }
+        if (failingSince.containsKey(notification.getNotificationId())) {
+            log.debug("DPH message fetched again: incomingMessage={}", incomingMessage);
+        } else {
+            log.info("DPH message received: incomingMessage={}", incomingMessage);
+        }
+
+        if (isAlreadyHandled(incomingMessage)) {
+            log.info("DPH message has already been received or rejected, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+            return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
+        }
+
+        BusinessDocumentResponse response = null;
+        EnqueueResult result;
+        try {
+            response = dphClientService.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
+            result = enqueueBusinessDocument(incomingMessage, response);
         } catch (Exception e) {
-            log.error("DPH message was received, but sending ApplicationReceipt or marking it as read failed. " +
-                "The message will be retried on the next poll: incomingMessage = {}", incomingMessage, e);
+            if (e instanceof DphException de && de.isNotFound()) {
+                // Like the message, its business document may not be readable yet
+                if (mayBecomeReadable(notification)) {
+                    throw new RetryLaterException("The business document of the message is not found in MSH.", e);
+                }
+                // Rejecting the message now would answer a message we may already have received
+                if (!isRetryPeriodOver(notification)) {
+                    log.warn("DPH - The business document of the message has not been found in MSH, and the notification " +
+                        "is old. The message has probably been received already, so it is not rejected, and the notification " +
+                        "is deleted: incomingMessage = {}", incomingMessage);
+                    return Optional.empty();
+                }
+                log.error("DPH - The business document has not been found in MSH within the retry period of {}. " +
+                    "The message is not rejected, and the notification is deleted: incomingMessage = {}", getRetryPeriod(), incomingMessage, e);
+                return Optional.empty();
+            }
+            if (!isFaultInMessage(e)) {
+                // E.g. the adapter, MSH or the database is unavailable, or the integrasjonspunkt and the adapter do
+                // not trust each other: rejecting the message would tell the sender that it is invalid
+                if (!isRetryPeriodOver(notification)) {
+                    throw new RetryLaterException("Receiving the message failed because of an error that is not in the message.", e);
+                }
+                log.error("DPH - Receiving the message has failed within the retry period of {} because of an error that is not in " +
+                    "the message. It is neither rejected nor marked as downloaded, so it is left in MSH, and the notification is deleted. " +
+                    "The message must be followed up manually: incomingMessage = {}", getRetryPeriod(), incomingMessage, e);
+                return Optional.empty();
+            }
+            KvitteringStatusMessage error = getError(incomingMessage, e);
+            // The adapter tells an invalid ApplicationReceipt, which MSH may not have flagged as one
+            boolean applicationReceipt = isApplicationReceipt(incomingMessage, response) || findFault(e).isInvalidApplicationReceipt();
+            HandledMessage rejected = new HandledMessage(herId, incomingMessage,
+                getApplicationReceiptForRejected(incomingMessage, applicationReceipt, error), now());
+            rejected.rejectionError = error;
+            rejected.applicationReceipt = applicationReceipt;
+            rejected.sbd = response != null ? response.getSbd() : null;
+            return Optional.of(rejected);
+        } finally {
+            closeAsic(response);
+        }
+
+        warnIfIdsDiffer(incomingMessage, response.getSbd());
+        if (result == EnqueueResult.DUPLICATE) {
+            // Another instance received the message at the same time, and answers it
+            log.info("DPH message has just been received by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+            return Optional.of(new HandledMessage(herId, incomingMessage, null, now()));
+        }
+
+        // The message is received, so nothing that fails from here on may reject it
+        saveExternalSystemReference(incomingMessage);
+        DialogmeldingKvitteringMessage applicationReceipt = getApplicationReceiptForReceived(
+            incomingMessage, isApplicationReceipt(incomingMessage, response), result == EnqueueResult.EXPIRED);
+        return Optional.of(new HandledMessage(herId, incomingMessage, applicationReceipt, now()));
+    }
+
+    /**
+     * Registers a rejected message, sends the ApplicationReceipt, if any, and marks the message as downloaded. A step
+     * that is done is not repeated if the notification comes back.
+     */
+    private void complete(Iso6523 onBehalfOf, HandledMessage handled) {
+        if (handled.rejectionError != null && !handled.rejectionRegistered) {
+            registerRejection(handled);
+            handled.rejectionRegistered = true;
+        }
+        if (handled.pendingApplicationReceipt != null) {
+            if (handled.applicationReceiptMessage == null) {
+                handled.applicationReceiptMessage = nextMoveMessageService.createMessage(createApplicationReceiptSbd(handled));
+            }
+            nextMoveMessageService.sendMessage(handled.applicationReceiptMessage);
+            handled.pendingApplicationReceipt = null;
+        }
+        if (!handled.downloaded) {
+            markAsDownloaded(onBehalfOf, handled);
+            handled.downloaded = true;
         }
     }
 
-    private void receiveMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        enqueueBusinessDoucment(onBehalfOf, incomingMessage);
-
-        conversationService.findConversation(incomingMessage.getBusinessDocumentId())
-            .ifPresent(conversation -> {
+    /**
+     * Registers the rejected message as an incoming conversation with the status FEIL, before it is answered, so that
+     * it is recognized as handled if its notification comes back, also after a restart or on another instance. The
+     * conversation of a message sent from this integrasjonspunkt is left alone.
+     */
+    private void registerRejection(HandledMessage handled) {
+        IncomingMessage incomingMessage = handled.message;
+        String messageId = incomingMessage.getBusinessDocumentId();
+        try {
+            Optional<Conversation> existing = conversationService.findConversation(messageId);
+            if (existing.isPresent() && existing.get().getDirection() != ConversationDirection.INCOMING) {
+                return;
+            }
+            if (existing.isPresent() && !handled.rejectionRegistrationAttempted) {
+                Conversation other = existing.get();
+                if (hasStatus(other, ReceiptStatus.FEIL) || hasStatus(other, ReceiptStatus.INNKOMMENDE_MOTTATT)) {
+                    // Another instance rejected or received the message since this instance found it not handled
+                    log.info("DPH message has just been handled by another instance, and is only marked as downloaded: incomingMessage = {}", incomingMessage);
+                    handled.pendingApplicationReceipt = null;
+                    return;
+                }
+                // Another instance began to reject the message, but has not finished, e.g. because it stopped: the
+                // rejection is finished and answered here, in case nobody else does
+                log.info("DPH message is being rejected by another instance, which has not finished. It is rejected here too: incomingMessage = {}", incomingMessage);
+            }
+            // An incoming conversation exists if saving the NHN message id or registering the status failed before
+            Conversation conversation = existing.orElse(null);
+            if (conversation == null) {
+                // Set before the conversation is created, so that it is taken as this instance's on the next try. If
+                // creating it fails without creating it, and another instance rejects the message before then, both
+                // answer it: like two instances rejecting it at the same time.
+                handled.rejectionRegistrationAttempted = true;
+                conversation = conversationService.registerConversation(rejectedMessage(handled));
+            }
+            if (conversation != null && conversation.getExternalSystemReference() == null) {
                 conversation.setExternalSystemReference(incomingMessage.getId());
                 conversationService.save(conversation);
-            });
-    }
-
-    private void rejectMessage(Iso6523 onBehalfOf, IncomingMessage incomingMessage, Exception e) {
-        KvitteringStatusMessage error;
-        if (e instanceof DphException de) {
-            log.warn("Client error while attempting to fetch business document for incomingMessage = {}", incomingMessage, e);
-            error = new KvitteringStatusMessage()
-                .setCode(de.getErrorCode())
-                .setText(de.getMessage());
-        } else {
-            // Details of unexpected errors are only logged, since they may reveal internal information to the sender
-            log.error("Unexpected error while receiving DPH message: incomingMessage = {}", incomingMessage, e);
-            error = new KvitteringStatusMessage()
-                .setCode(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi())
-                .setText(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getNavn());
-        }
-
-        try {
-            if (incomingMessage.isAppRec()) {
-                // An ApplicationReceipt is never answered with another ApplicationReceipt, to avoid loops between the parties
-                log.warn("Not sending ApplicationReceipt in response to rejected ApplicationReceipt: incomingMessage = {}, error = {}", incomingMessage, error);
-            } else {
-                DialogmeldingKvitteringMessage message = new DialogmeldingKvitteringMessage()
-                    .setRelatedToMessageId(incomingMessage.getId())
-                    .setStatus(DialogmeldingKvitteringStatus.REJECTED)
-                    .addMessage(error);
-
-                log.warn("Sending automatic ApplicationReceipt for rejected incomingMessage = {}: {}", incomingMessage, message);
-
-                sendApplicationReceipt(incomingMessage, message);
             }
-
-            dphClientService.markAsRead(onBehalfOf, incomingMessage.getReceiverHerId(), incomingMessage.getId());
-        } catch (Exception ex) {
-            log.error("Failed to reject DPH message. The message will be retried on the next poll: incomingMessage = {}", incomingMessage, ex);
+            conversationService.registerStatus(messageId, ReceiptStatus.FEIL,
+                "Message was rejected when received: " + handled.rejectionError.getText());
+        } catch (RuntimeException e) {
+            if (isUnavailable(e)) {
+                throw e;
+            }
+            // E.g. an id too long for the database: the sender is answered anyway
+            log.warn("DPH - Registering the rejected message failed. It is answered anyway, but it may be rejected again " +
+                "if its notification comes back after a restart: incomingMessage = {}", incomingMessage, e);
         }
     }
 
-    private void sendApplicationReceipt(IncomingMessage incomingMessage, DialogmeldingKvitteringMessage message) {
-        sendMessage(sbdFactory.createNextMoveSBD(
-            NhnIdentifier.herId(incomingMessage.getReceiverHerId()),
+    private RejectedMessage rejectedMessage(HandledMessage handled) {
+        IncomingMessage incomingMessage = handled.message;
+        String messageId = incomingMessage.getBusinessDocumentId();
+        StandardBusinessDocument sbd = handled.sbd;
+        String defaultDocumentType = handled.applicationReceipt
+            ? properties.getDph().getReceiptDocumentType()
+            : properties.getDph().getDialogmeldingDocumentType();
+        // The business document of a rejected message may lack any of these
+        return new RejectedMessage(
+            sbd != null ? valueOrDefault(sbd::getConversationId, messageId) : messageId,
+            messageId,
             NhnIdentifier.herId(incomingMessage.getSenderHerId()),
-            incomingMessage.getBusinessDocumentId(),
+            NhnIdentifier.herId(handled.herId),
+            sbd != null ? valueOrDefault(sbd::getProcess, properties.getDph().getNhnProcess()) : properties.getDph().getNhnProcess(),
+            sbd != null ? valueOrDefault(sbd::getDocumentType, defaultDocumentType) : defaultDocumentType,
+            ConversationDirection.INCOMING,
+            ServiceIdentifier.DPH,
+            now().plusHours(properties.getDph().getDefaultTtlHours()));
+    }
+
+    private static String valueOrDefault(Supplier<String> value, String defaultValue) {
+        try {
+            String v = value.get();
+            return v != null ? v : defaultValue;
+        } catch (RuntimeException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Whether the database is unavailable, so that the step is retried instead of skipped.
+     */
+    private static boolean isUnavailable(Throwable e) {
+        return findCause(e, TransientDataAccessException.class) != null
+            || findCause(e, RecoverableDataAccessException.class) != null
+            || findCause(e, DataAccessResourceFailureException.class) != null
+            || findCause(e, CannotCreateTransactionException.class) != null;
+    }
+
+    /**
+     * The notification of a handled message comes back if deleting it failed. A received message is put on the local
+     * queue with the id of its business document. Its conversation is incoming, unless the sender is on this
+     * integrasjonspunkt too: then the conversation of the sent message is reused, and gets the status
+     * INNKOMMENDE_MOTTATT when the message is received. A rejected message gets an incoming conversation too.
+     * <p>
+     * A message to several HER-ids on this integrasjonspunkt has one business document, so it is only received once.
+     * So is a message that the sender sends again with the id of a business document that has been received or
+     * rejected before, e.g. because it got no ApplicationReceipt: it is only marked as downloaded, and not answered.
+     */
+    private boolean isAlreadyHandled(IncomingMessage incomingMessage) {
+        return conversationService.findConversation(incomingMessage.getBusinessDocumentId())
+            .filter(conversation -> conversation.getDirection() == ConversationDirection.INCOMING
+                || hasStatus(conversation, ReceiptStatus.INNKOMMENDE_MOTTATT))
+            .isPresent();
+    }
+
+    private static boolean hasStatus(Conversation conversation, ReceiptStatus status) {
+        return conversation.getMessageStatuses() != null && conversation.findStatus(status) != null;
+    }
+
+    /**
+     * Whether the message is an ApplicationReceipt, according to MSH or to its business document. An
+     * ApplicationReceipt is never answered with another ApplicationReceipt, to avoid loops between the parties.
+     */
+    private static boolean isApplicationReceipt(IncomingMessage incomingMessage, BusinessDocumentResponse response) {
+        return incomingMessage.isAppRec()
+            || response != null && response.getSbd() != null
+            && BusinessMessageType.DIALOGMELDING_KVITTERING.getType().equalsIgnoreCase(valueOrDefault(response.getSbd()::getType, null));
+    }
+
+    /**
+     * @return the ApplicationReceipt to send for a received message, if any
+     */
+    private DialogmeldingKvitteringMessage getApplicationReceiptForReceived(IncomingMessage incomingMessage, boolean isApplicationReceipt, boolean expired) {
+        if (isApplicationReceipt) {
+            return null;
+        }
+        if (expired) {
+            // The message never reaches the fagsystem, so the sender would get no ApplicationReceipt from it
+            log.warn("DPH message had expired when it was received, and is rejected: incomingMessage = {}", incomingMessage);
+            return new DialogmeldingKvitteringMessage()
+                .setRelatedToMessageId(incomingMessage.getId())
+                .setStatus(DialogmeldingKvitteringStatus.REJECTED)
+                .addMessage(new KvitteringStatusMessage()
+                    .setCode(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi())
+                    .setText(EXPIRED_TEXT));
+        }
+        if (!properties.getFeature().isEnableReceipts()) {
+            log.info("Sending automatic ApplicationReceipt since difi.move.feature.enable-receipts=false");
+            return new DialogmeldingKvitteringMessage()
+                .setRelatedToMessageId(incomingMessage.getId())
+                .setStatus(DialogmeldingKvitteringStatus.OK);
+        }
+        return null;
+    }
+
+    /**
+     * @return why the message is rejected, as told to the sender
+     */
+    private static KvitteringStatusMessage getError(IncomingMessage incomingMessage, Exception e) {
+        log.warn("DPH message is invalid, and is rejected: incomingMessage = {}", incomingMessage, e);
+        // The adapter only tells the name of the error code, never content from the message
+        DphException fault = findFault(e);
+        Optional<FeilmeldingForApplikasjonskvittering> known = Arrays.stream(FeilmeldingForApplikasjonskvittering.values())
+            .filter(error -> error.getVerdi().equals(fault.getErrorCode()))
+            .findFirst();
+        if (known.isEmpty()) {
+            log.warn("DPH - Unknown error code {} for the ApplicationReceipt, {} is used instead: incomingMessage = {}",
+                fault.getErrorCode(), FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi(), incomingMessage);
+        }
+        FeilmeldingForApplikasjonskvittering error = known.orElse(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
+        return new KvitteringStatusMessage()
+            .setCode(error.getVerdi())
+            .setText(known.isPresent() && fault.getMessage() != null ? fault.getMessage() : error.getNavn());
+    }
+
+    /**
+     * @return the ApplicationReceipt that rejects the message, or nothing if the message is an ApplicationReceipt
+     */
+    private DialogmeldingKvitteringMessage getApplicationReceiptForRejected(IncomingMessage incomingMessage, boolean isApplicationReceipt, KvitteringStatusMessage error) {
+        if (isApplicationReceipt) {
+            log.warn("Not sending ApplicationReceipt in response to rejected ApplicationReceipt: incomingMessage = {}, error = {}", incomingMessage, error);
+            return null;
+        }
+
+        DialogmeldingKvitteringMessage message = new DialogmeldingKvitteringMessage()
+            .setRelatedToMessageId(incomingMessage.getId())
+            .setStatus(DialogmeldingKvitteringStatus.REJECTED)
+            .addMessage(error);
+        log.warn("Sending automatic ApplicationReceipt for rejected incomingMessage = {}: {}", incomingMessage, message);
+        return message;
+    }
+
+    /**
+     * Whether the error is a fault in the message itself, so that the message is rejected at once: the adapter answers
+     * 422 with {@link DphException#INVALID_MESSAGE} or {@link DphException#INVALID_APPLICATION_RECEIPT}, e.g. for
+     * invalid XML or a missing patient, or the business document is missing, has an unknown type, or lacks its
+     * content.
+     * <p>
+     * Any other error is not about the message, and retrying may help: other errors from the adapter, which answers
+     * 5xx when MSH is unavailable or answers with data it cannot read, errors on the connection to the adapter, e.g.
+     * when the integrasjonspunkt and the adapter do not trust each other's certificates or disagree on the model of
+     * the business document, which the adapter writes, and database errors, e.g. a conflict when another instance
+     * received the same message at the same time.
+     */
+    static boolean isFaultInMessage(Throwable e) {
+        return findFault(e) != null;
+    }
+
+    /**
+     * @return the error that tells the fault in the message, if any
+     */
+    private static DphException findFault(Throwable e) {
+        InvalidBusinessDocumentException invalid = findCause(e, InvalidBusinessDocumentException.class);
+        if (invalid != null) {
+            return invalid;
+        }
+        DphException dphException = findCause(e, DphException.class);
+        return dphException != null && dphException.isInvalidMessage() ? dphException : null;
+    }
+
+    /**
+     * Whether the adapter refused the request, so that retrying it cannot help, unlike an authorization that is not
+     * in place yet, a timeout or throttling.
+     */
+    private static boolean isRefusedByAdapter(DphException e) {
+        Integer statusCode = e.getStatusCode();
+        return statusCode != null && statusCode >= 400 && statusCode < 500 && !TEMPORARY_CLIENT_ERRORS.contains(statusCode);
+    }
+
+    private static <T extends Throwable> T findCause(Throwable e, Class<T> type) {
+        Set<Throwable> seen = new HashSet<>();
+        for (Throwable t = e; t != null && seen.add(t); t = t.getCause()) {
+            if (type.isInstance(t)) {
+                return type.cast(t);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Whether a message or business document that is not found in MSH may still turn up, so that it is retried. MSH
+     * may announce a message shortly before it can be read. A notification that is older than that, e.g. one that MSH
+     * sends again days later when the HER-id gets a new MSH configuration, is about a message that has probably been
+     * received already, so it is given up on the next try. Every notification is retried at least once.
+     */
+    private boolean mayBecomeReadable(Notification notification) {
+        if (!failingSince.containsKey(notification.getNotificationId())) {
+            return true;
+        }
+        if (isRetryPeriodOver(notification)) {
+            return false;
+        }
+        return isNew(notification);
+    }
+
+    /**
+     * Whether the notification is younger than {@link #MAX_TIME_UNTIL_READABLE}, or has no creation time.
+     */
+    private boolean isNew(Notification notification) {
+        OffsetDateTime createdAt = notification.getCreatedAt();
+        return createdAt == null || createdAt.plus(MAX_TIME_UNTIL_READABLE).isAfter(now());
+    }
+
+    private boolean isRetryPeriodOver(Notification notification) {
+        OffsetDateTime since = failingSince.get(notification.getNotificationId());
+        return since != null && since.plus(getRetryPeriod()).isBefore(now());
+    }
+
+    private Duration getRetryPeriod() {
+        return properties.getDph().getNotificationRetryPeriod();
+    }
+
+    private OffsetDateTime now() {
+        return OffsetDateTime.now(clock);
+    }
+
+    private static String handledMessageKey(Integer herId, String messageId) {
+        return herId + ":" + messageId;
+    }
+
+    /**
+     * Marks the message as downloaded, which deletes its business document in MSH. A message that is not found has
+     * already been marked as downloaded. If the adapter or MSH refuses the request, retrying cannot help, so the
+     * message is left in MSH.
+     */
+    private void markAsDownloaded(Iso6523 onBehalfOf, HandledMessage handled) {
+        markAsDownloaded(onBehalfOf, handled.herId, handled.message.getId(), handled.message);
+    }
+
+    /**
+     * @param message the message or notification, which is logged
+     */
+    private void markAsDownloaded(Iso6523 onBehalfOf, Integer herId, String messageId, Object message) {
+        try {
+            dphClientService.markAsDownloaded(onBehalfOf, herId, messageId);
+        } catch (DphException e) {
+            if (e.isNotFound()) {
+                log.info("DPH message has already been marked as downloaded: {}", message);
+            } else if (isRefusedByAdapter(e)) {
+                log.warn("DPH message cannot be marked as downloaded, and is left in MSH: {}", message, e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Deletes the notifications, and forgets what is remembered about them. A notification that cannot be deleted
+     * comes back on the next poll, and is handled again from what is remembered.
+     */
+    private void deleteNotifications(Iso6523 onBehalfOf, Integer herId, List<Notification> notifications) {
+        if (notifications.isEmpty()) {
+            return;
+        }
+        Exception failure = null;
+        List<String> failedIds = new ArrayList<>();
+        for (int from = 0; from < notifications.size(); from += MAX_NOTIFICATIONS_TO_DELETE) {
+            List<Notification> chunk = notifications.subList(from, Math.min(from + MAX_NOTIFICATIONS_TO_DELETE, notifications.size()));
+            List<String> notificationIds = chunk.stream().map(Notification::getNotificationId).toList();
+            try {
+                dphClientService.deleteNotifications(onBehalfOf, notificationIds);
+            } catch (Exception e) {
+                failure = failure == null ? e : failure;
+                failedIds.addAll(notificationIds);
+                continue;
+            }
+            forget(herId, chunk);
+        }
+
+        // Logged once per poll, so that a chunk that fails and one that succeeds do not log on every poll
+        if (failure == null) {
+            if (herIdsFailingToDeleteNotifications.remove(herId)) {
+                log.info("DPH - Deleting notifications works again for HER-id = {}", herId);
+            }
+        } else if (herIdsFailingToDeleteNotifications.add(herId)) {
+            log.error("DPH - Deleting handled notifications failed for HER-id = {}. They will come back on the next poll, " +
+                "but are not handled again: notificationIds = {}", herId, failedIds, failure);
+        } else {
+            log.debug("DPH - Deleting handled notifications failed again for HER-id = {}: notificationIds = {}", herId, failedIds);
+        }
+    }
+
+    /**
+     * Forgets what is remembered about the notifications, which have been deleted.
+     */
+    private void forget(Integer herId, List<Notification> notifications) {
+        for (Notification notification : notifications) {
+            failingSince.remove(notification.getNotificationId());
+            finishedNotifications.remove(notification.getNotificationId());
+            // Only a NewMessage notification has handled steps, a status notification may refer to the same message
+            if (notification.getType() == NotificationType.NEW_MESSAGE && notification.getRelatedMessageId() != null) {
+                handledMessages.remove(handledMessageKey(herId, notification.getRelatedMessageId()));
+            }
+        }
+    }
+
+    /**
+     * What is remembered about a notification is forgotten when it is deleted. If it was deleted some other way, it
+     * no longer comes back, and is forgotten when it has not been seen for so long that it would have been given up
+     * anyway.
+     */
+    private void forgetWhatIsTooOldToMatter() {
+        OffsetDateTime limit = now().minus(getMemoryPeriod());
+        handledMessages.values().removeIf(handled -> {
+            if (!handled.lastSeenAt.isBefore(limit)) {
+                return false;
+            }
+            if (handled.pendingApplicationReceipt != null) {
+                log.error("DPH - Giving up the ApplicationReceipt of the message, which could not be sent within {}. " +
+                    "The sender is not answered: incomingMessage = {}, applicationReceipt = {}",
+                    getMemoryPeriod(), handled.message, handled.pendingApplicationReceipt);
+            } else if (!handled.downloaded) {
+                log.error("DPH - Giving up marking the message as downloaded, which failed within {}. " +
+                    "It is left in MSH: incomingMessage = {}", getMemoryPeriod(), handled.message);
+            }
+            return true;
+        });
+        finishedNotifications.values().removeIf(lastSeenAt -> lastSeenAt.isBefore(limit));
+        failingSince.values().removeIf(since -> since.isBefore(limit));
+    }
+
+    private Duration getMemoryPeriod() {
+        Duration memoryPeriod = getRetryPeriod().multipliedBy(2);
+        return memoryPeriod.compareTo(MIN_MEMORY_PERIOD) < 0 ? MIN_MEMORY_PERIOD : memoryPeriod;
+    }
+
+    /**
+     * Saves the NHN message id on the conversation of the received message. The conversation of a sent message is
+     * left alone, since its reference is used to poll its statuses. The message is received already, so a failure is
+     * only logged.
+     */
+    private void saveExternalSystemReference(IncomingMessage incomingMessage) {
+        try {
+            conversationService.findConversation(incomingMessage.getBusinessDocumentId())
+                .filter(conversation -> conversation.getDirection() == ConversationDirection.INCOMING)
+                .ifPresent(conversation -> {
+                    conversation.setExternalSystemReference(incomingMessage.getId());
+                    conversationService.save(conversation);
+                });
+        } catch (Exception e) {
+            log.warn("DPH - Saving the NHN message id on the conversation failed. The message is received anyway: incomingMessage = {}", incomingMessage, e);
+        }
+    }
+
+    /**
+     * A message that has been received is recognized by the id of its business document in MSH, which should be the
+     * message id in the business document. If they differ, the message may be received again if its notification
+     * comes back after a restart.
+     */
+    private static void warnIfIdsDiffer(IncomingMessage incomingMessage, StandardBusinessDocument sbd) {
+        String sbdMessageId = sbd.getMessageId();
+        if (!incomingMessage.getBusinessDocumentId().equals(sbdMessageId)) {
+            log.warn("DPH - The business document id in MSH, {}, differs from the message id in the business document, {}. " +
+                "The message cannot be recognized as received if its notification comes back after a restart: incomingMessage = {}",
+                incomingMessage.getBusinessDocumentId(), sbdMessageId, incomingMessage);
+        }
+    }
+
+    /**
+     * Deletes the temporary file of a large ASiC, which has been copied when the message was put on the queue.
+     */
+    private static void closeAsic(BusinessDocumentResponse response) {
+        if (response != null && response.getEncryptedAsic() instanceof AutoCloseable asic) {
+            try {
+                asic.close();
+            } catch (Exception e) {
+                log.warn("DPH - Deleting the temporary file of the ASiC failed", e);
+            }
+        }
+    }
+
+    private StandardBusinessDocument createApplicationReceiptSbd(HandledMessage handled) {
+        return sbdFactory.createNextMoveSBD(
+            NhnIdentifier.herId(handled.herId),
+            NhnIdentifier.herId(handled.message.getSenderHerId()),
+            handled.message.getBusinessDocumentId(),
             null,
             properties.getDph().getReceiptProcess(),
             properties.getDph().getReceiptDocumentType(),
-            message
-        ));
+            handled.pendingApplicationReceipt
+        );
     }
 
-    private void sendMessage(StandardBusinessDocument sbd) {
-        NextMoveOutMessage message = nextMoveMessageService.createMessage(sbd);
-        nextMoveMessageService.sendMessage(message);
-    }
-
-    private void enqueueBusinessDoucment(Iso6523 onBehalfOf, IncomingMessage incomingMessage) {
-        BusinessDocumentResponse response = dphClientService.receiveBusinessDocument(onBehalfOf, incomingMessage.getId());
+    private EnqueueResult enqueueBusinessDocument(IncomingMessage incomingMessage, BusinessDocumentResponse response) {
         StandardBusinessDocument sbd = response.getSbd();
-
-        log.debug("DPH {} received: incomingMessage={}, response={}", sbd.getType(), incomingMessage, response);
-
-        switch (BusinessMessageType.fromType(sbd.getType())) {
-            case DIALOGMELDING -> handleDialogmelding(sbd, response.getEncryptedAsic());
-            case DIALOGMELDING_KVITTERING -> handleApplicationReceipt(sbd);
-            default -> throw new DphException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT);
+        if (sbd == null) {
+            throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
         }
+
+        BusinessMessageType type;
+        try {
+            type = BusinessMessageType.fromType(sbd.getType());
+        } catch (RuntimeException e) {
+            throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT, e);
+        }
+        log.debug("DPH {} received: incomingMessage={}, response={}", type, incomingMessage, response);
+
+        return switch (type) {
+            case DIALOGMELDING -> {
+                if (!(sbd.getAny() instanceof BusinessMessage)) {
+                    throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL);
+                }
+                yield nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, response.getEncryptedAsic());
+            }
+            case DIALOGMELDING_KVITTERING -> handleApplicationReceipt(sbd);
+            default -> throw new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.IKKE_STOTTET_FORMAT);
+        };
     }
 
-    private void handleDialogmelding(StandardBusinessDocument sbd, Resource encryptedAsic) {
-        nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH, encryptedAsic);
-    }
-
-    private void handleApplicationReceipt(StandardBusinessDocument sbd) {
+    private EnqueueResult handleApplicationReceipt(StandardBusinessDocument sbd) {
         DialogmeldingKvitteringMessage message = sbd.getBusinessMessage(DialogmeldingKvitteringMessage.class)
-            .orElseThrow(() -> new DphException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
+            .filter(m -> m.getStatus() != null)
+            .orElseThrow(() -> new InvalidBusinessDocumentException(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL));
 
         String relatedToMessageId = message.getRelatedToMessageId();
-        Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId);
+        // An ApplicationReceipt answers a message that was sent, not one that was received
+        Optional<Conversation> conversation = conversationService.findConversation(relatedToMessageId)
+            .filter(c -> c.getDirection() == ConversationDirection.OUTGOING);
 
         conversation.ifPresent(c -> {
-            switch (message.getStatus()) {
+            MessageStatus status = switch (message.getStatus()) {
                 case DialogmeldingKvitteringStatus.OK ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.LEVERT, "Application receipt has been recieved.", message.getRawReceipt());
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.LEVERT, "Application receipt has been recieved.");
                 case DialogmeldingKvitteringStatus.REJECTED, DialogmeldingKvitteringStatus.OK_ERROR_IN_MESSAGE_PART ->
-                    conversationService.registerStatus(relatedToMessageId, ReceiptStatus.FEIL, "Message has been rejected by the application", message.getRawReceipt());
-            }
+                    messageStatusFactory.getMessageStatus(ReceiptStatus.FEIL, "Message has been rejected by the application");
+            };
+            status.setRawReceipt(message.getRawReceipt());
+            // Locked, so that instances receiving the ApplicationReceipt at the same time register the status once
+            conversationService.registerStatusesWithLock(c, List.of(status));
         });
 
         if (properties.getFeature().isEnableReceipts()) {
-            nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH);
-        } else {
-            log.info("Skipping ApplicationReceipt since difi.move.feature.enable-receipts=false");
+            return nextMoveQueue.enqueueIncomingMessage(sbd, ServiceIdentifier.DPH);
+        }
+        log.info("Skipping ApplicationReceipt since difi.move.feature.enable-receipts=false");
+        return EnqueueResult.STATUS;
+    }
+
+    /**
+     * A message that has been received or rejected, with the steps that remain before its notification can be deleted.
+     */
+    private static final class HandledMessage {
+        private final Integer herId;
+        private final IncomingMessage message;
+        /**
+         * When the message was handled, or its notification last came back.
+         */
+        private OffsetDateTime lastSeenAt;
+        private DialogmeldingKvitteringMessage pendingApplicationReceipt;
+        /**
+         * The outgoing message of the pending ApplicationReceipt once it is created, so that it is not created again
+         * if sending it fails.
+         */
+        private NextMoveOutMessage applicationReceiptMessage;
+        private boolean downloaded;
+        /**
+         * Why the message was rejected, if it was.
+         */
+        private KvitteringStatusMessage rejectionError;
+        /**
+         * The business document of a rejected message, if it could be read.
+         */
+        private StandardBusinessDocument sbd;
+        private boolean rejectionRegistered;
+        /**
+         * Whether the rejected message is an ApplicationReceipt.
+         */
+        private boolean applicationReceipt;
+        /**
+         * Whether registering the rejection has been attempted, so that a conversation found later may be from this
+         * instance.
+         */
+        private boolean rejectionRegistrationAttempted;
+        /**
+         * Whether completing the message after its notification was deleted has failed and been logged.
+         */
+        private boolean completionFailureLogged;
+
+        private HandledMessage(Integer herId, IncomingMessage message, DialogmeldingKvitteringMessage pendingApplicationReceipt, OffsetDateTime handledAt) {
+            this.herId = herId;
+            this.message = message;
+            this.pendingApplicationReceipt = pendingApplicationReceipt;
+            this.lastSeenAt = handledAt;
+        }
+    }
+
+    /**
+     * The conversation of a rejected message.
+     */
+    @Value
+    private static class RejectedMessage implements MessageInformable {
+        String conversationId;
+        String messageId;
+        PartnerIdentifier sender;
+        PartnerIdentifier receiver;
+        String processIdentifier;
+        String documentIdentifier;
+        ConversationDirection direction;
+        ServiceIdentifier serviceIdentifier;
+        OffsetDateTime expiry;
+    }
+
+    /**
+     * The notification cannot be handled yet, and is retried on the next poll.
+     */
+    private static final class RetryLaterException extends RuntimeException {
+        private RetryLaterException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }
-

@@ -3,9 +3,11 @@ package no.difi.meldingsutveksling.dph.client.internal;
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.Iso6523;
 import no.difi.meldingsutveksling.dph.client.DphException;
+import no.difi.meldingsutveksling.nhn.adapter.model.DeleteNotificationsInput;
 import no.difi.meldingsutveksling.nhn.adapter.model.IncomingMessage;
 import no.difi.meldingsutveksling.nhn.adapter.model.MessageStatus;
 import no.difi.meldingsutveksling.nhn.adapter.model.MultipartNames;
+import no.difi.meldingsutveksling.nhn.adapter.model.Notification;
 import no.difi.meldingsutveksling.nhn.adapter.model.serialization.KxJson;
 import no.difi.move.common.dokumentpakking.PartUtils;
 import no.ks.fiks.hdir.FeilmeldingForApplikasjonskvittering;
@@ -71,17 +73,48 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public List<IncomingMessage> getMessages(Iso6523 onBehalfOf, Integer receiverHerId) {
+    public List<Notification> getUnreadNotifications(Iso6523 onBehalfOf, Integer herId, Integer notificationsToFetch) {
         return webClient.get()
-            .uri("/messages/in", builder -> builder
-                .queryParam("receiverHerId", receiverHerId)
+            .uri("/notifications/unread", builder -> builder
+                .queryParam("herId", herId)
+                .queryParamIfPresent("notificationsToFetch", Optional.ofNullable(notificationsToFetch))
                 .build())
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .bodyToMono(String.class)
-            .map(json -> KxJson.decode(json, ListSerializer(IncomingMessage.Companion.serializer())))
+            .map(json -> KxJson.decode(json, ListSerializer(Notification.Companion.serializer())))
+            .retryWhen(retrySpec)
+            .block();
+    }
+
+    @Override
+    public void deleteNotifications(Iso6523 onBehalfOf, List<String> notificationIds) {
+        webClient.post()
+            .uri("/notifications/delete")
+            .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(KxJson.encode(new DeleteNotificationsInput(notificationIds), DeleteNotificationsInput.Companion.serializer()))
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, errorHandler)
+            .toBodilessEntity()
+            .retryWhen(retrySpec)
+            .block();
+    }
+
+    @Override
+    public IncomingMessage getMessage(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
+        return webClient.get()
+            .uri("/messages/in/{messageId}", builder -> builder
+                .queryParam("receiverHerId", receiverHerId)
+                .build(messageId))
+            .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, errorHandler)
+            .bodyToMono(String.class)
+            .map(json -> KxJson.decode(json, IncomingMessage.Companion.serializer()))
             .retryWhen(retrySpec)
             .block();
     }
@@ -110,13 +143,12 @@ public class DphClientImpl implements DphClient {
     }
 
     @Override
-    public void markAsRead(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
+    public void markAsDownloaded(Iso6523 onBehalfOf, Integer receiverHerId, String messageId) {
         webClient.post()
-            .uri("/messages/in/{messageId}/read", builder -> builder
+            .uri("/messages/in/{messageId}/downloaded", builder -> builder
                 .queryParam("receiverHerId", receiverHerId)
                 .build(messageId))
             .headers(h -> h.setBearerAuth(getMaskinportenToken(onBehalfOf)))
-            .accept(MediaType.parseMediaType("application/jose"))
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler)
             .toBodilessEntity()

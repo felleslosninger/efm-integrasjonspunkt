@@ -283,6 +283,11 @@ public class DefaultConversationService implements ConversationService {
         return repo.findByConversationIdAndDirection(conversationId, direction);
     }
 
+    @Override
+    public boolean hasConversationWithExternalSystemReference(@NotNull String externalSystemReference, @NotNull ConversationDirection direction) {
+        return repo.existsByExternalSystemReferenceAndDirection(externalSystemReference, direction);
+    }
+
     @NotNull
     @Override
     @Transactional(propagation = Propagation.MANDATORY)

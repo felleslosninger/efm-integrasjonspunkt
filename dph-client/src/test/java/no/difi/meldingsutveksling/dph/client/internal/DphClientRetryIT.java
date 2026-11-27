@@ -76,16 +76,16 @@ class DphClientRetryIT {
 
     @Test
     void shouldKeepHttpResponseAsCauseOfDphException() {
-        wireMockExtension.stubFor(get(urlEqualTo("/messages/in?receiverHerId=1111"))
+        wireMockExtension.stubFor(get(urlEqualTo("/notifications/unread?herId=1111"))
             .willReturn(aResponse()
                 .withStatus(403)
                 .withHeader("Content-Type", "application/json")
                 .withBody("""
                     {"status": 403, "reason": "Forbidden", "errorCode": "FORBIDDEN", "message": "No access to HER-id",
-                     "path": "/messages/in", "requestId": "req-1", "timestamp": "2026-10-26T10:00:00Z"}""")));
+                     "path": "/notifications/unread", "requestId": "req-1", "timestamp": "2026-10-26T10:00:00Z"}""")));
 
         assertThatExceptionOfType(DphException.class)
-            .isThrownBy(() -> dphClient.getMessages(onBehalfOf, 1111))
+            .isThrownBy(() -> dphClient.getUnreadNotifications(onBehalfOf, 1111, null))
             .satisfies(e -> {
                 assertThat(e.getStatusCode()).isEqualTo(403);
                 assertThat(e.getErrorCode()).isEqualTo("FORBIDDEN");
@@ -96,14 +96,14 @@ class DphClientRetryIT {
 
     @Test
     void shouldThrowDphExceptionWhenErrorBodyIsNotApiError() {
-        wireMockExtension.stubFor(get(urlEqualTo("/messages/in?receiverHerId=1111"))
+        wireMockExtension.stubFor(get(urlEqualTo("/notifications/unread?herId=1111"))
             .willReturn(aResponse()
                 .withStatus(403)
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"error\": \"No access to HER-id\"}")));
 
         assertThatExceptionOfType(DphException.class)
-            .isThrownBy(() -> dphClient.getMessages(onBehalfOf, 1111))
+            .isThrownBy(() -> dphClient.getUnreadNotifications(onBehalfOf, 1111, null))
             .satisfies(e -> {
                 assertThat(e.getStatusCode()).isEqualTo(403);
                 assertThat(e.getErrorCode()).isEqualTo(FeilmeldingForApplikasjonskvittering.ANNEN_FEIL.getVerdi());

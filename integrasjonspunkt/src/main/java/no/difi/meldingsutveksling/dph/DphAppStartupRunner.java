@@ -59,8 +59,9 @@ public class DphAppStartupRunner implements CommandLineRunner {
         JWT jwt = JWTParser.parse(token);
         JWTClaimsSet claims = jwt.getJWTClaimsSet();
         log.info("DPH - Access token claims = {}", claims);
-        log.info("DPH - Trying to fetch messages for HER-id = {}", herId);
-        dphClientService.getMessages(onBehalfOf, herId);
+        log.info("DPH - Trying to fetch notifications for HER-id = {}", herId);
+        // Only reads a notification: it is not deleted, so the poller still handles it
+        dphClientService.getUnreadNotifications(onBehalfOf, herId, 1);
         log.info("DPH - HER-id = {} verified successfully", herId);
     }
 

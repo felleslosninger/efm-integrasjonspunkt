@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -69,7 +70,7 @@ public class DphAppStartupRunnerTest {
         assertThrows(HttpClientErrorException.class, () -> target.run());
 
         verify(dphClientService, times(1)).getMaskinportenToken(any());
-        verify(dphClientService, never()).getMessages(any(), any());
+        verify(dphClientService, never()).getUnreadNotifications(any(), any(), anyInt());
     }
 
     @Test
@@ -78,8 +79,8 @@ public class DphAppStartupRunnerTest {
 
         assertDoesNotThrow(() -> target.run());
 
-        verify(dphClientService, never()).getMessages(any(), eq(FAILING_HER_ID));
-        verify(dphClientService).getMessages(any(), eq(OK_HER_ID));
+        verify(dphClientService, never()).getUnreadNotifications(any(), eq(FAILING_HER_ID), eq(1));
+        verify(dphClientService).getUnreadNotifications(any(), eq(OK_HER_ID), eq(1));
     }
 
     @Test

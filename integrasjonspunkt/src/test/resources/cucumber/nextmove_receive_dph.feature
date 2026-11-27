@@ -4,6 +4,7 @@ Feature: Receiving a Next Move DPH message
     Given a "GET" request to "http://localhost:9099/info/her-id:8143154" will respond with status "200" and the following "application/json" in "/restmocks/info/her-id_8143154.json"
     And a "GET" request to "http://localhost:9099/identifier/her-id:8143541/process/urn:no:difi:profile:helse:response:ver1.0?conversationId=f3b8d2e1-5c4a-4b7e-8d9f-0a1b2c3d4e71" will respond with status "200" and the following "application/json" in "/restmocks/identifier/her-id_8143541-response.json"
     And a "GET" request to "http://localhost:9099/virksert/991825827" will respond with status "200" and the following "text/plain" in "/restmocks/virksert/910077473"
+    # As the NHN adapter writes it: one ConversationId scope, without scope information such as an expiry
     And NHN prepares a message with the following SBD:
     """
     {
@@ -11,11 +12,6 @@ Feature: Receiving a Next Move DPH message
             "businessScope": {
                 "scope": [
                     {
-                        "scopeInformation": [
-                            {
-                                "expectedResponseDateTime": "2019-05-10T00:31:52+01:00"
-                            }
-                        ],
                         "identifier": "urn:no:difi:profile:helse:helse:ver1.0",
                         "instanceIdentifier": "c9e4a7b2-1d3f-4a5e-b8c6-7d9e0f1a2b31",
                         "type": "ConversationId"
@@ -25,7 +21,7 @@ Feature: Receiving a Next Move DPH message
             "documentIdentification": {
                 "creationDateAndTime": "2019-03-25T11:35:00+01:00",
                 "instanceIdentifier": "f3b8d2e1-5c4a-4b7e-8d9f-0a1b2c3d4e71",
-                "standard": "urn:no:difi:helse:xsd:schema::dialogmelding",
+                "standard": "urn:no:difi:helse:xsd::dialogmelding",
                 "type": "dialogmelding",
                 "typeVersion": "1.0"
             },
@@ -90,7 +86,8 @@ Feature: Receiving a Next Move DPH message
         </Notat>
     </Dialogmelding>
     """
-    And the NHN adapter message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is marked as read
+    And the NHN adapter message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is marked as downloaded
+    And the NHN adapter notification for the message with id "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e" is deleted
     And a DPH message is sent to the NHN adapter
     And the sent message's SBD is:
     """
@@ -185,3 +182,7 @@ Feature: Receiving a Next Move DPH message
       "empty" : false
     }
     """
+    # The notification comes back, e.g. after deleting it failed: the message is not received or answered again
+    When the application checks for new DPH messages
+    Then there are no incoming messages
+    And a DPH message is sent to the NHN adapter
